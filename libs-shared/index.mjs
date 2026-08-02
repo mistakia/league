@@ -32,10 +32,12 @@ export { default as calculateStandings } from './calculate-standings.mjs'
 export { default as compare_playoff_seed } from './compare-playoff-seed.mjs'
 export { default as compare_all_play_seed } from './compare-all-play-seed.mjs'
 export { default as compare_division_winner } from './compare-division-winner.mjs'
+export { default as compare_at_large_berth } from './compare-at-large-berth.mjs'
 export {
   default as get_playoff_seeding,
   BYE_CANDIDATE_POOLS,
-  BYE_SELECTION_METHODS
+  BYE_SELECTION_METHODS,
+  AT_LARGE_SELECTION_METHODS
 } from './get-playoff-seeding.mjs'
 export { default as optimizeStandingsLineup } from './optimize-standings-lineup.mjs'
 export { default as getPlayerCountBySlot } from './get-player-count-by-slot.mjs'

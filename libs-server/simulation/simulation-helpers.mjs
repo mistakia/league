@@ -39,6 +39,7 @@ export async function load_simulation_context({ league_id, year }) {
       bye_count: season.bye_count,
       bye_candidate_pool: season.bye_candidate_pool,
       bye_selection_method: season.bye_selection_method,
+      at_large_selection_method: season.at_large_selection_method,
       has_division_winner_berths: season.has_division_winner_berths
     }
   }

@@ -40,6 +40,7 @@ export const League = new Record({
   bye_count: null,
   bye_candidate_pool: null,
   bye_selection_method: null,
+  at_large_selection_method: null,
   has_division_winner_berths: null,
 
   passing_attempts: null,
@@ -170,6 +171,7 @@ export function createLeague({
   bye_count,
   bye_candidate_pool,
   bye_selection_method,
+  at_large_selection_method,
   has_division_winner_berths,
 
   passing_attempts,
@@ -299,6 +301,7 @@ export function createLeague({
     bye_count,
     bye_candidate_pool,
     bye_selection_method,
+    at_large_selection_method,
     has_division_winner_berths,
 
     passing_attempts,

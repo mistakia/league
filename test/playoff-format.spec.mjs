@@ -197,6 +197,61 @@ describe('playoff format and division schedule', function () {
       expect(result.bye_tids).to.eql([2])
     })
 
+    // The full twelve-team shape: four division winners berthed, two of them on
+    // byes, and the last two places at large on points for.
+    it('fills at-large berths on points for', function () {
+      const teams = all_play_inverted.map((t) =>
+        team(t.tid, t.div, {
+          wins: t.wins,
+          losses: t.losses,
+          all_play_wins: t.all_play_wins,
+          all_play_losses: t.all_play_losses,
+          // tids 11 and 12 have the worst records in the league and the most
+          // points. Nothing but a points-for ladder puts them in the field.
+          points_for: t.tid >= 11 ? 2000 : 100
+        })
+      )
+
+      const result = get_playoff_seeding({
+        teams,
+        playoff_team_count: 6,
+        bye_count: 2,
+        bye_candidate_pool: 'division_winners',
+        bye_selection_method: 'all_play',
+        at_large_selection_method: 'points_for',
+        has_division_winner_berths: true
+      })
+
+      // Division winners are tids 1-4. All play ranks 4 and 3 highest among
+      // them, so those take the byes; 1 and 2 are berthed as winners; the two
+      // at-large places go to 11 and 12 on points for, NOT to tids 5 and 6 who
+      // have far better records.
+      expect(result.bye_tids).to.eql([4, 3])
+      expect(result.playoff_tids).to.have.members([4, 3, 1, 2, 11, 12])
+      expect(result.wildcard_tids).to.have.members([1, 2, 11, 12])
+    })
+
+    it('leaves the at-large ladder off the seed order', function () {
+      const teams = all_play_inverted.map((t) =>
+        team(t.tid, 1, {
+          wins: t.wins,
+          losses: t.losses,
+          points_for: t.tid >= 11 ? 2000 : 100
+        })
+      )
+
+      const result = get_playoff_seeding({
+        teams,
+        playoff_team_count: 4,
+        bye_count: 0,
+        at_large_selection_method: 'points_for'
+      })
+
+      // 11 and 12 take berths on points for, but the field is still ordered on
+      // the standings ladder, so the better records seed ahead of them.
+      expect(result.playoff_tids).to.eql([1, 2, 11, 12])
+    })
+
     it('throws when the division winner pool cannot fill the byes', function () {
       const single_division = Array.from({ length: 10 }, (unused, i) =>
         team(i + 1, 1, { wins: 12 - i, losses: i })

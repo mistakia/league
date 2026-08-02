@@ -284,6 +284,7 @@ const calculateStandings = ({
     bye_count: league.bye_count,
     bye_candidate_pool: league.bye_candidate_pool,
     bye_selection_method: league.bye_selection_method,
+    at_large_selection_method: league.at_large_selection_method,
     has_division_winner_berths: league.has_division_winner_berths
   })
 

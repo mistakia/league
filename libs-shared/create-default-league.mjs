@@ -16,6 +16,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     bye_count: 2,
     bye_candidate_pool: 'league',
     bye_selection_method: 'head_to_head',
+    at_large_selection_method: 'head_to_head',
     has_division_winner_berths: false,
     sqb: 1,
     srb: 2,

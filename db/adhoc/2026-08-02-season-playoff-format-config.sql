@@ -35,6 +35,7 @@ ALTER TABLE public.seasons
   ADD COLUMN bye_count smallint DEFAULT 2 NOT NULL,
   ADD COLUMN bye_candidate_pool text DEFAULT 'league' NOT NULL,
   ADD COLUMN bye_selection_method text DEFAULT 'head_to_head' NOT NULL,
+  ADD COLUMN at_large_selection_method text DEFAULT 'head_to_head' NOT NULL,
   ADD COLUMN has_division_winner_berths boolean DEFAULT false NOT NULL;
 
 ALTER TABLE public.seasons
@@ -48,6 +49,10 @@ ALTER TABLE public.seasons
 ALTER TABLE public.seasons
   ADD CONSTRAINT seasons_bye_selection_method_known
   CHECK (bye_selection_method IN ('head_to_head', 'all_play'));
+
+ALTER TABLE public.seasons
+  ADD CONSTRAINT seasons_at_large_selection_method_known
+  CHECK (at_large_selection_method IN ('head_to_head', 'all_play', 'points_for'));
 
 COMMENT ON COLUMN public.seasons.playoff_team_count IS 'Number of teams that qualify for the post-season.';
 COMMENT ON COLUMN public.seasons.bye_count IS 'How many of the top seeds skip the first playoff round.';

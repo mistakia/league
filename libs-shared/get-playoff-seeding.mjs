@@ -1,9 +1,21 @@
 import compare_playoff_seed from './compare-playoff-seed.mjs'
 import compare_all_play_seed from './compare-all-play-seed.mjs'
 import compare_division_winner from './compare-division-winner.mjs'
+import compare_at_large_berth from './compare-at-large-berth.mjs'
 
 export const BYE_CANDIDATE_POOLS = ['league', 'division_winners']
 export const BYE_SELECTION_METHODS = ['head_to_head', 'all_play']
+export const AT_LARGE_SELECTION_METHODS = [
+  'head_to_head',
+  'all_play',
+  'points_for'
+]
+
+const at_large_comparators = {
+  head_to_head: compare_playoff_seed,
+  all_play: compare_all_play_seed,
+  points_for: compare_at_large_berth
+}
 
 /**
  * Order a league's teams into playoff seeds.
@@ -21,17 +33,19 @@ export const BYE_SELECTION_METHODS = ['head_to_head', 'all_play']
  *
  *   1. Byes. Take the candidate pool (the whole league, or one winner per
  *      division), rank it by the configured ladder, and take the top bye_count.
- *   2. Berths. Order everyone else by compare_playoff_seed and fill the
- *      remaining places in the field. When has_division_winner_berths is set,
- *      every division winner without a bye takes one of those places first and
- *      the field is then re-ordered on the standings ladder, so the guarantee
- *      admits a winner without also promoting them past a better team.
+ *   2. Berths. When has_division_winner_berths is set, every division winner
+ *      without a bye takes one of the remaining places. The rest go to the best
+ *      of the field on the at-large ladder, which is its own configured metric.
+ *      The whole field is then ordered on the standings ladder, so the
+ *      guarantee admits a winner without promoting them past a better team.
  *
- * A division winner is the division's best team by compare_division_winner --
- * head-to-head, then points for, then All Play. Three separate ladders are in
- * play here and they are deliberately different: winning a division, ranking
- * the winners for a bye, and seeding the rest of the field each answer a
- * different question.
+ * Four ladders are in play and they are deliberately different, because they
+ * answer different questions:
+ *
+ *   - winning a division: compare_division_winner (head-to-head first)
+ *   - ranking the winners for a bye: bye_selection_method
+ *   - taking an at-large berth: at_large_selection_method
+ *   - ordering the standings: compare_playoff_seed
  *
  * @param {Object} params
  * @param {Array} params.teams - flat objects with tid, div, and the stat keys
@@ -50,6 +64,7 @@ const get_playoff_seeding = ({
   bye_count,
   bye_candidate_pool = 'league',
   bye_selection_method = 'head_to_head',
+  at_large_selection_method = 'head_to_head',
   has_division_winner_berths = false
 }) => {
   if (!Number.isInteger(playoff_team_count) || playoff_team_count < 1) {
@@ -77,6 +92,12 @@ const get_playoff_seeding = ({
   if (!BYE_SELECTION_METHODS.includes(bye_selection_method)) {
     throw new Error(
       `bye_selection_method must be one of ${BYE_SELECTION_METHODS.join(', ')}, got ${bye_selection_method}`
+    )
+  }
+
+  if (!AT_LARGE_SELECTION_METHODS.includes(at_large_selection_method)) {
+    throw new Error(
+      `at_large_selection_method must be one of ${AT_LARGE_SELECTION_METHODS.join(', ')}, got ${at_large_selection_method}`
     )
   }
 
@@ -121,31 +142,35 @@ const get_playoff_seeding = ({
   const remaining = by_record.filter((team) => !bye_tid_set.has(team.tid))
   const remaining_berths = playoff_team_count - bye_count
 
-  let field = remaining.slice(0, remaining_berths)
+  // At-large berths are selected on their own ladder, which need not be the
+  // standings ladder: a league can seed on record and still award its last
+  // places on points scored, which is what this one does.
+  const compare_at_large = at_large_comparators[at_large_selection_method]
 
-  if (has_division_winner_berths) {
-    // Guarantee a place, not a seed. Every division winner without a bye is put
-    // in the field, the rest of the places go to the best teams left, and the
-    // whole field is then ordered on the standings ladder -- so the guarantee
-    // admits a winner without also promoting them past a better team.
-    const guaranteed = division_winners.filter(
-      (team) => !bye_tid_set.has(team.tid)
+  // Guarantee a place, not a seed. Every division winner without a bye takes
+  // one of the remaining places first, the rest go to the best of the field on
+  // the at-large ladder, and the whole field is then ordered on the standings
+  // ladder -- so the guarantee admits a winner without promoting them past a
+  // better team.
+  const guaranteed = has_division_winner_berths
+    ? division_winners.filter((team) => !bye_tid_set.has(team.tid))
+    : []
+
+  if (guaranteed.length > remaining_berths) {
+    throw new Error(
+      `has_division_winner_berths requires ${guaranteed.length} berth(s) for division winners, more than the ${remaining_berths} remaining after byes`
     )
-
-    if (guaranteed.length > remaining_berths) {
-      throw new Error(
-        `has_division_winner_berths requires ${guaranteed.length} berth(s) for division winners, more than the ${remaining_berths} remaining after byes`
-      )
-    }
-
-    const guaranteed_tids = new Set(guaranteed.map((team) => team.tid))
-    const others = remaining.filter((team) => !guaranteed_tids.has(team.tid))
-
-    field = [
-      ...guaranteed,
-      ...others.slice(0, remaining_berths - guaranteed.length)
-    ].sort(compare_playoff_seed)
   }
+
+  const guaranteed_tids = new Set(guaranteed.map((team) => team.tid))
+  const at_large_candidates = remaining
+    .filter((team) => !guaranteed_tids.has(team.tid))
+    .sort(compare_at_large)
+
+  const field = [
+    ...guaranteed,
+    ...at_large_candidates.slice(0, remaining_berths - guaranteed.length)
+  ].sort(compare_playoff_seed)
 
   const field_tid_set = new Set(field.map((team) => team.tid))
   const missed = remaining.filter((team) => !field_tid_set.has(team.tid))

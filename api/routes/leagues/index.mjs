@@ -11,7 +11,8 @@ import {
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   BYE_CANDIDATE_POOLS,
-  BYE_SELECTION_METHODS
+  BYE_SELECTION_METHODS,
+  AT_LARGE_SELECTION_METHODS
 } from '#libs-shared/get-playoff-seeding.mjs'
 import process_projections_for_scoring_format from '#scripts/process-projections-for-scoring-format.mjs'
 import process_projections_for_league_format from '#scripts/process-projections-for-league-format.mjs'
@@ -190,14 +191,9 @@ router.put('/:leagueId', async (req, res) => {
       }
     }
 
-    // The playoff field size and the bye count constrain each other, and the
-    // relation is enforced in the database by the seasons_bye_count_within_
-    // playoff_field CHECK. Validating only the field types would let an
-    // invalid pair reach Postgres and surface as a 500 rather than a 400.
-    // playoff_team_count is checked for a positive value here too: zero passes
-    // the CHECK but throws in get_playoff_seeding on the next standings run.
-    // These two are text columns with a CHECK naming their allowed values, so
-    // an unknown value is a 500 from Postgres unless it is caught here.
+    // Each playoff-format text column carries a CHECK naming its allowed
+    // values, so an unknown value is a 500 from Postgres unless it is caught
+    // here.
     if (
       field === 'bye_candidate_pool' &&
       !BYE_CANDIDATE_POOLS.includes(value)
@@ -216,6 +212,20 @@ router.put('/:leagueId', async (req, res) => {
       })
     }
 
+    if (
+      field === 'at_large_selection_method' &&
+      !AT_LARGE_SELECTION_METHODS.includes(value)
+    ) {
+      return res.status(400).send({
+        error: `at_large_selection_method must be one of ${AT_LARGE_SELECTION_METHODS.join(', ')}`
+      })
+    }
+
+    // The field size and the bye count constrain each other, and the relation
+    // is enforced by the seasons_bye_count_within_playoff_field CHECK, so an
+    // invalid pair would otherwise reach Postgres as a 500. playoff_team_count
+    // is checked for a positive value here too: zero satisfies the CHECK but
+    // throws in get_playoff_seeding on the next standings run.
     if (field === 'playoff_team_count' || field === 'bye_count') {
       const playoff_team_count =
         field === 'playoff_team_count' ? value : league.playoff_team_count

@@ -26236,10 +26236,12 @@ CREATE TABLE public.seasons (
     bye_count smallint DEFAULT 2 NOT NULL,
     bye_candidate_pool text DEFAULT 'league'::text NOT NULL,
     bye_selection_method text DEFAULT 'head_to_head'::text NOT NULL,
+    at_large_selection_method text DEFAULT 'head_to_head'::text NOT NULL,
     has_division_winner_berths boolean DEFAULT false NOT NULL,
     trade_veto_window_hours smallint DEFAULT 24 NOT NULL,
     CONSTRAINT rfa_processing_precedes_announcement CHECK (((restricted_free_agency_processing_lead_hours >= 1) AND (restricted_free_agency_processing_lead_hours < restricted_free_agency_window_hours))),
     CONSTRAINT rfa_window_divides_day CHECK ((restricted_free_agency_window_hours = ANY (ARRAY[1, 2, 3, 4, 6, 8, 12, 24]))),
+    CONSTRAINT seasons_at_large_selection_method_known CHECK ((at_large_selection_method = ANY (ARRAY['head_to_head'::text, 'all_play'::text, 'points_for'::text]))),
     CONSTRAINT seasons_bye_candidate_pool_known CHECK ((bye_candidate_pool = ANY (ARRAY['league'::text, 'division_winners'::text]))),
     CONSTRAINT seasons_bye_count_within_playoff_field CHECK (((bye_count >= 0) AND (bye_count <= playoff_team_count))),
     CONSTRAINT seasons_bye_selection_method_known CHECK ((bye_selection_method = ANY (ARRAY['head_to_head'::text, 'all_play'::text])))
