@@ -8,7 +8,16 @@ import { install_process_handlers } from '#libs-server/install-process-handlers.
 import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
 
 const log = debug('import-live-plays-worker')
-debug.enable('import-live-plays-worker')
+
+// See the note in import-live-odds-worker.mjs: debug.enable REPLACES the
+// namespace set, so an unconditional call discards whatever DEBUG the pm2
+// config supplied -- silently, and with this worker's own logging still working,
+// which is what makes it invisible. Latent here rather than live, since nothing
+// has yet needed a second namespace on this worker, but it is the same trap
+// waiting for whoever adds one.
+debug.enable(
+  [process.env.DEBUG, 'import-live-plays-worker'].filter(Boolean).join(',')
+)
 
 install_process_handlers({
   service_name: 'import-live-plays-worker',

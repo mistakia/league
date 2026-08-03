@@ -10,7 +10,24 @@ import { job as import_pinnacle_odds } from '#scripts/import-pinnacle-odds.mjs'
 import { job as import_prizepicks_odds } from '#scripts/import-prizepicks-odds.mjs'
 
 const log = debug('import-live-odds-worker')
-debug.enable('import-live-odds-worker')
+
+// debug.enable REPLACES the enabled namespace set rather than adding to it, so
+// the unconditional `debug.enable('import-live-odds-worker')` this used to be
+// DISCARDED whatever DEBUG the environment supplied. That is what kept the prop
+// write path's instrumentation dark in production: the pm2 config named
+// insert-prop-markets, this line overwrote it at module load, and nothing
+// reported the loss -- the worker's own namespace kept logging normally, which
+// is precisely what made the config look effective.
+//
+// Append rather than branch on whether DEBUG is set. A bare `if (!DEBUG)` guard
+// trades this bug for its mirror image: a stray `DEBUG=1` in the environment
+// (Claude Code sets exactly that) is truthy, skips the fallback, matches no
+// namespace, and silently costs the worker its own logging -- the same
+// invisible failure in the other direction. Appending keeps this worker's
+// namespace unconditionally and leaves the environment purely additive.
+debug.enable(
+  [process.env.DEBUG, 'import-live-odds-worker'].filter(Boolean).join(',')
+)
 
 install_process_handlers({
   service_name: 'import-live-odds-worker',
