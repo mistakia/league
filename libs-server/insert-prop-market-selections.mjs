@@ -160,6 +160,7 @@ export default async function ({
   const all_selection_history_inserts = []
   const all_selection_index_inserts = []
   const cleanup_operations = []
+  const failures = []
 
   // Guard against truly missing selections (null/undefined)
   // Empty arrays are valid - they indicate all selections were removed
@@ -168,41 +169,45 @@ export default async function ({
       selection_history_inserts: all_selection_history_inserts,
       selection_index_inserts: all_selection_index_inserts,
       cleanup_operations,
+      failures,
       results
     }
   }
 
-  // Process all selections (skip if empty array)
-  if (selections.length > 0) {
-    const selection_results = await Promise.allSettled(
-      selections.map((selection) =>
-        process_market_selection({
-          observed_at,
-          selection,
-          existing_market,
-          market
-        })
-      )
-    )
+  // process_market_selection is SYNCHRONOUS, so the Promise.allSettled that used
+  // to wrap this loop isolated nothing: Array.map calls it inline, and a throw
+  // from validate_selection escaped the map before allSettled ever saw it. That
+  // rejected this function, which rejected process_market, which the caller's
+  // outer allSettled caught by dropping the WHOLE market -- so one selection
+  // missing odds_american discarded every other selection on that market plus
+  // its market history and index rows. A plain try/catch is what the original
+  // shape was reaching for, and it isolates per selection for real.
+  for (const selection of selections) {
+    try {
+      const result = process_market_selection({
+        observed_at,
+        selection,
+        existing_market,
+        market
+      })
 
-    for (let i = 0; i < selection_results.length; i++) {
-      const settled = selection_results[i]
-      if (settled.status === 'fulfilled') {
-        const result = settled.value
-        results.push(result)
+      results.push(result)
 
-        if (result.selection_history_inserts) {
-          all_selection_history_inserts.push(
-            ...result.selection_history_inserts
-          )
-        }
-        if (result.selection_index_inserts) {
-          all_selection_index_inserts.push(...result.selection_index_inserts)
-        }
-      } else {
-        log(selections[i])
-        log(settled.reason)
+      if (result.selection_history_inserts) {
+        all_selection_history_inserts.push(...result.selection_history_inserts)
       }
+      if (result.selection_index_inserts) {
+        all_selection_index_inserts.push(...result.selection_index_inserts)
+      }
+    } catch (error) {
+      log(selection)
+      log(error)
+      failures.push({
+        source_id: selection?.source_id,
+        source_market_id: selection?.source_market_id,
+        source_selection_id: selection?.source_selection_id,
+        error: error.message
+      })
     }
   }
 
@@ -233,6 +238,7 @@ export default async function ({
     selection_history_inserts: all_selection_history_inserts,
     selection_index_inserts: all_selection_index_inserts,
     cleanup_operations,
+    failures,
     results
   }
 }

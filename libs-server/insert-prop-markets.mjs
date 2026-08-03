@@ -23,8 +23,29 @@ import emit_signal from './emit-signal.mjs'
 
 const log = debug('insert-prop-markets')
 
-const MARKET_BATCH_SIZE = 100
-const SELECTION_BATCH_SIZE = 500
+// Batch sizes are bounded by Postgres's 65,535 bind parameters per statement,
+// which for an upsert is rows x columns. prop_markets_index has 14 columns and
+// prop_market_selections_index has 33 (the widest of the four tables, and so the
+// binding constraint), giving 7,000 and 33,000 parameters at the sizes below --
+// roughly half the ceiling, which leaves room for the tables to grow columns
+// without a silent approach to the limit.
+//
+// The previous 100/500 pair was not merely conservative, it FRAGMENTED the
+// selection chunks. An in-season DRAFTKINGS observation is about 2,417 markets
+// and 9,003 selections, or 3.7 selections per market, so a 100-market batch
+// produced ~372 selections -- under the chunk size, so every selection statement
+// ran partial and 25 of them carried what 19 full ones would. At 500 markets a
+// batch carries ~1,860 selections, which fills chunks instead of fragmenting
+// them, and it cuts the per-batch market statement and the cleanup SELECT from
+// 25 apiece to 5.
+const MARKET_BATCH_SIZE = 500
+const SELECTION_BATCH_SIZE = 1000
+
+// Chunks within one phase upsert disjoint key sets -- the deduplicate_inserts
+// pass above guarantees it -- so they may overlap without deadlocking against
+// each other. Concurrency stays WITHIN a phase and never spans the index/history
+// boundary, which is the ordering the correctness argument below rests on.
+const SELECTION_INSERT_CONCURRENCY = 4
 
 // Fields that trigger a history insert when changed
 const MARKET_HISTORY_UPDATE_FIELDS = [
@@ -301,8 +322,21 @@ export default async function (markets, { dry_run = false } = {}) {
     selection_history_inserts: 0,
     selection_index_inserts: 0,
     cleanup_operations: 0,
-    selection_deletes: 0
+    selection_deletes: 0,
+    market_processing_failures: 0,
+    selection_processing_failures: 0
   }
+
+  // A market or selection that throws is skipped, not retried, and the run still
+  // exits 0 -- so without an oracle distinct from the exit code the loss is
+  // invisible. It is not merely a dropped row either: a market that never
+  // reaches the insert leaves prop_markets_history sparse at this observed_at,
+  // and while the VALUE self-heals (the baseline stays stale, so the next run
+  // re-detects and writes at a new observed_at), the original observation
+  // timestamp is gone and an excursion that reverts inside one run interval is
+  // gone with it. Counting and signalling is the proportionate response; making
+  // the batch atomic would not recover the timestamp either.
+  const failure_samples = []
 
   const total_start = Date.now()
   log(
@@ -364,10 +398,29 @@ export default async function (markets, { dry_run = false } = {}) {
             all_selection_cleanup_operations.push(
               ...operations.selection_operations.cleanup_operations
             )
+
+            const selection_failures =
+              operations.selection_operations.failures || []
+            stats.selection_processing_failures += selection_failures.length
+            for (const failure of selection_failures) {
+              if (failure_samples.length < 20) {
+                failure_samples.push({ scope: 'selection', ...failure })
+              }
+            }
           }
         } else {
           log('Error processing market:', market_batch[i])
           log(result.reason)
+
+          stats.market_processing_failures++
+          if (failure_samples.length < 20) {
+            failure_samples.push({
+              scope: 'market',
+              source_id: market_batch[i]?.source_id,
+              source_market_id: market_batch[i]?.source_market_id,
+              error: result.reason?.message || String(result.reason)
+            })
+          }
         }
       }
 
@@ -416,6 +469,16 @@ export default async function (markets, { dry_run = false } = {}) {
         // the change and rewrites both. Two round trips per batch instead of
         // one; a per-batch transaction would serialize all four onto a single
         // connection and cost six.
+        //
+        // Re-examined 2026-08-03 and kept, on a stronger argument than the
+        // round-trip count: a transaction would not buy what it looks like it
+        // buys. These four statements are not the whole unit -- the cache
+        // prefetch happened before them and cleanup_stale_selections issues its
+        // own DELETEs after -- and a crash BETWEEN batches is still possible
+        // whatever a batch does internally. So the self-healing property has to
+        // hold regardless, and once it holds the transaction is paying four
+        // extra round trips per batch to make a guarantee the design already
+        // has.
         const index_promises = []
 
         if (unique_market_index.length > 0) {
@@ -432,6 +495,7 @@ export default async function (markets, { dry_run = false } = {}) {
             batch_insert({
               items: unique_selection_index,
               batch_size: SELECTION_BATCH_SIZE,
+              concurrency: SELECTION_INSERT_CONCURRENCY,
               save: async (selection_batch) => {
                 await db('prop_market_selections_index')
                   .insert(selection_batch)
@@ -465,6 +529,7 @@ export default async function (markets, { dry_run = false } = {}) {
             batch_insert({
               items: unique_selection_history,
               batch_size: SELECTION_BATCH_SIZE,
+              concurrency: SELECTION_INSERT_CONCURRENCY,
               save: async (selection_batch) => {
                 await db('prop_market_selections_history')
                   .insert(selection_batch)
@@ -516,6 +581,32 @@ export default async function (markets, { dry_run = false } = {}) {
   // Clear cache after processing
   clear_cache()
   const total_duration = ((Date.now() - total_start) / 1000).toFixed(2)
+
+  const total_failures =
+    stats.market_processing_failures + stats.selection_processing_failures
+
+  if (total_failures > 0 && !dry_run) {
+    log(
+      `${stats.market_processing_failures} market(s) and ${stats.selection_processing_failures} selection(s) failed to process`
+    )
+
+    await emit_signal({
+      source: 'libs-server/insert-prop-markets.mjs',
+      kind: 'data_integrity',
+      // A handful of malformed selections from a book is routine noise; losing
+      // whole markets means an observation is missing from history for every
+      // market in the failing set, so it escalates.
+      severity: stats.market_processing_failures > 0 ? 'high' : 'low',
+      title: `prop market import dropped ${stats.market_processing_failures} market(s) and ${stats.selection_processing_failures} selection(s)`,
+      payload: {
+        total_markets: stats.total_markets,
+        market_processing_failures: stats.market_processing_failures,
+        selection_processing_failures: stats.selection_processing_failures,
+        samples: failure_samples
+      },
+      dedup_key: 'prop-market-import:processing-failures'
+    })
+  }
 
   if (dry_run) {
     log(`\n=== DRY RUN - NO DB WRITES ===`)
