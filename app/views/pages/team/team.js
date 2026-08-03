@@ -64,7 +64,7 @@ export default function TeamPage({
         </div>
       </div>
       <div className='team__nomination'>
-        <RestrictedFreeAgencyNomination tid={teamId} />
+        <RestrictedFreeAgencyNomination tid={teamId} compact />
       </div>
       <LeagueTeam tid={teamId} />
     </div>

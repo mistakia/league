@@ -1,6 +1,6 @@
-// Same card frame as the schedule it sits beside, with the status carried by
-// the left border rather than a full-bleed tint — an outstanding obligation
-// should read as urgent without shouting over the tables around it.
+// Same card frame as the schedule it sits beside. The status is carried by the
+// countdown's color alone — an outstanding obligation should read as urgent
+// without shouting over the tables around it.
 .restricted-free-agency-nomination
   display flex
   flex-direction column
@@ -8,14 +8,7 @@
   padding 16px 20px
   background white
   border-radius 8px
-  border-left 4px solid $borderColor
   height 100%
-
-  &.rfa-nomination--due
-    border-left-color rgb(237, 108, 2)
-
-  &.rfa-nomination--set
-    border-left-color rgb(46, 125, 50)
 
   .rfa-nomination__header
     display flex
@@ -93,6 +86,33 @@
     font-size 13px
     line-height 1.5
     color rgba(0, 0, 0, 0.6)
+
+// One-line strip for a page that already has a header and a metric row of its
+// own. Items pack left and wrap as a unit, so no gap opens up at any width.
+.restricted-free-agency-nomination.rfa-nomination--compact
+  flex-direction row
+  align-items center
+  flex-wrap wrap
+  gap 8px 24px
+  height auto
+  padding 10px 16px
+  border 1px solid $borderColor
+
+  .rfa-nomination__label
+    font-size 10px
+
+  .rfa-nomination__status
+    font-size 14px
+    font-weight 600
+
+  &.rfa-nomination--due .rfa-nomination__status
+    color rgb(237, 108, 2)
+
+  .rfa-nomination__countdown
+    text-align left
+
+  .rfa-nomination__countdown-value
+    font-size 16px
 
 @media (max-width 600px)
   .restricted-free-agency-nomination

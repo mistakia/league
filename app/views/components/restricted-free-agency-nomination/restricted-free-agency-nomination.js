@@ -34,7 +34,8 @@ export default function RestrictedFreeAgencyNomination({
   teams,
   team_id,
   tid,
-  restricted_free_agency_players
+  restricted_free_agency_players,
+  compact = false
 }) {
   const now = useClockSeconds(1000)
   const now_minute = Math.floor(now / 60)
@@ -94,6 +95,61 @@ export default function RestrictedFreeAgencyNomination({
   const is_satisfied = Boolean(nominee)
   const status = is_satisfied ? 'set' : 'due'
 
+  const opens_block = (
+    <div className='rfa-nomination__time-block'>
+      <span className='rfa-nomination__time-label'>Window opens</span>
+      <span className='rfa-nomination__time'>
+        {format_deadline(next_window.announce_at)}
+      </span>
+    </div>
+  )
+
+  const closes_block = (
+    <div className='rfa-nomination__time-block'>
+      <span className='rfa-nomination__time-label'>Bids close</span>
+      <span className='rfa-nomination__time'>
+        {format_deadline(next_window.bids_close_at)}
+      </span>
+    </div>
+  )
+
+  const countdown_block = (
+    <div className='rfa-nomination__countdown'>
+      <div className='rfa-nomination__countdown-value'>
+        {format_countdown(seconds_remaining)}
+      </div>
+      <div className='rfa-nomination__countdown-label'>
+        until the window opens
+      </div>
+    </div>
+  )
+
+  // The team page already carries a header, a metric row and a roster table, so
+  // a second full card competes with them — everything worth knowing fits on
+  // one line there, packed left so nothing drifts across the page width.
+  if (compact) {
+    return (
+      <div
+        className={`restricted-free-agency-nomination rfa-nomination--compact rfa-nomination--${status}`}
+      >
+        <div className='rfa-nomination__label'>Next nomination</div>
+        {is_own_team && (
+          <div className='rfa-nomination__status'>
+            {is_satisfied ? 'Nominee designated' : 'Nomination needed'}
+          </div>
+        )}
+        {is_satisfied && (
+          <div className='rfa-nomination__nominee'>
+            <PlayerName pid={nominee.get('pid')} />
+          </div>
+        )}
+        {opens_block}
+        {closes_block}
+        {countdown_block}
+      </div>
+    )
+  }
+
   return (
     <div
       className={`restricted-free-agency-nomination rfa-nomination--${status}`}
@@ -111,14 +167,7 @@ export default function RestrictedFreeAgencyNomination({
               : 'Window opens'}
           </div>
         </div>
-        <div className='rfa-nomination__countdown'>
-          <div className='rfa-nomination__countdown-value'>
-            {format_countdown(seconds_remaining)}
-          </div>
-          <div className='rfa-nomination__countdown-label'>
-            until the window opens
-          </div>
-        </div>
+        {countdown_block}
       </div>
 
       {is_satisfied && (
@@ -128,18 +177,8 @@ export default function RestrictedFreeAgencyNomination({
       )}
 
       <div className='rfa-nomination__times'>
-        <div className='rfa-nomination__time-block'>
-          <span className='rfa-nomination__time-label'>Window opens</span>
-          <span className='rfa-nomination__time'>
-            {format_deadline(next_window.announce_at)}
-          </span>
-        </div>
-        <div className='rfa-nomination__time-block'>
-          <span className='rfa-nomination__time-label'>Bids close</span>
-          <span className='rfa-nomination__time'>
-            {format_deadline(next_window.bids_close_at)}
-          </span>
-        </div>
+        {opens_block}
+        {closes_block}
       </div>
 
       {is_own_team && !is_satisfied && (
@@ -178,5 +217,6 @@ RestrictedFreeAgencyNomination.propTypes = {
   teams: ImmutablePropTypes.map,
   team_id: PropTypes.number,
   tid: PropTypes.number,
-  restricted_free_agency_players: ImmutablePropTypes.map
+  restricted_free_agency_players: ImmutablePropTypes.map,
+  compact: PropTypes.bool
 }
