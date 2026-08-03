@@ -26,6 +26,50 @@ const should = chai.should()
 chai.use(chai_http)
 const expect = chai.expect
 
+// Pick one player of the SAME position from each of teams 1 and 2, so a
+// one-for-one BENCH swap is position-neutral.
+//
+// The draft fixture fills rosters at random and the league fixture caps DST
+// and K at 3 apiece. An arbitrary pair can therefore hand the receiving team a
+// fourth player at a capped position, and has_bench_space_for_position rejects
+// the ACCEPT with 400 'No active roster space available for this position' --
+// a flake that fires on roughly 1 run in 100 and reads as an unrelated
+// regression on whatever commit CI happened to be testing.
+//
+// Both halves matter. Matching the two positions keeps the count the removal
+// frees equal to the count the addition consumes. Requiring the roster row's
+// pos to agree with player.primary_position keeps those two counts on the same
+// basis: the draft fixture writes rosters_players.pos from secondary_position
+// while validate_trade_slot_assignment reads primary_position, and a handful of
+// players in the seed pool differ across the two.
+const select_tradeable_pair = async () => {
+  const roster_players_for_team = (tid) =>
+    knex('rosters_players')
+      .select('rosters_players.pid', 'rosters_players.pos')
+      .join('player', 'player.pid', 'rosters_players.pid')
+      .where({
+        'rosters_players.lid': 1,
+        'rosters_players.tid': tid,
+        'rosters_players.year': current_season.year,
+        'rosters_players.week': current_season.week
+      })
+      .whereRaw('player.primary_position = rosters_players.pos')
+
+  const proposing_pool = await roster_players_for_team(1)
+  const accepting_pool = await roster_players_for_team(2)
+
+  const accepting_positions = new Set(accepting_pool.map((p) => p.pos))
+  const proposing_row = proposing_pool.find((p) =>
+    accepting_positions.has(p.pos)
+  )
+  if (!proposing_row) {
+    throw new Error('no shared position between team 1 and team 2 rosters')
+  }
+  const accepting_row = accepting_pool.find((p) => p.pos === proposing_row.pos)
+
+  return [proposing_row, accepting_row]
+}
+
 describe('API /trades', function () {
   before(async function () {
     this.timeout(60 * 1000)
@@ -41,28 +85,10 @@ describe('API /trades', function () {
     it('one-for-one player trade', async () => {
       await draft(knex)
 
-      const proposingTeamPlayerRows = await knex('rosters_players')
-        .where({
-          lid: 1,
-          tid: 1,
-          year: current_season.year,
-          week: current_season.week
-        })
-        .whereNot('pos', 'K')
-        .limit(1)
+      const [proposing_row, accepting_row] = await select_tradeable_pair()
 
-      const acceptingTeamPlayerRows = await knex('rosters_players')
-        .where({
-          lid: 1,
-          tid: 2,
-          year: current_season.year,
-          week: current_season.week
-        })
-        .whereNot('pos', 'K')
-        .limit(1)
-
-      const proposingTeamPlayers = proposingTeamPlayerRows.map((p) => p.pid)
-      const acceptingTeamPlayers = acceptingTeamPlayerRows.map((p) => p.pid)
+      const proposingTeamPlayers = [proposing_row.pid]
+      const acceptingTeamPlayers = [accepting_row.pid]
 
       // set values to zero
       await knex('transactions')
@@ -157,38 +183,7 @@ describe('API /trades', function () {
     it('trade preserves extension counts', async () => {
       await draft(knex)
 
-      // Pick one player of the SAME position from each team so the 1-for-1
-      // BENCH swap is position-neutral. The draft fixture fills rosters with
-      // random positions; trading mismatched positions can exceed the
-      // receiving team's active position limit, so has_bench_space_for_position
-      // rejects the proposal with a 400 -- a nondeterministic flake. A
-      // same-position swap removes and re-adds the same position, so it always
-      // passes roster-slot validation.
-      const proposing_pool = await knex('rosters_players')
-        .where({
-          lid: 1,
-          tid: 1,
-          year: current_season.year,
-          week: current_season.week
-        })
-        .whereNot('pos', 'K')
-
-      const accepting_pool = await knex('rosters_players')
-        .where({
-          lid: 1,
-          tid: 2,
-          year: current_season.year,
-          week: current_season.week
-        })
-        .whereNot('pos', 'K')
-
-      const accepting_positions = new Set(accepting_pool.map((p) => p.pos))
-      const proposing_row = proposing_pool.find((p) =>
-        accepting_positions.has(p.pos)
-      )
-      const accepting_row = accepting_pool.find(
-        (p) => p.pos === proposing_row.pos
-      )
+      const [proposing_row, accepting_row] = await select_tradeable_pair()
 
       const proposingTeamPlayers = [proposing_row.pid]
       const acceptingTeamPlayers = [accepting_row.pid]
@@ -442,7 +437,14 @@ describe('API /trades', function () {
       )
       res.body.transaction.value.should.equal(value)
       res.body.transaction.year.should.equal(current_season.year)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // The server stamps the transaction while handling the request and the
+      // assertion reads the clock after the response, so an exact equality
+      // fails whenever a second boundary falls between the two. Reproduced
+      // once in 30 isolated runs of this file.
+      expect(res.body.transaction.timestamp).to.be.closeTo(
+        Math.round(Date.now() / 1000),
+        2
+      )
 
       // verify poach is cancelled
       const poaches = await knex('poaches')
