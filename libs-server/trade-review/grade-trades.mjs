@@ -135,12 +135,17 @@ const load_num_teams_by_format = async ({ format_ids }) => {
 // The two sides of each trade, read from the trade record itself.
 //
 // view_trade_asset_flow.from_tid is the team that held the asset immediately
-// before the trade, which is NOT reliably a participant: on 4 of league 1's 735
-// legs the lineage graph is missing the hop that moved a pick to the trading
-// team, leaving the pick's original owner as the apparent counterparty. Reading
-// the sides from trades.propose_tid / accept_tid instead means a trade always
-// has exactly two perspectives and never invents a third team. Tracked as
-// user:task/league/fix-lineage-walker-orphaned-pick-hops.md.
+// before the trade, which is a derived fact about the lineage graph rather than
+// a statement about who agreed to the deal. Reading the sides from
+// trades.propose_tid / accept_tid means a trade has exactly two perspectives by
+// construction, and no graph defect can ever invent a third team here.
+//
+// That is not hypothetical: the walker did emit legs naming a third team on 4
+// of league 1's 735 legs until 3c13b27fc, when a pick's hop to the trading team
+// was missing and its original owner stood in as the apparent counterparty.
+// That defect is fixed and from_tid is now a participant on 735/735, guarded by
+// the trade_leg_source_not_participant coverage warning. This function does not
+// depend on either fact holding.
 const load_trade_participants = async ({ lid, trade_uids }) => {
   const by_trade = new Map()
   if (!trade_uids.length) return by_trade
