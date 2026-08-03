@@ -117,6 +117,29 @@ const job_type_to_id = build_job_type_to_id()
 // Emit the log_error twin only when no resolvable failure will carry the
 // outcome — i.e. an unmapped job_type or an unconfigured API URL, where the
 // log_error is the sole escalation channel.
+// The zone --schedule is expressed in. Without it `base run report` stores a
+// NULL timezone and the stale sweep reads a local-time cron expression as UTC,
+// moving the next expected fire EARLIER by the host's offset -- on
+// America/New_York that eats 4 of the 6 grace hours and turns the staleness
+// surface into a false-flag generator.
+//
+// Resolved from the host at runtime rather than hardcoded: report_job runs on
+// more than one host, so a constant is wrong the day a job relocates. cron
+// interprets a schedule in the system zone unless the crontab sets CRON_TZ, and
+// a cron-spawned node process inherits that same system zone, so
+// `Intl...resolvedOptions().timeZone` IS the cron daemon's zone. The
+// JOB_SCHEDULE_TIMEZONE override exists for the CRON_TZ case, where the two
+// diverge and only the crontab knows it. No league crontab sets CRON_TZ or TZ
+// today (verified 2026-08-03: 0 of 92 scheduled lines).
+export const resolve_schedule_timezone = (env = process.env) => {
+  if (env.JOB_SCHEDULE_TIMEZONE) return env.JOB_SCHEDULE_TIMEZONE
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || null
+  } catch (err) {
+    return null
+  }
+}
+
 export const should_emit_log_error = ({ job_success, job_id, api_url }) =>
   !job_success && !(job_id && api_url)
 
@@ -217,6 +240,10 @@ export default async function report_job({
       '--schedule-type',
       process.env.JOB_SCHEDULE_TYPE || 'expr'
     )
+    const schedule_timezone = resolve_schedule_timezone()
+    if (schedule_timezone) {
+      schedule_args.push('--timezone', schedule_timezone)
+    }
   }
 
   try {

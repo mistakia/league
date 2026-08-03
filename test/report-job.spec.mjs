@@ -5,7 +5,8 @@ import * as chai from 'chai'
 import {
   should_emit_log_error,
   is_connection_error,
-  with_connection_retry
+  with_connection_retry,
+  resolve_schedule_timezone
 } from '#libs-server/report-job.mjs'
 
 const expect = chai.expect
@@ -170,5 +171,19 @@ describe('LIBS-SERVER report_job with_connection_retry', function () {
     expect(thrown).to.exist
     expect(thrown.code).to.equal('ECONNRESET')
     expect(calls).to.equal(3)
+  })
+})
+
+describe('LIBS-SERVER report_job resolve_schedule_timezone', function () {
+  it('prefers an explicit JOB_SCHEDULE_TIMEZONE from the crontab', () => {
+    expect(
+      resolve_schedule_timezone({ JOB_SCHEDULE_TIMEZONE: 'Europe/Berlin' })
+    ).to.equal('Europe/Berlin')
+  })
+
+  it('falls back to the run host zone when the crontab declares none', () => {
+    const resolved = resolve_schedule_timezone({})
+    expect(resolved).to.equal(Intl.DateTimeFormat().resolvedOptions().timeZone)
+    expect(resolved).to.be.a('string')
   })
 })
