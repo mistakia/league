@@ -157,11 +157,11 @@ const without_chains = (trade) => ({
  *           type: number
  *         lineage_state:
  *           type: string
- *           enum: [not_computed, no_longer_held, held]
+ *           enum: [no_longer_held, held]
  *           description: >-
- *             not_computed means the lineage graph has no row for this asset,
- *             which is distinct from no_longer_held. Both otherwise present as
- *             an empty result and a zero value.
+ *             no_longer_held means every asset descended from this one is
+ *             closed, so it is worth nothing to this team today. It presents as
+ *             a zero value and must not be rendered as one.
  *         hop_count:
  *           type: integer
  *           description: 0 when the asset never moved again after the trade
@@ -201,9 +201,9 @@ router.get('/?', async (req, res) => {
  *       asset reached, ordered by depth, carrying the transformation that
  *       created it and that holding's production, usage, cost and termination.
  *
- *       A chain of one row is an asset that never moved again — distinct from
- *       an asset with no chain at all, which reports
- *       `lineage_state: not_computed`.
+ *       A chain of one row is an asset that never moved again. Every leg has a
+ *       chain of at least that one row: the walk emits a depth-zero row for
+ *       every holding, and a leg only exists when its target holding does.
  *     security:
  *       - bearerAuth: []
  *     parameters:

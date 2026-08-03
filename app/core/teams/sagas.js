@@ -16,6 +16,7 @@ import { waiver_actions } from '@core/waivers'
 import { matchups_actions } from '@core/matchups'
 import { roster_actions } from '@core/rosters'
 import { restricted_free_agency_actions } from '@core/restricted-free-agency'
+import { trade_review_actions } from '@core/trade-review/actions'
 
 export function* initTeams() {
   const { leagueId } = yield select(get_app)
@@ -51,6 +52,25 @@ export function* load_teams_for_year({ payload }) {
   }
 
   yield call(api_get_teams, { leagueId, year })
+}
+
+// The trade review surface renders every season at once, so one year is not
+// enough: it needs teams for every season a trade landed in, the CURRENT one
+// included. `initTeams` fetches with no year at all, keying its request history
+// as GET_TEAMS_<lid>_undefined, so the current season is as absent from the
+// year-keyed store as 2020 is and renders just as blank.
+export function* load_teams_for_years_in_trade_review({ payload }) {
+  const records = Array.isArray(payload.data) ? payload.data : []
+  const years = new Set()
+  for (const record of records) {
+    if (record.occurred_at) {
+      years.add(new Date(record.occurred_at).getUTCFullYear())
+    }
+  }
+
+  for (const year of years) {
+    yield call(load_teams_for_year, { payload: { year } })
+  }
 }
 
 export function* updateTeam({ payload }) {
@@ -168,6 +188,15 @@ export function* watch_load_restricted_free_agency_auctions() {
   )
 }
 
+// Keyed on the response rather than the load action: the set of seasons is not
+// knowable until the trades come back.
+export function* watch_get_trade_review_fulfilled() {
+  yield takeLatest(
+    trade_review_actions.GET_TRADE_REVIEW_FULFILLED,
+    load_teams_for_years_in_trade_review
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -190,5 +219,6 @@ export const team_sagas = [
   fork(watchLoadRosters),
   fork(watchLoadTeams),
   fork(watch_select_year),
-  fork(watch_load_restricted_free_agency_auctions)
+  fork(watch_load_restricted_free_agency_auctions),
+  fork(watch_get_trade_review_fulfilled)
 ]

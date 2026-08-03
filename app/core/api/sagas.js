@@ -99,6 +99,10 @@ import {
   get_waiver_report_actions
 } from '@core/waivers/actions'
 import { get_restricted_free_agency_auctions_actions } from '@core/restricted-free-agency/actions'
+import {
+  get_trade_review_actions,
+  get_trade_review_trade_actions
+} from '@core/trade-review/actions'
 import { notification_actions } from '@core/notifications/actions'
 import { get_scoreboard_actions } from '@core/scoreboard/actions'
 import { post_error_actions } from '@core/errors/actions'
@@ -452,6 +456,18 @@ export const api_get_restricted_free_agency_auctions = fetch.bind(
   null,
   api.get_restricted_free_agency_auctions,
   get_restricted_free_agency_auctions_actions
+)
+
+export const api_get_trade_review = fetch.bind(
+  null,
+  api.get_trade_review,
+  get_trade_review_actions
+)
+
+export const api_get_trade_review_trade = fetch.bind(
+  null,
+  api.get_trade_review_trade,
+  get_trade_review_trade_actions
 )
 
 export const api_get_schedule = fetch.bind(

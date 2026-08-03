@@ -16,6 +16,7 @@ import { setting_sagas } from './settings'
 import { stat_sagas } from './stats'
 import { waiver_sagas } from './waivers'
 import { restricted_free_agency_sagas } from './restricted-free-agency'
+import { trade_review_sagas } from './trade-review'
 import { poach_sagas } from './poaches'
 import { schedule_sagas } from './schedule'
 import { error_sagas } from './errors'
@@ -51,6 +52,7 @@ export default function* rootSaga() {
     ...stat_sagas,
     ...waiver_sagas,
     ...restricted_free_agency_sagas,
+    ...trade_review_sagas,
     ...poach_sagas,
     ...schedule_sagas,
     ...error_sagas,

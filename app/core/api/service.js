@@ -271,6 +271,14 @@ export const api = {
     }/waivers/report?${queryString.stringify(params)}`
     return { url }
   },
+  get_trade_review({ leagueId }) {
+    const url = `${API_URL}/leagues/${leagueId}/trade-review`
+    return { url }
+  },
+  get_trade_review_trade({ leagueId, trade_uid }) {
+    const url = `${API_URL}/leagues/${leagueId}/trade-review/${trade_uid}`
+    return { url }
+  },
   get_restricted_free_agency_auctions(params) {
     const url = `${API_URL}/leagues/${
       params.leagueId

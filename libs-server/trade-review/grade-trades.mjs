@@ -47,14 +47,18 @@ const log = debug('grade-trades')
 // inside this window is worth 0.
 const STALE_VALUATION_DAYS = 30
 
-// Per-asset lineage states, distinguishing an asset the graph has not reached
-// from one that was genuinely consumed. Both otherwise present as an empty
-// chain and a zero value, which reads identically on a page.
+// Per-asset lineage states. An asset whose descendants are all closed values
+// at zero, exactly as an asset nobody ever traded does, so the state is what
+// stops a page reporting the two the same way.
+//
+// There is deliberately no "not computed" state. The walk view emits a
+// depth-zero row for every holding and view_trade_asset_flow only yields a leg
+// whose target holding exists, so a leg always has a chain. A lineage graph
+// that has not caught up to a trade omits the TRADE, it does not produce an
+// asset with an empty chain -- a state for that case could never fire and
+// would read as a covered case that is not covered.
 export const LINEAGE_STATE = {
-  // No row in the lineage graph at all -- the refresh has not reached this
-  // trade yet, or the holding is an unlinked orphan.
-  not_computed: 'not_computed',
-  // Reachable, but nothing descended from it is still open. Consumed.
+  // Reachable, and nothing descended from it is still open. Consumed.
   no_longer_held: 'no_longer_held',
   // At least one descendant is still owned by somebody today.
   held: 'held'
@@ -300,12 +304,9 @@ const grade_trades = async ({
   const build_asset_outcome = (leg) => {
     const chain = chains_by_origin.get(leg.target_holding_id) || []
     const terminals = chain.filter(is_terminal)
-    let lineage_state = LINEAGE_STATE.held
-    if (!chain.length) {
-      lineage_state = LINEAGE_STATE.not_computed
-    } else if (!terminals.length) {
-      lineage_state = LINEAGE_STATE.no_longer_held
-    }
+    const lineage_state = terminals.length
+      ? LINEAGE_STATE.held
+      : LINEAGE_STATE.no_longer_held
     return {
       ...asset_identity(leg),
       origin_holding_id: leg.target_holding_id,
@@ -322,8 +323,8 @@ const grade_trades = async ({
         tid: terminal_row.tid
       })),
       lineage_state,
-      // 0 means the asset is sitting where it landed and never moved again --
-      // reachable, unlike not_computed, which has no chain at all.
+      // 0 means the asset is sitting where it landed and never moved again.
+      // The chain always holds at least the asset's own depth-zero row.
       hop_count: chain.length ? chain.length - 1 : 0,
       chain
     }

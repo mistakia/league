@@ -77,6 +77,7 @@ export const get_draft_pick_values = (state) => state.get('draft_pick_value')
 export const get_waivers = (state) => state.get('waivers')
 export const get_restricted_free_agency_state = (state) =>
   state.get('restricted_free_agency')
+export const get_trade_review_state = (state) => state.get('trade_review')
 export const get_transactions = (state) => state.get('transactions')
 export const get_trade = (state) => state.get('trade')
 export const get_teams_for_current_year = (state) =>

@@ -1,0 +1,192 @@
+.trade-review-trade
+  background #fff
+  border 1px solid #e0e0e0
+  border-radius 8px
+  margin-bottom 12px
+  overflow hidden
+
+.trade-review-trade__summary
+  align-items center
+  cursor pointer
+  display flex
+  flex-wrap wrap
+  gap 8px 20px
+  justify-content space-between
+  padding 10px 16px
+
+  &:hover
+    background #fafafa
+
+.trade-review-trade__date
+  color #616161
+  flex 0 0 auto
+  font-size 12px
+  min-width 96px
+
+.trade-review-trade__teams
+  align-items center
+  display flex
+  flex 1 1 220px
+  gap 8px
+  min-width 0
+
+.trade-review-trade__versus
+  color #9e9e9e
+  font-size 12px
+
+.trade-review-trade__nets
+  display flex
+  flex 0 0 auto
+  gap 20px
+
+.trade-review-trade__net
+  display flex
+  flex-direction column
+  min-width 84px
+
+.trade-review-trade__net-label
+  color #9e9e9e
+  font-size 10px
+  letter-spacing 0.04em
+  text-transform uppercase
+
+.trade-review-trade__net-value
+  font-variant-numeric tabular-nums
+  font-weight 600
+
+  &.positive
+    color #2e7d32
+
+  &.negative
+    color #c62828
+
+// Deliberately styled as prose rather than as a number: the absence has to read
+// as "we do not know", not as a small or neutral value.
+.trade-review-trade__net-unpriced
+  color #9e9e9e
+  cursor help
+  font-size 12px
+  font-style italic
+
+.trade-review-trade__expand
+  align-items center
+  color #757575
+  display flex
+
+.trade-review-trade__detail
+  border-top 1px solid #e0e0e0
+  display flex
+  flex-wrap wrap
+  gap 16px
+  padding 12px 16px 16px
+
+.trade-review-trade__perspective
+  flex 1 1 340px
+  min-width 0
+
+.trade-review-trade__perspective-header
+  align-items center
+  border-bottom 1px solid #eeeeee
+  display flex
+  gap 8px
+  padding-bottom 6px
+
+.trade-review-trade__perspective-label
+  color #9e9e9e
+  font-size 12px
+
+.trade-review-trade__asset
+  border-bottom 1px solid #f5f5f5
+  padding 8px 0
+
+.trade-review-trade__asset-header
+  align-items baseline
+  display flex
+  flex-wrap wrap
+  gap 4px 12px
+  justify-content space-between
+
+.trade-review-trade__asset-name
+  align-items center
+  display flex
+  font-weight 600
+  gap 6px
+  min-width 0
+
+.trade-review-trade__asset-values
+  color #616161
+  display flex
+  font-size 12px
+  font-variant-numeric tabular-nums
+  gap 12px
+
+.trade-review-trade__lineage-state
+  cursor help
+
+  &.no_longer_held
+    color #757575
+
+  &.held
+    color #2e7d32
+
+.trade-review-trade__resulting
+  align-items center
+  color #616161
+  display flex
+  flex-wrap wrap
+  font-size 12px
+  gap 4px 8px
+  padding-top 4px
+
+.trade-review-trade__resulting-label
+  color #9e9e9e
+  font-size 10px
+  letter-spacing 0.04em
+  text-transform uppercase
+
+.trade-review-trade__chain
+  border-left 2px solid #e0e0e0
+  margin 6px 0 0 6px
+  padding-left 10px
+
+.trade-review-trade__chain-row
+  align-items baseline
+  display flex
+  flex-wrap wrap
+  font-size 12px
+  gap 2px 10px
+  padding 3px 0
+
+.trade-review-trade__chain-event
+  color #424242
+  flex 0 0 auto
+  min-width 150px
+
+.trade-review-trade__chain-asset
+  align-items center
+  display flex
+  gap 4px
+  min-width 0
+
+.trade-review-trade__chain-outcome
+  color #757575
+
+.trade-review-trade__chain-stats
+  color #9e9e9e
+  display flex
+  flex-wrap wrap
+  gap 10px
+
+// The named state an asset with no lineage rows renders as. A blank here would
+// be indistinguishable from an asset that produced nothing.
+.trade-review-trade__chain-absent
+  color #ef6c00
+  font-size 12px
+  padding 4px 0 0 8px
+
+@media (max-width 899px)
+  .trade-review-trade__nets
+    gap 12px
+
+  .trade-review-trade__net
+    min-width 70px

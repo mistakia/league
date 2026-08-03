@@ -176,6 +176,9 @@ export default function AppMenu({
                         >
                           Restricted Free Agency
                         </NavLink>
+                        <NavLink to={`/leagues/${leagueId}/trade-review`}>
+                          Trade Review
+                        </NavLink>
                       </>
                     )}
                   </>
