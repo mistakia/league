@@ -152,7 +152,8 @@ describe('LIBS-SHARED get_most_recent_practice_status', function () {
     }
     const current_date = new Date('2024-01-08T12:00:00') // Monday
     const result = get_most_recent_practice_status({ practice, current_date })
-    expect(result).to.equal('FULL')
+    // Legacy FULL is normalized to FP, same as every other case in this file
+    expect(result).to.equal('FP')
   })
 
   it('should handle Saturday as current day', function () {
