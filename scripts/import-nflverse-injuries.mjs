@@ -137,8 +137,10 @@ const download_csv = async ({ year, force_download = false }) => {
   const file_path = path.join(os.tmpdir(), `nflverse_injuries_${year}.csv`)
   if (force_download || !fs.existsSync(file_path)) {
     log(`downloading ${release_url_for_year(year)}`)
+    // use_proxy: false -- public GitHub release asset, not a vendor scrape target.
     const response = await fetch_with_retry({
-      url: release_url_for_year(year)
+      url: release_url_for_year(year),
+      use_proxy: false
     })
     if (!response.ok) {
       throw new Error(

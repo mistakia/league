@@ -32,7 +32,15 @@ const timestamp = Math.round(Date.now() / 1000)
 
 const run = async () => {
   const URL = 'https://api.sleeper.app/v1/players/nfl'
-  const result = await fetch_with_retry({ url: URL, response_type: 'json' })
+  // use_proxy: false -- Sleeper documents this as a public bulk-polling
+  // endpoint (no auth, no per-IP restriction called out), unlike the
+  // per-league scrape in import-sleeper-external-league-trades.mjs. Flagged
+  // as ambiguous rather than verified; revisit if Sleeper starts rate-limiting.
+  const result = await fetch_with_retry({
+    url: URL,
+    use_proxy: false,
+    response_type: 'json'
+  })
   const sleeper_player_count = result ? Object.keys(result).length : 0
 
   const statuses = []

@@ -67,7 +67,11 @@ const run = async () => {
     return { shortfall: null, in_season: false }
   }
 
-  const data = await fetch_with_retry({ url, response_type: 'json' })
+  const data = await fetch_with_retry({
+    url,
+    use_proxy: true,
+    response_type: 'json'
+  })
 
   const missing = []
   let players_processed = 0

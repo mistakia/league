@@ -33,7 +33,11 @@ const run = async ({ season = false, dry = false } = {}) => {
   }
 
   log(URL)
-  const data = await fetch_with_retry({ url: URL, response_type: 'json' })
+  const data = await fetch_with_retry({
+    url: URL,
+    use_proxy: true,
+    response_type: 'json'
+  })
   const missing = []
 
   const createEntry = (item) => ({

@@ -327,7 +327,11 @@ const download_contracts_file = async ({ force_download = false }) => {
   if (force_download || !fs.existsSync(file_path)) {
     log(`downloading contract data from NFLverse`)
     const stream_pipeline = promisify(pipeline)
-    const response = await fetch_with_retry({ url: NFLVERSE_CONTRACTS_URL })
+    // use_proxy: false -- public GitHub release asset, not a vendor scrape target.
+    const response = await fetch_with_retry({
+      url: NFLVERSE_CONTRACTS_URL,
+      use_proxy: false
+    })
 
     if (!response.ok) {
       throw new Error(`download failed: ${response.statusText}`)

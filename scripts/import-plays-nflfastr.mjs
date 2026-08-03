@@ -707,7 +707,8 @@ const download_file = async ({ year, force_download }) => {
   if (force_download || !fs.existsSync(path)) {
     log(`downloading ${url}`)
     const stream_pipeline = promisify(pipeline)
-    const response = await fetch_with_retry({ url })
+    // use_proxy: false -- public GitHub release asset, not a vendor scrape target.
+    const response = await fetch_with_retry({ url, use_proxy: false })
     if (!response.ok) {
       throw new Error(`unexpected response ${response.statusText}`)
     }

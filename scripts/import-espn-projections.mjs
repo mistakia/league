@@ -49,6 +49,7 @@ const run = async ({
   const data = await fetch_with_retry({
     url: URL,
     headers,
+    use_proxy: true,
     response_type: 'json'
   })
   const inserts = []

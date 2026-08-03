@@ -64,6 +64,7 @@ const run = async ({ dry_run = false } = {}) => {
   log(`fetching players from ${players_url}`)
   const fbg_players = await fetch_with_retry({
     url: players_url,
+    use_proxy: true,
     response_type: 'json'
   })
 
@@ -71,6 +72,7 @@ const run = async ({ dry_run = false } = {}) => {
   log(`fetching projections from ${projections_url}`)
   const data = await fetch_with_retry({
     url: projections_url,
+    use_proxy: true,
     response_type: 'json'
   })
 

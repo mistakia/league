@@ -4,6 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import js from '@eslint/js'
 import { FlatCompat } from '@eslint/eslintrc'
+import noUnproxiedFetchWithRetry from './eslint-rules/no-unproxied-fetch-with-retry.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -44,7 +45,12 @@ export default [
       }
     },
 
+    plugins: {
+      local: noUnproxiedFetchWithRetry
+    },
+
     rules: {
+      'local/no-unproxied-fetch-with-retry': 'error',
       camelcase: ['off'],
       curly: ['off'],
       indent: ['off'],

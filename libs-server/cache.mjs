@@ -1,6 +1,7 @@
 import config from '#config'
 import { fetch_with_retry } from './proxy-manager.mjs'
 
+// use_proxy: false -- this is our own xo.football API, not a vendor target.
 export const set = async ({ key, value }) => {
   const url = `https://xo.football/api/cache${key}`
 
@@ -15,12 +16,14 @@ export const set = async ({ key, value }) => {
     max_retries: 3,
     initial_delay: 1000,
     max_delay: 10000,
+    use_proxy: false,
     response_type: 'json'
   })
 
   return data.value
 }
 
+// use_proxy: false -- this is our own xo.football API, not a vendor target.
 export const get = async ({ key, max_age_ms = null }) => {
   let url = `https://xo.football/api/cache${key}`
   if (max_age_ms != null) {
@@ -32,6 +35,7 @@ export const get = async ({ key, max_age_ms = null }) => {
     max_retries: 3,
     initial_delay: 1000,
     max_delay: 10000,
+    use_proxy: false,
     response_type: 'json'
   })
 
