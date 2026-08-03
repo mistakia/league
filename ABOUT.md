@@ -510,15 +510,18 @@ observations:
     arbitrary non-K pair could hand the receiving team a fourth DST, rejecting the ACCEPT; 10/1500
     fixture draws, fixed in 14ade5fef.
   - >-
-    [ci-flake] 2026-08-03 46 suite assertions across 16 files compare a server timestamp to a later
-    Math.round(Date.now()/1000) and flake on a second boundary; one in test/trade.spec.mjs is fixed,
-    the rest are latent.
+    [ci-flake] 2026-08-03 The exact Math.round(Date.now()/1000) timestamp assertions are NOT a flake
+    class: the test server runs in-process, so MockDate.set freezes the clock the handler stamps
+    from and the clock the assertion reads, and all 45 sites outside test/trade.spec.mjs sit inside
+    an it() under a frozen clock. Only trade.spec.mjs never sets a date in its post block, which is
+    why it alone raced (fixed in 14ade5fef); sweeping the other 45 to closeTo would weaken real
+    assertions.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-03T16:18:33.966Z'
+updated_at: '2026-08-03T16:53:45.911Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
