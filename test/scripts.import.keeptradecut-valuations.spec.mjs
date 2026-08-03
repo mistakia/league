@@ -1,6 +1,7 @@
-/* global describe before it */
+/* global describe before it beforeEach afterEach */
 
 import * as chai from 'chai'
+import dayjs from 'dayjs'
 
 import db from '#db'
 import {
@@ -10,7 +11,8 @@ import {
   merge_columns_for_branch,
   create_valuation_accumulator,
   parse_keeptradecut_date,
-  resolve_known_keeptradecut_player
+  resolve_known_keeptradecut_player,
+  compute_freshness_shortfalls
 } from '#scripts/import-keeptradecut.mjs'
 import compute_snapshots_bulk, {
   ktc_at
@@ -275,6 +277,81 @@ describe('SCRIPTS import-keeptradecut valuations', function () {
       row.keeptradecut_value.should.equal(3300)
       row.overall_rank.should.equal(88)
       row.position_rank.should.equal(7)
+    })
+  })
+
+  describe('compute_freshness_shortfalls', function () {
+    // Table-wide MAX(observed_at) queries with no pid scope, so these tests own
+    // the whole table for their duration -- any residual row from another spec
+    // could read as fresher than the fixture and mask a shortfall that should
+    // fire. Other describe blocks in this file clean up their own pids rather
+    // than depending on ambient rows, so clearing here is safe.
+    beforeEach(async () => {
+      await db('keeptradecut_valuations').del()
+    })
+
+    afterEach(async () => {
+      await db('keeptradecut_valuations').del()
+    })
+
+    const insert_row = ({
+      observed_at,
+      position_rank = null,
+      overall_rank = null
+    }) =>
+      db('keeptradecut_valuations').insert({
+        pid: PLAYER_PID,
+        is_superflex: true,
+        observed_at,
+        keeptradecut_value: 1000,
+        position_rank,
+        overall_rank
+      })
+
+    it('is silent on an ordinary daily value-only run with no rank rows ever written', async () => {
+      await insert_row({ observed_at: dayjs().subtract(1, 'hour').toDate() })
+
+      const shortfalls = await compute_freshness_shortfalls()
+      shortfalls.should.deep.equal([
+        'rank staleness: no rows with position_rank/overall_rank found in keeptradecut_valuations'
+      ])
+    })
+
+    it('stays silent on rank staleness within the weekly --full cadence', async () => {
+      await insert_row({ observed_at: dayjs().subtract(1, 'hour').toDate() })
+      await insert_row({
+        observed_at: dayjs().subtract(6, 'day').toDate(),
+        position_rank: 12,
+        overall_rank: 34
+      })
+
+      const shortfalls = await compute_freshness_shortfalls()
+      shortfalls.should.deep.equal([])
+    })
+
+    it('fires on rank staleness once the last full scrape is older than the threshold', async () => {
+      await insert_row({ observed_at: dayjs().subtract(1, 'hour').toDate() })
+      await insert_row({
+        observed_at: dayjs().subtract(9, 'day').toDate(),
+        position_rank: 12,
+        overall_rank: 34
+      })
+
+      const shortfalls = await compute_freshness_shortfalls()
+      shortfalls.should.have.lengthOf(1)
+      shortfalls[0].should.match(/^rank staleness:/)
+    })
+
+    it('fires on value staleness independently of rank staleness', async () => {
+      await insert_row({
+        observed_at: dayjs().subtract(3, 'day').toDate(),
+        position_rank: 12,
+        overall_rank: 34
+      })
+
+      const shortfalls = await compute_freshness_shortfalls()
+      shortfalls.should.have.lengthOf(1)
+      shortfalls[0].should.match(/^staleness:/)
     })
   })
 

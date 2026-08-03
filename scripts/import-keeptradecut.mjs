@@ -278,10 +278,77 @@ const get_keeptradecut_config = async () => {
   return config_row.value
 }
 
+// Value staleness: cron runs daily and the daily branch always writes
+// keeptradecut_value, so 48h catches a run that completed without writing
+// anything.
+export const VALUE_STALENESS_THRESHOLD_HOURS = 48
+
+// Rank staleness: position_rank/overall_rank are written only by the --full
+// per-player scrape, scheduled weekly (server/crontab-main/league-imports.cron,
+// Wednesday 08:00 ET). Threshold is that cadence plus a one-day margin so an
+// ordinary week's gap between full runs never trips it -- the whole reason this
+// is a separate oracle from value staleness rather than a shared threshold.
+export const RANK_STALENESS_THRESHOLD_HOURS = 24 * 8
+
+// Split from the single table-wide freshness check that used to sit inline
+// here: that check could never see a frozen rank column, because the daily
+// value-only branch always advances max(observed_at) table-wide. Ranks need
+// their own max(observed_at), scoped to rows a full scrape actually wrote to.
+export const compute_freshness_shortfalls = async ({
+  value_threshold_hours = VALUE_STALENESS_THRESHOLD_HOURS,
+  rank_threshold_hours = RANK_STALENESS_THRESHOLD_HOURS
+} = {}) => {
+  const shortfalls = []
+
+  const value_row = await db('keeptradecut_valuations')
+    .max({ max_observed_at: 'observed_at' })
+    .first()
+  const value_max_observed_at = value_row?.max_observed_at
+  if (!value_max_observed_at) {
+    shortfalls.push('no rows found in keeptradecut_valuations after run')
+  } else {
+    const stale_hours = dayjs().diff(dayjs(value_max_observed_at), 'hour')
+    if (stale_hours > value_threshold_hours) {
+      shortfalls.push(
+        `staleness: max(observed_at)=${dayjs(value_max_observed_at).format('YYYY-MM-DD')} is ${stale_hours}h > threshold=${value_threshold_hours}h`
+      )
+    }
+  }
+
+  const rank_row = await db('keeptradecut_valuations')
+    .where((builder) =>
+      builder.whereNotNull('position_rank').orWhereNotNull('overall_rank')
+    )
+    .max({ max_observed_at: 'observed_at' })
+    .first()
+  const rank_max_observed_at = rank_row?.max_observed_at
+  if (!rank_max_observed_at) {
+    shortfalls.push(
+      'rank staleness: no rows with position_rank/overall_rank found in keeptradecut_valuations'
+    )
+  } else {
+    const rank_stale_hours = dayjs().diff(dayjs(rank_max_observed_at), 'hour')
+    if (rank_stale_hours > rank_threshold_hours) {
+      shortfalls.push(
+        `rank staleness: max(observed_at with rank)=${dayjs(rank_max_observed_at).format('YYYY-MM-DD')} is ${rank_stale_hours}h > threshold=${rank_threshold_hours}h`
+      )
+    }
+  }
+
+  return shortfalls
+}
+
+// All three vendor fetches route through the shared proxy pool (`default`,
+// 5 proxies as of 2026-08) rather than the process's own egress. Before this,
+// none of fetch_with_retry's use_proxy default (false) or the raw `fetch()`
+// below opted in, so this scraper always left the home IP regardless of pool
+// health -- unlike pinnacle.mjs and the plays/matchup charting importers,
+// which already pass use_proxy: true.
 const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   const dynasty_rankings_html = await fetch_with_retry({
     url: 'https://keeptradecut.com/dynasty-rankings',
-    response_type: 'text'
+    response_type: 'text',
+    use_proxy: true
   })
   const dynasty_rankings_dom = new JSDOM(dynasty_rankings_html, {
     runScripts: 'dangerously'
@@ -328,11 +395,13 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
   const keeptradecut_config = await get_keeptradecut_config()
 
-  const data = await fetch(keeptradecut_config.dynasty_rankings_url, {
+  const data = await fetch_with_retry({
+    url: keeptradecut_config.dynasty_rankings_url,
     method: 'POST',
     headers: keeptradecut_config.dynasty_rankings_headers,
-    body: null
-  }).then((res) => res.json())
+    response_type: 'json',
+    use_proxy: true
+  })
 
   log(`Processing ${data.length} players`)
 
@@ -457,7 +526,8 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       const slug = keeptradecut_player.slug
       const html = await fetch_with_retry({
         url: `https://keeptradecut.com/dynasty-rankings/players/${slug}`,
-        response_type: 'text'
+        response_type: 'text',
+        use_proxy: true
       })
 
       const dom = new JSDOM(html, { runScripts: 'dangerously' })
@@ -657,25 +727,8 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
     )
   }
 
-  // Freshness oracle: after running, max(observed_at) in keeptradecut_valuations
-  // should be within 48h of now. Cron runs daily at 04:30; a stale max means the
-  // script completed without writing any new rows — silent partial-success.
   if (!dry) {
-    const freshness_threshold_hours = 48
-    const max_row = await db('keeptradecut_valuations')
-      .max({ max_observed_at: 'observed_at' })
-      .first()
-    const max_observed_at = max_row?.max_observed_at
-    if (!max_observed_at) {
-      shortfalls.push('no rows found in keeptradecut_valuations after run')
-    } else {
-      const stale_hours = dayjs().diff(dayjs(max_observed_at), 'hour')
-      if (stale_hours > freshness_threshold_hours) {
-        shortfalls.push(
-          `staleness: max(observed_at)=${dayjs(max_observed_at).format('YYYY-MM-DD')} is ${stale_hours}h > threshold=${freshness_threshold_hours}h`
-        )
-      }
-    }
+    shortfalls.push(...(await compute_freshness_shortfalls()))
   }
 
   return { shortfall: shortfalls.length ? shortfalls.join('; ') : null }
