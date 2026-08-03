@@ -24,11 +24,17 @@ import {
 // serving a $0 salary for a further 12 hours after the graph was corrected,
 // stacking on top of the refresh lag rather than overlapping it.
 //
-// scripts/refresh-roster-asset-lineage.mjs cuts the staleness window to about
-// a minute; this bounds how long a response captured inside that window can
-// outlive it. Five minutes is chosen to sit above the poll interval plus a
-// worst-case rebuild (~85s) with margin, so a cached entry is normally
-// recomputed against a fresh graph rather than a rebuilding one.
+// scripts/refresh-roster-asset-lineage.mjs (*/5 cron) cuts the graph's own
+// staleness to about 5.5 minutes worst case; this TTL bounds how long a
+// response captured inside that window can outlive it. The two compose rather
+// than overlap, so the worst case a user can see is roughly 10 minutes --
+// against ~36 hours before 2026-08-03.
+//
+// Deliberately NOT matched any tighter to the poll interval. Cache keys are
+// opaque hashes of the request shape (get-data-view-hash.mjs), so nothing can
+// identify which entries depend on lineage, and there is no invalidation hook
+// to add one to; a TTL is the only lever, and shortening it further trades
+// real cache value for minutes nobody is waiting on.
 const get_cache_info = create_static_cache_info({
   ttl: CACHE_TTL.FIVE_MINUTES
 })

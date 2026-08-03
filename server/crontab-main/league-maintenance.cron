@@ -46,13 +46,21 @@
 ## inside one transaction; lid=1 takes 9-25s, dominated by the snapshot recompute.
 0 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-roster-asset-lineage.mjs --all >> /var/log/league/league-generate-roster-asset-lineage.log 2>&1
 
-## Every minute: rebuild any league whose lineage inputs changed. The lineage graph
+## Every 5 minutes: rebuild any league whose lineage inputs changed. The lineage graph
 ## is read by the player_extended_salary data-view column, which renders a $0 salary
 ## for any player whose open holding still points at the pre-trade team -- so a graph
 ## that lags live activity serves wrong numbers rather than merely old ones.
 ## Fingerprints all eight walker input tables (22.8ms for lid=1) and no-ops when
 ## nothing moved; a changed fingerprint that writes 0 holdings is reported as failure.
-* * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/refresh-roster-asset-lineage.mjs >> /var/log/league/league-refresh-roster-asset-lineage.log 2>&1
+##
+## */5 rather than every minute because report_job writes an audit row per run
+## regardless of outcome, and this job no-ops on almost all of them -- at 1/min it
+## would add 1440 jobs rows a day, 5x the busiest existing job, to carry a latency
+## win the reader cannot perceive: the data-view response it exists to correct is
+## itself cached for 5 minutes. Matches the cadence class of every other frequent
+## league job. Raise it only for a consumer that reads the graph directly and needs
+## sub-5-minute freshness.
+*/5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/refresh-roster-asset-lineage.mjs >> /var/log/league/league-refresh-roster-asset-lineage.log 2>&1
 
 ## Calibrate composite market value sources (15 5 daily; 15-min buffer after FantasyPros draft import at 0 5 * 5-8 *)
 15 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calibrate-composite-market-value-sources.mjs >> /var/log/league/calibrate-composite-market-value-sources.log 2>&1
