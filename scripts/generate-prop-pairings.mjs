@@ -119,7 +119,15 @@ const get_stats_for_props = async ({ props, week }) => {
   return stats
 }
 
-const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
+const format_prop_pairing = ({
+  props,
+  prop_stats,
+  week,
+  year,
+  seas_type,
+  team,
+  source
+}) => {
   const prop_odds_array = props.map((p) => {
     const implied_probability = oddslib
       .from('moneyline', p.odds_american)
@@ -182,6 +190,11 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
     source_id: source,
     name: `${prop_names.join(' / ')} (${status})`,
     nfl_team: team,
+    // season_year and season_type are the other two thirds of this row's
+    // partition key. week alone recycles every September and restarts at 1 in
+    // POST, so it cannot identify the period a pairing belongs to on its own.
+    season_year: year,
+    season_type: seas_type,
     week,
     market_prob,
     ...props_totals,
@@ -229,6 +242,81 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
       source_selection_id: p.source_selection_id
     }))
   }
+}
+
+// Number of periods kept, counting the one being generated. Two rather than one
+// because the generator runs DURING a week while filter-prop-pairings reads
+// current_season.nfl_seas_week, so a single-period window would delete the set
+// somebody is actively filtering. The second period costs roughly 1.9 GB.
+const PRUNE_RETAIN_WEEKS = 2
+
+// Pairings deleted per round trip. The parent is selected in bounded batches so
+// a first prune over a full season's backlog does not build one enormous
+// whereIn or hold a single long transaction open.
+const PRUNE_BATCH_SIZE = 5000
+
+/**
+ * Delete every pairing outside the retained window.
+ *
+ * Retains exactly (year, seas_type, week >= week - PRUNE_RETAIN_WEEKS + 1) and
+ * deletes everything else, which covers prior seasons, prior season types
+ * within this season, and older weeks in one predicate rather than three.
+ *
+ * Children are deleted BEFORE parents on purpose. A crash in between leaves
+ * pairings whose props are already gone, and those rows are still outside the
+ * window, so the next run reselects and finishes them. The reverse order would
+ * strand prop_pairing_props rows that no query can reach, since every read
+ * reaches them through prop_pairings.
+ */
+const prune_stale_prop_pairings = async ({
+  week,
+  year,
+  seas_type,
+  retain_weeks = PRUNE_RETAIN_WEEKS
+}) => {
+  // In PRE and in the offseason nfl_seas_week reads 0 or 1, so a window
+  // computed from it would select nothing and the prune would delete the whole
+  // table. That is a truncate arrived at by arithmetic rather than by
+  // intention, so refuse it outright -- a deliberate wipe is the adhoc file's
+  // job, not this one's.
+  if (seas_type !== 'REG' && seas_type !== 'POST') {
+    log(`prune skipped: seas_type ${seas_type} is not a live season`)
+    return { pairings_deleted: 0, props_deleted: 0, skipped: true }
+  }
+
+  const min_retained_week = Math.max(1, week - retain_weeks + 1)
+
+  const build_stale_query = () =>
+    db('prop_pairings').whereNot(function () {
+      this.where('season_year', year)
+        .andWhere('season_type', seas_type)
+        .andWhere('week', '>=', min_retained_week)
+    })
+
+  let pairings_deleted = 0
+  let props_deleted = 0
+
+  for (;;) {
+    const batch = await build_stale_query()
+      .select('pairing_id')
+      .limit(PRUNE_BATCH_SIZE)
+    if (!batch.length) {
+      break
+    }
+
+    const pairing_ids = batch.map((row) => row.pairing_id)
+    props_deleted += await db('prop_pairing_props')
+      .whereIn('pairing_id', pairing_ids)
+      .del()
+    pairings_deleted += await db('prop_pairings')
+      .whereIn('pairing_id', pairing_ids)
+      .del()
+  }
+
+  log(
+    `pruned ${pairings_deleted} pairings and ${props_deleted} pairing props outside ${year} ${seas_type} week >= ${min_retained_week}`
+  )
+  return { pairings_deleted, props_deleted, skipped: false }
 }
 
 const generate_prop_pairings = async ({
@@ -355,6 +443,8 @@ const generate_prop_pairings = async ({
           prop_stats,
           props,
           week,
+          year,
+          seas_type,
           source
         })
 
@@ -381,6 +471,8 @@ const generate_prop_pairings = async ({
               prop_stats,
               props,
               week,
+              year,
+              seas_type,
               source
             })
 
@@ -411,6 +503,8 @@ const generate_prop_pairings = async ({
                   prop_stats,
                   props,
                   week,
+                  year,
+                  seas_type,
                   source
                 })
 
@@ -465,6 +559,36 @@ const generate_prop_pairings = async ({
       await trx.raw("set local synchronous_commit = 'off'")
       await trx.raw('set local statement_timeout = 0')
 
+      // Rebuild this partition rather than adding to it. pairing_id is a
+      // blake2b hash over vendor market/selection ids, which are unique per
+      // event, so onConflict can only ever refresh a row this same run already
+      // produced -- a pairing that stops qualifying is never overwritten and
+      // would otherwise persist forever. Scoped by source_id as well as the
+      // period because the generator runs once per bookmaker and must not
+      // delete the other's work.
+      //
+      // Inside the transaction with the inserts that follow: on its own, a
+      // committed delete followed by a failing insert would leave the partition
+      // EMPTY rather than stale, which is the worse of the two outcomes.
+      const partition = {
+        season_year: year,
+        season_type: seas_type,
+        week,
+        source_id: source
+      }
+
+      const partition_pairing_ids = trx('prop_pairings')
+        .select('pairing_id')
+        .where(partition)
+
+      await trx('prop_pairing_props')
+        .whereIn('pairing_id', partition_pairing_ids)
+        .del()
+      const replaced = await trx('prop_pairings').where(partition).del()
+      if (replaced) {
+        log(`replacing ${replaced} existing pairings for this partition`)
+      }
+
       const pairing_chunks = chunk_array({
         items: prop_pairing_inserts,
         chunk_size
@@ -474,6 +598,8 @@ const generate_prop_pairings = async ({
           .insert(chunk)
           .onConflict('pairing_id')
           .merge([
+            'season_year',
+            'season_type',
             'week',
             'market_prob',
             'risk_total',
@@ -517,6 +643,13 @@ const generate_prop_pairings = async ({
     log(`inserted ${prop_pairing_inserts.length} prop pairings`)
   }
 
+  // Pruning follows generation rather than preceding it so a failed generate
+  // never costs the window its older period as well. Skipped on a dry run,
+  // which must not mutate anything.
+  if (!dry_run) {
+    await prune_stale_prop_pairings({ week, year, seas_type })
+  }
+
   console.timeEnd('generate_prop_pairings')
 }
 
@@ -524,18 +657,27 @@ const main = async () => {
   const argv = initialize_cli()
   let error
   try {
-    const week = argv.week
-    const year = argv.year
-    const seas_type = argv.seas_type
+    const week = argv.week ?? current_season.nfl_seas_week
+    const year = argv.year ?? current_season.year
+    const seas_type = argv.seas_type ?? current_season.nfl_seas_type
     const source = argv.source
     const dry_run = argv.dry
-    await generate_prop_pairings({ week, year, seas_type, source, dry_run })
+
+    if (argv.prune_only) {
+      await prune_stale_prop_pairings({ week, year, seas_type })
+    } else {
+      await generate_prop_pairings({ week, year, seas_type, source, dry_run })
+    }
   } catch (err) {
     error = err
     log(error)
   }
 
-  process.exit()
+  // Exit non-zero on failure. This used to be a bare process.exit(), which
+  // reports success no matter what was caught above -- survivable while the
+  // script was only ever run by hand, and silent data loss the moment anything
+  // schedules it.
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

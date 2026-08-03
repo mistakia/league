@@ -202,7 +202,7 @@ DROP INDEX IF EXISTS public.idx_restricted_free_agency_nominations_identity;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_bids_nomination_id;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_bids_lid;
 DROP INDEX IF EXISTS public.idx_props_index_hits_soft;
-DROP INDEX IF EXISTS public.idx_prop_pairings_week;
+DROP INDEX IF EXISTS public.idx_prop_pairings_season_year_season_type_week;
 DROP INDEX IF EXISTS public.idx_prop_pairing_props_composite;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_source_event_id;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_season_year;
@@ -25605,7 +25605,9 @@ CREATE TABLE public.prop_pairings (
     last_season_hist_rate_hard numeric(5,4),
     last_season_joint_hist_rate_soft numeric(5,4),
     last_season_hist_edge_soft numeric(6,5),
-    last_season_hist_edge_hard numeric(6,5)
+    last_season_hist_edge_hard numeric(6,5),
+    season_year smallint NOT NULL,
+    season_type character varying NOT NULL
 );
 
 
@@ -31381,10 +31383,10 @@ CREATE INDEX idx_prop_pairing_props_composite ON public.prop_pairing_props USING
 
 
 --
--- Name: idx_prop_pairings_week; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_prop_pairings_season_year_season_type_week; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_prop_pairings_week ON public.prop_pairings USING btree (week);
+CREATE INDEX idx_prop_pairings_season_year_season_type_week ON public.prop_pairings USING btree (season_year, season_type, week);
 
 
 --

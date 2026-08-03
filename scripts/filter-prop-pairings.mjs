@@ -552,9 +552,14 @@ const apply_team_player_filters = (query, opts) => {
  * @param {string} source - Data source
  * @returns {Object} Knex query builder
  */
-const build_prop_pairing_query = (opts, week, source) => {
+const build_prop_pairing_query = (opts, week, source, year, seas_type) => {
   const query = db('prop_pairings')
     .where('source_id', source)
+    // Scoped by season as well as week. week recycles every September and
+    // restarts at 1 in POST, so on its own it matched last season's rows and
+    // the other era's alongside this week's.
+    .where('season_year', year)
+    .where('season_type', seas_type)
     .where('week', week)
     .orderBy('current_season_hist_rate_hard', 'DESC')
     .orderBy('current_season_hist_rate_soft', 'DESC')
@@ -580,16 +585,23 @@ const build_prop_pairing_query = (opts, week, source) => {
 const filter_prop_pairings = async ({
   week = current_season.nfl_seas_week,
   year = current_season.year,
+  seas_type = current_season.nfl_seas_type,
   source = 'FANDUEL',
   filter_by_allowed_over_average = false
 } = {}) => {
   const opts = merge(default_options, config.filter_prop_pairings_options || {})
   log('options:', opts)
-  log({ week, year, source, filter_by_allowed_over_average })
+  log({ week, year, seas_type, source, filter_by_allowed_over_average })
 
   await db.raw(`SET statement_timeout = ${DEFAULT_TIMEOUT}`)
 
-  const prop_pairing_query = build_prop_pairing_query(opts, week, source)
+  const prop_pairing_query = build_prop_pairing_query(
+    opts,
+    week,
+    source,
+    year,
+    seas_type
+  )
   log('Query:', prop_pairing_query.toString())
 
   // Load team seasonlogs once before batch processing
@@ -822,16 +834,21 @@ const filter_prop_pairings = async ({
 const main = async () => {
   try {
     const argv = initialize_cli()
-    const { week, source, filter_by_allowed_over_average } = argv
+    const { week, year, seas_type, source, filter_by_allowed_over_average } =
+      argv
 
     log('Starting prop pairing filter with parameters:', {
       week,
+      year,
+      seas_type,
       source,
       filter_by_allowed_over_average
     })
 
     await filter_prop_pairings({
       week,
+      year,
+      seas_type,
       source,
       filter_by_allowed_over_average
     })
