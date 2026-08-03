@@ -172,6 +172,17 @@ const generate_league_format_player_careerlogs = async ({
     })
   }
 
+  // Output oracle. player_seasons is the selection this run works from, so
+  // reading it non-empty and writing nothing is a silent no-op, not an idle
+  // run -- which is exactly the state a punter's missing draft class produced
+  // for all 15 formats while main() reported success.
+  if (player_seasons.length && !inserts.length) {
+    throw new Error(
+      `league_format ${league_format_id}: read ${player_seasons.length} seasonlogs and produced 0 careerlogs`
+    )
+  }
+  log(`${inserts.length} careerlogs from ${player_seasons.length} seasonlogs`)
+
   if (dry) {
     // Shuffle the inserts array to get random elements
     const shuffled_inserts = inserts.sort(() => 0.5 - Math.random())

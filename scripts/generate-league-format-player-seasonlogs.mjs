@@ -150,6 +150,37 @@ const generate_league_format_player_seasonlogs = async ({
     delete insert.salary_adj_pts_added
   }
 
+  // Output oracles. Both numbers are already computed above; asserting on them
+  // is what separates a run that did nothing from a run that had nothing to do.
+  // Scoped to the SELECTION count rather than fired unconditionally, so a year
+  // the caller legitimately has no gamelogs for stays quiet.
+  if (gamelogs.length && !inserts.length) {
+    throw new Error(
+      `league_format ${league_format_id} ${year}: loaded ${gamelogs.length} gamelogs and produced 0 seasonlogs`
+    )
+  }
+
+  // An auction format must come out priced. Only a dfs_fixed format may be
+  // entirely unpriced, and it must be entirely so rather than partly. Without
+  // this, calculatePrices silently declining an auction format -- a bad
+  // pricing_model, a zero denominator -- would blank earned_salary across the
+  // whole format and read as a clean run.
+  const priced_count = inserts.filter((i) => i.earned_salary !== null).length
+  const pricing_model = league_format.pricing_model || 'auction'
+  if (pricing_model === 'auction' && inserts.length && !priced_count) {
+    throw new Error(
+      `league_format ${league_format_id} ${year}: pricing_model is auction but 0 of ${inserts.length} seasonlogs are priced`
+    )
+  }
+  if (pricing_model !== 'auction' && priced_count) {
+    throw new Error(
+      `league_format ${league_format_id} ${year}: pricing_model is ${pricing_model} but ${priced_count} seasonlogs carry a salary`
+    )
+  }
+  log(
+    `${inserts.length} seasonlogs, ${priced_count} priced (pricing_model=${pricing_model})`
+  )
+
   if (dry) {
     // Shuffle the inserts array to get random elements
     const shuffled_inserts = inserts.sort(() => 0.5 - Math.random())
