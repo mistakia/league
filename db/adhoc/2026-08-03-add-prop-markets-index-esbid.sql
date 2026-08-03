@@ -1,0 +1,43 @@
+-- STATUS: APPLIED 2026-08-03 against league_production
+--
+-- Add a partial (esbid, time_type) index to prop_markets_index.
+--
+-- Requires `yarn db:exec --no-transaction` (CREATE INDEX CONCURRENTLY cannot run
+-- inside a transaction block). CONCURRENTLY because this table is on live API
+-- read paths and a plain CREATE INDEX holds SHARE for the whole build, blocking
+-- every write behind it.
+--
+-- The table had no index leading with esbid. Its three were the UNIQUE
+-- (source_id, source_market_id, time_type), (market_type, time_type,
+-- season_year), and a partial on market_settled dropped earlier today. So every
+-- esbid-qualified read parallel seq scanned all 3.06M rows and then joined
+-- against 9.74M selections -- planner cost 106,192 for an estimated 2,150 rows.
+--
+-- This is not only the seasonal settlement path. Confirmed esbid-filtered call
+-- sites include GET /api/markets (api/routes/markets.mjs:932, esbid + source_id
+-- + time_type), libs-server/simulation/load-game-environment.mjs:69 (esbid IN +
+-- market_type + source_id + time_type), the combination-odds resolvers under
+-- private/, and libs-server/prop-market-settlement/prop-market-utils.mjs:286.
+--
+-- Column choice. esbid leads because it carries essentially all the selectivity:
+-- 774 distinct values over 1,483,599 non-null rows, ~1,917 rows per game against
+-- a 3.06M table. time_type is second because both live sites above filter it and
+-- it halves the remaining set; season_year is deliberately NOT included, since a
+-- game belongs to exactly one season and the column is functionally determined
+-- by esbid, so it would add bytes and no selectivity. market_type and source_id
+-- are left out as they are filtered inconsistently across call sites, and the
+-- esbid prefix alone already reduces the scan by three orders of magnitude.
+--
+-- Partial on esbid IS NOT NULL because 1,573,309 of 3,056,908 rows -- 51.5% --
+-- have no esbid at all. Those rows can never satisfy an esbid predicate, so
+-- indexing them costs size and write maintenance for nothing. Postgres proves
+-- `esbid = x` and `esbid IN (...)` both imply `esbid IS NOT NULL`, so the
+-- predicate does not narrow which queries can use the index. Note this is the
+-- opposite outcome to the market_settled partial index dropped this morning, and
+-- for the same reason read the other way: a partial index earns its place when
+-- its predicate excludes a large fraction of the table, and that one excluded
+-- 11%.
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_prop_markets_index_esbid_time_type
+  ON public.prop_markets_index USING btree (esbid, time_type)
+  WHERE esbid IS NOT NULL;

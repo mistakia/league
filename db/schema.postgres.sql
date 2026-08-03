@@ -217,6 +217,7 @@ DROP INDEX IF EXISTS public.idx_prop_pairings_hist_edge_soft;
 DROP INDEX IF EXISTS public.idx_prop_pairings_highest_payout;
 DROP INDEX IF EXISTS public.idx_prop_pairing_props_composite;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_season_year;
+DROP INDEX IF EXISTS public.idx_prop_markets_index_esbid_time_type;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_projections_index_pid;
 DROP INDEX IF EXISTS public.idx_projections_index_nfl_week_id;
@@ -31360,6 +31361,13 @@ CREATE INDEX idx_projections_index_pid ON ONLY public.projections_index USING bt
 --
 
 CREATE INDEX idx_prop_market_selections_index_composite ON public.prop_market_selections_index USING btree (selection_pid, source_market_id, source_id, time_type);
+
+
+--
+-- Name: idx_prop_markets_index_esbid_time_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_prop_markets_index_esbid_time_type ON public.prop_markets_index USING btree (esbid, time_type) WHERE (esbid IS NOT NULL);
 
 
 --
