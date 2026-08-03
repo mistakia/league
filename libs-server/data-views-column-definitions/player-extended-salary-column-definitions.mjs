@@ -10,10 +10,27 @@ import { ASSET_TYPE } from '#libs-server/roster-asset-lineage/constants.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import { get_single_value } from '#libs-server/data-views/param-utils.mjs'
-import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
+import {
+  create_static_cache_info,
+  CACHE_TTL
+} from '#libs-server/data-views/cache-info-utils.mjs'
 
+// NOT static data, despite the helper's name. This column left-joins
+// `roster_asset_holding`, which the lineage graph rewrites whenever a trade,
+// release, extension or draft pick lands. It carried a 12-hour TTL until
+// 2026-08-03, and nothing anywhere invalidates a data-view cache entry --
+// `redis_cache.del` has two callers repo-wide, both in an unrelated auction
+// script. So a response computed while the lineage graph was stale kept
+// serving a $0 salary for a further 12 hours after the graph was corrected,
+// stacking on top of the refresh lag rather than overlapping it.
+//
+// scripts/refresh-roster-asset-lineage.mjs cuts the staleness window to about
+// a minute; this bounds how long a response captured inside that window can
+// outlive it. Five minutes is chosen to sit above the poll interval plus a
+// worst-case rebuild (~85s) with margin, so a cached entry is normally
+// recomputed against a fresh graph rather than a rebuilding one.
 const get_cache_info = create_static_cache_info({
-  ttl: 1000 * 60 * 60 * 12
+  ttl: CACHE_TTL.FIVE_MINUTES
 })
 
 const ps_slots = [

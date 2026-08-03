@@ -26,17 +26,28 @@ const SIMPLE_RESET_TRANSACTION_TYPES = new Set([
   transaction_types.ROSTER_RELEASE
 ])
 
-const refresh_extension_state = async ({ lid, affected_keys = null }) => {
+// `trx` threads this refresh into the caller's transaction. The lineage
+// generator rebuilds all three lineage tables atomically, and this one is the
+// final write of that unit -- running it on the global handle would commit
+// extension state independently of the holdings it is derived from, leaving a
+// window where the two disagree. Defaults to the global handle for standalone
+// callers.
+const refresh_extension_state = async ({
+  lid,
+  affected_keys = null,
+  trx = null
+}) => {
   // affected_keys: optional set of "tid__pid" to limit refresh scope; if null,
   // recompute every (tid, pid) present in transactions for this lid.
+  const query = trx || db
 
-  const transactions = await db('transactions')
+  const transactions = await query('transactions')
     .select('uid', 'tid', 'pid', 'type', 'year', 'timestamp')
     .where('lid', lid)
     .orderBy('timestamp', 'asc')
 
   // Cross-team RFA wins: source of TRADED_AWAY-style reset on the losing team.
-  const rfa_wins = await db('restricted_free_agency_bids')
+  const rfa_wins = await query('restricted_free_agency_bids')
     .join(
       'restricted_free_agency_nominations',
       'restricted_free_agency_nominations.nomination_id',
@@ -143,7 +154,7 @@ const refresh_extension_state = async ({ lid, affected_keys = null }) => {
   }
   if (!inserts.length) return 0
 
-  await db('player_team_extension_state')
+  await query('player_team_extension_state')
     .insert(inserts)
     .onConflict(['lid', 'tid', 'pid'])
     .merge()

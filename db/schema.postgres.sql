@@ -483,6 +483,7 @@ ALTER TABLE IF EXISTS ONLY public.selection_combination_definitions DROP CONSTRA
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.roster_asset_transformation DROP CONSTRAINT IF EXISTS roster_asset_transformation_pkey;
+ALTER TABLE IF EXISTS ONLY public.roster_asset_lineage_refresh_state DROP CONSTRAINT IF EXISTS roster_asset_lineage_refresh_state_pkey;
 ALTER TABLE IF EXISTS ONLY public.roster_asset_holding DROP CONSTRAINT IF EXISTS roster_asset_holding_pkey;
 ALTER TABLE IF EXISTS ONLY public.restricted_free_agency_nominations DROP CONSTRAINT IF EXISTS restricted_free_agency_nominations_pkey;
 ALTER TABLE IF EXISTS ONLY public.prop_pairing_props DROP CONSTRAINT IF EXISTS prop_pairing_props_unique;
@@ -720,6 +721,7 @@ DROP TABLE IF EXISTS public.rosters_players;
 DROP TABLE IF EXISTS public.rosters;
 DROP SEQUENCE IF EXISTS public.roster_asset_transformation_transformation_row_id_seq;
 DROP TABLE IF EXISTS public.roster_asset_transformation;
+DROP TABLE IF EXISTS public.roster_asset_lineage_refresh_state;
 DROP SEQUENCE IF EXISTS public.roster_asset_holding_holding_id_seq;
 DROP TABLE IF EXISTS public.roster_asset_holding;
 DROP TABLE IF EXISTS public.ros_projections;
@@ -25965,6 +25967,31 @@ ALTER SEQUENCE public.roster_asset_holding_holding_id_seq OWNED BY public.roster
 
 
 --
+-- Name: roster_asset_lineage_refresh_state; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.roster_asset_lineage_refresh_state (
+    lid integer NOT NULL,
+    input_hash text NOT NULL,
+    refreshed_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE roster_asset_lineage_refresh_state; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.roster_asset_lineage_refresh_state IS 'Per-league fingerprint of the roster-asset-lineage input tables; drives incremental refresh in scripts/refresh-roster-asset-lineage.mjs.';
+
+
+--
+-- Name: COLUMN roster_asset_lineage_refresh_state.input_hash; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.roster_asset_lineage_refresh_state.input_hash IS 'md5 over the eight source tables walk-transactions.mjs reads. Changing the walker''s read set requires changing this fingerprint in lockstep.';
+
+
+--
 -- Name: roster_asset_transformation; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -29222,6 +29249,14 @@ ALTER TABLE ONLY public.restricted_free_agency_nominations
 
 ALTER TABLE ONLY public.roster_asset_holding
     ADD CONSTRAINT roster_asset_holding_pkey PRIMARY KEY (holding_id);
+
+
+--
+-- Name: roster_asset_lineage_refresh_state roster_asset_lineage_refresh_state_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.roster_asset_lineage_refresh_state
+    ADD CONSTRAINT roster_asset_lineage_refresh_state_pkey PRIMARY KEY (lid);
 
 
 --
@@ -59140,6 +59175,13 @@ GRANT SELECT ON TABLE public.roster_asset_holding TO league_reader;
 --
 
 GRANT SELECT ON SEQUENCE public.roster_asset_holding_holding_id_seq TO league_reader;
+
+
+--
+-- Name: TABLE roster_asset_lineage_refresh_state; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.roster_asset_lineage_refresh_state TO league_reader;
 
 
 --

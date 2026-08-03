@@ -155,7 +155,8 @@ export const job_types = {
   AUDIT_DRIVE_SEQ_COHERENCE: 129,
   IMPORT_SLEEPER_EXTERNAL_LEAGUE_TRADES: 130,
   IMPORT_PLAYERS_FANTASYPOINTS: 131,
-  GENERATE_DST_MARKET_PROJECTIONS: 132
+  GENERATE_DST_MARKET_PROJECTIONS: 132,
+  REFRESH_ROSTER_ASSET_LINEAGE: 133
 }
 
 export const job_title_by_id = {
@@ -290,5 +291,6 @@ export const job_title_by_id = {
   129: 'Audit drive_seq Coherence',
   130: 'Import Sleeper External League Trades',
   131: 'Import Players (FantasyPoints)',
-  132: 'Generate DST Market Projections'
+  132: 'Generate DST Market Projections',
+  133: 'Refresh Roster Asset Lineage'
 }

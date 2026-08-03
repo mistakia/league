@@ -16,13 +16,18 @@ import {
 //
 // A change here does NOT reach production by being deployed. The only writer
 // of roster_asset_holding / roster_asset_transformation is
-// scripts/generate-roster-asset-lineage.mjs, which is in no crontab, so
-// nothing re-runs it on its own and existing rows keep whatever the previous
-// rebuild computed. Finish a walker change by rebuilding the affected league:
+// scripts/generate-roster-asset-lineage.mjs, and both of the jobs that invoke
+// it re-derive from unchanged inputs: the 05:00 backstop sweeps every league,
+// and scripts/refresh-roster-asset-lineage.mjs rebuilds only when its
+// fingerprint of the walker's INPUT tables moves -- which a code change here
+// does not do. So existing rows keep whatever the previous run computed until
+// somebody forces it. Finish a walker change by rebuilding the affected league:
 //   NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 \
-//     node scripts/generate-roster-asset-lineage.mjs --lid <n> --rebuild
-// (--rebuild clears that lid's existing holding/transformation/extension-state
-// rows before regenerating, which is what makes a re-derivation take effect.)
+//     node scripts/refresh-roster-asset-lineage.mjs --lid <n> --force
+//
+// If a change here adds a table to this module's read set, add it to the
+// fingerprint in refresh-roster-asset-lineage.mjs in the same commit. Nothing
+// couples the two, and a missed table fails silently as staleness.
 //
 // Scope of v1 walker:
 //   Players: auction, draft, PS/FA add, poach, release, extension, RFA win,

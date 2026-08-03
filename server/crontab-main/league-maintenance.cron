@@ -37,12 +37,22 @@
 ## Every Monday at 5:00AM (with optimal-lineup pass)
 0 5 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-league-team-player-seasonlogs.mjs --all --with-optimal >> /var/log/league/league-generate-league-team-player-seasonlogs-with-optimal.log 2>&1
 
-## Every day at 5:00AM (--rebuild reasserts canonical state; the walker is
-## idempotent and lid=1 rebuild runs in ~5 seconds, so the daily cost is
-## negligible. Without --rebuild any future emission bug that leaks past
-## the suppression guards in walk-transactions.mjs accumulates orphans
-## the partial unique indexes cannot recover from on their own.)
-0 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-roster-asset-lineage.mjs --all --rebuild >> /var/log/league/league-generate-roster-asset-lineage.log 2>&1
+## Every day at 5:00AM. Backstop only since 2026-08-03 -- refresh-roster-asset-lineage.mjs
+## below now rebuilds a league within a minute of any change to the walker's inputs.
+## This full sweep stays because the watcher's fingerprint covers only the eight
+## tables walk-transactions.mjs reads today: a walker that gains an input without
+## the fingerprint gaining it too would go stale silently, and this run reasserts
+## canonical state regardless. Every run is a full per-league delete-and-rebuild
+## inside one transaction; lid=1 takes 9-25s, dominated by the snapshot recompute.
+0 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-roster-asset-lineage.mjs --all >> /var/log/league/league-generate-roster-asset-lineage.log 2>&1
+
+## Every minute: rebuild any league whose lineage inputs changed. The lineage graph
+## is read by the player_extended_salary data-view column, which renders a $0 salary
+## for any player whose open holding still points at the pre-trade team -- so a graph
+## that lags live activity serves wrong numbers rather than merely old ones.
+## Fingerprints all eight walker input tables (22.8ms for lid=1) and no-ops when
+## nothing moved; a changed fingerprint that writes 0 holdings is reported as failure.
+* * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/refresh-roster-asset-lineage.mjs >> /var/log/league/league-refresh-roster-asset-lineage.log 2>&1
 
 ## Calibrate composite market value sources (15 5 daily; 15-min buffer after FantasyPros draft import at 0 5 * 5-8 *)
 15 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/calibrate-composite-market-value-sources.mjs >> /var/log/league/calibrate-composite-market-value-sources.log 2>&1

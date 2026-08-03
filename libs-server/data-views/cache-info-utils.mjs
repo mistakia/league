@@ -2,6 +2,7 @@ import { current_season } from '#constants'
 
 // Common cache TTL values in milliseconds
 const CACHE_TTL = {
+  FIVE_MINUTES: 1000 * 60 * 5,
   ONE_HOUR: 1000 * 60 * 60,
   TWO_HOURS: 1000 * 60 * 60 * 2,
   SIX_HOURS: 1000 * 60 * 60 * 6,

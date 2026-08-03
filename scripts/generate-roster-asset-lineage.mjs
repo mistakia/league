@@ -24,7 +24,6 @@ const initialize_cli = () =>
     .option('lid', { type: 'number' })
     .option('year', { type: 'number' })
     .option('all', { type: 'boolean', default: false })
-    .option('rebuild', { type: 'boolean', default: false })
     .option('skip_snapshots', { type: 'boolean', default: false })
     .parse()
 
@@ -46,10 +45,22 @@ const resolve_league_format_id = async ({ lid, year }) => {
   return latest?.league_format_id || null
 }
 
+// Regeneration is always a full per-league rebuild: `walk_transactions` replays
+// the league's entire history, so there is no delta to apply. The old
+// `rebuild: false` path skipped the delete and inserted the full result on top
+// of the existing rows -- no upsert, no conflict target -- which duplicated
+// every holding and transformation. It had no callers; the flag only ever
+// selected between "correct" and "silently corrupt".
+//
+// The write is one transaction. Readers must never observe the window between
+// the delete and the inserts: `roster_asset_holding` is left-joined by the
+// `player_extended_salary` data-view column, and an empty table there renders
+// every player's salary as $0 rather than as missing. The expensive reads (the
+// walk, the snapshot recompute) run BEFORE the transaction opens so the write
+// holds its locks for about a second rather than the 9-25s the whole job takes.
 const generate_roster_asset_lineage = async ({
   lid,
   year = null,
-  rebuild = false,
   skip_snapshots = false
 }) => {
   log(`generating roster asset lineage for league ${lid}`)
@@ -72,13 +83,6 @@ const generate_roster_asset_lineage = async ({
       coverage_warning: 'unsupported_rule',
       rule: league.salary_attribution_rule
     }
-  }
-
-  if (rebuild) {
-    log(`rebuild mode: clearing existing lineage rows for lid=${lid}`)
-    await db('roster_asset_transformation').where('lid', lid).del()
-    await db('roster_asset_holding').where('lid', lid).del()
-    await db('player_team_extension_state').where('lid', lid).del()
   }
 
   const { holding_drafts, transformation_drafts, coverage_warnings } =
@@ -171,91 +175,107 @@ const generate_roster_asset_lineage = async ({
     }
   })
 
-  // Persist holdings; capture generated holding_ids by __draft_id for edge resolution.
-  const draft_id_to_holding_id = new Map()
-  if (holding_rows.length) {
-    for (let i = 0; i < holding_rows.length; i += BATCH_SIZE) {
-      const slice = holding_rows.slice(i, i + BATCH_SIZE).map((r) => {
-        const { __draft_id, ...rest } = r
-        return rest
-      })
-      const draft_ids = holding_rows
-        .slice(i, i + BATCH_SIZE)
-        .map((r) => r.__draft_id)
-      const inserted = await db('roster_asset_holding')
-        .insert(slice)
-        .returning('holding_id')
-      inserted.forEach((row, idx) => {
-        draft_id_to_holding_id.set(draft_ids[idx], row.holding_id)
-      })
-    }
-  }
-  log(`inserted ${holding_rows.length} roster_asset_holding rows`)
-
-  // Resolve transformation source/target holding_id references.
-  const transformation_rows = transformation_drafts.map((t) => ({
-    transformation_id: t.transformation_id,
-    lid: t.lid,
-    transaction_id: t.transaction_id,
-    trade_uid: t.trade_uid ?? null,
-    transformation_type: t.transformation_type,
-    occurred_at: t.occurred_at,
-    source_holding_id: t.source_draft_id
-      ? draft_id_to_holding_id.get(t.source_draft_id) || null
-      : null,
-    target_holding_id: t.target_draft_id
-      ? draft_id_to_holding_id.get(t.target_draft_id) || null
-      : null,
-    source_share: t.source_share,
-    target_share: t.target_share,
-    audit_corrected: false
-  }))
-  if (transformation_rows.length) {
-    await batch_insert({
-      items: transformation_rows,
-      save: (items) => db('roster_asset_transformation').insert(items),
-      batch_size: BATCH_SIZE
-    })
-  }
-  log(`inserted ${transformation_rows.length} roster_asset_transformation rows`)
-
-  // Apply audit-corrections seed: flag holdings keyed by (lid, tid, player_id,
-  // period_start_ts) with audit_corrected=true and a correction_note. Each
-  // entry is expected to match exactly one holding; mismatches surface as
-  // log warnings rather than errors so a rebuild on a different league does
-  // not fail on unrelated seed entries.
+  // Everything above this point is read-only. The swap below -- clear the
+  // league's three lineage tables and repopulate them -- is the only part that
+  // must be atomic, so it is the only part inside the transaction.
   let audit_corrections_applied = 0
-  for (const entry of audit_corrections) {
-    if (entry.lid !== lid) continue
-    const period_start = new Date(entry.period_start_ts * 1000)
-    const updated = await db('roster_asset_holding')
-      .where({
-        lid: entry.lid,
-        tid: entry.tid,
-        player_id: entry.player_id,
-        period_start
-      })
-      .update({
-        audit_corrected: true,
-        correction_note: entry.correction_note
-      })
-    if (updated === 0) {
-      log(
-        `audit-correction seed did not match any holding: lid=${entry.lid} tid=${entry.tid} player_id=${entry.player_id} period_start_ts=${entry.period_start_ts}`
-      )
-    } else {
-      audit_corrections_applied += updated
-    }
-  }
-  log(`applied ${audit_corrections_applied} audit-correction seed entries`)
+  let refreshed = 0
+  let transformation_row_count = 0
 
-  // Final pass: refresh denormalized extension state.
-  const refreshed = await refresh_extension_state({ lid })
-  log(`refreshed ${refreshed} player_team_extension_state rows`)
+  await db.transaction(async (trx) => {
+    await trx('roster_asset_transformation').where('lid', lid).del()
+    await trx('roster_asset_holding').where('lid', lid).del()
+    await trx('player_team_extension_state').where('lid', lid).del()
+
+    // Persist holdings; capture generated holding_ids by __draft_id for edge resolution.
+    const draft_id_to_holding_id = new Map()
+    if (holding_rows.length) {
+      for (let i = 0; i < holding_rows.length; i += BATCH_SIZE) {
+        const slice = holding_rows.slice(i, i + BATCH_SIZE).map((r) => {
+          const { __draft_id, ...rest } = r
+          return rest
+        })
+        const draft_ids = holding_rows
+          .slice(i, i + BATCH_SIZE)
+          .map((r) => r.__draft_id)
+        const inserted = await trx('roster_asset_holding')
+          .insert(slice)
+          .returning('holding_id')
+        inserted.forEach((row, idx) => {
+          draft_id_to_holding_id.set(draft_ids[idx], row.holding_id)
+        })
+      }
+    }
+    log(`inserted ${holding_rows.length} roster_asset_holding rows`)
+
+    // Resolve transformation source/target holding_id references.
+    const transformation_rows = transformation_drafts.map((t) => ({
+      transformation_id: t.transformation_id,
+      lid: t.lid,
+      transaction_id: t.transaction_id,
+      trade_uid: t.trade_uid ?? null,
+      transformation_type: t.transformation_type,
+      occurred_at: t.occurred_at,
+      source_holding_id: t.source_draft_id
+        ? draft_id_to_holding_id.get(t.source_draft_id) || null
+        : null,
+      target_holding_id: t.target_draft_id
+        ? draft_id_to_holding_id.get(t.target_draft_id) || null
+        : null,
+      source_share: t.source_share,
+      target_share: t.target_share,
+      audit_corrected: false
+    }))
+    transformation_row_count = transformation_rows.length
+    if (transformation_rows.length) {
+      await batch_insert({
+        items: transformation_rows,
+        save: (items) => trx('roster_asset_transformation').insert(items),
+        batch_size: BATCH_SIZE
+      })
+    }
+    log(
+      `inserted ${transformation_rows.length} roster_asset_transformation rows`
+    )
+
+    // Apply audit-corrections seed: flag holdings keyed by (lid, tid, player_id,
+    // period_start_ts) with audit_corrected=true and a correction_note. Each
+    // entry is expected to match exactly one holding; mismatches surface as
+    // log warnings rather than errors so a rebuild on a different league does
+    // not fail on unrelated seed entries.
+    for (const entry of audit_corrections) {
+      if (entry.lid !== lid) continue
+      const period_start = new Date(entry.period_start_ts * 1000)
+      const updated = await trx('roster_asset_holding')
+        .where({
+          lid: entry.lid,
+          tid: entry.tid,
+          player_id: entry.player_id,
+          period_start
+        })
+        .update({
+          audit_corrected: true,
+          correction_note: entry.correction_note
+        })
+      if (updated === 0) {
+        log(
+          `audit-correction seed did not match any holding: lid=${entry.lid} tid=${entry.tid} player_id=${entry.player_id} period_start_ts=${entry.period_start_ts}`
+        )
+      } else {
+        audit_corrections_applied += updated
+      }
+    }
+    log(`applied ${audit_corrections_applied} audit-correction seed entries`)
+
+    // Final pass: refresh denormalized extension state, on the same
+    // transaction so it commits with the holdings it is derived from.
+    refreshed = await refresh_extension_state({ lid, trx })
+    log(`refreshed ${refreshed} player_team_extension_state rows`)
+  })
 
   return {
     holdings: holding_rows.length,
-    transformations: transformation_rows.length,
+    transformations: transformation_row_count,
     extension_state_rows: refreshed,
     coverage_warnings
   }
@@ -273,15 +293,13 @@ const main = async () => {
       for (const league of leagues) {
         await generate_roster_asset_lineage({
           lid: league.uid,
-          year: argv.year || null,
-          rebuild: argv.rebuild
+          year: argv.year || null
         })
       }
     } else if (argv.lid) {
       await generate_roster_asset_lineage({
         lid: argv.lid,
         year: argv.year || null,
-        rebuild: argv.rebuild,
         skip_snapshots: argv.skip_snapshots
       })
     } else {
