@@ -1,22 +1,17 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import fs from 'fs'
-import path from 'path'
-import { spawn } from 'child_process'
 import { JSDOM } from 'jsdom'
 
 import db from '#db'
 import { active_nfl_teams } from '#private/libs-server/pro-football-reference.mjs'
+import { fetch_pfr_pages } from '#private/libs-server/pro-football-reference-pages.mjs'
 
 const log = debug('import-team-rosters-pfr')
-debug.enable('import-team-rosters-pfr,pro-football-reference,proxy-manager')
-
-const BROWSER_TASK = path.resolve(
-  import.meta.dirname,
-  '../private/scripts/browser-tasks/pro-football-reference.mjs'
+debug.enable(
+  'import-team-rosters-pfr,pro-football-reference,pro-football-reference-pages,proxy-manager,cloakbrowser'
 )
-const SANDBOX_WRAPPER = '/usr/local/bin/run-as-stealth-browser-node'
+
 const PRO_FOOTBALL_REFERENCE_URL = 'https://www.pro-football-reference.com'
 
 // Mirrors the format_game_html function in the pfr lib to uncomment hidden tables
@@ -81,77 +76,24 @@ const parse_roster_html = (html, team, year) => {
 }
 
 /**
- * Run the sandboxed PFR browser task. Fetches all team roster URLs for the
- * given year via CloakBrowser and returns raw HTML pages array.
+ * Fetch every team's roster page for the given year through CloakBrowser.
+ * Returns the pages array alongside the URL list, which is what maps a page
+ * back to its team.
  */
-const run_browser_task = async ({ year, ignore_cache = false }) => {
-  const tmp_dir = fs.mkdtempSync('/tmp/cb-pfr-')
-  fs.chmodSync(tmp_dir, 0o777)
-  log('handoff tempdir: %s', tmp_dir)
-
-  const caller_label =
-    process.env.CLOAKBROWSER_CALLER ||
-    (process.env.JOB_PROJECT
-      ? `job:${process.env.JOB_PROJECT}`
-      : 'import-team-rosters-pfr')
-
-  // Write URL list to a temp file to avoid shell arg length limits
-  const url_file = path.join(tmp_dir, 'urls.txt')
+const fetch_roster_pages = async ({ year }) => {
   const roster_urls = active_nfl_teams.map(
     (team) => `${PRO_FOOTBALL_REFERENCE_URL}/teams/${team}/${year}_roster.htm`
   )
-  fs.writeFileSync(url_file, roster_urls.join('\n'), 'utf-8')
-
-  const args = [
-    BROWSER_TASK,
-    '--out-dir',
-    tmp_dir,
-    '--url-file',
-    url_file,
-    '--wait-between-ms',
-    '5000',
-    '--caller-label',
-    caller_label
-  ]
-  if (ignore_cache) args.push('--ignore-cache')
-
-  try {
-    log(
-      'spawning sandboxed browser task as _stealth-browser (%d roster URLs)',
-      roster_urls.length
-    )
-    await new Promise((resolve, reject) => {
-      const child = spawn(SANDBOX_WRAPPER, args, {
-        stdio: ['ignore', 'inherit', 'inherit']
-      })
-      child.on('error', reject)
-      child.on('exit', (code, signal) => {
-        if (signal)
-          return reject(new Error(`browser-task killed by signal ${signal}`))
-        if (code !== 0)
-          return reject(new Error(`browser-task exited with code ${code}`))
-        resolve()
-      })
-    })
-
-    const out_path = path.join(tmp_dir, 'pages.json')
-    if (!fs.existsSync(out_path)) {
-      throw new Error(`browser-task did not produce ${out_path}`)
-    }
-    const pages = JSON.parse(fs.readFileSync(out_path, 'utf-8'))
-    log('read %d pages from sandbox handoff', pages.length)
-    return { pages, roster_urls }
-  } finally {
-    try {
-      fs.rmSync(tmp_dir, { recursive: true, force: true })
-    } catch (err) {
-      log('handoff cleanup failed (non-fatal): %s', err.message)
-    }
-  }
+  log('fetching %d roster pages via CloakBrowser', roster_urls.length)
+  const pages = await fetch_pfr_pages({
+    urls: roster_urls,
+    wait_between_ms: 5000
+  })
+  return { pages, roster_urls }
 }
 
 const get_all_rosters = async ({ year, ignore_cache = false }) => {
-  const { pages, roster_urls } = await run_browser_task({ year, ignore_cache })
+  const { pages, roster_urls } = await fetch_roster_pages({ year })
 
   const rosters = []
   for (let i = 0; i < active_nfl_teams.length; i++) {

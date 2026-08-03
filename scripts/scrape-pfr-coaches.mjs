@@ -3,12 +3,12 @@
 // Acquires the PFR-primary source-of-record for the nfl_coaches own-id
 // migration (task: user:task/league/migrate-nfl-coaches-to-own-id.md).
 //
-// Mirrors the sandboxed-browser dispatch pattern used by
-// import-team-rosters-pfr.mjs and import-pro-football-reference-player-ids.mjs:
-// spawn /usr/local/bin/run-as-stealth-browser-node with the generic PFR
-// browser-task; the browser-task returns raw HTML in pages.json; this script
-// parses orchestrator-side with JSDOM. The browser-task cannot import
-// #libs-shared (UID sandbox), so all parsing must happen here.
+// Fetches through the shared CloakBrowser page reader
+// (private/libs-server/pro-football-reference-pages.mjs), as
+// import-team-rosters-pfr.mjs and import-player-draft-position-pfr.mjs do; it
+// returns raw HTML and this script parses with cheerio. The reader replaced a
+// spawn of the macOS-only /usr/local/bin/run-as-stealth-browser-node, which was
+// what pinned this family to macbook2025.
 //
 // Inputs:
 //   - default: SELECT pfr_coach_id FROM nfl_coaches WHERE pfr_coach_id IS NOT NULL
@@ -39,19 +39,16 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import fs from 'fs'
 import path from 'path'
-import { spawn } from 'child_process'
 import * as cheerio from 'cheerio'
 
 import db from '#db'
+import { fetch_pfr_pages } from '#private/libs-server/pro-football-reference-pages.mjs'
 
 const log = debug('scrape-pfr-coaches')
-debug.enable('scrape-pfr-coaches,pro-football-reference')
-
-const BROWSER_TASK = path.resolve(
-  import.meta.dirname,
-  '../private/scripts/browser-tasks/pro-football-reference.mjs'
+debug.enable(
+  'scrape-pfr-coaches,pro-football-reference,pro-football-reference-pages,cloakbrowser'
 )
-const SANDBOX_WRAPPER = '/usr/local/bin/run-as-stealth-browser-node'
+
 const PRO_FOOTBALL_REFERENCE_URL = 'https://www.pro-football-reference.com'
 const OUTPUT_PATH = path.resolve(
   import.meta.dirname,
@@ -204,65 +201,19 @@ const parse_coach_html = (html, pfr_coach_id) => {
 // to ids that need a fresh fetch.
 const fetch_and_cache = async ({ pfr_coach_ids }) => {
   if (!pfr_coach_ids.length) {
-    log('all requested ids are cached; skipping browser-task spawn')
+    log('all requested ids are cached; skipping the browser fetch')
     return { fetched: 0, http_404: 0, errors: 0 }
   }
-  const tmp_dir = fs.mkdtempSync('/tmp/cb-pfr-coaches-')
-  fs.chmodSync(tmp_dir, 0o777)
-  log('handoff tempdir: %s', tmp_dir)
-
-  const caller_label =
-    process.env.CLOAKBROWSER_CALLER ||
-    (process.env.JOB_PROJECT
-      ? `job:${process.env.JOB_PROJECT}`
-      : 'scrape-pfr-coaches')
-
-  const url_file = path.join(tmp_dir, 'urls.txt')
   const urls = pfr_coach_ids.map(
     (id) => `${PRO_FOOTBALL_REFERENCE_URL}/coaches/${id}.htm`
   )
-  fs.writeFileSync(url_file, urls.join('\n'), 'utf-8')
-
-  const args = [
-    BROWSER_TASK,
-    '--out-dir',
-    tmp_dir,
-    '--url-file',
-    url_file,
-    '--wait-between-ms',
-    '5000',
-    '--caller-label',
-    caller_label
-  ]
 
   let fetched = 0
   let http_404 = 0
   let errors = 0
-  try {
-    log(
-      'spawning sandboxed browser task as _stealth-browser (%d coach URLs)',
-      urls.length
-    )
-    await new Promise((resolve, reject) => {
-      const child = spawn(SANDBOX_WRAPPER, args, {
-        stdio: ['ignore', 'inherit', 'inherit']
-      })
-      child.on('error', reject)
-      child.on('exit', (code, signal) => {
-        if (signal)
-          return reject(new Error(`browser-task killed by signal ${signal}`))
-        if (code !== 0)
-          return reject(new Error(`browser-task exited with code ${code}`))
-        resolve()
-      })
-    })
-
-    const out_path = path.join(tmp_dir, 'pages.json')
-    if (!fs.existsSync(out_path)) {
-      throw new Error(`browser-task did not produce ${out_path}`)
-    }
-    const pages = JSON.parse(fs.readFileSync(out_path, 'utf-8'))
-    log('read %d pages from sandbox handoff; writing to cache', pages.length)
+  log('fetching %d coach pages via CloakBrowser', urls.length)
+  {
+    const pages = await fetch_pfr_pages({ urls, wait_between_ms: 5000 })
 
     const url_to_id = new Map(urls.map((u, i) => [u, pfr_coach_ids[i]]))
     for (const page_result of pages) {
@@ -278,12 +229,6 @@ const fetch_and_cache = async ({ pfr_coach_ids }) => {
         write_cache_err(pfr_coach_id, page_result.error || 'no HTML')
         errors++
       }
-    }
-  } finally {
-    try {
-      fs.rmSync(tmp_dir, { recursive: true, force: true })
-    } catch (err) {
-      log('handoff cleanup failed (non-fatal): %s', err.message)
     }
   }
   return { fetched, http_404, errors }

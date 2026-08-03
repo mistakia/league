@@ -1,9 +1,6 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import fs from 'fs'
-import path from 'path'
-import { spawn } from 'child_process'
 import { JSDOM } from 'jsdom'
 
 import db from '#db'
@@ -11,77 +8,14 @@ import { current_season } from '#constants'
 import { is_main, updatePlayer, find_player_row } from '#libs-server'
 import { fixTeam } from '#libs-shared'
 import { create_logger } from '#libs-shared/log.mjs'
+import { fetch_pfr_pages } from '#private/libs-server/pro-football-reference-pages.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const signal_log = create_logger('import-player-draft-position-pfr', {
   service: 'league-imports'
 })
 
-const BROWSER_TASK = path.resolve(
-  import.meta.dirname,
-  '../private/scripts/browser-tasks/pro-football-reference.mjs'
-)
-const SANDBOX_WRAPPER = '/usr/local/bin/run-as-stealth-browser-node'
 const PRO_FOOTBALL_REFERENCE_URL = 'https://www.pro-football-reference.com'
-
-/**
- * Run the sandboxed PFR browser task. Fetches the given URL(s) via CloakBrowser
- * (handles Cloudflare challenges) and returns raw HTML pages array.
- */
-const run_browser_task = async ({ urls, ignore_cache = false }) => {
-  const tmp_dir = fs.mkdtempSync('/tmp/cb-pfr-')
-  fs.chmodSync(tmp_dir, 0o777)
-  log('handoff tempdir: %s', tmp_dir)
-
-  const caller_label =
-    process.env.CLOAKBROWSER_CALLER ||
-    (process.env.JOB_PROJECT
-      ? `job:${process.env.JOB_PROJECT}`
-      : 'import-player-draft-position-pfr')
-
-  const args = [
-    BROWSER_TASK,
-    '--out-dir',
-    tmp_dir,
-    '--caller-label',
-    caller_label
-  ]
-  for (const url of urls) {
-    args.push('--url', url)
-  }
-  if (ignore_cache) args.push('--ignore-cache')
-
-  try {
-    log('spawning sandboxed browser task as _stealth-browser')
-    await new Promise((resolve, reject) => {
-      const child = spawn(SANDBOX_WRAPPER, args, {
-        stdio: ['ignore', 'inherit', 'inherit']
-      })
-      child.on('error', reject)
-      child.on('exit', (code, signal) => {
-        if (signal)
-          return reject(new Error(`browser-task killed by signal ${signal}`))
-        if (code !== 0)
-          return reject(new Error(`browser-task exited with code ${code}`))
-        resolve()
-      })
-    })
-
-    const out_path = path.join(tmp_dir, 'pages.json')
-    if (!fs.existsSync(out_path)) {
-      throw new Error(`browser-task did not produce ${out_path}`)
-    }
-    const pages = JSON.parse(fs.readFileSync(out_path, 'utf-8'))
-    log('read %d pages from sandbox handoff', pages.length)
-    return pages
-  } finally {
-    try {
-      fs.rmSync(tmp_dir, { recursive: true, force: true })
-    } catch (err) {
-      log('handoff cleanup failed (non-fatal): %s', err.message)
-    }
-  }
-}
 
 /**
  * Parse PFR draft page HTML into draft player objects.
@@ -159,7 +93,7 @@ const initialize_cli = () => {
 
 const log = debug('import-player-draft-position-pfr')
 debug.enable(
-  'import-player-draft-position-pfr,update-player,get-player,pro-football-reference'
+  'import-player-draft-position-pfr,update-player,get-player,pro-football-reference,pro-football-reference-pages,cloakbrowser'
 )
 
 const import_player_draft_position_pfr = async ({
@@ -168,12 +102,12 @@ const import_player_draft_position_pfr = async ({
   dry = false
 } = {}) => {
   const draft_url = `${PRO_FOOTBALL_REFERENCE_URL}/years/${year}/draft.htm`
-  const pages = await run_browser_task({ urls: [draft_url], ignore_cache })
+  const pages = await fetch_pfr_pages({ urls: [draft_url] })
 
   const page_result = pages.find((p) => p.url === draft_url)
   if (!page_result || !page_result.html) {
     throw new Error(
-      `browser-task failed to fetch draft page for ${year}: ${page_result?.error || 'no HTML'}`
+      `failed to fetch PFR draft page for ${year}: ${page_result?.error || 'no HTML'}`
     )
   }
 
@@ -189,7 +123,7 @@ const import_player_draft_position_pfr = async ({
   // (year > current_season.year) can suppress via --allow-zero.
   if (draft_players.length === 0 && !dry) {
     const html_len = page_result.html ? page_result.html.length : 0
-    const message = `PFR draft scrape for ${year} parsed 0 rows (HTML ${html_len} bytes). Likely Cloudflare challenge returned unsolved; check browser-task selector / cloakbrowser version.`
+    const message = `PFR draft scrape for ${year} parsed 0 rows (HTML ${html_len} bytes). Likely the Cloudflare challenge went unsolved; check the pfr-cloakbrowser profile's clearance state and the parse selector.`
     if (year <= current_season.year) {
       const emitted = signal_log.error(new Error(message), {
         severity: 'high',
