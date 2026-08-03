@@ -525,7 +525,19 @@ export const crawl_sleeper_league_graph = async ({
   seed_league_ids = [],
   season_year = current_season.year,
   new_league_limit,
-  max_runtime_minutes = null
+  // The league budget alone does not bound wall clock, because it is denominated
+  // in the OUTPUT of a request while the rate limit prices the INPUT. Yield per
+  // request is measured at ~5 new leagues now, but it falls as the graph
+  // saturates and the same budget then costs several times longer -- at a yield
+  // of 1, a 20,000-league budget is 20,000 requests, which at 60/min is over two
+  // weeks and would still be running when the next run starts. A deadline is the
+  // only bound that holds regardless of yield, so time is the intended binding
+  // constraint and the league budget is the safety ceiling above it.
+  //
+  // Supplied by the caller rather than derived here, because it is the RUN's
+  // deadline and not this stage's: two stages each computing their own from the
+  // same --max_runtime_minutes would let a run take twice the number on the flag.
+  deadline_at = null
 }) => {
   const previous_stage = request_stage
   request_stage = 'crawl'
@@ -535,18 +547,6 @@ export const crawl_sleeper_league_graph = async ({
   let member_lists_crawled = 0
   let bootstrapped = false
   let stopped_on_time = false
-
-  // The league budget alone does not bound wall clock, because it is denominated
-  // in the OUTPUT of a request while the rate limit prices the INPUT. Yield per
-  // request is measured at ~5 new leagues now, but it falls as the graph
-  // saturates and the same budget then costs several times longer -- at a yield
-  // of 1, a 20,000-league budget is 20,000 requests, which at 60/min is over two
-  // weeks and would still be running when the next run starts. A deadline is the
-  // only bound that holds regardless of yield, so time is the intended binding
-  // constraint and the league budget is the safety ceiling above it.
-  const deadline_at = max_runtime_minutes
-    ? Date.now() + max_runtime_minutes * 60 * 1000
-    : null
 
   try {
     while (new_leagues < new_league_limit) {
@@ -603,7 +603,7 @@ export const crawl_sleeper_league_graph = async ({
   }
 
   log(
-    `crawl: ${new_leagues} new leagues from ${users_expanded} managers expanded and ${member_lists_crawled} member lists read (${request_counts.crawl} requests)${stopped_on_time ? `, stopped on the ${max_runtime_minutes}m deadline` : ''}`
+    `crawl: ${new_leagues} new leagues from ${users_expanded} managers expanded and ${member_lists_crawled} member lists read (${request_counts.crawl} requests)${stopped_on_time ? ', stopped on the run deadline' : ''}`
   )
 
   return { new_leagues, users_expanded, member_lists_crawled, stopped_on_time }
@@ -818,6 +818,15 @@ const import_sleeper_external_league_trades = async ({
     'import appetite: dynasty, no IDP, no best-ball, both format classes (single-QB first)'
   )
 
+  // ONE deadline for the whole run, shared by both stages. --max_runtime_minutes
+  // is a promise about when the process exits, so it cannot be a per-stage
+  // allowance: a run honoring it twice would take twice the number on the flag.
+  // In practice each cron entry zeroes the other's stage, so whichever stage does
+  // work gets the whole budget.
+  const deadline_at = max_runtime_minutes
+    ? Date.now() + max_runtime_minutes * 60 * 1000
+    : null
+
   // The crawl IS persistence -- its whole product is graph rows, and it reads
   // its own frontier back to decide where to go next -- so there is no coherent
   // dry version of it. A dry run therefore skips it entirely and reports what
@@ -829,7 +838,7 @@ const import_sleeper_external_league_trades = async ({
         seed_league_ids,
         season_year,
         new_league_limit: limit,
-        max_runtime_minutes
+        deadline_at
       })
 
   const selected = await select_leagues_to_import({
@@ -880,7 +889,28 @@ const import_sleeper_external_league_trades = async ({
     return Boolean(known) && !matches_import_appetite(known)
   }
 
+  // The chain walk is the reason this stage needs a deadline at all. --import_limit
+  // bounds only how many leagues are SELECTED; each one can enqueue up to
+  // history_depth prior seasons at ~19 requests apiece, and those enqueue no
+  // budget of their own. Measured 2026-08-03: 125 selected leagues imported in
+  // ~10 minutes and the walk was still running past 70. Checked at the top of the
+  // loop so a stop is always at a work-item boundary -- the league in hand is
+  // finished and its rows committed before the next one is considered, which is
+  // what lets this EXIT 0 rather than be killed.
+  //
+  // Selected leagues are all at depth 0 and the queue is FIFO, so they are drained
+  // before any chain link is touched. The deadline therefore eats the walk's tail
+  // first, which is the cheapest work to lose: a dropped link is a prior season
+  // that a later resync of its child league rediscovers, while a dropped selected
+  // league would leave the backlog untouched.
+  let import_stopped_on_time = false
+
   while (pending.length) {
+    if (deadline_at && Date.now() >= deadline_at) {
+      import_stopped_on_time = true
+      break
+    }
+
     const { external_league_id, discovered_via, depth } = pending.shift()
 
     // One bad league must not abort a crawl of hundreds. The failure is logged
@@ -932,6 +962,15 @@ const import_sleeper_external_league_trades = async ({
   log(
     `imported ${totals.trades} trades / ${totals.legs} legs from ${totals.leagues} leagues (${totals.skipped} skipped, ${totals.unresolved} unresolved players, ${request_counts.crawl} crawl + ${request_counts.import} import requests)`
   )
+  // Logged with the count still queued, because that number is the whole reason
+  // to raise or lower the deadline: a run that stops with thousands pending is
+  // shedding chain links every day, and one that never stops at all is under
+  // budget. Both are invisible from the exit code, which is 0 either way.
+  if (import_stopped_on_time) {
+    log(
+      `import stopped on the ${max_runtime_minutes}m run deadline with ${pending.length} league-seasons still queued`
+    )
+  }
   log(
     `frontier: ${frontier.uncrawled_users} managers and ${frontier.uncrawled_league_member_lists} league member lists unexplored, ${frontier.unimported_leagues} leagues known but not imported`
   )
@@ -948,6 +987,12 @@ const import_sleeper_external_league_trades = async ({
   // five figures, so an empty selection means the appetite filter, the ordering
   // join, or the graph is broken. Gated on the budget rather than asserted
   // flatly, so the crawl-only entry (--import_limit 0) stays correctly silent.
+  //
+  // Deliberately NOT gated on the deadline. Selection happens before the import
+  // loop and costs no wall clock worth speaking of, so a time-bounded run reaches
+  // this check having selected exactly what an unbounded one would have -- which
+  // is what keeps "bounded as designed" and "selected nothing" distinguishable
+  // rather than collapsing both into a green exit.
   if (!dry_run && import_limit > 0 && selected.length === 0) {
     throw new Error(
       `import budget was ${import_limit} but no league was selected -- appetite filter, ordering join, or graph is broken`
@@ -957,9 +1002,15 @@ const import_sleeper_external_league_trades = async ({
   // The companion case: leagues WERE selected and not one of them produced an
   // import. Distinguishes a genuine failure from the idle path, which is what
   // the trades oracle below cannot do on its own.
+  //
+  // Also NOT gated on the deadline, and that is the interesting half. An honest
+  // time-bounded run always has totals.leagues > 0 -- the queue is drained
+  // selected-leagues-first, so the deadline can only ever bite after real imports
+  // have landed -- while a deadline too small to finish even one league is a
+  // misconfiguration that deserves the same exit 1 as a refusing upstream.
   if (!dry_run && selected.length > 0 && totals.leagues === 0) {
     throw new Error(
-      `selected ${selected.length} leagues and imported none (${totals.skipped} skipped) -- Sleeper may be refusing the corpus`
+      `selected ${selected.length} leagues and imported none (${totals.skipped} skipped)${import_stopped_on_time ? ` -- stopped on the ${max_runtime_minutes}m deadline before any league finished` : ' -- Sleeper may be refusing the corpus'}`
     )
   }
 
@@ -995,7 +1046,13 @@ const import_sleeper_external_league_trades = async ({
     )
   }
 
-  return { ...totals, ...crawl_totals, frontier }
+  return {
+    ...totals,
+    ...crawl_totals,
+    import_stopped_on_time,
+    unwalked_chain_links: import_stopped_on_time ? pending.length : 0,
+    frontier
+  }
 }
 
 const main = async () => {
@@ -1019,12 +1076,14 @@ const main = async () => {
     // --resync_limit is how many ALREADY-imported leagues to refresh for new
     //   trades, stalest first. Separate budget so refresh work cannot starve
     //   frontier expansion.
-    // --max_runtime_minutes is a DEADLINE on the crawl stage. It exists because
-    //   --limit counts leagues while the rate limit prices requests, so the two
-    //   are related only by a yield that drifts downward as the graph
-    //   saturates; only a deadline bounds wall clock no matter what the yield
-    //   does. Set it whenever --limit is large enough that the run could
-    //   otherwise still be going when the next one starts.
+    // --max_runtime_minutes is a DEADLINE on the RUN, honored by both stages
+    //   against one shared clock. Neither --limit nor --import_limit bounds wall
+    //   clock: --limit counts leagues while the rate limit prices requests, and
+    //   --import_limit counts leagues SELECTED while the previous_league_id chain
+    //   walk each one triggers spends requests under no budget of its own.
+    //   Measured 2026-08-03 at --import_limit 100: the 125 selected leagues
+    //   imported in ~10 minutes and the walk was still running past 70. This flag
+    //   is the only thing that bounds either stage, so set it on every entry.
     const seed_league_ids = argv.seed_league_id
       ? [].concat(argv.seed_league_id).map(String)
       : []

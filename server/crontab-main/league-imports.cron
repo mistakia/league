@@ -99,6 +99,12 @@ JOB_PROJECT=league
 ## At 4:30AM Everyday
 30 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-keeptradecut.mjs >> /var/log/league/import-keeptradecut.log 2>&1
 
+## Weekly --full run at 8:00AM ET on Wednesday -- outside the 04:00-05:45 ET
+## window the daily KTC chain and adjacent maintenance jobs occupy. This is the
+## only path that writes position_rank/overall_rank; RANK_STALENESS_THRESHOLD_HOURS
+## in import-keeptradecut.mjs (this cadence + 1 day margin) assumes this schedule.
+0 8 * * 3 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-keeptradecut.mjs --full >> /var/log/league/import-keeptradecut-full.log 2>&1
+
 ################################### PRACTICE ########################################
 
 ## 10pm everynight
@@ -277,11 +283,18 @@ JOB_PROJECT=league
 ## run took the uncrawled member lists from 837 to 3,266. Do not read a large
 ## remaining frontier as a backlog to be finished.
 ##
-## --max_runtime_minutes IS THE REAL BOUND on the crawl. --limit counts leagues
+## --max_runtime_minutes IS THE REAL BOUND ON BOTH STAGES, and every entry must
+## carry it. It is one deadline for the whole run, checked at a work-item
+## boundary, so a bounded run finishes the league in hand and EXITS 0 -- it is
+## never killed, and the oracles below still fire.
+##
+## Neither league-denominated budget bounds wall clock. --limit counts leagues
 ## while the rate limit prices requests, and the two are related only through a
 ## yield (~15 new leagues per request measured 2026-07-29) that falls as the
-## graph saturates. At a yield of 1, --limit 5000 would be 5000 requests -- 83
-## minutes -- so only a deadline keeps a run from overlapping the next one.
+## graph saturates: at a yield of 1, --limit 5000 would be 5000 requests, 83
+## minutes. --import_limit is worse, because it counts leagues SELECTED and the
+## previous_league_id chain walk each selected league triggers takes no budget of
+## its own -- so the flag's value tells you nothing about the run's length.
 ##
 ## Rate limit unchanged and not to be raised: 60 req/min paced against elapsed
 ## time in throttle_request, deliberately under a conservative published 90/min
@@ -300,14 +313,22 @@ JOB_PROJECT=league
 ## pinned year here would silently crawl a stale frontier forever once the
 ## season rolled over.
 
-## Import stage, 5:10AM daily. --limit 0 skips the crawl entirely.
-## The import stage has no deadline flag of its own, so size it by requests: 100
-## never-imported leagues plus 25 resyncs cost up to 19 requests each, and the
-## unbudgeted previous_league_id chain walk rides along inside this stage (33
-## selected leagues once produced 54 imports). Budget roughly 40-60 minutes,
-## comfortably inside a daily cycle. Raise --import_limit only after reading an
-## actual run's request count out of the job's own output.
-10 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --limit 0 --import_limit 100 --resync_limit 25 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
+## Import stage, 5:10AM daily. --limit 0 skips the crawl entirely, so the whole
+## 120-minute deadline belongs to the import stage: the run exits by ~07:12,
+## being the deadline plus the one league in hand (at most 19 requests, ~19s).
+## THAT is the guarantee -- --import_limit does not carry one. An earlier note
+## here read "Budget roughly 40-60 minutes" from the flag values, and the first
+## real run passed 70 minutes with the chain walk still going.
+##
+## The 120 is sized so the SELECTED leagues always finish and only the walk's
+## tail is shed: 100 never-imported plus 25 resyncs cost ~10 minutes measured,
+## leaving ~110 minutes of chain walk at ~19s per prior league-season. Read
+## "stopped on the 120m run deadline with N league-seasons still queued" out of
+## the job's own log to tune it -- a large N every day means the walk is shedding
+## history and the deadline (not --import_limit) is the knob. Raising
+## --import_limit without raising this buys more selected leagues and less walk,
+## not a longer run.
+10 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --limit 0 --import_limit 100 --resync_limit 25 --max_runtime_minutes 120 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
 
 ## Graph crawl, 4:10AM Mondays. Weekly rather than daily because the backlog
 ## already exceeds import capacity by an order of magnitude. Runs an hour ahead
