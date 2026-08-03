@@ -39,6 +39,20 @@ import {
 //            intra-holding, no event emitted; captured downstream by the
 //            slot-week-counter pass.
 //   AUCTION_BID: non-state-changing, explicitly ignored.
+//
+// Pick chain-gap contract: a pick's owner sequence is walked forward from
+// `draft.otid` across its accepted trades, so it depends on trades_picks
+// recording every hop. Where a hop is missing the chain reaches a trade whose
+// participants do not include the holder -- observed on league 1, where three
+// 2026 picks are traded by teams that never acquired them in any recorded
+// trade. Every trade leg must name only the trade's own two teams, so the giver
+// falls back to the recorded trades_picks.tid, and a gap before the FIRST trade
+// additionally retargets the synthetic endowment onto that team (the endowment
+// timestamp is already synthetic in this case, `earliest_trade - 60s`). A gap
+// mid-chain gets its direction repaired but not its holding continuity: closing
+// that would mint an edge-less holding, which is the orphan class the partial
+// unique indexes exist to prevent. Both cases are counted as coverage warnings,
+// and `trade_leg_source_not_participant` is the oracle -- it must stay at zero.
 //   Unhandled flows (super-priority chains, decommission_reassignment,
 //   failed_poach_sanctuary, auto_cap_release, season_rollover for picks):
 //   accumulated as coverage_warnings; surfaced by the generator's row-count
@@ -530,6 +544,21 @@ const apply_trade = ({
   // tid 9 even though trade #2 had already moved it to tid 1). Returns the
   // {key, tid} pair so the caller can swap winning_tid when the recorded
   // losing_tid is wrong.
+  // Output oracle for the chain-gap repair, counted in-process rather than by a
+  // post-hoc query: a trade leg whose source holding sits on a team that is not
+  // in the trade means the graph is missing the hop that moved the asset to a
+  // participant, and every consumer reading view_trade_asset_flow.from_tid as
+  // the counterparty then invents a third team. Expected count is zero; this is
+  // logged rather than thrown because the walker cannot repair a mid-chain gap
+  // and a throw would leave the league on its previous rows forever.
+  const note_source_participant = (closed) => {
+    if (!closed) return
+    if (closed.tid === event.propose_tid || closed.tid === event.accept_tid) {
+      return
+    }
+    note_warning('trade_leg_source_not_participant')
+  }
+
   const find_open_pick = (pickid) => {
     for (const key of ctx.open.keys()) {
       if (!key.startsWith('pk__')) continue
@@ -551,6 +580,7 @@ const apply_trade = ({
         terminated_by: TERMINATED_BY.TRADE
       })
       if (!closed) note_warning('trade_no_open_source_player')
+      note_source_participant(closed)
       const opened = open_player_holding({
         tid: winning_tid,
         player_id: leg.player_id,
@@ -585,6 +615,7 @@ const apply_trade = ({
           note_warning('trade_no_open_source_pick')
         }
       }
+      note_source_participant(closed)
       const opened = open_pick_holding({
         tid: winning_tid,
         pickid: leg.pickid,
@@ -843,13 +874,22 @@ const build_event_stream = async ({ lid }) => {
   // relying on it produced wrong-direction trade legs and orphaned holdings
   // (e.g. pick 3 traded 9->1 in 2020-07-25 but `tid=1` looked like a giver).
   const pick_leg_dir = new Map() // `${tradeid}__${pickid}` -> {from_tid, to_tid}
+  // Picks whose chain is broken at its head: the endowment opens on this team
+  // instead of `draft.otid` so the first trade closes a holding the trade's own
+  // participants own. See the chain-gap contract in this module's header.
+  const endowment_holder_tid_by_pickid = new Map()
   const trade_by_id = new Map(trades.map((t) => [t.uid, t]))
   const trades_for_pickid = new Map()
+  const recorded_pick_tid_by_trade_pick = new Map()
   for (const tpi of trade_picks) {
     if (!trade_by_id.has(tpi.tradeid)) continue // unaccepted trade
     if (!trades_for_pickid.has(tpi.pickid))
       trades_for_pickid.set(tpi.pickid, [])
     trades_for_pickid.get(tpi.pickid).push(tpi.tradeid)
+    recorded_pick_tid_by_trade_pick.set(
+      `${tpi.tradeid}__${tpi.pickid}`,
+      tpi.tid
+    )
   }
   for (const [pickid, tradeids] of trades_for_pickid) {
     const meta = pick_meta_by_id.get(pickid)
@@ -858,14 +898,56 @@ const build_event_stream = async ({ lid }) => {
       (a, b) => trade_by_id.get(a).accepted - trade_by_id.get(b).accepted
     )
     let current = meta.otid
-    for (const tid of tradeids) {
-      const tr = trade_by_id.get(tid)
-      const next = tr.propose_tid === current ? tr.accept_tid : tr.propose_tid
-      pick_leg_dir.set(`${tid}__${pickid}`, {
-        from_tid: current,
-        to_tid: next
+    let leg_index = 0
+    for (const tradeid of tradeids) {
+      const trade = trade_by_id.get(tradeid)
+      const is_participant = (tid) =>
+        tid === trade.propose_tid || tid === trade.accept_tid
+      // The giver is normally whoever the chain says holds the pick. When that
+      // team is not in the trade at all, the chain has a gap -- the hop that
+      // moved the pick to a participant is missing from trades_picks -- and
+      // walking forward from a non-participant would emit a leg between a team
+      // and a trade it was never part of. Recover the giver from the recorded
+      // trades_picks.tid, which names one of the two sides.
+      let from_tid = current
+      if (!is_participant(current)) {
+        const recorded_tid = recorded_pick_tid_by_trade_pick.get(
+          `${tradeid}__${pickid}`
+        )
+        const recovered = is_participant(recorded_tid)
+        from_tid = recovered ? recorded_tid : trade.propose_tid
+        // A gap before the pick's FIRST trade is repairable whichever way the
+        // giver was resolved: nothing precedes it but the synthetic endowment,
+        // so retargeting that onto the giver restores holding continuity.
+        // Later in the chain the pick has a real holding on its previous owner
+        // and only the direction can be fixed -- closing that holding would
+        // mint an edge-less one, which is the orphan class the partial unique
+        // indexes exist to prevent. That leaves the leg's source holding on a
+        // non-participant, counted by trade_leg_source_not_participant.
+        if (leg_index === 0) {
+          endowment_holder_tid_by_pickid.set(pickid, from_tid)
+        }
+        const gap_label = !recovered
+          ? 'pick_chain_gap_unresolved'
+          : leg_index === 0
+            ? 'pick_chain_gap_before_first_trade'
+            : 'pick_chain_gap_mid_chain'
+        events.push({
+          sort_ts: trade.accepted,
+          sort_priority: 5,
+          kind: 'coverage_warning',
+          label: gap_label,
+          occurred_at: new Date(trade.accepted * 1000)
+        })
+      }
+      const to_tid =
+        from_tid === trade.propose_tid ? trade.accept_tid : trade.propose_tid
+      pick_leg_dir.set(`${tradeid}__${pickid}`, {
+        from_tid,
+        to_tid
       })
-      current = next
+      current = to_tid
+      leg_index++
     }
   }
   for (const trade of trades) {
@@ -914,6 +996,8 @@ const build_event_stream = async ({ lid }) => {
       occurred_at: new Date(trade.accepted * 1000),
       year: trade.year,
       trade_uid: trade.uid,
+      propose_tid: trade.propose_tid,
+      accept_tid: trade.accept_tid,
       legs
     })
   }
@@ -963,7 +1047,10 @@ const build_event_stream = async ({ lid }) => {
       sort_ts: Math.floor(endow_date.getTime() / 1000),
       sort_priority: 0, // process endowments first so trades-of-picks find an open source
       kind: 'pick_endowment',
-      tid: pick.otid,
+      // `pick_original_owner_tid` stays `otid` -- the standings fact is
+      // unchanged. Only the holder of the synthesized pre-trade window moves,
+      // and only for a pick whose first trade does not include `otid`.
+      tid: endowment_holder_tid_by_pickid.get(pick.uid) ?? pick.otid,
       pickid: pick.uid,
       pick_year: pick.year,
       pick_round: pick.round,
