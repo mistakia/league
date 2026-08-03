@@ -18,6 +18,15 @@
   &:empty
     display none
 
+  // PlayerName renders a fragment of two siblings, and the name half carries
+  // flex 1 — left alone it fills the strip and pushes its own status chips
+  // clear of the name they belong to
+  .player__name
+    flex 0 1 auto
+
+  .player__name-label
+    flex 0 0 auto
+
 .league-page-top-metrics
   display flex
   flex-wrap wrap
