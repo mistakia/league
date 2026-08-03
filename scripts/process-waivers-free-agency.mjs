@@ -185,12 +185,20 @@ const run_practice = async ({ daily = false }) => {
 
 const process_specific_waiver = async (waiver_id) => {
   let error
+  // Captured from the waiver itself so the outcome is reported under the right
+  // job type. This used to be inferred from the ERROR: `error ? null : error
+  // instanceof Error && ...`, which got both branches wrong. A failure reported
+  // nothing at all, and on success the ternary tested `error instanceof Error`
+  // when error was known falsy, so every run reported as ACTIVE -- a processed
+  // practice waiver closed the active source's signal instead of its own.
+  let job_type = job_types.CLAIMS_WAIVERS_ACTIVE
   try {
     const waiver = await get_waiver_by_id(waiver_id)
 
     if (waiver.waiver_type === waiver_types.FREE_AGENCY) {
       await processActiveWaivers({ daily: false, wid: waiver_id })
     } else if (waiver.waiver_type === waiver_types.FREE_AGENCY_PRACTICE) {
+      job_type = job_types.CLAIMS_WAIVERS_PRACTICE
       await processPracticeWaivers({ daily: false, wid: waiver_id })
     } else {
       throw new Error(`Unsupported waiver type: ${waiver.waiver_type}`)
@@ -204,19 +212,11 @@ const process_specific_waiver = async (waiver_id) => {
     console.log(error)
   }
 
-  const job_type = error
-    ? null
-    : error instanceof Error && error.message.includes('FREE_AGENCY_PRACTICE')
-      ? job_types.CLAIMS_WAIVERS_PRACTICE
-      : job_types.CLAIMS_WAIVERS_ACTIVE
-
-  if (job_type) {
-    await report_job({
-      job_type,
-      job_success,
-      job_reason: error ? error.message : null
-    })
-  }
+  await report_job({
+    job_type,
+    job_success,
+    job_reason: error ? error.message : null
+  })
 }
 
 const main = async () => {
