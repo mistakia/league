@@ -136,7 +136,8 @@ const resolve_player_ids = async (external_player_ids) => {
 export const import_sleeper_league_trades = async ({
   external_league_id,
   discovered_via = null,
-  dry_run = false
+  dry_run = false,
+  require_appetite = false
 }) => {
   const league = await sleeper_get(`/league/${external_league_id}`)
   if (!league) {
@@ -147,6 +148,25 @@ export const import_sleeper_league_trades = async ({
   const league_row = parse_sleeper_league({ league, discovered_via })
   if (!league_row) {
     log(`league ${external_league_id} has unusable format metadata, skipping`)
+    return { skipped: true, trades: 0, legs: 0, unresolved: 0 }
+  }
+
+  // Only the chain walk sets this. A league selected from the backlog was
+  // already filtered in SQL, but a previous_league_id arrives with no format
+  // known until this fetch -- and applying no check here is what let 31% of the
+  // existing corpus land out of format. Rejected BEFORE the transaction
+  // buckets, so a bad chain link costs one request instead of nineteen.
+  if (require_appetite && !matches_import_appetite(league_row)) {
+    // Persisted as a graph NODE anyway, with is_import false so last_synced_at
+    // stays null and it never enters the backlog. The row is already in hand,
+    // and recording its format is what makes the next run reject it from the
+    // graph for free instead of paying this request again.
+    if (!dry_run) {
+      await upsert_league_nodes({ league_rows: [league_row], is_import: false })
+    }
+    log(
+      `league ${external_league_id} (${league_row.league_format}${league_row.has_individual_defensive_players ? ' idp' : ''}${league_row.is_best_ball ? ' best-ball' : ''}) is outside the import appetite, skipping`
+    )
     return { skipped: true, trades: 0, legs: 0, unresolved: 0 }
   }
 
@@ -590,36 +610,46 @@ export const crawl_sleeper_league_graph = async ({
 }
 
 /**
- * Derive the import appetite from OUR league's own roster format.
+ * The import appetite: which external leagues are worth spending requests on.
  *
- * An external trade is only comparable to ours if the format matches, so the
- * filter has to follow our configuration rather than assume a direction --
- * selecting single-QB leagues for a superflex league (or the reverse) would
- * gather precisely the wrong corpus while looking like it was working. Read
- * from league_formats via seasons.league_format_id rather than hard-coded, so
- * a format change here retargets the crawl instead of silently invalidating it.
+ * Dynasty, no IDP, no best-ball -- three exclusions about bundles that
+ * misrepresent the exchange. Redraft prices a rental rather than an asset, an
+ * IDP league's unresolvable defender legs bias a side cheap, and best-ball
+ * leagues barely trade in-season and price on a different regime entirely.
  *
- * A league is superflex if it starts a QB/RB/WR/TE flex slot, or two or more
- * dedicated QBs -- the same test derive_is_superflex applies to the external
- * side, so both sides of the comparison are defined identically.
+ * Superflex is deliberately NOT in this list. It used to be, derived from OUR
+ * league's own roster format, on the argument that a superflex league can only
+ * learn from superflex trades. That argument is superseded: BOTH format classes
+ * ship, so the QB premium is a partition key the consumer conditions on, not an
+ * appetite the importer filters by. Deriving it from lid 1 made single-QB
+ * leagues unreachable at any --import_limit, which is why the single-QB class
+ * sat at 998 trades from 38 leagues while superflex held 14,509. The class
+ * split now lives in the SELECTION ORDER (see select_leagues_to_import), which
+ * prefers the under-covered class instead of excluding one outright.
  */
-const derive_import_appetite = async ({ lid, season_year }) => {
-  const format = await db('seasons')
-    .join('league_formats', 'league_formats.id', 'seasons.league_format_id')
-    .select('league_formats.sqb', 'league_formats.sqbrbwrte')
-    .where({ 'seasons.lid': lid, 'seasons.year': season_year })
-    .first()
-
-  if (!format) {
-    throw new Error(
-      `no league format found for lid ${lid} season ${season_year} -- cannot derive an import appetite, and guessing one would gather the wrong corpus`
-    )
-  }
-
-  return {
-    is_superflex: format.sqbrbwrte > 0 || format.sqb >= 2
-  }
+const IMPORT_APPETITE = {
+  league_format: 'dynasty',
+  has_individual_defensive_players: false,
+  is_best_ball: false
 }
+
+// One predicate, two evaluators. The SQL form filters the backlog; the JS form
+// judges a league fetched by the previous_league_id chain walk, which never
+// passes through the selection query at all.
+const matches_import_appetite = (league_row) =>
+  Object.entries(IMPORT_APPETITE).every(
+    ([column, value]) => league_row[column] === value
+  )
+
+// Table-qualified because the selection query joins external_leagues against
+// two membership relations, and a bare `is_best_ball` would be ambiguous there.
+const qualify_appetite = (table) =>
+  Object.fromEntries(
+    Object.entries(IMPORT_APPETITE).map(([column, value]) => [
+      `${table}.${column}`,
+      value
+    ])
+  )
 
 /**
  * Size the unexplored frontier.
@@ -670,51 +700,103 @@ const measure_frontier = async () => {
  * one or two requests to acquire and an import costs up to nineteen, so the
  * cheap thing should run far ahead of the expensive one: crawl broadly, import
  * narrowly, and let the backlog be the buffer between them.
+ *
+ * ORDER IS THE POLICY, now that the appetite admits both format classes. It has
+ * two keys before the old cursor:
+ *
+ * 1. Single-QB first (`is_superflex asc` -- Postgres orders false before true).
+ *    The two classes are not equally covered and never will be by accident:
+ *    superflex is the larger share of dynasty Sleeper leagues, so an
+ *    order-agnostic backlog walk would keep the minority class starved. This is
+ *    the only key that makes the under-covered class arrive on a schedule.
+ * 2. Fewest managers already known from imported leagues. A candidate whose
+ *    members are strangers adds an independent slice of the market; one whose
+ *    members already trade in the corpus mostly re-observes the same people, so
+ *    ascending on this count buys the widest manager coverage per request.
+ *    Note it counts only memberships the graph HOLDS, so a league whose member
+ *    list has never been crawled scores on its single discovery edge. That is a
+ *    floor rather than a wrong number: it cannot rank such a league too high.
+ *
+ * The resync side keeps the stalest-first cursor as its tiebreaker rather than
+ * the manager count, which is meaningless there -- an already-imported league's
+ * own members are known by construction, so every row would score the same.
  */
 const select_leagues_to_import = async ({
   import_limit,
   resync_limit,
-  dynasty_only,
-  appetite
+  dynasty_only
 }) => {
-  const apply_appetite = (query) => {
-    if (!dynasty_only) {
-      return query
-    }
-
-    return query.where({
-      league_format: 'dynasty',
-      // Superflex vs single-QB changes QB value by multiples, so the two are
-      // not the same market and mixing them pollutes the fit. Matched to OUR
-      // league rather than assumed -- getting the direction backwards would
-      // select precisely the wrong corpus.
-      is_superflex: appetite.is_superflex,
-      // Both exclusions are about bundles that misrepresent the exchange:
-      // an IDP league's unresolvable defender legs bias a side cheap, and
-      // best-ball leagues barely trade in-season and price on a different
-      // regime entirely.
-      has_individual_defensive_players: false,
-      is_best_ball: false
-    })
-  }
+  const apply_appetite = (query) =>
+    dynasty_only ? query.where(qualify_appetite('external_leagues')) : query
 
   const never_imported = await apply_appetite(
-    db('external_leagues')
-      .select('external_league_id', 'discovered_via')
-      .where({ platform: 'sleeper' })
-      .whereNull('last_synced_at')
+    db
+      .with('known_managers', (builder) =>
+        builder
+          .distinct('imported_membership.external_user_id')
+          .from('external_league_memberships as imported_membership')
+          .join('external_leagues as imported_league', function () {
+            this.on(
+              'imported_league.platform',
+              'imported_membership.platform'
+            ).andOn(
+              'imported_league.external_league_id',
+              'imported_membership.external_league_id'
+            )
+          })
+          .where('imported_membership.platform', 'sleeper')
+          .whereNotNull('imported_league.last_synced_at')
+      )
+      .from('external_leagues')
+      .leftJoin(
+        'external_league_memberships as candidate_membership',
+        function () {
+          this.on(
+            'candidate_membership.platform',
+            'external_leagues.platform'
+          ).andOn(
+            'candidate_membership.external_league_id',
+            'external_leagues.external_league_id'
+          )
+        }
+      )
+      .leftJoin(
+        'known_managers',
+        'known_managers.external_user_id',
+        'candidate_membership.external_user_id'
+      )
+      .select(
+        'external_leagues.external_league_id',
+        'external_leagues.discovered_via'
+      )
+      .where('external_leagues.platform', 'sleeper')
+      .whereNull('external_leagues.last_synced_at')
+      .groupBy(
+        'external_leagues.external_league_id',
+        'external_leagues.discovered_via',
+        'external_leagues.is_superflex',
+        'external_leagues.created_at'
+      )
   )
-    .orderBy('created_at', 'asc')
+    .orderByRaw(
+      'external_leagues.is_superflex asc, count(known_managers.external_user_id) asc, external_leagues.created_at asc'
+    )
     .limit(import_limit)
 
   const stalest_imported = resync_limit
     ? await apply_appetite(
         db('external_leagues')
-          .select('external_league_id', 'discovered_via')
-          .where({ platform: 'sleeper' })
-          .whereNotNull('last_synced_at')
+          .select(
+            'external_leagues.external_league_id',
+            'external_leagues.discovered_via'
+          )
+          .where('external_leagues.platform', 'sleeper')
+          .whereNotNull('external_leagues.last_synced_at')
       )
-        .orderBy('last_synced_at', 'asc')
+        .orderBy([
+          { column: 'external_leagues.is_superflex', order: 'asc' },
+          { column: 'external_leagues.last_synced_at', order: 'asc' }
+        ])
         .limit(resync_limit)
     : []
 
@@ -730,15 +812,10 @@ const import_sleeper_external_league_trades = async ({
   history_depth = 4,
   max_runtime_minutes = null,
   dry_run = false,
-  dynasty_only = true,
-  lid = 1
+  dynasty_only = true
 } = {}) => {
-  const appetite = await derive_import_appetite({ lid, season_year })
-
-  // Logged rather than assumed silently: if this ever reads backwards, the run
-  // that gathered the wrong corpus should say so in its own output.
   log(
-    `import appetite: dynasty, ${appetite.is_superflex ? 'superflex' : 'single-QB'}, no IDP, no best-ball (derived from lid ${lid} ${season_year})`
+    'import appetite: dynasty, no IDP, no best-ball, both format classes (single-QB first)'
   )
 
   // The crawl IS persistence -- its whole product is graph rows, and it reads
@@ -758,8 +835,7 @@ const import_sleeper_external_league_trades = async ({
   const selected = await select_leagues_to_import({
     import_limit,
     resync_limit,
-    dynasty_only,
-    appetite
+    dynasty_only
   })
 
   log(`importing ${selected.length} leagues`)
@@ -791,6 +867,19 @@ const import_sleeper_external_league_trades = async ({
     ).map((row) => row.external_league_id)
   )
 
+  // A chain link the graph already describes is judged without spending a
+  // request at all. The check inside import_sleeper_league_trades is the
+  // backstop for a link nobody has ever seen; this is the cheap path, and it is
+  // what keeps a rejected link from costing one request on every future run.
+  const chain_link_rejected_by_graph = async (external_league_id) => {
+    const known = await db('external_leagues')
+      .select(Object.keys(IMPORT_APPETITE))
+      .where({ platform: 'sleeper', external_league_id })
+      .first()
+
+    return Boolean(known) && !matches_import_appetite(known)
+  }
+
   while (pending.length) {
     const { external_league_id, discovered_via, depth } = pending.shift()
 
@@ -800,7 +889,8 @@ const import_sleeper_external_league_trades = async ({
       const result = await import_sleeper_league_trades({
         external_league_id,
         discovered_via,
-        dry_run
+        dry_run,
+        require_appetite: dynasty_only && depth > 0
       })
 
       if (result.skipped) {
@@ -817,7 +907,11 @@ const import_sleeper_external_league_trades = async ({
       if (previous_league_id && depth < history_depth) {
         if (
           !seen.has(previous_league_id) &&
-          !previously_imported_chain_links.has(previous_league_id)
+          !previously_imported_chain_links.has(previous_league_id) &&
+          !(
+            dynasty_only &&
+            (await chain_link_rejected_by_graph(previous_league_id))
+          )
         ) {
           seen.add(previous_league_id)
           pending.push({
