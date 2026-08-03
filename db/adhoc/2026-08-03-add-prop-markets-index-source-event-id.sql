@@ -1,0 +1,54 @@
+-- STATUS: APPLIED 2026-08-03 against league_production
+--
+-- Add an index on prop_markets_index (source_event_id).
+--
+-- Requires `yarn db:exec --no-transaction` (CREATE INDEX CONCURRENTLY cannot run
+-- inside a transaction block). CONCURRENTLY because this table is on live API
+-- read paths and a plain CREATE INDEX holds SHARE for the whole build, blocking
+-- every write behind it -- and DRAFTKINGS is importing into it continuously.
+--
+-- Found by the same call-site sweep that produced the esbid index earlier today.
+-- source_event_id is the vendor's own event key, a sibling identifier to esbid
+-- and the only way one consumer reaches a game:
+--
+--   libs-server/wager-analysis/wager-data-processing.mjs:87
+--     .where('pms.source_id', ...)
+--     .whereIn('pms.source_selection_id', ...)
+--     .whereIn('pm.source_event_id', ...)
+--
+-- It never filters esbid, so the index added this morning cannot help it. With
+-- no index leading on source_event_id the planner drives off idx_24959_market's
+-- source_id prefix instead and hash-semi-joins the event filter on top.
+-- Measured on production, three source_event_ids for one game:
+--
+--   Index Scan using idx_24959_market on prop_markets_index pm
+--     Index Cond: (source_id = 'FANDUEL')
+--     actual rows=228,011   Buffers: shared hit=136,296
+--
+-- 136,296 buffers is 1.06 GB touched to apply a filter that selects roughly
+-- 1,200 rows. The 273 ms measured is against a warm cache and understates it.
+--
+-- Selectivity: 7,692 distinct values over 3,014,488 non-null rows, about 397
+-- rows per event -- three orders of magnitude better than the source_id prefix
+-- the planner is currently forced onto, and comparable to esbid's 1,917 rows
+-- per game. The two are not redundant with each other: 1,573,309 rows have no
+-- esbid while only 42,420 have no source_event_id, so source_event_id reaches
+-- the season-futures and cross-sport markets that carry no game at all.
+--
+-- Not partial, deliberately, and this is the opposite call to the esbid index.
+-- The rule is the same one applied there and to the market_settled drop: a
+-- partial index earns its place when its predicate excludes a large fraction of
+-- the table. WHERE esbid IS NOT NULL excludes 51.5%, so that index is partial.
+-- WHERE source_event_id IS NOT NULL would exclude 1.4%, which is not worth the
+-- planner-proof obligation it imposes on every future call site.
+--
+-- Single column, deliberately. The consumer's other two predicates
+-- (source_id, source_selection_id) are both on prop_market_selections_index,
+-- not on this table, so there is no second column here to add.
+--
+-- Cost: roughly 100 MB, modeled from avg_length 15.8 bytes over 3,014,488
+-- non-null rows plus per-entry overhead -- not measured, since the index does
+-- not exist yet. Landing alongside the 2,884 MB freed on prop_pairings.
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_prop_markets_index_source_event_id
+  ON public.prop_markets_index USING btree (source_event_id);

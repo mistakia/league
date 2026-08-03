@@ -203,19 +203,8 @@ DROP INDEX IF EXISTS public.idx_restricted_free_agency_bids_nomination_id;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_bids_lid;
 DROP INDEX IF EXISTS public.idx_props_index_hits_soft;
 DROP INDEX IF EXISTS public.idx_prop_pairings_week;
-DROP INDEX IF EXISTS public.idx_prop_pairings_total_games;
-DROP INDEX IF EXISTS public.idx_prop_pairings_source_id;
-DROP INDEX IF EXISTS public.idx_prop_pairings_size;
-DROP INDEX IF EXISTS public.idx_prop_pairings_risk_total;
-DROP INDEX IF EXISTS public.idx_prop_pairings_opp_allow_rate;
-DROP INDEX IF EXISTS public.idx_prop_pairings_nfl_team;
-DROP INDEX IF EXISTS public.idx_prop_pairings_market_prob;
-DROP INDEX IF EXISTS public.idx_prop_pairings_lowest_payout;
-DROP INDEX IF EXISTS public.idx_prop_pairings_joint_hist_rate;
-DROP INDEX IF EXISTS public.idx_prop_pairings_hist_rate_soft;
-DROP INDEX IF EXISTS public.idx_prop_pairings_hist_edge_soft;
-DROP INDEX IF EXISTS public.idx_prop_pairings_highest_payout;
 DROP INDEX IF EXISTS public.idx_prop_pairing_props_composite;
+DROP INDEX IF EXISTS public.idx_prop_markets_index_source_event_id;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_season_year;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_esbid_time_type;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
@@ -31378,94 +31367,17 @@ CREATE INDEX idx_prop_markets_index_market_time_season_year ON public.prop_marke
 
 
 --
+-- Name: idx_prop_markets_index_source_event_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_prop_markets_index_source_event_id ON public.prop_markets_index USING btree (source_event_id);
+
+
+--
 -- Name: idx_prop_pairing_props_composite; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_prop_pairing_props_composite ON public.prop_pairing_props USING btree (source_market_id, source_selection_id);
-
-
---
--- Name: idx_prop_pairings_highest_payout; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_highest_payout ON public.prop_pairings USING btree (highest_payout);
-
-
---
--- Name: idx_prop_pairings_hist_edge_soft; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_hist_edge_soft ON public.prop_pairings USING btree (current_season_hist_edge_soft);
-
-
---
--- Name: idx_prop_pairings_hist_rate_soft; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_hist_rate_soft ON public.prop_pairings USING btree (current_season_hist_rate_soft);
-
-
---
--- Name: idx_prop_pairings_joint_hist_rate; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_joint_hist_rate ON public.prop_pairings USING btree (current_season_joint_hist_rate_soft);
-
-
---
--- Name: idx_prop_pairings_lowest_payout; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_lowest_payout ON public.prop_pairings USING btree (lowest_payout);
-
-
---
--- Name: idx_prop_pairings_market_prob; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_market_prob ON public.prop_pairings USING btree (market_prob);
-
-
---
--- Name: idx_prop_pairings_nfl_team; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_nfl_team ON public.prop_pairings USING btree (nfl_team);
-
-
---
--- Name: idx_prop_pairings_opp_allow_rate; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_opp_allow_rate ON public.prop_pairings USING btree (current_season_opp_allow_rate);
-
-
---
--- Name: idx_prop_pairings_risk_total; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_risk_total ON public.prop_pairings USING btree (risk_total);
-
-
---
--- Name: idx_prop_pairings_size; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_size ON public.prop_pairings USING btree (size);
-
-
---
--- Name: idx_prop_pairings_source_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_source_id ON public.prop_pairings USING btree (source_id);
-
-
---
--- Name: idx_prop_pairings_total_games; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_pairings_total_games ON public.prop_pairings USING btree (current_season_total_games);
 
 
 --
