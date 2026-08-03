@@ -79,10 +79,20 @@ const generate_league_format_player_careerlogs = async ({
     // TODO have a rank based on adp instead of draft position
   }
 
+  const player_by_pid = new Map(
+    draft_classes_query.map((row) => [row.pid, row])
+  )
+
   for (const pid in seasons_by_pid) {
-    const draft_class = draft_classes_query.find(
-      (i) => i.pid === pid
-    ).nfl_draft_year
+    // A pid can carry seasonlogs without appearing in draft_classes_query --
+    // that query is filtered to fantasy_positions, while
+    // league_format_player_gamelogs accumulates punters too (51 such pids
+    // today). The bare .find(...).nfl_draft_year threw on the first of them
+    // and took the whole format's careerlogs with it, silently, because main()
+    // swallows the error and exits 0. Tolerate the absence: these players'
+    // existing rows already carry draft_rank 0, since a punter is never in his
+    // draft class's fantasy-position list either.
+    const draft_class = player_by_pid.get(pid)?.nfl_draft_year ?? null
     const seasons = seasons_by_pid[pid]
 
     const sorted = seasons.sort((a, b) => a.year - b.year)
@@ -99,8 +109,9 @@ const generate_league_format_player_careerlogs = async ({
     const games = games_by_pid[pid] || 0
     const startable_games = sum(seasons.map((s) => s.startable_games))
 
-    const draft_rank =
-      sorted_pids_by_draft_classes[draft_class].indexOf(pid) + 1
+    const draft_rank = draft_class
+      ? sorted_pids_by_draft_classes[draft_class].indexOf(pid) + 1
+      : 0
 
     // A dfs_fixed format is not priced, so every season carries a NULL
     // earned_salary. Math.max coerces null to 0, which would report an
@@ -222,7 +233,11 @@ const main = async () => {
     log(error)
   }
 
-  process.exit()
+  // Exit non-zero on failure. This script swallowed its own exception and
+  // exited 0, so a throw wiped out a format's careerlogs generation without
+  // any caller -- cron, the logs orchestrator, an operator -- being able to
+  // tell a successful run from a dead one.
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {
