@@ -11,23 +11,27 @@ import { job as import_prizepicks_odds } from '#scripts/import-prizepicks-odds.m
 
 const log = debug('import-live-odds-worker')
 
-// debug.enable REPLACES the enabled namespace set rather than adding to it, so
-// the unconditional `debug.enable('import-live-odds-worker')` this used to be
-// DISCARDED whatever DEBUG the environment supplied. That is what kept the prop
-// write path's instrumentation dark in production: the pm2 config named
-// insert-prop-markets, this line overwrote it at module load, and nothing
-// reported the loss -- the worker's own namespace kept logging normally, which
-// is precisely what made the config look effective.
+// Do NOT call debug.enable() when DEBUG is set. It is tempting to append to it
+// instead of branching, and that does not work: under debug 4.4.3 a call made
+// AFTER a logger already exists can turn that logger OFF but cannot turn it back
+// ON, and every logger in the import graph is already constructed by the time
+// this line runs, because ESM evaluates all imports before the module body.
+// Measured on the production host -- with DEBUG naming insert-prop-markets, the
+// logger reads enabled=true at import and still enabled=false after an enable()
+// call naming it.
 //
-// Append rather than branch on whether DEBUG is set. A bare `if (!DEBUG)` guard
-// trades this bug for its mirror image: a stray `DEBUG=1` in the environment
-// (Claude Code sets exactly that) is truthy, skips the fallback, matches no
-// namespace, and silently costs the worker its own logging -- the same
-// invisible failure in the other direction. Appending keeps this worker's
-// namespace unconditionally and leaves the environment purely additive.
-debug.enable(
-  [process.env.DEBUG, 'import-live-odds-worker'].filter(Boolean).join(',')
-)
+// So the unconditional `debug.enable('import-live-odds-worker')` this used to be
+// did not merely fail to add namespaces, it actively switched off the ones the
+// environment had turned on. That is what kept the prop write path dark: the pm2
+// config named insert-prop-markets, the debug library enabled it at load, and
+// this line switched it off one module body later -- while the worker's own
+// namespace kept logging, which is precisely what made the config look effective.
+//
+// When DEBUG is unset there are no environment-enabled namespaces to protect, so
+// enabling this worker's own is safe and keeps a bare local run useful.
+if (!process.env.DEBUG) {
+  debug.enable('import-live-odds-worker')
+}
 
 install_process_handlers({
   service_name: 'import-live-odds-worker',
