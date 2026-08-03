@@ -6,7 +6,19 @@ import get_playoff_seeding from './get-playoff-seeding.mjs'
 import compare_playoff_seed from './compare-playoff-seed.mjs'
 
 const log = debug('calculate-standings')
-debug.enable('calculate-standings')
+
+// A bare debug.enable REPLACES the namespace set for the whole process, and this
+// module reaches the odds worker through the #libs-server barrel -- so this one
+// line was switching off every namespace the worker's DEBUG had turned on,
+// leaving the import worker's stderr completely silent and the prop write path
+// uninstrumented. It was the last enable() standing after the libs-server and
+// odds-script call sites were guarded.
+//
+// globalThis.process?.env rather than a bare process.env: this file is
+// isomorphic and is bundled into the SPA, where `process` need not exist.
+if (!globalThis.process?.env?.DEBUG) {
+  debug.enable('calculate-standings')
+}
 
 const average = (data) => data.reduce((sum, value) => sum + value) / data.length
 const standardDeviation = (values) =>
