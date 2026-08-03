@@ -1,26 +1,44 @@
+// Capped and card-framed to match the other league-home sections. Unbounded,
+// the current-window row stretched its team name and its times to opposite
+// edges of a 1900px screen with nothing between them.
 .restricted-free-agency-schedule
   display flex
   flex-direction column
-  gap 8px
-  padding 12px
+  gap 10px
+  max-width 720px
+  padding 16px 20px
+  background white
+  border-radius 8px
 
   .rfa-schedule__title
-    font-size 15px
-    font-weight 600
+    font-family 'IBM Plex Mono', monospace
+    letter-spacing .2em
+    text-transform uppercase
+    font-size 12px
+    font-weight 800
 
   .rfa-schedule__summary
     font-size 13px
     line-height 1.5
     color rgba(0, 0, 0, 0.6)
 
-  // Active window — full detail row
+  // Active window — team and its two boundaries on the left, the live
+  // countdown held out on the right as the one number worth acting on
   .rfa-schedule__current
     display flex
     align-items center
-    gap 12px
-    padding 10px 12px
+    justify-content space-between
+    gap 20px
+    padding 12px 14px
+    border 1px solid $borderColor
     border-radius 6px
-    background rgba(25, 118, 210, 0.08)
+    background rgba(25, 118, 210, 0.06)
+
+  .rfa-schedule__current-body
+    display flex
+    flex-direction column
+    gap 6px
+    min-width 0
 
   .rfa-schedule__current-label
     text-transform uppercase
@@ -29,18 +47,12 @@
     color rgba(0, 0, 0, 0.55)
     font-weight 600
 
-  .rfa-schedule__current-body
-    display flex
-    align-items center
-    gap 16px
-    flex 1
-
   .rfa-schedule__current-team
     display flex
     align-items center
     gap 6px
     font-weight 500
-    font-size 13px
+    font-size 14px
 
   .rfa-schedule__current-tag
     font-size 11px
@@ -49,11 +61,17 @@
 
   .rfa-schedule__current-times
     display flex
-    align-items center
-    gap 6px
-    margin-left auto
+    flex-direction column
+    gap 2px
+    margin-top 2px
+
+  .rfa-schedule__current-time-row
+    display flex
+    align-items baseline
+    gap 8px
 
   .rfa-schedule__current-time-label
+    flex 0 0 68px
     font-size 11px
     color rgba(0, 0, 0, 0.5)
     text-transform uppercase
@@ -65,15 +83,21 @@
     font-weight 500
 
   .rfa-schedule__countdown
-    font-size 13px
+    flex 0 0 auto
+    text-align right
+
+  .rfa-schedule__countdown-value
+    font-size 22px
+    line-height 1.2
+    font-weight 700
     font-variant-numeric tabular-nums
-    font-weight 600
     color rgba(25, 118, 210, 1)
-    padding 2px 6px
-    border-radius 4px
-    background rgba(25, 118, 210, 0.12)
-    min-width 92px
-    text-align center
+
+  .rfa-schedule__countdown-label
+    font-size 10px
+    text-transform uppercase
+    letter-spacing 0.5px
+    color rgba(0, 0, 0, 0.5)
 
   // Future windows — condensed timeline
   .rfa-schedule__future
@@ -125,6 +149,7 @@
 
   .rfa-schedule__future-team
     flex 1
+    min-width 0
     display flex
     align-items center
     gap 6px
@@ -139,3 +164,15 @@
     color rgba(0, 0, 0, 0.7)
     min-width 120px
     text-align right
+
+@media (max-width 600px)
+  .restricted-free-agency-schedule
+    padding 12px
+
+    .rfa-schedule__current
+      flex-direction column
+      align-items flex-start
+      gap 10px
+
+    .rfa-schedule__countdown
+      text-align left
