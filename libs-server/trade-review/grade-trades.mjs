@@ -81,16 +81,30 @@ const current_player_value = ({
   return age_days > STALE_VALUATION_DAYS ? 0 : valuation_row.value
 }
 
-const load_current_player_values = async ({ player_ids }) => {
+const load_current_player_values = async ({ player_ids, now_unix }) => {
   const player_valuation_by_id = new Map()
   if (!player_ids.length) return player_valuation_by_id
   // DISTINCT ON gives the latest observation per pid in one pass.
+  //
+  // The observed_at floor is not an approximation -- it is the same
+  // STALE_VALUATION_DAYS boundary current_player_value applies, moved into the
+  // query. A pid whose latest observation is older than the window scores 0
+  // either way: excluded here it is simply absent from the map, and the
+  // missing-row branch already returns 0.
+  //
+  // It matters because keeptradecut_valuations holds one row per pid per day
+  // over 2.35M rows, so the unbounded form read 513,004 rows to return 304 --
+  // 891ms of the request, and the single dominant cost in the whole engine.
+  const observed_at_floor = new Date(
+    (now_unix - STALE_VALUATION_DAYS * 86400) * 1000
+  )
   const rows = await db
     .select('pid', 'keeptradecut_value', 'observed_at')
     .distinctOn('pid')
     .from('keeptradecut_valuations')
     .whereIn('pid', player_ids)
     .where('is_superflex', true)
+    .where('observed_at', '>=', observed_at_floor)
     .orderBy('pid')
     .orderBy('observed_at', 'desc')
   for (const valuation_row of rows) {
@@ -251,7 +265,8 @@ const grade_trades = async ({
   const player_valuation_by_id = await load_current_player_values({
     player_ids: [
       ...new Set(chain_rows.map((row) => row.player_id).filter(Boolean))
-    ]
+    ],
+    now_unix
   })
   const num_teams_by_format = await load_num_teams_by_format({
     format_ids: [
