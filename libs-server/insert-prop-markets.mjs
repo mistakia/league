@@ -401,20 +401,25 @@ export default async function (markets, { dry_run = false } = {}) {
 
       // Skip actual DB operations in dry run mode
       if (!dry_run) {
-        // Execute all insert operations in parallel
-        const insert_promises = []
-
-        if (unique_market_history.length > 0) {
-          insert_promises.push(
-            db('prop_markets_history')
-              .insert(unique_market_history)
-              .onConflict(['source_id', 'source_market_id', 'observed_at'])
-              .merge()
-          )
-        }
+        // Index rows must be durable BEFORE history rows, and these four
+        // statements are not in one transaction. Change detection is baselined
+        // on the HISTORY tables (betting-market-cache.mjs prefetches
+        // prop_markets_history / prop_market_selections_history), so a history
+        // row that commits while its index row does not advances the baseline:
+        // the next run diffs clean, never re-emits the index row, and the index
+        // stays stale indefinitely. Only the OPEN rows are exposed -- the CLOSE
+        // rows are rewritten unconditionally every run -- which makes the
+        // damage rare but permanent.
+        //
+        // Ordering fixes it without a transaction. A failure anywhere after the
+        // index phase leaves the baseline behind, so the next run re-detects
+        // the change and rewrites both. Two round trips per batch instead of
+        // one; a per-batch transaction would serialize all four onto a single
+        // connection and cost six.
+        const index_promises = []
 
         if (unique_market_index.length > 0) {
-          insert_promises.push(
+          index_promises.push(
             db('prop_markets_index')
               .insert(unique_market_index)
               .onConflict(['source_id', 'source_market_id', 'time_type'])
@@ -422,28 +427,8 @@ export default async function (markets, { dry_run = false } = {}) {
           )
         }
 
-        if (unique_selection_history.length > 0) {
-          insert_promises.push(
-            batch_insert({
-              items: unique_selection_history,
-              batch_size: SELECTION_BATCH_SIZE,
-              save: async (selection_batch) => {
-                await db('prop_market_selections_history')
-                  .insert(selection_batch)
-                  .onConflict([
-                    'source_id',
-                    'source_market_id',
-                    'source_selection_id',
-                    'observed_at'
-                  ])
-                  .merge()
-              }
-            })
-          )
-        }
-
         if (unique_selection_index.length > 0) {
-          insert_promises.push(
+          index_promises.push(
             batch_insert({
               items: unique_selection_index,
               batch_size: SELECTION_BATCH_SIZE,
@@ -462,8 +447,40 @@ export default async function (markets, { dry_run = false } = {}) {
           )
         }
 
-        // Wait for all inserts to complete
-        await Promise.all(insert_promises)
+        await Promise.all(index_promises)
+
+        const history_promises = []
+
+        if (unique_market_history.length > 0) {
+          history_promises.push(
+            db('prop_markets_history')
+              .insert(unique_market_history)
+              .onConflict(['source_id', 'source_market_id', 'observed_at'])
+              .merge()
+          )
+        }
+
+        if (unique_selection_history.length > 0) {
+          history_promises.push(
+            batch_insert({
+              items: unique_selection_history,
+              batch_size: SELECTION_BATCH_SIZE,
+              save: async (selection_batch) => {
+                await db('prop_market_selections_history')
+                  .insert(selection_batch)
+                  .onConflict([
+                    'source_id',
+                    'source_market_id',
+                    'source_selection_id',
+                    'observed_at'
+                  ])
+                  .merge()
+              }
+            })
+          )
+        }
+
+        await Promise.all(history_promises)
 
         // Clean up stale selections
         const cleanup_result = await cleanup_stale_selections(
