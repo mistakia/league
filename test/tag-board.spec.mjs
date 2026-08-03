@@ -190,7 +190,12 @@ describe('tag board', function () {
       }).should.equal(10)
     })
 
-    it('leaves a restricted free agency contract pending', function () {
+    it('extends a restricted free agency contract up the regular ladder', function () {
+      // Not 21. `process-extensions.mjs` coerces the tag to REGULAR before
+      // pricing, so a tag-4 player is charged the ordinary ladder at the
+      // deadline; projecting the stored value instead reports a number the
+      // writer of record never writes. Confirmed against league 1, where all 14
+      // tag-4 players carry a 2026 EXTENSION transaction at the ladder price.
       post_deadline_salary({
         tag: 4,
         pos: 'WR',
@@ -198,7 +203,24 @@ describe('tag board', function () {
         value: 21,
         season,
         extensions_processed: false
-      }).should.equal(21)
+      }).should.equal(31)
+    })
+
+    it('prices a restricted free agent identically to a regular contract', function () {
+      // The disclosure property, pinned as a test because a tag-4 arm that
+      // returns anything else leaks the tag: the tag is private until the
+      // nomination is announced, and any per-tag difference in a PUBLIC salary
+      // figure recovers it by comparison against the stored value.
+      const args = {
+        pos: 'WR',
+        extensions: 1,
+        value: 21,
+        season,
+        extensions_processed: false
+      }
+      post_deadline_salary({ ...args, tag: 4 }).should.equal(
+        post_deadline_salary({ ...args, tag: 1 })
+      )
     })
 
     // The ladder is a PROJECTION of an extension that has not happened yet.
@@ -258,7 +280,7 @@ describe('tag board', function () {
             { tid: 1, pid: 'FRA', pos: 'RB', tag: 2, value: 61 },
             // rookie -> unchanged 10 (the extension is free, the salary stays)
             { tid: 1, pid: 'ROO', pos: 'RB', tag: 3, value: 10 },
-            // restricted free agency -> unchanged 21
+            // restricted free agency -> 21 + (0+1)*5 = 26, the regular ladder
             { tid: 1, pid: 'RFA', pos: 'WR', tag: 4, value: 21 },
             { tid: 2, pid: 'B1', pos: 'WR', tag: 1, extensions: 0, value: 10 }
           ]
@@ -267,10 +289,11 @@ describe('tag board', function () {
 
       const exposure = team_exposure(board, 1)
       exposure.current_salary.should.equal(112)
-      // 25 (regular) + 41 (franchise price) + 10 (rookie, unchanged) + 21 (RFA)
-      exposure.post_extension_salary.should.equal(97)
+      // 25 (regular) + 41 (franchise price) + 10 (rookie, unchanged) + 26 (RFA,
+      // priced as regular the way process-extensions.mjs charges it)
+      exposure.post_extension_salary.should.equal(102)
       exposure.current_room.should.equal(88)
-      exposure.post_extension_room.should.equal(103)
+      exposure.post_extension_room.should.equal(98)
     })
 
     it('reports an overage as negative post-extension room', function () {
@@ -1140,11 +1163,13 @@ describe('tag board', function () {
       row.projected_market_salary.should.equal(30)
 
       // The salary and gap he actually carries. Both are public state: the
-      // contract the owner holds today, differenced against a published
-      // single-season projection. Neither is the settling offer, which is blind
-      // under Article IX §2 and never enters the artifact at all.
-      row.post_deadline_salary.should.equal(20)
-      row.market_gap.should.equal(-10)
+      // contract the owner holds today extended up the regular ladder, the way
+      // process-extensions.mjs charges a tag-4 player at the deadline,
+      // differenced against a published single-season projection. Neither is the
+      // settling offer, which is blind under Article IX §2 and never enters the
+      // artifact at all.
+      row.post_deadline_salary.should.equal(25)
+      row.market_gap.should.equal(-5)
       expect(row.value).to.equal(undefined)
 
       // Still in neither shed pool: those describe a contract an owner might
@@ -1160,7 +1185,7 @@ describe('tag board', function () {
       // minimum. This is the change: the players most obviously in the
       // restricted-free-agency pool used to be the only ones it could never
       // describe, because their gap was nulled away.
-      pool_row('RFA_CHEAP').market_gap.should.equal(12)
+      pool_row('RFA_CHEAP').market_gap.should.equal(17)
       pool_row('RFA_CHEAP').rfa_nomination_target.should.equal(true)
 
       // ...and so contributes nothing to its owner's capacity.

@@ -140,6 +140,17 @@ const franchise_price_for = ({ pos, season }) => {
  * the shed pool and every capacity ranking derived from them simply move
  * together in the understating direction, which is the same silent-plausible
  * failure as the double-ladder it replaced.
+ *
+ * A restricted free agency tag is priced as REGULAR, mirroring the coercion
+ * `scripts/process-extensions.mjs` performs before it calls the same primitive.
+ * That script is the writer of record, so a tag-4 player is charged the ordinary
+ * ladder at the deadline and the projection has to say so. Delegating the tag
+ * straight through instead reaches `get_extension_amount`'s `bid ?? value` arm,
+ * which returns the stored value when no bid is attached — correct for the CAP
+ * charge that arm exists to price, and wrong here, because it is the salary
+ * BEFORE the deadline rather than after it. Confirmed against league 1: all 14
+ * tag-4 players carry a 2026 EXTENSION transaction at the ladder price and none
+ * at their stored value.
  */
 export const post_deadline_salary = ({
   tag,
@@ -153,7 +164,10 @@ export const post_deadline_salary = ({
 
   return get_extension_amount({
     extensions,
-    tag,
+    tag:
+      tag === player_tag_types.RESTRICTED_FREE_AGENCY
+        ? player_tag_types.REGULAR
+        : tag,
     pos,
     league: season,
     value

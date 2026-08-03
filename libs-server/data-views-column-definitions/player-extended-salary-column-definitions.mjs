@@ -67,6 +67,26 @@ export const player_extended_salary_join = async ({
   // Once the extensions are processed the stored salary IS the post-deadline
   // salary for every tag — applying the ladder again would compound it off an
   // already-extended base.
+  //
+  // A restricted free agency tag takes the REGULAR ladder, via the ELSE arm and
+  // not an arm of its own. `process-extensions.mjs` is the writer of record here
+  // and it coerces the tag to REGULAR before pricing (`process-extensions.mjs`
+  // getExtensionAmount call), so a tag-4 player is charged
+  // `salary_paid + (extensions + 1) * 5` at the deadline like any other
+  // unextended contract — confirmed against league 1, where all 14 tag-4 players
+  // carry a 2026 EXTENSION transaction at the ladder price and none at their
+  // stored value. This column projects what that writer will do, so an arm
+  // returning `salary_paid` here was a number production never charges.
+  //
+  // Removing it also closes a disclosure channel, which is why it must not come
+  // back. A tag-4-only arm made the emitted salary differ by tag, and the tag is
+  // private until the nomination is announced (see `player_league_roster_tag` in
+  // data-views-column-definitions/index.mjs). Since the ladder adds at least $5,
+  // `extended_salary = player_league_salary` held for a tagged player and for no
+  // regular one, so differencing two public columns recovered the hidden tag
+  // exactly. The window is real and annual: tags are applied through
+  // `POST /teams/:teamId/tag` up until `ext_date`, and this branch is live for
+  // precisely that period.
   const salary_expression = extensions_processed
     ? 'COALESCE(s.salary_paid, 0) AS extended_salary'
     : `CASE
@@ -80,7 +100,6 @@ export const player_extended_salary_join = async ({
               ELSE 0
             END
           WHEN rp.tag = ${player_tag_types.ROOKIE} THEN COALESCE(s.salary_paid, 0)
-          WHEN rp.tag = ${player_tag_types.RESTRICTED_FREE_AGENCY} THEN COALESCE(s.salary_paid, 0)
           ELSE COALESCE(s.salary_paid, 0) + (COALESCE(rp.extensions, 0) + 1) * 5
         END AS extended_salary`
 
