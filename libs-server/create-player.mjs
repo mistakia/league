@@ -11,7 +11,12 @@ import db from '#db'
 import generate_player_id from './generate-player-id.mjs'
 
 const log = debug('create-player')
-debug.enable('create-player')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('create-player')
+}
 
 /*
    first_name

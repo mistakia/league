@@ -9,7 +9,12 @@ import db from '#db'
 import * as cache from './cache.mjs'
 
 const log = debug('fanatics')
-debug.enable('fanatics')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('fanatics')
+}
 
 const get_fanatics_config = async () => {
   const config_row = await db('config')

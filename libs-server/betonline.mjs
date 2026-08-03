@@ -1,7 +1,12 @@
 import debug from 'debug'
 
 const log = debug('betonline')
-debug.enable('betonline')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('betonline')
+}
 
 const DIGITAL_SPORTS_TECH_API_URL = 'https://bv2.digitalsportstech.com/api'
 

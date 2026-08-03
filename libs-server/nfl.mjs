@@ -5,7 +5,12 @@ import { wait } from './wait.mjs'
 import * as cache from './cache.mjs'
 
 const log = debug('nfl')
-debug.enable('nfl')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('nfl')
+}
 
 const fetch_json_with_context = async (url, response) => {
   const body = await response.text()

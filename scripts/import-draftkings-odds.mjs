@@ -115,7 +115,14 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-draft-kings')
-debug.enable(DEBUG_MODULES.join(','))
+
+// See the note in import-prizepicks-odds.mjs: a module-scope debug.enable
+// REPLACES the namespace set for the whole process, and this module is imported
+// as a library by jobs/import-live-odds-worker.mjs. Defer to an explicit DEBUG
+// so the worker's configuration survives.
+if (!process.env.DEBUG) {
+  debug.enable(DEBUG_MODULES.join(','))
+}
 
 // Helper functions moved to separate modules
 

@@ -103,7 +103,14 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-pinnacle-odds')
-debug.enable(DEBUG_MODULES)
+
+// See the note in import-prizepicks-odds.mjs: a module-scope debug.enable
+// REPLACES the namespace set for the whole process, and this module is imported
+// as a library by jobs/import-live-odds-worker.mjs. Defer to an explicit DEBUG
+// so the worker's configuration survives.
+if (!process.env.DEBUG) {
+  debug.enable(DEBUG_MODULES)
+}
 
 /**
  * Formats the source event name based on matchup type

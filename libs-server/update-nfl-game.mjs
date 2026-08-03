@@ -8,7 +8,12 @@ import db from '#db'
 import record_changelog from './record-changelog.mjs'
 
 const log = debug('update-nfl-game')
-debug.enable('update-nfl-game')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('update-nfl-game')
+}
 
 const excluded_column_names = ['esbid', 'updated']
 

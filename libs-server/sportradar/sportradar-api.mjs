@@ -40,7 +40,12 @@ const queue = create_serial_queue()
 let last_request
 
 const log = debug('sportradar')
-debug.enable('sportradar')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('sportradar')
+}
 
 // Helper to monitor queue during long waits
 const monitor_queue_wait = ({

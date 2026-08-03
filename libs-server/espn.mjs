@@ -7,7 +7,12 @@ import { wait } from './wait.mjs'
 import { current_season } from '#constants'
 
 const log = debug('espn')
-debug.enable('espn')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('espn')
+}
 
 const slot_nums = { QB: 0, RB: 2, WR: 4, TE: 6, K: 17, DST: 16 }
 

@@ -21,7 +21,16 @@ const initialize_cli = () => {
 }
 
 const log = debug('import-prizepicks-odds')
-debug.enable('import-prizepicks-odds,get-player,prizepicks')
+
+// Only claim the namespace set when nothing else has configured one. This module
+// is imported as a library by jobs/import-live-odds-worker.mjs, and a
+// module-scope debug.enable REPLACES the whole set for the importing process --
+// so this line ran during the worker's import phase and, being the LAST of the
+// three importers it loads, silently switched off every namespace the worker's
+// DEBUG had turned on, including insert-prop-markets.
+if (!process.env.DEBUG) {
+  debug.enable('import-prizepicks-odds,get-player,prizepicks')
+}
 
 const format_market = async ({
   prizepicks_market,

@@ -9,7 +9,12 @@ import db from '#db'
 import record_changelog from './record-changelog.mjs'
 
 const log = debug('update-player')
-debug.enable('update-player')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('update-player')
+}
 
 const excluded_props = ['pid', 'formatted_name', 'primary_position']
 

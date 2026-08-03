@@ -6,7 +6,12 @@ import db from '#db'
 import is_main from './is-main.mjs'
 
 const log = debug('update-player-id')
-debug.enable('update-player-id')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('update-player-id')
+}
 
 const update_player_id = async function ({ current_pid, new_pid }) {
   if (!current_pid) {

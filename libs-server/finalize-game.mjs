@@ -18,7 +18,12 @@ import { process_market_results } from '#scripts/process-market-results.mjs'
 import { update_market_settlement_status } from '#scripts/update-market-settlement-status.mjs'
 
 const log = debug('finalize-game')
-debug.enable('finalize-game')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('finalize-game')
+}
 
 /**
  * Finalize a single game after END_GAME detection

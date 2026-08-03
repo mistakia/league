@@ -5,7 +5,12 @@ import update_player_id from './update-player-id.mjs'
 import updatePlayer from './update-player.mjs'
 
 const log = debug('merge-player')
-debug.enable('merge-player,update-player-id')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('merge-player,update-player-id')
+}
 
 export default async function ({ update_player_row, remove_player_row }) {
   // Determine which PID to use based on birthdate

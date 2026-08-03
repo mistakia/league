@@ -8,7 +8,12 @@ import { player_nfl_status } from '#constants'
 import db from '#db'
 
 const log = debug('get-player')
-debug.enable('get-player')
+// Library module: a bare debug.enable REPLACES the namespace set for the whole
+// process, so importing this would silently switch off namespaces the entry
+// point enabled. Defer to an explicit DEBUG (see jobs/import-live-odds-worker.mjs).
+if (!process.env.DEBUG) {
+  debug.enable('get-player')
+}
 
 // Expand positions to include all equivalent positions for matching
 // Also normalizes positions (e.g., HB -> RB, C -> OL) before expanding
