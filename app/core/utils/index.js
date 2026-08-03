@@ -6,6 +6,7 @@ export { default as useTraceUpdate } from './use-trace-update'
 export { create_debug_selector } from './create-debug-selector'
 export { default as shorten_url, get_shortened_url } from './shorten-url'
 export { get_player_image_url } from './player-image'
+export { useClockSeconds, format_countdown } from './use-clock-seconds'
 
 export const ordinalSuffixOf = (i) => {
   const j = i % 10

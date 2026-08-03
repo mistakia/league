@@ -1,1 +1,1 @@
-export { default, useClockSeconds } from './trade-veto-countdown'
+export { default } from './trade-veto-countdown'

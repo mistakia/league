@@ -1,14 +1,14 @@
-// Capped and card-framed to match the other league-home sections. Unbounded,
-// the current-window row stretched its team name and its times to opposite
-// edges of a 1900px screen with nothing between them.
+// Card-framed to match the other league-home sections; the grid cell owns the
+// width. Unbounded and stretched, the current-window row put its team name and
+// its times at opposite edges of a 1900px screen with nothing between them.
 .restricted-free-agency-schedule
   display flex
   flex-direction column
   gap 10px
-  max-width 720px
   padding 16px 20px
   background white
   border-radius 8px
+  height 100%
 
   .rfa-schedule__title
     font-family 'IBM Plex Mono', monospace
@@ -22,22 +22,26 @@
     line-height 1.5
     color rgba(0, 0, 0, 0.6)
 
-  // Active window — team and its two boundaries on the left, the live
-  // countdown held out on the right as the one number worth acting on
+  // Active window — team and countdown on one line, the two boundaries as
+  // natural-width blocks beneath, so nothing stretches to fill the card
   .rfa-schedule__current
     display flex
-    align-items center
-    justify-content space-between
-    gap 20px
+    flex-direction column
     padding 12px 14px
     border 1px solid $borderColor
     border-radius 6px
     background rgba(25, 118, 210, 0.06)
 
-  .rfa-schedule__current-body
+  .rfa-schedule__current-header
+    display flex
+    align-items flex-start
+    justify-content space-between
+    gap 16px
+
+  .rfa-schedule__current-heading
     display flex
     flex-direction column
-    gap 6px
+    gap 4px
     min-width 0
 
   .rfa-schedule__current-label
@@ -61,21 +65,21 @@
 
   .rfa-schedule__current-times
     display flex
-    flex-direction column
-    gap 2px
-    margin-top 2px
+    gap 28px
+    margin-top 10px
+    padding-top 8px
+    border-top 1px solid rgba(0, 0, 0, 0.08)
 
-  .rfa-schedule__current-time-row
+  .rfa-schedule__current-time-block
     display flex
-    align-items baseline
-    gap 8px
+    flex-direction column
+    gap 1px
 
   .rfa-schedule__current-time-label
-    flex 0 0 68px
-    font-size 11px
+    font-size 10px
     color rgba(0, 0, 0, 0.5)
     text-transform uppercase
-    letter-spacing 0.3px
+    letter-spacing 0.5px
 
   .rfa-schedule__current-time
     font-size 13px
@@ -169,10 +173,12 @@
   .restricted-free-agency-schedule
     padding 12px
 
-    .rfa-schedule__current
+    .rfa-schedule__current-header
       flex-direction column
-      align-items flex-start
-      gap 10px
+      gap 8px
 
     .rfa-schedule__countdown
       text-align left
+
+    .rfa-schedule__future-time
+      min-width 0

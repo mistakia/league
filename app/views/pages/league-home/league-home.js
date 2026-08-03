@@ -25,6 +25,7 @@ import {
 } from '@libs-shared'
 import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
 import RestrictedFreeAgencySchedule from '@components/restricted-free-agency-schedule'
+import RestrictedFreeAgencyNomination from '@components/restricted-free-agency-nomination'
 
 import './league-home.styl'
 
@@ -224,12 +225,22 @@ export default function LeagueHomePage({
           <CopyMarkdownButton path={`/leagues/${league.uid}.md`} />
         </div>
       )}
-      <Grid container spacing={2} alignItems='flex-start'>
+      <Grid container spacing={2}>
         {notice_items.length ? (
           <Grid item xs={12}>
             <Notices notices={notice_items} />
           </Grid>
         ) : null}
+        {is_before_restricted_free_agency_end && (
+          <Grid item xs={12} md={6}>
+            <RestrictedFreeAgencyNomination />
+          </Grid>
+        )}
+        {is_before_restricted_free_agency_end && (
+          <Grid item xs={12} md={6}>
+            <RestrictedFreeAgencySchedule />
+          </Grid>
+        )}
         {active_free_agent_items.length > 0 && (
           <Grid item xs={12}>
             <DashboardPlayersTable
@@ -248,11 +259,6 @@ export default function LeagueHomePage({
               isRestrictedFreeAgency
               {...{ percentiles }}
             />
-          </Grid>
-        )}
-        {is_before_restricted_free_agency_end && (
-          <Grid item xs={12}>
-            <RestrictedFreeAgencySchedule />
           </Grid>
         )}
         {Boolean(waivers.poach.size) && (
@@ -308,10 +314,10 @@ export default function LeagueHomePage({
             />
           </Grid>
         )}
-        <Grid item xs={12} className='league-positional-value'>
+        <Grid item xs={12} lg={6} className='league-positional-value'>
           <DashboardLeaguePositionalValue tid={teamId} />
         </Grid>
-        <Grid item xs={12} className='league-recent-transactions'>
+        <Grid item xs={12} lg={6} className='league-recent-transactions'>
           <LeagueRecentTransactions />
         </Grid>
       </Grid>

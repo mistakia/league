@@ -1,26 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { get_trade_veto_deadline } from '@libs-shared'
-
-/**
- * A unix-second clock that advances on its own, for anything whose visibility
- * depends on a deadline passing rather than on redux state changing.
- */
-export const useClockSeconds = (interval_ms = 30000) => {
-  const [now, set_now] = useState(() => Math.round(Date.now() / 1000))
-
-  useEffect(() => {
-    const interval = setInterval(
-      () => set_now(Math.round(Date.now() / 1000)),
-      interval_ms
-    )
-    return () => clearInterval(interval)
-  }, [interval_ms])
-
-  return now
-}
+import { useClockSeconds } from '@core/utils'
 
 const format_remaining = (seconds) => {
   if (seconds < 60) return '< 1m'

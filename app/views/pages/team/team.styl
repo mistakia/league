@@ -9,6 +9,20 @@
   max-width 1000px
   margin 0 auto 16px
 
+// Aligned to the header above it — the nomination obligation belongs with the
+// team's own summary, not buried below the roster
+.team__nomination
+  max-width 1000px
+  margin 0 auto 16px
+
+  &:empty
+    display none
+
+  // Aligned to the header's left edge but not stretched to its width — across
+  // a full 1000px the headline and the countdown drift to opposite ends
+  .restricted-free-agency-nomination
+    max-width 560px
+
 .league-page-top-metrics
   display flex
   flex-wrap wrap

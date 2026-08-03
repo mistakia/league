@@ -6,7 +6,7 @@
   .MuiPaper-elevation1
     overflow hidden
 
-.league-positional-value.MuiGrid-root.MuiGrid-item
-.league-recent-transactions.MuiGrid-root.MuiGrid-item
-  max-width 850px
-  margin 0 auto
+  // A section that decides it has nothing to say renders null, and its grid
+  // cell would otherwise hold half a row of blank space beside its partner
+  .MuiGrid-item:empty
+    display none

@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 
 import { get_restricted_free_agency_nomination_info } from '@libs-shared'
 import TeamName from '@components/team-name'
-import { useClockSeconds } from '@components/trade-veto-countdown'
+import { useClockSeconds, format_countdown } from '@core/utils'
 
 import './restricted-free-agency-schedule.styl'
 
@@ -19,21 +19,6 @@ function teams_to_array(teams) {
 
 const format_window_full = (timestamp) =>
   dayjs.unix(timestamp).format('ddd MMM D, h:mm A')
-
-const pad = (value) => String(value).padStart(2, '0')
-
-// Counts down to the bid close, so the reader knows how long they have to act
-// rather than having to subtract two clock times themselves.
-const format_countdown = (seconds) => {
-  const days = Math.floor(seconds / 86400)
-  const hours = Math.floor((seconds % 86400) / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const remaining_seconds = seconds % 60
-
-  if (days) return `${days}d ${pad(hours)}h ${pad(minutes)}m`
-  if (hours) return `${hours}h ${pad(minutes)}m ${pad(remaining_seconds)}s`
-  return `${minutes}m ${pad(remaining_seconds)}s`
-}
 
 export default function RestrictedFreeAgencySchedule({
   league,
@@ -90,43 +75,45 @@ export default function RestrictedFreeAgencySchedule({
 
       {current && (
         <div className='rfa-schedule__current'>
-          <div className='rfa-schedule__current-body'>
-            <div className='rfa-schedule__current-label'>Current window</div>
-            <div className='rfa-schedule__current-team'>
-              <TeamName tid={current.nominating_team.uid} />
-              {current.nominating_team.uid === team_id && (
-                <span className='rfa-schedule__current-tag'>your team</span>
-              )}
-            </div>
-            <div className='rfa-schedule__current-times'>
-              <div className='rfa-schedule__current-time-row'>
-                <span className='rfa-schedule__current-time-label'>
-                  Announced
-                </span>
-                <span className='rfa-schedule__current-time'>
-                  {format_window_full(current.announce_at)}
-                </span>
+          <div className='rfa-schedule__current-header'>
+            <div className='rfa-schedule__current-heading'>
+              <div className='rfa-schedule__current-label'>Current window</div>
+              <div className='rfa-schedule__current-team'>
+                <TeamName tid={current.nominating_team.uid} />
+                {current.nominating_team.uid === team_id && (
+                  <span className='rfa-schedule__current-tag'>your team</span>
+                )}
               </div>
-              <div className='rfa-schedule__current-time-row'>
-                <span className='rfa-schedule__current-time-label'>
-                  Bids close
-                </span>
-                <span className='rfa-schedule__current-time'>
-                  {format_window_full(current.bids_close_at)}
-                </span>
+            </div>
+            <div className='rfa-schedule__countdown'>
+              <div className='rfa-schedule__countdown-value'>
+                {current.bids_close_at > now
+                  ? format_countdown(current.bids_close_at - now)
+                  : 'Closed'}
+              </div>
+              <div className='rfa-schedule__countdown-label'>
+                {current.bids_close_at > now
+                  ? 'until bids close'
+                  : 'bidding closed'}
               </div>
             </div>
           </div>
-          <div className='rfa-schedule__countdown'>
-            <div className='rfa-schedule__countdown-value'>
-              {current.bids_close_at > now
-                ? format_countdown(current.bids_close_at - now)
-                : 'Closed'}
+          <div className='rfa-schedule__current-times'>
+            <div className='rfa-schedule__current-time-block'>
+              <span className='rfa-schedule__current-time-label'>
+                Announced
+              </span>
+              <span className='rfa-schedule__current-time'>
+                {format_window_full(current.announce_at)}
+              </span>
             </div>
-            <div className='rfa-schedule__countdown-label'>
-              {current.bids_close_at > now
-                ? 'until bids close'
-                : 'bidding closed'}
+            <div className='rfa-schedule__current-time-block'>
+              <span className='rfa-schedule__current-time-label'>
+                Bids close
+              </span>
+              <span className='rfa-schedule__current-time'>
+                {format_window_full(current.bids_close_at)}
+              </span>
             </div>
           </div>
         </div>

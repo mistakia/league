@@ -7,6 +7,7 @@ import PageLayout from '@layouts/page'
 import LeagueSelectTeam from '@components/league-select-team'
 import LeagueTeam from '@components/league-team'
 import LeagueTeamHistoricalRanks from '@components/league-team-historical-ranks'
+import RestrictedFreeAgencyNomination from '@components/restricted-free-agency-nomination'
 
 import './team.styl'
 
@@ -61,6 +62,9 @@ export default function TeamPage({
         <div className='league-page-top-metrics'>
           <LeagueTeamHistoricalRanks tid={teamId} />
         </div>
+      </div>
+      <div className='team__nomination'>
+        <RestrictedFreeAgencyNomination tid={teamId} />
       </div>
       <LeagueTeam tid={teamId} />
     </div>

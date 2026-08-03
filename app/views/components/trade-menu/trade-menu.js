@@ -3,10 +3,9 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import TeamName from '@components/team-name'
-import TradeVetoCountdown, {
-  useClockSeconds
-} from '@components/trade-veto-countdown'
+import TradeVetoCountdown from '@components/trade-veto-countdown'
 import { is_trade_within_veto_window } from '@libs-shared'
+import { useClockSeconds } from '@core/utils'
 
 import './trade-menu.styl'
 
