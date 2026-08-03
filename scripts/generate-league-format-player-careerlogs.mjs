@@ -102,6 +102,18 @@ const generate_league_format_player_careerlogs = async ({
     const draft_rank =
       sorted_pids_by_draft_classes[draft_class].indexOf(pid) + 1
 
+    // A dfs_fixed format is not priced, so every season carries a NULL
+    // earned_salary. Math.max coerces null to 0, which would report an
+    // unpriced career as a best season of exactly $0 -- indistinguishable
+    // from a priced player who never cleared replacement. Carry the absence
+    // through instead.
+    const priced_seasons = seasons
+      .map((season) => season.earned_salary)
+      .filter((salary) => salary !== null && salary !== undefined)
+    const best_season_earned_salary = priced_seasons.length
+      ? Math.max(...priced_seasons)
+      : null
+
     inserts.push({
       pid,
       league_format_id,
@@ -119,9 +131,7 @@ const generate_league_format_player_careerlogs = async ({
       best_season_points_added_net_per_game: Math.max(
         ...seasons.map((s) => s.points_added_net_per_game ?? 0)
       ),
-      best_season_earned_salary: Math.max(
-        ...seasons.map((s) => s.earned_salary)
-      ),
+      best_season_earned_salary,
       points_added_earned_first_three_seasons: sum(
         first_three_seasons.map((s) => s.points_added_earned)
       ),
