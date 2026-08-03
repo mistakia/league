@@ -5,8 +5,7 @@ import * as chai from 'chai'
 import {
   should_emit_log_error,
   is_connection_error,
-  with_connection_retry,
-  resolve_schedule_timezone
+  with_connection_retry
 } from '#libs-server/report-job.mjs'
 
 const expect = chai.expect
@@ -171,13 +170,5 @@ describe('LIBS-SERVER report_job with_connection_retry', function () {
     expect(thrown).to.exist
     expect(thrown.code).to.equal('ECONNRESET')
     expect(calls).to.equal(3)
-  })
-})
-
-describe('LIBS-SERVER report_job resolve_schedule_timezone', function () {
-  it('resolves the run host zone, so a cadence is never stored without one', () => {
-    const resolved = resolve_schedule_timezone()
-    expect(resolved).to.equal(Intl.DateTimeFormat().resolvedOptions().timeZone)
-    expect(resolved).to.be.a('string')
   })
 })

@@ -117,33 +117,6 @@ const job_type_to_id = build_job_type_to_id()
 // Emit the log_error twin only when no resolvable failure will carry the
 // outcome — i.e. an unmapped job_type or an unconfigured API URL, where the
 // log_error is the sole escalation channel.
-// The zone --schedule is expressed in. Without it `base run report` stores a
-// NULL timezone and the stale sweep reads a local-time cron expression as UTC,
-// moving the next expected fire EARLIER by the host's offset -- on
-// America/New_York that eats 4 of the 6 grace hours and turns the staleness
-// surface into a false-flag generator.
-//
-// Resolved from the host at runtime rather than hardcoded: report_job runs on
-// more than one host, so a constant is wrong the day a job relocates. cron
-// interprets a schedule in the system zone, and a cron-spawned node process
-// inherits that same zone, so this IS the cron daemon's zone.
-//
-// TEMPORARY. `base run report` resolves the local zone itself as of base
-// 2026-08-03, so this duplicates the CLI. It stays only because league runs a
-// COMPILED base CLI (2026.07.30) that predates that change; deleting it now
-// would put every league cadence back on a NULL timezone. Delete this function
-// and the --timezone push below once league's compiled CLI carries the
-// auto-resolution -- the flag is optional there, so no crontab change is needed.
-export const resolve_schedule_timezone = () => {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || null
-  } catch (err) {
-    // A host that cannot name its own zone reports none: the sweep falls back to
-    // the flat window, which is loose but never falsely stale.
-    return null
-  }
-}
-
 export const should_emit_log_error = ({ job_success, job_id, api_url }) =>
   !job_success && !(job_id && api_url)
 
@@ -236,6 +209,12 @@ export default async function report_job({
   // and a too-tight window false-flags the source. That is the rule the
   // writer-side registry encodes in its authoring_rules, and it does not
   // survive a naive mechanical edit.
+  // No --timezone: `base run report` resolves the reporting host's own zone as
+  // of base 2026.08.03, which league now runs. It resolves one only for a cron
+  // EXPRESSION, where a wall-clock time is meaningless without a zone; an
+  // `every` interval is measured from the last actual run and is zone-
+  // independent, and the sweep now reads a missing zone there for meaning. This
+  // file used to attach a zone to every cadence, which was wrong for `every`.
   const schedule_args = []
   if (process.env.JOB_SCHEDULE) {
     schedule_args.push(
@@ -244,10 +223,6 @@ export default async function report_job({
       '--schedule-type',
       process.env.JOB_SCHEDULE_TYPE || 'expr'
     )
-    const schedule_timezone = resolve_schedule_timezone()
-    if (schedule_timezone) {
-      schedule_args.push('--timezone', schedule_timezone)
-    }
   }
 
   try {
