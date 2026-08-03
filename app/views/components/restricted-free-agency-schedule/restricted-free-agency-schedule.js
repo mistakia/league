@@ -5,6 +5,7 @@ import dayjs from 'dayjs'
 
 import { get_restricted_free_agency_nomination_info } from '@libs-shared'
 import TeamName from '@components/team-name'
+import { useClockSeconds } from '@components/trade-veto-countdown'
 
 import './restricted-free-agency-schedule.styl'
 
@@ -16,11 +17,23 @@ function teams_to_array(teams) {
   }))
 }
 
-const format_window_short = (timestamp) =>
-  dayjs.unix(timestamp).format('M/D hA')
-
 const format_window_full = (timestamp) =>
   dayjs.unix(timestamp).format('ddd MMM D, h:mm A')
+
+const pad = (value) => String(value).padStart(2, '0')
+
+// Counts down to the bid close, so the reader knows how long they have to act
+// rather than having to subtract two clock times themselves.
+const format_countdown = (seconds) => {
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const remaining_seconds = seconds % 60
+
+  if (days) return `${days}d ${pad(hours)}h ${pad(minutes)}m`
+  if (hours) return `${hours}h ${pad(minutes)}m ${pad(remaining_seconds)}s`
+  return `${minutes}m ${pad(remaining_seconds)}s`
+}
 
 export default function RestrictedFreeAgencySchedule({
   league,
@@ -28,6 +41,10 @@ export default function RestrictedFreeAgencySchedule({
   team_id
 }) {
   const [showAll, setShowAll] = useState(false)
+  const now = useClockSeconds(1000)
+  // The schedule only changes on a window boundary, so rebuild it by the minute
+  // while the countdown below ticks every second
+  const now_minute = Math.floor(now / 60)
 
   const info = useMemo(() => {
     if (!league?.restricted_free_agency_period_start || !teams || !teams.size) {
@@ -37,13 +54,14 @@ export default function RestrictedFreeAgencySchedule({
     try {
       return get_restricted_free_agency_nomination_info({
         league,
-        teams: teams_to_array(teams)
+        teams: teams_to_array(teams),
+        current_timestamp: now_minute * 60
       })
     } catch (error) {
       console.error('Error building RFA nomination schedule:', error)
       return null
     }
-  }, [league, teams])
+  }, [league, teams, now_minute])
 
   if (!info || !info.schedule.length) return null
 
@@ -83,13 +101,18 @@ export default function RestrictedFreeAgencySchedule({
             <div className='rfa-schedule__current-times'>
               <span className='rfa-schedule__current-time-label'>Announce</span>
               <span className='rfa-schedule__current-time'>
-                {format_window_short(current.announce_at)}
+                {format_window_full(current.announce_at)}
               </span>
               <span className='rfa-schedule__current-time-label'>
                 Bid close
               </span>
               <span className='rfa-schedule__current-time'>
-                {format_window_short(current.bids_close_at)}
+                {format_window_full(current.bids_close_at)}
+              </span>
+              <span className='rfa-schedule__countdown'>
+                {current.bids_close_at > now
+                  ? format_countdown(current.bids_close_at - now)
+                  : 'closed'}
               </span>
             </div>
           </div>
