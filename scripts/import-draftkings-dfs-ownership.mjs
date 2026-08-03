@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import path from 'path'
 import fs from 'fs'
-import { spawn } from 'child_process'
+import { execFile } from 'child_process'
+import { promisify } from 'util'
 
 import db from '#db'
 import { is_main, report_job, batch_insert, draftkings } from '#libs-server'
@@ -13,73 +14,53 @@ import {
   find_player
 } from '#libs-server/player-cache.mjs'
 import { draftkings_session_manager } from '#private/libs-server/draftkings/draftkings-session-manager.mjs'
+import {
+  open_profile,
+  get_session_cookies,
+  download_via_browser
+} from '#private/libs-server/cloakbrowser.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { current_season } from '#constants'
 
-const BROWSER_TASK = path.resolve(
-  import.meta.dirname,
-  '../private/scripts/browser-tasks/draftkings.mjs'
+const exec_file_async = promisify(execFile)
+
+const log = debug('import-draftkings-dfs-ownership')
+debug.enable(
+  'import-draftkings-dfs-ownership,draft-kings:dfs:api,draftkings-session-manager,cloakbrowser'
 )
-const SANDBOX_WRAPPER = '/usr/local/bin/run-as-stealth-browser-node'
+
+const DRAFTKINGS_PROFILE = 'draftkings'
+const DRAFTKINGS_URL = 'https://www.draftkings.com'
+
+// STIDN and STH identify the browser session; jwe is the AUTH token, and the
+// contest-standings export is behind it -- an anonymous request to
+// /contest/exportfullstandingscsv/<id> answers 302 to /account/sitelogin. So a
+// missing jwe means a signed-out profile, not a transient miss.
+const DRAFTKINGS_SESSION_COOKIES = ['STIDN', 'STH', 'jwe']
 
 /**
- * Run the sandboxed DraftKings browser task. The same sandbox call captures
- * session cookies (page.route() interception) AND -- if contest_ids is
- * supplied -- downloads the per-contest CSVs inside the same persistent
- * context. The Playwright BrowserContext cannot cross processes, so the
- * CSV-download phase must stay co-resident with the cookie capture.
+ * Read the DraftKings session out of the CloakBrowser profile and persist it.
  *
- * Returns { cookies, tmp_dir, csv_files } -- the orchestrator owns the
- * tmp_dir lifetime and reads CSVs by name (contest-<id>.csv) before
- * cleaning up.
+ * Was a spawn of /usr/local/bin/run-as-stealth-browser-node against a local
+ * sandboxed Playwright process, which is why this importer could only run on
+ * macbook2025 -- and why it was BROKEN when relocated to base-storage, where no
+ * such wrapper exists and there is deliberately no Chromium at all. The cookies
+ * live in the profile's persistent context rather than only on the wire, so
+ * `get-cookies` reads them with no request hook, and the browser leg runs
+ * wherever the daemon does. See
+ * user:task/league/relocate-league-imports-off-macbook.md.
  */
-const run_browser_task = async ({ contest_ids = [] } = {}) => {
-  const tmp_dir = fs.mkdtempSync('/tmp/cb-draftkings-')
-  fs.chmodSync(tmp_dir, 0o777)
-  log('handoff tempdir: %s', tmp_dir)
+const capture_draftkings_session = async () => {
+  // get-cookies talks to an ALREADY-RUNNING daemon; `open` is what launches one
+  // and doubles as the warm step on a cold profile.
+  await open_profile({ url: DRAFTKINGS_URL, profile: DRAFTKINGS_PROFILE })
 
-  const caller_label =
-    process.env.CLOAKBROWSER_CALLER ||
-    (process.env.JOB_PROJECT
-      ? `job:${process.env.JOB_PROJECT}`
-      : 'import-draftkings-dfs-ownership')
-
-  const args = [
-    BROWSER_TASK,
-    '--out-dir',
-    tmp_dir,
-    '--caller-label',
-    caller_label
-  ]
-  if (contest_ids.length) {
-    args.push('--contest-ids', contest_ids.join(','))
-  }
-
-  log(
-    'spawning sandboxed browser task as _stealth-browser (contests=%d)',
-    contest_ids.length
-  )
-  await new Promise((resolve, reject) => {
-    const child = spawn(SANDBOX_WRAPPER, args, {
-      stdio: ['ignore', 'inherit', 'inherit']
-    })
-    child.on('error', reject)
-    child.on('exit', (code, signal) => {
-      if (signal)
-        return reject(new Error(`browser-task killed by signal ${signal}`))
-      if (code !== 0)
-        return reject(new Error(`browser-task exited with code ${code}`))
-      resolve()
-    })
+  const cookies = await get_session_cookies({
+    profile: DRAFTKINGS_PROFILE,
+    names: DRAFTKINGS_SESSION_COOKIES,
+    url: DRAFTKINGS_URL
   })
-
-  const out_path = path.join(tmp_dir, 'session_cookies.json')
-  if (!fs.existsSync(out_path)) {
-    fs.rmSync(tmp_dir, { recursive: true, force: true })
-    throw new Error(`browser-task did not produce ${out_path}`)
-  }
-  const cookies = JSON.parse(fs.readFileSync(out_path, 'utf-8'))
-  log('read DK session cookies from sandbox handoff')
+  log('read %d DraftKings session cookies', Object.keys(cookies).length)
 
   await draftkings_session_manager.store_draftkings_session_data({
     cookies,
@@ -87,13 +68,43 @@ const run_browser_task = async ({ contest_ids = [] } = {}) => {
   })
   log('DraftKings session cookies persisted to DB')
 
-  return { cookies, tmp_dir }
+  return cookies
 }
 
-const log = debug('import-draftkings-dfs-ownership')
-debug.enable(
-  'import-draftkings-dfs-ownership,draft-kings:dfs:api,draftkings-session-manager'
-)
+/**
+ * Download one contest's full-standings export into `out_dir`.
+ *
+ * Returns the CSV path. DK serves either a bare CSV or a zip containing one, so
+ * this sniffs the PK magic rather than trusting the extension.
+ */
+const download_contest_csv = async ({ contest_id, out_dir }) => {
+  const raw_path = path.join(out_dir, `contest-${contest_id}.download`)
+  await download_via_browser({
+    url: `${DRAFTKINGS_URL}/contest/exportfullstandingscsv/${contest_id}`,
+    out_path: raw_path,
+    profile: DRAFTKINGS_PROFILE
+  })
+
+  const csv_path = path.join(out_dir, `contest-${contest_id}.csv`)
+  const raw_bytes = await fs.promises.readFile(raw_path)
+  const is_zip = raw_bytes[0] === 0x50 && raw_bytes[1] === 0x4b
+
+  if (!is_zip) {
+    await fs.promises.rename(raw_path, csv_path)
+    return csv_path
+  }
+
+  const extract_dir = path.join(out_dir, `contest-${contest_id}.extracted`)
+  await fs.promises.mkdir(extract_dir, { recursive: true })
+  await exec_file_async('unzip', ['-o', raw_path, '-d', extract_dir])
+  const files = await fs.promises.readdir(extract_dir)
+  const csv_file = files.find((file) => file.endsWith('.csv'))
+  if (!csv_file) {
+    throw new Error(`no CSV in downloaded zip for contest ${contest_id}`)
+  }
+  await fs.promises.copyFile(path.join(extract_dir, csv_file), csv_path)
+  return csv_path
+}
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -228,19 +239,17 @@ const import_ownership = async ({
     include_name_draft_index: false
   })
 
-  // Single sandboxed pass: captures session cookies AND downloads each
-  // contest CSV inside the same _stealth-browser BrowserContext. The CSVs
-  // land in the handoff tempdir as contest-<id>.csv; the orchestrator
-  // reads them by name below.
-  const contest_ids = contests.map((c) => c.source_contest_id)
-  log(
-    'capturing DraftKings session + downloading %d contest CSVs via sandboxed browser task',
-    contest_ids.length
-  )
-  const { tmp_dir } = await run_browser_task({ contest_ids })
+  // The session read must succeed before any download is attempted: without a
+  // live jwe every export answers 302 to the login page, which arrives as an
+  // empty download rather than as an error, and each one costs a full timeout.
+  await capture_draftkings_session()
+
+  const tmp_dir = fs.mkdtempSync('/tmp/cb-draftkings-')
+  log('download tempdir: %s', tmp_dir)
 
   let total_ownership_records = 0
   let contests_processed = 0
+  let downloads_failed = 0
   const draftables_cache = new Map()
 
   try {
@@ -253,14 +262,18 @@ const import_ownership = async ({
         contest.source_draft_group_id
       )
 
-      const csv_path = path.join(
-        tmp_dir,
-        `contest-${contest.source_contest_id}.csv`
-      )
-      if (!fs.existsSync(csv_path)) {
+      let csv_path
+      try {
+        csv_path = await download_contest_csv({
+          contest_id: contest.source_contest_id,
+          out_dir: tmp_dir
+        })
+      } catch (err) {
+        downloads_failed++
         log(
-          'no CSV produced by sandbox for contest %s -- skipping',
-          contest.source_contest_id
+          'CSV download failed for contest %s: %s',
+          contest.source_contest_id,
+          err.message
         )
         continue
       }
@@ -427,10 +440,22 @@ const import_ownership = async ({
   }
 
   log(
-    'completed: %d contests processed, %d total ownership records',
+    'completed: %d contests processed, %d total ownership records, %d downloads failed',
     contests_processed,
-    total_ownership_records
+    total_ownership_records,
+    downloads_failed
   )
+
+  // Output oracle distinct from the exit code. Every per-contest download is
+  // caught and logged so one dead contest cannot cost the rest of the slate --
+  // which also means a signed-out profile, an allowlist refusal or an
+  // unreachable daemon would otherwise exit 0 having written nothing. See
+  // user:guideline/surface-pipeline-failures.md.
+  if (downloads_failed === contests.length) {
+    throw new Error(
+      `all ${contests.length} DraftKings contest downloads failed -- check the draftkings profile session`
+    )
+  }
 }
 
 const import_draftkings_dfs_ownership = async ({
