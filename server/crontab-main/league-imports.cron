@@ -234,25 +234,30 @@ JOB_PROJECT=league
 
 # External League Trades
 
-## At 5:10AM daily. Sleeper's public read-only API -- see
-## scripts/import-sleeper-external-league-trades.mjs.
+## Sleeper's public read-only API -- see
+## scripts/import-sleeper-external-league-trades.mjs. ONE script, split across
+## TWO entries because its two stages now want opposite cadences: the import
+## stage runs daily and the graph crawl weekly. Each entry zeroes the other
+## entry's stage, so exactly one stage does work per run and neither can starve
+## the other by ordering.
 ##
-## GRAPH-FIRST POSTURE, set 2026-07-29 on operator instruction. Trade imports
-## are PAUSED and the crawl runs wide. 17,718 already-imported trades stay put;
-## pausing only stops acquiring more. The corpus was 834 leagues against 21
-## known managers and 424 membership edges -- the map was far behind the trade
-## data, so the map is what gets the requests until the operator decides which
-## leagues are worth importing from.
+## IMPORTS RESUMED 2026-08-03, ending the graph-first pause set 2026-07-29.
+## The pause was correct while the map lagged the trade data; it does not any
+## more. The backlog is 18,448 in-appetite leagues against an import capacity of
+## ~100/day, so further discovery now solves a problem we do not have -- which
+## is the whole reason the crawl drops to weekly.
 ##
-## IMPORTS ARE PAUSED BY BUDGET, NOT BY A MODE FLAG. --import_limit 0 and
-## --resync_limit 0 are honored as real values, not fallen through to defaults
-## (main() compares each against undefined rather than testing truthiness).
-## Verified on production: a run with both at 0 makes 0 import-stage requests,
-## counted separately from crawl requests in the job's own output. To resume
-## imports, restore the budgets -- nothing else needs changing.
-## This also stops the previous_league_id chain walk, which lives INSIDE the
-## import stage and is unbudgeted (33 selected leagues once produced 54
-## imports). With no leagues selected there is nothing for it to walk.
+## Resuming was NOT just restoring the budgets, and the earlier note here saying
+## it was is why this warning is now first. derive_import_appetite read OUR
+## league's format (lid 1, superflex) and filtered on it unconditionally, so no
+## --import_limit value could pull a single-QB league at all: the class sat at
+## 998 trades from 38 leagues while superflex held 14,509. Both classes ship, so
+## the appetite is now format-class-blind (dynasty, no IDP, no best-ball) and
+## the class split lives in the selection ORDER, single-QB first.
+##
+## BUDGETS ARE HONORED AS REAL VALUES, not fallen through to defaults -- main()
+## compares each against undefined rather than testing truthiness, so 0 means
+## zero and not 25. That is what makes the two-entry split work.
 ##
 ## THE FRONTIER CANNOT BE DRAINED, so --limit is a corpus-growth policy and not
 ## a completion target. Every league discovered arrives with its own uncrawled
@@ -261,18 +266,11 @@ JOB_PROJECT=league
 ## run took the uncrawled member lists from 837 to 3,266. Do not read a large
 ## remaining frontier as a backlog to be finished.
 ##
-## --max_runtime_minutes IS THE REAL BOUND. --limit counts leagues while the
-## rate limit prices requests, and the two are related only through a yield
-## (~15 new leagues per request measured 2026-07-29) that falls as the graph
-## saturates. At a yield of 1, --limit 5000 would be 5000 requests -- 83 minutes
-## -- so only a deadline keeps a run from overlapping the next one. 45 minutes
-## caps a run at ~2,700 requests; --limit 5000 is expected to bind first at
-## roughly 6 minutes while the yield stays high.
-##
-## Daily rather than weekly because a graph-only run is cheap: no imports means
-## no 19-request league fetches, so this is ~6 minutes of paced traffic a day
-## and it gives a frontier reading every morning instead of every Monday.
-## Restore the weekly cadence when imports resume.
+## --max_runtime_minutes IS THE REAL BOUND on the crawl. --limit counts leagues
+## while the rate limit prices requests, and the two are related only through a
+## yield (~15 new leagues per request measured 2026-07-29) that falls as the
+## graph saturates. At a yield of 1, --limit 5000 would be 5000 requests -- 83
+## minutes -- so only a deadline keeps a run from overlapping the next one.
 ##
 ## Rate limit unchanged and not to be raised: 60 req/min paced against elapsed
 ## time in throttle_request, deliberately under a conservative published 90/min
@@ -290,4 +288,17 @@ JOB_PROJECT=league
 ## the offseason bucket), and the script defaults to current_season.year. A
 ## pinned year here would silently crawl a stale frontier forever once the
 ## season rolled over.
-10 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --seed_league_id 1182953443152855040 --limit 5000 --import_limit 0 --resync_limit 0 --max_runtime_minutes 45 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
+
+## Import stage, 5:10AM daily. --limit 0 skips the crawl entirely.
+## The import stage has no deadline flag of its own, so size it by requests: 100
+## never-imported leagues plus 25 resyncs cost up to 19 requests each, and the
+## unbudgeted previous_league_id chain walk rides along inside this stage (33
+## selected leagues once produced 54 imports). Budget roughly 40-60 minutes,
+## comfortably inside a daily cycle. Raise --import_limit only after reading an
+## actual run's request count out of the job's own output.
+10 5 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --limit 0 --import_limit 100 --resync_limit 25 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
+
+## Graph crawl, 4:10AM Mondays. Weekly rather than daily because the backlog
+## already exceeds import capacity by an order of magnitude. Runs an hour ahead
+## of the import entry so a Monday's imports select from the fresh graph.
+10 4 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-sleeper-external-league-trades.mjs --seed_league_id 1182953443152855040 --limit 5000 --import_limit 0 --resync_limit 0 --max_runtime_minutes 45 >> /var/log/league/import-sleeper-external-league-trades.log 2>&1
