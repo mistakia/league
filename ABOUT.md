@@ -505,12 +505,20 @@ observations:
     request timeout at all from 32019f35f (which removed node-fetch) until 61d0eed61 — native fetch
     silently ignores a `timeout` option, so a hung vendor connection blocked until the caller gave
     up rather than aborting at 30s.
+  - >-
+    [ci-flake] 2026-08-03 The flaky trade-post spec's 400 was the DST roster cap (mdst=3): an
+    arbitrary non-K pair could hand the receiving team a fourth DST, rejecting the ACCEPT; 10/1500
+    fixture draws, fixed in 14ade5fef.
+  - >-
+    [ci-flake] 2026-08-03 46 suite assertions across 16 files compare a server timestamp to a later
+    Math.round(Date.now()/1000) and flake on a second boundary; one in test/trade.spec.mjs is fixed,
+    the rest are latent.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-02T02:10:03.115Z'
+updated_at: '2026-08-03T16:18:33.966Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
