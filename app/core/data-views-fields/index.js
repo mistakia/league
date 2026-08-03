@@ -1,4 +1,4 @@
-import { List } from 'immutable'
+import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 
 import { data_view_fields_index } from '@libs-shared'
@@ -58,11 +58,31 @@ import {
 
 // fixed - optional
 
+// The fantasy team filter is keyed on team id and labeled with the team's
+// current name. Teams land in the store on auth, so an anonymous session gets
+// an empty list -- which is fine, since every fantasy league field is hidden
+// when logged out.
+const get_fantasy_team_column_values = (teams) =>
+  teams
+    .valueSeq()
+    .map((team) => ({
+      value: team.get('uid'),
+      label: team.get('name') || team.get('abbrv')
+    }))
+    .sortBy((column_value) => column_value.label)
+    .toArray()
+
 export const get_data_views_fields = createSelector(
   (state) =>
     state.getIn(['players', 'week'], new List([current_season.week])).get(0),
   (state) => state.getIn(['app', 'userId']),
-  (week, userId) => PlayerTableFields({ week, is_logged_in: Boolean(userId) })
+  (state) => state.getIn(['teams', current_season.year], new Map()),
+  (week, userId, teams) =>
+    PlayerTableFields({
+      week,
+      is_logged_in: Boolean(userId),
+      fantasy_teams: get_fantasy_team_column_values(teams)
+    })
   // (state) => state.get('seasonlogs'),
   // (state) => state.getIn(['players', 'positions'], new List()),
   // (state) => state.getIn(['schedule', 'teams']),
@@ -88,14 +108,15 @@ export const get_data_views_fields = createSelector(
 
 export function PlayerTableFields({
   week,
-  is_logged_in
+  is_logged_in,
+  fantasy_teams
   // seasonlogs,
   // player_positions,
   // nfl_team_schedule
 }) {
   const fields = {
     ...with_row_grains(
-      fantasy_league_table_fields({ week, is_logged_in }),
+      fantasy_league_table_fields({ week, is_logged_in, fantasy_teams }),
       PLAYER_ROW_GRAINS
     ),
     ...with_row_grains(

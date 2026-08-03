@@ -7,7 +7,7 @@ import { common_column_params } from '@libs-shared'
 
 const { single_nfl_week_id } = common_column_params
 
-export default function ({ week, is_logged_in }) {
+export default function ({ week, is_logged_in, fantasy_teams = [] }) {
   const fields = {
     player_league_roster_status: {
       column_title: 'Roster Status',
@@ -37,12 +37,22 @@ export default function ({ week, is_logged_in }) {
       ]
     },
 
+    // Filter values are team ids, not team names: names are editable and change
+    // year to year, so a name-based filter silently stops matching. The picker
+    // labels each id with the team's current name.
     player_league_fantasy_team: {
       column_title: 'Fantasy Team',
       column_groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
       header_label: 'Team',
       size: 140,
-      data_type: table_constants.TABLE_DATA_TYPES.TEXT
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      column_values: fantasy_teams,
+      operators: [
+        table_constants.TABLE_OPERATORS.IN,
+        table_constants.TABLE_OPERATORS.NOT_IN,
+        table_constants.TABLE_OPERATORS.IS_NULL,
+        table_constants.TABLE_OPERATORS.IS_NOT_NULL
+      ]
     },
 
     player_league_salary: {

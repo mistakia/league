@@ -24,7 +24,7 @@ export default {
   player_league_roster_tag:
     "The contract tag the player's roster spot carries in the fantasy league: regular, franchise, rookie, or restricted_free_agency. Null for a player who is not rostered. A restricted free agency tag reads as regular until its nomination is announced, unless you manage the team holding it",
   player_league_fantasy_team:
-    "The fantasy franchise that currently holds the player's contract. Null for a free agent. This is the fantasy team, not the NFL team — see player_nfl_team for that",
+    "The fantasy franchise that currently holds the player's contract. Null for a free agent. This is the fantasy team, not the NFL team — see player_nfl_team for that. Displays the team name; filters take team ids (the `6` in /leagues/1/teams/6), because names are editable and re-keyed each year",
   player_league_salary: "The player's current salary in the fantasy league",
   player_league_extended_salary:
     "The player's next-year salary in the fantasy league. Once the season's extensions are processed, this is the settled salary the roster carries. Before then it is projected, applying the extension formula (current salary + (extensions + 1) * $5), franchise-tag values, rookie-tag carryover, and slot-based zeroing",

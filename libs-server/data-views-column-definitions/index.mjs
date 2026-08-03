@@ -260,7 +260,10 @@ export default {
     table_name: 'rosters_players',
     source: { grain: 'player' },
     select_as: () => 'player_league_fantasy_team',
-    main_where: ({ params }) => player_league_fantasy_team_sql({ params }),
+    // Filters resolve against `rosters_players.tid`, not the displayed name:
+    // team names are user-editable and re-keyed per year, so a name predicate
+    // stops matching the moment a manager renames. The client sends team ids.
+    main_where: () => 'rosters_players.tid',
     main_select: ({ params, column_index }) => [
       `${player_league_fantasy_team_sql({ params })} AS player_league_fantasy_team_${column_index}`
     ],
