@@ -125,17 +125,21 @@ const job_type_to_id = build_job_type_to_id()
 //
 // Resolved from the host at runtime rather than hardcoded: report_job runs on
 // more than one host, so a constant is wrong the day a job relocates. cron
-// interprets a schedule in the system zone unless the crontab sets CRON_TZ, and
-// a cron-spawned node process inherits that same system zone, so
-// `Intl...resolvedOptions().timeZone` IS the cron daemon's zone. The
-// JOB_SCHEDULE_TIMEZONE override exists for the CRON_TZ case, where the two
-// diverge and only the crontab knows it. No league crontab sets CRON_TZ or TZ
-// today (verified 2026-08-03: 0 of 92 scheduled lines).
-export const resolve_schedule_timezone = (env = process.env) => {
-  if (env.JOB_SCHEDULE_TIMEZONE) return env.JOB_SCHEDULE_TIMEZONE
+// interprets a schedule in the system zone, and a cron-spawned node process
+// inherits that same zone, so this IS the cron daemon's zone.
+//
+// TEMPORARY. `base run report` resolves the local zone itself as of base
+// 2026-08-03, so this duplicates the CLI. It stays only because league runs a
+// COMPILED base CLI (2026.07.30) that predates that change; deleting it now
+// would put every league cadence back on a NULL timezone. Delete this function
+// and the --timezone push below once league's compiled CLI carries the
+// auto-resolution -- the flag is optional there, so no crontab change is needed.
+export const resolve_schedule_timezone = () => {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone || null
   } catch (err) {
+    // A host that cannot name its own zone reports none: the sweep falls back to
+    // the flat window, which is loose but never falsely stale.
     return null
   }
 }

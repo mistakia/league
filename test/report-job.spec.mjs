@@ -175,14 +175,8 @@ describe('LIBS-SERVER report_job with_connection_retry', function () {
 })
 
 describe('LIBS-SERVER report_job resolve_schedule_timezone', function () {
-  it('prefers an explicit JOB_SCHEDULE_TIMEZONE from the crontab', () => {
-    expect(
-      resolve_schedule_timezone({ JOB_SCHEDULE_TIMEZONE: 'Europe/Berlin' })
-    ).to.equal('Europe/Berlin')
-  })
-
-  it('falls back to the run host zone when the crontab declares none', () => {
-    const resolved = resolve_schedule_timezone({})
+  it('resolves the run host zone, so a cadence is never stored without one', () => {
+    const resolved = resolve_schedule_timezone()
     expect(resolved).to.equal(Intl.DateTimeFormat().resolvedOptions().timeZone)
     expect(resolved).to.be.a('string')
   })
