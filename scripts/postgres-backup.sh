@@ -144,7 +144,20 @@ else
     # Real gzip (-z), not a misnamed uncompressed tar: the .tar.gz name is now
     # honest, and both consumers extract with `tar -xzf` (explicit -z), which
     # only works against a genuinely gzipped archive on GNU tar.
-    tar -vczf "$output_file" "$sql_file"
+    #
+    # Write to a temp path and rename, so $output_file is only ever a COMPLETE
+    # archive. The checkpoint artifact is overwritten in place every 15 minutes
+    # (*/15 cron) and base-storage's league-backup-pull reads it hourly at :15
+    # -- the two collide in the same minute, every hour. A non-atomic
+    # `tar -czf` straight onto $output_file let rsync copy a half-written tar:
+    # sometimes loudly (rsync rc=23, "read errors mapping ... No data
+    # available") and sometimes SILENTLY (rc=0, a truncated destination file
+    # that fails `gzip -t`). The silent case is the dangerous one -- the pull
+    # reported success while the backup tree held an unusable checkpoint.
+    # The .tmp suffix is also outside the pull's include globs
+    # ('*-user.tar.gz', 'checkpoint-*.tar.gz'), so a partial is never pulled.
+    tar -vczf "$output_file.tmp" "$sql_file"
+    mv -f "$output_file.tmp" "$output_file"
     rm "$sql_file"
 fi
 
