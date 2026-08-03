@@ -18,9 +18,12 @@
   &:empty
     display none
 
-  // PlayerName renders a fragment of two siblings, and the name half carries
-  // flex 1 — left alone it fills the strip and pushes its own status chips
-  // clear of the name they belong to
+  // PlayerName renders a fragment of two siblings: the name and NFL team on
+  // one side, the status and tag chips on the other. The label's 20px basis is
+  // the only thing separating them, so collapsing it needs an explicit gap.
+  .rfa-nomination__nominee
+    gap 8px
+
   .player__name
     flex 0 1 auto
 
