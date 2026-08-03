@@ -46,9 +46,16 @@
 -- (source_id, source_selection_id) are both on prop_market_selections_index,
 -- not on this table, so there is no second column here to add.
 --
--- Cost: roughly 100 MB, modeled from avg_length 15.8 bytes over 3,014,488
--- non-null rows plus per-entry overhead -- not measured, since the index does
--- not exist yet. Landing alongside the 2,884 MB freed on prop_pairings.
+-- Cost: 22 MB as built. This was modeled at roughly 100 MB beforehand from
+-- avg_length 15.8 bytes over 3,014,488 non-null rows plus per-entry overhead;
+-- the model was 4x too high because it ignored btree deduplication, which is
+-- very effective here -- 7,692 distinct values over 3.01M rows means each key
+-- is stored once against a posting list rather than 397 times. Landing
+-- alongside the 2,884 MB freed on prop_pairings.
+--
+-- Verified after the build: the wager-data-processing shape replans from the
+-- 136,296-buffer source_id scan above to an Index Scan using this index,
+-- 273 ms -> 1.5 ms.
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_prop_markets_index_source_event_id
   ON public.prop_markets_index USING btree (source_event_id);
