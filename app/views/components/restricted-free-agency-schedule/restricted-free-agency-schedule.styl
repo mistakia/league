@@ -13,56 +13,118 @@
     line-height 1.5
     color rgba(0, 0, 0, 0.6)
 
-  .rfa-schedule__next
+  // Active window — full detail row
+  .rfa-schedule__current
     display flex
     align-items center
-    gap 8px
-    padding 8px
-    border-radius 4px
+    gap 12px
+    padding 10px 12px
+    border-radius 6px
     background rgba(25, 118, 210, 0.08)
+
+  .rfa-schedule__current-label
+    text-transform uppercase
+    font-size 10px
+    letter-spacing 0.8px
+    color rgba(0, 0, 0, 0.55)
+    font-weight 600
+
+  .rfa-schedule__current-body
+    display flex
+    align-items center
+    gap 16px
+    flex 1
+
+  .rfa-schedule__current-team
+    display flex
+    align-items center
+    gap 6px
+    font-weight 500
     font-size 13px
 
-  .rfa-schedule__next-label
-    text-transform uppercase
+  .rfa-schedule__current-tag
     font-size 11px
-    letter-spacing 0.5px
-    color rgba(0, 0, 0, 0.6)
+    color rgba(25, 118, 210, 0.8)
+    font-weight 500
 
-  .rfa-schedule__next-time
+  .rfa-schedule__current-times
+    display flex
+    align-items center
+    gap 6px
     margin-left auto
-    font-variant-numeric tabular-nums
 
-  .rfa-schedule__table
+  .rfa-schedule__current-time-label
+    font-size 11px
+    color rgba(0, 0, 0, 0.5)
+    text-transform uppercase
+    letter-spacing 0.3px
+
+  .rfa-schedule__current-time
+    font-size 13px
+    font-variant-numeric tabular-nums
+    font-weight 500
+
+  // Future windows — condensed timeline
+  .rfa-schedule__future
     display flex
     flex-direction column
+    gap 2px
 
-  .rfa-schedule__row
+  .rfa-schedule__future-header
     display flex
     align-items center
-    padding 6px 4px
-    border-bottom 1px solid rgba(0, 0, 0, 0.08)
+    justify-content space-between
+    margin-bottom 4px
+
+  .rfa-schedule__future-title
+    font-size 11px
+    text-transform uppercase
+    letter-spacing 0.5px
+    color rgba(0, 0, 0, 0.5)
+    font-weight 600
+
+  .rfa-schedule__toggle
+    font-size 12px
+    color rgba(25, 118, 210, 0.85)
+    background none
+    border none
+    cursor pointer
+    padding 2px 0
+    font-weight 500
+
+    &:hover
+      color rgba(25, 118, 210, 1)
+      text-decoration underline
+
+  .rfa-schedule__future-row
+    display flex
+    align-items center
+    padding 5px 4px
+    border-radius 3px
     font-size 13px
 
-    &--header
-      font-size 11px
-      text-transform uppercase
-      letter-spacing 0.5px
-      color rgba(0, 0, 0, 0.6)
+    &:hover
+      background rgba(0, 0, 0, 0.03)
 
-    &--current
-      background rgba(25, 118, 210, 0.08)
-
-    &--complete
-      opacity 0.5
+    &--warning
+      background rgba(255, 152, 0, 0.06)
 
     &--mine
       font-weight 600
 
-  .rfa-schedule__cell
+  .rfa-schedule__future-team
     flex 1
-    font-variant-numeric tabular-nums
+    display flex
+    align-items center
+    gap 6px
 
-    &--team
-      flex 1.4
-      display flex
-      align-items center
+  .rfa-schedule__future-tag
+    font-size 11px
+    color rgba(25, 118, 210, 0.8)
+    font-weight 500
+
+  .rfa-schedule__future-time
+    font-variant-numeric tabular-nums
+    color rgba(0, 0, 0, 0.7)
+    min-width 120px
+    text-align right
