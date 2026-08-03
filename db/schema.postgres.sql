@@ -217,9 +217,7 @@ DROP INDEX IF EXISTS public.idx_prop_pairings_hist_edge_soft;
 DROP INDEX IF EXISTS public.idx_prop_pairings_highest_payout;
 DROP INDEX IF EXISTS public.idx_prop_pairing_props_composite;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_season_year;
-DROP INDEX IF EXISTS public.idx_prop_markets_index_market_settled;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
-DROP INDEX IF EXISTS public.idx_prop_market_selections_composite;
 DROP INDEX IF EXISTS public.idx_projections_index_pid;
 DROP INDEX IF EXISTS public.idx_projections_index_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_projections_index_natural_key;
@@ -31358,24 +31356,10 @@ CREATE INDEX idx_projections_index_pid ON ONLY public.projections_index USING bt
 
 
 --
--- Name: idx_prop_market_selections_composite; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_market_selections_composite ON public.prop_market_selections_index USING btree (source_id, source_market_id, source_selection_id, time_type);
-
-
---
 -- Name: idx_prop_market_selections_index_composite; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_prop_market_selections_index_composite ON public.prop_market_selections_index USING btree (selection_pid, source_market_id, source_id, time_type);
-
-
---
--- Name: idx_prop_markets_index_market_settled; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_prop_markets_index_market_settled ON public.prop_markets_index USING btree (market_settled) WHERE (market_settled = false);
 
 
 --

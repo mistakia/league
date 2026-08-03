@@ -20,14 +20,28 @@ set -euo pipefail
 # The remaining human step is committing the rewritten file, which the script
 # prints as a ready-to-paste command with an explicit pathspec.
 #
-# usage: yarn db:exec <path/to/file.sql> [--reapply]
+# --no-transaction drops the --single-transaction wrapper for the statements that
+# Postgres refuses to run inside a transaction block: DROP INDEX CONCURRENTLY,
+# CREATE INDEX CONCURRENTLY, ALTER TYPE ... ADD VALUE, VACUUM. The alternative is
+# to drop CONCURRENTLY instead, which trades a lock-free operation for an ACCESS
+# EXCLUSIVE lock on a live table -- the wrong half to give up. ON_ERROR_STOP=1
+# still applies, so the run halts at the first failure; what is lost is
+# rollback, and a file applied this way must therefore be written so that each
+# statement is independently safe and re-runnable (IF EXISTS / IF NOT EXISTS).
+# The banner discipline is unchanged: a partial apply exits non-zero and so
+# leaves the file PENDING, which is then an accurate record that it did not
+# fully land.
+#
+# usage: yarn db:exec <path/to/file.sql> [--reapply] [--no-transaction]
 
 REAPPLY=0
+NO_TRANSACTION=0
 SQL_FILE=""
 
 for arg in "$@"; do
   case "$arg" in
     --reapply) REAPPLY=1 ;;
+    --no-transaction) NO_TRANSACTION=1 ;;
     -*)
       echo "db:exec: unknown option: $arg" >&2
       exit 2
@@ -43,7 +57,7 @@ for arg in "$@"; do
 done
 
 if [[ -z "$SQL_FILE" ]]; then
-  echo "usage: yarn db:exec <path/to/file.sql> [--reapply]" >&2
+  echo "usage: yarn db:exec <path/to/file.sql> [--reapply] [--no-transaction]" >&2
   exit 2
 fi
 
@@ -82,13 +96,37 @@ if [[ $IS_ADHOC -eq 1 ]]; then
   fi
 fi
 
+# Postgres refuses CONCURRENTLY inside a transaction block, and the failure it
+# gives ("CREATE INDEX CONCURRENTLY cannot run inside a transaction block") names
+# the statement rather than the wrapper this script added, so it reads as a
+# problem with the SQL. Catch it here instead, and name the flag.
+if [[ $NO_TRANSACTION -eq 0 ]] && grep -qiE '\bCONCURRENTLY\b' "$SQL_FILE"; then
+  echo "db:exec: REFUSING -- $SQL_FILE uses CONCURRENTLY, which Postgres cannot" >&2
+  echo "db:exec: run inside a transaction block, and this script wraps the file in" >&2
+  echo "db:exec: one by default. Re-run with --no-transaction:" >&2
+  echo >&2
+  echo "    yarn db:exec $SQL_FILE --no-transaction" >&2
+  echo >&2
+  echo "db:exec: note that this gives up rollback, so every statement in the file" >&2
+  echo "db:exec: must be independently safe to re-run (IF EXISTS / IF NOT EXISTS)." >&2
+  exit 3
+fi
+
 REMOTE_PATH="/tmp/db-exec.$(date +%s).$$.sql"
 
 echo "db:exec: copying $SQL_FILE -> league:$REMOTE_PATH"
 scp -q "$SQL_FILE" "league:$REMOTE_PATH"
 
-echo "db:exec: executing on league_production (single transaction, ON_ERROR_STOP=1)"
-ssh league "psql -U league_writer -h localhost --dbname=league_production --single-transaction --set ON_ERROR_STOP=1 -f $REMOTE_PATH; rc=\$?; rm -f $REMOTE_PATH; exit \$rc"
+if [[ $NO_TRANSACTION -eq 1 ]]; then
+  PSQL_TXN_FLAG=""
+  echo "db:exec: executing on league_production (NO transaction, ON_ERROR_STOP=1)"
+  echo "db:exec: a failure part-way through leaves earlier statements APPLIED."
+else
+  PSQL_TXN_FLAG="--single-transaction"
+  echo "db:exec: executing on league_production (single transaction, ON_ERROR_STOP=1)"
+fi
+
+ssh league "psql -U league_writer -h localhost --dbname=league_production $PSQL_TXN_FLAG --set ON_ERROR_STOP=1 -f $REMOTE_PATH; rc=\$?; rm -f $REMOTE_PATH; exit \$rc"
 
 # Only reached when psql exited 0: `set -e` plus ON_ERROR_STOP means a failed
 # apply never rewrites the banner, so a PENDING file that stays PENDING is an

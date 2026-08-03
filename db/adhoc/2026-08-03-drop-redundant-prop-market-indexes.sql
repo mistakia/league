@@ -1,0 +1,89 @@
+-- STATUS: APPLIED 2026-08-03 against league_production
+--
+-- Drop two indexes on the prop-market index tables: one an exact duplicate of a
+-- UNIQUE index, one a partial index that cannot serve any query it was built for.
+--
+-- Requires `yarn db:exec --no-transaction` -- DROP INDEX CONCURRENTLY cannot run
+-- inside a transaction block, and db-exec.sh applies --single-transaction by
+-- default. CONCURRENTLY is kept rather than dropped: a plain DROP INDEX takes
+-- ACCESS EXCLUSIVE on the table, and while the unlink itself is fast, the lock
+-- REQUEST queues behind any in-flight reader and blocks every query arriving
+-- after it. prop_market_selections_index is on the player-facing read path.
+--
+--
+-- 1. idx_prop_market_selections_composite (686 MB, non-unique)
+--
+-- Column list, column order and opclasses are identical to idx_24949_market,
+-- which is UNIQUE on the same four columns:
+--
+--   idx_24949_market                     UNIQUE (source_id, source_market_id,
+--                                                source_selection_id, time_type)
+--   idx_prop_market_selections_composite        (source_id, source_market_id,
+--                                                source_selection_id, time_type)
+--
+-- The two are within 0.006% on disk (718,888,960 vs 718,848,000 bytes), which is
+-- what you would expect of the same tuples in the same order. Uniqueness
+-- constrains what may be INSERTED, never what may be SCANNED, so every access
+-- path the duplicate serves the unique index serves at the same cost. The
+-- planner's current preference for the duplicate (184,601,860 scans vs
+-- 28,887,222) is a tie-break between two equal-cost paths, not a capability
+-- difference, so removing the loser does not change the winner's cost.
+--
+-- The unique index is load-bearing and must survive: it is the conflict arbiter
+-- for the write path's upsert in libs-server/insert-prop-markets.mjs, which
+-- targets onConflict(['source_id', 'source_market_id', 'source_selection_id',
+-- 'time_type']). Dropping the wrong one of the pair would break every write.
+--
+-- On the write saving: it is real but smaller than a per-row count suggests.
+-- 93.9% of updates to this table are HOT (215,952,686 of 229,982,453 in the
+-- current stats window) and a HOT update touches no index at all. The saving
+-- falls on the 9,131,223 inserts and the ~14.0M non-HOT updates, plus 686 MB of
+-- shared-buffer and autovacuum pressure removed outright.
+--
+--
+-- 2. idx_prop_markets_index_market_settled (18 MB, partial WHERE market_settled = false)
+--
+-- This one is dropped on a structural argument, NOT on its idx_scan = 0.
+--
+-- The zero does not survive scrutiny. pg_stat_database.stats_reset is NULL, but
+-- the counters were discarded regardless: prop_markets_index reports 871,140
+-- lifetime inserts against 3,061,797 live rows (28.5%), and prop_markets_history
+-- 2,452,220 against 12,825,051 (19.1%). The window instead tracks the postmaster
+-- start of 2026-05-22 -- 73 days -- and it is entirely OFFSEASON: nfl_plays and
+-- player_gamelogs show 0 inserts while nfl_games shows 334, the 2026 schedule
+-- release. Both consumers of market_settled are seasonal game-finalize paths, so
+-- a zero over this window is precisely the seasonal blind spot it looks like and
+-- proves nothing on its own.
+--
+-- Capability is the argument that does hold. market_settled = false matches
+-- 2,721,140 of 3,056,872 rows -- 89% of the table. A partial index whose
+-- predicate selects 89% of the relation is not a useful access path at any time
+-- of year, and the planner agrees: a bare `count(*) WHERE market_settled = false`
+-- plans a Parallel Seq Scan, as does the settlement query's shape with esbid and
+-- season_year conjuncts alongside it.
+--
+-- Neither consumer could use it even if it were selective:
+--
+--   scripts/update-market-settlement-status.mjs:184 applies market_settled = false
+--   in the OUTER select over a CTE, post-aggregation. No base-table index can
+--   serve a predicate evaluated on CTE output.
+--
+--   libs-server/prop-market-settlement/prop-market-utils.mjs:294 applies it as a
+--   conjunct beside whereIn(esbid) and season_year, both far more selective. It
+--   is a filter there, never the driving path.
+--
+--
+-- Checked before dropping, for both indexes: zero constraint dependencies
+-- (pg_constraint.conindid returns no rows for any of the six indexes on these two
+-- tables), and relreplident = 'd' on both tables, so neither is a replica
+-- identity. Neither index is referenced by a UNIQUE, PRIMARY KEY or EXCLUDE
+-- constraint, so DROP INDEX is legal without touching a constraint definition.
+--
+-- NOT addressed here, and the larger finding: prop_markets_index has no index
+-- leading with esbid, so prop-market-utils.mjs parallel seq scans all 3.06M rows
+-- on every settlement read. That is an ADD, it is seasonal and currently dormant,
+-- and it wants its own measurement rather than a ride on a drop.
+
+DROP INDEX CONCURRENTLY IF EXISTS idx_prop_market_selections_composite;
+
+DROP INDEX CONCURRENTLY IF EXISTS idx_prop_markets_index_market_settled;
