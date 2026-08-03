@@ -78,7 +78,9 @@ const roster_tag_sql = ({ params, data_view_options }) => {
 // blind is the settling BID, which never enters this column or the board.
 // `build-tag-board.mjs` stopped nulling `post_deadline_salary`/`market_gap` for
 // tag 4 in league 411c94bb8, and all ten manager homepages now render those
-// figures with `check-manager-homepages.mjs` enforcing it -- so the null here
+// figures with `check-manager-homepages.mjs` enforcing it (that gate lives in
+// user-base at `cli/league/check-manager-homepages.mjs`, NOT in this repo -- a
+// search scoped to this checkout reports it missing) -- so the null here
 // had inverted into the very disagreement it was written to prevent, printing
 // blank for ten rostered players the homepages give a number for.
 //
