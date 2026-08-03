@@ -38,15 +38,15 @@ const PROTECTED_SLOTS = {
 
 // Lift every protected designation held by a league in the current season year.
 //
-// Scope is the whole season year rather than week 0 alone. During the offseason
-// the only populated slices are week 0 and the week-1 slice that
-// generate-rosters materializes each night, and both carry the designation --
-// the previous week-0-only form left week 1 protected until generate-rosters
-// next propagated week 0 forward, so the live slice disagreed with the deadline
-// for up to a day. generate-rosters' own orphan-slice oracle is what guarantees
-// nothing beyond week 1 exists here.
-// The players whose designation is about to expire, deduped across the week 0
-// and week 1 slices so the count is players rather than roster rows.
+// Scope is the whole season year rather than one week. The `ext_date` trigger
+// falls in the offseason, where generate-rosters now holds the forward slice
+// until Week 1 is days away, so week 0 is normally the only populated slice --
+// but a run inside that lead window sees week 1 too, and a week-0-only form
+// would leave it protected until the next nightly propagation, putting the live
+// slice a day out of agreement with the deadline. Taking the year covers both
+// shapes; generate-rosters' orphan-slice oracle is what bounds what exists here.
+// The players whose designation is about to expire, deduped across every
+// populated slice so the count is players rather than roster rows.
 //
 // Read BEFORE the reset, because the reset is what destroys the evidence: once
 // the slots are PS/PSD nothing distinguishes a player who was protected this

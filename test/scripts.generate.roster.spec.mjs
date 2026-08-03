@@ -28,7 +28,41 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       await league(knex)
     })
 
+    it('does not materialize a forward slice in the offseason', async () => {
+      // A month out from `regular_season_start`, week 1 is not real yet. The
+      // slice would freeze at whatever week 0 held tonight and then drift from
+      // it for weeks, which is what mispriced team 6's 2026 restricted free
+      // agency bids -- so nothing beyond week 0 may be written.
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
+      await draft(knex)
+
+      let error
+      try {
+        await run()
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).to.equal(undefined)
+
+      const forward_rows = await knex('rosters_players').where({
+        lid: 1,
+        year: current_season.year,
+        week: 1
+      })
+      expect(forward_rows.length).to.equal(0)
+
+      const week_zero_rows = await knex('rosters_players').where({
+        lid: 1,
+        year: current_season.year,
+        week: 0
+      })
+      expect(week_zero_rows.length).to.be.greaterThan(0)
+    })
+
     it('generate rosters for week 1', async () => {
+      // Inside the lead window: week 1 is days away and must exist by kickoff.
+      MockDate.set(regular_season_start.subtract('2', 'day').toISOString())
       await draft(knex)
 
       let error

@@ -10,6 +10,42 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 const log = debug('generate-rosters')
 debug.enable('generate-rosters')
 
+// How close to `regular_season_start` the forward slice may be materialized.
+// The job runs nightly, so anything above one day is margin; a week is enough
+// that several consecutive missed runs still leave week 1 in place at kickoff,
+// and short enough that the slice cannot drift far from the week 0 it copies.
+const FORWARD_SLICE_LEAD_DAYS = 7
+
+// No week beyond the one this run is responsible for may hold players. A slice
+// that survives past its own week is served to nobody -- every consumer clamps
+// its read back to the current week -- so it can only ever drift out of
+// agreement with the week that IS served, which is how a stale offseason week 1
+// mispriced restricted free agency bids for a whole team.
+//
+// Measured over rosters_players rather than rosters: an empty roster shell holds
+// no state and cannot be served as one, and the test fixture pre-seeds a shell
+// for every week of the season.
+const check_orphan_slice = async ({
+  league,
+  highest_valid_week,
+  slice_failures
+}) => {
+  const max_week_row = await db('rosters_players')
+    .where({ lid: league.uid, year: current_season.year })
+    .max({ max_week: 'week' })
+    .first()
+  const max_week = max_week_row?.max_week
+  if (
+    max_week !== null &&
+    max_week !== undefined &&
+    max_week > highest_valid_week
+  ) {
+    slice_failures.push(
+      `orphan roster slice for (lid=${league.uid}, year=${current_season.year}): populated week ${max_week} exists beyond week ${highest_valid_week}`
+    )
+  }
+}
+
 const run = async () => {
   const is_new_season = current_season.now > current_season.end
 
@@ -18,6 +54,23 @@ const run = async () => {
     log('season over')
     return
   }
+
+  // `current_season.week` reads 0 for the WHOLE offseason, so an unguarded
+  // `week + 1` materializes a week-1 slice the day the previous season ends and
+  // then lets it drift: the slice freezes at whatever week 0 held that night
+  // while tags, trades and restricted free agency bids keep moving underneath
+  // it. In 2026 it sat six months stale carrying the prior season's tags. Week 1
+  // is not real until `regular_season_start` (two Tuesdays before the opener),
+  // so hold the forward slice until that is days away and leave week 0 as the
+  // only populated slice for the rest of the offseason.
+  const days_until_week_one = current_season.regular_season_start.diff(
+    current_season.now,
+    'day'
+  )
+  const generate_forward_slice =
+    is_new_season ||
+    current_season.week > 0 ||
+    days_until_week_one <= FORWARD_SLICE_LEAD_DAYS
 
   // get list of hosted leagues
   const leagues = await db('leagues').where('hosted', 1)
@@ -32,11 +85,29 @@ const run = async () => {
     ? current_season.year - 1
     : current_season.year
 
-  log(
-    `Generating rosters for ${current_season.year} Week ${nextWeek} using ${previousYear} Week ${previousWeek}`
-  )
+  // The highest slice that may legitimately be populated for the current year.
+  // Without the forward slice that is the current week itself, which is what
+  // makes an offseason week-1 slice an orphan the check below reports.
+  const highest_valid_week = generate_forward_slice
+    ? nextWeek
+    : current_season.week
+
+  if (generate_forward_slice) {
+    log(
+      `Generating rosters for ${current_season.year} Week ${nextWeek} using ${previousYear} Week ${previousWeek}`
+    )
+  } else {
+    log(
+      `Offseason: holding the forward slice until Week 1 is within ${FORWARD_SLICE_LEAD_DAYS} days (${days_until_week_one} days out)`
+    )
+  }
 
   for (const league of leagues) {
+    if (!generate_forward_slice) {
+      await check_orphan_slice({ league, highest_valid_week, slice_failures })
+      continue
+    }
+
     // get latest rosters for league
     const rosters = await db('rosters').where({
       lid: league.uid,
@@ -163,14 +234,10 @@ const run = async () => {
     //
     // The row-count oracle above only asks whether each populated source team
     // produced any rows at all, so it is blind to a slice that exists but has
-    // drifted from its source. That is the failure this catches: `nextWeek` is
-    // `week + 1` and `week` reads 0 for the whole offseason, so a week-1 slice
-    // is materialized in February and then frozen at whatever week 0 held that
-    // day. In 2026 it sat six months stale -- still carrying the prior season's
-    // tags -- and would have gone live at kickoff, because the last week-0
-    // Monday fell in August and this job's month-pinned schedule skipped it.
-    // Whether the schedule is dense enough to keep the slice fresh is now
-    // measured here rather than assumed from the crontab.
+    // drifted from its source. Within the lead window the forward slice is a
+    // nightly copy of a week 0 that keeps moving, so whether the schedule is
+    // dense enough to keep it fresh is measured here rather than assumed from
+    // the crontab.
     const key_of = ({ tid, pid }) => `${tid}:${pid}`
     const source_keys = new Set(
       (
@@ -197,19 +264,7 @@ const run = async () => {
       )
     }
 
-    // Measured over rosters_players rather than rosters: an empty roster shell
-    // beyond the generated week holds no state and cannot be served as one, and
-    // the test fixture pre-seeds a shell for every week of the season.
-    const max_week_row = await db('rosters_players')
-      .where({ lid: league.uid, year: current_season.year })
-      .max({ max_week: 'week' })
-      .first()
-    const max_week = max_week_row?.max_week
-    if (max_week !== null && max_week !== undefined && max_week > nextWeek) {
-      slice_failures.push(
-        `orphan roster slice for (lid=${league.uid}, year=${current_season.year}): populated week ${max_week} exists beyond the generated week ${nextWeek}`
-      )
-    }
+    await check_orphan_slice({ league, highest_valid_week, slice_failures })
   }
 
   throw_if_shortfall(

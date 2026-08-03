@@ -13,18 +13,16 @@ export default async function ({
     .where({ lid, year })
     .orderBy('week', 'desc')
 
+  const is_current_year = year === current_season.year
+  const current_week = Math.min(
+    Math.max(current_season.fantasy_season_week, 0),
+    current_season.finalWeek
+  )
+
   if (min_week === null || min_week === undefined) {
     // for current year, we want to start at the current week (between 0 and final week)
     // for past years we want to start at week 0
-    const is_current_year = year === current_season.year
-    if (is_current_year) {
-      min_week = Math.min(
-        Math.max(current_season.fantasy_season_week, 0),
-        current_season.finalWeek
-      )
-    } else {
-      min_week = 0
-    }
+    min_week = is_current_year ? current_week : 0
   }
 
   const lineups = await db('league_team_lineups')
@@ -77,7 +75,10 @@ export default async function ({
   })
 
   // include team restricted free agency bid
-  if (userId) {
+  //
+  // Only live bids exist, and they are all for the current season, so there is
+  // nothing to attach to a historical year's rosters.
+  if (userId && is_current_year) {
     const query1 = await db('teams')
       .select('teams.*')
       .join('users_teams', function () {
@@ -118,9 +119,18 @@ export default async function ({
           bids.map((b) => b.uid)
         )
 
-        const team_roster = rosters.find((r) => r.tid === tid)
+        // Pin to the week the client actually renders. `rosters` holds every
+        // week of the year ordered week-DESC, so a bare `find` on `tid` returns
+        // the HIGHEST week -- which is never the one being served, since every
+        // consumer clamps its read back to the current week. Team 6's 2026
+        // restricted free agency bids attached to a week-1 slice nobody reads
+        // while the week-0 roster it renders charged the pre-bid salaries,
+        // putting the dialog's max bid $52 under the true figure.
+        const team_roster = rosters.find(
+          (r) => r.tid === tid && r.week === current_week
+        )
         for (const bid of bids) {
-          const player = team_roster.players.find((p) => p.pid === bid.pid)
+          const player = team_roster?.players.find((p) => p.pid === bid.pid)
           if (
             player &&
             player.tag === player_tag_types.RESTRICTED_FREE_AGENCY
