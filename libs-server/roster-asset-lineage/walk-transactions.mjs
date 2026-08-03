@@ -53,6 +53,17 @@ import {
 // that would mint an edge-less holding, which is the orphan class the partial
 // unique indexes exist to prevent. Both cases are counted as coverage warnings,
 // and `trade_leg_source_not_participant` is the oracle -- it must stay at zero.
+//
+// Pick identity contract: `draft.uid` is a pick's stable identity and
+// `trades_picks.pickid` is the only reference to it, so `draft.(tid, otid)` may
+// only ever be written keyed on `draft.uid`. Rewriting them keyed on
+// `(round, pick)` -- the way a draft-order correction is tempting to write --
+// re-points a pickid at another team's pick and silently mis-keys every trade
+// row naming it. `pick_chain_end_state_mismatch` is the oracle for that: the
+// team the chain lands on after the last accepted trade must equal `draft.tid`.
+// The identity-preserving way to restate draft order is to fix
+// `teams.draft_order` and re-run scripts/set-draft-pick-number.mjs, which
+// derives `pick`/`pick_str` from `draft.otid` keyed on `draft.uid`.
 //   Unhandled flows (super-priority chains, decommission_reassignment,
 //   failed_poach_sanctuary, auto_cap_release, season_rollover for picks):
 //   accumulated as coverage_warnings; surfaced by the generator's row-count
@@ -860,7 +871,7 @@ const build_event_stream = async ({ lid }) => {
   const picks_meta = pickids.length
     ? await db('draft')
         .whereIn('uid', pickids)
-        .select('uid', 'round', 'year', 'otid', 'pick')
+        .select('uid', 'round', 'year', 'otid', 'pick', 'tid')
     : []
   const pick_meta_by_id = new Map(picks_meta.map((p) => [p.uid, p]))
   // Compute per-pick chronological from/to per trade by walking forward from
@@ -948,6 +959,22 @@ const build_event_stream = async ({ lid }) => {
       })
       current = to_tid
       leg_index++
+    }
+    // End-state check: the team the walked chain lands on must be the team
+    // `draft.tid` says holds the pick. A mismatch means the pick's identity and
+    // its trade history disagree about who owns it -- the shape produced by
+    // rewriting `draft.(tid, otid)` keyed on `(round, pick)` instead of on
+    // `draft.uid`, which re-points a pickid at a different team's pick and
+    // leaves every trades_picks row naming it mis-keyed.
+    if (current !== meta.tid) {
+      const last_trade = trade_by_id.get(tradeids[tradeids.length - 1])
+      events.push({
+        sort_ts: last_trade.accepted,
+        sort_priority: 5,
+        kind: 'coverage_warning',
+        label: 'pick_chain_end_state_mismatch',
+        occurred_at: new Date(last_trade.accepted * 1000)
+      })
     }
   }
   for (const trade of trades) {

@@ -155,6 +155,35 @@ describe('LINEAGE - pick chain gap', function () {
     expect(coverage_warnings.trade_leg_source_not_participant).to.equal(
       undefined
     )
+    expect(coverage_warnings.pick_chain_end_state_mismatch).to.equal(undefined)
+  })
+
+  it('flags a chain that does not land on draft.tid', async function () {
+    this.timeout(60 * 1000)
+    // Every hop is recorded and every leg names the trade's own two teams, so
+    // none of the gap warnings fire -- but the chain ends on team 4 while
+    // draft.tid says team 5 holds the pick. That is the signature of a pickid
+    // pointed at the wrong team's pick: the identity and the trade history
+    // disagree about ownership, and only the end state exposes it.
+    await insert_pick({ pickid: 5, otid: 3, tid: 5, round: 2 })
+    await insert_trade({
+      tradeid: 6,
+      propose_tid: 3,
+      accept_tid: 4,
+      accepted: now() - 7 * 24 * 60 * 60,
+      pickid: 5,
+      recorded_tid: 3
+    })
+
+    const { legs, coverage_warnings } = await walk_pick({ pickid: 5 })
+
+    expect(legs).to.deep.equal([{ trade_uid: 6, from_tid: 3, to_tid: 4 }])
+    expect(coverage_warnings.pick_chain_end_state_mismatch).to.equal(1)
+    expect(coverage_warnings.pick_chain_gap_before_first_trade).to.equal(
+      undefined
+    )
+    expect(coverage_warnings.pick_chain_gap_mid_chain).to.equal(undefined)
+    expect(coverage_warnings.pick_chain_gap_unresolved).to.equal(undefined)
   })
 
   it('repairs direction but not holding continuity on a mid-chain gap', async function () {
