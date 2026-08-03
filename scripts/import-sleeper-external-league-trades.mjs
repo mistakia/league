@@ -936,6 +936,33 @@ const import_sleeper_external_league_trades = async ({
     `frontier: ${frontier.uncrawled_users} managers and ${frontier.uncrawled_league_member_lists} league member lists unexplored, ${frontier.unimported_leagues} leagues known but not imported`
   )
 
+  // SELECTION oracle, and it has to come first because every oracle below it is
+  // conditional on work having already happened. The trades oracle needs
+  // totals.leagues > 0; the crawl oracle needs 20 crawl requests, which a
+  // --limit 0 import run never makes. So a run that selected nothing satisfied
+  // both by doing nothing, and exited 0 -- an exit-code-only oracle on the one
+  // entry whose whole job is importing. The daily import entry ran in exactly
+  // that shape from 2026-08-03 until this was added.
+  //
+  // A budget above zero that selects no league is never routine: the backlog is
+  // five figures, so an empty selection means the appetite filter, the ordering
+  // join, or the graph is broken. Gated on the budget rather than asserted
+  // flatly, so the crawl-only entry (--import_limit 0) stays correctly silent.
+  if (!dry_run && import_limit > 0 && selected.length === 0) {
+    throw new Error(
+      `import budget was ${import_limit} but no league was selected -- appetite filter, ordering join, or graph is broken`
+    )
+  }
+
+  // The companion case: leagues WERE selected and not one of them produced an
+  // import. Distinguishes a genuine failure from the idle path, which is what
+  // the trades oracle below cannot do on its own.
+  if (!dry_run && selected.length > 0 && totals.leagues === 0) {
+    throw new Error(
+      `selected ${selected.length} leagues and imported none (${totals.skipped} skipped) -- Sleeper may be refusing the corpus`
+    )
+  }
+
   // The output oracle is distinct from the exit code: a run that discovers
   // leagues but lands zero trades has failed at its actual purpose even though
   // every request returned 200, so it is surfaced as an error rather than a
@@ -973,6 +1000,9 @@ const import_sleeper_external_league_trades = async ({
 
 const main = async () => {
   let error
+  // Defaulted to the import job so a throw BEFORE the budgets are resolved
+  // still reports under a real source rather than an undefined one.
+  let job_type = job_types.IMPORT_SLEEPER_EXTERNAL_LEAGUE_TRADES
   try {
     // --seed_league_id is a BOOTSTRAP for an empty graph, not a permanent
     //   anchor: once anything is persisted the crawl resumes from the frontier
@@ -999,18 +1029,34 @@ const main = async () => {
       ? [].concat(argv.seed_league_id).map(String)
       : []
 
+    // Compared against undefined rather than tested for truthiness: `0` is a
+    // meaningful value for every budget (skip the crawl / skip the import /
+    // skip the refresh) and a truthiness test would silently substitute the
+    // default instead.
+    const limit = argv.limit === undefined ? undefined : Number(argv.limit)
+    const import_limit =
+      argv.import_limit === undefined ? undefined : Number(argv.import_limit)
+    const resync_limit =
+      argv.resync_limit === undefined ? undefined : Number(argv.resync_limit)
+
+    // WHICH LEDGER SOURCE this run reports as, decided from the budgets rather
+    // than a mode flag so it cannot disagree with what the run actually did.
+    // Two crontab entries drive this one script at different cadences, and they
+    // must not share a source: the runs oracle closes pipeline_failure by
+    // source, so the weekly crawl's success would auto-close a failure the
+    // daily import had opened, and the ledger's single cadence-per-source would
+    // flap between the two schedules depending on which entry reported last.
+    job_type =
+      limit > 0 && import_limit === 0 && resync_limit === 0
+        ? job_types.CRAWL_SLEEPER_EXTERNAL_LEAGUE_GRAPH
+        : job_types.IMPORT_SLEEPER_EXTERNAL_LEAGUE_TRADES
+
     await import_sleeper_external_league_trades({
       seed_league_ids,
       season_year: argv.season_year ? Number(argv.season_year) : undefined,
-      // Compared against undefined rather than tested for truthiness: `0` is a
-      // meaningful value for every budget (skip the crawl / skip the import /
-      // skip the refresh) and a truthiness test would silently substitute the
-      // default instead.
-      limit: argv.limit === undefined ? undefined : Number(argv.limit),
-      import_limit:
-        argv.import_limit === undefined ? undefined : Number(argv.import_limit),
-      resync_limit:
-        argv.resync_limit === undefined ? undefined : Number(argv.resync_limit),
+      limit,
+      import_limit,
+      resync_limit,
       history_depth:
         argv.history_depth === undefined
           ? undefined
@@ -1027,10 +1073,7 @@ const main = async () => {
     log(error)
   }
 
-  await report_job({
-    job_type: job_types.IMPORT_SLEEPER_EXTERNAL_LEAGUE_TRADES,
-    error
-  })
+  await report_job({ job_type, error })
 
   process.exit(error ? 1 : 0)
 }

@@ -156,7 +156,15 @@ export const job_types = {
   IMPORT_SLEEPER_EXTERNAL_LEAGUE_TRADES: 130,
   IMPORT_PLAYERS_FANTASYPOINTS: 131,
   GENERATE_DST_MARKET_PROJECTIONS: 132,
-  REFRESH_ROSTER_ASSET_LINEAGE: 133
+  REFRESH_ROSTER_ASSET_LINEAGE: 133,
+
+  // Same SCRIPT as IMPORT_SLEEPER_EXTERNAL_LEAGUE_TRADES, reported as its own
+  // job because it is its own pipeline: the graph crawl runs weekly and the
+  // trade import daily, and they fail for unrelated reasons. Sharing one job id
+  // would let the weekly crawl's success auto-close a pipeline_failure the
+  // daily import opened, and would flap the ledger's one-cadence-per-source
+  // between the two schedules.
+  CRAWL_SLEEPER_EXTERNAL_LEAGUE_GRAPH: 134
 }
 
 export const job_title_by_id = {
@@ -292,5 +300,6 @@ export const job_title_by_id = {
   130: 'Import Sleeper External League Trades',
   131: 'Import Players (FantasyPoints)',
   132: 'Generate DST Market Projections',
-  133: 'Refresh Roster Asset Lineage'
+  133: 'Refresh Roster Asset Lineage',
+  134: 'Crawl Sleeper External League Graph'
 }

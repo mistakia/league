@@ -241,6 +241,17 @@ JOB_PROJECT=league
 ## entry's stage, so exactly one stage does work per run and neither can starve
 ## the other by ordering.
 ##
+## THE TWO ENTRIES REPORT AS TWO LEDGER SOURCES, and must keep doing so:
+##   service:league-import-sleeper-external-league-trades  (daily import)
+##   service:league-crawl-sleeper-external-league-graph    (weekly crawl)
+## The script picks the source from the budgets, so it follows the flags rather
+## than a mode switch. Sharing one source would break two things at once: the
+## runs oracle closes pipeline_failure BY SOURCE, so a Monday crawl success
+## would auto-close a failure the daily import had opened; and the ledger holds
+## one cadence per source, so the JOB_SCHEDULE these two lines inject would flap
+## the staleness window between daily and weekly depending on which ran last.
+## If you ever merge these back into one entry, merge the job types too.
+##
 ## IMPORTS RESUMED 2026-08-03, ending the graph-first pause set 2026-07-29.
 ## The pause was correct while the map lagged the trade data; it does not any
 ## more. The backlog is 18,448 in-appetite leagues against an import capacity of
