@@ -134,6 +134,16 @@ export const init_error_reporting = () => {
     // Ignore resource-load errors (img/script 404s) — they target the element,
     // not the window, and carry no Error object.
     if (event?.target && event.target !== window) return
+    // Ignore the browser's opaque cross-origin error ("Script error." with no
+    // error object, filename, lineno or colno). The content is withheld by
+    // design for a script served without CORS headers, so there is nothing to
+    // triage and nothing a stack could recover — the reported stack points at
+    // the `new Error` below, inside this file. It is never OUR bundle: webpack
+    // serves the SPA same-origin from publicPath '/dist/', so an opaque error
+    // is an extension or an injected third-party script on the user's page.
+    // A real same-origin error always carries either an Error or a filename,
+    // so this cannot swallow one (signal #124055).
+    if (!(event?.error instanceof Error) && !event?.filename) return
     const error =
       event?.error instanceof Error
         ? event.error
