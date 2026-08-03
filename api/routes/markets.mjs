@@ -327,8 +327,16 @@ router.get('/?', async (req, res) => {
         (market) => market.source_market_id
       )
 
+      // source_id and time_type are not redundant with the market rows already
+      // filtered above. Neither index on prop_market_selections_index leads
+      // with source_market_id, so without them this is a sequential scan of all
+      // 9.7M selections; with them idx_24949_market is usable as a
+      // (source_id, source_market_id) prefix. They also keep the opposite
+      // time_type's selections off a market selected for this one.
       const selections_data = await db('prop_market_selections_index')
         .select('prop_market_selections_index.*')
+        .where('prop_market_selections_index.source_id', params.bookmaker)
+        .where('prop_market_selections_index.time_type', params.time_type)
         .whereIn(
           'prop_market_selections_index.source_market_id',
           source_market_ids
@@ -749,12 +757,25 @@ router.get('/players/:pid', async (req, res) => {
     // Get selections for each market
     const source_market_ids = markets_data.map((m) => m.source_market_id)
     if (source_market_ids.length > 0) {
+      // source_id is not redundant with the market rows already filtered above.
+      // Neither index on prop_market_selections_index leads with
+      // source_market_id, so without it this is a sequential scan of all 9.7M
+      // selections; with it idx_24949_market is usable as a
+      // (source_id, source_market_id) prefix. Unlike the other two market
+      // routes this one takes no time_type param, so it cannot be filtered here
+      // -- both time_types are wanted, and time_type is part of the key below.
       const selections_data = await db('prop_market_selections_index')
         .select('prop_market_selections_index.*')
+        .where('prop_market_selections_index.source_id', params.bookmaker)
         .whereIn(
           'prop_market_selections_index.source_market_id',
           source_market_ids
         )
+
+      // Keyed on source_market_id AND time_type: this route returns a market's
+      // OPEN and CLOSE rows as two entries, so keying on source_market_id alone
+      // makes the second overwrite the first and leaves it with no selections.
+      const market_key = (row) => `${row.source_market_id}/${row.time_type}`
 
       const markets_index = {}
       for (const market of markets_data) {
@@ -762,11 +783,11 @@ router.get('/players/:pid', async (req, res) => {
         // Documented on this route's response but not a prop_markets_index
         // column; every market here matched this player by construction.
         market.selection_pid = pid
-        markets_index[market.source_market_id] = market
+        markets_index[market_key(market)] = market
       }
 
       for (const selection of selections_data) {
-        const market = markets_index[selection.source_market_id]
+        const market = markets_index[market_key(selection)]
         if (market) {
           market.selections.push(selection)
         }
@@ -938,8 +959,16 @@ router.get('/games/:esbid', async (req, res) => {
     // Get selections for each market
     const source_market_ids = markets_data.map((m) => m.source_market_id)
     if (source_market_ids.length > 0) {
+      // source_id and time_type are not redundant with the market rows already
+      // filtered above. Neither index on prop_market_selections_index leads
+      // with source_market_id, so without them this is a sequential scan of all
+      // 9.7M selections; with them idx_24949_market is usable as a
+      // (source_id, source_market_id) prefix. They also keep the opposite
+      // time_type's selections off a market selected for this one.
       const selections_data = await db('prop_market_selections_index')
         .select('prop_market_selections_index.*')
+        .where('prop_market_selections_index.source_id', params.bookmaker)
+        .where('prop_market_selections_index.time_type', params.time_type)
         .whereIn(
           'prop_market_selections_index.source_market_id',
           source_market_ids
