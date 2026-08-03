@@ -268,7 +268,7 @@ const PRUNE_BATCH_SIZE = 5000
  * strand prop_pairing_props rows that no query can reach, since every read
  * reaches them through prop_pairings.
  */
-const prune_stale_prop_pairings = async ({
+export const prune_stale_prop_pairings = async ({
   week,
   year,
   seas_type,
