@@ -3141,6 +3141,7 @@ CREATE TABLE public.external_leagues (
     external_draft_id character varying(32),
     league_settings jsonb,
     league_metadata jsonb,
+    previous_external_league_unavailable_at timestamp with time zone,
     CONSTRAINT external_leagues_league_format_check CHECK (((league_format)::text = ANY ((ARRAY['dynasty'::character varying, 'keeper'::character varying, 'redraft'::character varying])::text[])))
 );
 

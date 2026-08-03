@@ -130,6 +130,33 @@ const resolve_player_ids = async (external_player_ids) => {
 }
 
 /**
+ * Record that Sleeper will not serve this league, on every edge pointing at it.
+ *
+ * The fact belongs on the CHILD because the league itself has no row to carry it
+ * and never will: season_year and league_format are NOT NULL, so a league we
+ * could not fetch has nothing honest to write. Without this the chain frontier
+ * re-derives the dead link every run and pays a request for it every run, for
+ * the life of the corpus.
+ *
+ * Keyed on the league id rather than on the child that led us here, because the
+ * property recorded is "this league is unavailable" -- which is equally true of
+ * any other league whose chain points at the same season.
+ *
+ * This suppresses the FRONTIER, not live discovery: a resync that re-imports a
+ * child still re-enqueues its dead prior once and pays one request to re-learn
+ * this. That cost is bounded by --resync_limit and does not grow with the corpus,
+ * so it is not worth a second per-link query to avoid.
+ */
+const mark_league_unavailable_for_chain_walk = async (external_league_id) =>
+  db('external_leagues')
+    .where({
+      platform: 'sleeper',
+      previous_external_league_id: external_league_id
+    })
+    .whereNull('previous_external_league_unavailable_at')
+    .update({ previous_external_league_unavailable_at: new Date() })
+
+/**
  * Import every completed trade from one Sleeper league-season.
  * @returns {Promise<Object>} Per-league import counts
  */
@@ -139,14 +166,25 @@ export const import_sleeper_league_trades = async ({
   dry_run = false,
   require_appetite = false
 }) => {
+  // The two paths below are the only ones that spend a request and persist no
+  // row. Both are permanent states -- a deleted or privatised league does not
+  // come back, and metadata Sleeper cannot describe now it will not describe
+  // later -- so both mark the edge rather than leaving the frontier to re-derive
+  // the link and re-request it on every future run.
   const league = await sleeper_get(`/league/${external_league_id}`)
   if (!league) {
+    if (!dry_run) {
+      await mark_league_unavailable_for_chain_walk(external_league_id)
+    }
     log(`league ${external_league_id} unavailable, skipping`)
     return { skipped: true, trades: 0, legs: 0, unresolved: 0 }
   }
 
   const league_row = parse_sleeper_league({ league, discovered_via })
   if (!league_row) {
+    if (!dry_run) {
+      await mark_league_unavailable_for_chain_walk(external_league_id)
+    }
     log(`league ${external_league_id} has unusable format metadata, skipping`)
     return { skipped: true, trades: 0, legs: 0, unresolved: 0 }
   }
@@ -803,6 +841,47 @@ const select_leagues_to_import = async ({
   return [...never_imported, ...stalest_imported]
 }
 
+/**
+ * Prior league-seasons a previous_league_id points at that were never fetched.
+ *
+ * This is what makes the run deadline non-destructive. The walk's queue lives in
+ * memory, so anything still on it when the deadline fires is gone -- but the EDGE
+ * is not: previous_external_league_id is persisted on the child, and a link that
+ * was fetched always leaves a row behind (imported ones carry last_synced_at,
+ * appetite-rejected ones are written as nodes with is_import false). So "referenced
+ * by an imported league and absent from the table" is exactly the set of links no
+ * run has ever spent a request on, and re-deriving it each run resumes the walk
+ * instead of restarting it.
+ *
+ * RESTRICTED TO IMPORTED CHILDREN, which is the whole difficulty. 21,311 of the
+ * 22,054 chain edges hang off leagues the crawl merely discovered and nobody has
+ * imported -- the crawl payload carries previous_league_id, so a league we have
+ * never read trades from still declares its prior season. Walking those would let
+ * back-history front-run the import backlog and pull prior seasons of leagues
+ * whose current season is still unread. Measured against imported children the
+ * set is 166, which is three minutes of requests.
+ */
+const select_unwalked_chain_links = async () => {
+  const rows = await db('external_leagues as child')
+    .distinct('child.previous_external_league_id as external_league_id')
+    .leftJoin('external_leagues as prior', function () {
+      this.on('prior.platform', 'child.platform').andOn(
+        'prior.external_league_id',
+        'child.previous_external_league_id'
+      )
+    })
+    .where('child.platform', 'sleeper')
+    .whereNotNull('child.last_synced_at')
+    .whereNotNull('child.previous_external_league_id')
+    .whereNull('prior.external_league_id')
+    // A link already found unavailable never acquires a row, so without this it
+    // would be re-derived and re-requested every run forever.
+    .whereNull('child.previous_external_league_unavailable_at')
+    .orderBy('external_league_id', 'asc')
+
+  return rows.map((row) => row.external_league_id)
+}
+
 const import_sleeper_external_league_trades = async ({
   seed_league_ids = [],
   season_year = current_season.year,
@@ -864,6 +943,40 @@ const import_sleeper_external_league_trades = async ({
   }))
   const seen = new Set(selected.map((row) => row.external_league_id))
 
+  // Links a previous run left unwalked, drained BEHIND this run's selected
+  // leagues and AHEAD of the links those leagues discover. Selected leagues come
+  // first because they are the run's actual budget; the resumed links come next
+  // because they are the oldest outstanding work.
+  //
+  // Entered at depth 1 rather than 0 for two reasons, both load-bearing. It is
+  // what applies require_appetite, since a resumed link is a chain link that has
+  // never been format-checked -- entering at 0 would import it unchecked and put
+  // redraft and IDP seasons into the corpus. And it keeps history_depth a bound
+  // on the walk rather than a per-run stride: a chain resumed at depth 1 buys 3
+  // more hops, not another full 4.
+  //
+  // Only a run that is importing walks them. The weekly crawl entry passes
+  // --import_limit 0 --resync_limit 0 and selects nothing, and it must stay a
+  // pure graph run -- otherwise it would spend its whole deadline importing and
+  // report that work under the crawl ledger source.
+  if (selected.length) {
+    const unwalked_chain_links = await select_unwalked_chain_links()
+
+    for (const external_league_id of unwalked_chain_links) {
+      if (seen.has(external_league_id)) {
+        continue
+      }
+      seen.add(external_league_id)
+      pending.push({
+        external_league_id,
+        discovered_via: 'previous_season',
+        depth: 1
+      })
+    }
+
+    log(`resuming ${unwalked_chain_links.length} unwalked chain links`)
+  }
+
   // Prior league-seasons are complete and immutable, so one already imported is
   // never worth 19 requests again. Without this the chain walk re-paid for the
   // entire back-catalogue on every single run.
@@ -898,11 +1011,12 @@ const import_sleeper_external_league_trades = async ({
   // finished and its rows committed before the next one is considered, which is
   // what lets this EXIT 0 rather than be killed.
   //
-  // Selected leagues are all at depth 0 and the queue is FIFO, so they are drained
-  // before any chain link is touched. The deadline therefore eats the walk's tail
-  // first, which is the cheapest work to lose: a dropped link is a prior season
-  // that a later resync of its child league rediscovers, while a dropped selected
-  // league would leave the backlog untouched.
+  // Nothing on this queue is LOST when the deadline fires, which is what makes a
+  // wall-clock bound acceptable here at all. A selected league never reached keeps
+  // its null last_synced_at and is re-selected next run; a chain link never
+  // reached is re-derived by select_unwalked_chain_links from the
+  // previous_external_league_id already persisted on its child. The queue is an
+  // ordering, not a record.
   let import_stopped_on_time = false
 
   while (pending.length) {
@@ -963,12 +1077,12 @@ const import_sleeper_external_league_trades = async ({
     `imported ${totals.trades} trades / ${totals.legs} legs from ${totals.leagues} leagues (${totals.skipped} skipped, ${totals.unresolved} unresolved players, ${request_counts.crawl} crawl + ${request_counts.import} import requests)`
   )
   // Logged with the count still queued, because that number is the whole reason
-  // to raise or lower the deadline: a run that stops with thousands pending is
-  // shedding chain links every day, and one that never stops at all is under
-  // budget. Both are invisible from the exit code, which is 0 either way.
+  // to raise or lower the deadline: a run that stops with thousands deferred is
+  // not keeping up with what it discovers, and one that never stops at all is
+  // under budget. Both are invisible from the exit code, which is 0 either way.
   if (import_stopped_on_time) {
     log(
-      `import stopped on the ${max_runtime_minutes}m run deadline with ${pending.length} league-seasons still queued`
+      `import stopped on the ${max_runtime_minutes}m run deadline, deferring ${pending.length} league-seasons to the next run`
     )
   }
   log(
@@ -1050,7 +1164,7 @@ const import_sleeper_external_league_trades = async ({
     ...totals,
     ...crawl_totals,
     import_stopped_on_time,
-    unwalked_chain_links: import_stopped_on_time ? pending.length : 0,
+    deferred_league_seasons: import_stopped_on_time ? pending.length : 0,
     frontier
   }
 }
