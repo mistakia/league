@@ -38,6 +38,7 @@ import draft from './draft.mjs'
 import games from './games.mjs'
 import settings from './settings.mjs'
 import trades from './trades.mjs'
+import trade_review from './trade-review.mjs'
 import waivers from './waivers/index.mjs'
 import restricted_free_agency from './restricted-free-agency.mjs'
 import poaches from './poaches.mjs'
@@ -486,6 +487,7 @@ router.use('/:leagueId/draft', draft)
 router.use('/:leagueId/draft-pick-value', draft_pick_value)
 router.use('/:leagueId/settings', settings)
 router.use('/:leagueId/trades', trades)
+router.use('/:leagueId/trade-review', trade_review)
 router.use('/:leagueId/waivers', waivers)
 router.use('/:leagueId/restricted-free-agency', restricted_free_agency)
 router.use('/:leagueId/poaches', poaches)

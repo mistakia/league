@@ -58,6 +58,18 @@ export function require_commissioner(league, userId, res, action) {
 
 /**
  * Require user to be league commissioner or team owner
+ *
+ * Ownership lives in users_teams, joined to teams on (tid, year) -- the same
+ * shape libs-server/verify-user-team.mjs uses. The teams table has no user
+ * column at all; teams.uid is the team's own id, so the previous predicate
+ * (`teams.where({ lid, uid: userId })`) compared a user id against a team id
+ * and authorized on a coincidental collision between the two id spaces.
+ *
+ * Membership counts in ANY year, not just the current season. teams rows are
+ * per-year, so a current-season-only check would revoke every member's access
+ * during the offseason window before the new season's rows exist, and every
+ * caller of this helper is a league-scoped read.
+ *
  * @param {Object} league - League object
  * @param {number} userId - User ID
  * @param {string} leagueId - League ID
@@ -71,8 +83,16 @@ export async function require_league_access(league, userId, leagueId, db, res) {
   }
 
   const user_team = await db('teams')
-    .where({ lid: leagueId, uid: userId })
-    .first()
+    .join('users_teams', function () {
+      this.on('teams.uid', '=', 'users_teams.tid').andOn(
+        'teams.year',
+        '=',
+        'users_teams.year'
+      )
+    })
+    .where('teams.lid', leagueId)
+    .where('users_teams.userid', userId)
+    .first('teams.uid')
 
   if (!user_team) {
     res.status(403).send({ error: 'Access denied' })
