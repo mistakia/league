@@ -7,7 +7,6 @@ import {
   calculate_projection_values,
   calculatePrices,
   calculatePlayerValuesRestOfSeason,
-  getRosterSize,
   groupBy
 } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
@@ -48,11 +47,6 @@ const process_league_format_year = async ({
     `processing league format ${league_format_id} for year ${year} (${pricing_model})`
   )
 
-  const { num_teams, cap, min_bid } = league_format
-  const league_roster_size = getRosterSize(league_format)
-  const league_total_salary_cap =
-    num_teams * cap - num_teams * league_roster_size * min_bid
-
   let week = 0
 
   const final_week_result = await db('nfl_games')
@@ -73,20 +67,17 @@ const process_league_format_year = async ({
       week
     })
 
-    if (pricing_model === 'auction') {
-      calculatePrices({
-        cap: league_total_salary_cap,
-        total_pts_added,
-        players: player_rows,
-        week
-      })
-    }
+    calculatePrices({
+      league_format,
+      total_pts_added,
+      players: player_rows,
+      week
+    })
   }
 
   calculatePlayerValuesRestOfSeason({
     players: player_rows,
-    league: league_format,
-    pricing_model
+    league: league_format
   })
 
   const value_inserts = []
@@ -98,8 +89,7 @@ const process_league_format_year = async ({
         league_format_id,
         week,
         pts_added,
-        market_salary:
-          pricing_model === 'auction' ? player_row.market_salary[week] : null
+        market_salary: player_row.market_salary?.[week] ?? null
       }
 
       value_inserts.push(params)

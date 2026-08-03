@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { sum, groupBy } from '#libs-shared'
+import { sum, groupBy, calculatePrices } from '#libs-shared'
 import { current_season } from '#constants'
 import { is_main, getLeague } from '#libs-server'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
@@ -100,9 +100,28 @@ const generate_league_format_player_seasonlogs = async ({
     inserts.map((i) => i.points_added_earned)
   )
 
-  // Calculate the rate of $ per points added
-  const total_league_salary = league_format.cap * league_format.num_teams
-  const rate_per_point = total_league_salary / total_points_added_earned
+  // earned_salary is the realized-season half of the SAME points-added-to-cap-
+  // dollars arithmetic the forward path prices market_salary with, so it runs
+  // through calculatePrices rather than open-coding a second rate. This file
+  // used to derive its own, over the FULL cap rather than the discretionary
+  // one, which priced identical points added ~8% higher on the seven formats
+  // carrying min_bid = 1 and agreed with the shipped arithmetic only on the
+  // eight where min_bid = 0 -- genesis_10_team among them, so the format anyone
+  // would test against was the one that hid it.
+  //
+  // calculatePrices reads pts_added[week] and writes market_salary[week], and
+  // its week parameter is an aggregation key rather than a week number, so the
+  // season aggregate is passed as 'earned' exactly as calculate-points-added.mjs
+  // passes it for the realized season.
+  for (const insert of inserts) {
+    insert.pts_added = { earned: insert.points_added_earned }
+  }
+  calculatePrices({
+    league_format,
+    total_pts_added: total_points_added_earned,
+    players: inserts,
+    week: 'earned'
+  })
 
   for (const insert of inserts) {
     insert.points_added_earned_rank =
@@ -120,12 +139,15 @@ const generate_league_format_player_seasonlogs = async ({
         insert.points_added_earned_per_game
       ) + 1
 
-    // Calculate earned salary
-    insert.earned_salary = Number(
-      (insert.points_added_earned * rate_per_point).toFixed(2)
-    )
+    // A dfs_fixed format publishes per-player salaries externally, so
+    // calculatePrices declines to price it and earned_salary is null rather
+    // than a number derived from a contest-entry cap.
+    insert.earned_salary = insert.market_salary?.earned ?? null
 
     delete insert.pos
+    delete insert.pts_added
+    delete insert.market_salary
+    delete insert.salary_adj_pts_added
   }
 
   if (dry) {

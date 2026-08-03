@@ -4,7 +4,6 @@ import {
   calculatePoints,
   calculate_projection_values,
   calculatePrices,
-  getRosterSize,
   getOptimizerPositionConstraints,
   optimizeLineup,
   calculatePlayerValuesRestOfSeason
@@ -41,10 +40,6 @@ export function workerCalculateStatsFromPlays({ plays, qualifiers, league }) {
 
 export function calculatePlayerValues(payload) {
   const { league, players, rosterRows } = payload
-
-  const { num_teams, cap, min_bid } = league
-  const rosterSize = getRosterSize(league)
-  const leagueTotalCap = num_teams * cap - num_teams * rosterSize * min_bid
 
   const finalWeek = current_season.finalWeek
   for (const player of players) {
@@ -93,7 +88,7 @@ export function calculatePlayerValues(payload) {
     })
     baselinesByWeek[week] = baselines
 
-    calculatePrices({ cap: leagueTotalCap, total_pts_added, players, week })
+    calculatePrices({ league_format: league, total_pts_added, players, week })
   }
 
   calculatePlayerValuesRestOfSeason({ players, rosterRows, league })

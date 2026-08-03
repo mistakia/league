@@ -9,7 +9,6 @@ import { is_main, getLeague } from '#libs-server'
 import {
   sum,
   groupBy,
-  getRosterSize,
   calculateValues,
   calculatePrices,
   calculateBaselines
@@ -32,10 +31,6 @@ const calculate_points_added = async ({
   if (!Number.isInteger(year)) {
     throw new Error(`${year} invalid year`)
   }
-
-  const { num_teams, cap, min_bid } = league
-  const rosterSize = getRosterSize(league)
-  const leagueTotalCap = num_teams * cap - num_teams * rosterSize * min_bid
 
   log(`calculating Points Added for ${year}`)
 
@@ -145,7 +140,7 @@ const calculate_points_added = async ({
       week
     })
     calculatePrices({
-      cap: leagueTotalCap,
+      league_format: league,
       total_pts_added,
       players,
       week
@@ -186,7 +181,7 @@ const calculate_points_added = async ({
   }
 
   calculatePrices({
-    cap: leagueTotalCap,
+    league_format: league,
     total_pts_added,
     players,
     week: 'earned'

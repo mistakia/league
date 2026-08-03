@@ -6,7 +6,6 @@ import db from '#db'
 import {
   groupBy,
   Roster,
-  getRosterSize,
   weightProjections,
   calculatePrices,
   calculate_projection_values,
@@ -300,11 +299,6 @@ const process_league_format = async ({
     throw new Error(`league format ${league_format_id} not found`)
   }
 
-  const { num_teams, cap, min_bid } = league_format
-  const league_roster_size = getRosterSize(league_format)
-  const league_total_salary_cap =
-    num_teams * cap - num_teams * league_roster_size * min_bid
-
   const player_rows = await getPlayers({
     pids: projection_pids,
     league_format_id: league_format.league_format_id,
@@ -321,24 +315,17 @@ const process_league_format = async ({
       week
     })
 
-    // Auction-pricing only. DFS contests (pricing_model='dfs_fixed') publish
-    // per-player salaries externally (player_salaries table); deriving a
-    // market_salary from a contest-entry cap and num_teams=1 is meaningless
-    // and overflows the column. pts_added stays meaningful for any format.
-    if (pricing_model === 'auction') {
-      calculatePrices({
-        cap: league_total_salary_cap,
-        total_pts_added,
-        players: player_rows,
-        week
-      })
-    }
+    calculatePrices({
+      league_format,
+      total_pts_added,
+      players: player_rows,
+      week
+    })
   }
 
   calculatePlayerValuesRestOfSeason({
     players: player_rows,
-    league: league_format,
-    pricing_model
+    league: league_format
   })
 
   const valueInserts = []
@@ -350,8 +337,7 @@ const process_league_format = async ({
         league_format_id,
         week,
         pts_added,
-        market_salary:
-          pricing_model === 'auction' ? player_row.market_salary[week] : null
+        market_salary: player_row.market_salary?.[week] ?? null
       }
 
       valueInserts.push(params)
@@ -389,11 +375,9 @@ const process_league = async ({ year, lid }) => {
 
   const league = await getLeague({ lid })
   const teams = await db('teams').where({ lid, year })
-  const league_roster_size = getRosterSize(league)
-
-  const { num_teams, cap, min_bid } = league
-  const league_total_salary_cap =
-    num_teams * cap - num_teams * league_roster_size * min_bid
+  // min_bid here prices unused roster space, not the board -- unrelated to the
+  // discretionary cap calculatePrices derives.
+  const { min_bid } = league
   let league_available_salary_space = 0
 
   // initialize roster rows
@@ -456,7 +440,7 @@ const process_league = async ({ year, lid }) => {
     baselines[week] = week_baselines
 
     calculatePrices({
-      cap: league_total_salary_cap,
+      league_format: league,
       total_pts_added,
       players: player_rows,
       week

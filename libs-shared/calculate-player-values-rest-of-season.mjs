@@ -1,15 +1,9 @@
-import getRosterSize from './get-roster-size.mjs'
 import calculatePrices from './calculate-prices.mjs'
 import { current_season } from '#constants'
 
-export default function ({ players, league, pricing_model = 'auction' }) {
+export default function ({ players, league }) {
   // calculate total available points added
   let total_pts_added = 0
-
-  const { num_teams, cap, min_bid } = league
-  const league_roster_size = getRosterSize(league)
-  const league_total_salary_cap =
-    num_teams * cap - num_teams * league_roster_size * min_bid
 
   for (const player of players) {
     let player_ros_pts_added = 0
@@ -36,16 +30,12 @@ export default function ({ players, league, pricing_model = 'auction' }) {
     player.pts_added.ros_net = player_ros_pts_added_net
   }
 
-  // Auction-pricing only. DFS formats publish per-player salaries externally;
-  // see scripts/process-projections.mjs:process_league_format.
-  if (pricing_model === 'auction') {
-    calculatePrices({
-      cap: league_total_salary_cap,
-      total_pts_added,
-      players,
-      week: 'ros'
-    })
-  }
+  calculatePrices({
+    league_format: league,
+    total_pts_added,
+    players,
+    week: 'ros'
+  })
 
   return players
 }
