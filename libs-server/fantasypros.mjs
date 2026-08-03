@@ -52,6 +52,7 @@ export const get_fantasypros_rankings = async ({
   const data = await fetch_with_retry({
     url,
     headers: fantasypros_config.headers,
+    use_proxy: true,
     response_type: 'json'
   })
 

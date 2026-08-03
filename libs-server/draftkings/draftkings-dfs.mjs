@@ -9,7 +9,11 @@ const get_draftkings_contests = async () => {
   const draftkings_config = await get_draftkings_config()
   const url = draftkings_config.draftkings_contests_url
   api_log(`DK API REQUEST: ${url}`)
-  const data = await fetch_with_retry({ url, response_type: 'json' })
+  const data = await fetch_with_retry({
+    url,
+    use_proxy: true,
+    response_type: 'json'
+  })
   return data
 }
 
@@ -31,7 +35,11 @@ export const get_draftkings_draft_group_draftables = async ({
   const draftkings_config = await get_draftkings_config()
   const url = `${draftkings_config.draftkings_salary_url}/${draft_group_id}/draftables`
   api_log(`DK API REQUEST: ${url}`)
-  const data = await fetch_with_retry({ url, response_type: 'json' })
+  const data = await fetch_with_retry({
+    url,
+    use_proxy: true,
+    response_type: 'json'
+  })
   return data
 }
 
@@ -48,7 +56,11 @@ export const get_draftkings_nfl_lobby_contests = async () => {
 export const get_draftkings_contest_detail = async ({ contest_id }) => {
   const url = `https://api.draftkings.com/contests/v1/contests/${contest_id}`
   api_log(`DK API REQUEST: ${url}`)
-  const data = await fetch_with_retry({ url, response_type: 'json' })
+  const data = await fetch_with_retry({
+    url,
+    use_proxy: true,
+    response_type: 'json'
+  })
   return data
 }
 
