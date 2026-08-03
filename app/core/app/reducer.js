@@ -71,7 +71,7 @@ export function app_reducer(state = initialState(), { payload, type }) {
       })
 
     case app_actions.AUTH_FULFILLED:
-      set_error_user(payload.data.user.id, payload.data.user.email)
+      set_error_user(payload.data.user.id)
       return state.withMutations((state) => {
         const currentLeagueId = state.get('leagueId')
         const leagueNotSet = !currentLeagueId

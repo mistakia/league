@@ -167,11 +167,15 @@ export const notify = (err, metadata) => {
   post_to_league_api(err, metadata)
 }
 
-export const set_user = (id, email) => {
-  current_user =
-    id != null || email != null
-      ? { id: id ?? null, email: email ?? null }
-      : null
+// Identity attached to every reported error. The user id alone is what triage
+// needs — it joins to the users table when an error is actually ours, and it is
+// the only thing anyone has ever looked up. The email was carried here until
+// 2026-08-03 and was pure liability: a client error report is not a place to
+// accumulate personal data, and the reports we CANNOT act on are exactly the
+// ones that collect the most of it (signal #124239 shipped a real user's email
+// for a MetaMask extension failure in their own browser).
+export const set_user = (id) => {
+  current_user = id != null ? { id } : null
 }
 
 export class ErrorBoundary extends React.Component {
