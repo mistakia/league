@@ -471,48 +471,62 @@ const process_league = async ({ year, lid }) => {
     )
     player_row.market_salary_adj = market_salary_adj
 
-    // The period sentinels are no longer written into the week column. This loop
-    // was period-blind by construction -- calculatePlayerValuesRestOfSeason adds
-    // a 'ros' key and calculatePrices adds a '0' key to the same map the numeric
-    // weeks live in -- which is exactly what let the sentinels accumulate. Each
-    // period now routes to its own table.
+    // The period sentinels are no longer written into the week column. The loop
+    // below was period-blind by construction -- calculatePlayerValuesRestOfSeason
+    // adds a 'ros' key and calculatePrices adds a '0' key to the same map the
+    // numeric weeks live in -- which is exactly what let the sentinels
+    // accumulate. Each period now routes to its own table.
+    //
+    // Both VARIANTS of a period land as named columns on one row rather than as
+    // two rows. Pushing the net variant as its own row would collide with the
+    // positive one on (pid, lid, season_year) inside the same batch, and
+    // `onConflict(...).merge()` raises "ON CONFLICT DO UPDATE command cannot
+    // affect row a second time" for a duplicate within a single INSERT -- it
+    // does not merge them. So the period keys are read directly here and the
+    // loop is left to the numeric weeks alone.
+    const salary_adj_by_key = player_row.salary_adj_pts_added
+
+    const season_positive = salary_adj_by_key['0']
+    const season_net = salary_adj_by_key[season_net_projection_key]
+    if (season_positive !== undefined || season_net !== undefined) {
+      season_value_inserts.push({
+        pid: player_row.pid,
+        season_year: current_season.year,
+        lid,
+        salary_adj_pts_added: season_positive ?? null,
+        salary_adj_points_added_net: season_net ?? null,
+        market_salary_adj
+      })
+    }
+
+    const ros_positive = salary_adj_by_key.ros
+    const ros_net = salary_adj_by_key.ros_net
+    if (ros_positive !== undefined || ros_net !== undefined) {
+      rest_of_season_value_inserts.push({
+        pid: player_row.pid,
+        season_year: current_season.year,
+        lid,
+        salary_adj_pts_added: ros_positive ?? null,
+        salary_adj_points_added_net: ros_net ?? null
+      })
+    }
+
     for (const [week, salary_adj_pts_added] of Object.entries(
-      player_row.salary_adj_pts_added
+      salary_adj_by_key
     )) {
-      if (week === '0') {
-        season_value_inserts.push({
-          pid: player_row.pid,
-          season_year: current_season.year,
-          lid,
-          salary_adj_pts_added,
-          market_salary_adj
-        })
-        continue
-      }
-
-      if (week === 'ros') {
-        rest_of_season_value_inserts.push({
-          pid: player_row.pid,
-          season_year: current_season.year,
-          lid,
-          salary_adj_pts_added
-        })
-        continue
-      }
-
-      // The NET variants have no home on the hosted-league side yet. The period
-      // tables gain salary_adj_pts_added_net in the schema split that this
-      // task's remaining half performs; until then they are computed and
-      // deliberately not persisted here.
-      //
-      // This guard is not cosmetic. Falling through to the weekly insert below
-      // would put 'ros_net' into league_player_projection_values.week, which is
-      // varchar(3), and that table is written delete-by-lid THEN batch_insert --
-      // so the delete commits, the insert throws, and the table is left EMPTY
-      // rather than stale, blanking market_salary_adj on league-home, the
+      // Every period key is excluded here, not just the two that already had a
+      // home. league_player_projection_values.week is varchar(3) and the table
+      // is written delete-by-lid THEN batch_insert, so letting 'ros_net' through
+      // means the delete commits, the insert throws, and the table is left EMPTY
+      // rather than stale -- blanking market_salary_adj on league-home, the
       // auction nomination panel and the selected-player panel for a full cron
-      // cycle. Remove this guard in the same change that adds the columns.
-      if (week === 'ros_net' || week === season_net_projection_key) {
+      // cycle.
+      if (
+        week === '0' ||
+        week === 'ros' ||
+        week === 'ros_net' ||
+        week === season_net_projection_key
+      ) {
         continue
       }
 
