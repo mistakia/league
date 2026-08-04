@@ -249,7 +249,10 @@ Note what a gated column must emit for a hidden value. `player_league_roster_tag
   column_id: "player_fantasy_points_from_plays",
   params: {
     year: [2023, 2024],                   // Multi-year for trends
-    week: [1, 2, 3, 4],                   // Week range
+    nfl_week_id: [                        // Week scope (see note below)
+      "2024_REG_WEEK_1",
+      "2024_REG_WEEK_2"
+    ],
     scoring_format_hash: "half_ppr",      // Named format (auto-resolved)
     rate_type: ["per_game"]               // Statistical normalization
   }
@@ -259,11 +262,27 @@ Note what a gated column must emit for a hidden value. `player_league_roster_tag
 {
   column_id: "player_rushing_yards_from_plays",
   params: {
-    year: { dynamic_type: "last_n_years", value: 3 },    // Last 3 seasons
-    week: { dynamic_type: "current_week" }               // Current week only
+    year: { dynamic_type: "last_n_years", value: 3 }     // Last 3 seasons
   }
 }
 ```
+
+**On the `*_from_plays` path, `nfl_week_id` is the canonical week param — not `week`.**
+`week` was a member of `nfl_plays_column_params` until `64a28f9dc` replaced it with the
+composite `nfl_week_id`, whose values are `<year>_<PRE|REG|POST>_WEEK_<n>` identifier
+strings (`libs-shared/nfl-week-identifier.mjs`), not bare week numbers.
+Nothing on the from-plays path reads `params.week` any more, so
+setting it emits no SQL predicate: the column returns the full-season figure while the
+config claims a week scope. It is not fully inert either — `get_cache_info_for_fields_from_plays`
+and `cache-info-utils` still read it when deriving a cache key, so a stray `week` splits
+the cache across entries that hold identical SQL. Wasteful rather than wrong, but there is
+no reason to set it here.
+
+`params.week` remains live for OTHER column families. `resolve_single_nfl_week_id`
+(`libs-server/data-views/resolve-single-nfl-week-id.mjs`) reads it on behalf of the
+projected and DFS-salary column definitions, so do not treat it as a dead param globally.
+The rationale for keeping `week` out of the from-plays CTE alias key is written up at
+`libs-server/data-views/get-stats-column-param-key.mjs:18`.
 
 ### Where Clause Structure
 
