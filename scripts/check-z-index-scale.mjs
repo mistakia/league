@@ -62,8 +62,16 @@ const GLOBAL_STYLESHEET = path.join(repo_root, 'app/styles/general.styl')
  * ties the selected-player drawer and loses to every dialog, and it survived
  * the first pass of this check precisely because there was no number to find.
  *
- * So each of these has to be pinned onto the scale in general.styl. A component
- * this app stops using should leave this list rather than stay unpinned.
+ * So each of these has to be pinned onto the scale in general.styl, by a rule
+ * whose selector is COMPOUND. MUI's emotion class is a single class injected
+ * after the app stylesheet, so a single-class pin ties on specificity and loses
+ * on source order — it changes nothing, and nothing reports that it changed
+ * nothing. The first version of this block was written single-class and was
+ * entirely inert; the check below is what makes that state fail rather than
+ * look fixed.
+ *
+ * A component this app stops using should leave this list rather than stay
+ * unpinned.
  */
 const MUI_OVERLAYS_REQUIRING_A_PIN = [
   '.MuiDialog-root',
@@ -127,9 +135,12 @@ const main = () => {
   // assertion — the selector appearing under some unrelated rule proves nothing.
   const global_lines = fs.readFileSync(GLOBAL_STYLESHEET, 'utf8').split('\n')
   const unpinned_overlays = MUI_OVERLAYS_REQUIRING_A_PIN.filter((selector) => {
-    const start = global_lines.findIndex(
-      (line) => line.trim() === selector || line.trim() === `${selector},`
-    )
+    // Compound means at least two classes on one element — no descendant
+    // combinator, which would select a child rather than raise specificity.
+    const is_compound_pin = (line) =>
+      /^(\.[A-Za-z0-9_-]+){2,},?$/.test(line) && line.includes(selector)
+
+    const start = global_lines.findIndex((line) => is_compound_pin(line.trim()))
     if (start === -1) return true
     for (let index = start + 1; index < global_lines.length; index++) {
       const line = global_lines[index].trim()

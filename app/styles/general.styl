@@ -28,27 +28,33 @@ p
 // (1300), and relies on DOM order to break the ties. That works until an app
 // surface is raised above 1300 — the selected-player drawer sits at
 // $z_selected_player — at which point the whole group falls behind it. These
-// four rules restate the group as an ordered set: a dialog above the drawer
-// that opened it, and a dropdown above the dialog that contains it.
-.MuiDialog-root
+// rules restate the group as an ordered set: a dialog above the drawer that
+// opened it, and a dropdown above the dialog that contains it. Snackbar is here
+// for the same reason, at its own rung — it hardcodes 1400, which ties the
+// drawer and loses to any open dialog, and notifications fire from websocket
+// events with no relation to what the user has open.
+//
+// Every selector is DOUBLED on purpose. MUI styles these components with an
+// emotion class of its own, which is a single class like ours and is injected
+// into head AFTER the app stylesheet — so a single-class rule here ties on
+// specificity and loses on source order, silently and with no warning. That is
+// not hypothetical: this whole block was written single-class first and changed
+// nothing at all, while the drawer rule below kept working because it happens
+// to be compound. Doubling takes each rule to (0,2,0) and wins outright.
+// Removing a duplicate reverts the bug, so do not "tidy" them.
+.MuiDialog-root.MuiDialog-root
   z-index $z_dialog
 
-.MuiPopover-root
-.MuiMenu-root
-.MuiAutocomplete-popper
+.MuiPopover-root.MuiPopover-root
+.MuiMenu-root.MuiMenu-root
+.MuiAutocomplete-popper.MuiAutocomplete-popper
   z-index $z_popper
 
-.MuiTooltip-popper
-  z-index $z_tooltip
-
-// Snackbar hardcodes theme.zIndex.snackbar (1400), which ties the
-// selected-player drawer and loses to any open dialog. Notifications fire from
-// websocket events — a trade accepted, a waiver processed — with no relation to
-// what the user has open, so the losing case is ordinary rather than rare.
-// Note the guard cannot see this one: the value is in MUI's source, not a
-// literal in this repo.
-.MuiSnackbar-root
+.MuiSnackbar-root.MuiSnackbar-root
   z-index $z_snackbar
+
+.MuiTooltip-popper.MuiTooltip-popper
+  z-index $z_tooltip
 
 .MuiTooltip-popper .MuiTooltip-tooltip
   color rgba(0, 0, 0, 0.87)
