@@ -1,0 +1,615 @@
+{
+  "cluster": "boolean-prefix",
+  "ruler": "league cb578d8e7",
+  "shared_tokens": [
+    "fumbles_lost",
+    "interceptions",
+    "pass_td",
+    "td",
+    "comp",
+    "pass",
+    "sk"
+  ],
+  "renames": [
+    {
+      "table": "nfl_plays",
+      "old_name": "valid",
+      "new_name": "is_valid"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "assist_tk",
+      "new_name": "is_assist_tackle"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "batted_pass",
+      "new_name": "is_batted_pass"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "blitz",
+      "new_name": "is_blitz"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "catchable_ball",
+      "new_name": "is_catchable_ball"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "charted",
+      "new_name": "has_charting_data"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "comp",
+      "new_name": "is_completion"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "contested_ball",
+      "new_name": "is_contested_ball"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "created_reception",
+      "new_name": "is_created_reception"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "deleted",
+      "new_name": "is_deleted"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "drive_inside20",
+      "new_name": "is_drive_inside_20"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "drive_score",
+      "new_name": "is_drive_score"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "dropped_pass",
+      "new_name": "is_dropped_pass"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "end_around_run",
+      "new_name": "is_end_around_run"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "endzone_target",
+      "new_name": "is_endzone_target"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "ep_att",
+      "new_name": "is_extra_point_attempt"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "ep_succ",
+      "new_name": "is_epa_successful"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "fake_field_goal",
+      "new_name": "is_fake_field_goal"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "fake_punt",
+      "new_name": "is_fake_punt"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "fg_att",
+      "new_name": "is_field_goal_attempt"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "fg_blocked",
+      "new_name": "is_field_goal_blocked"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "first_down",
+      "new_name": "is_first_down"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "first_down_pass",
+      "new_name": "is_first_down_pass"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "first_down_penalty",
+      "new_name": "is_first_down_penalty"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "first_down_rush",
+      "new_name": "is_first_down_rush"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "fourth_down_converted",
+      "new_name": "is_fourth_down_converted"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "fourth_down_failed",
+      "new_name": "is_fourth_down_failed"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "fum",
+      "new_name": "is_fumble"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "fumbles_lost",
+      "new_name": "is_fumble_lost"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "goal_to_go",
+      "new_name": "is_goal_to_go"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "highlight_pass",
+      "new_name": "is_highlight_pass"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "hindered_pass",
+      "new_name": "is_hindered_pass"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "incomp",
+      "new_name": "is_incompletion"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "int_worthy",
+      "new_name": "is_interception_worthy"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "interceptions",
+      "new_name": "is_interception"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "jet_sweep_run",
+      "new_name": "is_jet_sweep_run"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "kickoff_att",
+      "new_name": "is_kickoff_attempt"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "kickoff_onside",
+      "new_name": "is_kickoff_onside"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "kickoff_out_of_bounds",
+      "new_name": "is_kickoff_out_of_bounds"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "kickoff_touchback",
+      "new_name": "is_kickoff_touchback"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "lead_run",
+      "new_name": "is_lead_run"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "motion",
+      "new_name": "is_motion"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "motion_before_snap",
+      "new_name": "is_motion_before_snap"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "motion_during_snap",
+      "new_name": "is_motion_during_snap"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "no_huddle",
+      "new_name": "is_no_huddle"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "oob",
+      "new_name": "is_out_of_bounds"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "option_run",
+      "new_name": "is_option_run"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "out_of_pocket_pass",
+      "new_name": "is_out_of_pocket_pass"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "own_fumble_recovery",
+      "new_name": "is_own_fumble_recovery"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "pain_free_play",
+      "new_name": "is_pain_free_play"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "pass",
+      "new_name": "is_passing_play"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "pass_breakup",
+      "new_name": "is_pass_breakup"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "pass_td",
+      "new_name": "is_passing_touchdown"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "penalty",
+      "new_name": "is_penalty"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "penalty_declined",
+      "new_name": "is_penalty_declined"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "penalty_offset",
+      "new_name": "is_penalty_offset"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "phyb",
+      "new_name": "is_physical_ball"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "pitch_run",
+      "new_name": "is_pitch_run"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "play_action",
+      "new_name": "is_play_action"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "punt_att",
+      "new_name": "is_punt_attempt"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "punt_blocked",
+      "new_name": "is_punt_blocked"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "punt_fair_catch",
+      "new_name": "is_punt_fair_catch"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "punt_inside_20",
+      "new_name": "is_punt_inside_20"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "punt_out_of_bounds",
+      "new_name": "is_punt_out_of_bounds"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "punt_touchback",
+      "new_name": "is_punt_touchback"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_dropback",
+      "new_name": "is_qb_dropback"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_fault_sack",
+      "new_name": "is_qb_fault_sack"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_hit",
+      "new_name": "is_qb_hit"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_hurry",
+      "new_name": "is_qb_hurry"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_kneel",
+      "new_name": "is_qb_kneel"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_left_pocket",
+      "new_name": "is_qb_left_pocket"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_pressure",
+      "new_name": "is_qb_pressure"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_pressure_tracking",
+      "new_name": "is_qb_pressure_tracking"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_rush",
+      "new_name": "is_qb_rush"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_scramble",
+      "new_name": "is_qb_scramble"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_sneak",
+      "new_name": "is_qb_sneak"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "qb_spike",
+      "new_name": "is_qb_spike"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "ret_td",
+      "new_name": "is_return_touchdown"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "reverse_run",
+      "new_name": "is_reverse_run"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "run_play_option",
+      "new_name": "is_run_play_option"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "rush",
+      "new_name": "is_rushing_play"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "rush_td",
+      "new_name": "is_rushing_touchdown"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "safety",
+      "new_name": "is_safety"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "score",
+      "new_name": "is_scoring_play"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "screen_pass",
+      "new_name": "is_screen_pass"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "series_suc",
+      "new_name": "is_series_successful"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "shovel_pass",
+      "new_name": "is_shovel_pass"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "sideline_pass",
+      "new_name": "is_sideline_pass"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "sk",
+      "new_name": "is_sack"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "solo_tk",
+      "new_name": "is_solo_tackle"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "special",
+      "new_name": "is_special_teams_play"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "split_run",
+      "new_name": "is_split_run"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "stunt",
+      "new_name": "is_stunt"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "successful_play",
+      "new_name": "is_successful_play"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "td",
+      "new_name": "is_touchdown"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "tfl",
+      "new_name": "is_tackle_for_loss"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "third_down_converted",
+      "new_name": "is_third_down_converted"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "third_down_failed",
+      "new_name": "is_third_down_failed"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "throw_away",
+      "new_name": "is_throw_away"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "timeouts",
+      "new_name": "is_timeout"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "touchback",
+      "new_name": "is_touchback"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "trick_look",
+      "new_name": "is_trick_look"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "trick_play",
+      "new_name": "is_trick_play"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "two_att",
+      "new_name": "is_two_point_conversion_attempt"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "zero_blitz",
+      "new_name": "is_zero_blitz"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "hurry",
+      "new_name": "is_hurry"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "pass_dropped",
+      "new_name": "is_pass_dropped"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "pressure",
+      "new_name": "is_pressure"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "pressure_at_pass_forward",
+      "new_name": "is_pressure_at_pass_forward"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "spike",
+      "new_name": "is_spike"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "caused_pressure",
+      "new_name": "has_caused_pressure"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "lined_up_in_the_box",
+      "new_name": "is_lined_up_in_the_box"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "pass_defended",
+      "new_name": "is_pass_defended"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "pressure_caused_turnover",
+      "new_name": "has_pressure_caused_turnover"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "was_blitzing",
+      "new_name": "is_blitzing"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "was_running_route",
+      "new_name": "is_running_route"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "completion",
+      "new_name": "is_completion"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "interception",
+      "new_name": "is_interception"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "isolated",
+      "new_name": "is_isolated"
+    },
+    {
+      "table": "nfl_plays",
+      "old_name": "touchdown",
+      "new_name": "is_touchdown"
+    }
+  ]
+}

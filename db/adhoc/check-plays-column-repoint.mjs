@@ -34,7 +34,15 @@
 //   node db/adhoc/check-plays-column-repoint.mjs --gate     # exit 1 if any GATE hit remains
 //   node db/adhoc/check-plays-column-repoint.mjs --column playId
 //   node db/adhoc/check-plays-column-repoint.mjs --json
+//   node db/adhoc/check-plays-column-repoint.mjs --map <file>   # another cluster
 // Exit 0 = no gated dangling refs; 1 = gated refs remain; 2 = tooling error.
+//
+// --map takes a JSON file shaped
+//   { renames: [{ table, old_name, new_name }, ...], shared_tokens?: [...] }
+// and REPLACES the built-in map below, so the same two gates serve any cluster
+// renaming columns on the plays family. Only the map is cluster-specific; the
+// anchor tables, scan dirs and matchers are not. Without --map the built-in
+// nfl-plays-snaps map is used, which is what every existing invocation expects.
 
 import fs from 'fs'
 import path from 'path'
@@ -187,19 +195,46 @@ function scan_column(old_col) {
   return { gate: [...gate, ...def_gate], warn }
 }
 
+// Loads a cluster rename map from disk, replacing the built-in one. Two old
+// names on different tables may share a new name, and a plays-family rename is
+// routinely applied to both nfl_plays and its current-week mirror, so the map
+// is collapsed by OLD name -- the scan is textual and cannot distinguish the
+// two tables anyway.
+function load_map(map_path) {
+  const raw = JSON.parse(fs.readFileSync(map_path, 'utf8'))
+  const renames = {}
+  for (const { old_name, new_name } of raw.renames) renames[old_name] = new_name
+  return { renames, shared_tokens: new Set(raw.shared_tokens || []) }
+}
+
 function main() {
   const argv = yargs(hideBin(process.argv))
     .option('gate', { type: 'boolean', default: false })
     .option('column', { type: 'string' })
     .option('json', { type: 'boolean', default: false })
+    .option('map', { type: 'string' })
     .strict(false)
     .parse()
 
-  const columns = argv.column
-    ? [argv.column]
-    : Object.keys(PLAYS_COLUMN_RENAMES)
+  let rename_map = PLAYS_COLUMN_RENAMES
+  if (argv.map) {
+    try {
+      const loaded = load_map(argv.map)
+      rename_map = loaded.renames
+      // Replace rather than merge: a token this cluster treats as decidable
+      // must not stay WARN-only because a previous cluster could not decide it.
+      SHARED_TOKENS.clear()
+      for (const t of loaded.shared_tokens) SHARED_TOKENS.add(t)
+    } catch (error) {
+      console.error(`could not read --map ${argv.map}: ${error.message}`)
+      process.exitCode = 2
+      return
+    }
+  }
 
-  if (argv.column && !PLAYS_COLUMN_RENAMES[argv.column]) {
+  const columns = argv.column ? [argv.column] : Object.keys(rename_map)
+
+  if (argv.column && !rename_map[argv.column]) {
     console.error(`unknown plays column: ${argv.column}`)
     process.exitCode = 2
     return
@@ -211,7 +246,7 @@ function main() {
   for (const old_col of columns) {
     const { gate, warn } = scan_column(old_col)
     if (gate.length || warn.length) {
-      results[old_col] = { new: PLAYS_COLUMN_RENAMES[old_col], gate, warn }
+      results[old_col] = { new: rename_map[old_col], gate, warn }
       gate_total += gate.length
       warn_total += warn.length
     }
