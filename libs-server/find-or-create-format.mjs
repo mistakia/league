@@ -1,11 +1,16 @@
 import db from '#db'
-import { scoring_column_names } from '#libs-shared/scoring-columns.mjs'
+import {
+  scoring_column_names,
+  resolve_scoring_config
+} from '#libs-shared/scoring-columns.mjs'
 
 // Find-or-create upsert for league_scoring_formats / league_formats.
 //
-// The DB unique index across the full config tuple is the dedup oracle;
-// identity (id) is opaque (slug for the named catalog, gen_random_uuid() for
-// the long tail). ON CONFLICT ... DO UPDATE SET id = <table>.id is a
+// A DB unique index is the dedup oracle -- config_digest for scoring formats,
+// the full config tuple for league formats, which still fits in an index.
+// Identity (id) is opaque either way (slug for the named catalog,
+// gen_random_uuid() for the long tail).
+// ON CONFLICT ... DO UPDATE SET id = <table>.id is a
 // no-op-with-returning trick: DO NOTHING returns no row on conflict, so the
 // caller cannot retrieve the existing id without a second SELECT.
 //
@@ -62,15 +67,24 @@ const upsert_and_return_id = async (
   return result.rows[0].id
 }
 
+// The conflict target is config_digest, a generated column carrying an md5 over
+// every scoring column, rather than the columns themselves. The config tuple is
+// 44 columns and Postgres's max_index_keys is 32, so the full-tuple unique
+// index that used to be the dedup oracle can no longer be built. See
+// db/adhoc/2026-08-04-kicking-dst-scoring-config.sql for why a digest nothing
+// references is not the content-derived identity the guideline forbids.
 export const find_or_create_scoring_format = async (knex = db, config) => {
-  const values = SCORING_COLUMNS.map((col) =>
-    config[col] === undefined ? null : config[col]
-  )
+  // resolve_scoring_config fills an absent key from the registry default rather
+  // than with null. Every kicking and DST column is NOT NULL and no caller
+  // supplies them yet -- the external-league mapper structurally cannot -- so
+  // mapping absent to null here would fail every import.
+  const resolved = resolve_scoring_config(config)
+  const values = SCORING_COLUMNS.map((col) => resolved[col])
   return upsert_and_return_id(
     knex,
     'league_scoring_formats',
     SCORING_COLUMNS,
-    SCORING_COLUMNS,
+    ['config_digest'],
     values
   )
 }

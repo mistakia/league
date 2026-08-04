@@ -8,7 +8,10 @@
  * the context-doc rules generator consumes it server-side.
  *
  * `scoring_field_labels` is grouped by section (passing / rushing / receiving /
- * misc) to match both the settings UI sections and the rules-doc scoring table.
+ * misc / kicking / defense) to match both the settings UI sections and the
+ * rules-doc scoring table. Every key is a `section` in
+ * libs-shared/scoring-columns.mjs, and the registry spec asserts the two agree
+ * in both directions.
  * It additionally labels scoring fields that carry no UI control today
  * (`targets`, `rushing_first_downs`, `receiving_first_downs`,
  * `punt_return_touchdowns`, `kickoff_return_touchdowns`,
@@ -47,6 +50,31 @@ export const scoring_field_labels = {
     kickoff_return_touchdowns: 'Kick Return Tds',
     fumble_return_touchdowns: 'Fumble Return Tds',
     exclude_quarterback_kneels: 'Exclude QB Kneels'
+  },
+  kicking: {
+    field_goal_yards: 'FG Yards',
+    field_goals_made_0_19_yards: 'FG 0-19',
+    field_goals_made_20_29_yards: 'FG 20-29',
+    field_goals_made_30_39_yards: 'FG 30-39',
+    field_goals_made_40_49_yards: 'FG 40-49',
+    field_goals_made_50_plus_yards: 'FG 50+',
+    extra_points_made: 'Extra Points'
+  },
+  defense: {
+    defensive_sacks: 'Sacks',
+    defensive_interceptions: 'Ints',
+    defensive_forced_fumbles: 'Forced Fumbles',
+    defensive_recovered_fumbles: 'Recovered Fumbles',
+    defensive_three_and_outs: 'Three And Outs',
+    defensive_fourth_down_stops: 'Fourth Down Stops',
+    defensive_points_against: 'Points Against',
+    defensive_points_against_threshold: 'Points Against Threshold',
+    defensive_yards_against: 'Yards Against',
+    defensive_yards_against_threshold: 'Yards Against Threshold',
+    defensive_blocked_kicks: 'Blocked Kicks',
+    defensive_safeties: 'Safeties',
+    defensive_two_point_returns: 'Two PT Returns',
+    defensive_touchdowns: 'Tds'
   }
 }
 

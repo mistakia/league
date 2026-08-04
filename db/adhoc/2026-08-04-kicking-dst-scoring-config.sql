@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-04 against league_production
 --
 -- Make kicking and DST scoring configurable per format, and replace the dedup
 -- mechanism with a generated digest.

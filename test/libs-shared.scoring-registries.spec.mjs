@@ -63,20 +63,50 @@ const parse_scoring_format_columns = (schema_sql) => {
 
 // The dedup oracle: a config that already exists must upsert onto its existing
 // id rather than minting a new one. A registry column missing from the oracle
-// silently merges two distinct formats.
+// silently merges two distinct formats onto one id, with no error anywhere.
 //
-// Today the oracle is the full-tuple unique constraint. It is replaced by a
-// generated config_digest column once the kicking and DST columns take the
-// tuple past Postgres's 32-key index ceiling, at which point this reads the
-// digest expression instead.
+// The oracle is the generated `config_digest` column. It replaced the
+// full-tuple unique constraint once the kicking and DST columns took the tuple
+// to 44 columns, past Postgres's max_index_keys of 32.
+//
+// The old constraint could be read with a paren-delimited regex; the digest
+// cannot, because its body is a chain of `coalesce(<col>::text, '')` calls and
+// so is full of nested parens. Matching to the first `)` would stop inside the
+// first coalesce. This instead anchors on the generated-column clause and reads
+// the column names out of the coalesce calls directly, which needs no balanced
+// matching at all.
 const parse_dedup_oracle_columns = (schema_sql) => {
-  const constraint = schema_sql.match(
-    /ADD CONSTRAINT league_scoring_formats_config_unique UNIQUE \(([^)]+)\)/
+  const generated = schema_sql.match(
+    /config_digest text GENERATED ALWAYS AS \(([\s\S]*?)\) STORED/i
   )
 
-  expect(constraint, 'dedup oracle not found in schema').to.exist
+  expect(generated, 'config_digest generated column not found in schema').to
+    .exist
 
-  return constraint[1].split(',').map((column) => column.trim())
+  // Postgres does not store the expression as authored -- it round-trips it
+  // through its own deparser, which upcases COALESCE and parenthesises a column
+  // reference before a cast, so the authored `coalesce(passing_attempts::text,
+  // '')` dumps as `COALESCE((passing_attempts)::text, ''::text)`. Both forms
+  // are accepted here so the assertion is about which columns the digest
+  // covers, not about deparser formatting.
+  const columns = [
+    ...generated[1].matchAll(/coalesce\(\(?(\w+)\)?::text/gi)
+  ].map((match) => match[1])
+
+  expect(columns, 'digest expression names no columns').to.not.be.empty
+
+  return columns
+}
+
+// pg_dump renders a positive numeric default bare (`DEFAULT 0.1`) and a
+// negative one as a cast literal (`DEFAULT '-0.4'::numeric`), so a registry
+// holding the real JS value cannot be compared to the dumped text as a string.
+// Normalising here rather than encoding pg_dump's cast syntax into the registry
+// keeps `default_value` a usable value -- find-or-create-format fills absent
+// NOT NULL columns from it, and it could not bind the string "'-0.4'::numeric".
+const normalize_schema_default = (default_sql) => {
+  const unwrapped = default_sql.replace(/^'(.*)'::\w+(\(\d+(,\d+)?\))?$/, '$1')
+  return unwrapped.replace(/::\w+(\(\d+(,\d+)?\))?$/, '')
 }
 
 describe('LIBS-SHARED scoring registry', function () {
@@ -134,10 +164,23 @@ describe('LIBS-SHARED scoring registry', function () {
             `${entry.column} has no schema default`
           ).to.equal(undefined)
         } else {
-          expect(
-            String(entry.default_value),
-            `default_value for ${entry.column}`
-          ).to.equal(default_sql)
+          const expected = normalize_schema_default(default_sql)
+          const actual = String(entry.default_value)
+          const both_numeric =
+            Number.isFinite(Number(expected)) && Number.isFinite(Number(actual))
+
+          if (both_numeric) {
+            // numeric(4,3) DEFAULT 0.1 dumps as `0.100`; the registry holds
+            // 0.1. Compare as numbers so trailing zeros are not a failure.
+            expect(
+              Number(actual),
+              `default_value for ${entry.column}`
+            ).to.equal(Number(expected))
+          } else {
+            expect(actual, `default_value for ${entry.column}`).to.equal(
+              expected
+            )
+          }
         }
       }
     })

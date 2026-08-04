@@ -161,6 +161,7 @@ DROP INDEX IF EXISTS public.nfl_games_nflverse_game_id;
 DROP INDEX IF EXISTS public.nfl_game_coaches_team;
 DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_tid_year_idx;
 DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_pid_year_idx;
+DROP INDEX IF EXISTS public.league_scoring_formats_config_digest_unique;
 DROP INDEX IF EXISTS public.idx_weekly_market_selections_analysis_cache_composite;
 DROP INDEX IF EXISTS public.idx_waivers_super_priority;
 DROP INDEX IF EXISTS public.idx_waivers_lid;
@@ -4344,7 +4345,29 @@ CREATE TABLE public.league_scoring_formats (
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     exclude_quarterback_kneels boolean DEFAULT false NOT NULL,
     fumble_return_touchdowns smallint NOT NULL,
-    id text NOT NULL
+    id text NOT NULL,
+    field_goal_yards numeric(4,3) DEFAULT 0.1 NOT NULL,
+    field_goals_made_0_19_yards numeric(4,2) DEFAULT 0 NOT NULL,
+    field_goals_made_20_29_yards numeric(4,2) DEFAULT 0 NOT NULL,
+    field_goals_made_30_39_yards numeric(4,2) DEFAULT 0 NOT NULL,
+    field_goals_made_40_49_yards numeric(4,2) DEFAULT 0 NOT NULL,
+    field_goals_made_50_plus_yards numeric(4,2) DEFAULT 0 NOT NULL,
+    extra_points_made numeric(4,2) DEFAULT 1 NOT NULL,
+    defensive_sacks numeric(4,2) DEFAULT 1 NOT NULL,
+    defensive_interceptions numeric(4,2) DEFAULT 2 NOT NULL,
+    defensive_forced_fumbles numeric(4,2) DEFAULT 1 NOT NULL,
+    defensive_recovered_fumbles numeric(4,2) DEFAULT 1 NOT NULL,
+    defensive_three_and_outs numeric(4,2) DEFAULT 1 NOT NULL,
+    defensive_fourth_down_stops numeric(4,2) DEFAULT 1 NOT NULL,
+    defensive_blocked_kicks numeric(4,2) DEFAULT 3 NOT NULL,
+    defensive_safeties numeric(4,2) DEFAULT 2 NOT NULL,
+    defensive_two_point_returns numeric(4,2) DEFAULT 2 NOT NULL,
+    defensive_touchdowns numeric(4,2) DEFAULT 6 NOT NULL,
+    defensive_points_against numeric(4,3) DEFAULT '-0.4'::numeric NOT NULL,
+    defensive_points_against_threshold smallint DEFAULT 20 NOT NULL,
+    defensive_yards_against numeric(5,4) DEFAULT '-0.02'::numeric NOT NULL,
+    defensive_yards_against_threshold smallint DEFAULT 300 NOT NULL,
+    config_digest text GENERATED ALWAYS AS (md5(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((COALESCE((passing_attempts)::text, ''::text) || '|'::text) || COALESCE((passing_completions)::text, ''::text)) || '|'::text) || COALESCE((passing_yards)::text, ''::text)) || '|'::text) || COALESCE((passing_interceptions)::text, ''::text)) || '|'::text) || COALESCE((passing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_attempts)::text, ''::text)) || '|'::text) || COALESCE((rushing_yards)::text, ''::text)) || '|'::text) || COALESCE((rushing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_first_downs)::text, ''::text)) || '|'::text) || COALESCE((fumbles_lost)::text, ''::text)) || '|'::text) || COALESCE((targets)::text, ''::text)) || '|'::text) || COALESCE((receptions)::text, ''::text)) || '|'::text) || COALESCE((running_back_reception)::text, ''::text)) || '|'::text) || COALESCE((wide_receiver_reception)::text, ''::text)) || '|'::text) || COALESCE((tight_end_reception)::text, ''::text)) || '|'::text) || COALESCE((receiving_yards)::text, ''::text)) || '|'::text) || COALESCE((receiving_first_downs)::text, ''::text)) || '|'::text) || COALESCE((receiving_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((two_point_conversions)::text, ''::text)) || '|'::text) || COALESCE((punt_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((kickoff_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((fumble_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((exclude_quarterback_kneels)::text, ''::text)) || '|'::text) || COALESCE((field_goal_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_0_19_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_20_29_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_30_39_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_40_49_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_50_plus_yards)::text, ''::text)) || '|'::text) || COALESCE((extra_points_made)::text, ''::text)) || '|'::text) || COALESCE((defensive_sacks)::text, ''::text)) || '|'::text) || COALESCE((defensive_interceptions)::text, ''::text)) || '|'::text) || COALESCE((defensive_forced_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_recovered_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_three_and_outs)::text, ''::text)) || '|'::text) || COALESCE((defensive_fourth_down_stops)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_blocked_kicks)::text, ''::text)) || '|'::text) || COALESCE((defensive_safeties)::text, ''::text)) || '|'::text) || COALESCE((defensive_two_point_returns)::text, ''::text)) || '|'::text) || COALESCE((defensive_touchdowns)::text, ''::text)))) STORED
 );
 
 
@@ -31804,6 +31827,13 @@ CREATE INDEX idx_waivers_super_priority ON public.waivers USING btree (super_pri
 --
 
 CREATE INDEX idx_weekly_market_selections_analysis_cache_composite ON public.weekly_market_selections_analysis_cache USING btree (source_id, source_market_id, source_selection_id);
+
+
+--
+-- Name: league_scoring_formats_config_digest_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX league_scoring_formats_config_digest_unique ON public.league_scoring_formats USING btree (config_digest);
 
 
 --

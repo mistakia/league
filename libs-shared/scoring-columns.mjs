@@ -45,10 +45,10 @@
  * control today. An entry without them is scoreable but not editable in the UI.
  */
 
-// The kicking and DST entries below carry a `stat` but no `column`: their
-// values are still hardcoded in calculate-points.mjs. The columns arrive with
-// the league_scoring_formats migration, at which point the `if/else` in that
-// file collapses into one loop over this registry.
+// The two `*_threshold` entries are the only kicking or DST columns with no
+// `stat`. They parameterise a rate rather than reporting a value, so a gamelog
+// never carries them and they must stay out of `defense_fantasy_stats` and
+// therefore out of `all_fantasy_stats`, which gates persisted gamelog columns.
 export const scoring_registry = [
   // --- passing ---
   {
@@ -320,32 +320,262 @@ export const scoring_registry = [
     stat: 'field_goals_made',
     group: 'kicking'
   },
-  { stat: 'field_goal_yards', group: 'kicking' },
-  { stat: 'field_goals_made_0_19_yards', group: 'kicking' },
-  { stat: 'field_goals_made_20_29_yards', group: 'kicking' },
-  { stat: 'field_goals_made_30_39_yards', group: 'kicking' },
-  { stat: 'field_goals_made_40_49_yards', group: 'kicking' },
-  { stat: 'field_goals_made_50_plus_yards', group: 'kicking' },
-  { stat: 'extra_points_made', group: 'kicking' },
+  {
+    // A per-yard rate, not a per-kick value. The five bands below partition the
+    // same made kicks and are additive with it, so a banded league sets the
+    // bands and zeroes this. The 0.1 default is what production has always
+    // scored -- see the migration header for the measurement.
+    stat: 'field_goal_yards',
+    column: 'field_goal_yards',
+    group: 'kicking',
+    section: 'kicking',
+    label: 'FG Yards',
+    sql_type: 'numeric(4,3)',
+    default_value: 0.1,
+    input_type: 'float'
+  },
+  {
+    stat: 'field_goals_made_0_19_yards',
+    column: 'field_goals_made_0_19_yards',
+    group: 'kicking',
+    section: 'kicking',
+    label: 'FG 0-19',
+    sql_type: 'numeric(4,2)',
+    default_value: 0,
+    input_type: 'float'
+  },
+  {
+    stat: 'field_goals_made_20_29_yards',
+    column: 'field_goals_made_20_29_yards',
+    group: 'kicking',
+    section: 'kicking',
+    label: 'FG 20-29',
+    sql_type: 'numeric(4,2)',
+    default_value: 0,
+    input_type: 'float'
+  },
+  {
+    stat: 'field_goals_made_30_39_yards',
+    column: 'field_goals_made_30_39_yards',
+    group: 'kicking',
+    section: 'kicking',
+    label: 'FG 30-39',
+    sql_type: 'numeric(4,2)',
+    default_value: 0,
+    input_type: 'float'
+  },
+  {
+    stat: 'field_goals_made_40_49_yards',
+    column: 'field_goals_made_40_49_yards',
+    group: 'kicking',
+    section: 'kicking',
+    label: 'FG 40-49',
+    sql_type: 'numeric(4,2)',
+    default_value: 0,
+    input_type: 'float'
+  },
+  {
+    stat: 'field_goals_made_50_plus_yards',
+    column: 'field_goals_made_50_plus_yards',
+    group: 'kicking',
+    section: 'kicking',
+    label: 'FG 50+',
+    sql_type: 'numeric(4,2)',
+    default_value: 0,
+    input_type: 'float'
+  },
+  {
+    stat: 'extra_points_made',
+    column: 'extra_points_made',
+    group: 'kicking',
+    section: 'kicking',
+    label: 'Extra Points',
+    sql_type: 'numeric(4,2)',
+    default_value: 1,
+    input_type: 'float'
+  },
 
   // --- DST (defense and special teams, one unit) ---
-  { stat: 'defensive_sacks', group: 'dst' },
-  { stat: 'defensive_interceptions', group: 'dst' },
-  { stat: 'defensive_forced_fumbles', group: 'dst' },
-  { stat: 'defensive_recovered_fumbles', group: 'dst' },
-  { stat: 'defensive_three_and_outs', group: 'dst' },
-  { stat: 'defensive_fourth_down_stops', group: 'dst' },
-  { stat: 'defensive_points_against', group: 'dst' },
-  { stat: 'defensive_yards_against', group: 'dst' },
-  { stat: 'defensive_blocked_kicks', group: 'dst' },
-  { stat: 'defensive_safeties', group: 'dst' },
-  { stat: 'defensive_two_point_returns', group: 'dst' },
-  { stat: 'defensive_touchdowns', group: 'dst' }
+  {
+    stat: 'defensive_sacks',
+    column: 'defensive_sacks',
+    group: 'dst',
+    section: 'defense',
+    label: 'Sacks',
+    sql_type: 'numeric(4,2)',
+    default_value: 1,
+    input_type: 'float'
+  },
+  {
+    stat: 'defensive_interceptions',
+    column: 'defensive_interceptions',
+    group: 'dst',
+    section: 'defense',
+    label: 'Ints',
+    sql_type: 'numeric(4,2)',
+    default_value: 2,
+    input_type: 'float'
+  },
+  {
+    stat: 'defensive_forced_fumbles',
+    column: 'defensive_forced_fumbles',
+    group: 'dst',
+    section: 'defense',
+    label: 'Forced Fumbles',
+    sql_type: 'numeric(4,2)',
+    default_value: 1,
+    input_type: 'float'
+  },
+  {
+    stat: 'defensive_recovered_fumbles',
+    column: 'defensive_recovered_fumbles',
+    group: 'dst',
+    section: 'defense',
+    label: 'Recovered Fumbles',
+    sql_type: 'numeric(4,2)',
+    default_value: 1,
+    input_type: 'float'
+  },
+  {
+    stat: 'defensive_three_and_outs',
+    column: 'defensive_three_and_outs',
+    group: 'dst',
+    section: 'defense',
+    label: 'Three And Outs',
+    sql_type: 'numeric(4,2)',
+    default_value: 1,
+    input_type: 'float'
+  },
+  {
+    stat: 'defensive_fourth_down_stops',
+    column: 'defensive_fourth_down_stops',
+    group: 'dst',
+    section: 'defense',
+    label: 'Fourth Down Stops',
+    sql_type: 'numeric(4,2)',
+    default_value: 1,
+    input_type: 'float'
+  },
+  {
+    // Rate half of a rate/threshold pair: the value is applied per point
+    // ALLOWED BEYOND the threshold, replacing the hardcoded
+    // `max(points_against - 20, 0) * -0.4` in calculate-points.mjs.
+    stat: 'defensive_points_against',
+    column: 'defensive_points_against',
+    group: 'dst',
+    section: 'defense',
+    label: 'Points Against',
+    sql_type: 'numeric(4,3)',
+    default_value: -0.4,
+    input_type: 'float'
+  },
+  {
+    // Threshold half of the pair. A count, not a rate, so smallint -- the
+    // repo's numeric(2,1) scoring convention cannot hold 300. Carries no
+    // `stat`: it is a parameter of the scoring, not a value a gamelog reports,
+    // so it must stay out of defense_fantasy_stats and all_fantasy_stats.
+    column: 'defensive_points_against_threshold',
+    group: 'dst',
+    section: 'defense',
+    label: 'Points Against Threshold',
+    sql_type: 'smallint',
+    default_value: 20,
+    input_type: 'int'
+  },
+  {
+    stat: 'defensive_yards_against',
+    column: 'defensive_yards_against',
+    group: 'dst',
+    section: 'defense',
+    label: 'Yards Against',
+    sql_type: 'numeric(5,4)',
+    default_value: -0.02,
+    input_type: 'float'
+  },
+  {
+    column: 'defensive_yards_against_threshold',
+    group: 'dst',
+    section: 'defense',
+    label: 'Yards Against Threshold',
+    sql_type: 'smallint',
+    default_value: 300,
+    input_type: 'int'
+  },
+  {
+    stat: 'defensive_blocked_kicks',
+    column: 'defensive_blocked_kicks',
+    group: 'dst',
+    section: 'defense',
+    label: 'Blocked Kicks',
+    sql_type: 'numeric(4,2)',
+    default_value: 3,
+    input_type: 'float'
+  },
+  {
+    stat: 'defensive_safeties',
+    column: 'defensive_safeties',
+    group: 'dst',
+    section: 'defense',
+    label: 'Safeties',
+    sql_type: 'numeric(4,2)',
+    default_value: 2,
+    input_type: 'float'
+  },
+  {
+    stat: 'defensive_two_point_returns',
+    column: 'defensive_two_point_returns',
+    group: 'dst',
+    section: 'defense',
+    label: 'Two PT Returns',
+    sql_type: 'numeric(4,2)',
+    default_value: 2,
+    input_type: 'float'
+  },
+  {
+    stat: 'defensive_touchdowns',
+    column: 'defensive_touchdowns',
+    group: 'dst',
+    section: 'defense',
+    label: 'Tds',
+    sql_type: 'numeric(4,2)',
+    default_value: 6,
+    input_type: 'float'
+  }
 ]
 
 export const scoring_columns = scoring_registry.filter((entry) => entry.column)
 
 export const scoring_column_names = scoring_columns.map((entry) => entry.column)
+
+// Resolves the value to write for a config column a caller did not supply.
+//
+// This is load bearing, not a convenience. Every one of the 21 kicking and DST
+// columns is NOT NULL, and callers routinely supply a partial config: the
+// external-league importer builds `scoring_params` from a platform mapper that
+// has no kicking or DST keys at all, and the named format definitions declare
+// only the base columns. Mapping an absent key to `null` -- which is what
+// find-or-create did before these columns existed -- inserts an explicit NULL
+// and fails the constraint, taking live external-league import with it. An
+// explicit NULL does NOT fall back to the column DEFAULT, so the schema cannot
+// rescue this and the fill has to happen here.
+//
+// A base column with no registry default still resolves to `null`, preserving
+// the previous behaviour: those have no schema default either, so a caller
+// omitting one is a real error and should fail loudly rather than be invented.
+export const default_value_for_column = (column) => {
+  const entry = scoring_columns.find((entry) => entry.column === column)
+  return entry && entry.default_value !== undefined ? entry.default_value : null
+}
+
+export const resolve_scoring_config = (config) =>
+  Object.fromEntries(
+    scoring_column_names.map((column) => [
+      column,
+      config[column] === undefined
+        ? default_value_for_column(column)
+        : config[column]
+    ])
+  )
 
 export const stat_names_for_group = (group) =>
   scoring_registry

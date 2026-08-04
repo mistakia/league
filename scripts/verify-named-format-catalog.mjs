@@ -28,12 +28,22 @@ import {
   SCORING_COLUMNS,
   LEAGUE_COLUMNS
 } from '#libs-server/find-or-create-format.mjs'
+import { default_value_for_column } from '#libs-shared/scoring-columns.mjs'
 
-const compare_config = (db_row, source_config, columns) => {
+// `default_resolver` fills a column the source config omits, matching what the
+// writer did on insert. Without it every named format reports a mismatch on all
+// 21 kicking and DST columns, which no named format declares: the source would
+// compare null against the registry default the row actually holds.
+const compare_config = (db_row, source_config, columns, default_resolver) => {
   const mismatches = []
   for (const col of columns) {
     const db_val = db_row[col]
-    const src_val = source_config[col] === undefined ? null : source_config[col]
+    const src_val =
+      source_config[col] === undefined
+        ? default_resolver
+          ? default_resolver(col)
+          : null
+        : source_config[col]
     // Numeric coercion: knex returns numerics as strings on some drivers
     const db_num = typeof db_val === 'string' ? Number(db_val) : db_val
     const src_num = typeof src_val === 'string' ? Number(src_val) : src_val
@@ -66,7 +76,12 @@ const verify_scoring = async () => {
         errors.push(`No source config for scoring source key '${source_key}'`)
         continue
       }
-      const mismatches = compare_config(row, source_config, SCORING_COLUMNS)
+      const mismatches = compare_config(
+        row,
+        source_config,
+        SCORING_COLUMNS,
+        default_value_for_column
+      )
       if (mismatches.length) {
         errors.push(
           `Scoring '${source_key}' -> id '${id}' mismatches: ${mismatches.join('; ')}`
