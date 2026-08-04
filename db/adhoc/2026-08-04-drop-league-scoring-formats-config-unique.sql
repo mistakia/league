@@ -1,0 +1,33 @@
+-- STATUS: PENDING
+--
+-- Drop the 23-column config tuple constraint, now that config_digest is the
+-- dedup oracle.
+--
+-- DO NOT APPLY THIS UNTIL THE DEPLOY LANDS. It is the second half of
+-- 2026-08-04-kicking-dst-scoring-config.sql, split off for one reason: deployed
+-- production code spells its upsert `ON CONFLICT (<the 23 columns>)`, and that
+-- form requires a unique index on exactly those columns. Dropping the
+-- constraint while that code is running fails every
+-- find_or_create_scoring_format call -- including live external-league import --
+-- with "no unique or exclusion constraint matching the ON CONFLICT
+-- specification". The deploy is human-gated, so that window is hours, not
+-- seconds.
+--
+-- The precondition is therefore not "the code is committed" but "the code is
+-- RUNNING". Check it the way CLAUDE.md prescribes, against the host rather than
+-- against origin:
+--
+--   ssh league 'cd /root/league && git rev-parse --short HEAD'
+--
+-- and confirm that commit carries `ON CONFLICT (config_digest)` in
+-- libs-server/find-or-create-format.mjs before running this file.
+--
+-- Leaving the constraint in place indefinitely is not an option, which is why
+-- this is a file rather than a note: it is strictly stricter than the digest,
+-- so once formats start differing in the new kicking and DST columns it will
+-- reject legitimately distinct configs that share the older 23 values.
+--
+-- The transaction is required. No non-blocking index build is involved.
+
+ALTER TABLE public.league_scoring_formats
+  DROP CONSTRAINT league_scoring_formats_config_unique;
