@@ -1,11 +1,13 @@
 {
   "generated_at": "2026-08-04",
-  "ruler": "league cb578d8e7 (db/adhoc/audit-schema-conformance.mjs, boolean-prefix rule landed 2026-08-01)",
+  "ruler": "league 74b1366cd (db/adhoc/audit-schema-conformance.mjs, epa/iqr proprietary-metric exemption 2026-08-04). Authored against cb578d8e7, which measured 559 total / 240 shorthand; the exemption this map argued for landed in 74b1366cd and moved the ruler to 553 total / 234 shorthand.",
   "measured": {
-    "total_violations": 559,
-    "shorthand_violations": 240,
+    "total_violations_at_authoring": 559,
+    "shorthand_at_authoring": 240,
     "shorthand_tables": 55,
-    "note": "Re-measured by running the audit directly; matches the brief on all three figures."
+    "total_after_rule_refinement": 553,
+    "shorthand_after_rule_refinement": 234,
+    "note": "The 6 epa/iqr keeps stopped being reported once the exemption landed, so the residual FLOOR this map drives to is now 23 (the superseded set) rather than 29."
   },
   "dispositions": {
     "rename": 202,
@@ -24,7 +26,8 @@
     "boolean_overlap": "ZERO. Not merely empirically -- structurally. audit-schema-conformance.mjs computes is_unprefixed_boolean BEFORE the shorthand block and the bare-short-name branch guards on !unprefixed_boolean, so a column cannot be reported under both rules. comm(1) over class-shorthand.txt and class-boolean-prefix.txt confirms an empty intersection. No column is double-scheduled and no marking was required.",
     "audit_rule_conflict": "db/adhoc/2026-07-22-player-prospect-profile-sis-conform.sql:5 records the operator ruling \"IQR kept (proprietary metric name, like EPA)\" while conforming 224 SIS columns. audit-schema-conformance.mjs:148 says the opposite -- that domain acronyms including epa are \"likewise not exempt\". Six columns sit in that gap (epa on nfl_plays, nfl_plays_current_week and both player_college tables; iqr on both player_college tables). They are marked `keep` on the strength of the operator ruling, which outranks the script. The script needs epa and iqr added to its exempt set. Note the ruling does NOT extend to adp, faab or cpoe, which have unambiguous expansions and are mapped as renames.",
     "lifecycle": "MIGRATION INSTRUMENT, NOT A PERMANENT ARTIFACT. It is authoritative input for the per-cluster migrations -- eleven workers consume it so they do not each re-derive the vocabulary and drift -- which is exactly why it cannot live under scratch/: user:guideline/scratch-tier-discipline.md states that scratch is never a source of truth and that \"grepping scratch/ for authoritative answers is a workflow bug\", and scratch is single-machine so it cannot cross hosts. Retirement trigger: when the audit's shorthand class reaches its floor of 29 (23 superseded + 6 keep) and those are cleared by their owning tasks, DELETE this file in the same commit that closes the class. The durable residue is not this JSON -- it is the applied db/adhoc/*.sql files, the schema itself, and the three non-obvious rulings recorded as observations on user:task/league/redesign-league-database-schema.md (pos -> player_position rather than the audit hint, the epa/iqr exemption, and the nine dead columns).",
-    "output_path": "This file sits under scratch/, which .gitignore excludes at rule `scratch/*/*/*`. The task plan says to COMMIT it; at this path that is impossible. Recommend relocating to repository/active/league/db/adhoc/shorthand-rename-map.json, beside the audit script that defines the rule it answers to."
+    "output_path": "This file sits under scratch/, which .gitignore excludes at rule `scratch/*/*/*`. The task plan says to COMMIT it; at this path that is impossible. Recommend relocating to repository/active/league/db/adhoc/shorthand-rename-map.json, beside the audit script that defines the rule it answers to.",
+    "partitions": "VERIFIED EMPIRICALLY, not assumed. Two mapped tables are partitioned parents: nfl_plays (27 children x 21 renamed columns) and player_gamelogs (28 children x 2). No mapped table is itself a partition child. A throwaway Postgres probe confirmed both directions: ALTER TABLE <parent> RENAME COLUMN propagates to every child in one catalog operation, and attempting the rename on a child instead FAILS with \"cannot rename inherited column\" rather than diverging silently. So the 623 implied child-level column instances collapse to 23 parent statements, and the wrong approach is loud rather than quiet."
   },
   "records": [
     {
