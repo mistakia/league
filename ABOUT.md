@@ -516,12 +516,23 @@ observations:
     an it() under a frozen clock. Only trade.spec.mjs never sets a date in its post block, which is
     why it alone raced (fixed in 14ade5fef); sweeping the other 45 to closeTo would weaken real
     assertions.
+  - >-
+    [security] 2026-08-04 mistakia/league master is NOT protected (branches/master/protection
+    returns 404) and the sole ruleset 'protect main' is enforcement:disabled targeting 'main' while
+    the default branch is master, so a failing CI check blocks no merge and a direct push to master
+    is unguarded; any design that leans on CI as a merge gate must enable protection first.
+  - >-
+    [gotcha] 2026-08-04 thread_config deny_paths cannot stop a file write from Bash:
+    claude-home-bootstrap.mjs:149-190 emits only Read()/Edit() denials and the container gate
+    config/base-container/validate-user-command.sh (60 lines) covers network tools, destructive
+    commands and privilege escalation only, so sed -i, tee, node -e and shell redirection all pass;
+    treat path denials as advisory and gate on a diff check instead.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-03T16:53:45.911Z'
+updated_at: '2026-08-04T18:23:21.377Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
