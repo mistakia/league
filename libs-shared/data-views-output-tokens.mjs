@@ -49,7 +49,7 @@ export const translate_rate_type_to_output = (rate_type) => {
 
 // Periods whose denominator does not vary with play-level filter params.
 // Single source of truth for is_play_level_period and the column-param UI
-// `disabled_values` list in output-column-param.mjs / rate-type-column-param.mjs.
+// `disabled_values` list in output-column-param.mjs.
 export const NON_PLAY_LEVEL_PERIODS = new Set([
   'game',
   'season',

@@ -62,10 +62,11 @@ export default function get_rate_type_denominator_params({ params = {} } = {}) {
     }
   }
 
-  // Canonical key under the identity-model contract is `output_column_params`;
-  // `rate_type_column_params` is retained as an alias for one release cycle and
-  // is read only when the canonical key is absent. Removed in
-  // retire-rate-type-compat-shims.
+  // Canonical key is `output_column_params`; `rate_type_column_params` is read
+  // only when it is absent. That alias is permanent, not a deprecation window:
+  // shared short URLs are immutable rows in the production `urls` table and
+  // carry the old key forever, and the saved-view migrator runs against browser
+  // localStorage rather than the request path, so it cannot reach them.
   const output_column_params =
     params.output_column_params ?? params.rate_type_column_params
 
