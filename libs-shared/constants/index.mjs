@@ -59,6 +59,17 @@ export {
   nfl_player_status_descriptions
 } from './player-status-constants.mjs'
 
+// Position constants
+export {
+  position_groups,
+  position_group_members,
+  position_vocabulary,
+  group_for_position,
+  position_alias_map,
+  normalize_position,
+  get_position_group
+} from './position-constants.mjs'
+
 // NFL teams constants
 export {
   nfl_team_abbreviations,
