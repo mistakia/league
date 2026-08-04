@@ -42,7 +42,7 @@ const describe_asset = (asset) => {
   const resulting = asset.resulting_assets.length
     ? asset.resulting_assets.map(format_trade_asset_label).join(', ')
     : asset.lineage_state
-  return `${format_trade_asset_label(asset)} -> ${resulting} (now ${asset.current_market_value})`
+  return `${format_trade_asset_label(asset)} -> ${resulting} (now ${asset.current_keeptradecut_value})`
 }
 
 const report = ({ results, boom_threshold }) => {

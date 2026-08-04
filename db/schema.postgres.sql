@@ -26924,7 +26924,7 @@ CREATE VIEW public.view_trade_asset_flow AS
     tgt.pick_year,
     tgt.pick_round,
     tgt.pick_original_owner_tid,
-    src.keeptradecut_value_at_termination AS market_value_at_trade,
+    src.keeptradecut_value_at_termination AS keeptradecut_value_at_trade,
     src.salary_paid AS salary_paid_at_trade,
     src.realized_pts_added_net_through_termination AS pts_added_before_trade,
     tgt.terminated_by AS post_trade_terminated_by,
@@ -26939,7 +26939,7 @@ CREATE VIEW public.view_trade_asset_flow AS
 -- Name: VIEW view_trade_asset_flow; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON VIEW public.view_trade_asset_flow IS 'One row per trade leg: which team gave up which asset to whom, and what that asset was worth when it moved. market_value_at_trade is the source holding''s KTC value at the moment it left. Join target_holding_id to view_roster_asset_lineage_walk.originating_holding_id to follow what the asset later became.';
+COMMENT ON VIEW public.view_trade_asset_flow IS 'One row per trade leg: which team gave up which asset to whom, and what that asset was worth when it moved. keeptradecut_value_at_trade is the source holding''s KeepTradeCut value at the moment it left, in the league''s own market format class. Join target_holding_id to view_roster_asset_lineage_walk.originating_holding_id to follow what the asset later became.';
 
 
 --

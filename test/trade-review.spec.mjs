@@ -289,7 +289,7 @@ describe('LIBS SERVER trade-review', function () {
     expect(acquired_pick.resulting_assets[0].player_id).to.equal(
       drafted_player.pid
     )
-    expect(acquired_pick.current_market_value).to.equal(
+    expect(acquired_pick.current_keeptradecut_value).to.equal(
       DRAFTED_PLAYER_VALUE_NOW
     )
   })
@@ -323,7 +323,7 @@ describe('LIBS SERVER trade-review', function () {
     expect(acquired_player.player_id).to.equal(traded_player.pid)
     expect(acquired_player.lineage_state).to.equal(LINEAGE_STATE.no_longer_held)
     expect(acquired_player.resulting_assets.length).to.equal(0)
-    expect(acquired_player.current_market_value).to.equal(0)
+    expect(acquired_player.current_keeptradecut_value).to.equal(0)
   })
 
   // Derived from the source data rather than asserted as a constant: which
@@ -331,7 +331,7 @@ describe('LIBS SERVER trade-review', function () {
   it('withholds the at-trade figure whenever any leg is unpriced', async () => {
     const unpriced_rows = await knex('view_trade_asset_flow')
       .where('lid', LID)
-      .whereNull('market_value_at_trade')
+      .whereNull('keeptradecut_value_at_trade')
       .select('trade_uid')
     const unpriced_trade_uids = new Set(
       unpriced_rows.map((row) => row.trade_uid)

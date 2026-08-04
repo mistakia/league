@@ -150,10 +150,10 @@ const without_chains = (trade) => ({
  *           type: integer
  *           nullable: true
  *           description: Position across the whole draft, not within its round
- *         market_value_at_trade:
+ *         keeptradecut_value_at_trade:
  *           type: number
  *           nullable: true
- *         current_market_value:
+ *         current_keeptradecut_value:
  *           type: number
  *         lineage_state:
  *           type: string

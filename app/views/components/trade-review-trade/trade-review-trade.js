@@ -145,7 +145,7 @@ function Asset({ asset, has_chains }) {
   const lineage_state = asset.get('lineage_state')
   const chain = asset.get('chain')
   const resulting_assets = asset.get('resulting_assets')
-  const market_value_at_trade = asset.get('market_value_at_trade')
+  const keeptradecut_value_at_trade = asset.get('keeptradecut_value_at_trade')
 
   return (
     <div className='trade-review-trade__asset'>
@@ -154,8 +154,8 @@ function Asset({ asset, has_chains }) {
           <AssetLabel asset={asset} />
         </div>
         <div className='trade-review-trade__asset-values'>
-          <span title='Market value on the day of the trade'>
-            {market_value_at_trade == null ? (
+          <span title='KeepTradeCut value on the day of the trade'>
+            {keeptradecut_value_at_trade == null ? (
               <span
                 className='trade-review-trade__net-unpriced'
                 title={UNPRICED_EXPLANATION}
@@ -163,11 +163,14 @@ function Asset({ asset, has_chains }) {
                 Not priced
               </span>
             ) : (
-              Math.round(market_value_at_trade).toLocaleString()
+              Math.round(keeptradecut_value_at_trade).toLocaleString()
             )}
           </span>
-          <span title='Market value today of everything this asset became and this team still holds'>
-            {Math.round(asset.get('current_market_value')).toLocaleString()} now
+          <span title='KeepTradeCut value today of everything this asset became and this team still holds'>
+            {Math.round(
+              asset.get('current_keeptradecut_value')
+            ).toLocaleString()}{' '}
+            now
           </span>
           <span
             className={`trade-review-trade__lineage-state ${lineage_state}`}

@@ -322,10 +322,10 @@ const grade_trades = async ({
     return {
       ...asset_identity(leg),
       origin_holding_id: leg.target_holding_id,
-      market_value_at_trade: leg.market_value_at_trade
-        ? Number(leg.market_value_at_trade)
+      keeptradecut_value_at_trade: leg.keeptradecut_value_at_trade
+        ? Number(leg.keeptradecut_value_at_trade)
         : null,
-      current_market_value: terminals.reduce(
+      current_keeptradecut_value: terminals.reduce(
         (sum, terminal_row) => sum + terminal_value(terminal_row),
         0
       ),
@@ -365,14 +365,15 @@ const grade_trades = async ({
       const sum_of = (assets, field) =>
         assets.reduce((total, asset) => total + (asset[field] ?? 0), 0)
       const unpriced_leg_count =
-        acquired_assets.filter((a) => a.market_value_at_trade == null).length +
-        sent_assets.filter((a) => a.market_value_at_trade == null).length
+        acquired_assets.filter((a) => a.keeptradecut_value_at_trade == null)
+          .length +
+        sent_assets.filter((a) => a.keeptradecut_value_at_trade == null).length
       const net_value_at_trade =
-        sum_of(acquired_assets, 'market_value_at_trade') -
-        sum_of(sent_assets, 'market_value_at_trade')
+        sum_of(acquired_assets, 'keeptradecut_value_at_trade') -
+        sum_of(sent_assets, 'keeptradecut_value_at_trade')
       const net_value_realized =
-        sum_of(acquired_assets, 'current_market_value') -
-        sum_of(sent_assets, 'current_market_value')
+        sum_of(acquired_assets, 'current_keeptradecut_value') -
+        sum_of(sent_assets, 'current_keeptradecut_value')
 
       results.push({
         trade_uid: uid,
