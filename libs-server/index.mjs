@@ -110,7 +110,7 @@ export { default as record_league_format_projection_value_history } from './reco
 export * as betonline from './betonline.mjs'
 export { default as format_starting_hash } from './format-starting-hash.mjs'
 export { default as report_job } from './report-job.mjs'
-export { default as emit_signal } from './emit-signal.mjs'
+export { default as emit_signal, resolve_signal } from './emit-signal.mjs'
 export { default as throw_if_shortfall } from './throw-if-shortfall.mjs'
 export { default as check_projections_index_floor } from './check-projections-index-floor.mjs'
 export {
@@ -155,7 +155,7 @@ export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
     .select(
       'nfl_plays.player_fuml_pid',
-      'nfl_plays.fumbles_lost',
+      'nfl_plays.is_fumble_lost',
       'nfl_plays.offense_nfl_team',
       'nfl_plays.play_type',
       'nfl_plays.ball_carrier_pid',
@@ -163,24 +163,24 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.rush_yds',
       'nfl_plays.recv_yds',
       'nfl_plays.yds_gained',
-      'nfl_plays.first_down',
-      'nfl_plays.successful_play',
+      'nfl_plays.is_first_down',
+      'nfl_plays.is_successful_play',
       'nfl_plays.passer_pid',
       'nfl_plays.target_pid',
       'nfl_plays.interceptor_pid',
-      'nfl_plays.comp',
-      'nfl_plays.td',
-      'nfl_plays.sk',
+      'nfl_plays.is_completion',
+      'nfl_plays.is_touchdown',
+      'nfl_plays.is_sack',
       'nfl_plays.dwn',
       'nfl_plays.qtr',
       'nfl_plays.dot',
-      'nfl_plays.qb_pressure',
-      'nfl_plays.qb_hit',
-      'nfl_plays.qb_hurry',
-      'nfl_plays.highlight_pass',
-      'nfl_plays.int_worthy',
-      'nfl_plays.dropped_pass',
-      'nfl_plays.contested_ball',
+      'nfl_plays.is_qb_pressure',
+      'nfl_plays.is_qb_hit',
+      'nfl_plays.is_qb_hurry',
+      'nfl_plays.is_highlight_pass',
+      'nfl_plays.is_interception_worthy',
+      'nfl_plays.is_dropped_pass',
+      'nfl_plays.is_contested_ball',
       'nfl_plays.mbt',
       'nfl_plays.yards_after_catch',
       'nfl_plays.yards_after_any_contact',
@@ -212,13 +212,13 @@ const fields = [
   'nfl_plays_current_week.game_clock_start',
   'nfl_plays_current_week.ydl_end',
   'nfl_plays_current_week.ydl_start',
-  'nfl_plays_current_week.first_down',
-  'nfl_plays_current_week.goal_to_go',
+  'nfl_plays_current_week.is_first_down',
+  'nfl_plays_current_week.is_goal_to_go',
   'nfl_plays_current_week.drive_play_count',
   'nfl_plays_current_week.play_time_of_day',
   'nfl_plays_current_week.play_type_nfl',
   'nfl_plays_current_week.updated',
-  'nfl_plays_current_week.qb_kneel',
+  'nfl_plays_current_week.is_qb_kneel',
 
   'nfl_games.home_nfl_team as h',
   'nfl_games.away_nfl_team as v'

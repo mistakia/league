@@ -79,10 +79,20 @@ export const CONFIG = {
   }
 }
 
+// `draftkings` does NOT match `draftkings-tracking` -- debug matches namespaces
+// exactly unless a wildcard is given -- so the tracking module's log line never
+// printed under any configuration this repo or the pm2 config has ever carried.
+// That is the second half of why a total write failure stayed invisible for ten
+// months: the catch swallowed the error and the only line reporting it went to a
+// namespace nobody had enabled. Note this is NOT the debug.enable clobbering
+// documented in CLAUDE.md; verified 2026-08-04 by instrumenting debug.enable
+// across the real worker import graph, where no enable() call fires at all and
+// the environment's namespace set survives intact.
 export const DEBUG_MODULES = [
   'import-draft-kings',
   'get-player',
   'draftkings',
+  'draftkings-tracking',
   'insert-prop-markets',
   'insert-prop-market-selections'
 ]

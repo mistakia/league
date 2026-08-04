@@ -21,8 +21,13 @@ module.exports = {
         // write is degrading -- and it is what left the 2026-08-03 batch-size
         // retune with only wall-clock insertion timings to be judged on, with no
         // row counts to normalize them against.
+        // draftkings-tracking is listed separately on purpose: debug matches a
+        // namespace exactly, so `draftkings` does NOT cover it. Its absence is
+        // half of why draftkings_category_activity failed every write for ten
+        // months in silence -- the per-write catch logged the Postgres error to
+        // a namespace nothing had ever enabled.
         DEBUG:
-          'import-live-odds-worker,draftkings,pinnacle,prizepicks,insert-prop-markets,insert-prop-market-selections',
+          'import-live-odds-worker,draftkings,draftkings-tracking,pinnacle,prizepicks,insert-prop-markets,insert-prop-market-selections',
         BASE_MACHINE_SLUG: 'digitalocean-0',
         BASE_INSTANCE_KEY_FILE: '/root/.base-instance-private.key',
         USER_BASE_DIRECTORY:
