@@ -205,7 +205,7 @@
 | column                  | name                    | description                                                                       | coverage | since      |
 | ----------------------- | ----------------------- | --------------------------------------------------------------------------------- | -------- | ---------- |
 | desc                    | Description             | Text description of the play                                                      | 100.00%  | 2001/01/06 |
-| motion                  | Motion Type             | Type of motion: Pre-snap (P), during the snap (S), or both (PS)                   | 92.07%   | 2022/09/08 |
+| motion                  | Motion                  | Indicator if any player was in motion on the play                                 | 92.07%   | 2022/09/08 |
 | timestamp               | Timestamp               | Timestamp of the play                                                             | 99.11%   | 2001/01/06 |
 | pos_team                | Possession Team         | Team in possession of the ball                                                    | 99.99%   | 2001/01/06 |
 | pos_team_id             | Possession Team ID      | ID of the team in possession                                                      | 99.38%   | 2002/08/03 |
@@ -549,7 +549,7 @@
 | dob              | Date of Birth        | Date of birth                                                   | 100.00%  |
 | col              | College              | College                                                         | 99.02%   |
 | dv               | College Division     | College division                                                | 46.67%   |
-| start            | NFL Start Year       | Year started in the NFL                                         | 100.00%  |
+| nfl_draft_year   | NFL Start Year       | First NFL year (a start year, not a draft year)                 | 100.00%  |
 | current_nfl_team | Current NFL Team     | Current NFL team (default 'INA' if not on a team)               | 100.00%  |
 | posd             | Position Depth       | Position depth                                                  | 100.00%  |
 | jnum             | Jersey Number        | Jersey number                                                   | 99.99%   |
