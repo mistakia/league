@@ -1,4 +1,5 @@
 import db from '#db'
+import { player_could_have_played } from '../player-era.mjs'
 
 /**
  * Build the week-accurate participation index `enrich_player_identifications`
@@ -29,9 +30,36 @@ export const build_snap_roster_by_esbid = async (esbids) => {
     .join('player as p', 'p.gsis_it_player_id', 's.gsis_it_id')
     .whereIn('s.esbid', esbids)
     .whereNotNull('p.gsis_player_id')
-    .distinct('s.esbid', 'p.pid', 'p.gsis_player_id', 'p.short_name')
+    .distinct(
+      's.esbid',
+      's.season_year',
+      'p.pid',
+      'p.gsis_player_id',
+      'p.short_name',
+      'p.date_of_birth',
+      'p.nfl_draft_year',
+      'p.draft_round'
+    )
 
   for (const row of rows) {
+    // `gsis_it_player_id` is a third identifier column that can name the wrong
+    // player, the same defect `resolve_play_stat_player` and the gamelog
+    // generator's snap path both falsify on: a `player` row can hold an
+    // identifier belonging to an earlier player of the same name, and this join
+    // then places that player on a field they were not yet in the league for.
+    // Measured on production 2026-08-04, the unfiltered join yielded
+    // era-impossible entries for 4 players across 39 games and 1,328 snap rows.
+    // An index feeding a name-keyed fallback is exactly where such an entry
+    // does damage -- it can be the unique match the fallback resolves to.
+    if (
+      !player_could_have_played({
+        player: row,
+        season_year: row.season_year
+      })
+    ) {
+      continue
+    }
+
     const name_key = (row.short_name || '').toString().trim().toLowerCase()
     if (!name_key) continue
     let by_name = roster_by_esbid.get(row.esbid)
