@@ -1,0 +1,242 @@
+import fs from 'fs/promises'
+
+import debug from 'debug'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
+
+import db from '#db'
+import { is_main } from '#libs-server'
+
+const log = debug('audit-conflated-player-identity')
+debug.enable('audit-conflated-player-identity')
+
+// A conflated player row merges two different people — most often a father and
+// a son sharing a name. Each field is individually plausible; the defect is only
+// visible when independent fields are asked which ERA the person belongs to and
+// they disagree.
+//
+// Four identifier spaces are independently monotone in entry cohort, so each one
+// votes for an entry year:
+//
+//   gsis_player_id      00-00NNNNN, usable from the 2000 cohort onward
+//   gsis_it_player_id   integer, usable from the 2003 cohort onward
+//   nfl_player_id       only the 25xxxxx block is monotone; below 2503900 the
+//                       curve is flat across the 1990s and cannot resolve a year
+//   nfl_draft_year      the recorded value itself
+//
+// date_of_birth is deliberately NOT a hard vote. Its implied entry year (birth +
+// 22) is legitimately off by several years for late entrants — AFL punters,
+// rugby and CFL converts, two-sport players — and treating it as exact floods
+// the result with those false positives. It is reported alongside for context.
+
+const CALIBRATION = `
+  cohort AS (
+    SELECT
+      nfl_draft_year AS draft_year,
+      CAST(substring(gsis_player_id from 4) AS int) AS gsis_number,
+      gsis_it_player_id,
+      CASE
+        WHEN nfl_player_id BETWEEN 2499000 AND 2580000 THEN nfl_player_id
+      END AS nfl_number
+    FROM player
+    WHERE nfl_draft_year BETWEEN 1990 AND 2026
+      AND gsis_player_id ~ '^00-00[0-9]{5}$'
+  ),
+  cohort_median AS (
+    SELECT
+      draft_year,
+      percentile_disc(0.5) WITHIN GROUP (ORDER BY gsis_number) AS gsis_median,
+      percentile_disc(0.5) WITHIN GROUP (ORDER BY gsis_it_player_id)
+        FILTER (WHERE gsis_it_player_id IS NOT NULL) AS gsis_it_median,
+      percentile_disc(0.5) WITHIN GROUP (ORDER BY nfl_number)
+        FILTER (WHERE nfl_number IS NOT NULL) AS nfl_median
+    FROM cohort
+    GROUP BY draft_year
+  ),
+  calibration_gsis AS (
+    SELECT draft_year, gsis_median FROM cohort_median WHERE draft_year >= 2000
+  ),
+  calibration_gsis_it AS (
+    SELECT draft_year, gsis_it_median FROM cohort_median
+    WHERE draft_year >= 2003 AND gsis_it_median IS NOT NULL
+  ),
+  calibration_nfl AS (
+    SELECT draft_year, nfl_median FROM cohort_median
+    WHERE draft_year >= 2000 AND nfl_median >= 2503900
+  )
+`
+
+const VOTES = `
+  candidate AS (
+    SELECT
+      pid,
+      formatted_name,
+      date_of_birth,
+      nfl_draft_year,
+      draft_round,
+      draft_overall_pick,
+      college,
+      gsis_player_id,
+      gsis_it_player_id,
+      nfl_player_id,
+      pfr_player_id,
+      esb_player_id,
+      CASE
+        WHEN gsis_player_id ~ '^00-00[0-9]{5}$'
+        THEN CAST(substring(gsis_player_id from 4) AS int)
+      END AS gsis_number,
+      CASE
+        WHEN date_of_birth ~ '^(19|20)[0-9]{2}-[0-9]{2}'
+        THEN CAST(substring(date_of_birth from 1 for 4) AS int)
+      END AS birth_year
+    FROM player
+  ),
+  voted AS (
+    SELECT
+      candidate.*,
+      CASE WHEN birth_year IS NOT NULL THEN birth_year + 22 END AS era_from_birth,
+      CASE
+        WHEN nfl_draft_year BETWEEN 1990 AND 2026 THEN nfl_draft_year
+      END AS era_from_draft_year,
+      CASE WHEN gsis_number >= 19000 THEN (
+        SELECT draft_year FROM calibration_gsis
+        ORDER BY abs(gsis_median - candidate.gsis_number) LIMIT 1
+      ) END AS era_from_gsis,
+      CASE WHEN gsis_it_player_id >= 28000 THEN (
+        SELECT draft_year FROM calibration_gsis_it
+        ORDER BY abs(gsis_it_median - candidate.gsis_it_player_id) LIMIT 1
+      ) END AS era_from_gsis_it,
+      CASE WHEN nfl_player_id BETWEEN 2503900 AND 2580000 THEN (
+        SELECT draft_year FROM calibration_nfl
+        ORDER BY abs(nfl_median - candidate.nfl_player_id) LIMIT 1
+      ) END AS era_from_nfl_player_id
+    FROM candidate
+  ),
+  scored AS (
+    SELECT
+      voted.*,
+      (SELECT max(vote) FROM unnest(ARRAY[
+        era_from_draft_year, era_from_gsis, era_from_gsis_it, era_from_nfl_player_id
+      ]) vote) -
+      (SELECT min(vote) FROM unnest(ARRAY[
+        era_from_draft_year, era_from_gsis, era_from_gsis_it, era_from_nfl_player_id
+      ]) vote) AS hard_spread,
+      (SELECT count(vote) FROM unnest(ARRAY[
+        era_from_draft_year, era_from_gsis, era_from_gsis_it, era_from_nfl_player_id
+      ]) vote) AS hard_vote_count
+    FROM voted
+  )
+`
+
+const build_query = ({ threshold }) => `
+  WITH ${CALIBRATION}, ${VOTES}
+  SELECT
+    pid, formatted_name, date_of_birth, nfl_draft_year, draft_round,
+    draft_overall_pick, college, gsis_player_id, gsis_it_player_id,
+    nfl_player_id, pfr_player_id, esb_player_id,
+    era_from_birth, era_from_draft_year, era_from_gsis, era_from_gsis_it,
+    era_from_nfl_player_id, hard_spread, hard_vote_count
+  FROM scored
+  WHERE hard_vote_count >= 2 AND hard_spread >= ${threshold}
+  ORDER BY hard_spread DESC, formatted_name
+`
+
+const build_coverage_query = () => `
+  WITH ${CALIBRATION}, ${VOTES}
+  SELECT
+    count(*) AS player_rows,
+    count(*) FILTER (WHERE hard_vote_count >= 2) AS testable_rows,
+    count(*) FILTER (WHERE hard_vote_count >= 3) AS testable_rows_three_votes,
+    count(*) FILTER (WHERE hard_vote_count >= 2 AND hard_spread >= 2) AS spread_2,
+    count(*) FILTER (WHERE hard_vote_count >= 2 AND hard_spread >= 3) AS spread_3,
+    count(*) FILTER (WHERE hard_vote_count >= 2 AND hard_spread >= 5) AS spread_5,
+    count(*) FILTER (WHERE hard_vote_count >= 2 AND hard_spread >= 8) AS spread_8
+  FROM scored
+`
+
+// The sharpest signal needs no calibration at all. Every identifier column on
+// player carries a UNIQUE index except nfl_player_id, so it is the only one that
+// can hold the same person's id on two rows — which is exactly what a conflation
+// leaves behind when the second person already has a row of their own.
+const DUPLICATE_NFL_PLAYER_ID_QUERY = `
+  WITH duplicated AS (
+    SELECT nfl_player_id FROM player
+    WHERE nfl_player_id IS NOT NULL
+    GROUP BY nfl_player_id HAVING count(*) > 1
+  )
+  SELECT
+    player.nfl_player_id, player.pid, player.formatted_name, player.date_of_birth,
+    player.nfl_draft_year, player.draft_round, player.college,
+    player.gsis_player_id, player.gsis_it_player_id, player.pfr_player_id
+  FROM player
+  JOIN duplicated ON duplicated.nfl_player_id = player.nfl_player_id
+  ORDER BY player.nfl_player_id, player.date_of_birth
+`
+
+const audit_conflated_player_identity = async ({
+  threshold = 3,
+  output_path = null
+} = {}) => {
+  const coverage = (await db.raw(build_coverage_query())).rows[0]
+  log('coverage and disagreement distribution:')
+  log(coverage)
+
+  const duplicate_nfl_player_id_rows = (
+    await db.raw(DUPLICATE_NFL_PLAYER_ID_QUERY)
+  ).rows
+  const duplicated_values = new Set(
+    duplicate_nfl_player_id_rows.map((row) => row.nfl_player_id)
+  )
+  log(
+    `${duplicated_values.size} duplicated nfl_player_id values across ${duplicate_nfl_player_id_rows.length} rows`
+  )
+
+  const rows = (await db.raw(build_query({ threshold }))).rows
+  log(`${rows.length} rows with hard_spread >= ${threshold}`)
+
+  if (output_path) {
+    await fs.writeFile(
+      output_path,
+      JSON.stringify(
+        { coverage, threshold, rows, duplicate_nfl_player_id_rows },
+        null,
+        2
+      )
+    )
+    log(`wrote ${output_path}`)
+  }
+
+  return { coverage, rows, duplicate_nfl_player_id_rows }
+}
+
+export default audit_conflated_player_identity
+
+const main = async () => {
+  let error
+  try {
+    const argv = yargs(hideBin(process.argv))
+      .option('threshold', {
+        type: 'number',
+        default: 3,
+        describe: 'minimum disagreement in years between identifier era votes'
+      })
+      .option('output_path', {
+        type: 'string',
+        describe: 'write the full candidate set as JSON to this path'
+      }).argv
+
+    await audit_conflated_player_identity({
+      threshold: argv.threshold,
+      output_path: argv.output_path
+    })
+  } catch (err) {
+    error = err
+    log(error)
+  }
+
+  process.exit(error ? 1 : 0)
+}
+
+if (is_main(import.meta.url)) {
+  main()
+}
