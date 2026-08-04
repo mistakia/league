@@ -41,3 +41,26 @@
 
 # User dump — 15-minute checkpoint (latest overwritten in place) year-round
 */15 * * * * job-wrapper.sh league-backup-user-checkpoint /bin/bash /root/league/scripts/postgres-backup.sh -n checkpoint >> /var/log/league/league-postgres-backup.log 2>&1
+
+# Cluster globals — roles, their passwords, their per-role settings, their grants.
+# Daily, sops/age-encrypted, latest overwritten in place.
+#
+# `pg_dump` is per-DATABASE, so neither pipeline above carries pg_authid or
+# pg_db_role_setting: until 2026-08-04 a rebuild restored all 279 tables and then
+# could not connect, because league_writer and league_reader did not exist. The
+# artifact is ENCRYPTED (it holds every login role's SCRAM verifier) to the
+# narrow {league, macbook2025} recipient set in /root/league/.sops.yaml, so
+# base-storage stores it and cannot read it.
+#
+# Daily rather than at the full's Tue/Fri cadence: the dump is a sub-second read
+# of three small catalogs, and role state changes on its own schedule (a password
+# rotation or an ALTER ROLE SET lands on whatever day it lands). A daily source
+# also sits under check-stale-runs' flat 3-day default, so it needs no
+# scheduled-command carrier entity — unlike the full above, whose 4-day Fri->Tue
+# gap did.
+#
+# Minute 37 is chosen to collide with nothing: the */15 checkpoint above fires at
+# :00/:15/:30/:45 and league-imports.cron's */10 draft-notifications poll at
+# :00/:10/:20/:30/:40/:50. 09:xx UTC keeps it clear of the 08:00 full, which runs
+# for minutes.
+37 9 * * * job-wrapper.sh league-backup-globals /bin/bash /root/league/scripts/postgres-globals-backup.sh >> /var/log/league/league-postgres-backup.log 2>&1
