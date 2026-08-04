@@ -17,6 +17,22 @@ $yellowColor = #ff0
 $box_shadow = $borderColor 4px 4px 0px 0px
 $smooth_transition = 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
 
+// Layering scale. Anything that floats above page content takes its z-index
+// from here — never a bare literal, and never a value nudged upward to win a
+// specific collision. The app hand-rolls its nav drawer and several poppers, so
+// MUI's own defaults (drawer 1200, modal 1300, tooltip 1500) are not sufficient
+// on their own: raising one surface above a neighbour silently pushes it above
+// every MUI layer that sat between them.
+$z_page_chrome = 1000        // sticky table headers, in-page toolbars
+$z_nav_button = 1100         // floating nav open button
+$z_nav_backdrop = 1200
+$z_nav_drawer = 1300
+$z_selected_player = 1400    // selected-player drawer, above the nav drawer
+$z_popper = 1500             // poppers/menus anchored inside a drawer
+$z_dialog = 1600             // MUI dialogs and confirmations
+$z_context_menu = 1700       // right-click menu, above whatever opened it
+$z_app_backdrop = 1800       // app-initializing backdrop, blocks everything
+
 // Button styles
 $button_border_radius = 4px
 
