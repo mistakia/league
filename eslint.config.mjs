@@ -16,16 +16,18 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ['dist/*', 'tmp/*', '.yarn/**/*', '.cache/**', 'private/**']
+    ignores: ['dist/*', 'tmp/*', '.yarn/**/*', '.cache/**']
   },
   ...compat
     .extends('standard', 'standard-jsx', 'standard-react', 'prettier')
     .map((config) => ({
       ...config,
-      files: ['**/*.js', '**/*.mjs']
+      files: ['**/*.js', '**/*.mjs'],
+      ignores: ['private/**']
     })),
   {
     files: ['**/*.js', '**/*.mjs'],
+    ignores: ['private/**'],
 
     languageOptions: {
       globals: {
@@ -88,6 +90,31 @@ export default [
 
     rules: {
       'no-unused-expressions': 'off'
+    }
+  },
+  {
+    // private/ is a separate git repo with its own style conventions, so it
+    // does not get the standard/style ruleset above -- only the proxy-safety
+    // rule, which is the one CI cannot see for this submodule (eslint.config
+    // used to ignore private/** entirely, and CI never checks it out).
+    files: ['private/**/*.js', 'private/**/*.mjs'],
+
+    languageOptions: {
+      parser: babelParser,
+      ecmaVersion: 12,
+      sourceType: 'script',
+
+      parserOptions: {
+        sourceType: 'module'
+      }
+    },
+
+    plugins: {
+      local: noUnproxiedFetchWithRetry
+    },
+
+    rules: {
+      'local/no-unproxied-fetch-with-retry': 'error'
     }
   }
 ]
