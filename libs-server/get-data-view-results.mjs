@@ -2292,6 +2292,31 @@ export const get_data_view_results_query = async ({
   }
 }
 
+// Reserved output column carrying the `count(*) over ()` total. Column ids and
+// their generated aliases are `[a-z0-9_]`, so leading/trailing double
+// underscores cannot collide with a real one; the collision is asserted against
+// the generated SQL before the column is added.
+const TOTAL_COUNT_KEY = '__data_view_total_count__'
+
+// Split the reserved total-count column off the rows and strip it, so no
+// consumer -- the HTTP route, the websocket socket, the CSV export -- ever sees
+// it. An empty result set yields no rows to read the count from, in which case
+// the total is 0, matching what the wrapped COUNT(*) returned.
+function extract_total_count({ rows, calculate_total_count }) {
+  if (!calculate_total_count) {
+    return { data_view_results: rows, total_count: null }
+  }
+
+  const total_count = rows.length ? parseInt(rows[0][TOTAL_COUNT_KEY], 10) : 0
+
+  const data_view_results = rows.map(
+    ({ [TOTAL_COUNT_KEY]: reserved_total_count, ...data_view_row }) =>
+      data_view_row
+  )
+
+  return { data_view_results, total_count }
+}
+
 export default async function ({
   row_axes = [],
   where = [],
@@ -2317,58 +2342,45 @@ export default async function ({
     user_id
   })
 
+  // The un-augmented query string is what the goldens capture and what the
+  // debug route reports; the total-count window column is added below on a
+  // clone, at execution time only.
   const data_view_query_string = query.toString()
-  console.log(data_view_query_string)
 
-  let total_count = null
-
-  // Only calculate total count if requested
+  // Add `count(*) over ()` to the outer select rather than executing a second
+  // wrapped COUNT(*) query. The window function is evaluated over the full
+  // result set before LIMIT applies, so it returns the identical total for a
+  // single execution. The count half of the old two-query shape stripped the
+  // limit and so cost more than the half that returned rows.
+  let execution_query_string = data_view_query_string
   if (calculate_total_count) {
-    // Create a count query to get the total number of rows
-    const count_query = query.clone()
-    // Remove limit and offset from count query
-    count_query.clear('limit').clear('offset')
-    // Wrap the query in a count
-    const count_wrapper_query = db.raw(
-      `SELECT COUNT(*) as total_count FROM (${count_query.toString()}) as count_query`
-    )
-
-    if (timeout) {
-      // Execute count query with timeout and elevated work_mem for complex aggregations
-      const count_session_settings = `SET LOCAL statement_timeout = ${timeout}; SET LOCAL work_mem = '1GB'; SET LOCAL jit = off;`
-      const full_count_query = `${count_session_settings} ${count_wrapper_query.toString()};`
-      const count_response = await db.raw(full_count_query)
-      total_count = parseInt(count_response[3].rows[0].total_count, 10)
-    } else {
-      // Execute count query with elevated work_mem
-      const full_count_query = `SET LOCAL work_mem = '1GB'; SET LOCAL jit = off; ${count_wrapper_query.toString()};`
-      const count_response = await db.raw(full_count_query)
-      total_count = parseInt(count_response[2].rows[0].total_count, 10)
+    if (data_view_query_string.includes(TOTAL_COUNT_KEY)) {
+      throw new Error(
+        `data view query collides with reserved column ${TOTAL_COUNT_KEY}`
+      )
     }
+    execution_query_string = query
+      .clone()
+      .select(db.raw(`count(*) over () as "${TOTAL_COUNT_KEY}"`))
+      .toString()
   }
 
-  if (timeout) {
-    const query_string = query.toString()
-    const session_settings = `SET LOCAL statement_timeout = ${timeout}; SET LOCAL work_mem = '1GB'; SET LOCAL jit = off;`
-    const full_query = `${session_settings} ${query_string};`
+  const session_settings = timeout
+    ? `SET LOCAL statement_timeout = ${timeout}; SET LOCAL work_mem = '1GB'; SET LOCAL jit = off;`
+    : `SET LOCAL work_mem = '1GB'; SET LOCAL jit = off;`
+  // Each `SET LOCAL` produces its own result object ahead of the query's, so
+  // the row set is the last one: index 3 with a statement_timeout, 2 without.
+  const rows_index = timeout ? 3 : 2
 
-    const response = await db.raw(full_query)
-    const data_view_results = response[3].rows
+  const response = await db.raw(
+    `${session_settings} ${execution_query_string};`
+  )
+  const rows = response[rows_index].rows
 
-    return {
-      data_view_results,
-      data_view_metadata: {
-        ...data_view_metadata,
-        ...(total_count !== null ? { total_count } : {})
-      },
-      data_view_query_string
-    }
-  }
-
-  const query_string = query.toString()
-  const full_query = `SET LOCAL work_mem = '1GB'; SET LOCAL jit = off; ${query_string};`
-  const response = await db.raw(full_query)
-  const data_view_results = response[2].rows
+  const { data_view_results, total_count } = extract_total_count({
+    rows,
+    calculate_total_count
+  })
 
   return {
     data_view_results,
