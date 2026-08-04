@@ -35,6 +35,17 @@ export const add_defensive_play_by_play_with_statement = ({
   ])
   const stat_columns = new Set([])
 
+  // Same reason nfl_week_id is unconditional: the row_axes loop below selects
+  // and groups by `defensive_plays.<axis>`, so any axis resolving to this
+  // subquery must be in its inner projection. `year` is already a base column;
+  // `week` was not, and a week row axis therefore emitted
+  // `defensive_plays.week` against a subquery that never selected it (42703).
+  for (const row_axis of row_axes) {
+    if (!data_views_constants.row_axis_params.includes(row_axis)) continue
+    if (nfl_plays_column_params[row_axis]?.table) continue
+    base_columns.add(row_axis)
+  }
+
   for (const param_name of Object.keys(params)) {
     if (param_name === 'career_year') {
       base_columns.add('year')

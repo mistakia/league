@@ -222,8 +222,14 @@ const apply_projected_join = ({
             ? week.map(String)
             : [String(week)]
           if (week_array.length) {
+            // Bound rather than interpolated so a varchar week column gets
+            // quoted literals; the bare integer list is the same type error the
+            // cast above exists to avoid.
             this.andOn(
-              db.raw(`${table_alias}.week IN (${week_array.join(',')})`)
+              db.raw(
+                `${table_alias}.week IN (${week_array.map(() => '?').join(',')})`,
+                week_array
+              )
             )
           }
         }
@@ -274,6 +280,9 @@ const make_league_player_projection_source = () => ({
       join_table_clause: `league_player_projection_values as ${table_alias}`,
       join_year: true,
       join_week: true,
+      // This table's week is character varying(3); week_reference is smallint,
+      // and Postgres will not compare them.
+      cast_join_week_to_string: true,
       additional_conditions() {
         this.andOn(`${table_alias}.lid`, '=', db.raw('?', [league_id]))
       }
@@ -355,6 +364,9 @@ const make_league_format_player_projection_source = ({
       join_table_clause: `league_format_player_projection_values as ${table_alias}`,
       join_year: true,
       join_week: !is_rest_of_season,
+      // This table's week is character varying(10); week_reference is smallint,
+      // and Postgres will not compare them.
+      cast_join_week_to_string: true,
       additional_conditions() {
         this.andOn(
           `${table_alias}.league_format_id`,

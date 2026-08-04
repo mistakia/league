@@ -150,18 +150,24 @@ const SHAPES = {
   year_offset_range: () => ({ year_offset: [0, 1] })
 }
 
+// The row_axes combinations the UI can produce. `week` without `year` is not
+// reachable -- the week control is nested under the year one.
+const ROW_AXES_SHAPES = [[], ['year'], ['year', 'week']]
+
 const generate_and_explain = async ({
   db,
   get_data_view_results_query,
   column_id,
   params,
-  row_grain
+  row_grain,
+  row_axes
 }) => {
   let sql
   try {
     const { query } = await get_data_view_results_query({
       columns: [Object.keys(params).length ? { column_id, params } : column_id],
-      row_grain
+      row_grain,
+      row_axes
     })
     sql = query.toString()
   } catch (error) {
@@ -284,32 +290,50 @@ const main = async () => {
     const started_at = Date.now()
 
     for (const column_id of column_ids) {
-      // Row grain is a property of the column, not of the request: asking for a
-      // team-grain column under the default player grain fails validation in the
-      // builder rather than in Postgres, which would report as a generation
-      // error and mask whatever the SQL actually does.
-      const row_grains = derive_column_row_grains(column_definitions[column_id])
-      const row_grain = [
-        row_grains.includes('player') ? 'player' : row_grains[0] || 'player'
-      ]
+      const definition = column_definitions[column_id]
+      // Every grain the column admits, not just one. Picking a single grain
+      // (this loop preferred `player`) left the team row grain unEXPLAINed for
+      // every dual-grain column, which is exactly the surface the identity
+      // migration added. Asking for a grain the column does NOT admit fails in
+      // the builder rather than in Postgres, so the admitted set is the honest
+      // sweep space.
+      const row_grains = derive_column_row_grains(definition)
+      if (!row_grains.length) row_grains.push('player')
+      const supports_row_axes = definition?.source?.supports_row_axes || null
 
-      for (const shape_name of shape_names) {
-        checked++
-        const result = await generate_and_explain({
-          db,
-          get_data_view_results_query,
-          column_id,
-          params: SHAPES[shape_name](),
-          row_grain
-        })
-        if (result.status === 'valid') continue
-        findings.push({
-          column_id,
-          shape: shape_name,
-          row_grain: row_grain[0],
-          reachability: reachability.get(column_id) || 'catalog_only',
-          ...result
-        })
+      for (const row_grain_id of row_grains) {
+        for (const row_axes of ROW_AXES_SHAPES) {
+          // An axis the column does not declare is filtered out of the request
+          // before dispatch, so generating it would EXPLAIN a shape no user can
+          // reach.
+          if (
+            supports_row_axes &&
+            row_axes.some((axis) => !supports_row_axes.includes(axis))
+          ) {
+            continue
+          }
+
+          for (const shape_name of shape_names) {
+            checked++
+            const result = await generate_and_explain({
+              db,
+              get_data_view_results_query,
+              column_id,
+              params: SHAPES[shape_name](),
+              row_grain: [row_grain_id],
+              row_axes
+            })
+            if (result.status === 'valid') continue
+            findings.push({
+              column_id,
+              shape: shape_name,
+              row_grain: row_grain_id,
+              row_axes,
+              reachability: reachability.get(column_id) || 'catalog_only',
+              ...result
+            })
+          }
+        }
       }
     }
 
@@ -344,7 +368,7 @@ const main = async () => {
               ? `INVALID ${finding.code || ''}`.trim()
               : 'GENERATION ERROR'
           console.log(
-            `  ${label}  ${finding.column_id} [${finding.shape}, ${finding.row_grain}]`
+            `  ${label}  ${finding.column_id} [${finding.shape}, ${finding.row_grain}, row_axes=[${finding.row_axes}]]`
           )
           console.log(`    ${finding.message.split('\n')[0]}`)
         }

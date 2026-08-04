@@ -105,13 +105,24 @@ const game_source = {
   // row's historical team mapping selects the right opponent row.
   grain: 'team_year',
   attach: ({ query_context, params, table_alias, join_type }) => {
-    // Team-subject queries reach this attach via team-cell-to-team-source,
-    // which does NOT attach player_year_teams. The legacy join_on_team path
-    // resolved either alias; under the bridge model we'd need separate
-    // (team*, team_year) registration for this column. Until Step 6's
-    // source-attach reachability check gates that, silently skip — the
-    // column's intended audience is player-family cells.
-    if (!query_context.player_year_teams_cte_name) return
+    // Two cell families reach this attach and they resolve the cell's team
+    // differently. A player-family cell has no team of its own, so it goes
+    // through the player_year_teams CTE that maps the player to the team he
+    // played for that year. A team-family cell IS a team, so it joins the game
+    // CTE on its own identity column directly.
+    //
+    // This used to `return` when player_year_teams was absent, which left
+    // main_select and main_group_by referencing an alias that was never joined
+    // -- every team-row-grain view containing this column was a 42P01, in all
+    // three row_axes shapes.
+    const team_reference = query_context.player_year_teams_cte_name
+      ? 'player_year_teams.team'
+      : query_context.team_reference
+    if (!team_reference) return
+
+    const year_reference = query_context.player_year_teams_cte_name
+      ? 'player_year_teams.year'
+      : query_context.year_reference
 
     const { nfl_week: base_nfl_week } = get_params({ params })
     const offset_range = resolve_year_offset_range(params)
@@ -144,7 +155,11 @@ const game_source = {
 
     const join_method = join_type === 'INNER' ? 'innerJoin' : 'leftJoin'
     players_query[join_method](cte_name, function () {
-      this.on(`${cte_name}.nfl_team`, '=', 'player_year_teams.team')
+      this.on(`${cte_name}.nfl_team`, '=', team_reference)
+      // The bare `team` identity has no year column. That is not a gap: the
+      // CTE is already filtered to the requested nfl_week list, so team alone
+      // selects the right row.
+      if (!year_reference) return
       if (offset_range) {
         // Correlate the offset-expanded game year to the player's base-year
         // team mapping THROUGH the offset (single `= ref+k`, range BETWEEN):
@@ -153,14 +168,14 @@ const game_source = {
         emit_year_match({
           builder: this,
           db,
-          year_reference: 'player_year_teams.year',
+          year_reference,
           source: { year_default: () => null },
           key_columns: { year: 'season_year' },
           params,
           ref: cte_name
         })
       } else {
-        this.andOn(`${cte_name}.season_year`, '=', 'player_year_teams.year')
+        this.andOn(`${cte_name}.season_year`, '=', year_reference)
       }
     })
   }
