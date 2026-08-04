@@ -11,6 +11,7 @@ import {
   report_job,
   check_projections_index_floor
 } from '#libs-server'
+import throw_if_shortfall from '#libs-server/throw-if-shortfall.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -45,7 +46,10 @@ const run = async ({ season = false, dry = false } = {}) => {
     const url = getUrl(position, type)
     log(url)
     const $ = await fetch_cheerio(url)
-    $('main table tbody tr').each((i, el) => {
+    const row_count_before = items.length
+    // CBS renders one table per stat page; it sat inside <main> until a 2025
+    // redesign moved it out, which silently zeroed this import for a year.
+    $('.TableBase table tbody tr').each((i, el) => {
       const name = $(el, 'td')
         .eq(0)
         .find('.CellPlayerName--long a')
@@ -111,6 +115,16 @@ const run = async ({ season = false, dry = false } = {}) => {
 
       items.push({ params, data })
     })
+
+    // A parse that yields nothing is always a failure — the page either moved
+    // or changed shape. check_projections_index_floor cannot catch it here,
+    // because it short-circuits on is_offseason and the only live CBS cron is
+    // the offseason season-projection run.
+    throw_if_shortfall(
+      items.length === row_count_before
+        ? `cbs projections: parsed 0 rows for ${position} (${url})`
+        : null
+    )
   }
 
   const inserts = []

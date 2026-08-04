@@ -11,6 +11,7 @@ import {
   report_job,
   check_projections_index_floor
 } from '#libs-server'
+import throw_if_shortfall from '#libs-server/throw-if-shortfall.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -163,6 +164,15 @@ const run = async ({
       log(url)
       const $ = await fetch_cheerio(url)
       count = $('table tr table tr tr:not(.tablehdr):not(.tableclmhdr)').length
+
+      // Zero rows on the FIRST page means the page moved or changed shape; on a
+      // later page it is just the end of the pagination.
+      throw_if_shortfall(
+        page === 0 && count === 0
+          ? `fftoday projections: parsed 0 rows for position ${position} (${url})`
+          : null
+      )
+
       $('table tr table tr tr:not(.tablehdr):not(.tableclmhdr)').each(
         (i, el) => {
           const name = $(el).find('td').eq(1).text().trim()

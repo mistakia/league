@@ -11,6 +11,7 @@ import {
   report_job,
   check_projections_index_floor
 } from '#libs-server'
+import throw_if_shortfall from '#libs-server/throw-if-shortfall.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -40,6 +41,7 @@ const runOne = async ({ week = 0, dry = false } = {}) => {
     const url = getURL(week, items.length)
     log(url)
     const $ = await fetch_cheerio(url)
+    const page_row_count_before = items.length
     $('table.tableType-player tbody tr').each((i, el) => {
       const name = $(el, 'td')
         .eq(0)
@@ -114,6 +116,15 @@ const runOne = async ({ week = 0, dry = false } = {}) => {
         lastProjection = parseFloat($(el).find('td').eq(14).text().trim())
       }
     })
+
+    // A page that parses no rows leaves lastProjection at its previous value,
+    // so without this the loop re-requests the same offset forever rather than
+    // terminating — a hang, not just a silent zero.
+    throw_if_shortfall(
+      items.length === page_row_count_before
+        ? `nfl projections: parsed 0 rows for week ${week} (${url})`
+        : null
+    )
   }
 
   const inserts = []
