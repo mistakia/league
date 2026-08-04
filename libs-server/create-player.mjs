@@ -4,9 +4,9 @@ import {
   formatHeight,
   format_player_name,
   fixTeam,
-  formatPosition,
   format_nfl_status
 } from '#libs-shared'
+import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
 import db from '#db'
 import generate_player_id from './generate-player-id.mjs'
 
@@ -80,9 +80,15 @@ const createPlayer = async (playerData) => {
   )
   playerData.height_inches = formatHeight(playerData.height_inches)
   playerData.current_nfl_team = fixTeam(playerData.current_nfl_team)
-  playerData.primary_position = formatPosition(playerData.primary_position)
-  playerData.secondary_position = formatPosition(playerData.secondary_position)
-  playerData.position_depth = formatPosition(playerData.position_depth)
+  playerData.primary_position = normalize_position(playerData.primary_position)
+  playerData.secondary_position = normalize_position(
+    playerData.secondary_position
+  )
+  // position_depth is a depth-chart slot (INA, RWR, LCB, PK), not a roster
+  // position, so it has its own vocabulary and is not normalized -- only cased.
+  playerData.position_depth = playerData.position_depth
+    ? playerData.position_depth.toUpperCase()
+    : playerData.position_depth
   playerData.roster_status = format_nfl_status(playerData.roster_status)
 
   try {

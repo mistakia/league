@@ -103,7 +103,8 @@ describe('LIBS-SHARED position-constants', function () {
       expect(normalize_position('$LB')).to.equal('LB')
     })
 
-    // ED -> EDGE reverses format-position.mjs, which mapped EDGE -> DE.
+    // EDGE is a canonical DL member. This reverses the retired
+    // format-position.mjs, which folded EDGE into DE.
     it('maps ED to EDGE rather than DE', () => {
       expect(normalize_position('ED')).to.equal('EDGE')
       expect(normalize_position('EDGE')).to.equal('EDGE')

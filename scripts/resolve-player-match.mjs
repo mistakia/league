@@ -16,6 +16,7 @@ import {
   player_name_utils
 } from '#libs-server'
 import { format_player_name, fixTeam, strings_are_similar } from '#libs-shared'
+import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
 import { search_players as espn_search_players } from '#libs-server/espn.mjs'
 import { search_players as pfr_search_players } from '#private/libs-server/pro-football-reference.mjs'
 
@@ -251,11 +252,11 @@ const action_update_player = async (argv) => {
 
   // Handle position update
   if (primary_position) {
-    const upper_pos = primary_position.toUpperCase()
-    update.primary_position = upper_pos
-    update.secondary_position = upper_pos
-    update.position_depth = upper_pos
-    log(`Setting primary_position = ${upper_pos}`)
+    const canonical_position = normalize_position(primary_position)
+    update.primary_position = canonical_position
+    update.secondary_position = canonical_position
+    update.position_depth = canonical_position
+    log(`Setting primary_position = ${canonical_position}`)
   }
 
   // Handle external IDs
@@ -279,6 +280,7 @@ const action_update_player = async (argv) => {
     pid,
     update,
     allow_protected_props: true,
+    allow_primary_position_write: true,
     source: 'manual'
   })
 
@@ -389,9 +391,10 @@ const action_search = async (argv) => {
 
   if (pos) {
     query.where(function () {
-      this.where('primary_position', pos.toUpperCase())
-        .orWhere('secondary_position', pos.toUpperCase())
-        .orWhere('tertiary_position', pos.toUpperCase())
+      const canonical_pos = normalize_position(pos)
+      this.where('primary_position', canonical_pos)
+        .orWhere('secondary_position', canonical_pos)
+        .orWhere('tertiary_position', canonical_pos)
     })
   }
 
@@ -798,7 +801,7 @@ const action_lookup = async (argv) => {
     // Check if any match the team/position criteria
     const exact_match = db_matches.find((p) => {
       const team_match = !search_team || p.current_nfl_team === search_team
-      const pos_match = !pos || p.primary_position === pos.toUpperCase()
+      const pos_match = !pos || p.primary_position === normalize_position(pos)
       const year_match = !draftYear || p.nfl_draft_year === draftYear
       return team_match && pos_match && year_match
     })
@@ -934,7 +937,7 @@ const action_lookup = async (argv) => {
         'NODE_ENV=production node scripts/resolve-player-match.mjs create',
         `--first-name "${data.first_name || best.name.split(' ')[0]}"`,
         `--last-name "${data.last_name || best.name.split(' ').slice(1).join(' ')}"`,
-        `--primary-position "${best.position || 'UNK'}"`,
+        `--primary-position "${best.position || 'REPLACE-WITH-POSITION'}"`,
         `--team "${best.team || 'INA'}"`
       ]
 

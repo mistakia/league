@@ -4,6 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { format_nfl_status, format_nfl_injury_status } from '#libs-shared'
+import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
 import is_main from './is-main.mjs'
 import db from '#db'
 import record_changelog from './record-changelog.mjs'
@@ -16,7 +17,12 @@ if (!process.env.DEBUG) {
   debug.enable('update-player')
 }
 
-const excluded_props = ['pid', 'formatted_name', 'primary_position']
+const excluded_props = ['pid', 'formatted_name']
+
+// primary_position is the column every consumer groups and filters on, so an
+// importer must opt in by name rather than through allow_protected_props --
+// eight importers already pass that flag for external IDs.
+const primary_position_prop = 'primary_position'
 
 const protected_props = [
   'nfl_player_id',
@@ -60,6 +66,7 @@ const updatePlayer = async ({
   pid,
   update,
   allow_protected_props = false,
+  allow_primary_position_write = false,
   source = null
 }) => {
   if (!player_row && (typeof pid === 'string' || pid instanceof String)) {
@@ -89,6 +96,18 @@ const updatePlayer = async ({
     )
   }
 
+  if (update.primary_position) {
+    formatted_update.primary_position = normalize_position(
+      update.primary_position
+    )
+  }
+
+  if (update.secondary_position) {
+    formatted_update.secondary_position = normalize_position(
+      update.secondary_position
+    )
+  }
+
   const differences = diff(player_row, formatted_update)
 
   const edits = differences.filter((d) => d.kind === 'E')
@@ -113,6 +132,13 @@ const updatePlayer = async ({
 
     if (excluded_props.includes(prop)) {
       log(`not allowed to update ${prop}`)
+      continue
+    }
+
+    if (prop === primary_position_prop && !allow_primary_position_write) {
+      log(
+        `SKIP ${prop} on ${player_row.pid}: pass allow_primary_position_write=true to write it.`
+      )
       continue
     }
 
@@ -227,6 +253,7 @@ const main = async () => {
     const changes = await updatePlayer({
       pid: argv.pid,
       update,
+      allow_primary_position_write: true,
       source: 'manual'
     })
     log(`player ${argv.pid} updated, changes: ${changes}`)
