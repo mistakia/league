@@ -990,6 +990,30 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['active']
  * 11 of the 19 players involved have a null `gsis_it_player_id` and so cannot
  * be resolved by that importer at all. Leaving the row alone stays right; the
  * inference about who wrote it does not.
+ *
+ * A FOURTH bound, and the one that makes the era predicate non-destructive:
+ * a row is never pruned when `player_could_have_played` rejects its player for
+ * this season.
+ *
+ * The prune reads "this run did not produce the row" as evidence the row is
+ * stale. That inference only holds when the run was ABLE to produce it. An era
+ * rejection is the case where it was not: the predicate removes the player as a
+ * candidate upstream -- in `resolve_play_stat_player` for the stat path and in
+ * `players_with_snaps` for the snap path -- so the row's absence from this run
+ * is fully explained by the predicate and carries no information about
+ * staleness. Deleting on it turns a false rejection into data loss, silently.
+ *
+ * That is not hypothetical. It is what 8f4292e08 did: its predicate consulted
+ * only `nfl_draft_year`, which is the field a conflated `player` row gets wrong,
+ * and the resulting run deleted 1,560 gamelogs of which 450 were real. Ranking
+ * `date_of_birth` first (f26685ef3) made the predicate much better but not
+ * incapable of being wrong -- a row can carry the intruder's birth date too, as
+ * CHRI-SMIT-007265 does -- so the durable fix is to stop a rejection from
+ * reaching a DELETE at all, rather than to keep improving the predicate's aim.
+ *
+ * Checking the predicate here rather than plumbing rejections out of the two
+ * call sites covers both paths at once, and keeps holding if a third caller
+ * starts filtering on era.
  */
 
 // Columns whose presence proves a row records PARTICIPATION -- that the player
@@ -1014,9 +1038,10 @@ const OWNED_PARTICIPATION_COLUMNS = [
   'snaps_def',
   'snaps_st'
 ]
-const prune_unreferenced_gamelogs = async ({
+export const prune_unreferenced_gamelogs = async ({
   unique_esbids,
   player_gamelog_inserts,
+  year,
   dry_run
 }) => {
   const produced_by_esbid = new Map()
@@ -1048,9 +1073,33 @@ const prune_unreferenced_gamelogs = async ({
       }
     })
 
-  const stale = existing.filter(
+  const unproduced = existing.filter(
     (row) => !produced_by_esbid.get(row.esbid)?.has(row.pid)
   )
+
+  // See the fourth bound in the docstring: a row the era predicate rejects was
+  // never producible this run, so its absence is not evidence of staleness.
+  const era_rejected_pids = new Set()
+  if (unproduced.length) {
+    const players = await db('player')
+      .select('pid', 'date_of_birth', 'nfl_draft_year', 'draft_round')
+      .whereIn('pid', [...new Set(unproduced.map((row) => row.pid))])
+
+    for (const player of players) {
+      if (!player_could_have_played({ player, season_year: year })) {
+        era_rejected_pids.add(player.pid)
+      }
+    }
+  }
+
+  const stale = unproduced.filter((row) => !era_rejected_pids.has(row.pid))
+
+  const era_retained = unproduced.length - stale.length
+  if (era_retained) {
+    log(
+      `prune: retaining ${era_retained} rows for ${era_rejected_pids.size} players the era predicate rejects -- not producible this run, so not evidence of staleness`
+    )
+  }
 
   if (!stale.length) {
     log('prune: no stale gamelogs')
@@ -1316,6 +1365,7 @@ const generate_player_gamelogs = async ({
     await prune_unreferenced_gamelogs({
       unique_esbids,
       player_gamelog_inserts,
+      year,
       dry_run
     })
     return
@@ -1335,6 +1385,7 @@ const generate_player_gamelogs = async ({
   await prune_unreferenced_gamelogs({
     unique_esbids,
     player_gamelog_inserts,
+    year,
     dry_run
   })
 }

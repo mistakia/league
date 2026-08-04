@@ -131,6 +131,33 @@ describe('LIBS SERVER player_could_have_played', function () {
     ).to.equal(true)
   })
 
+  it('passes a DRAFTED player whose birth date clears the floor and whose draft year does not', () => {
+    // maurice alexander, as production carried him on 2026-08-04. dob and
+    // draft_round 4 are the 2014 Utah State safety; college and
+    // nfl_draft_year 2020 came from a later same-name player's importer match.
+    // The draft-only predicate NULLed his 204 correct 2014-2019 play stats and
+    // KEPT the 33 rows from 2024 that belong to the intruder -- this pins the
+    // dob-present case that f26685ef3 fixed, on a drafted row, where the old
+    // `nfl_draft_year <= season_year` branch had no grace window at all.
+    const maurice_alexander = {
+      nfl_draft_year: 2020,
+      draft_round: 4,
+      date_of_birth: '1991-02-16'
+    }
+    expect(
+      player_could_have_played({
+        player: maurice_alexander,
+        season_year: 2014
+      })
+    ).to.equal(true)
+    expect(
+      player_could_have_played({
+        player: maurice_alexander,
+        season_year: 2019
+      })
+    ).to.equal(true)
+  })
+
   it('still falls back to the draft year when no birth date is recorded', () => {
     // The fallback is not dead code: it is the only evidence for a row with no
     // usable birth date, and it must keep rejecting there.

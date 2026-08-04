@@ -54,6 +54,20 @@
  * distribution elbows: 904 rows at a one-year gap, 175 at two, 52 at three, 20
  * at four.
  *
+ * This branch reaches the corrupt column the rest of the module exists to work
+ * around, and it is KEPT anyway. Reviewed 2026-08-04: 2,353 `player` rows carry
+ * no usable birth date, and the branch rejects **zero** `player_gamelogs` rows
+ * across zero players today, so weakening it buys nothing measurable — while
+ * removing it would readmit exactly the era-impossible candidates 8f4292e08
+ * filtered out of `resolve_play_stat_player`, since for a row with no birth
+ * date this is the only falsifier there is.
+ *
+ * The exposure it leaves is real but it is not located here. A false rejection
+ * only costs data when a caller responds to one by DELETING, so the fix belongs
+ * at that caller: `prune_unreferenced_gamelogs` now refuses to delete a row
+ * whose player this predicate rejects. That bound holds for a bad birth date
+ * too, which no amount of reordering inside this module can cover.
+ *
  * ## Not used as evidence
  *
  * `player_gamelogs`, `player_seasonlogs`, and any other table derived from
