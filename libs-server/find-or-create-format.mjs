@@ -1,4 +1,5 @@
 import db from '#db'
+import { scoring_column_names } from '#libs-shared/scoring-columns.mjs'
 
 // Find-or-create upsert for league_scoring_formats / league_formats.
 //
@@ -13,31 +14,14 @@ import db from '#db'
 // non-sqb/non-sqbrbwrte/non-scoring_format_id changes, and the row's
 // scoring_format_title (not in the unique tuple) is preserved as-is.
 
-export const SCORING_COLUMNS = [
-  'passing_attempts',
-  'passing_completions',
-  'passing_yards',
-  'passing_interceptions',
-  'passing_touchdowns',
-  'rushing_attempts',
-  'rushing_yards',
-  'rushing_touchdowns',
-  'receptions',
-  'running_back_reception',
-  'wide_receiver_reception',
-  'tight_end_reception',
-  'receiving_yards',
-  'two_point_conversions',
-  'receiving_touchdowns',
-  'fumbles_lost',
-  'punt_return_touchdowns',
-  'kickoff_return_touchdowns',
-  'fumble_return_touchdowns',
-  'targets',
-  'rushing_first_downs',
-  'receiving_first_downs',
-  'exclude_quarterback_kneels'
-]
+// Derived from libs-shared/scoring-columns.mjs rather than listed here, so a
+// new scoring column cannot be added to the table and the settings UI while
+// silently staying out of the dedup tuple.
+//
+// The registry's order differs from the hand-written order this replaced, which
+// is safe: the INSERT column list and its bound values are built from this same
+// array, and Postgres matches an ON CONFLICT column list by set.
+export const SCORING_COLUMNS = scoring_column_names
 
 export const LEAGUE_COLUMNS = [
   'num_teams',

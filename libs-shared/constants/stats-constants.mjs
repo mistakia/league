@@ -1,59 +1,22 @@
+import { stat_names_for_group } from '../scoring-columns.mjs'
 import { roster_slot_types } from './roster-constants.mjs'
 
 export const fantasy_positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DST']
 
-export const base_fantasy_stats = [
-  'passing_attempts',
-  'passing_completions',
-  'passing_yards',
-  'passing_interceptions',
-  'passing_touchdowns',
+// These three lists are derived, not authored. libs-shared/scoring-columns.mjs
+// is the single source; adding a scoring metric there adds it here, to
+// SCORING_COLUMNS, and to the settings labels at once.
+//
+// They are NOT dead just because calculate-points.mjs repeats the kicking and
+// DST stat names inline: all three feed `all_fantasy_stats` below, which
+// `format_base_gamelog` uses to filter which fields are persisted. Dropping
+// either the kicker or the defense list stops every one of those columns being
+// written to player_gamelogs.
+export const base_fantasy_stats = stat_names_for_group('base')
 
-  'rushing_attempts',
-  'rushing_yards',
-  'rushing_yards_excluding_kneels', // rushing yards excluding kneel plays
-  'rushing_touchdowns',
-  'rushing_first_downs', // rushing first downs
-  'fumbles_lost',
+export const kicker_fantasy_stats = stat_names_for_group('kicking')
 
-  'targets',
-  'receptions',
-  'receiving_yards',
-  'receiving_first_downs', // receiving first downs
-  'receiving_touchdowns',
-
-  'two_point_conversions',
-
-  'punt_return_touchdowns', // punt return touchdown
-  'kickoff_return_touchdowns', // kickoff return touchdown
-  'fumble_return_touchdowns' // fumble return touchdown
-]
-
-export const kicker_fantasy_stats = [
-  'field_goals_made', // field goal made
-  'field_goal_yards', // field goal yards (min of 30)
-  'field_goals_made_0_19_yards', // field goal <19
-  'field_goals_made_20_29_yards', // field goal 29
-  'field_goals_made_30_39_yards', // field goal 39
-  'field_goals_made_40_49_yards', // field goal 49
-  'field_goals_made_50_plus_yards', // field goal 50
-  'extra_points_made' // extra point made
-]
-
-export const defense_fantasy_stats = [
-  'defensive_sacks', // sack
-  'defensive_interceptions', // int
-  'defensive_forced_fumbles', // forced fumble
-  'defensive_recovered_fumbles', // recovered fumble
-  'defensive_three_and_outs', // three and out
-  'defensive_fourth_down_stops', // fourth down stop
-  'defensive_points_against', // points against
-  'defensive_yards_against', // yards against
-  'defensive_blocked_kicks', // blocked kicks
-  'defensive_safeties', // safety
-  'defensive_two_point_returns', // two point return
-  'defensive_touchdowns' // touchdown
-]
+export const defense_fantasy_stats = stat_names_for_group('dst')
 
 export const all_fantasy_stats = [
   ...base_fantasy_stats,
