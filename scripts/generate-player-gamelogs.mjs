@@ -521,6 +521,7 @@ const generate_snap_based_gamelogs = async ({
       'player.smart_player_id',
       'player.nfl_draft_year',
       'player.draft_round',
+      'player.date_of_birth',
       'nfl_snaps.esbid'
     )
     .join('player', 'player.gsis_it_player_id', 'nfl_snaps.gsis_it_id')
@@ -533,6 +534,7 @@ const generate_snap_based_gamelogs = async ({
       'player.smart_player_id',
       'player.nfl_draft_year',
       'player.draft_round',
+      'player.date_of_birth',
       'nfl_snaps.esbid'
     )
     .havingRaw('COUNT(*) > 0')
@@ -927,9 +929,16 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['active']
  *     rows are all stale, and deleting on it would turn a resolution
  *     regression into data loss.
  *
- * A roster-only row -- on the gameday roster, no stats -- is never touched
- * under any of the three. That claim is the importers' to make and this script
- * has no evidence against it.
+ * A row carrying neither this script's `source` nor a participation column is
+ * never touched under any of the three. That is deliberately conservative and
+ * it is NOT the same as "it belongs to a roster importer": until the default
+ * was dropped, `player_gamelogs.source` defaulted to 'nfl-pro-gameday-roster',
+ * so a row that named no writer was silently tagged with that importer's name
+ * whatever wrote it. Reading such a row's `source` as provenance is what led a
+ * 2026-08-04 audit to call 262 stat-free rows a fourth ingestion mechanism when
+ * 11 of the 19 players involved have a null `gsis_it_player_id` and so cannot
+ * be resolved by that importer at all. Leaving the row alone stays right; the
+ * inference about who wrote it does not.
  */
 
 // Columns whose presence proves a row records PARTICIPATION -- that the player

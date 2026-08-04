@@ -62,6 +62,97 @@ describe('LIBS SERVER player_could_have_played', function () {
     ).to.equal(false)
   })
 
+  it('rejects a player who had not been born twenty years before the season', () => {
+    // The residual the draft check alone left behind: a player row born 2000
+    // carrying 62 gamelog rows from 2001-2006.
+    const josh_williams = {
+      nfl_draft_year: 2025,
+      draft_round: 0,
+      date_of_birth: '2000-06-09'
+    }
+    expect(
+      player_could_have_played({ player: josh_williams, season_year: 2001 })
+    ).to.equal(false)
+  })
+
+  it('accepts a twenty-year-old, the youngest a real NFL player has been', () => {
+    // amobi okoye, rookie season 2007. The predicate must never reject him.
+    const amobi_okoye = {
+      nfl_draft_year: 2007,
+      draft_round: 1,
+      date_of_birth: '1987-06-03'
+    }
+    expect(
+      player_could_have_played({ player: amobi_okoye, season_year: 2007 })
+    ).to.equal(true)
+  })
+
+  it('rejects on birth date even when the draft year would accept', () => {
+    // The two falsifiers are independent, and this is the case that needs the
+    // birth date: a conflated row whose draft year is plausible for the season
+    // while the person named could not have been there.
+    const conflated = {
+      nfl_draft_year: 2001,
+      draft_round: 3,
+      date_of_birth: '1999-01-14'
+    }
+    expect(
+      player_could_have_played({ player: conflated, season_year: 2002 })
+    ).to.equal(false)
+  })
+
+  it('accepts on birth date when the draft year is the field that is wrong', () => {
+    // The regression this ordering exists to prevent, with the real row. The
+    // 2013 devin taylor was born 1989-11-15 and drafted in round 4, but his
+    // `player` row is a merge with a later player and reads
+    // `nfl_draft_year: 2022`. Draft-year-only, that condemns his real
+    // 2013-2015 Detroit gamelogs -- 19 of the 450 rows a repair run deleted.
+    const devin_taylor = {
+      nfl_draft_year: 2022,
+      draft_round: 4,
+      date_of_birth: '1989-11-15'
+    }
+    expect(
+      player_could_have_played({ player: devin_taylor, season_year: 2013 })
+    ).to.equal(true)
+  })
+
+  it('accepts a father whose row carries his son the draft year', () => {
+    // The same shape at its most extreme, and the largest single group in that
+    // deletion: kwamie lassiter (Cardinals, 1995-2003) born 1969-12-03, on a
+    // row carrying kwamie lassiter II's 2022 entry year. 58 rows.
+    const kwamie_lassiter = {
+      nfl_draft_year: 2022,
+      draft_round: 0,
+      date_of_birth: '1969-12-03'
+    }
+    expect(
+      player_could_have_played({ player: kwamie_lassiter, season_year: 2001 })
+    ).to.equal(true)
+  })
+
+  it('still falls back to the draft year when no birth date is recorded', () => {
+    // The fallback is not dead code: it is the only evidence for a row with no
+    // usable birth date, and it must keep rejecting there.
+    const no_birth_date = { nfl_draft_year: 2021, draft_round: 6 }
+    expect(
+      player_could_have_played({ player: no_birth_date, season_year: 2016 })
+    ).to.equal(false)
+  })
+
+  it('ignores the 0000-00-00 unknown-birth-date sentinel', () => {
+    // `date_of_birth` is a varchar and spells absent as a zero date. Reading a
+    // year off it would reject every row the player appears in.
+    const unknown_dob = {
+      nfl_draft_year: 2010,
+      draft_round: 2,
+      date_of_birth: '0000-00-00'
+    }
+    expect(
+      player_could_have_played({ player: unknown_dob, season_year: 2012 })
+    ).to.equal(true)
+  })
+
   it('passes every case where the evidence cannot falsify', () => {
     // The predicate rejects an impossible attribution; it never confirms a
     // possible one, so absent evidence has to pass.

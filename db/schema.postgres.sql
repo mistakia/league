@@ -20564,7 +20564,7 @@ CREATE TABLE public.player_gamelogs (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 )
 PARTITION BY RANGE (season_year);
@@ -20687,7 +20687,7 @@ CREATE TABLE public.player_gamelogs_default (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -20802,7 +20802,7 @@ CREATE TABLE public.player_gamelogs_year_2000 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -20917,7 +20917,7 @@ CREATE TABLE public.player_gamelogs_year_2001 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21032,7 +21032,7 @@ CREATE TABLE public.player_gamelogs_year_2002 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21147,7 +21147,7 @@ CREATE TABLE public.player_gamelogs_year_2003 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21262,7 +21262,7 @@ CREATE TABLE public.player_gamelogs_year_2004 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21377,7 +21377,7 @@ CREATE TABLE public.player_gamelogs_year_2005 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21492,7 +21492,7 @@ CREATE TABLE public.player_gamelogs_year_2006 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21607,7 +21607,7 @@ CREATE TABLE public.player_gamelogs_year_2007 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21722,7 +21722,7 @@ CREATE TABLE public.player_gamelogs_year_2008 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21837,7 +21837,7 @@ CREATE TABLE public.player_gamelogs_year_2009 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21952,7 +21952,7 @@ CREATE TABLE public.player_gamelogs_year_2010 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22067,7 +22067,7 @@ CREATE TABLE public.player_gamelogs_year_2011 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22182,7 +22182,7 @@ CREATE TABLE public.player_gamelogs_year_2012 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22297,7 +22297,7 @@ CREATE TABLE public.player_gamelogs_year_2013 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22412,7 +22412,7 @@ CREATE TABLE public.player_gamelogs_year_2014 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22527,7 +22527,7 @@ CREATE TABLE public.player_gamelogs_year_2015 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22642,7 +22642,7 @@ CREATE TABLE public.player_gamelogs_year_2016 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22757,7 +22757,7 @@ CREATE TABLE public.player_gamelogs_year_2017 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22872,7 +22872,7 @@ CREATE TABLE public.player_gamelogs_year_2018 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22987,7 +22987,7 @@ CREATE TABLE public.player_gamelogs_year_2019 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23102,7 +23102,7 @@ CREATE TABLE public.player_gamelogs_year_2020 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23217,7 +23217,7 @@ CREATE TABLE public.player_gamelogs_year_2021 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23332,7 +23332,7 @@ CREATE TABLE public.player_gamelogs_year_2022 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23447,7 +23447,7 @@ CREATE TABLE public.player_gamelogs_year_2023 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23562,7 +23562,7 @@ CREATE TABLE public.player_gamelogs_year_2024 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23677,7 +23677,7 @@ CREATE TABLE public.player_gamelogs_year_2025 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23792,7 +23792,7 @@ CREATE TABLE public.player_gamelogs_year_2026 (
     q3_snaps_def_pct numeric(5,2),
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
-    source character varying(32) DEFAULT 'nfl-pro-gameday-roster'::character varying,
+    source character varying(32),
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((pos IS NULL) OR ((pos)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 

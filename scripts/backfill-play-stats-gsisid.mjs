@@ -53,7 +53,8 @@ const build_game_rosters = async ({ esbids, year }) => {
       'p.gsis_player_id',
       'p.formatted_name',
       'p.nfl_draft_year',
-      'p.draft_round'
+      'p.draft_round',
+      'p.date_of_birth'
     )
 
   // Real participation, available from 2016 onward only.
@@ -68,7 +69,8 @@ const build_game_rosters = async ({ esbids, year }) => {
       'p.gsis_player_id',
       'p.formatted_name',
       'p.nfl_draft_year',
-      'p.draft_round'
+      'p.draft_round',
+      'p.date_of_birth'
     )
 
   const rosters = new Map()
