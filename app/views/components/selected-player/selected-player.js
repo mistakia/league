@@ -133,6 +133,12 @@ export default function SelectedPlayer({
   const playerValue = player_map.get('value')
   const rosPoints = player_map.getIn(['points', 'ros', 'total'], 0)
 
+  // Both rest-of-season, so the pair is comparable: `ros` floors each remaining
+  // week at the baseline, `ros_net` subtracts the weeks below it. There is no
+  // season-grain net, which is why neither follows the season phase.
+  const pts_added_positive = player_map.getIn(['pts_added', 'ros'], null)
+  const pts_added_net = player_map.getIn(['pts_added', 'ros_net'], null)
+
   const external_button_items = []
 
   const has_pfr_link = Boolean(
@@ -348,6 +354,16 @@ export default function SelectedPlayer({
                   {rosPoints && projWks
                     ? (rosPoints / projWks).toFixed(1)
                     : '-'}
+                </div>
+                <div className='selected__player-header-item'>
+                  <label>Pts+ Positive</label>
+                  {pts_added_positive != null
+                    ? pts_added_positive.toFixed(1)
+                    : '-'}
+                </div>
+                <div className='selected__player-header-item'>
+                  <label>Pts+ Net</label>
+                  {pts_added_net != null ? pts_added_net.toFixed(1) : '-'}
                 </div>
                 {draftNum != null && draftNum !== undefined && (
                   <>

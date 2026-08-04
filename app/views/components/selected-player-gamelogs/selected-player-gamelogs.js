@@ -7,12 +7,10 @@ import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
 import './selected-player-gamelogs.styl'
 
-// Fantasy stats to show in gamelogs (only total points and points added)
-const GAMELOGS_FANTASY_STATS_FILTER = [
-  'points',
-  'points_added_earned',
-  'points_added_net'
-]
+// Gamelogs render their own fantasy group in the lead, ahead of the snaps
+// columns, so the generic stat row must contribute none of its own. Passing the
+// full set here duplicated points and points added in every row.
+const GAMELOGS_FANTASY_STATS_FILTER = []
 
 const QUARTER_LABELS = ['Q1', 'Q2', 'Q3', 'Q4']
 
@@ -101,8 +99,13 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
                 {(game.points || 0).toFixed(1)}
               </div>
               <div className='table__cell metric'>
-                {game.points_added_earned
+                {game.points_added_earned != null
                   ? game.points_added_earned.toFixed(1)
+                  : '-'}
+              </div>
+              <div className='table__cell metric'>
+                {game.points_added_net != null
+                  ? game.points_added_net.toFixed(1)
                   : '-'}
               </div>
             </div>
@@ -182,7 +185,8 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
           <div className='row__group-head'>Fantasy</div>
           <div className='row__group-body'>
             <div className='table__cell'>Pts</div>
-            <div className='table__cell'>Pts+</div>
+            <div className='table__cell'>Pts+ Earned</div>
+            <div className='table__cell'>Pts+ Net</div>
           </div>
         </div>
         <div className='row__group'>

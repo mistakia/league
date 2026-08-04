@@ -29,6 +29,7 @@ export default class PlayerRosterTotal extends React.Component {
     let weekPointsTotal = 0
     let seasonlog_points_total = 0
     let points_added_total = 0
+    let pts_added_net_total = 0
 
     players.forEach((player_map) => {
       const extensions = player_map.get('extensions', 0)
@@ -78,6 +79,11 @@ export default class PlayerRosterTotal extends React.Component {
       valueTotal =
         valueTotal +
         Math.max(player_map.getIn(['pts_added', projectionType], 0), 0)
+      // Summed SIGNED, unlike `valueTotal` above: the net variant's whole point
+      // is the cost of the weeks a player is below baseline, and flooring each
+      // player would discard exactly that.
+      pts_added_net_total =
+        pts_added_net_total + player_map.getIn(['pts_added', 'ros_net'], 0)
       valueAdjTotal =
         valueAdjTotal +
         player_map.getIn(['salary_adj_pts_added', projectionType], 0)
@@ -160,6 +166,9 @@ export default class PlayerRosterTotal extends React.Component {
           <div className='row__group-body'>
             <div className='metric table__cell'>
               {valueTotal ? valueTotal.toFixed(1) : '-'}
+            </div>
+            <div className='metric table__cell'>
+              {pts_added_net_total ? pts_added_net_total.toFixed(1) : '-'}
             </div>
             {isOffseason && (
               <div className='metric table__cell'>

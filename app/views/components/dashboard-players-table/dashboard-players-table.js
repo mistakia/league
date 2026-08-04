@@ -340,8 +340,14 @@ export default function DashboardPlayersTable({
             <div className='row__group-body'>
               <div className='table__cell'>
                 <PlayerRosterHeader
-                  tooltip='Projected points relative to baseline player'
-                  title='Pts+'
+                  tooltip='Projected points added above the baseline player, counting only the weeks he clears it — the perfect-optionality bound. Full season in the offseason, rest of season once games start.'
+                  title='Pts+ Positive'
+                />
+              </div>
+              <div className='table__cell'>
+                <PlayerRosterHeader
+                  tooltip='Projected points added over the rest of the season with sub-baseline weeks subtracted — what he adds when you must start him every week'
+                  title='Pts+ Net'
                 />
               </div>
               {isOffseason && (

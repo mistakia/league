@@ -276,7 +276,11 @@ const get_stat_fields = (pos, fantasy_stats_filter = null) => {
     ]
   }
 
-  return position_configs[pos] || []
+  // An empty group would render a bare `row__group` in the row while
+  // `PlayerSelectedRowHeader` emits nothing for it, shifting every column after
+  // it out of alignment. A caller passing `fantasy_stats_filter={[]}` means it
+  // renders those columns itself.
+  return (position_configs[pos] || []).filter((group) => group.length > 0)
 }
 
 const get_snaps_fields = (pos) => {

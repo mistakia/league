@@ -78,6 +78,10 @@ class PlayerRoster extends Player {
     const savings = get_savings()
 
     const pts_added = player_map.getIn(['pts_added', projectionType], 0)
+    // The net variant exists only at rest-of-season grain -- there is no
+    // season-grain net, so this reads `ros_net` in every phase rather than
+    // following `projectionType`.
+    const pts_added_net = player_map.getIn(['pts_added', 'ros_net'], null)
     const salary_adj_pts_added = player_map.getIn(
       ['salary_adj_pts_added', projectionType],
       0
@@ -310,6 +314,12 @@ class PlayerRoster extends Player {
               scaled
               value={pts_added}
               percentile={percentiles.pts_added}
+              show_positivity
+            />
+            <PercentileMetric
+              scaled
+              value={pts_added_net}
+              percentile={percentiles.pts_added_net}
               show_positivity
             />
             {isOffseason && (
