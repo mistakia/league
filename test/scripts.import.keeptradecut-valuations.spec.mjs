@@ -4,6 +4,7 @@ import * as chai from 'chai'
 import dayjs from 'dayjs'
 
 import db from '#db'
+import league from '#db/fixtures/league.mjs'
 import {
   MERGE_COLUMNS_FULL,
   MERGE_COLUMNS_FULL_RDP,
@@ -420,8 +421,15 @@ describe('SCRIPTS import-keeptradecut valuations', function () {
           }))
         )
 
+        // compute_snapshots_bulk derives the market format class from the
+        // league's own seasons/league_formats rows and throws rather than
+        // defaulting to superflex, so this needs a real league rather than a
+        // synthetic lid. The fixture league is superflex, which is the class
+        // the valuations above are written under.
+        await league(db)
+
         const [{ snapshot }] = await compute_snapshots_bulk({
-          lid: 999999,
+          lid: 1,
           holding_drafts: [
             {
               draft_id: 1,

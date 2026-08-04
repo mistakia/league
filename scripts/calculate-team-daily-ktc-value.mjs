@@ -191,10 +191,11 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   log(`calculating team daily ktc value for league ${lid}`)
 
   // KTC publishes a separate value set per market format class, so the read
-  // below must ask for this league's own class. This ran superflex-only for
-  // every league until 2026-08-04, which was wrong for every single-QB league
-  // it processed -- and the driver at the bottom of this file iterates all of
-  // them, so this was live output rather than a latent defect.
+  // below must ask for this league's own class. This ran superflex-only until
+  // 2026-08-04, which is wrong for any single-QB league -- and the driver at
+  // the bottom of this file iterates every hosted, non-archived league rather
+  // than taking one. Latent so far only because lid 1 is currently the sole
+  // such league; 33 of the 116 leagues carrying seasons rows are single-QB.
   const is_superflex = await derive_league_format_is_superflex({ lid })
 
   const teams_index = {}
@@ -554,7 +555,7 @@ const main = async () => {
       // get all hosted leagues that are not archived
       const leagues = await db('leagues')
         .select('uid')
-        .where({ hosted: 1 })
+        .where({ is_hosted: 1 })
         .whereNull('archived_at')
 
       for (const league of leagues) {
