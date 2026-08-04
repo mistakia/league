@@ -1,0 +1,17 @@
+{
+  "name": "team row grain year axis game opponent",
+  "description": "game_opponent under the team row grain with a year row axis, so the join correlates on team_years.year rather than on team alone.",
+  "request": {
+    "row_grain": ["team"],
+    "row_axes": ["year"],
+    "columns": [
+      {
+        "column_id": "game_opponent",
+        "params": { "year": [2023], "week": [1] }
+      }
+    ]
+  },
+  "tags": ["team-subject", "identity", "game", "joins"],
+  "timeout_ms": 40000,
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"team\" as (SELECT team_code, team_name, team_conference, team_division FROM (VALUES ('ARI','Arizona Cardinals','NFC','NFC West'),('ATL','Atlanta Falcons','NFC','NFC South'),('BAL','Baltimore Ravens','AFC','AFC North'),('BUF','Buffalo Bills','AFC','AFC East'),('CAR','Carolina Panthers','NFC','NFC South'),('CHI','Chicago Bears','NFC','NFC North'),('CIN','Cincinnati Bengals','AFC','AFC North'),('CLE','Cleveland Browns','AFC','AFC North'),('DAL','Dallas Cowboys','NFC','NFC East'),('DEN','Denver Broncos','AFC','AFC West'),('DET','Detroit Lions','NFC','NFC North'),('GB','Green Bay Packers','NFC','NFC North'),('HOU','Houston Texans','AFC','AFC South'),('IND','Indianapolis Colts','AFC','AFC South'),('JAX','Jacksonville Jaguars','AFC','AFC South'),('KC','Kansas City Chiefs','AFC','AFC West'),('LA','Los Angeles Rams','NFC','NFC West'),('LAC','Los Angeles Chargers','AFC','AFC West'),('LV','Las Vegas Raiders','AFC','AFC West'),('MIA','Miami Dolphins','AFC','AFC East'),('MIN','Minnesota Vikings','NFC','NFC North'),('NE','New England Patriots','AFC','AFC East'),('NO','New Orleans Saints','NFC','NFC South'),('NYG','New York Giants','NFC','NFC East'),('NYJ','New York Jets','AFC','AFC East'),('PHI','Philadelphia Eagles','NFC','NFC East'),('PIT','Pittsburgh Steelers','AFC','AFC North'),('SEA','Seattle Seahawks','NFC','NFC West'),('SF','San Francisco 49ers','NFC','NFC West'),('TB','Tampa Bay Buccaneers','NFC','NFC South'),('TEN','Tennessee Titans','AFC','AFC South'),('WAS','Washington Commanders','NFC','NFC East')) AS t(team_code, team_name, team_conference, team_division)), \"team_years\" as (SELECT team.team_code, base_years.year FROM team CROSS JOIN base_years), \"tfb77aedb84b029b95b61e438ba1624a2\" as (select \"season_year\", \"week\", away_nfl_team as nfl_team, home_nfl_team as game_opponent, false as game_is_home from \"nfl_games\" where \"nfl_week_id\" in ('2023_REG_WEEK_1') union select \"season_year\", \"week\", home_nfl_team as nfl_team, away_nfl_team as game_opponent, true as game_is_home from \"nfl_games\" where \"nfl_week_id\" in ('2023_REG_WEEK_1')) select \"team_years\".\"team_code\", tfb77aedb84b029b95b61e438ba1624a2.game_opponent as game_opponent_0, tfb77aedb84b029b95b61e438ba1624a2.game_is_home as game_is_home_0, \"team_years\".\"year\" from \"team_years\" inner join \"team\" on \"team\".\"team_code\" = \"team_years\".\"team_code\" left join \"tfb77aedb84b029b95b61e438ba1624a2\" on \"tfb77aedb84b029b95b61e438ba1624a2\".\"nfl_team\" = \"team_years\".\"team_code\" and \"tfb77aedb84b029b95b61e438ba1624a2\".\"season_year\" = \"team_years\".\"year\" group by tfb77aedb84b029b95b61e438ba1624a2.game_opponent, tfb77aedb84b029b95b61e438ba1624a2.game_is_home, \"team_years\".\"year\", \"team_years\".\"team_code\" order by \"team_years\".\"team_code\" asc limit 500"
+}

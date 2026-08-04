@@ -1,0 +1,31 @@
+{
+  "name": "player receiving yards count season threshold 1000",
+  "description": "The count aggregator at season period: counts seasons clearing the threshold rather than games. Pairs with the game-period fixture to cover both registered count tuples.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_receiving_yards_from_plays",
+        "params": {
+          "year": [2021, 2022, 2023],
+          "output": {
+            "period": "season",
+            "aggregation": "count",
+            "threshold": { "op": ">=", "value": 1000 }
+          }
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_receiving_yards_from_plays",
+        "column_index": 0,
+        "desc": true
+      }
+    ],
+    "where": []
+  },
+  "tags": ["output", "count", "aggregator"],
+  "timeout_ms": 40000,
+  "expected_query": "with \"count_season_cb8a8f5a0ec3\" as materialized (select \"nfl_games\".\"season_year\" as \"year\", CONCAT(nfl_games.season_year, '_', nfl_games.season_type) AS period_key, nfl_plays.target_pid AS pid, SUM(CASE WHEN nfl_plays.comp = true THEN nfl_plays.recv_yds ELSE 0 END) AS m_33f2f8aa0da1 from \"nfl_plays\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"nfl_plays\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2021, 2022, 2023) and not \"nfl_plays\".\"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') group by nfl_plays.target_pid, CONCAT(nfl_games.season_year, '_', nfl_games.season_type), \"nfl_games\".\"season_year\") select \"player\".\"pid\", player.first_name, player.last_name, COUNT(DISTINCT count_season_cb8a8f5a0ec3.period_key) FILTER (WHERE count_season_cb8a8f5a0ec3.m_33f2f8aa0da1 >= 1000) AS rec_yds_from_plays_0, \"player\".\"primary_position\" from \"player\" left join \"count_season_cb8a8f5a0ec3\" on \"count_season_cb8a8f5a0ec3\".\"pid\" = \"player\".\"pid\" group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500"
+}
