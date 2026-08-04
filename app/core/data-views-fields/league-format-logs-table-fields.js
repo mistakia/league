@@ -108,6 +108,40 @@ export default {
       header_label: 'Pts+ Net/G',
       player_value_path: 'points_added_net_per_game_from_seasonlogs'
     }),
+  player_points_added_net_rank_from_seasonlogs: from_league_format_seasonlogs({
+    column_title: 'Points Added Net Rank (Season)',
+    header_label: 'Pts+ Net Rnk',
+    player_value_path: 'points_added_net_rank_from_seasonlogs',
+    reverse_percentiles: true
+  }),
+  player_points_added_net_position_rank_from_seasonlogs:
+    from_league_format_seasonlogs({
+      column_title: 'Points Added Net Position Rank (Season)',
+      header_label: 'Pts+ Net Pos Rnk',
+      player_value_path: 'points_added_net_position_rank_from_seasonlogs',
+      reverse_percentiles: true
+    }),
+  player_points_added_net_per_game_rank_from_seasonlogs:
+    from_league_format_seasonlogs({
+      column_title: 'Points Added Net Per Game Rank (Season)',
+      header_label: 'Pts+ Net/G Rnk',
+      player_value_path: 'points_added_net_per_game_rank_from_seasonlogs',
+      reverse_percentiles: true
+    }),
+  player_points_added_net_per_game_position_rank_from_seasonlogs:
+    from_league_format_seasonlogs({
+      column_title: 'Points Added Net Per Game Position Rank (Season)',
+      header_label: 'Pts+ Net/G Pos Rnk',
+      player_value_path:
+        'points_added_net_per_game_position_rank_from_seasonlogs',
+      reverse_percentiles: true
+    }),
+  player_points_added_net_cap_dollars_from_seasonlogs:
+    from_league_format_seasonlogs({
+      column_title: 'Points Added Net Cap Dollars (Season)',
+      header_label: 'Pts+ Net $',
+      player_value_path: 'points_added_net_cap_dollars_from_seasonlogs'
+    }),
 
   player_startable_games_from_careerlogs: from_league_format_careerlogs({
     column_title: 'Startable Games (Career)',

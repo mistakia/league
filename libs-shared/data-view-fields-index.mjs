@@ -65,6 +65,16 @@ export default {
     'The points added by the player in a season based on league format (cumulative, positive + negative weeks)',
   player_points_added_net_per_game_from_seasonlogs:
     'The points added per game by the player in a season based on league format (cumulative, positive + negative weeks)',
+  player_points_added_net_rank_from_seasonlogs:
+    "The rank of the player's net points added in a season based on league format",
+  player_points_added_net_position_rank_from_seasonlogs:
+    "The position rank of the player's net points added in a season based on league format",
+  player_points_added_net_per_game_rank_from_seasonlogs:
+    "The rank of the player's net points added per game in a season based on league format",
+  player_points_added_net_per_game_position_rank_from_seasonlogs:
+    "The position rank of the player's net points added per game in a season based on league format",
+  player_points_added_net_cap_dollars_from_seasonlogs:
+    "The player's net points added converted to cap dollars for a season based on league format",
 
   player_startable_games_from_careerlogs:
     'The number of startable games for the player in their career based on league format',

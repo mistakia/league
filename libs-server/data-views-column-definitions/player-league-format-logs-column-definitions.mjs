@@ -162,6 +162,24 @@ export default {
     create_field_from_league_format_player_seasonlogs(
       'points_added_net_per_game'
     ),
+  player_points_added_net_rank_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs('points_added_net_rank'),
+  player_points_added_net_position_rank_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs(
+      'points_added_net_position_rank'
+    ),
+  player_points_added_net_per_game_rank_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs(
+      'points_added_net_per_game_rank'
+    ),
+  player_points_added_net_per_game_position_rank_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs(
+      'points_added_net_per_game_position_rank'
+    ),
+  player_points_added_net_cap_dollars_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs(
+      'points_added_net_cap_dollars'
+    ),
 
   player_startable_games_from_careerlogs:
     create_field_from_league_format_player_careerlogs('startable_games'),
