@@ -4,6 +4,8 @@ _Generated at: 2026-05-29T15:23:53.767Z_
 
 This document shows the configuration for each named format in the system. Identities are stable opaque IDs; multiple source keys may share an ID when their configs are byte-identical (the alphabetical-first slug wins).
 
+**The scoring tables below list only the columns a format DECLARES, which since 2026-08-04 is no longer all of them.** Kicking and DST scoring became configurable on that date, adding 21 columns to `league_scoring_formats`; no named format declares any of them, so every one of these formats takes the registry defaults in `libs-shared/scoring-columns.mjs` — 0.1 per field goal yard, 1 per extra point, 6 per defensive touchdown, and so on. Those defaults are exactly the literals `calculate-points.mjs` used to hardcode, so no format's effective scoring changed; the stored rows do carry the values, and a format that wants different ones declares them like any other column. Read a format's kicking or DST scoring off the registry defaults, not off the absence of a row here.
+
 ## League Format Summary
 
 | Source Key                                  | ID                                          | Description                                                                                                   |
