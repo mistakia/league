@@ -583,6 +583,8 @@ if (is_main(import.meta.url)) {
 
 Use `handle_season_args_for_script()` for year/week parameters.
 
+**A script that imports `#db` does not EXIT when its work finishes — the knex pool keeps the event loop alive, so wall-clock duration is not run duration.** The work completes, the last `console.log` sits unflushed in a pipe, and the process lives until something kills it. This is the default outcome of an ad-hoc invocation, not a rare event: a 2026-08-04 census of league-production found **four** leaked `node` processes aged 10 to 56 days, every one a hand-typed `node -e` or a `tmp/*.mjs` throwaway, two of them ad-hoc data-view scripts. The 56-day one had held a Postgres backend authenticated as `league_user` — a role DROPPED in the 2026-07-01 rename — because Postgres never re-checks a role on an already-open session, so no timeout and no credential change could ever have reclaimed it. The same trap corrupts measurement while you are still at the keyboard: in that session two timing scripts appeared to hang for 7 and 15 minutes and were nearly diagnosed as slow query CONSTRUCTION, when construction took 98ms and the queries took 44s — the rest was the process refusing to exit behind a `| tail` that therefore printed nothing. End any script that opens a handle with `await db.destroy()`, and add an explicit `process.exit(0)` when a redis client is also open (`redis_cache` from `#libs-server` holds its own socket, which `db.destroy()` does not close). When a script prints nothing and seems slow, check `ps -o etime= -p <pid>` and its open sockets before believing the work is slow.
+
 ### Season Constants
 
 Current season info from `libs-shared/constants/season-constants.mjs`:
