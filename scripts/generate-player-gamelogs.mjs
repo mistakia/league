@@ -303,7 +303,7 @@ const format_player_gamelog = ({
     }),
     pid,
     pos,
-    is_active: true,
+    active: true,
     source: PLAY_STATS_GAMELOG_SOURCE
   }
 }
@@ -677,7 +677,7 @@ const generate_snap_based_gamelogs = async ({
         nfl_team: team,
         opponent_nfl_team: opponent,
         season_year: year,
-        is_active: true,
+        active: true,
         source: PLAY_STATS_GAMELOG_SOURCE
         // All counting stats default to NULL/0
       })
