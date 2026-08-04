@@ -1,4 +1,4 @@
-/* global describe it before after */
+/* global describe it before after afterEach */
 import * as chai from 'chai'
 import MockDate from 'mockdate'
 
@@ -37,16 +37,6 @@ describe('LIBS-SHARED isReserveEligible', function () {
       expect(result).to.equal(true)
     })
 
-    it('should return true for any game_designation during week 0', function () {
-      const result = isReserveEligible({
-        roster_status: player_nfl_status.ACTIVE,
-        game_designation: player_nfl_injury_status.QUESTIONABLE
-      })
-      // This depends on current_season.week === 0, which is unlikely in tests
-      // but the logic is in the function
-      expect(result).to.be.a('boolean')
-    })
-
     it('should return false for ACTIVE status with no injury', function () {
       const result = isReserveEligible({
         roster_status: player_nfl_status.ACTIVE,
@@ -55,12 +45,46 @@ describe('LIBS-SHARED isReserveEligible', function () {
       expect(result).to.equal(false)
     })
 
-    it('should return false for QUESTIONABLE game_designation', function () {
-      const result = isReserveEligible({
-        roster_status: player_nfl_status.ACTIVE,
-        game_designation: player_nfl_injury_status.QUESTIONABLE
+    // QUESTIONABLE is the one designation whose answer FLIPS with the season
+    // phase, so it needs a frozen clock on both sides. In the regular season
+    // only OUT and DOUBTFUL make a player reserve-eligible; in the offseason
+    // ANY designation does, because there is no game to be active for. The
+    // switch is `current_season.week === 0`, which reads 0 for the whole
+    // offseason -- see the offseason allowance in
+    // libs-shared/is-reserve-eligible.mjs.
+    //
+    // Do not collapse these into one expectation. A single hardcoded answer is
+    // wrong for half the year: this file carried `expect(result).to.equal(
+    // false)` with no clock, which was correct in-season and failed every
+    // offseason. It went unnoticed for an unknown period because the spec sat
+    // under test/libs-shared/ and mocha's default glob is one level deep, so
+    // it had never run.
+    describe('QUESTIONABLE game_designation - flips with season phase', function () {
+      afterEach(function () {
+        MockDate.reset()
       })
-      expect(result).to.equal(false)
+
+      it('should return false for QUESTIONABLE during the regular season', function () {
+        MockDate.set('2026-10-15T12:00:00.000Z') // regular season
+        expect(current_season.week).to.be.above(0)
+
+        const result = isReserveEligible({
+          roster_status: player_nfl_status.ACTIVE,
+          game_designation: player_nfl_injury_status.QUESTIONABLE
+        })
+        expect(result).to.equal(false)
+      })
+
+      it('should return true for QUESTIONABLE during the offseason', function () {
+        MockDate.set('2026-07-01T12:00:00.000Z') // offseason
+        expect(current_season.week).to.equal(0)
+
+        const result = isReserveEligible({
+          roster_status: player_nfl_status.ACTIVE,
+          game_designation: player_nfl_injury_status.QUESTIONABLE
+        })
+        expect(result).to.equal(true)
+      })
     })
 
     it('should handle no parameters', function () {

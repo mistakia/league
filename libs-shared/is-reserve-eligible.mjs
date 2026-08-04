@@ -124,6 +124,22 @@ export default function isReserveEligible({
   }
 
   // Original eligibility logic (backward compatible)
+  //
+  // The last clause is the OFFSEASON ALLOWANCE and it is deliberate: outside
+  // the regular season ANY game_designation makes a player reserve-eligible,
+  // because there is no game for them to be active for. `current_season.week`
+  // reads 0 for the entire offseason, which is the switch.
+  //
+  // The consequence that reads as a bug and is not one: QUESTIONABLE returns
+  // true today and false once Week 1 starts. In-season only OUT and DOUBTFUL
+  // qualify, so no QUESTIONABLE player can reach injured reserve during the
+  // season -- `submit-reserve.mjs` passes the live `current_season.week` to
+  // this function. Confirmed 2026-08-03 by evaluating both phases directly.
+  //
+  // This clause predates the libs-shared rename. Anything asserting on
+  // QUESTIONABLE must pin the clock; a single hardcoded expectation is wrong
+  // for half the year. See the paired cases in
+  // test/libs-shared/is-reserve-eligible.spec.mjs.
   return Boolean(
     (roster_status && roster_status !== player_nfl_status.ACTIVE) ||
       game_designation === player_nfl_injury_status.OUT ||
