@@ -18,12 +18,15 @@
 // from the clustered bootstrap that already exists in the harness. Building both
 // would be two mechanisms for one job.
 
-import { CholeskyDecomposition, Matrix, solve } from 'ml-matrix'
+import { CholeskyDecomposition, Matrix } from 'ml-matrix'
 
 // The penalty is on the STANDARDIZED scale, so it means the same thing whatever
 // units the caller's features carry. A caller passing raw yardage beside a 0/1
 // indicator would otherwise be penalizing the two by a factor of a thousand.
 const DEFAULT_RIDGE_PENALTY = 1e-4
+// Floor applied to whatever the caller asks for -- see the penalty construction
+// below for why a zero penalty is not safe here.
+const MINIMUM_RIDGE_PENALTY = 1e-8
 const DEFAULT_MAX_ITERATIONS = 100
 const DEFAULT_TOLERANCE = 1e-8
 
@@ -77,34 +80,25 @@ const standardize_features = (feature_rows) => {
   return { standardized, means, standard_deviations }
 }
 
-// XᵀWX is symmetric in exact arithmetic but not in floating point -- the two
-// triangles differ in the last bits, and `CholeskyDecomposition` tests symmetry
-// EXACTLY and throws "Matrix is not symmetric" on the difference. Averaging the
-// triangles restores the symmetry the mathematics already guarantees.
-const symmetrize = (matrix) => {
-  const size = matrix.rows
-  const result = new Matrix(size, size)
-  for (let row = 0; row < size; row++) {
-    for (let column = row; column < size; column++) {
-      const average = (matrix.get(row, column) + matrix.get(column, row)) / 2
-      result.set(row, column, average)
-      result.set(column, row, average)
-    }
-  }
-  return result
-}
-
-// Solve the penalized normal equations. Cholesky is tried first because the
-// matrix is symmetric positive definite whenever the penalty is positive and it
-// is the cheaper factorization; a general solve is the fallback for the
-// unpenalized case, where the matrix can be merely positive semi-definite.
+// Solve the penalized normal equations by Cholesky.
+//
+// There is no general-solve fallback, deliberately. An earlier revision tried
+// Cholesky and fell back to an LU solve when `isPositiveDefinite()` said no --
+// which does not do what it reads like, in BOTH directions. On a rank-deficient
+// positive SEMI-definite matrix `isPositiveDefinite()` returns TRUE, so the
+// Cholesky branch is taken and returns coefficients of order 1e15; and on an
+// exactly duplicated column it returns false and the LU fallback throws
+// `LU matrix is singular`, which names nothing a caller can act on. The floor on
+// the penalty below makes the matrix genuinely positive definite instead, so
+// neither path is needed and a failure here is a real one worth surfacing.
 const solve_normal_equations = ({ hessian, gradient }) => {
-  const symmetric = symmetrize(hessian)
-  const cholesky = new CholeskyDecomposition(symmetric)
-  if (cholesky.isPositiveDefinite()) {
-    return cholesky.solve(gradient)
+  const cholesky = new CholeskyDecomposition(hessian)
+  if (!cholesky.isPositiveDefinite()) {
+    throw new Error(
+      'penalized normal equations are not positive definite: the design is rank-deficient beyond what the ridge penalty conditions. Raise ridge_penalty or drop a collinear feature.'
+    )
   }
-  return solve(symmetric, gradient)
+  return cholesky.solve(gradient)
 }
 
 // Fit by IRLS. Each iteration forms the working response and weights of the
@@ -141,6 +135,32 @@ const fit_logistic_regression = ({
     }
   }
 
+  // Every feature value must be a finite NUMBER, and this check is not
+  // defensive boilerplate -- without it a single bad value silently DELETES the
+  // feature and the fit reports success. A NaN anywhere in a column makes that
+  // column's standard deviation NaN; `NaN > 1e-12` is false, so the column is
+  // classified zero-variance, standardizes to all zeros, and its coefficient is
+  // pinned to 0 with `converged: true` and no warning. A string sneaks through
+  // by concatenating in the mean loop, and a null coerces to 0 and is treated as
+  // a real observation. These consumers build feature matrices from SQL result
+  // sets of 10,000 to 50,000 rows, where exactly one null is the expected
+  // failure -- and it would drop an entire feature from a valuation stage.
+  for (let row = 0; row < features.length; row++) {
+    if (features[row].length !== column_count) {
+      throw new Error(
+        `feature row ${row} has ${features[row].length} values, expected ${column_count}`
+      )
+    }
+    for (let column = 0; column < column_count; column++) {
+      const value = features[row][column]
+      if (typeof value !== 'number' || !Number.isFinite(value)) {
+        throw new Error(
+          `feature value at row ${row}, column ${column} is ${JSON.stringify(value)}; every value must be a finite number`
+        )
+      }
+    }
+  }
+
   const { standardized, means, standard_deviations } =
     standardize_features(features)
 
@@ -149,7 +169,19 @@ const fit_logistic_regression = ({
   // which is a claim about the outcome nobody asked the penalty to make.
   const design = new Matrix(standardized.map((row) => [1, ...row]))
   const parameter_count = column_count + 1
-  const penalty = Matrix.eye(parameter_count).mul(ridge_penalty)
+
+  // The penalty carries a FLOOR, and it is numerical conditioning rather than
+  // shrinkage. At `ridge_penalty: 0` a rank-deficient design -- two features
+  // that are exact linear combinations of each other, which a feature matrix
+  // assembled from correlated football statistics can easily produce -- leaves
+  // the normal equations singular, and `CholeskyDecomposition` does not
+  // reliably detect it (see `solve_normal_equations`). A measured 2000-row fit
+  // with `c = 2a + 3b` at zero penalty returned coefficients of 2.11 and 1.40
+  // against truths of 1.0 and -0.5, `converged: false`, and nothing else to
+  // read. 1e-8 on the STANDARDIZED scale conditions the matrix while moving an
+  // O(1) coefficient by less than the convergence tolerance.
+  const effective_ridge_penalty = Math.max(ridge_penalty, MINIMUM_RIDGE_PENALTY)
+  const penalty = Matrix.eye(parameter_count).mul(effective_ridge_penalty)
   penalty.set(0, 0, 0)
 
   // A zero-variance feature standardizes to an all-zero column, which
@@ -184,13 +216,32 @@ const fit_logistic_regression = ({
     }
 
     // hessian = XᵀWX + penalty, gradient = Xᵀ(y - p) - penalty * beta
-    const weighted_design = new Matrix(design.rows, parameter_count)
+    //
+    // Formed as (√W X)ᵀ(√W X) rather than Xᵀ(WX). The two are equal in exact
+    // arithmetic, but only the first is exactly symmetric in floating point: its
+    // (i,j) and (j,i) entries multiply the same three factors in the same
+    // association, so they agree bit for bit. Xᵀ(WX) associates them
+    // differently and the triangles disagree in the last bits, which
+    // `CholeskyDecomposition` -- which tests symmetry EXACTLY -- rejects with
+    // "Matrix is not symmetric". Measured on a 5000x6 design spanning five
+    // orders of magnitude in scale: max asymmetry 3.6e-7 for Xᵀ(WX), exactly 0
+    // for this form. An earlier revision averaged the triangles instead; this
+    // removes the need.
+    const sqrt_weighted_design = new Matrix(design.rows, parameter_count)
     for (let row = 0; row < design.rows; row++) {
+      const sqrt_weight = Math.sqrt(weights[row])
       for (let column = 0; column < parameter_count; column++) {
-        weighted_design.set(row, column, design.get(row, column) * weights[row])
+        sqrt_weighted_design.set(
+          row,
+          column,
+          design.get(row, column) * sqrt_weight
+        )
       }
     }
-    const hessian = design.transpose().mmul(weighted_design).add(penalty)
+    const hessian = sqrt_weighted_design
+      .transpose()
+      .mmul(sqrt_weighted_design)
+      .add(penalty)
     const gradient = design
       .transpose()
       .mmul(Matrix.columnVector(working_residual))
@@ -245,6 +296,7 @@ const fit_logistic_regression = ({
     feature_means: means,
     feature_standard_deviations: standard_deviations,
     ridge_penalty,
+    effective_ridge_penalty,
     iterations,
     converged,
     observations: features.length
@@ -254,11 +306,27 @@ const fit_logistic_regression = ({
 // Apply a fit to new rows, in the caller's own units. Kept here rather than in
 // the consumer because the standardization transform is part of the fit and a
 // consumer re-deriving it is how live and backtest predictions drift apart.
+//
+// It evaluates through the STANDARDIZED coefficients, not the raw ones, and that
+// is a numerical choice rather than a stylistic one. The raw intercept absorbs
+// `-Σ bⱼ mⱼ / sⱼ`, so on the raw path the linear predictor is a large number
+// minus large numbers and cancels catastrophically once a feature's mean dwarfs
+// its spread. Measured against the standardized path at a probability spread of
+// about 0.55: a feature offset of 1e6 disagrees by 7e-11, 1e12 by 3e-5, and 1e15
+// by 6.7e-2 -- which is a wrong answer. Yardage beside an indicator is safe, an
+// epoch timestamp or an absolute year is not. Going through the standardization
+// is exact at every scale, and it makes this comment's first paragraph true:
+// before, the function claimed to carry the transform while not using it.
 export const predict_logistic_probability = ({ fit, features }) =>
   features.map((row) => {
-    let linear_predictor = fit.intercept
+    let linear_predictor = fit.standardized_intercept
     for (let column = 0; column < row.length; column++) {
-      linear_predictor += fit.coefficients[column] * row[column]
+      const deviation = fit.feature_standard_deviations[column]
+      if (deviation === 0) continue
+      const standardized_value =
+        (row[column] - fit.feature_means[column]) / deviation
+      linear_predictor +=
+        fit.standardized_coefficients[column] * standardized_value
     }
     return sigmoid(linear_predictor)
   })

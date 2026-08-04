@@ -10,7 +10,7 @@ chai.should()
 const expect = chai.expect
 
 // The module is hand-rolled IRLS, so "it ran and produced numbers" proves
-// nothing. Three independent checks, in increasing strength:
+// nothing. Four independent checks, in increasing strength:
 //
 //   1. Recovery -- fits synthetic data generated from known coefficients and
 //      checks it finds them back. Statistical, so the tolerance is loose.
@@ -20,6 +20,16 @@ const expect = chai.expect
 //      step that converges to the wrong point.
 //   3. Cross-implementation -- reruns the same fit by plain gradient ascent,
 //      which shares no code path with the Newton solve, and requires agreement.
+//   4. Raw-space recovery -- refits in the CALLER's units with an optimizer that
+//      never standardizes, and compares raw coefficients.
+//
+// The fourth exists because the first three share a blind spot, and a 2026-08-04
+// review proved it: checks 2 and 3 are both handed `fit.feature_means` and
+// `fit.feature_standard_deviations` and both assert only on the STANDARDIZED
+// parameters, so an error inside `standardize_features` is self-consistent
+// across them and reads as a perfect zero gradient. Check 3 is an independent
+// OPTIMIZER, not an independent MODEL. Only check 4 observes the standardization
+// and the back-transform at all.
 //
 // Together these are the "coefficients match a fixture computed independently,
 // to a stated tolerance" verify on the Groundwork item of
@@ -30,11 +40,21 @@ const sigmoid = (value) => 1 / (1 + Math.exp(-value))
 
 // Deterministic uniform generator. Fixed seed so a failure is reproducible and a
 // flake is impossible -- there is no wall clock or Math.random anywhere here.
+//
+// `Math.imul` and `>>> 0` are load-bearing. The obvious spelling,
+// `(state * 1103515245 + 12345) & 0x7fffffff`, reaches 2.4e18 before the mask --
+// about 250x past Number.MAX_SAFE_INTEGER -- so the low bits are destroyed by
+// float rounding before they are ever masked, and the generator collapses to a
+// period of 10,466 for every seed used in this file. That is not a cosmetic
+// flaw: it made the 20,000-observation recovery test below contain only 7,031
+// distinct rows, so its tolerances were calibrated against a design that is 65%
+// exact duplicates -- precisely the regime in which a conditioning defect hides.
+// `Math.imul` keeps the multiply exact in 32 bits.
 const make_random = (seed) => {
-  let state = seed
+  let state = seed >>> 0
   return () => {
-    state = (state * 1103515245 + 12345) & 0x7fffffff
-    return state / 0x7fffffff
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0
+    return state / 0x100000000
   }
 }
 
@@ -96,7 +116,7 @@ const penalized_gradient = ({ fit, features, targets }) => {
 
   // The intercept is unpenalized, matching the module.
   for (let index = 1; index < parameters.length; index++) {
-    gradient[index] -= fit.ridge_penalty * parameters[index]
+    gradient[index] -= fit.effective_ridge_penalty * parameters[index]
   }
   return gradient
 }
@@ -354,6 +374,176 @@ describe('LIBS SERVER fit-logistic-regression', function () {
       Math.abs(heavy.standardized_coefficients[index]).should.be.below(
         Math.abs(light.standardized_coefficients[index])
       )
+    }
+  })
+
+  // The three tests below close bug classes the original spec provably could not
+  // see. The gradient check and the gradient-ascent reference both read
+  // `fit.feature_means` and `fit.feature_standard_deviations` and both assert
+  // only on the STANDARDIZED parameters, so any error inside
+  // `standardize_features` is self-consistent across all of them and reads as a
+  // perfect zero gradient. The raw back-transform was likewise observed only by
+  // a test that compared two paths sharing the same (possibly wrong) transform.
+
+  it('recovers raw coefficients against a fit that never standardizes', () => {
+    // The only check on `standardize_features` and the back-transform together.
+    // The reference optimizes the RAW-space objective directly, so it shares no
+    // centering, no scaling, and no parameterization with the module.
+    const random = make_random(8675309)
+    const intercept = 0.35
+    const true_coefficients = [1.1, -0.7]
+    const features = []
+    const targets = []
+    for (let row = 0; row < 1200; row++) {
+      // Deliberately off-center and unequally scaled, so a wrong mean or a wrong
+      // denominator inside the standardization cannot cancel. Kept to modest
+      // magnitudes because the reference below is plain gradient ascent in RAW
+      // space, which is only stable when the feature scale is O(1) -- a larger
+      // offset diverges the REFERENCE and reads as a module failure.
+      const feature_row = [5 + random() * 3, 2 + random() * 1.8]
+      let linear_predictor = intercept
+      for (let column = 0; column < 2; column++) {
+        linear_predictor +=
+          true_coefficients[column] *
+          (feature_row[column] - (column === 0 ? 6.5 : 2.9))
+      }
+      features.push(feature_row)
+      targets.push(random() < sigmoid(linear_predictor) ? 1 : 0)
+    }
+
+    const fit = fit_logistic_regression({
+      features,
+      targets,
+      feature_names: ['offset_scale', 'small_scale'],
+      ridge_penalty: 0
+    })
+
+    // Plain gradient ascent in RAW space. No standardization anywhere.
+    const parameters = [0, 0, 0]
+    const learning_rate = 2e-5
+    for (let iteration = 0; iteration < 400000; iteration++) {
+      const gradient = [0, 0, 0]
+      for (let row = 0; row < features.length; row++) {
+        const linear_predictor =
+          parameters[0] +
+          parameters[1] * features[row][0] +
+          parameters[2] * features[row][1]
+        const residual = targets[row] - sigmoid(linear_predictor)
+        gradient[0] += residual
+        gradient[1] += residual * features[row][0]
+        gradient[2] += residual * features[row][1]
+      }
+      let max_step = 0
+      for (let index = 0; index < 3; index++) {
+        const step = learning_rate * gradient[index]
+        parameters[index] += step
+        max_step = Math.max(max_step, Math.abs(step))
+      }
+      if (max_step < 1e-11) break
+    }
+
+    expect(fit.coefficients[0]).to.be.closeTo(parameters[1], 1e-3)
+    expect(fit.coefficients[1]).to.be.closeTo(parameters[2], 1e-3)
+    expect(fit.intercept).to.be.closeTo(parameters[0], 5e-2)
+  })
+
+  it('predicts identically at a feature offset that breaks the raw path', () => {
+    // The raw intercept absorbs -sum(b_j * m_j / s_j), so a raw-coefficient
+    // prediction cancels catastrophically once a mean dwarfs its spread. This
+    // pins the standardized evaluation: at an offset of 1e12 the raw path is
+    // wrong in the third decimal of a probability.
+    const random = make_random(20260804)
+    const features = []
+    const targets = []
+    for (let row = 0; row < 2000; row++) {
+      const value = 1e12 + random() * 2 - 1
+      features.push([value])
+      targets.push(random() < sigmoid(1.5 * (value - 1e12)) ? 1 : 0)
+    }
+
+    const fit = fit_logistic_regression({
+      features,
+      targets,
+      feature_names: ['epoch_like']
+    })
+    const probabilities = predict_logistic_probability({
+      fit,
+      features: features.slice(0, 200)
+    })
+
+    for (let row = 0; row < 200; row++) {
+      const deviation = fit.feature_standard_deviations[0]
+      const standardized_value =
+        (features[row][0] - fit.feature_means[0]) / deviation
+      const expected = sigmoid(
+        fit.standardized_intercept +
+          fit.standardized_coefficients[0] * standardized_value
+      )
+      expect(probabilities[row]).to.be.closeTo(expected, 1e-12)
+    }
+    // And the predictions must still span the range rather than collapsing.
+    expect(Math.max(...probabilities) - Math.min(...probabilities)).to.be.above(
+      0.3
+    )
+  })
+
+  it('conditions a rank-deficient design rather than returning garbage', () => {
+    // A third feature that is an exact linear combination of the first two. At a
+    // literal zero penalty the normal equations are singular and Cholesky's
+    // positive-definiteness test does NOT catch it -- it returns true and the
+    // solve yields coefficients of order 1e15. The penalty floor is what makes
+    // this well posed.
+    const random = make_random(31415)
+    const features = []
+    const targets = []
+    for (let row = 0; row < 3000; row++) {
+      const first = random() * 2 - 1
+      const second = random() * 2 - 1
+      features.push([first, second, 2 * first + 3 * second])
+      targets.push(random() < sigmoid(0.2 + 1.0 * first - 0.5 * second) ? 1 : 0)
+    }
+
+    const fit = fit_logistic_regression({
+      features,
+      targets,
+      feature_names: ['first', 'second', 'dependent'],
+      ridge_penalty: 0
+    })
+
+    fit.converged.should.equal(true)
+    fit.effective_ridge_penalty.should.be.above(0)
+    for (const coefficient of fit.coefficients) {
+      Math.abs(coefficient).should.be.below(100)
+    }
+    // The identified direction is what the collinear set can carry: the fitted
+    // combination must reproduce the true linear predictor, even though the
+    // individual coefficients are not separately identified.
+    const first_effect = fit.coefficients[0] + 2 * fit.coefficients[2]
+    const second_effect = fit.coefficients[1] + 3 * fit.coefficients[2]
+    expect(first_effect).to.be.closeTo(1.0, 0.2)
+    expect(second_effect).to.be.closeTo(-0.5, 0.2)
+  })
+
+  it('rejects a non-finite feature rather than silently dropping the column', () => {
+    // The highest-severity input defect: without this check a single NaN makes
+    // the column read as zero-variance, pins its coefficient to 0, and returns
+    // converged: true. These consumers assemble features from SQL result sets
+    // where exactly one null is the expected failure.
+    const base = [
+      [1, 5],
+      [2, 6],
+      [3, 7],
+      [4, 8]
+    ]
+    const targets = [0, 1, 0, 1]
+
+    for (const bad of [NaN, null, undefined, '3', Infinity]) {
+      const features = base.map((row) => [...row])
+      features[2][0] = bad
+      expect(
+        () => fit_logistic_regression({ features, targets, ridge_penalty: 0 }),
+        `value ${String(bad)} must be rejected`
+      ).to.throw('must be a finite number')
     }
   })
 
