@@ -58,6 +58,10 @@ const project = (row, { compare_columns, ignore_columns }) => {
 const normalize_rows = (rows, opts) =>
   rows.map((r) => JSON.stringify(project(r, opts))).sort()
 
+// Kept in sync with the `pos` / `primary_position` values in the
+// test/data-view-queries/*-result-equivalence.json seeds.
+const SEED_ISOLATION_POSITION = 'MLB'
+
 const get_fixtures = () =>
   load_data_view_test_queries_sync().filter((f) => f.result_equivalence)
 
@@ -79,6 +83,22 @@ describe('Data View', () => {
 
         const trx = await db.transaction()
         try {
+          // The seeds isolate themselves by giving their players a position no
+          // shared fixture uses, then filtering the data view on it. That was
+          // 'ZZ' until the position vocabulary became CHECK-constrained; MLB is
+          // the one canonical value the shared fixtures leave free. Unlike 'ZZ'
+          // it is a real position, so a future fixture could claim it and make
+          // these tests wrong rather than red -- assert it stays free.
+          const [{ count: mlb_fixture_players }] = await trx('player')
+            .where({ primary_position: SEED_ISOLATION_POSITION })
+            .whereNot('pid', 'like', 'TEST-%')
+            .count()
+          if (Number(mlb_fixture_players) > 0) {
+            throw new Error(
+              `result-equivalence seeds isolate on primary_position=${SEED_ISOLATION_POSITION}, but ${mlb_fixture_players} shared fixture player(s) now carry it. Pick another unused vocabulary member and update the fixtures' seed and request.`
+            )
+          }
+
           for (const stmt of re.seed || []) {
             await trx.raw(stmt)
           }

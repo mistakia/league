@@ -5,13 +5,13 @@
     "prefix_columns": ["player_name"],
     "columns": [{ "column_id": "player_keeptradecut_position_rank" }],
     "where": [
-      { "column_id": "player_position", "operator": "IN", "value": ["ZW"] }
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"t90891809356f9407f65875d649680396\".\"position_rank\" AS \"player_keeptradecut_position_rank_0\", \"player\".\"primary_position\" from \"player\" left join \"keeptradecut_valuations\" as \"t90891809356f9407f65875d649680396\" on \"t90891809356f9407f65875d649680396\".\"pid\" = \"player\".\"pid\" and \"t90891809356f9407f65875d649680396\".\"is_superflex\" = true and \"t90891809356f9407f65875d649680396\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"position_rank\" is not null) where player.primary_position IN ('ZW') group by player.first_name, player.last_name, \"t90891809356f9407f65875d649680396\".\"position_rank\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"t90891809356f9407f65875d649680396\".\"position_rank\" AS \"player_keeptradecut_position_rank_0\", \"player\".\"primary_position\" from \"player\" left join \"keeptradecut_valuations\" as \"t90891809356f9407f65875d649680396\" on \"t90891809356f9407f65875d649680396\".\"pid\" = \"player\".\"pid\" and \"t90891809356f9407f65875d649680396\".\"is_superflex\" = true and \"t90891809356f9407f65875d649680396\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"position_rank\" is not null) where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"t90891809356f9407f65875d649680396\".\"position_rank\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
-      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTC-000909', 'Test', 'Ktcw', 'T.Ktcw', 'Test Ktcw', 'ZW', 'ZW', '2000-01-01', 2020, 'ZWA')",
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTC-000909', 'Test', 'Ktcw', 'T.Ktcw', 'Test Ktcw', 'MLB', 'MLB', '2000-01-01', 2020, 'ZWA')",
       "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value, position_rank, overall_rank) VALUES ('TEST-KTC-000909', true, TIMESTAMPTZ '2025-06-01 00:00:00-04', 5000, 3, 10)",
       "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTC-000909', true, TIMESTAMPTZ '2025-06-02 00:00:00-04', 5100)"
     ],
