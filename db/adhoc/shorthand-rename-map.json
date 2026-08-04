@@ -10,10 +10,11 @@
     "note": "The 6 epa/iqr keeps stopped being reported once the exemption landed, so the residual FLOOR this map drives to is now 23 (the superseded set) rather than 29."
   },
   "dispositions": {
-    "rename": 202,
+    "rename": 200,
     "superseded": 23,
     "keep": 6,
-    "drop": 9
+    "drop": 9,
+    "blocked_operator_ruling": 2
   },
   "low_confidence_count": 0,
   "disposition_vocabulary": {
@@ -27,7 +28,8 @@
     "audit_rule_conflict": "db/adhoc/2026-07-22-player-prospect-profile-sis-conform.sql:5 records the operator ruling \"IQR kept (proprietary metric name, like EPA)\" while conforming 224 SIS columns. audit-schema-conformance.mjs:148 says the opposite -- that domain acronyms including epa are \"likewise not exempt\". Six columns sit in that gap (epa on nfl_plays, nfl_plays_current_week and both player_college tables; iqr on both player_college tables). They are marked `keep` on the strength of the operator ruling, which outranks the script. The script needs epa and iqr added to its exempt set. Note the ruling does NOT extend to adp, faab or cpoe, which have unambiguous expansions and are mapped as renames.",
     "lifecycle": "MIGRATION INSTRUMENT, NOT A PERMANENT ARTIFACT. It is authoritative input for the per-cluster migrations -- eleven workers consume it so they do not each re-derive the vocabulary and drift -- which is exactly why it cannot live under scratch/: user:guideline/scratch-tier-discipline.md states that scratch is never a source of truth and that \"grepping scratch/ for authoritative answers is a workflow bug\", and scratch is single-machine so it cannot cross hosts. Retirement trigger: when the audit's shorthand class reaches its floor of 29 (23 superseded + 6 keep) and those are cleared by their owning tasks, DELETE this file in the same commit that closes the class. The durable residue is not this JSON -- it is the applied db/adhoc/*.sql files, the schema itself, and the three non-obvious rulings recorded as observations on user:task/league/redesign-league-database-schema.md (pos -> player_position rather than the audit hint, the epa/iqr exemption, and the nine dead columns).",
     "output_path": "This file sits under scratch/, which .gitignore excludes at rule `scratch/*/*/*`. The task plan says to COMMIT it; at this path that is impossible. Recommend relocating to repository/active/league/db/adhoc/shorthand-rename-map.json, beside the audit script that defines the rule it answers to.",
-    "partitions": "VERIFIED EMPIRICALLY, not assumed. Two mapped tables are partitioned parents: nfl_plays (27 children x 21 renamed columns) and player_gamelogs (28 children x 2). No mapped table is itself a partition child. A throwaway Postgres probe confirmed both directions: ALTER TABLE <parent> RENAME COLUMN propagates to every child in one catalog operation, and attempting the rename on a child instead FAILS with \"cannot rename inherited column\" rather than diverging silently. So the 623 implied child-level column instances collapse to 23 parent statements, and the wrong approach is loud rather than quiet."
+    "partitions": "VERIFIED EMPIRICALLY, not assumed. Two mapped tables are partitioned parents: nfl_plays (27 children x 21 renamed columns) and player_gamelogs (28 children x 2). No mapped table is itself a partition child. A throwaway Postgres probe confirmed both directions: ALTER TABLE <parent> RENAME COLUMN propagates to every child in one catalog operation, and attempting the rename on a child instead FAILS with \"cannot rename inherited column\" rather than diverging silently. So the 623 implied child-level column instances collapse to 23 parent statements, and the wrong approach is loud rather than quiet.",
+    "grain_conflation_finding": "Independent verification 2026-08-04 (session shorthand-migration-takeover) re-derived every disposition rather than trusting this map. Two records were WRONG and are now blocked_operator_ruling: pff_team_gamelogs.wins/ties are per-game outcome flags, not counts. The 9 drops and the remaining 200 renames were re-verified and stand. Also noted, not defects: pff_player_facet_gamelogs holds 0 rows (5 renames land on an empty table), and tds/yards on pff_player_facet_seasonlogs are 100% NULL across 21,751 rows."
   },
   "records": [
     {
@@ -1129,18 +1131,18 @@
     {
       "table": "pff_team_gamelogs",
       "column": "wins",
-      "proposed_name": "win_count",
-      "disposition": "rename",
-      "confidence": "high",
-      "rationale": "NFL team win total on a PFF-sourced log. Bare `wins` is 4 characters and NOT in the audit's accepted_short_words, so leaving it would keep flagging; the league_* tables take regular_season_wins instead because they carry three other win counts to distinguish from."
+      "proposed_name": null,
+      "disposition": "blocked_operator_ruling",
+      "confidence": "blocked",
+      "rationale": "BLOCKED ON OPERATOR RULING (re-verified 2026-08-04, disposition changed from rename). The prior rationale -- \"NFL team win total\" -- is WRONG at this grain. On pff_team_gamelogs the trio is a set of mutually exclusive PER-GAME OUTCOME FLAGS, not counts: across 11,996 rows the only non-null value is 1, and exactly one of wins/losses/ties is set per row (5,135 wins, 5,076 losses, 27 ties, 1,758 unplayed). So win_count/tie_count would name a flag as a count. Note the identical rationale was applied to pff_team_seasonlogs, where it IS correct -- that table holds real counts (wins 0-18) -- so one name was assigned to two different meanings, the exact defect this program exists to remove. A further constraint: `losses` is 6 characters, so the audit never flags it and it is absent from this map. Renaming only wins and ties yields the incoherent trio win_count / losses / tie_count. The three columns must be settled together. Options: (a) is_win/is_loss/is_tie as booleans, (b) a single game_outcome enum, (c) leave and exempt. Each exceeds a shorthand rename."
     },
     {
       "table": "pff_team_gamelogs",
       "column": "ties",
-      "proposed_name": "tie_count",
-      "disposition": "rename",
-      "confidence": "high",
-      "rationale": "NFL team tie total; same reasoning as the wins sibling."
+      "proposed_name": null,
+      "disposition": "blocked_operator_ruling",
+      "confidence": "blocked",
+      "rationale": "BLOCKED ON OPERATOR RULING (re-verified 2026-08-04, disposition changed from rename). The prior rationale -- \"NFL team win total\" -- is WRONG at this grain. On pff_team_gamelogs the trio is a set of mutually exclusive PER-GAME OUTCOME FLAGS, not counts: across 11,996 rows the only non-null value is 1, and exactly one of wins/losses/ties is set per row (5,135 wins, 5,076 losses, 27 ties, 1,758 unplayed). So win_count/tie_count would name a flag as a count. Note the identical rationale was applied to pff_team_seasonlogs, where it IS correct -- that table holds real counts (wins 0-18) -- so one name was assigned to two different meanings, the exact defect this program exists to remove. A further constraint: `losses` is 6 characters, so the audit never flags it and it is absent from this map. Renaming only wins and ties yields the incoherent trio win_count / losses / tie_count. The three columns must be settled together. Options: (a) is_win/is_loss/is_tie as booleans, (b) a single game_outcome enum, (c) leave and exempt. Each exceeds a shorthand rename."
     },
     {
       "table": "pff_team_seasonlogs",

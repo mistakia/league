@@ -2,7 +2,7 @@
 --
 -- Shorthand conformance: the remaining tables
 --
--- Retires 155 of the 234 shorthand violations reported by
+-- Retires 153 of the 234 shorthand violations reported by
 -- db/adhoc/audit-schema-conformance.mjs at ruler league 74b1366cd.
 --
 -- Expands abbreviated column names to full words. Every (table, column) here
@@ -10,7 +10,14 @@
 -- NOT already taken on its table, against production before this file was
 -- authored.
 --
--- Spread across 47 tables, none partitioned.
+-- Spread across 46 tables, none partitioned.
+--
+-- EXCLUDED: pff_team_gamelogs.wins and .ties. The map originally renamed them
+-- to win_count/tie_count; verification against production showed they are
+-- mutually exclusive per-game outcome FLAGS (only value 1; exactly one of
+-- wins/losses/ties set per row), not counts. They are now
+-- blocked_operator_ruling in the map and must be settled together with the
+-- unflagged `losses` sibling.
 --
 -- ORDERING: apply only AFTER the boolean-prefix sweep
 -- (db/adhoc/2026-08-04-conform-boolean-prefix-*.sql) has landed its DDL and
@@ -130,10 +137,6 @@ ALTER TABLE public.pff_player_facet_seasonlogs RENAME COLUMN yards TO facet_yard
 ALTER TABLE public.pff_player_seasonlogs RENAME COLUMN pass TO pass_grade;
 ALTER TABLE public.pff_player_seasonlogs RENAME COLUMN run TO run_grade;
 ALTER TABLE public.pff_player_seasonlogs RENAME COLUMN speed TO speed_rating;
-
--- pff_team_gamelogs (2)
-ALTER TABLE public.pff_team_gamelogs RENAME COLUMN ties TO tie_count;
-ALTER TABLE public.pff_team_gamelogs RENAME COLUMN wins TO win_count;
 
 -- pff_team_seasonlogs (2)
 ALTER TABLE public.pff_team_seasonlogs RENAME COLUMN ties TO tie_count;
