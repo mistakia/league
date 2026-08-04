@@ -40,6 +40,7 @@ import {
   nfl_team_abbreviations
 } from '#constants'
 import { get_play_stats } from '#libs-server/play-stats-utils.mjs'
+import { resolve_play_stat_player } from '#libs-server/resolve-play-stat-player.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
 const initialize_cli = () => {
@@ -52,7 +53,12 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-player-gamelogs')
-debug.enable('generate-player-gamelogs')
+// Guarded because `debug.enable` REPLACES the enabled namespace set rather than
+// adding to it, so an unguarded call at module scope silences every other
+// namespace in any process that imports this file -- including the spec run.
+if (!process.env.DEBUG) {
+  debug.enable('generate-player-gamelogs')
+}
 
 // Database field constraints
 const DB_CONSTRAINTS = {
@@ -630,42 +636,82 @@ const load_team_dropbacks = async ({ unique_esbids }) => {
 }
 
 /**
- * Process player gamelogs from play stats grouped by player identifier
+ * Group play stats by the player each row resolves to.
+ *
+ * Replaces the two-pass structure this script carried until 2026-08-04, which
+ * grouped by `smart_player_id`, then by `gsis_player_id`, and SKIPPED any group
+ * in the second pass whose player had already been seen in the first. The skip
+ * existed to avoid emitting a duplicate gamelog, but it discarded the group's
+ * stats rather than merging them, so a row carrying only a `gsis_player_id`,
+ * for a player who had any other row in the same game, was never counted:
+ * 31,945 rows overall, 499 of them on stats the calculator acts on.
+ *
+ * Resolving identity BEFORE grouping removes both the second pass and its
+ * exclusion list, because one player is now one group by construction.
+ */
+export const group_play_stats_by_pid = ({
+  playStats,
+  players_by_smart_player_id,
+  players_by_gsis_player_id
+}) => {
+  const play_stats_by_pid = new Map()
+  const unresolved_by_tier = { unidentified: 0, conflicting: 0 }
+
+  for (const play_stat of playStats) {
+    const resolution = resolve_play_stat_player({
+      play_stat,
+      players_by_smart_player_id,
+      players_by_gsis_player_id,
+      season_year: play_stat.year
+    })
+
+    if (!resolution) {
+      // A row naming no player at all is ordinary (team-level stats); a row
+      // naming two the tiers cannot separate is not, and is worth counting
+      // separately so a regression in identity data is visible here.
+      const names_a_player =
+        Boolean(play_stat.smart_player_id) || Boolean(play_stat.gsis_player_id)
+      if (names_a_player) unresolved_by_tier.conflicting++
+      else unresolved_by_tier.unidentified++
+      continue
+    }
+
+    const group = play_stats_by_pid.get(resolution.pid)
+    if (group) group.push(play_stat)
+    else play_stats_by_pid.set(resolution.pid, [play_stat])
+  }
+
+  log(
+    `resolved play stats to ${play_stats_by_pid.size} players; ` +
+      `${unresolved_by_tier.unidentified} rows name no player, ` +
+      `${unresolved_by_tier.conflicting} name two that could not be separated`
+  )
+
+  return play_stats_by_pid
+}
+
+/**
+ * Process player gamelogs from play stats grouped by resolved pid
  */
 const process_player_gamelogs = ({
-  play_stats_by_player,
-  player_rows,
-  player_identifier_field,
+  play_stats_by_pid,
+  players_by_pid,
   team_gamelog_inserts,
   player_gamelog_inserts,
   player_receiving_gamelog_inserts,
   player_rushing_gamelog_inserts,
   player_routes_by_game,
   team_dropbacks_by_game,
-  processed_player_ids,
   dry_run
 }) => {
-  for (const player_id of Object.keys(play_stats_by_player)) {
-    if (player_id === 'null') continue
-
-    const player_row = player_rows.find(
-      (p) => p[player_identifier_field] === player_id
-    )
+  for (const [pid, group] of play_stats_by_pid) {
+    const player_row = players_by_pid.get(pid)
     if (!player_row) {
-      log(`missing player for ${player_identifier_field}: ${player_id}`)
+      log(`missing player for pid: ${pid}`)
       continue
     }
 
-    // Skip if already processed via smart_player_id
-    if (
-      player_identifier_field === 'gsis_player_id' &&
-      player_row.smart_player_id &&
-      processed_player_ids.includes(player_row.smart_player_id)
-    ) {
-      continue
-    }
-
-    const play_stat = play_stats_by_player[player_id].find((p) => p.nfl_team)
+    const play_stat = group.find((p) => p.nfl_team)
     if (!play_stat) continue
 
     const opp = calculate_opponent({
@@ -674,11 +720,7 @@ const process_player_gamelogs = ({
       away_team: play_stat.away_nfl_team
     })
 
-    const stats = calculateStatsFromPlayStats(play_stats_by_player[player_id])
-
-    if (player_identifier_field === 'smart_player_id') {
-      processed_player_ids.push(player_id)
-    }
+    const stats = calculateStatsFromPlayStats(group)
 
     const player_gamelog = format_player_gamelog({
       pid: player_row.pid,
@@ -969,54 +1011,46 @@ const generate_player_gamelogs = async ({
   // Generate team gamelogs
   generate_team_gamelogs({ playStats, team_gamelog_inserts })
 
-  // Load player data
-  const play_stats_by_gsispid = groupBy(playStats, 'smart_player_id')
-  const gsispids = Object.keys(play_stats_by_gsispid)
-  const player_gsispid_rows = await db('player').whereIn(
-    'smart_player_id',
-    gsispids
-  )
-  log(
-    `loaded play stats for ${Object.keys(play_stats_by_gsispid).length} gsispid players`
-  )
+  // Load every player either identifier column could name, in one query. The
+  // two lookups are Maps rather than the array scan this used to do, which was
+  // O(rows x players).
+  const smart_player_ids = [
+    ...new Set(playStats.map((p) => p.smart_player_id).filter(Boolean))
+  ]
+  const gsis_player_ids = [
+    ...new Set(playStats.map((p) => p.gsis_player_id).filter(Boolean))
+  ]
+  const player_rows = await db('player')
+    .whereIn('smart_player_id', smart_player_ids)
+    .orWhereIn('gsis_player_id', gsis_player_ids)
 
-  const play_stats_by_gsisid = groupBy(playStats, 'gsis_player_id')
-  const gsisids = Object.keys(play_stats_by_gsisid)
-  const player_gsisid_rows = await db('player').whereIn(
-    'gsis_player_id',
-    gsisids
-  )
-  log(
-    `loaded play stats for ${Object.keys(play_stats_by_gsisid).length} gsisid players`
-  )
+  const players_by_pid = new Map()
+  const players_by_smart_player_id = new Map()
+  const players_by_gsis_player_id = new Map()
+  for (const player_row of player_rows) {
+    players_by_pid.set(player_row.pid, player_row)
+    if (player_row.smart_player_id)
+      players_by_smart_player_id.set(player_row.smart_player_id, player_row)
+    if (player_row.gsis_player_id)
+      players_by_gsis_player_id.set(player_row.gsis_player_id, player_row)
+  }
+  log(`loaded ${player_rows.length} players for play stat resolution`)
 
-  // Process player gamelogs (gsispid first, then gsisid for players not found via gsispid)
-  const processed_gsispids = []
-  process_player_gamelogs({
-    play_stats_by_player: play_stats_by_gsispid,
-    player_rows: player_gsispid_rows,
-    player_identifier_field: 'smart_player_id',
-    team_gamelog_inserts,
-    player_gamelog_inserts,
-    player_receiving_gamelog_inserts,
-    player_rushing_gamelog_inserts,
-    player_routes_by_game,
-    team_dropbacks_by_game,
-    processed_player_ids: processed_gsispids,
-    dry_run
+  const play_stats_by_pid = group_play_stats_by_pid({
+    playStats,
+    players_by_smart_player_id,
+    players_by_gsis_player_id
   })
 
   process_player_gamelogs({
-    play_stats_by_player: play_stats_by_gsisid,
-    player_rows: player_gsisid_rows,
-    player_identifier_field: 'gsis_player_id',
+    play_stats_by_pid,
+    players_by_pid,
     team_gamelog_inserts,
     player_gamelog_inserts,
     player_receiving_gamelog_inserts,
     player_rushing_gamelog_inserts,
     player_routes_by_game,
     team_dropbacks_by_game,
-    processed_player_ids: processed_gsispids,
     dry_run
   })
 
