@@ -1,0 +1,54 @@
+-- STATUS: PENDING
+--
+-- Drop pff_team_gamelogs.wins, .losses and .ties.
+--
+-- These three are not counts at the game grain. Across 11,996 rows the only
+-- non-null value is 1, exactly one of the three is set per populated row
+-- (5,135 wins / 5,076 losses / 27 ties), and no row has more than one set.
+-- They are per-game outcome flags wearing the names of season totals. The
+-- identical names on pff_team_seasonlogs ARE counts (wins ranges 0-18) and are
+-- untouched by this file.
+--
+-- Why drop rather than rename to is_win/is_loss/is_tie or a game_outcome enum:
+--
+-- 1. The outcome is already stated on the same row. points_scored vs
+--    points_allowed derives it exactly -- zero contradictions across all
+--    10,238 populated rows (no wins=1 with a non-winning score, and so on).
+--
+-- 2. The stored flags are strictly LESS complete than the derivation. 624 rows
+--    carry scores with all three flags null. Those are postseason (weeks
+--    28-32), and the cause is mechanical: import-pff-team-grades.mjs is the
+--    only writer of the trio and validates `week < 1 || week > 18`, throwing
+--    outside that range. Postseason rows arrive from
+--    import-pff-archive-team-gamelogs.mjs, which never writes the trio at all.
+--    So a null here means "no writer reached this row", not "not played".
+--
+-- 3. The stored values cannot distinguish a loss from a non-report anyway.
+--    The writer used `team_data.wins || null`, a falsy coercion turning a
+--    PFF-supplied 0 into NULL -- there are zero explicit zeros in the table.
+--
+-- 4. Nothing reads them. Four references to pff_team_gamelogs exist in the
+--    tree, all four write-side, both files under private/. No view uses them
+--    (checked against information_schema.view_column_usage).
+--
+-- Retires the two shorthand-class violations (.wins, .ties) that were blocked
+-- on an operator ruling, and additionally removes .losses, which neither the
+-- shorthand rule (6 characters, over its bare-name threshold) nor the
+-- boolean_prefix rule (keys on data_type = 'boolean', these are smallint) can
+-- see. Renaming only the two the audit flags would have produced the
+-- incoherent trio win_count / losses / tie_count.
+--
+-- Consumer change lands with this file: the three keys are removed from the
+-- gamelog_record insert in private/scripts/import-pff-team-grades.mjs. The
+-- season_record insert in the same file keeps them -- that one targets
+-- pff_team_seasonlogs, where they are genuine counts.
+--
+-- NOT addressed here, deliberately: pff_team_gamelogs has no season_type
+-- column and encodes postseason rounds in magic week numbers 28/29/30/32.
+-- That is a season_grain-class violation on this table and belongs to that
+-- wave, not to this drop.
+
+ALTER TABLE public.pff_team_gamelogs
+  DROP COLUMN wins,
+  DROP COLUMN losses,
+  DROP COLUMN ties;
