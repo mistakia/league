@@ -79,6 +79,7 @@ DROP INDEX IF EXISTS public.roster_asset_holding_pick_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
 DROP INDEX IF EXISTS public.players_status_pid_observed_at_key;
 DROP INDEX IF EXISTS public.player_underdog_id_unique;
+DROP INDEX IF EXISTS public.player_nfl_player_id_unique;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.player_fantasypoints_id_unique;
 DROP INDEX IF EXISTS public.play_changelog_natural_key;
@@ -43955,6 +43956,13 @@ CREATE UNIQUE INDEX player_gamelogs_year_2026_year_esbid_pid_idx ON public.playe
 --
 
 CREATE INDEX player_name_search_idx ON public.player USING gin (name_search_vector);
+
+
+--
+-- Name: player_nfl_player_id_unique; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_nfl_player_id_unique ON public.player USING btree (nfl_player_id);
 
 
 --
