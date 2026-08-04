@@ -364,7 +364,7 @@ describe('LIBS SERVER resolve_play_stat_player', function () {
         ...build_indexes([robert, rodney]),
         season_year: 2005
       })
-      expect(result).to.equal(null)
+      expect(result).to.eql({ pid: null, tier: 'unseparable' })
     })
 
     it('abstains when the only identifier names a player who had not entered the league', () => {
@@ -389,7 +389,7 @@ describe('LIBS SERVER resolve_play_stat_player', function () {
         ...build_indexes([shi_smith]),
         season_year: 2003
       })
-      expect(result).to.equal(null)
+      expect(result).to.eql({ pid: null, tier: 'era' })
     })
 
     it('abstains when both identifiers agree on a player who had not entered the league', () => {
@@ -415,7 +415,7 @@ describe('LIBS SERVER resolve_play_stat_player', function () {
         ...build_indexes([shi_smith]),
         season_year: 2003
       })
-      expect(result).to.equal(null)
+      expect(result).to.eql({ pid: null, tier: 'era' })
     })
 
     it('keeps an undrafted player inside the entry-year grace window', () => {
@@ -443,7 +443,7 @@ describe('LIBS SERVER resolve_play_stat_player', function () {
       expect(result).to.eql({ pid: 'CORY-PROC-003146', tier: 'gsis_only' })
     })
 
-    it('returns null when neither identifier names a player', () => {
+    it('abstains when neither identifier names a player', () => {
       const result = resolve_play_stat_player({
         play_stat: {
           gsis_player_id: null,
@@ -454,7 +454,7 @@ describe('LIBS SERVER resolve_play_stat_player', function () {
         ...build_indexes([]),
         season_year: 2005
       })
-      expect(result).to.equal(null)
+      expect(result).to.eql({ pid: null, tier: 'unidentified' })
     })
   })
 
@@ -488,30 +488,74 @@ describe('LIBS SERVER resolve_play_stat_player', function () {
         }
       ]
 
-      const grouped = group_play_stats_by_pid({
+      const { play_stats_by_pid } = group_play_stats_by_pid({
         playStats,
         ...build_indexes([adams])
       })
 
-      expect(grouped.size).to.equal(1)
-      expect(grouped.get('DAVA-ADAM-000003')).to.have.length(2)
+      expect(play_stats_by_pid.size).to.equal(1)
+      expect(play_stats_by_pid.get('DAVA-ADAM-000003')).to.have.length(2)
     })
 
     it('drops a row it cannot resolve rather than attributing it to anyone', () => {
-      const grouped = group_play_stats_by_pid({
-        playStats: [
-          {
-            gsis_player_id: '00-0099999',
-            smart_player_id: null,
-            player_name: 'X.Nobody',
-            stat_id: 79,
-            year: 2016
-          }
-        ],
-        ...build_indexes([])
+      const { play_stats_by_pid, unseparable_by_esbid } =
+        group_play_stats_by_pid({
+          playStats: [
+            {
+              esbid: 2016090800,
+              gsis_player_id: '00-0099999',
+              smart_player_id: null,
+              player_name: 'X.Nobody',
+              stat_id: 79,
+              year: 2016
+            }
+          ],
+          ...build_indexes([])
+        })
+
+      expect(play_stats_by_pid.size).to.equal(0)
+      // An id no `player` row carries is chronic, not a resolution failure, so
+      // it must NOT suppress the prune for this game -- see the third bound in
+      // `prune_unreferenced_gamelogs`.
+      expect(unseparable_by_esbid.get(2016090800)).to.equal(undefined)
+    })
+
+    it('counts an unseparable row against its own game', () => {
+      // This is the signal `prune_unreferenced_gamelogs` keys its per-game skip
+      // on: the run had two real, era-plausible candidates and could not choose,
+      // so it FAILED rather than abstained, and the rows it did not reproduce
+      // for this game are not trustworthy as stale.
+      const robert = build_player({
+        pid: 'ROBE-WILL-010659',
+        formatted_name: 'robert williams',
+        primary_position: 'DB',
+        nfl_draft_year: 1998,
+        gsis_player_id: '00-0008001',
+        smart_player_id: encode_smart_player_id('00-0008001')
+      })
+      const rodney = build_player({
+        pid: 'RODN-WILL-010730',
+        formatted_name: 'rodney williams',
+        primary_position: 'P',
+        nfl_draft_year: 1999,
+        gsis_player_id: '00-0009001'
       })
 
-      expect(grouped.size).to.equal(0)
+      const { unseparable_by_esbid } = group_play_stats_by_pid({
+        playStats: [
+          {
+            esbid: 2005091100,
+            gsis_player_id: '00-0009001',
+            smart_player_id: encode_smart_player_id('00-0008001'),
+            player_name: 'R.Williams',
+            stat_id: 79,
+            year: 2005
+          }
+        ],
+        ...build_indexes([robert, rodney])
+      })
+
+      expect(unseparable_by_esbid.get(2005091100)).to.equal(1)
     })
   })
 })

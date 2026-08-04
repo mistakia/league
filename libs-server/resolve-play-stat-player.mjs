@@ -216,16 +216,31 @@ const resolve_conflict = ({ play_stat, smart_player, gsis_player }) => {
   if (gsis_position_plausible === true && smart_position_plausible === false)
     return { pid: gsis_player.pid, tier: 'position' }
 
-  return null
+  return { pid: null, tier: 'unseparable' }
 }
 
 /**
  * Resolve one play-stat row to a pid.
  *
- * @returns {{ pid: string, tier: string }|null} null when the row names no
- *   player, names only players who had not entered the league, or names two the
- *   tiers cannot separate -- callers should drop and log rather than guess,
- *   since attributing a stat to the wrong player is worse than not counting it.
+ * Always returns an object. `pid` is null when the row could not be resolved,
+ * and `tier` then says WHY -- which matters because the four reasons are not
+ * equally alarming and a caller acting on them needs to tell them apart:
+ *
+ *   - `unidentified`: the row names no player id at all. Ordinary; team-level
+ *     stat rows look like this.
+ *   - `unknown_id`: it names an id no `player` row carries. Chronic rather than
+ *     acute -- 236,572 valid rows carry a fabricated `smart_player_id`.
+ *   - `era`: it names only players who had not entered the league.
+ *     `player_could_have_played` removed every candidate.
+ *   - `unseparable`: it names two real, era-plausible candidates and no tier
+ *     could choose between them. This is the only one that means the run
+ *     FAILED at something it should have been able to do, which is why
+ *     `prune_unreferenced_gamelogs` keys its per-game skip on it alone.
+ *
+ * A caller should drop an unresolved row and log it rather than guess, since
+ * attributing a stat to the wrong player is worse than not counting it.
+ *
+ * @returns {{ pid: string|null, tier: string }}
  */
 export const resolve_play_stat_player = ({
   play_stat,
@@ -264,7 +279,12 @@ export const resolve_play_stat_player = ({
     Boolean(smart_candidate && !smart_player) ||
     Boolean(gsis_candidate && !gsis_player)
 
-  if (!smart_player && !gsis_player) return null
+  if (!smart_player && !gsis_player) {
+    if (era_filtered_a_candidate) return { pid: null, tier: 'era' }
+    const names_an_id =
+      Boolean(play_stat.smart_player_id) || Boolean(play_stat.gsis_player_id)
+    return { pid: null, tier: names_an_id ? 'unknown_id' : 'unidentified' }
+  }
   if (!gsis_player)
     return {
       pid: smart_player.pid,

@@ -303,7 +303,7 @@ const format_player_gamelog = ({
     }),
     pid,
     pos,
-    active: true,
+    is_active: true,
     source: PLAY_STATS_GAMELOG_SOURCE
   }
 }
@@ -677,7 +677,7 @@ const generate_snap_based_gamelogs = async ({
         nfl_team: team,
         opponent_nfl_team: opponent,
         season_year: year,
-        active: true,
+        is_active: true,
         source: PLAY_STATS_GAMELOG_SOURCE
         // All counting stats default to NULL/0
       })
@@ -733,7 +733,7 @@ const load_team_dropbacks = async ({ unique_esbids }) => {
     .select('possession_nfl_team as tm', 'esbid')
     .count('* as dropbacks')
     .whereIn('esbid', unique_esbids)
-    .where({ qb_dropback: true })
+    .where({ is_qb_dropback: true })
     .whereNot({ play_type: 'NOPL' })
     .groupBy('possession_nfl_team', 'esbid')
 
@@ -765,7 +765,20 @@ export const group_play_stats_by_pid = ({
   players_by_gsis_player_id
 }) => {
   const play_stats_by_pid = new Map()
-  const unresolved_by_tier = { unidentified: 0, conflicting: 0 }
+  const unresolved_by_tier = {
+    unidentified: 0,
+    unknown_id: 0,
+    era: 0,
+    unseparable: 0
+  }
+
+  // Games in which a row named two real, era-plausible players and no tier
+  // could choose between them. That is the one unresolved tier meaning the run
+  // FAILED rather than abstained, so it is the evidence
+  // `prune_unreferenced_gamelogs` needs: a game carrying any of these had a
+  // resolution failure, and the rows it did not reproduce there are not
+  // trustworthy as stale. See the third bound in that function's docstring.
+  const unseparable_by_esbid = new Map()
 
   for (const play_stat of playStats) {
     const resolution = resolve_play_stat_player({
@@ -775,14 +788,14 @@ export const group_play_stats_by_pid = ({
       season_year: play_stat.year
     })
 
-    if (!resolution) {
-      // A row naming no player at all is ordinary (team-level stats); a row
-      // naming two the tiers cannot separate is not, and is worth counting
-      // separately so a regression in identity data is visible here.
-      const names_a_player =
-        Boolean(play_stat.smart_player_id) || Boolean(play_stat.gsis_player_id)
-      if (names_a_player) unresolved_by_tier.conflicting++
-      else unresolved_by_tier.unidentified++
+    if (!resolution.pid) {
+      unresolved_by_tier[resolution.tier]++
+      if (resolution.tier === 'unseparable') {
+        unseparable_by_esbid.set(
+          play_stat.esbid,
+          (unseparable_by_esbid.get(play_stat.esbid) || 0) + 1
+        )
+      }
       continue
     }
 
@@ -794,10 +807,12 @@ export const group_play_stats_by_pid = ({
   log(
     `resolved play stats to ${play_stats_by_pid.size} players; ` +
       `${unresolved_by_tier.unidentified} rows name no player, ` +
-      `${unresolved_by_tier.conflicting} name two that could not be separated`
+      `${unresolved_by_tier.unknown_id} name an id no player carries, ` +
+      `${unresolved_by_tier.era} name only players not yet in the league, ` +
+      `${unresolved_by_tier.unseparable} name two that could not be separated`
   )
 
-  return play_stats_by_pid
+  return { play_stats_by_pid, unseparable_by_esbid }
 }
 
 /**
@@ -977,13 +992,29 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['active']
  *     three columns.
  *   - `esbid` scopes it to games this run actually loaded play stats for, so a
  *     single-week or single-game run cannot touch anything outside its window.
- *   - a game the run failed to substantially reproduce is skipped entirely.
- *     That is the signature of a run that failed to resolve rather than of a
- *     game whose rows are all stale, and deleting on it would turn a
- *     resolution regression into data loss. The test is PROPORTIONAL, against
- *     PRUNE_MIN_REPRODUCTION_RATE: a binary "produced at least one row" test
- *     covers only TOTAL failure, and a run that resolved 10 of a game's 40
- *     players passes it and then deletes the other 30.
+ *   - a game in which the run FAILED to resolve a play stat is skipped
+ *     entirely. Deleting on such a game turns a resolution regression into
+ *     data loss, and the run knows directly whether it happened: a play stat
+ *     naming two real, era-plausible players that no tier could separate is
+ *     the `unseparable` tier out of `resolve_play_stat_player`, counted per
+ *     game by `group_play_stats_by_pid`.
+ *
+ *     The test used to be `produced_by_esbid.has(esbid)` -- did the run make
+ *     ANY row for this game -- which covers only TOTAL failure, so a run that
+ *     resolved 10 of a game's 40 players passed it and deleted the other 30.
+ *     The obvious repair is a proportional floor ("reproduce 80% or skip"),
+ *     and it is the wrong shape: it is a statistical PROXY for resolution
+ *     health, so it needs a threshold nobody can calibrate, it is meaningless
+ *     on a five-row game, and it wrongly blocks a clean run that legitimately
+ *     retracts a large share of a game. The unseparable count is the thing
+ *     itself, so the threshold is zero and there is nothing to tune.
+ *
+ *     The other three unresolved tiers are deliberately NOT counted here.
+ *     `unidentified` and `unknown_id` are chronic rather than acute -- team
+ *     stat rows and 236,572 fabricated smart ids -- so keying on them would
+ *     suppress the prune almost everywhere. `era` is already handled per
+ *     player by the fourth bound below, which is strictly more precise than
+ *     skipping the player's whole game.
  *
  * A row carrying neither this script's `source` nor a participation column is
  * never touched under any of the three. That is deliberately conservative and
@@ -1019,11 +1050,6 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['active']
  * Checking the predicate here rather than plumbing rejections out of the two
  * call sites covers both paths at once, and keeps holding if a third caller
  * starts filtering on era.
- *
- * An era-rejected row is also held OUT of the reproduction-rate denominator.
- * The rate asks whether the run resolved normally; a row it was structurally
- * unable to produce carries no evidence either way, and counting it would let a
- * handful of conflated players suppress the prune for a whole game.
  *
  * Finally, the retraction reaches `player_receiving_gamelogs` and
  * `player_rushing_gamelogs` for the same `(esbid, pid)`. Those tables hang off
@@ -1066,18 +1092,27 @@ const OWNED_PARTICIPATION_COLUMNS = [
   'field_goals_made',
   'extra_points_made'
 ]
-
-// A run must reproduce at least this share of the rows it owns for a game
-// before the prune will delete any of them. See the third bound in the
-// docstring: a binary "produced anything at all" test passes a run that
-// resolved 10 of 40 players and then deletes the other 30.
-const PRUNE_MIN_REPRODUCTION_RATE = 0.8
 export const prune_unreferenced_gamelogs = async ({
   unique_esbids,
   player_gamelog_inserts,
+  unseparable_by_esbid = new Map(),
   year,
   dry_run
 }) => {
+  // See the third bound in the docstring. A game whose play stats did not all
+  // resolve had a resolution failure, so its unproduced rows are not evidence
+  // of staleness.
+  const prunable_esbids = unique_esbids.filter(
+    (esbid) => !unseparable_by_esbid.get(esbid)
+  )
+  const skipped = unique_esbids.length - prunable_esbids.length
+  if (skipped) {
+    log(
+      `prune: skipping ${skipped} games with play stats that named two players no tier could separate`
+    )
+  }
+  if (!prunable_esbids.length) return 0
+
   const produced_by_esbid = new Map()
   for (const gamelog of player_gamelog_inserts) {
     let pids = produced_by_esbid.get(gamelog.esbid)
@@ -1088,9 +1123,23 @@ export const prune_unreferenced_gamelogs = async ({
     pids.add(gamelog.pid)
   }
 
+  // A game the run produced NO rows for is skipped too. Total failure need not
+  // involve an unseparable conflict -- a game whose play stats all carry ids no
+  // `player` row holds resolves to nothing with a clean unseparable count.
+  const produced_esbids = prunable_esbids.filter((esbid) =>
+    produced_by_esbid.has(esbid)
+  )
+  const produced_nothing = prunable_esbids.length - produced_esbids.length
+  if (produced_nothing) {
+    log(
+      `prune: skipping ${produced_nothing} games this run produced no rows for`
+    )
+  }
+  if (!produced_esbids.length) return 0
+
   const existing = await db('player_gamelogs')
     .select('esbid', 'pid')
-    .whereIn('esbid', unique_esbids)
+    .whereIn('esbid', produced_esbids)
     .where((builder) => {
       builder.where({ source: PLAY_STATS_GAMELOG_SOURCE })
       for (const column of OWNED_PARTICIPATION_COLUMNS) {
@@ -1125,35 +1174,7 @@ export const prune_unreferenced_gamelogs = async ({
     )
   }
 
-  // Rows the run was able to produce. The reproduction rate below is measured
-  // over these alone; an era-rejected row is not evidence about resolution.
-  const candidates = existing.filter((row) => !era_rejected_pids.has(row.pid))
-
-  const owned_by_esbid = new Map()
-  for (const row of candidates) {
-    let rows = owned_by_esbid.get(row.esbid)
-    if (!rows) {
-      rows = []
-      owned_by_esbid.set(row.esbid, rows)
-    }
-    rows.push(row)
-  }
-
-  const prunable_esbids = new Set()
-  for (const [esbid, rows] of owned_by_esbid) {
-    const reproduced = rows.filter(was_produced).length
-    if (reproduced >= rows.length * PRUNE_MIN_REPRODUCTION_RATE) {
-      prunable_esbids.add(esbid)
-      continue
-    }
-    log(
-      `prune: skipping ${esbid} -- run reproduced ${reproduced} of ${rows.length} owned gamelogs, below the ${PRUNE_MIN_REPRODUCTION_RATE} floor`
-    )
-  }
-
-  const stale = candidates.filter(
-    (row) => prunable_esbids.has(row.esbid) && !was_produced(row)
-  )
+  const stale = unproduced.filter((row) => !era_rejected_pids.has(row.pid))
 
   if (!stale.length) {
     log('prune: no stale gamelogs')
@@ -1378,7 +1399,7 @@ const generate_player_gamelogs = async ({
   }
   log(`loaded ${player_rows.length} players for play stat resolution`)
 
-  const play_stats_by_pid = group_play_stats_by_pid({
+  const { play_stats_by_pid, unseparable_by_esbid } = group_play_stats_by_pid({
     playStats,
     players_by_smart_player_id,
     players_by_gsis_player_id
@@ -1429,6 +1450,7 @@ const generate_player_gamelogs = async ({
     await prune_unreferenced_gamelogs({
       unique_esbids,
       player_gamelog_inserts,
+      unseparable_by_esbid,
       year,
       dry_run
     })
@@ -1449,6 +1471,7 @@ const generate_player_gamelogs = async ({
   await prune_unreferenced_gamelogs({
     unique_esbids,
     player_gamelog_inserts,
+    unseparable_by_esbid,
     year,
     dry_run
   })

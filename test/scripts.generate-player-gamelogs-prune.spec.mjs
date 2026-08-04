@@ -72,10 +72,11 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
     date_of_birth
   })
 
-  const run_prune = (produced) =>
+  const run_prune = (produced, unseparable_by_esbid) =>
     prune_unreferenced_gamelogs({
       unique_esbids: [esbid],
       player_gamelog_inserts: produced.map((pid) => ({ esbid, pid })),
+      unseparable_by_esbid,
       year: season_year,
       dry_run: false
     })
@@ -179,15 +180,29 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
     ).to.have.length(all_pids.length)
   })
 
-  it('deletes nothing for a game the run only partly reproduced', async () => {
-    // The binary form of the bound above -- "produced at least one row" --
-    // passes this run and then deletes the six rows it failed to resolve.
-    const deleted = await run_prune(produced_pids.slice(0, 5))
+  it('deletes nothing for a game whose play stats did not all resolve', async () => {
+    // The partial-failure case the "produced at least one row" bound misses: the
+    // run resolved half the game and failed on the rest, so its output is not
+    // evidence that the rows it skipped are stale. One unseparable play stat is
+    // the run's own report that it failed, and it needs no threshold.
+    const deleted = await run_prune(
+      produced_pids.slice(0, 5),
+      new Map([[esbid, 1]])
+    )
 
     expect(deleted).to.equal(0)
     expect(
       await db('player_gamelogs').where({ esbid }).pluck('pid')
     ).to.have.length(all_pids.length)
+  })
+
+  it('still prunes a clean run that retracts a large share of a game', async () => {
+    // The proportional floor this replaced got this case wrong: a run that
+    // resolved everything it saw and legitimately no longer supports most of a
+    // game's rows is exactly what the prune exists for.
+    const deleted = await run_prune(produced_pids.slice(0, 2))
+
+    expect(deleted).to.equal(9)
   })
 
   it('retracts the receiving and rushing gamelogs of a deleted pair', async () => {
