@@ -19674,7 +19674,7 @@ CREATE TABLE public.player_aliases (
 CREATE TABLE public.player_archetypes (
     pid character varying(25) NOT NULL,
     season_year smallint NOT NULL,
-    primary_position character varying(3),
+    primary_position character varying(4),
     archetype character varying(20) NOT NULL,
     rushing_rate numeric(4,2),
     target_share numeric(4,3),
