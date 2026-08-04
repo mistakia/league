@@ -53,6 +53,27 @@ const Z_INDEX_LITERAL = /(?:z-index|zIndex)\s*:?\s*(-?\d+)/
  */
 const ALLOWED_LITERALS = new Map()
 
+const GLOBAL_STYLESHEET = path.join(repo_root, 'app/styles/general.styl')
+
+/**
+ * MUI overlay components carry their z-index in their own source
+ * (theme.zIndex.*), so nothing in this repo is a literal the sweep above can
+ * see. That blind spot is not hypothetical: Snackbar's library default of 1400
+ * ties the selected-player drawer and loses to every dialog, and it survived
+ * the first pass of this check precisely because there was no number to find.
+ *
+ * So each of these has to be pinned onto the scale in general.styl. A component
+ * this app stops using should leave this list rather than stay unpinned.
+ */
+const MUI_OVERLAYS_REQUIRING_A_PIN = [
+  '.MuiDialog-root',
+  '.MuiPopover-root',
+  '.MuiMenu-root',
+  '.MuiAutocomplete-popper',
+  '.MuiTooltip-popper',
+  '.MuiSnackbar-root'
+]
+
 const list_files = (dir, extensions) => {
   const found = []
   if (!fs.existsSync(dir)) return found
@@ -99,6 +120,25 @@ const main = () => {
   const duplicate_layers = [...by_value.entries()].filter(
     ([, names]) => names.length > 1
   )
+
+  // Each required MUI overlay must be pinned in general.styl by a rule whose
+  // first declaration is a z-index taken from the scale. Reading the block
+  // rather than just grepping for the class name is what makes this an
+  // assertion — the selector appearing under some unrelated rule proves nothing.
+  const global_lines = fs.readFileSync(GLOBAL_STYLESHEET, 'utf8').split('\n')
+  const unpinned_overlays = MUI_OVERLAYS_REQUIRING_A_PIN.filter((selector) => {
+    const start = global_lines.findIndex(
+      (line) => line.trim() === selector || line.trim() === `${selector},`
+    )
+    if (start === -1) return true
+    for (let index = start + 1; index < global_lines.length; index++) {
+      const line = global_lines[index].trim()
+      if (line === '' || line.startsWith('//')) return true
+      if (line.startsWith('.') || line.startsWith('&')) continue
+      return !/^z-index\s+\$z_[a-z0-9_]+$/.test(line)
+    }
+    return true
+  })
 
   const violations = []
   const files = [
@@ -147,13 +187,33 @@ const main = () => {
   if (
     violations.length === 0 &&
     dead_exemptions.length === 0 &&
-    duplicate_layers.length === 0
+    duplicate_layers.length === 0 &&
+    unpinned_overlays.length === 0
   ) {
     console.log(
-      `z-index scale OK — ${scale_layers.size} named layers, no bare literals ` +
-        `at or above ${LOCAL_STACKING_CEILING}`
+      `z-index scale OK — ${scale_layers.size} named layers, ` +
+        `${MUI_OVERLAYS_REQUIRING_A_PIN.length} MUI overlays pinned, no bare ` +
+        `literals at or above ${LOCAL_STACKING_CEILING}`
     )
     return 0
+  }
+
+  if (unpinned_overlays.length) {
+    console.error(
+      `\n${unpinned_overlays.length} MUI overlay(s) not pinned to the scale in ` +
+        `${path.relative(repo_root, GLOBAL_STYLESHEET)}:\n`
+    )
+    for (const selector of unpinned_overlays) {
+      console.error(`  ${selector}`)
+    }
+    console.error(
+      "\nThese carry their z-index in MUI's own source (theme.zIndex.*), so " +
+        'the literal sweep below cannot see them and an unpinned one fails ' +
+        'silently — Snackbar defaults to 1400, which loses to every dialog. ' +
+        'Add a rule whose first declaration is `z-index $z_<layer>`, or drop ' +
+        'the selector from MUI_OVERLAYS_REQUIRING_A_PIN if the app no longer ' +
+        'uses that component.\n'
+    )
   }
 
   if (duplicate_layers.length) {

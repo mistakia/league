@@ -41,6 +41,15 @@ p
 .MuiTooltip-popper
   z-index $z_tooltip
 
+// Snackbar hardcodes theme.zIndex.snackbar (1400), which ties the
+// selected-player drawer and loses to any open dialog. Notifications fire from
+// websocket events — a trade accepted, a waiver processed — with no relation to
+// what the user has open, so the losing case is ordinary rather than rare.
+// Note the guard cannot see this one: the value is in MUI's source, not a
+// literal in this repo.
+.MuiSnackbar-root
+  z-index $z_snackbar
+
 .MuiTooltip-popper .MuiTooltip-tooltip
   color rgba(0, 0, 0, 0.87)
   font-size 11px
