@@ -87,6 +87,12 @@ const count_period_label_by_value = new Map(
   COUNT_PERIOD_OPTIONS.map(({ value, label }) => [value, label])
 )
 
+// The chip renders the same glyph the operator dropdown offers, so a threshold
+// reads identically wherever it appears.
+const threshold_operator_label_by_value = new Map(
+  THRESHOLD_OPERATOR_OPTIONS.map(({ value, label }) => [value, label])
+)
+
 export const format_output_value = ({ value }) => {
   if (!value || !value.period) return null
 
@@ -94,7 +100,10 @@ export const format_output_value = ({ value }) => {
     const period_label =
       count_period_label_by_value.get(value.period) || value.period
     if (!value.threshold) return period_label
-    return `${period_label} ${value.threshold.op} ${value.threshold.value}`
+    const operator_label =
+      threshold_operator_label_by_value.get(value.threshold.op) ||
+      value.threshold.op
+    return `${period_label} ${operator_label} ${value.threshold.value}`
   }
 
   return rate_period_label_by_value.get(value.period) || value.period

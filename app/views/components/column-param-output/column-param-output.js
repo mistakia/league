@@ -21,6 +21,12 @@ const DEFAULT_THRESHOLD = { op: '>=', value: 0 }
 
 const first_value = (value) => (Array.isArray(value) ? value[0] : value)
 
+// The select controls treat this prop as a list -- they forEach and includes
+// over it -- so a bare scalar throws on mount. null is the correct "unset",
+// not [], because an empty array reads as a defined param and styles the chip
+// as though it carried a value.
+const as_selection = (value) => (value == null ? null : [value])
+
 const build_select_definition = ({ label, values }) => ({
   label,
   single: true,
@@ -172,7 +178,7 @@ export default function ColumnParamOutput({
       <ColumnParamSelectFilter
         column_param_name={column_param_name}
         column_param_definition={aggregation_definition}
-        selected_param_values={aggregation}
+        selected_param_values={as_selection(aggregation)}
         handle_change={handle_aggregation_change}
         mixed_state={mixed_state}
         row_axes={row_axes}
@@ -184,7 +190,7 @@ export default function ColumnParamOutput({
           <ColumnParamSelectFilterWithOverrides
             column_param_name='period'
             column_param_definition={rate_period_definition}
-            selected_param_values={output?.period}
+            selected_param_values={as_selection(output?.period)}
             handle_change={handle_period_change}
             column={column}
             column_index={column_index}
@@ -195,7 +201,7 @@ export default function ColumnParamOutput({
           <ColumnParamSelectFilter
             column_param_name='period'
             column_param_definition={rate_period_definition}
-            selected_param_values={output?.period}
+            selected_param_values={as_selection(output?.period)}
             handle_change={handle_period_change}
             row_axes={row_axes}
           />
@@ -206,14 +212,14 @@ export default function ColumnParamOutput({
           <ColumnParamSelectFilter
             column_param_name='period'
             column_param_definition={count_period_definition}
-            selected_param_values={output?.period}
+            selected_param_values={as_selection(output?.period)}
             handle_change={handle_period_change}
             row_axes={row_axes}
           />
           <ColumnParamSelectFilter
             column_param_name='threshold_op'
             column_param_definition={threshold_operator_definition}
-            selected_param_values={output?.threshold?.op}
+            selected_param_values={as_selection(output?.threshold?.op)}
             handle_change={handle_threshold_operator_change}
             row_axes={row_axes}
           />
