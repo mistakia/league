@@ -1,6 +1,6 @@
 -- STATUS: APPLIED 2026-08-04 against league_production
 --
--- Repair nine conflated player rows — rows that merge two different people who
+-- Repair eight conflated player rows — rows that merge two different people who
 -- share a name. Each field is individually plausible, so the defect is only
 -- visible when independent fields are asked which era the person belongs to.
 -- Follows db/adhoc/2026-08-04-repair-conflated-chris-smith-devin-taylor.sql.
@@ -66,7 +66,7 @@
 -- is otherwise empty while the copy retained carries the game's counting stats.
 --
 -- ===========================================================================
--- SECTION 2 — six rows carrying a second person's BIOGRAPHY only
+-- SECTION 2 — five rows carrying a second person's BIOGRAPHY only
 -- ===========================================================================
 --
 -- These rows' identifiers, gamelogs and snaps are internally consistent. A
