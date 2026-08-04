@@ -136,8 +136,19 @@ const generate_dst_market_projections = async ({
   return { inserts: inserts.length, games: esbids.length }
 }
 
-const SIGNAL_SOURCE =
-  'user:scheduled-command/league/generate-dst-market-projections.md'
+// Nothing schedules this generator: it is committed NOT ACTIVATED (the sources
+// row is PENDING, and activation first needs the weekly DST calibration refit
+// against a consensus reconstructed to include points-against). So there is no
+// crontab entry to name, and a `scheduled-command` entity would be wrong twice
+// over -- the league host runs no schedule-processor, so such an entity is
+// inert, and base's schedule-processor would execute an `enabled: true` one for
+// a job nobody intends to run yet. The source therefore takes the emitter-named
+// `script:<repo-relative-path>` shape (cf. `script:scripts/import-3dep-dem.mjs`),
+// which identifies the script rather than its scheduler and so stays correct if
+// this is later put on a schedule. It previously named
+// `user:scheduled-command/league/generate-dst-market-projections.md`, which has
+// never existed, so every signal this script raised addressed nothing.
+const SIGNAL_SOURCE = 'script:scripts/generate-dst-market-projections.mjs'
 
 const main = async () => {
   const argv = initialize_cli()
