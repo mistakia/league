@@ -159,13 +159,29 @@ const action_create_player = async (argv) => {
     throw new Error('--primary-position is required')
   }
 
-  // Warn (don't block) when DOB missing: the resulting stub pid
-  // (FFFF-LLLL-YEAR-0000-00-00) is the hijack vector that
-  // import-pff-seasonlogs and similar fall-back importers latch onto. Pass
-  // --date-of-birth whenever possible.
+  // Warn (don't block) when DOB is missing. Creating a player without one has
+  // to stay legal -- a person can be minted at the college/recruit stage before
+  // a birth date is known, and a conflated row whose stored birth date belongs
+  // to the OTHER person is corrected TO the unknown sentinel rather than to a
+  // guess.
+  //
+  // The reason has changed, and the old one is why this warning is worth
+  // reading rather than skipping. It used to say a missing DOB produced a stub
+  // pid (`FFFF-LLLL-YEAR-0000-00-00`) that fall-back importers could hijack.
+  // That pid format no longer exists: a pid is now an opaque immutable serial
+  // off a sequence and encodes neither the birth date nor the draft year
+  // (`generate-player-id.mjs`), so a missing DOB costs nothing at mint time.
+  //
+  // What it costs now is EVIDENCE. `player_could_have_played`
+  // (`libs-server/player-era.mjs`) lets `date_of_birth` decide whether a player
+  // could have played in a season, and falls back to `nfl_draft_year` only when
+  // there is no usable birth date -- and the draft year is precisely the field
+  // that lies on a row merging two people, because it follows one person while
+  // the career follows the other. A row created without a birth date is a row
+  // that falsifies against the unreliable field for the rest of its life.
   if (!date_of_birth || date_of_birth === '0000-00-00') {
     log(
-      `WARNING: creating ${first_name} ${last_name} with no DOB. Stub pids are a known external-ID hijack risk -- pass --date-of-birth to mint a stable pid (see guideline/nfl/league/league-player-resolution.md).`
+      `WARNING: creating ${first_name} ${last_name} with no DOB. The era falsifier will fall back to nfl_draft_year for this row, which is the field that lies on conflated players -- pass --date-of-birth when a source has one.`
     )
   }
 

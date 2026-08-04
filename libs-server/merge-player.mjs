@@ -12,28 +12,29 @@ if (!process.env.DEBUG) {
   debug.enable('merge-player,update-player-id')
 }
 
+// The caller names which row survives: `update_player_row` keeps its pid and
+// `remove_player_row` is folded into it.
+//
+// This used to be decided here, by preferring whichever row carried a real
+// `date_of_birth`. That rule predates the pid redesign and no longer means
+// anything: a pid is now an opaque immutable serial off a sequence
+// (`generate-player-id.mjs`), so it encodes no birth date and two pids are
+// equally canonical. Holding a birth date said something about which pid was
+// "more real" only while the pid string was built from one.
+//
+// Note the field merge below still keeps both rows' values, so the surviving
+// row inherits a birth date from either side regardless of which pid wins.
 export default async function ({ update_player_row, remove_player_row }) {
-  // Determine which PID to use based on birthdate
-  const update_pid = determine_pid_to_use({
-    update_player: update_player_row,
-    remove_player: remove_player_row
-  })
-
-  const keep_player_row =
-    update_pid === update_player_row.pid ? update_player_row : remove_player_row
-  const discard_player_row =
-    update_pid === update_player_row.pid ? remove_player_row : update_player_row
-
   log(
-    `merging ${keep_player_row.first_name} ${keep_player_row.last_name} ${keep_player_row.pid} and ${discard_player_row.first_name} ${discard_player_row.last_name} ${discard_player_row.pid}. Using pid ${update_pid}`
+    `merging ${update_player_row.first_name} ${update_player_row.last_name} ${update_player_row.pid} and ${remove_player_row.first_name} ${remove_player_row.last_name} ${remove_player_row.pid}. Using pid ${update_player_row.pid}`
   )
 
   await update_player_id({
-    current_pid: discard_player_row.pid,
-    new_pid: keep_player_row.pid
+    current_pid: remove_player_row.pid,
+    new_pid: update_player_row.pid
   })
 
-  await db('player').where('pid', discard_player_row.pid).del()
+  await db('player').where('pid', remove_player_row.pid).del()
 
   // merge update_player_row and remove_player_row, select truthy values or longest string or largest number
   const merged_player_row = Object.keys(update_player_row).reduce(
@@ -74,22 +75,4 @@ export default async function ({ update_player_row, remove_player_row }) {
     update: merged_player_row,
     source: 'merge'
   })
-}
-
-function determine_pid_to_use({ update_player, remove_player }) {
-  const update_has_birthdate =
-    update_player.date_of_birth && update_player.date_of_birth !== '0000-00-00'
-  const remove_has_birthdate =
-    remove_player.date_of_birth && remove_player.date_of_birth !== '0000-00-00'
-
-  if (update_has_birthdate && !remove_has_birthdate) {
-    // update_player has birthdate and remove_player does not
-    return update_player.pid
-  } else if (!update_has_birthdate && remove_has_birthdate) {
-    // update_player does not have birthdate and remove_player does
-    return remove_player.pid
-  } else {
-    // If both have birthdate or both don't have birthdate, use update_player's PID
-    return update_player.pid
-  }
 }
