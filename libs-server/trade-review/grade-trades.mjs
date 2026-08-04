@@ -5,6 +5,7 @@ import {
   load_pick_ktc_indexes,
   ktc_pick_at
 } from '#libs-server/composite-market-value/ktc-pick-value-at.mjs'
+import { derive_league_format_is_superflex } from '#libs-server/derive-league-format-is-superflex.mjs'
 
 const log = debug('grade-trades')
 
@@ -85,7 +86,11 @@ const current_player_value = ({
   return age_days > STALE_VALUATION_DAYS ? 0 : valuation_row.value
 }
 
-const load_current_player_values = async ({ player_ids, now_unix }) => {
+const load_current_player_values = async ({
+  player_ids,
+  now_unix,
+  is_superflex
+}) => {
   const player_valuation_by_id = new Map()
   if (!player_ids.length) return player_valuation_by_id
   // DISTINCT ON gives the latest observation per pid in one pass.
@@ -107,7 +112,7 @@ const load_current_player_values = async ({ player_ids, now_unix }) => {
     .distinctOn('pid')
     .from('keeptradecut_valuations')
     .whereIn('pid', player_ids)
-    .where('is_superflex', true)
+    .where('is_superflex', is_superflex)
     .where('observed_at', '>=', observed_at_floor)
     .orderBy('pid')
     .orderBy('observed_at', 'desc')
@@ -271,18 +276,20 @@ const grade_trades = async ({
   })
 
   const chain_rows = [...chains_by_origin.values()].flat()
+  const is_superflex = await derive_league_format_is_superflex({ lid })
   const player_valuation_by_id = await load_current_player_values({
     player_ids: [
       ...new Set(chain_rows.map((row) => row.player_id).filter(Boolean))
     ],
-    now_unix
+    now_unix,
+    is_superflex
   })
   const num_teams_by_format = await load_num_teams_by_format({
     format_ids: [
       ...new Set(chain_rows.map((row) => row.league_format_id).filter(Boolean))
     ]
   })
-  const pick_ktc = await load_pick_ktc_indexes({ is_superflex: true })
+  const pick_ktc = await load_pick_ktc_indexes({ is_superflex })
 
   const terminal_value = (terminal_row) => {
     if (terminal_row.player_id) {

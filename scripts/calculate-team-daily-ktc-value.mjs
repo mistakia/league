@@ -13,6 +13,7 @@ import {
   report_job,
   throw_if_shortfall
 } from '#libs-server'
+import { derive_league_format_is_superflex } from '#libs-server/derive-league-format-is-superflex.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -189,6 +190,13 @@ const build_day_inserts = ({
 const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   log(`calculating team daily ktc value for league ${lid}`)
 
+  // KTC publishes a separate value set per market format class, so the read
+  // below must ask for this league's own class. This ran superflex-only for
+  // every league until 2026-08-04, which was wrong for every single-QB league
+  // it processed -- and the driver at the bottom of this file iterates all of
+  // them, so this was live output rather than a latent defect.
+  const is_superflex = await derive_league_format_is_superflex({ lid })
+
   const teams_index = {}
   const trades = await get_trades({ lid })
   const transactions = await db('transactions')
@@ -222,7 +230,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
       )
     )
     .whereIn('pid', transaction_pids)
-    .where('is_superflex', true) // choose based on league settings
+    .where('is_superflex', is_superflex)
     .orderBy('observed_at', 'asc')
 
   const keeptradecut_index = build_keeptradecut_index(ktc_values)

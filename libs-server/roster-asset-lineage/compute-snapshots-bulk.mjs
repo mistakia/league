@@ -6,6 +6,7 @@ import {
   load_pick_ktc_indexes,
   ktc_pick_at
 } from '#libs-server/composite-market-value/ktc-pick-value-at.mjs'
+import { derive_league_format_is_superflex } from '#libs-server/derive-league-format-is-superflex.mjs'
 
 import { ASSET_TYPE, INITIAL_SLOT_TYPE, PS_SLOT_SUBTYPE } from './constants.mjs'
 
@@ -78,7 +79,13 @@ const ps_subtype = (slot) => {
   return null
 }
 
-const load_indexes = async ({ lid, player_ids, years, format_ids }) => {
+const load_indexes = async ({
+  lid,
+  player_ids,
+  years,
+  format_ids,
+  is_superflex
+}) => {
   const idx = {}
 
   // KTC: keyed pid -> sorted array of {d, v}, where `d` is epoch SECONDS.
@@ -90,7 +97,7 @@ const load_indexes = async ({ lid, player_ids, years, format_ids }) => {
     const ktc_rows = await db('keeptradecut_valuations')
       .select('pid', 'keeptradecut_value', 'observed_at')
       .whereIn('pid', player_ids)
-      .where('is_superflex', true)
+      .where('is_superflex', is_superflex)
       .orderBy('observed_at', 'asc')
     idx.ktc = new Map()
     for (const r of ktc_rows) {
@@ -234,9 +241,9 @@ const load_indexes = async ({ lid, player_ids, years, format_ids }) => {
     }
   }
 
-  // Pick KTC indexes (superflex; matches the player-side query above).
-  // Loaded once across all picks the snapshot pass will touch.
-  idx.pick_ktc = await load_pick_ktc_indexes({ is_superflex: true })
+  // Pick KTC indexes, in the league's own market format class -- matches the
+  // player-side query above. Loaded once across all picks the pass will touch.
+  idx.pick_ktc = await load_pick_ktc_indexes({ is_superflex })
 
   return idx
 }
@@ -426,7 +433,14 @@ const compute_snapshots_bulk = async ({ lid, holding_drafts }) => {
   const years = Array.from(years_set)
   const format_ids = Array.from(format_ids_set)
 
-  const idx = await load_indexes({ lid, player_ids, years, format_ids })
+  const is_superflex = await derive_league_format_is_superflex({ lid })
+  const idx = await load_indexes({
+    lid,
+    player_ids,
+    years,
+    format_ids,
+    is_superflex
+  })
 
   const snapshots = []
   for (const draft of holding_drafts) {
