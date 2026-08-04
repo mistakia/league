@@ -98,6 +98,34 @@ const generate_table_alias = ({ type, params = {}, row_axes = [] } = {}) => {
 // "latest outright" by definition.
 const YEAR_AXIS_AS_OF_WINDOW = '30 days'
 
+// The year-axis boundary, clamped so it can never sit in the future.
+//
+// Unclamped, a season whose opening day has not arrived yet puts BOTH the
+// boundary and the recency floor ahead of every observation the feed holds, so
+// the as-of lookup matches nothing and the column renders empty for every
+// player. That is not a coverage gap -- it is the floor and a future boundary
+// composing into an empty window. Measured 2026-08-03: the 2026 window was
+// [2026-08-10, 2026-09-09] against a latest observation of 2026-08-03, so a
+// year-split KTC column was blank for all 2026 rows, and would have been from
+// January through August 10 of every year.
+//
+// LEAST against now() makes the request "the board as of the opening day, or as
+// of today if that day has not come", which is what a reader asking for the
+// upcoming season's value means. It is a no-op for any boundary already in the
+// past, so every historical year is byte-identical in behaviour. The floor is
+// derived from the clamped boundary, not the raw one, so the 30-day
+// delisted-player guard still applies relative to whichever end the window
+// actually lands on.
+//
+// opening_day is a date, and date_trunc resolves to the timestamptz overload,
+// so LEAST compares two timestamptz values and introduces no coercion of its
+// own. The date -> timestamptz step is the session-timezone dependence the
+// boundary already carried before this clamp existed (production resolves it at
+// New York local midnight, the test container at UTC), so this changes nothing
+// about it. The clamped branch is TZ-independent outright, since now() is now().
+const year_axis_boundary = ({ opening_day_sql, year_offset_single }) =>
+  `LEAST(date_trunc('day', ${opening_day_sql}) + interval '${year_offset_single} year', now())`
+
 // The single as-of lookup every axis uses: the most recent observation at or
 // before `boundary_sql` that actually carries `metric_column`. A null boundary
 // means "no upper bound" -- the latest observation outright. A null
@@ -184,10 +212,12 @@ const keeptradecut_join = ({
       // deletes this cast.
       boundary_sql = 'to_timestamp(nfl_year_week_timestamp.week_timestamp)'
     } else if (row_axes.includes('year')) {
-      boundary_sql = `(date_trunc('day', opening_days.opening_day) + interval '${year_offset_single} year')`
+      boundary_sql = year_axis_boundary({
+        opening_day_sql: 'opening_days.opening_day',
+        year_offset_single
+      })
       // Recency floor -- see YEAR_AXIS_AS_OF_WINDOW. Without it a delisted
-      // player's final rank is carried into every later season, and a FUTURE
-      // opening day renders today's value for a season that has not started.
+      // player's final rank is carried into every later season.
       lower_bound_sql = `(${boundary_sql} - interval '${YEAR_AXIS_AS_OF_WINDOW}')`
 
       // TODO pretty sure this is always truthy
@@ -271,15 +301,20 @@ const keeptradecut_year_offset_range_select =
 
     const per_offset_selects = []
     for (let off = min_off; off <= max_off; off++) {
+      // Same clamp and same recency floor as the year-axis join -- this IS the
+      // year axis, reduced across a range of offsets. An unbounded reach would
+      // reintroduce the delisted-player tail one offset at a time, and an
+      // unclamped boundary would empty every offset landing past today.
+      const boundary = year_axis_boundary({
+        opening_day_sql: 'od_o.opening_day',
+        year_offset_single: off
+      })
       per_offset_selects.push(
         `(SELECT ktc_o.${metric_column} FROM keeptradecut_valuations ktc_o ` +
           `WHERE ktc_o.pid = ${pid_reference} AND ktc_o.is_superflex = ${is_superflex} ` +
           `AND ktc_o.${metric_column} IS NOT NULL ` +
-          `AND ktc_o.observed_at <= (date_trunc('day', od_o.opening_day) + interval '${off} year') ` +
-          // Same recency floor as the year-axis join -- this IS the year axis,
-          // reduced across a range of offsets, so an unbounded reach here would
-          // reintroduce the delisted-player tail one offset at a time.
-          `AND ktc_o.observed_at > (date_trunc('day', od_o.opening_day) + interval '${off} year' - interval '${YEAR_AXIS_AS_OF_WINDOW}') ` +
+          `AND ktc_o.observed_at <= ${boundary} ` +
+          `AND ktc_o.observed_at > (${boundary} - interval '${YEAR_AXIS_AS_OF_WINDOW}') ` +
           `ORDER BY ktc_o.observed_at DESC LIMIT 1)`
       )
     }

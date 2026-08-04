@@ -1,0 +1,37 @@
+{
+  "name": "player_keeptradecut_value year axis clamps a future opening day to now (executed-result parity)",
+  "description": "A season whose opening day has not arrived yet puts both the as-of boundary and the 30-day recency floor ahead of every observation the feed holds, so the window is empty and the column renders NULL for every player. Measured on production 2026-08-03: the 2026 window was [2026-08-10, 2026-09-09] against a latest observation of 2026-08-03, so a year-split KTC column was blank for all 533 players that otherwise carried a value, and would have been blank from January through August 10 of every year. Seed a season whose opening day is two years out, a fresh player observed 3 days ago (inside the window ending at now()) and a stale player observed 200 days ago (outside it). The fresh player's value must read populated and the stale player's must read NULL, which pins both halves: that the boundary is clamped to now(), and that the recency floor still applies relative to the clamped end. Fails at HEAD without the LEAST(..., now()) clamp in year_axis_boundary -- both players then read NULL.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      { "column_id": "player_keeptradecut_value", "params": { "year": [2025] } }
+    ],
+    "row_axes": ["year"],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["ZQ"] }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.primary_position IN ('ZQ')) select \"player\".\"pid\", player.first_name, player.last_name, \"tfcfc9eab80a063fa2009382eef2a8970\".\"keeptradecut_value\" AS \"player_keeptradecut_value_0\", \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_valuations\" as \"tfcfc9eab80a063fa2009382eef2a8970\" on \"tfcfc9eab80a063fa2009382eef2a8970\".\"pid\" = \"player\".\"pid\" and \"tfcfc9eab80a063fa2009382eef2a8970\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"tfcfc9eab80a063fa2009382eef2a8970\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(date_trunc('day', opening_days.opening_day) + interval '0 year', now()) and \"observed_at\" > (LEAST(date_trunc('day', opening_days.opening_day) + interval '0 year', now()) - interval '30 days')) where player.primary_position IN ('ZQ') group by player.first_name, player.last_name, \"tfcfc9eab80a063fa2009382eef2a8970\".\"keeptradecut_value\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTCC-920001', 'Test', 'Ktccf', 'T.Ktccf', 'Test Ktccf', 'ZQ', 'ZQ', '2000-01-01', 2020, 'ZQA')",
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTCC-920002', 'Test', 'Ktccs', 'T.Ktccs', 'Test Ktccs', 'ZQ', 'ZQ', '2001-01-01', 2021, 'ZQA')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) SELECT 970960, 2025, 1, 'REG', 'ZQA', 'ZQX', (now() + interval '2 years')::date",
+      "REFRESH MATERIALIZED VIEW opening_days",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value, position_rank, overall_rank) VALUES ('TEST-KTCC-920001', true, now() - interval '3 days', 4200, 7, 31)",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value, position_rank, overall_rank) VALUES ('TEST-KTCC-920002', true, now() - interval '200 days', 1100, 44, 190)"
+    ],
+    "expected_rows": [
+      { "player_keeptradecut_value_0": 4200 },
+      { "player_keeptradecut_value_0": null }
+    ],
+    "compare_columns": ["player_keeptradecut_value_0"]
+  },
+  "tags": [
+    "keeptradecut",
+    "as-of",
+    "year_split",
+    "future-boundary-clamp",
+    "result-equivalence"
+  ]
+}
