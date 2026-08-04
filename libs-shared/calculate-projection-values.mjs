@@ -1,8 +1,10 @@
 import { fantasy_positions } from '#constants'
 import calculateBaselines from './calculate-baselines.mjs'
 import calculateValues from './calculate-values.mjs'
+import calculatePrices from './calculate-prices.mjs'
 import calculate_distributional_baselines, {
   assign_expected_surplus,
+  season_net_projection_key,
   season_projection_week
 } from './calculate-distributional-baselines.mjs'
 
@@ -36,10 +38,18 @@ import calculate_distributional_baselines, {
 // chart and the SPA's lineup-contribution saga). The season pass is now
 // distributional only.
 //
-// Returns the total positive pts_added (the denominator calculate-prices divides
-// the discretionary cap by) and the week's baselines in a shape ready to
-// persist. Writes pts_added onto the player rows as a side effect, which is how
-// the rest of the pipeline has always consumed it.
+// Returns the week's baselines in a shape ready to persist. Writes pts_added
+// and market_salary onto the player rows as a side effect, which is how the rest
+// of the pipeline has always consumed them.
+//
+// PRICING RUNS HERE, for the same reason the season/weekly dispatch does. All
+// four callers computed values and then immediately called calculatePrices with
+// the same week, so the pairing was open-coded four times and a caller could
+// compute an aggregate it never priced -- which is exactly what happened to the
+// net variants. Pricing beside the computation means every aggregate this module
+// writes leaves it priced, and the season board's two variants cannot come apart.
+// The denominator for each is derived inside calculate-prices.mjs from the
+// aggregate key; nothing is passed in.
 const calculate_projection_values = ({
   players,
   league,
@@ -55,10 +65,15 @@ const calculate_projection_values = ({
     const {
       baselines: drawn_baselines,
       expected_surplus,
-      total_pts_added
+      expected_net_surplus
     } = calculate_distributional_baselines({ players, league, week })
 
-    assign_expected_surplus({ players, expected_surplus, week })
+    assign_expected_surplus({
+      players,
+      expected_surplus,
+      expected_net_surplus,
+      week
+    })
 
     for (const position of fantasy_positions) {
       const points = drawn_baselines[position]
@@ -69,7 +84,17 @@ const calculate_projection_values = ({
         points === null ? null : { pid: null, points }
     }
 
-    return { total_pts_added, baselines }
+    // The season board publishes both variants, so both are priced, each
+    // against the sum of its OWN positive parts. The net one is signed and sums
+    // negative across the board.
+    calculatePrices({ league_format: league, players, aggregate_key: week })
+    calculatePrices({
+      league_format: league,
+      players,
+      aggregate_key: season_net_projection_key
+    })
+
+    return { baselines }
   }
 
   const point_estimate_baselines = calculateBaselines({
@@ -79,7 +104,7 @@ const calculate_projection_values = ({
     week
   })
 
-  const total_pts_added = calculateValues({
+  calculateValues({
     players,
     baselines: point_estimate_baselines,
     week
@@ -98,7 +123,13 @@ const calculate_projection_values = ({
       : null
   }
 
-  return { total_pts_added, baselines }
+  // A weekly pts_added is already signed -- it is a start/sit signal whose
+  // negative range is read directly -- so there is one weekly aggregate, not
+  // two, and the positive-part denominator is what keeps its negative half out
+  // of the rate.
+  calculatePrices({ league_format: league, players, aggregate_key: week })
+
+  return { baselines }
 }
 
 export default calculate_projection_values

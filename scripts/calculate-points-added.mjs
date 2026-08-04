@@ -134,16 +134,15 @@ const calculate_points_added = async ({
     }
 
     // calculate values
-    const total_pts_added = calculateValues({
+    calculateValues({
       players,
       baselines: baseline,
       week
     })
     calculatePrices({
       league_format: league,
-      total_pts_added,
       players,
-      week
+      aggregate_key: week
     })
   }
 
@@ -155,7 +154,6 @@ const calculate_points_added = async ({
   // The -999 sentinel guard applies to BOTH raw_by_week (prevents leak into
   // persisted points_added_net) and earned_net (prevents shifting the aggregate
   // by -999 * weeks_missed).
-  let total_pts_added = 0
   for (const player of players) {
     player.pts_added.earned = 0
     let earned_net = 0
@@ -171,7 +169,6 @@ const calculate_points_added = async ({
       if (value > 0) {
         player.starts += 1
         player.pts_added.earned += value
-        total_pts_added += value
       }
     }
     player.pts_added.earned_net = earned_net
@@ -180,11 +177,22 @@ const calculate_points_added = async ({
     points_by_position[player.primary_position].push(player.points)
   }
 
+  // Both realized-season aggregates are priced. `earned` is the positive-only
+  // variant -- what he added on the weeks you started him -- and `earned_net`
+  // is the signed one, which charges him for the weeks he was below
+  // replacement. Each is priced against the sum of its OWN positive parts,
+  // derived inside calculatePrices; `earned_net` sums negative across the board
+  // and a raw-total denominator would floor the entire net board to $0.
   calculatePrices({
     league_format: league,
-    total_pts_added,
     players,
-    week: 'earned'
+    aggregate_key: 'earned'
+  })
+
+  calculatePrices({
+    league_format: league,
+    players,
+    aggregate_key: 'earned_net'
   })
 
   const output = {}
@@ -197,7 +205,8 @@ const calculate_points_added = async ({
       pts_added_earned: player.pts_added.earned,
       pts_added_net: player.pts_added.earned_net,
       pts_added_raw_by_week: player.pts_added_raw_by_week,
-      value: player.market_salary.earned,
+      earned_salary: player.market_salary.earned,
+      net_salary: player.market_salary.earned_net,
       points: player.points,
       games: player.games,
       starts: player.starts
@@ -258,7 +267,8 @@ const main = async () => {
           pts_added: player.pts_added_earned.toFixed(2),
           points: player.points.toFixed(2),
           rank: `${player.primary_position}${player.pos_rnk}`,
-          value: `$${player.value}`,
+          earned_salary: `$${player.earned_salary}`,
+          net_salary: `$${player.net_salary}`,
           rookie: player.rookie ? 'rookie' : '',
           startable: player.starts
         },

@@ -7,7 +7,6 @@ import {
   groupBy,
   Roster,
   weightProjections,
-  calculatePrices,
   calculate_projection_values,
   calculatePlayerValuesRestOfSeason,
   named_scoring_formats,
@@ -38,6 +37,7 @@ import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-proje
 import { process_scoring_format_year } from './process-projections-for-scoring-format.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import first_projection_week_to_recompute from '#libs-shared/first-projection-week-to-recompute.mjs'
+import { season_net_projection_key } from '#libs-shared/calculate-distributional-baselines.mjs'
 
 dayjs.extend(dayOfYear)
 
@@ -309,16 +309,9 @@ const process_league_format = async ({
   // only process_league writes league_baselines, and it computes its own.
   let week = first_projection_week_to_recompute({ year })
   for (; week <= current_season.nflFinalWeek; week++) {
-    const { total_pts_added } = calculate_projection_values({
+    calculate_projection_values({
       players: player_rows,
       league: league_format,
-      week
-    })
-
-    calculatePrices({
-      league_format,
-      total_pts_added,
-      players: player_rows,
       week
     })
   }
@@ -331,6 +324,11 @@ const process_league_format = async ({
   const valueInserts = []
   for (const player_row of player_rows) {
     for (const [week, pts_added] of Object.entries(player_row.pts_added)) {
+      // season_net has no column yet -- it lands with the period split. Writing
+      // it here would add a THIRD sentinel to the mixed week key this task
+      // exists to retire, and the history table would then carry it too.
+      if (week === season_net_projection_key) continue
+
       const params = {
         pid: player_row.pid,
         year: current_season.year,
@@ -430,21 +428,13 @@ const process_league = async ({ year, lid }) => {
 
   const baselines = {}
   for (; week <= current_season.nflFinalWeek; week++) {
-    const { total_pts_added, baselines: week_baselines } =
-      calculate_projection_values({
-        players: player_rows,
-        league,
-        rosterRows,
-        week
-      })
-    baselines[week] = week_baselines
-
-    calculatePrices({
-      league_format: league,
-      total_pts_added,
+    const { baselines: week_baselines } = calculate_projection_values({
       players: player_rows,
+      league,
+      rosterRows,
       week
     })
+    baselines[week] = week_baselines
   }
 
   calculatePlayerValuesRestOfSeason({
@@ -507,6 +497,22 @@ const process_league = async ({ year, lid }) => {
           lid,
           salary_adj_pts_added
         })
+        continue
+      }
+
+      // The NET variants have no home on the hosted-league side yet. The period
+      // tables gain salary_adj_pts_added_net in the schema split that this
+      // task's remaining half performs; until then they are computed and
+      // deliberately not persisted here.
+      //
+      // This guard is not cosmetic. Falling through to the weekly insert below
+      // would put 'ros_net' into league_player_projection_values.week, which is
+      // varchar(3), and that table is written delete-by-lid THEN batch_insert --
+      // so the delete commits, the insert throws, and the table is left EMPTY
+      // rather than stale, blanking market_salary_adj on league-home, the
+      // auction nomination panel and the selected-player panel for a full cron
+      // cycle. Remove this guard in the same change that adds the columns.
+      if (week === 'ros_net' || week === season_net_projection_key) {
         continue
       }
 

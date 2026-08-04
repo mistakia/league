@@ -5,11 +5,11 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import {
   calculate_projection_values,
-  calculatePrices,
   calculatePlayerValuesRestOfSeason,
   groupBy
 } from '#libs-shared'
 import { current_season, external_data_sources } from '#constants'
+import { season_net_projection_key } from '#libs-shared/calculate-distributional-baselines.mjs'
 import {
   is_main,
   batch_insert,
@@ -61,16 +61,9 @@ const process_league_format_year = async ({
   // Baselines are not persisted for a league FORMAT -- only process_league
   // writes league_baselines, and it computes its own.
   for (; week <= final_week; week++) {
-    const { total_pts_added } = calculate_projection_values({
+    calculate_projection_values({
       players: player_rows,
       league: league_format,
-      week
-    })
-
-    calculatePrices({
-      league_format,
-      total_pts_added,
-      players: player_rows,
       week
     })
   }
@@ -83,6 +76,11 @@ const process_league_format_year = async ({
   const value_inserts = []
   for (const player_row of player_rows) {
     for (const [week, pts_added] of Object.entries(player_row.pts_added)) {
+      // season_net has no column yet -- it lands with the period split. Writing
+      // it here would add a THIRD sentinel to the mixed week key this task
+      // exists to retire, and the history table would then carry it too.
+      if (week === season_net_projection_key) continue
+
       const params = {
         pid: player_row.pid,
         year,

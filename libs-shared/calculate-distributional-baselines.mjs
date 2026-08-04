@@ -31,6 +31,13 @@ import { get_player_week_total } from './get-player-week-points.mjs'
 // known bias rather than trading it for an unknown one.
 export const season_projection_week = 0
 
+// The season board publishes TWO variants, and the net one lives under its own
+// named aggregation key rather than a second numeric week -- `week` is a period
+// and the variant is not a period. Mixing the two axes into one column is what
+// let the period sentinels accumulate on the projection-values tables; see
+// process-projections.mjs.
+export const season_net_projection_key = 'season_net'
+
 // Replacement level and surplus, both as expectations over drawn seasons.
 //
 // The shipped model reads replacement level off the point-estimate board: rank
@@ -197,8 +204,12 @@ const calculate_distributional_baselines = ({
 
   const baseline_totals = {}
   const surplus_totals = {}
+  const net_surplus_totals = {}
   for (const position of fantasy_positions) baseline_totals[position] = 0
-  for (const pid of pids) surplus_totals[pid] = 0
+  for (const pid of pids) {
+    surplus_totals[pid] = 0
+    net_surplus_totals[pid] = 0
+  }
 
   const baseline_draw_counts = {}
   const values = new Array(means.length)
@@ -223,6 +234,14 @@ const calculate_distributional_baselines = ({
     for (let i = 0; i < values.length; i++) {
       const replacement = baseline[positions[i]]
       if (replacement === undefined) continue
+      // The net variant is the same quantity WITHOUT the per-draw floor:
+      // E[X - baseline] beside E[max(X - baseline, 0)]. It must be accumulated
+      // per draw for the mirror image of the reason the floored one is -- taking
+      // the expectation first and subtracting after would give
+      // E[X] - baseline, which is a different number whenever the baseline
+      // covaries with the draw, and the baseline here is redrawn every pass.
+      // One addition per draw, no additional draws.
+      net_surplus_totals[pids[i]] += values[i] - replacement
       if (values[i] > replacement) {
         surplus_totals[pids[i]] += values[i] - replacement
       }
@@ -240,14 +259,22 @@ const calculate_distributional_baselines = ({
   }
 
   const expected_surplus = {}
+  const expected_net_surplus = {}
   let total_pts_added = 0
   for (const pid of pids) {
     const expected = surplus_totals[pid] / draws
     expected_surplus[pid] = expected
+    expected_net_surplus[pid] = net_surplus_totals[pid] / draws
     total_pts_added += expected
   }
 
-  return { baselines, expected_surplus, total_pts_added, draws }
+  return {
+    baselines,
+    expected_surplus,
+    expected_net_surplus,
+    total_pts_added,
+    draws
+  }
 }
 
 // Write the drawn expectation onto the player rows, in the shape the rest of the
@@ -257,15 +284,22 @@ const calculate_distributional_baselines = ({
 // Expected surplus is E[max(X - baseline, 0)] and so is floored at zero by
 // construction -- a player projected below replacement still has some chance of
 // clearing it, which is worth a small positive amount, and no chance of being
-// worth less than nothing because he would simply not be started. The weekly
-// path stays signed; this one cannot be.
+// worth less than nothing because he would simply not be started.
+//
+// The NET variant, E[X - baseline], is the same expectation without that floor:
+// what he adds when you must start him every week rather than bench him when he
+// busts. It is signed, and it is the quantity a league format with no viable
+// bench should read. The two are not a rescale of one another -- the gap between
+// them is the value of the option to bench, which is largest exactly where
+// dispersion is largest.
 //
 // A player absent from expected_surplus was never in the drawn pool -- a kicker,
 // a position the league does not start, or a player with no projection for the
-// season -- and takes the same sentinel the weekly path gives him.
+// season -- and takes the same sentinel the weekly path gives him, on both.
 export const assign_expected_surplus = ({
   players,
   expected_surplus,
+  expected_net_surplus,
   week
 }) => {
   for (const player of players) {
@@ -276,6 +310,10 @@ export const assign_expected_surplus = ({
     const surplus = expected_surplus[player.pid]
     player.pts_added[week] =
       surplus === undefined ? default_points_added : surplus
+
+    const net_surplus = expected_net_surplus[player.pid]
+    player.pts_added[season_net_projection_key] =
+      net_surplus === undefined ? default_points_added : net_surplus
   }
 
   return players

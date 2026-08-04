@@ -43,9 +43,59 @@ import get_discretionary_cap from './get-discretionary-cap.mjs'
 // as a separate lens, never inside it -- and the situational question ("what
 // will he actually cost given what is left in this league right now") is already
 // answered separately by market_salary_adj in scripts/process-projections.mjs.
-const calculatePrices = ({ league_format, total_pts_added, players, week }) => {
+
+// The denominator is the sum of the POSITIVE PARTS of the aggregate being
+// priced, never its raw sum.
+//
+// For every aggregate priced before 2026-08 the two were identical, because
+// those aggregates are all non-negative -- the weekly and season paths write a
+// -999 sentinel that max() maps to zero, and the drawn season surplus is
+// E[max(X - baseline, 0)] by construction. That is exactly what made this
+// dangerous: nothing stated the rule, no test covered it, and the first SIGNED
+// variant to be priced breaks it silently. Measured on live 2026 data,
+// genesis_10_team rest of season, the net aggregate sums to -41,841.3 across the
+// board while its positive parts sum to 3,114.5. A raw-sum denominator gives a
+// NEGATIVE rate, every price computes negative, every one hits the floor below,
+// and the whole board prices at $0 -- with no error, no failing test and no
+// diagnostic.
+//
+// It is derived HERE rather than passed in for the same reason the discretionary
+// cap is. Three producers each hand-accumulated this total inside a `value > 0`
+// branch, and all three independently forgot to accumulate a second one for the
+// signed variant they were already computing and persisting beside it. A
+// denominator the caller supplies is a denominator the caller can get wrong;
+// deriving it from the aggregate key means a caller cannot price a variant
+// against the wrong population, and cannot add a variant that is silently
+// unpriced.
+const get_positive_part_total = ({ players, aggregate_key }) => {
+  let total = 0
+  for (const player of players) {
+    const value = player.pts_added?.[aggregate_key]
+    if (Number.isFinite(value) && value > 0) {
+      total += value
+    }
+  }
+  return total
+}
+
+// `aggregate_key` is an aggregation key rather than a week number. It takes the
+// numeric weeks, `0` for the season board, and the named season aggregates
+// ('earned', 'earned_net', 'ros', 'ros_net') -- it was called `week` while only
+// the first of those was true.
+const calculatePrices = ({ league_format, players, aggregate_key }) => {
   const pricing_model = league_format.pricing_model || 'auction'
   if (pricing_model !== 'auction') {
+    return players
+  }
+
+  const total_pts_added = get_positive_part_total({ players, aggregate_key })
+
+  // No player clears replacement on this aggregate, so there is nothing to
+  // allocate the cap against. Leaving the board unpriced is the honest answer;
+  // dividing by zero would price every player at Infinity, which `|| 0` below
+  // does NOT catch. Callers that require an auction format to come out priced
+  // assert on that themselves -- see generate-league-format-player-seasonlogs.
+  if (!(total_pts_added > 0)) {
     return players
   }
 
@@ -63,7 +113,7 @@ const calculatePrices = ({ league_format, total_pts_added, players, week }) => {
     // algebraic coincidence of the current formula. Flooring at the definition
     // makes the value mean the same thing everywhere it is read.
     const market_salary = Math.max(
-      Math.round(pts_added_salary_rate * player.pts_added[week]) || 0,
+      Math.round(pts_added_salary_rate * player.pts_added[aggregate_key]) || 0,
       0
     )
     const salary_diff =
@@ -73,17 +123,20 @@ const calculatePrices = ({ league_format, total_pts_added, players, week }) => {
 
     const pts_added_from_salary_savings = salary_diff / pts_added_salary_rate
     const pts_added_salary_adjusted =
-      player.pts_added[week] + pts_added_from_salary_savings || 0
+      player.pts_added[aggregate_key] + pts_added_from_salary_savings || 0
 
     if (!player.salary_adj_pts_added) {
       player.salary_adj_pts_added = {}
     }
-    player.salary_adj_pts_added[week] = Math.max(pts_added_salary_adjusted, 0)
+    player.salary_adj_pts_added[aggregate_key] = Math.max(
+      pts_added_salary_adjusted,
+      0
+    )
 
     if (!player.market_salary) {
       player.market_salary = {}
     }
-    player.market_salary[week] = market_salary
+    player.market_salary[aggregate_key] = market_salary
   }
 
   return players

@@ -13,9 +13,11 @@ import { get_player_week_total } from './get-player-week-points.mjs'
 // projection is regressed toward the mean, so subtracting the first from the
 // second biased every pts_added downward -- far enough at DST that all 32
 // defenses priced at $0.00. The columns are gone; the board is its own baseline.
+// Writes pts_added onto the player rows and returns nothing. It used to return
+// the positive-part total as well, for the caller to hand to calculatePrices --
+// which is now derived there from the aggregate key, so no caller can price an
+// aggregate against another one's denominator. See calculate-prices.mjs.
 const calculateValues = ({ players, baselines, week }) => {
-  let total_pts_added = 0
-
   for (const player of players) {
     if (!player.pts_added) {
       player.pts_added = {}
@@ -38,13 +40,7 @@ const calculateValues = ({ players, baselines, week }) => {
         player_week_points -
         baselines[primary_position].starter.points[week].total
     }
-
-    if (player.pts_added[week] > 0) {
-      total_pts_added = total_pts_added + player.pts_added[week]
-    }
   }
-
-  return total_pts_added
 }
 
 export default calculateValues

@@ -3,7 +3,6 @@ import {
   calculatePercentiles,
   calculatePoints,
   calculate_projection_values,
-  calculatePrices,
   getOptimizerPositionConstraints,
   optimizeLineup,
   calculatePlayerValuesRestOfSeason
@@ -80,15 +79,13 @@ export function calculatePlayerValues(payload) {
 
   const baselinesByWeek = {}
   for (let week = 0; week <= finalWeek; week++) {
-    const { total_pts_added, baselines } = calculate_projection_values({
+    const { baselines } = calculate_projection_values({
       players,
       league,
       rosterRows,
       week
     })
     baselinesByWeek[week] = baselines
-
-    calculatePrices({ league_format: league, total_pts_added, players, week })
   }
 
   calculatePlayerValuesRestOfSeason({ players, rosterRows, league })

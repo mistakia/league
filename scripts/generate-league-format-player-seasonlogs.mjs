@@ -76,73 +76,68 @@ const generate_league_format_player_seasonlogs = async ({
     })
   }
 
-  const seasons_by_pos = groupBy(inserts, 'pos')
-  const sorted_by_points_added_earned_by_pos = {}
-  const sorted_by_points_added_earned_per_game_by_pos = {}
-  for (const pos in seasons_by_pos) {
-    sorted_by_points_added_earned_by_pos[pos] = seasons_by_pos[pos]
-      .map((i) => i.points_added_earned)
-      .sort((a, b) => b - a)
-    sorted_by_points_added_earned_per_game_by_pos[pos] = seasons_by_pos[pos]
-      .map((i) => i.points_added_earned_per_game)
-      .sort((a, b) => b - a)
-  }
-
-  const sorted_by_points_added_earned = inserts
-    .map((i) => i.points_added_earned)
-    .sort((a, b) => b - a)
-  const sorted_by_points_added_earned_per_game = inserts
-    .map((i) => i.points_added_earned_per_game)
-    .sort((a, b) => b - a)
-
-  // Calculate total points added for the season
-  const total_points_added_earned = sum(
-    inserts.map((i) => i.points_added_earned)
-  )
-
-  // earned_salary is the realized-season half of the SAME points-added-to-cap-
-  // dollars arithmetic the forward path prices market_salary with, so it runs
-  // through calculatePrices rather than open-coding a second rate. This file
-  // used to derive its own, over the FULL cap rather than the discretionary
-  // one, which priced identical points added ~8% higher on the seven formats
-  // carrying min_bid = 1 and agreed with the shipped arithmetic only on the
-  // eight where min_bid = 0 -- genesis_10_team among them, so the format anyone
-  // would test against was the one that hid it.
+  // Rank every metric overall and within position. The net variant carries the
+  // same four ranks the earned side always had -- it was ranked nowhere at all
+  // while it was also priced nowhere, and the two omissions had the same cause.
   //
-  // calculatePrices reads pts_added[week] and writes market_salary[week], and
-  // its week parameter is an aggregation key rather than a week number, so the
-  // season aggregate is passed as 'earned' exactly as calculate-points-added.mjs
-  // passes it for the realized season.
-  for (const insert of inserts) {
-    insert.pts_added = { earned: insert.points_added_earned }
+  // `indexOf` into a descending sort gives tied values the same rank, which is
+  // the behaviour the earned side has always had and is preserved deliberately.
+  const seasons_by_pos = groupBy(inserts, 'pos')
+  const ranked_metrics = [
+    'points_added_earned',
+    'points_added_earned_per_game',
+    'points_added_net',
+    'points_added_net_per_game'
+  ]
+  for (const metric of ranked_metrics) {
+    const sorted_overall = inserts.map((i) => i[metric]).sort((a, b) => b - a)
+    const sorted_by_pos = {}
+    for (const pos in seasons_by_pos) {
+      sorted_by_pos[pos] = seasons_by_pos[pos]
+        .map((i) => i[metric])
+        .sort((a, b) => b - a)
+    }
+
+    for (const insert of inserts) {
+      insert[`${metric}_rank`] = sorted_overall.indexOf(insert[metric]) + 1
+      insert[`${metric}_position_rank`] =
+        sorted_by_pos[insert.pos].indexOf(insert[metric]) + 1
+    }
   }
-  calculatePrices({
-    league_format,
-    total_pts_added: total_points_added_earned,
-    players: inserts,
-    week: 'earned'
-  })
+
+  // The realized-season half of the SAME points-added-to-cap-dollars arithmetic
+  // the forward path prices market_salary with, so it runs through
+  // calculatePrices rather than open-coding a second rate. This file used to
+  // derive its own, over the FULL cap rather than the discretionary one, which
+  // priced identical points added ~8% higher on the seven formats carrying
+  // min_bid = 1 and agreed with the shipped arithmetic only on the eight where
+  // min_bid = 0 -- genesis_10_team among them, so the format anyone would test
+  // against was the one that hid it.
+  //
+  // calculatePrices reads pts_added[aggregate_key] and writes
+  // market_salary[aggregate_key], and the key is an aggregation key rather than
+  // a week number, so each season aggregate is passed by name.
+  //
+  // BOTH variants are priced. The denominator is derived per aggregate inside
+  // calculatePrices as the sum of that aggregate's own positive parts, which is
+  // what makes the net call safe: points_added_net is signed and sums negative
+  // across the board, so a raw-total denominator would floor the whole net
+  // board to $0 with no error and no failing test.
+  for (const insert of inserts) {
+    insert.pts_added = {
+      earned: insert.points_added_earned,
+      net: insert.points_added_net
+    }
+  }
+  calculatePrices({ league_format, players: inserts, aggregate_key: 'earned' })
+  calculatePrices({ league_format, players: inserts, aggregate_key: 'net' })
 
   for (const insert of inserts) {
-    insert.points_added_earned_rank =
-      sorted_by_points_added_earned.indexOf(insert.points_added_earned) + 1
-    insert.points_added_earned_position_rank =
-      sorted_by_points_added_earned_by_pos[insert.pos].indexOf(
-        insert.points_added_earned
-      ) + 1
-    insert.points_added_earned_per_game_rank =
-      sorted_by_points_added_earned_per_game.indexOf(
-        insert.points_added_earned_per_game
-      ) + 1
-    insert.points_added_earned_per_game_position_rank =
-      sorted_by_points_added_earned_per_game_by_pos[insert.pos].indexOf(
-        insert.points_added_earned_per_game
-      ) + 1
-
     // A dfs_fixed format publishes per-player salaries externally, so
-    // calculatePrices declines to price it and earned_salary is null rather
-    // than a number derived from a contest-entry cap.
+    // calculatePrices declines to price it and both salaries are null rather
+    // than numbers derived from a contest-entry cap.
     insert.earned_salary = insert.market_salary?.earned ?? null
+    insert.points_added_net_cap_dollars = insert.market_salary?.net ?? null
 
     delete insert.pos
     delete insert.pts_added
@@ -160,25 +155,37 @@ const generate_league_format_player_seasonlogs = async ({
     )
   }
 
-  // An auction format must come out priced. Only a dfs_fixed format may be
-  // entirely unpriced, and it must be entirely so rather than partly. Without
-  // this, calculatePrices silently declining an auction format -- a bad
-  // pricing_model, a zero denominator -- would blank earned_salary across the
-  // whole format and read as a clean run.
-  const priced_count = inserts.filter((i) => i.earned_salary !== null).length
+  // An auction format must come out priced, on BOTH variants. Only a dfs_fixed
+  // format may be entirely unpriced, and it must be entirely so rather than
+  // partly. Without this, calculatePrices silently declining an auction format
+  // -- a bad pricing_model, a zero denominator -- would blank a whole format's
+  // salaries and read as a clean run.
+  //
+  // The net arm is the one that matters going forward: the net variant was
+  // computed and persisted for months with no salary at all, and nothing here
+  // would have said so. An oracle that covers only the variant someone
+  // remembered to price is how the omission stayed invisible.
   const pricing_model = league_format.pricing_model || 'auction'
-  if (pricing_model === 'auction' && inserts.length && !priced_count) {
-    throw new Error(
-      `league_format ${league_format_id} ${year}: pricing_model is auction but 0 of ${inserts.length} seasonlogs are priced`
-    )
+  const priced_counts = {
+    earned_salary: inserts.filter((i) => i.earned_salary !== null).length,
+    points_added_net_cap_dollars: inserts.filter(
+      (i) => i.points_added_net_cap_dollars !== null
+    ).length
   }
-  if (pricing_model !== 'auction' && priced_count) {
-    throw new Error(
-      `league_format ${league_format_id} ${year}: pricing_model is ${pricing_model} but ${priced_count} seasonlogs carry a salary`
-    )
+  for (const [column, priced_count] of Object.entries(priced_counts)) {
+    if (pricing_model === 'auction' && inserts.length && !priced_count) {
+      throw new Error(
+        `league_format ${league_format_id} ${year}: pricing_model is auction but 0 of ${inserts.length} seasonlogs carry ${column}`
+      )
+    }
+    if (pricing_model !== 'auction' && priced_count) {
+      throw new Error(
+        `league_format ${league_format_id} ${year}: pricing_model is ${pricing_model} but ${priced_count} seasonlogs carry ${column}`
+      )
+    }
   }
   log(
-    `${inserts.length} seasonlogs, ${priced_count} priced (pricing_model=${pricing_model})`
+    `${inserts.length} seasonlogs, ${priced_counts.earned_salary} earned / ${priced_counts.points_added_net_cap_dollars} net priced (pricing_model=${pricing_model})`
   )
 
   if (dry) {
