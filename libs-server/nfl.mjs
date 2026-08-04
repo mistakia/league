@@ -3,6 +3,7 @@ import debug from 'debug'
 import db from '#db'
 import { wait } from './wait.mjs'
 import * as cache from './cache.mjs'
+import { fetch_with_retry } from './proxy-manager.mjs'
 
 const log = debug('nfl')
 // Library module: a bare debug.enable REPLACES the namespace set for the whole
@@ -84,14 +85,16 @@ export const get_session_token_v3 = async () => {
   form.set('nflClaimGroupsToAdd', '[]')
   form.set('nflClaimGroupsToRemove', '[]')
 
-  const response = await fetch(session_url, {
+  const response = await fetch_with_retry({
+    url: session_url,
     method: 'POST',
     body: form,
     headers: {
       origin: 'https://www.nfl.com',
       referer: 'https://www.nfl.com/',
       'User-Agent': user_agent
-    }
+    },
+    use_proxy: true
   })
 
   const data = await fetch_json_with_context(session_url, response)
@@ -190,10 +193,12 @@ query {
       query
     )}&variables=null`
     log(`fetching nfl players for year: ${year}, after: ${after}`)
-    const res = await fetch(url, {
+    const res = await fetch_with_retry({
+      url,
       headers: {
         authorization: `Bearer ${token}`
-      }
+      },
+      use_proxy: true
     })
     data = await fetch_json_with_context(url, res)
 
@@ -241,10 +246,12 @@ export const getGames = async ({
 
   const url = `${api_url}/experience/v1/games?season=${year}&seasonType=${seas_type}&week=${week}&withExternalIds=true&limit=100`
   log(url)
-  const res = await fetch(url, {
+  const res = await fetch_with_retry({
+    url,
     headers: {
       authorization: `Bearer ${token}`
-    }
+    },
+    use_proxy: true
   })
 
   const data = await fetch_json_with_context(url, res)
@@ -275,10 +282,12 @@ export const get_plays_v1 = async ({ id, token, ignore_cache = false }) => {
   }
 
   const url = `${api_url}/experience/v1/gamedetails/${id}?withExternalIds`
-  const res = await fetch(url, {
+  const res = await fetch_with_retry({
+    url,
     headers: {
       authorization: `Bearer ${token}`
-    }
+    },
+    use_proxy: true
   })
 
   const data = await fetch_json_with_context(url, res)
@@ -319,10 +328,12 @@ export const get_combine_profiles = async ({
 
   const url = `${combine_profiles_url}?year=${year}&limit=1000`
   log(url)
-  const res = await fetch(url, {
+  const res = await fetch_with_retry({
+    url,
     headers: {
       authorization: `Bearer ${token}`
-    }
+    },
+    use_proxy: true
   })
   const data = await fetch_json_with_context(url, res)
 

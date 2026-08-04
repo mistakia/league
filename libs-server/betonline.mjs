@@ -1,5 +1,7 @@
 import debug from 'debug'
 
+import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
+
 const log = debug('betonline')
 // Library module: a bare debug.enable REPLACES the namespace set for the whole
 // process, so importing this would silently switch off namespaces the entry
@@ -22,8 +24,11 @@ export const market_groups = [
 export const get_market_groups = async () => {
   const url = `${DIGITAL_SPORTS_TECH_API_URL}/grouped-markets/v2/map?sb=betonline&sgmOdds=true&league=nfl`
   log(url)
-  const res = await fetch(url)
-  const data = await res.json()
+  const data = await fetch_with_retry({
+    url,
+    use_proxy: true,
+    response_type: 'json'
+  })
 
   return data
 }
@@ -31,8 +36,11 @@ export const get_market_groups = async () => {
 export const get_events = async () => {
   const url = `${DIGITAL_SPORTS_TECH_API_URL}/gfm/gamesByGfm?sb=betonline&league=nfl&sgmOdds=true`
   log(url)
-  const res = await fetch(url)
-  const data = await res.json()
+  const data = await fetch_with_retry({
+    url,
+    use_proxy: true,
+    response_type: 'json'
+  })
 
   return data
 }
@@ -40,8 +48,11 @@ export const get_events = async () => {
 export const get_markets = async ({ statistic, gameId }) => {
   const url = `${DIGITAL_SPORTS_TECH_API_URL}/dfm/marketsBySs?sb=betonline&gameId=${gameId}&statistic=${statistic}`
   log(url)
-  const res = await fetch(url)
-  const data = await res.json()
+  const data = await fetch_with_retry({
+    url,
+    use_proxy: true,
+    response_type: 'json'
+  })
 
   return data
 }

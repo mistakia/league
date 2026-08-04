@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 
 import { current_season } from '#constants'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
 
 // const log = debug('gambet')
 // debug.enable('gambet')
@@ -56,12 +57,14 @@ export const markets = {
 export const get_events = async () => {
   const url = `${GAMBET_API_URL}/en/prematch/football/nfl`
 
-  const res = await fetch(url, {
+  const data = await fetch_with_retry({
+    url,
     method: 'POST',
     body: JSON.stringify({}),
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
+    use_proxy: true,
+    response_type: 'json'
   })
-  const data = await res.json()
 
   const week_end = current_season.week_end
   if (
@@ -84,12 +87,14 @@ export const get_events = async () => {
 export const get_event_markets = async ({ event_url }) => {
   const url = `${GAMBET_API_URL}${event_url}`
 
-  const res = await fetch(url, {
+  const data = await fetch_with_retry({
+    url,
     method: 'POST',
     body: JSON.stringify({}),
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
+    use_proxy: true,
+    response_type: 'json'
   })
-  const data = await res.json()
 
   if (
     data &&

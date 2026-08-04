@@ -10,6 +10,7 @@ import { current_season } from '#constants'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { NGS_API_URL } from '#private/libs-server/ngs.mjs'
+import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
 
 dayjs.extend(timezone)
 
@@ -110,11 +111,14 @@ const run = async ({ year = current_season.year, collector = null } = {}) => {
 
   let data
   try {
-    data = await fetch(url, {
+    data = await fetch_with_retry({
+      url,
       headers: {
         referer: 'https://nextgenstats.nfl.com/'
-      }
-    }).then((res) => res.json())
+      },
+      use_proxy: true,
+      response_type: 'json'
+    })
   } catch (error) {
     if (collector) {
       collector.add_error(error, { year, context: 'fetch_schedule' })

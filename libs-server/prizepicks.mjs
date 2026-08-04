@@ -1,6 +1,7 @@
 import debug from 'debug'
 
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
 
 const log = debug('prizepicks')
 
@@ -126,8 +127,11 @@ export const getPlayerProps = async ({ page = 1 }) => {
   const url = `${PRIZEPICKS_API_URL}/projections?league_id=9&per_page=250&single_stat=true&page=${page}`
 
   // log(`fetching ${url}`)
-  const res = await fetch(url)
-  const data = await res.json()
+  const data = await fetch_with_retry({
+    url,
+    use_proxy: true,
+    response_type: 'json'
+  })
 
   return data
 }

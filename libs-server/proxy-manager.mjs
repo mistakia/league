@@ -265,6 +265,37 @@ class ProxyManager {
 
 const proxy_manager = new ProxyManager()
 
+// A single proxied attempt that returns the raw Response with no ok-check and
+// no retry -- for a caller (like the PFF session/auth flow) that must branch on
+// specific status codes (401/403/431) and inspect the body itself, where
+// fetch_with_retry's throw-before-return on any non-2xx would swallow exactly
+// the information the caller needs. Falls back to a direct fetch if no proxy
+// is available, same as fetch_with_retry.
+async function fetch_via_proxy_raw({
+  url,
+  method,
+  headers,
+  body,
+  proxy_pool = 'default'
+}) {
+  await proxy_manager.initialize()
+
+  const fetch_options = {}
+  if (method) fetch_options.method = method
+  if (headers) fetch_options.headers = headers
+  if (body) fetch_options.body = body
+
+  const proxy_config = await proxy_manager.get_working_proxy(proxy_pool)
+
+  if (!proxy_config) {
+    log(`[${proxy_pool}] No proxy available, using direct connection`)
+    return fetch(url, fetch_options)
+  }
+
+  const proxyAgent = new ProxyAgent(proxy_config.connection_string)
+  return undiciFetch(url, { ...fetch_options, dispatcher: proxyAgent })
+}
+
 async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
   await proxy_manager.initialize()
 
@@ -496,5 +527,5 @@ export async function fetch_with_retry({
   throw last_error
 }
 
-export { proxy_manager, fetch_with_proxy, ProxyPool }
+export { proxy_manager, fetch_with_proxy, fetch_via_proxy_raw, ProxyPool }
 export default fetch_with_proxy
