@@ -3,7 +3,7 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import COLUMN_GROUPS from './column-groups'
 import {
   nfl_plays_column_params,
-  rate_type_column_param,
+  output_column_param,
   nfl_plays_team_column_params
 } from '@libs-shared'
 
@@ -15,7 +15,7 @@ const from_play_field = (field) => ({
   },
   column_params: {
     ...nfl_plays_team_column_params,
-    rate_type: rate_type_column_param.offensive_rate_type_param,
+    output: output_column_param.offensive_output_param,
     ...nfl_plays_column_params
   },
   size: 70,
@@ -37,14 +37,14 @@ export default {
     header_label: 'ATT',
     player_value_path: 'team_pass_att_from_plays'
   }),
-  // TODO prevent showing rate_type param for this field
+  // TODO prevent showing output param for this field
   team_pass_rate_over_expected_from_plays: from_play_field({
     column_title: 'Team Passing Rate Over Expected (By Play)',
     column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.PASSING],
     header_label: 'PROE',
     player_value_path: 'team_pass_rate_over_expected_from_plays'
   }),
-  // TODO prevent showing rate_type param for this field
+  // TODO prevent showing output param for this field
   team_completion_percentage_over_expected_from_plays: from_play_field({
     column_title: 'Team Completion Percentage Over Expected (By Play)',
     column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.PASSING],

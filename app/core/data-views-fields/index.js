@@ -4,6 +4,8 @@ import { createSelector } from 'reselect'
 import { data_view_fields_index } from '@libs-shared'
 import { current_season } from '@constants'
 import ColumnParamNflWeekSelector from '@components/column-param-nfl-week-selector/column-param-nfl-week-selector.js'
+import ColumnParamOutput from '@components/column-param-output/column-param-output.js'
+import { resolve_column_fixed } from '@core/data-views/resolve-column-formatter.mjs'
 
 import betting_market_table_fields from './betting-market-table-fields'
 import espn_score_table_fields from './espn-score-table-fields'
@@ -176,6 +178,17 @@ export function PlayerTableFields({
     if (value.column_params?.single_nfl_week_id) {
       fields[key].column_params.single_nfl_week_id.component =
         ColumnParamNflWeekSelector
+    }
+    // Decimals on an output-capable column depend on the params of the
+    // instance, so `fixed` becomes a resolver closed over whatever the column
+    // declared as its no-output default. Applied here rather than at each of
+    // the ~50 declaration sites, and safe to assign because `with_row_grains`
+    // hands this loop a fresh clone of every field on each call.
+    if (value.column_params?.output) {
+      fields[key].column_params.output.component = ColumnParamOutput
+      fields[key].fixed = resolve_column_fixed({
+        default_fixed: value.fixed ?? null
+      })
     }
   }
 

@@ -1,5 +1,5 @@
 import * as table_constants from 'react-table/src/constants.mjs'
-import { nfl_plays_column_params, rate_type_column_param } from '@libs-shared'
+import { nfl_plays_column_params, output_column_param } from '@libs-shared'
 import COLUMN_GROUPS from './column-groups'
 
 export default {
@@ -12,7 +12,7 @@ export default {
     column_groups: [COLUMN_GROUPS.OPPORTUNITY],
     fixed: 2,
     column_params: {
-      rate_type: rate_type_column_param.offensive_rate_type_param,
+      output: output_column_param.offensive_output_param,
       ...nfl_plays_column_params
     },
     row_axes: ['year', 'week']
