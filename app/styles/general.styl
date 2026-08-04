@@ -24,12 +24,22 @@ p
   line-height 1.5
   letter-spacing 0.00938em
 
-// MUI's default modal z-index is 1300, which sits below the selected-player
-// drawer ($z_selected_player). Every confirmation reachable from that drawer —
-// place bid, designate/sign free agent, waiver, poach — is a Dialog, so without
-// this they open behind the panel that launched them.
+// MUI puts dialogs, popovers, menus and autocomplete popups all on one layer
+// (1300), and relies on DOM order to break the ties. That works until an app
+// surface is raised above 1300 — the selected-player drawer sits at
+// $z_selected_player — at which point the whole group falls behind it. These
+// four rules restate the group as an ordered set: a dialog above the drawer
+// that opened it, and a dropdown above the dialog that contains it.
 .MuiDialog-root
   z-index $z_dialog
+
+.MuiPopover-root
+.MuiMenu-root
+.MuiAutocomplete-popper
+  z-index $z_popper
+
+.MuiTooltip-popper
+  z-index $z_tooltip
 
 .MuiTooltip-popper .MuiTooltip-tooltip
   color rgba(0, 0, 0, 0.87)

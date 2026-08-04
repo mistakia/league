@@ -44,6 +44,13 @@ jobs:
       - name: Test collection guard
         run: yarn check:test-collection
 
+      # Fails when a floating surface sets a global-layer z-index as a bare
+      # number instead of taking it from the scale in app/styles/variables.styl.
+      # Runs here for the same reason as the guard above — it is a static read
+      # and answers in under a second.
+      - name: z-index scale guard
+        run: yarn check:z-index-scale
+
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update

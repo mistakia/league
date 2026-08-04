@@ -11,6 +11,7 @@
     "prettier": "prettier --write .",
     "test": "LEAGUE_DB_HOST= LEAGUE_DB_PORT= TZ=America/New_York NODE_ENV=test TEST=all mocha --exit --require test/global.mjs",
     "check:test-collection": "node scripts/check-test-spec-collection.mjs",
+    "check:z-index-scale": "node scripts/check-z-index-scale.mjs",
     "test:private": "LEAGUE_DB_HOST= LEAGUE_DB_PORT= TZ=America/New_York NODE_ENV=test TEST=all mocha --exit 'private/test/**/*.spec.mjs' --require test/global.mjs",
     "test:data-view-queries": "LEAGUE_DB_HOST= LEAGUE_DB_PORT= TZ=America/New_York NODE_ENV=test TEST=all mocha --exit test/libs-server.data-view-queries.mjs --require test/global.mjs",
     "test:db:up": "docker compose -f compose.test.yaml up -d --wait",

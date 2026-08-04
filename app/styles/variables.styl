@@ -23,15 +23,22 @@ $smooth_transition = 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
 // MUI's own defaults (drawer 1200, modal 1300, tooltip 1500) are not sufficient
 // on their own: raising one surface above a neighbour silently pushes it above
 // every MUI layer that sat between them.
-$z_page_chrome = 1000        // sticky table headers, in-page toolbars
-$z_nav_button = 1100         // floating nav open button
-$z_nav_backdrop = 1200
-$z_nav_drawer = 1300
-$z_selected_player = 1400    // selected-player drawer, above the nav drawer
-$z_popper = 1500             // poppers/menus anchored inside a drawer
-$z_dialog = 1600             // MUI dialogs and confirmations
-$z_context_menu = 1700       // right-click menu, above whatever opened it
-$z_app_backdrop = 1800       // app-initializing backdrop, blocks everything
+// The order is the whole point, so read it as a sequence rather than as
+// values. A surface that is always opened FROM another surface — a dropdown, a
+// menu, a tooltip — belongs ABOVE everything that can open it, which is why
+// poppers sit above dialogs rather than beside them: ten confirmation dialogs
+// here contain a Select or an Autocomplete.
+$z_page_chrome = 1000            // sticky table headers, fixed in-page notices
+$z_floating_action = 1100        // floating action buttons
+$z_overlay_backdrop = 1200       // scrim behind a hand-rolled overlay panel
+$z_overlay_panel = 1300          // nav drawer, speed dial — MUI's drawer layer
+$z_selected_player = 1400        // selected-player drawer, above the nav drawer
+$z_dialog = 1500                 // MUI dialogs and confirmations
+$z_popper = 1600                 // dropdowns, selects, autocompletes, menus
+$z_context_menu_backdrop = 1650
+$z_context_menu = 1700           // right-click menu, above whatever opened it
+$z_tooltip = 1800
+$z_app_backdrop = 1900           // app-initializing scrim, blocks everything
 
 // Button styles
 $button_border_radius = 4px
