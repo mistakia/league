@@ -62,9 +62,16 @@ if [ -n "$dirty" ]; then
     "  WT=/tmp/league-deploy-\$\$   # unique per run: several sessions share this" \
     "                             # checkout and a fixed path collides" \
     "  git worktree add \"\$WT\" origin/master" \
-    "  ln -s \"\$PWD/node_modules\" \"\$WT/node_modules\"" \
-    "  cd \"\$WT\" && yarn build && yarn deploy:dist && yarn deploy:sourcemaps" \
-    "  cd - && rm -f \"\$WT/node_modules\" && git worktree remove \"\$WT\"" \
+    "  cd \"\$WT\" && ~/bin/sandbox-install yarn install --immutable" \
+    "  yarn build && yarn deploy:dist && yarn deploy:sourcemaps" \
+    "  cd - && git worktree remove --force \"\$WT\"" \
+    "" \
+    "Install into the worktree; do NOT symlink this checkout's node_modules in." \
+    "The shared node_modules carries whatever a concurrent session installed but" \
+    "has not committed, so a symlink ships a sibling's dependency bump to" \
+    "production while the worktree itself is clean (this happened 2026-07-31)." \
+    "'--immutable' builds strictly from the committed yarn.lock and fails rather" \
+    "than resolving something new." \
     "" \
     "For a BACKEND+frontend deploy from the worktree, run 'yarn deploy:all' there" \
     "instead -- but init the submodule first, or this gate refuses again on (3):" \

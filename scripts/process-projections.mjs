@@ -851,7 +851,15 @@ const check_lineup_starter_identity_oracle = async () => {
 // the recovery is structurally incapable of closing it and the signal stays
 // open forever on a healthy pipeline. Signal 122353 sat open that way from
 // 2026-07-23 while every run after it was clean.
-const SIGNAL_SOURCE = 'user:scheduled-command/league/process-projections.md'
+// This pipeline is scheduled by the league host's OWN crontab
+// (`server/crontab-main/league-imports.cron`, hourly at :30), not by base's
+// schedule-processor -- the league host runs no schedule-processor, so a
+// `scheduled-command` entity for it would be inert. The source therefore takes
+// the host-cron shape `cron:<job>@<host>` (cf. `cron:check-host-resources@database`)
+// rather than an entity uri. It previously named
+// `user:scheduled-command/league/process-projections.md`, which has never
+// existed, so every signal this pipeline raised addressed nothing.
+const SIGNAL_SOURCE = 'cron:process-projections@league'
 const SIGNAL_DEDUP_FAILURE = `pipeline_failure:${SIGNAL_SOURCE}`
 const SIGNAL_DEDUP_SUCCESS = `pipeline_success:${SIGNAL_SOURCE}`
 
