@@ -231,7 +231,13 @@ export const apply_output_aggregator = async ({
   // materialized numerator CTE; emit_rate_outer_select reads from it. Skipped
   // when the chosen plugin is aggregator_rate itself (it already materializes
   // the canonical period CTE).
+  // The numerator is a RATE concern -- emit_rate_outer_select is the only
+  // reader. A count column resolves to aggregator_count, which passed this
+  // guard (it is not aggregator_rate) and so materialized and LEFT JOINed a
+  // numerator CTE that nothing in its SELECT, WHERE or GROUP BY referenced:
+  // a second full nfl_plays scan per count output, for nothing.
   if (
+    aggregation === 'rate' &&
     plugin !== aggregator_rate &&
     numerator_via_cte() &&
     !plugin_handles_numerator
