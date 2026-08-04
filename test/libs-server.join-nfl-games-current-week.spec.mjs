@@ -5,8 +5,8 @@ import * as chai from 'chai'
 import knex from '#db'
 import apply_nfl_games_current_week_join from '#libs-server/data-views/join-nfl-games-current-week.mjs'
 
-import { seed_nfl_games, clear_nfl_games } from '../fixtures/seed-nfl-games.mjs'
-import { run_under_season_type } from '../fixtures/postseason.mjs'
+import { seed_nfl_games, clear_nfl_games } from './fixtures/seed-nfl-games.mjs'
+import { run_under_season_type } from './fixtures/postseason.mjs'
 
 const expect = chai.expect
 

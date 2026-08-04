@@ -50,7 +50,7 @@ describe('data-views saga integration contracts', () => {
   describe('restore_view_states_from_browser dispatch suppression', () => {
     it('equivalent plain-JS table_states compare equal for dispatch suppression', async () => {
       const { default: deep_equal } = await import(
-        '../../app/core/utils/deep_equal.js'
+        '#app/core/utils/deep_equal.js'
       )
       const a = make_state({ sort: [{ column_id: 'x', desc: true }] })
       const b = make_state({ sort: [{ column_id: 'x', desc: true }] })

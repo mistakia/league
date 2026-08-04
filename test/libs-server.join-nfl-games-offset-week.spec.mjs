@@ -7,8 +7,8 @@ import knex from '#db'
 import { current_season } from '#constants'
 import apply_nfl_games_offset_week_join from '#libs-server/data-views/join-nfl-games-offset-week.mjs'
 
-import { seed_nfl_games, clear_nfl_games } from '../fixtures/seed-nfl-games.mjs'
-import { run_under_season_type } from '../fixtures/postseason.mjs'
+import { seed_nfl_games, clear_nfl_games } from './fixtures/seed-nfl-games.mjs'
+import { run_under_season_type } from './fixtures/postseason.mjs'
 
 const expect = chai.expect
 

@@ -6,7 +6,7 @@ import knex from '#db'
 import apply_practice_current_week_join from '#libs-server/data-views/join-practice-current-week.mjs'
 import { current_season } from '#constants'
 
-import { run_under_season_type } from '../fixtures/postseason.mjs'
+import { run_under_season_type } from './fixtures/postseason.mjs'
 
 const expect = chai.expect
 

@@ -12,3 +12,26 @@
 # unhandled rejection so a swallowed Postgres error surfaces as itself rather
 # than as a timeout.
 timeout: 10000
+
+# Every spec lives FLAT in test/, named test/<area>.<name>.spec.mjs, because
+# mocha's default spec glob (./test/*.{js,cjs,mjs}) is one level deep. A spec in
+# a subdirectory is silently not a test: 13 files and 205 tests sat uncollected
+# under test/libs-shared/, test/libs-server/, test/data-view-storage/ and
+# test/data-views/ until 2026-08-03, two of them failing the whole time.
+# `yarn check:test-collection` now fails on any test file mocha does not collect.
+#
+# Do NOT add a `spec` key here to widen collection. Mocha MERGES rc `spec` into
+# the command line's positional arguments rather than being overridden by them
+# (lib/cli/options.js recombines `args.spec` into `args._`), so a `spec` glob
+# would silently widen every script that passes its own path -- `test:private`
+# and `test:data-view-queries` would each pull in the entire main suite.
+# Overlapping globs also double-collect: 'test/*.mjs' plus 'test/**/*.spec.mjs'
+# resolves to 376 files, 196 unique, running most specs twice. Both measured
+# against mocha 11.0.1.
+#
+# `ignore` is safe here -- it is the rc spelling of the CLI's `--exclude`, and
+# it stays exclusionary under a positional argument instead of widening it.
+# These two files are excluded from `yarn test` and CI on purpose.
+ignore:
+  - 'test/importer-espn.spec.mjs'
+  - 'test/libs-server.get-players-table-view-results-debug.mjs'

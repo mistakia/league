@@ -38,6 +38,12 @@ jobs:
           rm -rf node_modules
           yarn install --immutable
 
+      # Fails when a test file under test/ is not collected by mocha. Runs
+      # before the database setup so an uncollected spec fails in seconds
+      # rather than after a full suite that silently skipped it.
+      - name: Test collection guard
+        run: yarn check:test-collection
+
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update
