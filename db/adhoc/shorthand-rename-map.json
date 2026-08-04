@@ -1,0 +1,1951 @@
+{
+  "generated_at": "2026-08-04",
+  "ruler": "league cb578d8e7 (db/adhoc/audit-schema-conformance.mjs, boolean-prefix rule landed 2026-08-01)",
+  "measured": {
+    "total_violations": 559,
+    "shorthand_violations": 240,
+    "shorthand_tables": 55,
+    "note": "Re-measured by running the audit directly; matches the brief on all three figures."
+  },
+  "dispositions": {
+    "rename": 202,
+    "superseded": 23,
+    "keep": 6,
+    "drop": 9
+  },
+  "low_confidence_count": 0,
+  "disposition_vocabulary": {
+    "rename": "A full-word replacement is settled; the cluster worker applies it.",
+    "superseded": "The column disappears with its table or is removed by another task; no rename.",
+    "blocked_operator_ruling": "DEVIATION from the task plan, which specified only rename/keep/superseded. Used where a name cannot be settled without an operator decision. Folding these into `rename` would assert decisions this task was told not to make unilaterally.",
+    "keep": "The name stands. Used only where a prior operator ruling conflicts with the audit rule; each keep REQUIRES a rule refinement in audit-schema-conformance.mjs or the gate cannot reach zero."
+  },
+  "notes": {
+    "boolean_overlap": "ZERO. Not merely empirically -- structurally. audit-schema-conformance.mjs computes is_unprefixed_boolean BEFORE the shorthand block and the bare-short-name branch guards on !unprefixed_boolean, so a column cannot be reported under both rules. comm(1) over class-shorthand.txt and class-boolean-prefix.txt confirms an empty intersection. No column is double-scheduled and no marking was required.",
+    "audit_rule_conflict": "db/adhoc/2026-07-22-player-prospect-profile-sis-conform.sql:5 records the operator ruling \"IQR kept (proprietary metric name, like EPA)\" while conforming 224 SIS columns. audit-schema-conformance.mjs:148 says the opposite -- that domain acronyms including epa are \"likewise not exempt\". Six columns sit in that gap (epa on nfl_plays, nfl_plays_current_week and both player_college tables; iqr on both player_college tables). They are marked `keep` on the strength of the operator ruling, which outranks the script. The script needs epa and iqr added to its exempt set. Note the ruling does NOT extend to adp, faab or cpoe, which have unambiguous expansions and are mapped as renames.",
+    "lifecycle": "MIGRATION INSTRUMENT, NOT A PERMANENT ARTIFACT. It is authoritative input for the per-cluster migrations -- eleven workers consume it so they do not each re-derive the vocabulary and drift -- which is exactly why it cannot live under scratch/: user:guideline/scratch-tier-discipline.md states that scratch is never a source of truth and that \"grepping scratch/ for authoritative answers is a workflow bug\", and scratch is single-machine so it cannot cross hosts. Retirement trigger: when the audit's shorthand class reaches its floor of 29 (23 superseded + 6 keep) and those are cleared by their owning tasks, DELETE this file in the same commit that closes the class. The durable residue is not this JSON -- it is the applied db/adhoc/*.sql files, the schema itself, and the three non-obvious rulings recorded as observations on user:task/league/redesign-league-database-schema.md (pos -> player_position rather than the audit hint, the epa/iqr exemption, and the nine dead columns).",
+    "output_path": "This file sits under scratch/, which .gitignore excludes at rule `scratch/*/*/*`. The task plan says to COMMIT it; at this path that is impossible. Recommend relocating to repository/active/league/db/adhoc/shorthand-rename-map.json, beside the audit script that defines the rule it answers to."
+  },
+  "records": [
+    {
+      "table": "config",
+      "column": "value",
+      "proposed_name": "config_value",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "jsonb payload of a key/value settings table. Flagged because `value` is jsonb here and integer on transactions -- differing types under one name is the schema stating the name carries two meanings."
+    },
+    {
+      "table": "draft",
+      "column": "otid",
+      "proposed_name": "original_team_id",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "api/routes/leagues/draft.mjs:170 doc comment: \"Original team ID (otid) shows if pick was traded\"; libs-server/roster-asset-lineage/walk-transactions.mjs:1013,1084 aliases it pick_original_owner_tid, distinguished from the current-owner draft.tid at :1080."
+    },
+    {
+      "table": "espn_player_win_rates_history",
+      "column": "wins",
+      "proposed_name": "line_win_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Count of pass-rush / run-block line WINS scraped from cells[3] at scripts/import-espn-line-win-rates.mjs:69 and inserted at :195 -- not team wins, which is the ambiguity the bare name creates. Bare `wins` also still flags at 4 characters."
+    },
+    {
+      "table": "espn_player_win_rates_history",
+      "column": "plays",
+      "proposed_name": "total_plays",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "The denominator behind win_rate, scraped from cells[4] at scripts/import-espn-line-win-rates.mjs:70 and inserted at :196."
+    },
+    {
+      "table": "espn_player_win_rates_index",
+      "column": "wins",
+      "proposed_name": "line_win_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Count of pass-rush / run-block line WINS scraped from cells[3] at scripts/import-espn-line-win-rates.mjs:69 and inserted at :195 -- not team wins, which is the ambiguity the bare name creates. Bare `wins` also still flags at 4 characters."
+    },
+    {
+      "table": "espn_player_win_rates_index",
+      "column": "plays",
+      "proposed_name": "total_plays",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "The denominator behind win_rate, scraped from cells[4] at scripts/import-espn-line-win-rates.mjs:70 and inserted at :196."
+    },
+    {
+      "table": "espn_receiving_metrics_history",
+      "column": "pos",
+      "proposed_name": "player_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: proceed with the rename. Target is player_position, NOT the audit's own hint `position` (audit-schema-conformance.mjs:102) -- that name is on the SAME script's reserved_word_columns list and is already reported as a reserved_word violation on six tables, so following the hint would trade 10 shorthand violations for 10 reserved_word ones. player_position is the conforming precedent already live on nfl_plays_player, props_index and weekly_market_selections_analysis_cache, none of which the audit flags. All ten columns carry a byte-identical 25-value vocabulary CHECK constraint, so one name serves them all."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "ork",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "drk",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "odvoa",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "ddvoa",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "olw",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "dlw",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "odave",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "ddave",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "opass",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "dpass",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "orun",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "drun",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "olrby",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "dlrby",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "olpwr",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "dlpwr",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "olstf",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "dlstf",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "odrv",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "ddrv",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "otdfg",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "footballoutsiders",
+      "column": "dtdfg",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "The footballoutsiders table is dropped outright by user:task/league/consolidate-footballoutsiders-dvoa-historical-data.md, which folds its only unique payload (2020 weeks 4-10 weekly drive-efficiency snapshots) into new conformed dvoa_* tables. That task body states the outcome as \"footballoutsiders dropped\". No rename is worth authoring for a table being retired."
+    },
+    {
+      "table": "league_baselines",
+      "column": "pos",
+      "proposed_name": "player_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: proceed with the rename. Target is player_position, NOT the audit's own hint `position` (audit-schema-conformance.mjs:102) -- that name is on the SAME script's reserved_word_columns list and is already reported as a reserved_word violation on six tables, so following the hint would trade 10 shorthand violations for 10 reserved_word ones. player_position is the conforming precedent already live on nfl_plays_player, props_index and weekly_market_selections_analysis_cache, none of which the audit flags. All ten columns carry a byte-identical 25-value vocabulary CHECK constraint, so one name serves them all. CONSIDERED AND REJECTED: a distinct name (baseline_position) for this table, because the row is keyed BY position and carries no player -- db/schema.postgres.sql:3974 documents that for type='starter' the baseline \"is an expectation over drawn seasons that no real player holds, so pid is null\". Kept uniform anyway: the column's value DOMAIN is still player positions, and splitting the vocabulary across two names for two of ten tables would recreate exactly the drift this task exists to prevent."
+    },
+    {
+      "table": "league_format_draft_pick_value",
+      "column": "rank",
+      "proposed_name": "draft_pick_rank",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "scripts/calculate-draft-pick-value.mjs:35-40 writes rank from draft_rank groups; api/routes/leagues/draft-pick-value.mjs:17 documents it as \"Draft pick position/rank\"."
+    },
+    {
+      "table": "league_formats",
+      "column": "sqb",
+      "proposed_name": "starter_slots_qb",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Starting-lineup slot count. The auction-economy task retains this column: its rebuilt league_formats_config_unique still lists it as format identity, and its body states \"every column except cap, min_bid, and pricing_model describes the fantasy format itself\". So it needs a real rename, not supersession."
+    },
+    {
+      "table": "league_formats",
+      "column": "srb",
+      "proposed_name": "starter_slots_rb",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Starting-lineup slot count. The auction-economy task retains this column: its rebuilt league_formats_config_unique still lists it as format identity, and its body states \"every column except cap, min_bid, and pricing_model describes the fantasy format itself\". So it needs a real rename, not supersession."
+    },
+    {
+      "table": "league_formats",
+      "column": "swr",
+      "proposed_name": "starter_slots_wr",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Starting-lineup slot count. The auction-economy task retains this column: its rebuilt league_formats_config_unique still lists it as format identity, and its body states \"every column except cap, min_bid, and pricing_model describes the fantasy format itself\". So it needs a real rename, not supersession."
+    },
+    {
+      "table": "league_formats",
+      "column": "ste",
+      "proposed_name": "starter_slots_te",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Starting-lineup slot count. The auction-economy task retains this column: its rebuilt league_formats_config_unique still lists it as format identity, and its body states \"every column except cap, min_bid, and pricing_model describes the fantasy format itself\". So it needs a real rename, not supersession."
+    },
+    {
+      "table": "league_formats",
+      "column": "srbwr",
+      "proposed_name": "starter_slots_rb_wr_flex",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "RB/WR flex slot count, matching the existing sibling columns srbwrte and sqbrbwrte in the unique index. Retained by the auction-economy task."
+    },
+    {
+      "table": "league_formats",
+      "column": "swrte",
+      "proposed_name": "starter_slots_wr_te_flex",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "WR/TE flex slot count, same family as srbwr. Retained by the auction-economy task."
+    },
+    {
+      "table": "league_formats",
+      "column": "sdst",
+      "proposed_name": "starter_slots_dst",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Starting-lineup slot count. The auction-economy task retains this column: its rebuilt league_formats_config_unique still lists it as format identity, and its body states \"every column except cap, min_bid, and pricing_model describes the fantasy format itself\". So it needs a real rename, not supersession."
+    },
+    {
+      "table": "league_formats",
+      "column": "sk",
+      "proposed_name": "starter_slots_k",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Starting-lineup slot count. The auction-economy task retains this column: its rebuilt league_formats_config_unique still lists it as format identity, and its body states \"every column except cap, min_bid, and pricing_model describes the fantasy format itself\". So it needs a real rename, not supersession."
+    },
+    {
+      "table": "league_formats",
+      "column": "bench",
+      "proposed_name": "bench_slot_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Bench size. Bare `bench` also collides in meaning with player_college_*.bench (combine bench-press reps), which is exactly the cross-table ambiguity the standard prohibits."
+    },
+    {
+      "table": "league_formats",
+      "column": "ps",
+      "proposed_name": "practice_squad_slot_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Practice-squad CAPACITY, settled by the arithmetic: libs-shared/roster.mjs:100 returns `this._league.ps - this.practice_signed.length` for remaining room and :365 tests `this.practice_signed.length < this._league.ps`. Exposed in the SPA at app/views/components/league-settings-roster-limits/league-settings-roster-limits.js:76. Named to match the bench_slot_count sibling. Retained (not superseded) by the auction-economy task, which removes only cap, min_bid and pricing_model."
+    },
+    {
+      "table": "league_formats",
+      "column": "cap",
+      "proposed_name": null,
+      "disposition": "superseded",
+      "confidence": "high",
+      "rationale": "Removed from league_formats by user:task/league/separate-auction-economy-from-format-identity.md, which extracts cap, min_bid and pricing_model into a league-scoped economy record."
+    },
+    {
+      "table": "league_nfl_team_seasonlogs",
+      "column": "rank",
+      "proposed_name": "points_rank",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "scripts/generate-nfl-team-seasonlogs.mjs:580-588 sorts by `points` within (lid, stat_key, season_year) and assigns rank = index+1, so the ranked dimension is points."
+    },
+    {
+      "table": "league_team_careerlogs",
+      "column": "wins",
+      "proposed_name": "regular_season_wins",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/calculate-standings.mjs:159-169 increments this on a head-to-head matchup win, explicitly distinct from the sibling all_play_wins, potential_wins and wildcard_wins columns; aggregated at scripts/calculate-league-careerlogs.mjs:107,218-231. The qualifier is what separates it from three other win counts on the same row."
+    },
+    {
+      "table": "league_team_careerlogs",
+      "column": "ties",
+      "proposed_name": "regular_season_ties",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/calculate-standings.mjs:176-177, aggregated at scripts/calculate-league-careerlogs.mjs:109. Renamed with its wins sibling for one consistent record vocabulary."
+    },
+    {
+      "table": "league_team_lineup_contribution_weeks",
+      "column": "sp",
+      "proposed_name": "starter_plus_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "The writer's own comment names it: \"starter+ is difference between current lineup and lineup without player\" scripts/project-lineups.mjs:145, accumulated at scripts/project-lineups.mjs:148."
+    },
+    {
+      "table": "league_team_lineup_contribution_weeks",
+      "column": "bp",
+      "proposed_name": "bench_plus_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "The writer's own comment names it: \"bench+ is difference between player output and best available\" scripts/project-lineups.mjs:158, accumulated at scripts/project-lineups.mjs:161."
+    },
+    {
+      "table": "league_team_lineup_contributions",
+      "column": "sp",
+      "proposed_name": "starter_plus_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "The writer's own comment names it: \"starter+ is difference between current lineup and lineup without player\" scripts/project-lineups.mjs:145, accumulated at scripts/project-lineups.mjs:148."
+    },
+    {
+      "table": "league_team_lineup_contributions",
+      "column": "bp",
+      "proposed_name": "bench_plus_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "The writer's own comment names it: \"bench+ is difference between player output and best available\" scripts/project-lineups.mjs:158, accumulated at scripts/project-lineups.mjs:161."
+    },
+    {
+      "table": "league_team_lineups",
+      "column": "total",
+      "proposed_name": "optimal_total",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "scripts/project-lineups.mjs:83-84 sets total from optimizeLineup() WITHOUT baseline substitution, as against the sibling baseline_total from a second call with use_baseline_when_missing:true (libs-shared/optimize-lineup.mjs:80-84). The contrast is the meaning."
+    },
+    {
+      "table": "league_team_seasonlogs",
+      "column": "wins",
+      "proposed_name": "regular_season_wins",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/calculate-standings.mjs:159-169 increments this on a head-to-head matchup win, explicitly distinct from the sibling all_play_wins, potential_wins and wildcard_wins columns; aggregated at scripts/calculate-league-careerlogs.mjs:107,218-231. The qualifier is what separates it from three other win counts on the same row."
+    },
+    {
+      "table": "league_team_seasonlogs",
+      "column": "ties",
+      "proposed_name": "regular_season_ties",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/calculate-standings.mjs:176-177, aggregated at scripts/calculate-league-careerlogs.mjs:109. Renamed with its wins sibling for one consistent record vocabulary."
+    },
+    {
+      "table": "league_user_careerlogs",
+      "column": "wins",
+      "proposed_name": "regular_season_wins",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/calculate-standings.mjs:159-169 increments this on a head-to-head matchup win, explicitly distinct from the sibling all_play_wins, potential_wins and wildcard_wins columns; aggregated at scripts/calculate-league-careerlogs.mjs:107,218-231. The qualifier is what separates it from three other win counts on the same row."
+    },
+    {
+      "table": "league_user_careerlogs",
+      "column": "ties",
+      "proposed_name": "regular_season_ties",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/calculate-standings.mjs:176-177, aggregated at scripts/calculate-league-careerlogs.mjs:109. Renamed with its wins sibling for one consistent record vocabulary."
+    },
+    {
+      "table": "matchups",
+      "column": "aid",
+      "proposed_name": "away_team_id",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "simulate-season-forecast.mjs:172-173 sets away_team_id: matchup.aid; scripts/process-matchups.mjs:76."
+    },
+    {
+      "table": "matchups",
+      "column": "hid",
+      "proposed_name": "home_team_id",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-server/simulation/simulate-season-forecast.mjs:172-173 literally sets home_team_id: matchup.hid; scripts/process-matchups.mjs:75."
+    },
+    {
+      "table": "matchups",
+      "column": "ap",
+      "proposed_name": "away_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Away actual points scored: result[aid].points.weeks[week] at scripts/process-matchups.mjs:76."
+    },
+    {
+      "table": "matchups",
+      "column": "hp",
+      "proposed_name": "home_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Home actual points scored: result[hid].points.weeks[week] at scripts/process-matchups.mjs:75."
+    },
+    {
+      "table": "matchups",
+      "column": "app",
+      "proposed_name": "away_potential_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "result[aid].potential_points_weekly[week] at scripts/process-matchups.mjs:79."
+    },
+    {
+      "table": "matchups",
+      "column": "hpp",
+      "proposed_name": "home_potential_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "result[hid].potential_points_weekly[week] at scripts/process-matchups.mjs:78; distinct from the existing home_projection column."
+    },
+    {
+      "table": "nfl_games",
+      "column": "stad",
+      "proposed_name": "stadium_name",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "varchar(45) venue name; `stadium` alone is the venue, and the sibling nfl_games columns spell out their subject."
+    },
+    {
+      "table": "nfl_games",
+      "column": "clock",
+      "proposed_name": "game_clock",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "scripts/import-nfl-games-ngs.mjs:97 writes clock: score.time from the NGS score object, so it is an in-game clock value and not a scheduled kickoff time. game_clock matches the vocabulary already established by libs-server/play-cache.mjs:97,123 (game_clock_start)."
+    },
+    {
+      "table": "nfl_games",
+      "column": "surf",
+      "proposed_name": "playing_surface",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Enum type public.nfl_games_surf; `surf` abbreviates surface. The enum type itself should be renamed with the column."
+    },
+    {
+      "table": "nfl_games",
+      "column": "temp",
+      "proposed_name": "temperature_fahrenheit",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "integer weather reading; a bare quantity needs its unit per the standard. Sibling `wind` takes the same treatment."
+    },
+    {
+      "table": "nfl_games",
+      "column": "wind",
+      "proposed_name": "wind_speed_mph",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "integer weather reading; unit-qualified for the same reason as temperature."
+    },
+    {
+      "table": "nfl_play_stats",
+      "column": "yards",
+      "proposed_name": "stat_yards",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "integer yardage on a play-stat row; the standard names this case outright (\"`passing_yards` not `yards`\"), and the row is already keyed by stat type so the qualifier is the stat, not the phase."
+    },
+    {
+      "table": "nfl_play_stats_current_week",
+      "column": "yards",
+      "proposed_name": "stat_yards",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Mirrors nfl_play_stats.yards."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "dwn",
+      "proposed_name": "down_number",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Down -- current down in the play\" docs/glossary.md:335; bare `down` is 4 chars and not in the audit's accepted_short_words, so it would re-flag."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "qtr",
+      "proposed_name": "quarter",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Quarter -- current quarter of the game\" docs/glossary.md:336."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "pru",
+      "proposed_name": "ngs_pass_rushers",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "NGS-sourced pass-rusher count. nfl_plays ALREADY carries a separate charted `pass_rushers` smallint (db/schema.postgres.sql:5074, COMMENT 'pass rushers'), which scripts/import-charted-plays-from-csv.mjs:78 writes from the CSV's own pru field. The two are different sources of the same measure, and libs-shared/data-views-saved-view-migration.mjs:29 aliases this column as `pru_ngs`, which is the evidence for the ngs_ qualifier. Renaming to bare pass_rushers would COLLIDE."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "dot",
+      "proposed_name": "depth_of_target",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Depth of Target -- distance the ball traveled to the receiver\" docs/glossary.md:242."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "mbt",
+      "proposed_name": "missed_or_broken_tackle",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Missed or Broken Tackle\" docs/glossary.md:215; written at scripts/import-charted-plays-from-csv.mjs:31."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "yfog",
+      "proposed_name": "yards_from_own_goal",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Yards from Own Goal\" docs/glossary.md:344."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "avsk",
+      "proposed_name": "avoided_sacks",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Avoided Sacks -- number of sacks avoided by the quarterback\" docs/glossary.md:236; scripts/import-charted-plays-from-csv.mjs:41."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ttsk",
+      "proposed_name": "time_to_sack",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Time to Sack -- time elapsed from the snap to the sack\" docs/glossary.md:272; scripts/import-charted-plays-from-csv.mjs:70."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "back",
+      "proposed_name": "backfield_player_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Number in Backfield -- number of players in the backfield\" docs/glossary.md:388; scripts/import-charted-plays-from-csv.mjs:73."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "xlm",
+      "proposed_name": "extra_men_on_line",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Extra Men on Line\" docs/glossary.md:390; scripts/import-charted-plays-from-csv.mjs:74."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "db",
+      "proposed_name": "defensive_back_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Defensive Backs -- number of defensive backs involved in the play\" docs/glossary.md:382; libs-shared/nfl-plays-column-params.mjs:484-485 labels the same key def_personnel_db_count."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "boxdb",
+      "proposed_name": "defensive_backs_in_box",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"DBs in the Box -- number of defensive backs in the box\" docs/glossary.md:384; scripts/import-charted-plays-from-csv.mjs:77."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "oopd",
+      "proposed_name": "out_of_pocket_details",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Out of Pocket Details\" docs/glossary.md:235; scripts/import-charted-plays-from-csv.mjs:81."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "cov",
+      "proposed_name": "coverage_on_target",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Coverage on Target (0: Uncovered, 1: Single, 2: Double)\" docs/glossary.md:379; scripts/import-charted-plays-from-csv.mjs:82. Sibling cov_type_charted already carries the full-word form."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "sep",
+      "proposed_name": "receiver_separation",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Charted receiver separation, written alongside cov/oopd at scripts/import-charted-plays-from-csv.mjs:84; varchar(3) band rather than a numeric distance."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ep",
+      "proposed_name": "expected_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Expected Points ... with respect to the possession team\" docs/glossary.md:425."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "epa",
+      "proposed_name": null,
+      "disposition": "keep",
+      "confidence": "high",
+      "rationale": "Operator precedent inside this same program: db/adhoc/2026-07-22-player-prospect-profile-sis-conform.sql:5 states \"IQR kept (proprietary metric name, like EPA)\" while conforming 224 SIS columns. That ruling treats EPA as an established keep. It DIRECTLY CONTRADICTS audit-schema-conformance.mjs:148, which names epa among the domain acronyms that are \"likewise not exempt\". Per the task's own assumption, a keep feeds a RULE REFINEMENT -- epa needs adding to the audit's exempt set -- rather than a rename. Flagged as an operator question because the audit is the program's completion gate and cannot reach zero while the two disagree."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "wp",
+      "proposed_name": "win_probability",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Win Probability ... for the posteam at the start of the play\" docs/glossary.md:453."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "wpa",
+      "proposed_name": "win_probability_added",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Win Probability Added\" docs/glossary.md:454."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "cp",
+      "proposed_name": "completion_probability",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Completion Probability\" docs/glossary.md:499."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "cpoe",
+      "proposed_name": "completion_percentage_over_expected",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Completion Over Expected\" docs/glossary.md:500."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "route",
+      "proposed_name": "charted_route",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Route -- route run by the receiver\" docs/glossary.md:234. The audit flags it because route is an enum on 29 tables and varchar(100) here, i.e. two meanings under one name."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "dwn",
+      "proposed_name": "down_number",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Down -- current down in the play\" docs/glossary.md:335; bare `down` is 4 chars and not in the audit's accepted_short_words, so it would re-flag."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "qtr",
+      "proposed_name": "quarter",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Quarter -- current quarter of the game\" docs/glossary.md:336."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "pru",
+      "proposed_name": "ngs_pass_rushers",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "NGS-sourced pass-rusher count. nfl_plays ALREADY carries a separate charted `pass_rushers` smallint (db/schema.postgres.sql:5074, COMMENT 'pass rushers'), which scripts/import-charted-plays-from-csv.mjs:78 writes from the CSV's own pru field. The two are different sources of the same measure, and libs-shared/data-views-saved-view-migration.mjs:29 aliases this column as `pru_ngs`, which is the evidence for the ngs_ qualifier. Renaming to bare pass_rushers would COLLIDE."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "dot",
+      "proposed_name": "depth_of_target",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Depth of Target -- distance the ball traveled to the receiver\" docs/glossary.md:242."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "mbt",
+      "proposed_name": "missed_or_broken_tackle",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Missed or Broken Tackle\" docs/glossary.md:215; written at scripts/import-charted-plays-from-csv.mjs:31."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "yfog",
+      "proposed_name": "yards_from_own_goal",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Yards from Own Goal\" docs/glossary.md:344."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "avsk",
+      "proposed_name": "avoided_sacks",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Avoided Sacks -- number of sacks avoided by the quarterback\" docs/glossary.md:236; scripts/import-charted-plays-from-csv.mjs:41."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "ttsk",
+      "proposed_name": "time_to_sack",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Time to Sack -- time elapsed from the snap to the sack\" docs/glossary.md:272; scripts/import-charted-plays-from-csv.mjs:70."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "back",
+      "proposed_name": "backfield_player_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Number in Backfield -- number of players in the backfield\" docs/glossary.md:388; scripts/import-charted-plays-from-csv.mjs:73."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "xlm",
+      "proposed_name": "extra_men_on_line",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Extra Men on Line\" docs/glossary.md:390; scripts/import-charted-plays-from-csv.mjs:74."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "db",
+      "proposed_name": "defensive_back_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Defensive Backs -- number of defensive backs involved in the play\" docs/glossary.md:382; libs-shared/nfl-plays-column-params.mjs:484-485 labels the same key def_personnel_db_count."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "box",
+      "proposed_name": null,
+      "disposition": "drop",
+      "confidence": "high",
+      "rationale": "VESTIGIAL, NOT A RENAME. `box` appears exactly once in the entire schema dump (db/schema.postgres.sql:6080, nfl_plays_current_week) while its replacement box_defenders_charted appears on four tables INCLUDING this one (:5072, :6598, :7032, :7466). The importer writes only the replacement: scripts/import-charted-plays-from-csv.mjs:76 sets box_defenders_charted from the CSV's box field. Production confirms the column is dead -- 0 of 5,969 rows are non-null. Naming is settled for the record (libs-shared/plays-view-fields-index.mjs:86 defines play_box_defenders as \"Number of defenders in the box\"), but the column should be dropped rather than renamed."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "boxdb",
+      "proposed_name": "defensive_backs_in_box",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"DBs in the Box -- number of defensive backs in the box\" docs/glossary.md:384; scripts/import-charted-plays-from-csv.mjs:77."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "oopd",
+      "proposed_name": "out_of_pocket_details",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Out of Pocket Details\" docs/glossary.md:235; scripts/import-charted-plays-from-csv.mjs:81."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "cov",
+      "proposed_name": "coverage_on_target",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Coverage on Target (0: Uncovered, 1: Single, 2: Double)\" docs/glossary.md:379; scripts/import-charted-plays-from-csv.mjs:82. Sibling cov_type_charted already carries the full-word form."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "sep",
+      "proposed_name": "receiver_separation",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Charted receiver separation, written alongside cov/oopd at scripts/import-charted-plays-from-csv.mjs:84; varchar(3) band rather than a numeric distance."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "ep",
+      "proposed_name": "expected_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Expected Points ... with respect to the possession team\" docs/glossary.md:425."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "epa",
+      "proposed_name": null,
+      "disposition": "keep",
+      "confidence": "high",
+      "rationale": "Operator precedent inside this same program: db/adhoc/2026-07-22-player-prospect-profile-sis-conform.sql:5 states \"IQR kept (proprietary metric name, like EPA)\" while conforming 224 SIS columns. That ruling treats EPA as an established keep. It DIRECTLY CONTRADICTS audit-schema-conformance.mjs:148, which names epa among the domain acronyms that are \"likewise not exempt\". Per the task's own assumption, a keep feeds a RULE REFINEMENT -- epa needs adding to the audit's exempt set -- rather than a rename. Flagged as an operator question because the audit is the program's completion gate and cannot reach zero while the two disagree."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "wp",
+      "proposed_name": "win_probability",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Win Probability ... for the posteam at the start of the play\" docs/glossary.md:453."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "wpa",
+      "proposed_name": "win_probability_added",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Win Probability Added\" docs/glossary.md:454."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "cp",
+      "proposed_name": "completion_probability",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Completion Probability\" docs/glossary.md:499."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "cpoe",
+      "proposed_name": "completion_percentage_over_expected",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Completion Over Expected\" docs/glossary.md:500."
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "route",
+      "proposed_name": "charted_route",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Mirrors nfl_plays.route; same glossary entry docs/glossary.md:234."
+    },
+    {
+      "table": "nfl_plays_receiver",
+      "column": "route",
+      "proposed_name": "route_run",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Per-receiver NGS tracking row -- the table carries receiver_location_type, cushion, isolated and separation_at_pass_forward/arrived (db/schema.postgres.sql:6414-6426), so this is the route that receiver actually RAN, at a finer grain than the play-level charted route on nfl_plays. Consumed as such by libs-server/data-views/rate-type/rate-type-per-player-route.mjs:47-48."
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "sacks",
+      "proposed_name": "sacks_taken",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Polarity settled by the generator: scripts/generate-nfl-team-seasonlogs.mjs:25-30 places sacks inside the passing_stats list, beside pressures_against, pressure_rate_against, dropbacks and avg_time_to_sack. That list is the team's own passing OFFENSE, so these are sacks taken by the offense, not sacks made by the defense."
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "cpoe",
+      "proposed_name": "completion_percentage_over_expected",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Team-season aggregate of the play-level metric docs/glossary.md:500."
+    },
+    {
+      "table": "percentiles",
+      "column": "p25",
+      "proposed_name": "percentile_25",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Statistical percentile of the row's `field`, emitted by calculatePercentiles and spread into the insert at scripts/generate-nfl-team-seasonlogs.mjs:277-scripts/generate-nfl-team-seasonlogs.mjs:281."
+    },
+    {
+      "table": "percentiles",
+      "column": "p50",
+      "proposed_name": "percentile_50",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Statistical percentile of the row's `field`, emitted by calculatePercentiles and spread into the insert at scripts/generate-nfl-team-seasonlogs.mjs:277-scripts/generate-nfl-team-seasonlogs.mjs:281."
+    },
+    {
+      "table": "percentiles",
+      "column": "p75",
+      "proposed_name": "percentile_75",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Statistical percentile of the row's `field`, emitted by calculatePercentiles and spread into the insert at scripts/generate-nfl-team-seasonlogs.mjs:277-scripts/generate-nfl-team-seasonlogs.mjs:281."
+    },
+    {
+      "table": "percentiles",
+      "column": "p90",
+      "proposed_name": "percentile_90",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Statistical percentile of the row's `field`, emitted by calculatePercentiles and spread into the insert at scripts/generate-nfl-team-seasonlogs.mjs:277-scripts/generate-nfl-team-seasonlogs.mjs:281."
+    },
+    {
+      "table": "percentiles",
+      "column": "p95",
+      "proposed_name": "percentile_95",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Statistical percentile of the row's `field`, emitted by calculatePercentiles and spread into the insert at scripts/generate-nfl-team-seasonlogs.mjs:277-scripts/generate-nfl-team-seasonlogs.mjs:281."
+    },
+    {
+      "table": "percentiles",
+      "column": "p98",
+      "proposed_name": "percentile_98",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Statistical percentile of the row's `field`, emitted by calculatePercentiles and spread into the insert at scripts/generate-nfl-team-seasonlogs.mjs:277-scripts/generate-nfl-team-seasonlogs.mjs:281."
+    },
+    {
+      "table": "percentiles",
+      "column": "p99",
+      "proposed_name": "percentile_99",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Statistical percentile of the row's `field`, emitted by calculatePercentiles and spread into the insert at scripts/generate-nfl-team-seasonlogs.mjs:277-scripts/generate-nfl-team-seasonlogs.mjs:281."
+    },
+    {
+      "table": "percentiles",
+      "column": "min",
+      "proposed_name": "minimum_value",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Distribution minimum from the same calculatePercentiles output (scripts/generate-nfl-team-seasonlogs.mjs:452); bare `min` is also a reserved-ish generic that collides with player_rankings min."
+    },
+    {
+      "table": "percentiles",
+      "column": "max",
+      "proposed_name": "maximum_value",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Distribution maximum from the same output (scripts/generate-nfl-team-seasonlogs.mjs:452)."
+    },
+    {
+      "table": "pff_player_facet_gamelogs",
+      "column": "snaps",
+      "proposed_name": "snap_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Projected from PFF's snap_counts_pass_block at private/scripts/import-pff-archive-player-facet-seasonlogs.mjs:66; the standard names bare `snaps` as a worked example of a quantity needing a qualifier."
+    },
+    {
+      "table": "pff_player_facet_gamelogs",
+      "column": "grade",
+      "proposed_name": "pff_grade",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Projected from PFF grades_pass_block at private/scripts/import-pff-archive-player-facet-seasonlogs.mjs:66. Bare `grade` is 5 characters and not in accepted_short_words, so it would keep flagging; the vendor qualifier also separates it from the other grading systems in the schema."
+    },
+    {
+      "table": "pff_player_facet_gamelogs",
+      "column": "pbe",
+      "proposed_name": "pass_blocking_efficiency",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "SETTLED FROM PRODUCTION DATA rather than external knowledge. Across 3,297 non-null rows the value runs 0-100 with mean 96.39 and median 97.40, and every row sits in the offense/pass_blocking facet. That distribution is the fingerprint of PFF Pass Blocking Efficiency, which is scaled so a blocker allowing few weighted pressures scores just under the 100 ceiling; no grade or count column behaves that way. Combined with the facet scoping and the pressures_allowed / hurries_allowed / sacks_allowed siblings on the same row (private/scripts/import-pff-archive-player-facet-seasonlogs.mjs:64-76), the expansion is confirmed. The repo still contains no glossary -- the evidence is the data, not a citation."
+    },
+    {
+      "table": "pff_player_facet_gamelogs",
+      "column": "yards",
+      "proposed_name": "facet_yards",
+      "disposition": "rename",
+      "confidence": "medium",
+      "rationale": "The column is DELIBERATELY polymorphic: facet is part of the primary key, and private/scripts/import-pff-archive-player-facet-seasonlogs.mjs:77-83 states the same yards/tds columns are the intended promotion target for the receiving/depth, receiving/concept, receiving/scheme AND rushing/direction facets. So one row's yards means receiving and another's means rushing, disambiguated at query time by the facet key. facet_yards names that honestly; a facet-specific full word is impossible without splitting the column, which is a schema-design question (split per-facet versus stay polymorphic) rather than a naming one. Flagged for the operator as such."
+    },
+    {
+      "table": "pff_player_facet_gamelogs",
+      "column": "tds",
+      "proposed_name": "facet_touchdowns",
+      "disposition": "rename",
+      "confidence": "medium",
+      "rationale": "Same polymorphic design as the yards sibling; tds also needs expanding to touchdowns regardless of the facet question."
+    },
+    {
+      "table": "pff_player_facet_seasonlogs",
+      "column": "snaps",
+      "proposed_name": "snap_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Projected from PFF's snap_counts_pass_block at private/scripts/import-pff-archive-player-facet-seasonlogs.mjs:66; the standard names bare `snaps` as a worked example of a quantity needing a qualifier."
+    },
+    {
+      "table": "pff_player_facet_seasonlogs",
+      "column": "grade",
+      "proposed_name": "pff_grade",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Projected from PFF grades_pass_block at private/scripts/import-pff-archive-player-facet-seasonlogs.mjs:66. Bare `grade` is 5 characters and not in accepted_short_words, so it would keep flagging; the vendor qualifier also separates it from the other grading systems in the schema."
+    },
+    {
+      "table": "pff_player_facet_seasonlogs",
+      "column": "pbe",
+      "proposed_name": "pass_blocking_efficiency",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "SETTLED FROM PRODUCTION DATA rather than external knowledge. Across 3,297 non-null rows the value runs 0-100 with mean 96.39 and median 97.40, and every row sits in the offense/pass_blocking facet. That distribution is the fingerprint of PFF Pass Blocking Efficiency, which is scaled so a blocker allowing few weighted pressures scores just under the 100 ceiling; no grade or count column behaves that way. Combined with the facet scoping and the pressures_allowed / hurries_allowed / sacks_allowed siblings on the same row (private/scripts/import-pff-archive-player-facet-seasonlogs.mjs:64-76), the expansion is confirmed. The repo still contains no glossary -- the evidence is the data, not a citation."
+    },
+    {
+      "table": "pff_player_facet_seasonlogs",
+      "column": "yards",
+      "proposed_name": "facet_yards",
+      "disposition": "rename",
+      "confidence": "medium",
+      "rationale": "The column is DELIBERATELY polymorphic: facet is part of the primary key, and private/scripts/import-pff-archive-player-facet-seasonlogs.mjs:77-83 states the same yards/tds columns are the intended promotion target for the receiving/depth, receiving/concept, receiving/scheme AND rushing/direction facets. So one row's yards means receiving and another's means rushing, disambiguated at query time by the facet key. facet_yards names that honestly; a facet-specific full word is impossible without splitting the column, which is a schema-design question (split per-facet versus stay polymorphic) rather than a naming one. Flagged for the operator as such."
+    },
+    {
+      "table": "pff_player_facet_seasonlogs",
+      "column": "tds",
+      "proposed_name": "facet_touchdowns",
+      "disposition": "rename",
+      "confidence": "medium",
+      "rationale": "Same polymorphic design as the yards sibling; tds also needs expanding to touchdowns regardless of the facet question."
+    },
+    {
+      "table": "pff_player_seasonlogs",
+      "column": "speed",
+      "proposed_name": "speed_rating",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/data-view-fields-index.mjs:961 labels the reader-facing field \"Player speed rating according to PFF\" -- an explicit in-repo statement that it is a RATING, not a grade. The numeric(3,2) scale (max 9.99, db/schema.postgres.sql:18958) is materially different from the 0-100 grade columns, consistent with a distinct rating type."
+    },
+    {
+      "table": "pff_player_seasonlogs",
+      "column": "run",
+      "proposed_name": "run_grade",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Same 0-100 PFF grade scale and column group as the table's run_block / run_defense / pass_rush siblings (libs-server/data-views-column-definitions/player-pff-seasonlogs-column-definitions.mjs:78-94; private import-pff-grades.mjs:183)."
+    },
+    {
+      "table": "pff_player_seasonlogs",
+      "column": "pass",
+      "proposed_name": "pass_grade",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Same grade-scale group, matching the table's pass_block / pass_rush convention (player-pff-seasonlogs-column-definitions.mjs:88-93; import-pff-grades.mjs:195). Also resolves the audit's noted conflict where `pass` is boolean on 29 tables and numeric here."
+    },
+    {
+      "table": "pff_team_gamelogs",
+      "column": "wins",
+      "proposed_name": "win_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "NFL team win total on a PFF-sourced log. Bare `wins` is 4 characters and NOT in the audit's accepted_short_words, so leaving it would keep flagging; the league_* tables take regular_season_wins instead because they carry three other win counts to distinguish from."
+    },
+    {
+      "table": "pff_team_gamelogs",
+      "column": "ties",
+      "proposed_name": "tie_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "NFL team tie total; same reasoning as the wins sibling."
+    },
+    {
+      "table": "pff_team_seasonlogs",
+      "column": "wins",
+      "proposed_name": "win_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "NFL team win total on a PFF-sourced log. Bare `wins` is 4 characters and NOT in the audit's accepted_short_words, so leaving it would keep flagging; the league_* tables take regular_season_wins instead because they carry three other win counts to distinguish from."
+    },
+    {
+      "table": "pff_team_seasonlogs",
+      "column": "ties",
+      "proposed_name": "tie_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "NFL team tie total; same reasoning as the wins sibling."
+    },
+    {
+      "table": "player_adp_history",
+      "column": "pos",
+      "proposed_name": "player_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: proceed with the rename. Target is player_position, NOT the audit's own hint `position` (audit-schema-conformance.mjs:102) -- that name is on the SAME script's reserved_word_columns list and is already reported as a reserved_word violation on six tables, so following the hint would trade 10 shorthand violations for 10 reserved_word ones. player_position is the conforming precedent already live on nfl_plays_player, props_index and weekly_market_selections_analysis_cache, none of which the audit flags. All ten columns carry a byte-identical 25-value vocabulary CHECK constraint, so one name serves them all."
+    },
+    {
+      "table": "player_adp_history",
+      "column": "adp",
+      "proposed_name": "average_draft_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "ADP is Average Draft Position -- a domain acronym, which the audit explicitly declines to exempt. The table name already carries the concept, so the column spells it out."
+    },
+    {
+      "table": "player_adp_index",
+      "column": "pos",
+      "proposed_name": "player_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: proceed with the rename. Target is player_position, NOT the audit's own hint `position` (audit-schema-conformance.mjs:102) -- that name is on the SAME script's reserved_word_columns list and is already reported as a reserved_word violation on six tables, so following the hint would trade 10 shorthand violations for 10 reserved_word ones. player_position is the conforming precedent already live on nfl_plays_player, props_index and weekly_market_selections_analysis_cache, none of which the audit flags. All ten columns carry a byte-identical 25-value vocabulary CHECK constraint, so one name serves them all."
+    },
+    {
+      "table": "player_adp_index",
+      "column": "adp",
+      "proposed_name": "average_draft_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "ADP is Average Draft Position -- a domain acronym, which the audit explicitly declines to exempt. The table name already carries the concept, so the column spells it out."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "games",
+      "proposed_name": "games_played",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Bare count of games; `games_played` is the unambiguous form and is already the idiom elsewhere in the schema."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "snaps",
+      "proposed_name": "snap_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Bare `snaps` is the standard's own worked example of a quantity needing a qualifier."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "td",
+      "proposed_name": "total_touchdowns",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "SIS maps passTd -> pass_td (sis.mjs:472) and recTd -> rec_td (sis.mjs:483) in the later alphabetical additions block, but NO rushTd key exists anywhere in the file. Since passing and receiving splits were added and a rushing split never was, the original bare td (sis.mjs:294, in the general summary section beside games and gamesStarted) is the provider's single top-level touchdown total across all types."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "arms",
+      "proposed_name": "arm_length",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Combine measurement, proven by the sibling boolean arms_is_pro_day sitting directly beside it in the schema and by SIS's own expansion 'Arm Length' -> combine_arm_length at private/libs-server/sis.mjs:138. Named arm_length rather than combine_arm_length because that exact name is a DIFFERENT column on player_prospect_profile. NOTE for the cluster worker: rename the companion arms_is_pro_day / arms_is_unofficial flags in the same pass or the pair goes inconsistent."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "hands",
+      "proposed_name": "hand_size",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Combine hand measurement; sibling hands_is_pro_day flag, and SIS expands 'Hand Size' -> combine_hand_size at private/libs-server/sis.mjs:139. SIS separately maps a scouting field \"Hands\" to critical_factor_hands at private/libs-server/sis.mjs:98 -- a different concept, which is precisely why the bare name must go. Companion _is_pro_day / _is_unofficial flags rename with it."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "bench",
+      "proposed_name": "bench_press",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Bench-press drill: sibling bench_is_pro_day flag, SIS expands 'Bench' -> combine_bench_press at private/libs-server/sis.mjs:141, and docs/glossary.md:570 defines \"Bench Press Reps\". Also disambiguates from league_formats.bench (a bench SLOT count). Companion flags rename with it."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "adot",
+      "proposed_name": "average_depth_of_target",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "sis.mjs maps aDoT -> adot at private/libs-server/sis.mjs:318; the repo already spells the metric out as \"Depth of Target\" in docs/glossary.md:242, and this is its per-player average."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "epa",
+      "proposed_name": null,
+      "disposition": "keep",
+      "confidence": "high",
+      "rationale": "Operator precedent inside this same program: db/adhoc/2026-07-22-player-prospect-profile-sis-conform.sql:5 states \"IQR kept (proprietary metric name, like EPA)\" while conforming 224 SIS columns. That ruling treats EPA as an established keep. It DIRECTLY CONTRADICTS audit-schema-conformance.mjs:148, which names epa among the domain acronyms that are \"likewise not exempt\". Per the task's own assumption, a keep feeds a RULE REFINEMENT -- epa needs adding to the audit's exempt set -- rather than a rename. Flagged as an operator question because the audit is the program's completion gate and cannot reach zero while the two disagree."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "hits",
+      "proposed_name": "quarterback_hits",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Sits in the defensive pass-rush cluster with hurries / knockdowns / pressures / sacks (private/libs-server/sis.mjs:352-private/libs-server/sis.mjs:394)."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "sacks",
+      "proposed_name": "defensive_sacks",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Defensive polarity confirmed by the surrounding SIS cluster -- hits, hurries, knockdowns, pressures, forced fumbles, tackles (private/libs-server/sis.mjs:352-394). Adopts the full-word column ALREADY in the schema on player_gamelogs (db/schema.postgres.sql:20494) rather than inventing a new qualifier, matching the treatment given player_defender_gamelogs.sacks."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "drops",
+      "proposed_name": "dropped_passes",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Receiving-cluster dropped-pass count (private/libs-server/sis.mjs:406)."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "adoc",
+      "proposed_name": "average_depth_of_completion",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Settled from production data, not inference: adoc is populated ONLY on rows where position_name='QB' (20 of 20 non-null), always co-occurs with adot on the same row, and sits below adot on 19 of 20. That is the ADOT/ADOC relationship in quarterback passing analytics -- average depth of TARGET spans all attempts, average depth of COMPLETION only completed passes, so completions skew shorter. The QB-only population rules out \"depth of catch\" (a receiving stat) and \"depth of coverage\" (a defensive one). One row runs the other way (JALE-MILR-000359, 2021, adot 6.1 / adoc 6.3), which is possible when a passer completes deeper than average and does not refute the reading. Raw key mapped at private/libs-server/sis.mjs:445."
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "iqr",
+      "proposed_name": null,
+      "disposition": "keep",
+      "confidence": "high",
+      "rationale": "KEEP per operator precedent (db/adhoc/2026-07-22-player-prospect-profile-sis-conform.sql:5, \"IQR kept (proprietary metric name, like EPA)\"), and the metric is now DEFINED: IQR is Sports Info Solutions' Independent Quarterback Rating, a passer-rating variant that isolates the quarterback's own contribution. Proven from production: the column is QB-only (20 of 20 rows, position_name=QB), runs 69.7-149.1 with mean 105.0, and its iqr_deep and iqr_pressure siblings both top out at exactly 158.3 -- the maximum of the NFL passer-rating scale, which no other scale shares. The split family (iqr_deep / iqr_intermediate / iqr_short by throw depth, iqr_pressure / iqr_no_pressure, iqr_vs_man / iqr_vs_zone) is a quarterback passing-context breakdown, and in player_prospect_profile the same key sits among passing metrics (private/libs-server/sis.mjs:183, beside TPTS RTG Passing, Snap-Throw +/-, On-Target%). It is NOT the statistical interquartile range. Keeping the name still requires adding iqr to the audit's exempt set, or the gate cannot reach zero."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "games",
+      "proposed_name": "games_played",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Bare count of games; `games_played` is the unambiguous form and is already the idiom elsewhere in the schema."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "snaps",
+      "proposed_name": "snap_count",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Bare `snaps` is the standard's own worked example of a quantity needing a qualifier."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "td",
+      "proposed_name": "total_touchdowns",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "SIS maps passTd -> pass_td (sis.mjs:472) and recTd -> rec_td (sis.mjs:483) in the later alphabetical additions block, but NO rushTd key exists anywhere in the file. Since passing and receiving splits were added and a rushing split never was, the original bare td (sis.mjs:294, in the general summary section beside games and gamesStarted) is the provider's single top-level touchdown total across all types."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "arms",
+      "proposed_name": "arm_length",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Combine measurement, proven by the sibling boolean arms_is_pro_day sitting directly beside it in the schema and by SIS's own expansion 'Arm Length' -> combine_arm_length at private/libs-server/sis.mjs:138. Named arm_length rather than combine_arm_length because that exact name is a DIFFERENT column on player_prospect_profile. NOTE for the cluster worker: rename the companion arms_is_pro_day / arms_is_unofficial flags in the same pass or the pair goes inconsistent."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "hands",
+      "proposed_name": "hand_size",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Combine hand measurement; sibling hands_is_pro_day flag, and SIS expands 'Hand Size' -> combine_hand_size at private/libs-server/sis.mjs:139. SIS separately maps a scouting field \"Hands\" to critical_factor_hands at private/libs-server/sis.mjs:98 -- a different concept, which is precisely why the bare name must go. Companion _is_pro_day / _is_unofficial flags rename with it."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "bench",
+      "proposed_name": "bench_press",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Bench-press drill: sibling bench_is_pro_day flag, SIS expands 'Bench' -> combine_bench_press at private/libs-server/sis.mjs:141, and docs/glossary.md:570 defines \"Bench Press Reps\". Also disambiguates from league_formats.bench (a bench SLOT count). Companion flags rename with it."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "adot",
+      "proposed_name": "average_depth_of_target",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "sis.mjs maps aDoT -> adot at private/libs-server/sis.mjs:318; the repo already spells the metric out as \"Depth of Target\" in docs/glossary.md:242, and this is its per-player average."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "epa",
+      "proposed_name": null,
+      "disposition": "keep",
+      "confidence": "high",
+      "rationale": "Operator precedent inside this same program: db/adhoc/2026-07-22-player-prospect-profile-sis-conform.sql:5 states \"IQR kept (proprietary metric name, like EPA)\" while conforming 224 SIS columns. That ruling treats EPA as an established keep. It DIRECTLY CONTRADICTS audit-schema-conformance.mjs:148, which names epa among the domain acronyms that are \"likewise not exempt\". Per the task's own assumption, a keep feeds a RULE REFINEMENT -- epa needs adding to the audit's exempt set -- rather than a rename. Flagged as an operator question because the audit is the program's completion gate and cannot reach zero while the two disagree."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "hits",
+      "proposed_name": "quarterback_hits",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Sits in the defensive pass-rush cluster with hurries / knockdowns / pressures / sacks (private/libs-server/sis.mjs:352-private/libs-server/sis.mjs:394)."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "sacks",
+      "proposed_name": "defensive_sacks",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Defensive polarity confirmed by the surrounding SIS cluster -- hits, hurries, knockdowns, pressures, forced fumbles, tackles (private/libs-server/sis.mjs:352-394). Adopts the full-word column ALREADY in the schema on player_gamelogs (db/schema.postgres.sql:20494) rather than inventing a new qualifier, matching the treatment given player_defender_gamelogs.sacks."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "drops",
+      "proposed_name": "dropped_passes",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Receiving-cluster dropped-pass count (private/libs-server/sis.mjs:406)."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "adoc",
+      "proposed_name": "average_depth_of_completion",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Settled from production data, not inference: adoc is populated ONLY on rows where position_name='QB' (20 of 20 non-null), always co-occurs with adot on the same row, and sits below adot on 19 of 20. That is the ADOT/ADOC relationship in quarterback passing analytics -- average depth of TARGET spans all attempts, average depth of COMPLETION only completed passes, so completions skew shorter. The QB-only population rules out \"depth of catch\" (a receiving stat) and \"depth of coverage\" (a defensive one). One row runs the other way (JALE-MILR-000359, 2021, adot 6.1 / adoc 6.3), which is possible when a passer completes deeper than average and does not refute the reading. Raw key mapped at private/libs-server/sis.mjs:445."
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "iqr",
+      "proposed_name": null,
+      "disposition": "keep",
+      "confidence": "high",
+      "rationale": "KEEP per operator precedent (db/adhoc/2026-07-22-player-prospect-profile-sis-conform.sql:5, \"IQR kept (proprietary metric name, like EPA)\"), and the metric is now DEFINED: IQR is Sports Info Solutions' Independent Quarterback Rating, a passer-rating variant that isolates the quarterback's own contribution. Proven from production: the column is QB-only (20 of 20 rows, position_name=QB), runs 69.7-149.1 with mean 105.0, and its iqr_deep and iqr_pressure siblings both top out at exactly 158.3 -- the maximum of the NFL passer-rating scale, which no other scale shares. The split family (iqr_deep / iqr_intermediate / iqr_short by throw depth, iqr_pressure / iqr_no_pressure, iqr_vs_man / iqr_vs_zone) is a quarterback passing-context breakdown, and in player_prospect_profile the same key sits among passing metrics (private/libs-server/sis.mjs:183, beside TPTS RTG Passing, Snap-Throw +/-, On-Target%). It is NOT the statistical interquartile range. Keeping the name still requires adding iqr to the audit's exempt set, or the gate cannot reach zero."
+    },
+    {
+      "table": "player_defender_gamelogs",
+      "column": "sacks",
+      "proposed_name": "defensive_sacks",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Reuses the full-word column ALREADY in the schema on player_gamelogs (db/schema.postgres.sql:20494), written at scripts/import-gamelogs-ngs.mjs:237. Adopting the established name beats inventing a new qualifier."
+    },
+    {
+      "table": "player_defender_gamelogs",
+      "column": "ints",
+      "proposed_name": "defensive_interceptions",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Reuses the existing sibling column defensive_interceptions (db/schema.postgres.sql:20495; import-gamelogs-ngs.mjs:243)."
+    },
+    {
+      "table": "player_dfs_ownership",
+      "column": "fpts",
+      "proposed_name": "fantasy_points",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "`fpts` abbreviates fantasy points; the schema already uses fantasy-points full words on the scoring-format tables."
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "pos",
+      "proposed_name": "player_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: proceed with the rename. Target is player_position, NOT the audit's own hint `position` (audit-schema-conformance.mjs:102) -- that name is on the SAME script's reserved_word_columns list and is already reported as a reserved_word violation on six tables, so following the hint would trade 10 shorthand violations for 10 reserved_word ones. player_position is the conforming precedent already live on nfl_plays_player, props_index and weekly_market_selections_analysis_cache, none of which the audit flags. All ten columns carry a byte-identical 25-value vocabulary CHECK constraint, so one name serves them all. Also considered `primary_player_position` for the two logs, since user:task/league/normalize-nfl-position-values.md re-derives both to equal player.primary_position exactly. Rejected: the redundancy is an argument for DROPPING the column, not for baking the word \"primary\" into its name, and the vendor-sourced pos columns (adp, rankings, espn) are NOT primary_position -- they are the source's stated position -- so the qualifier would be wrong on six of the ten and fragment the vocabulary. Kept as a rename rather than a drop: seven live consumers read it (api/routes/stats.mjs:97, libs-server/prop-market-settlement/data-preloader.mjs:56, scripts/generate-player-snaps.mjs:51, scripts/calculate-player-game-outcome-correlations.mjs:60, app/core/selectors.js:2901, app/views/components/selected-player-matchup-table/index.js:57, scripts/audit-player-gamelogs.mjs:139), so removing it is a real consumer sweep and belongs to its own task."
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "jnum",
+      "proposed_name": "jersey_number",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "\"Jersey Number\" per docs/glossary.md:555."
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "sacks",
+      "proposed_name": "passing_sacks",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Matches the table's own passing_* family -- passing_attempts / passing_completions / passing_yards / passing_interceptions / passing_touchdowns (db/schema.postgres.sql:20470-20474; import-gamelogs-ngs.mjs:173,200-204)."
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "cpoe",
+      "proposed_name": "completion_percentage_over_expected",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Passer aggregate of docs/glossary.md:500."
+    },
+    {
+      "table": "player_rankings_history",
+      "column": "pos",
+      "proposed_name": "player_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: proceed with the rename. Target is player_position, NOT the audit's own hint `position` (audit-schema-conformance.mjs:102) -- that name is on the SAME script's reserved_word_columns list and is already reported as a reserved_word violation on six tables, so following the hint would trade 10 shorthand violations for 10 reserved_word ones. player_position is the conforming precedent already live on nfl_plays_player, props_index and weekly_market_selections_analysis_cache, none of which the audit flags. All ten columns carry a byte-identical 25-value vocabulary CHECK constraint, so one name serves them all."
+    },
+    {
+      "table": "player_rankings_history",
+      "column": "min",
+      "proposed_name": "min_rank",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "The codebase already uses this exact alias: libs-server/data-views-column-definitions/player-rankings-column-definitions.mjs:76-79 and scripts/import-fantasypros-draft.mjs:28."
+    },
+    {
+      "table": "player_rankings_history",
+      "column": "max",
+      "proposed_name": "max_rank",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Existing alias at player-rankings-column-definitions.mjs:80-83; import-fantasypros-draft.mjs:29."
+    },
+    {
+      "table": "player_rankings_history",
+      "column": "avg",
+      "proposed_name": "average_rank",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Existing alias at player-rankings-column-definitions.mjs:69-72; import-fantasypros-draft.mjs:30."
+    },
+    {
+      "table": "player_rankings_history",
+      "column": "std",
+      "proposed_name": "rank_standard_deviation",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Standard deviation of the same rank distribution (player-rankings-column-definitions.mjs:84-88; import-fantasypros-draft.mjs:31). The codebase alias rank_stddev is itself still an abbreviation, so it is not adopted."
+    },
+    {
+      "table": "player_rankings_index",
+      "column": "pos",
+      "proposed_name": "player_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: proceed with the rename. Target is player_position, NOT the audit's own hint `position` (audit-schema-conformance.mjs:102) -- that name is on the SAME script's reserved_word_columns list and is already reported as a reserved_word violation on six tables, so following the hint would trade 10 shorthand violations for 10 reserved_word ones. player_position is the conforming precedent already live on nfl_plays_player, props_index and weekly_market_selections_analysis_cache, none of which the audit flags. All ten columns carry a byte-identical 25-value vocabulary CHECK constraint, so one name serves them all."
+    },
+    {
+      "table": "player_rankings_index",
+      "column": "min",
+      "proposed_name": "min_rank",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "The codebase already uses this exact alias: libs-server/data-views-column-definitions/player-rankings-column-definitions.mjs:76-79 and scripts/import-fantasypros-draft.mjs:28."
+    },
+    {
+      "table": "player_rankings_index",
+      "column": "max",
+      "proposed_name": "max_rank",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Existing alias at player-rankings-column-definitions.mjs:80-83; import-fantasypros-draft.mjs:29."
+    },
+    {
+      "table": "player_rankings_index",
+      "column": "avg",
+      "proposed_name": "average_rank",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Existing alias at player-rankings-column-definitions.mjs:69-72; import-fantasypros-draft.mjs:30."
+    },
+    {
+      "table": "player_rankings_index",
+      "column": "std",
+      "proposed_name": "rank_standard_deviation",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Standard deviation of the same rank distribution (player-rankings-column-definitions.mjs:84-88; import-fantasypros-draft.mjs:31). The codebase alias rank_stddev is itself still an abbreviation, so it is not adopted."
+    },
+    {
+      "table": "player_seasonlogs",
+      "column": "pos",
+      "proposed_name": "player_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: proceed with the rename. Target is player_position, NOT the audit's own hint `position` (audit-schema-conformance.mjs:102) -- that name is on the SAME script's reserved_word_columns list and is already reported as a reserved_word violation on six tables, so following the hint would trade 10 shorthand violations for 10 reserved_word ones. player_position is the conforming precedent already live on nfl_plays_player, props_index and weekly_market_selections_analysis_cache, none of which the audit flags. All ten columns carry a byte-identical 25-value vocabulary CHECK constraint, so one name serves them all. Also considered `primary_player_position` for the two logs, since user:task/league/normalize-nfl-position-values.md re-derives both to equal player.primary_position exactly. Rejected: the redundancy is an argument for DROPPING the column, not for baking the word \"primary\" into its name, and the vendor-sourced pos columns (adp, rankings, espn) are NOT primary_position -- they are the source's stated position -- so the qualifier would be wrong on six of the ten and fragment the vocabulary."
+    },
+    {
+      "table": "position_game_outcome_defaults",
+      "column": "pos",
+      "proposed_name": "player_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: proceed with the rename. Target is player_position, NOT the audit's own hint `position` (audit-schema-conformance.mjs:102) -- that name is on the SAME script's reserved_word_columns list and is already reported as a reserved_word violation on six tables, so following the hint would trade 10 shorthand violations for 10 reserved_word ones. player_position is the conforming precedent already live on nfl_plays_player, props_index and weekly_market_selections_analysis_cache, none of which the audit flags. All ten columns carry a byte-identical 25-value vocabulary CHECK constraint, so one name serves them all. Same considered-and-rejected note as league_baselines: this table is a defaults lookup keyed (pos, archetype_key, season_year, outcome_type) with no player on the row. Uniform name retained for the same reason."
+    },
+    {
+      "table": "practice",
+      "column": "inj",
+      "proposed_name": "injury_type",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Written from item.injtype at scripts/import-rotowire-practice-report.mjs:23."
+    },
+    {
+      "table": "practice",
+      "column": "m",
+      "proposed_name": "monday_practice_status",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "item.monday at scripts/import-rotowire-practice-report.mjs:24."
+    },
+    {
+      "table": "practice",
+      "column": "tu",
+      "proposed_name": "tuesday_practice_status",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "item.tuesday at scripts/import-rotowire-practice-report.mjs:25."
+    },
+    {
+      "table": "practice",
+      "column": "w",
+      "proposed_name": "wednesday_practice_status",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "item.wednesday at scripts/import-rotowire-practice-report.mjs:26."
+    },
+    {
+      "table": "practice",
+      "column": "th",
+      "proposed_name": "thursday_practice_status",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "item.thursday at scripts/import-rotowire-practice-report.mjs:27."
+    },
+    {
+      "table": "practice",
+      "column": "f",
+      "proposed_name": "friday_practice_status",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "item.friday at scripts/import-rotowire-practice-report.mjs:28."
+    },
+    {
+      "table": "practice",
+      "column": "s",
+      "proposed_name": "saturday_practice_status",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "item.saturday at scripts/import-rotowire-practice-report.mjs:29."
+    },
+    {
+      "table": "practice",
+      "column": "su",
+      "proposed_name": "sunday_practice_status",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "item.sunday at scripts/import-rotowire-practice-report.mjs:30."
+    },
+    {
+      "table": "props",
+      "column": "ln",
+      "proposed_name": "prop_line",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "numeric(4,1) betting line for the prop; `ln` is a vowel-dropped abbreviation of line."
+    },
+    {
+      "table": "props",
+      "column": "o",
+      "proposed_name": "over_odds_decimal",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Decimal odds paired 1:1 with the American-odds counterpart o_am (db/schema.postgres.sql:25721-25725). The codebase already has the established full-word name for exactly this: prop_market_selections_index.odds_decimal (libs-server/insert-prop-market-selections.mjs:22,41-42), held distinct from American odds (libs-server/draftkings-helpers.mjs:210 process_american_odds). The sibling o_am should become over_odds_american in the same pass for consistency, though it is outside this class."
+    },
+    {
+      "table": "props",
+      "column": "u",
+      "proposed_name": "under_odds_decimal",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Under-side counterpart of o, same odds_decimal precedent; sibling u_am becomes under_odds_american."
+    },
+    {
+      "table": "props_index",
+      "column": "ln",
+      "proposed_name": "prop_line",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "numeric(4,1) betting line for the prop; `ln` is a vowel-dropped abbreviation of line."
+    },
+    {
+      "table": "props_index",
+      "column": "o",
+      "proposed_name": "over_odds_decimal",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Decimal odds paired 1:1 with the American-odds counterpart o_am (db/schema.postgres.sql:25721-25725). The codebase already has the established full-word name for exactly this: prop_market_selections_index.odds_decimal (libs-server/insert-prop-market-selections.mjs:22,41-42), held distinct from American odds (libs-server/draftkings-helpers.mjs:210 process_american_odds). The sibling o_am should become over_odds_american in the same pass for consistency, though it is outside this class."
+    },
+    {
+      "table": "props_index",
+      "column": "u",
+      "proposed_name": "under_odds_decimal",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Under-side counterpart of o, same odds_decimal precedent; sibling u_am becomes under_odds_american."
+    },
+    {
+      "table": "props_index",
+      "column": "risk",
+      "proposed_name": "risk_amount",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Matches the established stake/wager-amount vocabulary elsewhere in the repo: total_risk in scripts/generate-prop-pairings.mjs:142 and wager.stake in libs-shared/wager-calculations.mjs:156."
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "bid",
+      "proposed_name": "bid_amount",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-server/get-top-restricted-free-agency-bids.mjs:13-19 gives it dollar-amount semantics (\"boost of 20% or $2\")."
+    },
+    {
+      "table": "rosters_players",
+      "column": "rid",
+      "proposed_name": "roster_id",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Direct FK: libs-server/get-roster.mjs:51 writes rid: roster_row.uid against the rosters table's uid key (db/schema.postgres.sql:26162)."
+    },
+    {
+      "table": "rosters_players",
+      "column": "pos",
+      "proposed_name": "player_position",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: proceed with the rename. Target is player_position, NOT the audit's own hint `position` (audit-schema-conformance.mjs:102) -- that name is on the SAME script's reserved_word_columns list and is already reported as a reserved_word violation on six tables, so following the hint would trade 10 shorthand violations for 10 reserved_word ones. player_position is the conforming precedent already live on nfl_plays_player, props_index and weekly_market_selections_analysis_cache, none of which the audit flags. All ten columns carry a byte-identical 25-value vocabulary CHECK constraint, so one name serves them all."
+    },
+    {
+      "table": "scoring_format_player_careerlogs",
+      "column": "games",
+      "proposed_name": "games_played",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Bare count of games, matching the college-log treatment."
+    },
+    {
+      "table": "scoring_format_player_projection_points",
+      "column": "total",
+      "proposed_name": "projected_points_total",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "numeric(5,2) total projected fantasy points for the scoring format; a bare `total` states neither subject nor unit."
+    },
+    {
+      "table": "scoring_format_player_seasonlogs",
+      "column": "games",
+      "proposed_name": "games_played",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Bare count of games, matching the college-log treatment."
+    },
+    {
+      "table": "seasons",
+      "column": "fqb",
+      "proposed_name": "franchise_tag_salary_qb",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "A dollar PRICE for a franchise-tagged player at that position, not a slot count: libs-shared/get-extension-amount.mjs:6-15 and libs-server/tag-board/build-tag-board.mjs:96-109,308-311."
+    },
+    {
+      "table": "seasons",
+      "column": "frb",
+      "proposed_name": "franchise_tag_salary_rb",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "A dollar PRICE for a franchise-tagged player at that position, not a slot count: libs-shared/get-extension-amount.mjs:6-15 and libs-server/tag-board/build-tag-board.mjs:96-109,308-311."
+    },
+    {
+      "table": "seasons",
+      "column": "fwr",
+      "proposed_name": "franchise_tag_salary_wr",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "A dollar PRICE for a franchise-tagged player at that position, not a slot count: libs-shared/get-extension-amount.mjs:6-15 and libs-server/tag-board/build-tag-board.mjs:96-109,308-311."
+    },
+    {
+      "table": "seasons",
+      "column": "fte",
+      "proposed_name": "franchise_tag_salary_te",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "A dollar PRICE for a franchise-tagged player at that position, not a slot count: libs-shared/get-extension-amount.mjs:6-15 and libs-server/tag-board/build-tag-board.mjs:96-109,308-311."
+    },
+    {
+      "table": "seasons",
+      "column": "mqb",
+      "proposed_name": "max_roster_qb",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/roster.mjs:391-397 has_position_capacity() reads league['m'+pos] as `limit` and tests count<limit, which is what the m prefix means; the SPA field sits under \"Roster Limits\" at app/views/components/league-settings-roster-limits/league-settings-roster-limits.js:14-65."
+    },
+    {
+      "table": "seasons",
+      "column": "mrb",
+      "proposed_name": "max_roster_rb",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/roster.mjs:391-397 has_position_capacity() reads league['m'+pos] as `limit` and tests count<limit, which is what the m prefix means; the SPA field sits under \"Roster Limits\" at app/views/components/league-settings-roster-limits/league-settings-roster-limits.js:14-65."
+    },
+    {
+      "table": "seasons",
+      "column": "mwr",
+      "proposed_name": "max_roster_wr",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/roster.mjs:391-397 has_position_capacity() reads league['m'+pos] as `limit` and tests count<limit, which is what the m prefix means; the SPA field sits under \"Roster Limits\" at app/views/components/league-settings-roster-limits/league-settings-roster-limits.js:14-65."
+    },
+    {
+      "table": "seasons",
+      "column": "mte",
+      "proposed_name": "max_roster_te",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/roster.mjs:391-397 has_position_capacity() reads league['m'+pos] as `limit` and tests count<limit, which is what the m prefix means; the SPA field sits under \"Roster Limits\" at app/views/components/league-settings-roster-limits/league-settings-roster-limits.js:14-65."
+    },
+    {
+      "table": "seasons",
+      "column": "mdst",
+      "proposed_name": "max_roster_dst",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/roster.mjs:391-397 has_position_capacity() reads league['m'+pos] as `limit` and tests count<limit, which is what the m prefix means; the SPA field sits under \"Roster Limits\" at app/views/components/league-settings-roster-limits/league-settings-roster-limits.js:14-65."
+    },
+    {
+      "table": "seasons",
+      "column": "mk",
+      "proposed_name": "max_roster_k",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/roster.mjs:391-397 has_position_capacity() reads league['m'+pos] as `limit` and tests count<limit, which is what the m prefix means; the SPA field sits under \"Roster Limits\" at app/views/components/league-settings-roster-limits/league-settings-roster-limits.js:14-65."
+    },
+    {
+      "table": "seasons",
+      "column": "faab",
+      "proposed_name": "starting_faab_budget",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "api/routes/leagues/teams.mjs:531 seeds a new team's teams.faab FROM this column, so it is the season allocation as against teams.faab the remaining balance."
+    },
+    {
+      "table": "seasons",
+      "column": "tag2",
+      "proposed_name": "franchise_tag_limit",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "libs-shared/constants/transaction-constants.mjs:80-85 defines player_tag_types.FRANCHISE=2; libs-server/tag-board/build-tag-board.mjs:313-317 reads tag_limits.franchise = season.tag2. The digit is the tag TYPE id, not an ordinal."
+    },
+    {
+      "table": "seasons",
+      "column": "tag3",
+      "proposed_name": "rookie_tag_limit",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "player_tag_types.ROOKIE=3 (transaction-constants.mjs:80-85); build-tag-board.mjs:315 sets tag_limits.rookie = season.tag3."
+    },
+    {
+      "table": "seasons",
+      "column": "tag4",
+      "proposed_name": "restricted_free_agency_tag_limit",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "player_tag_types.RESTRICTED_FREE_AGENCY=4 (transaction-constants.mjs:80-85); build-tag-board.mjs:316 sets tag_limits.restricted_free_agency = season.tag4; libs-shared/roster.mjs:386-388."
+    },
+    {
+      "table": "seasons",
+      "column": "ext1",
+      "proposed_name": null,
+      "disposition": "drop",
+      "confidence": "high",
+      "rationale": "NEVER FUNCTIONAL. Git archaeology: 5811f8ce4 (\"feat: dashboard extension salary & savings\", 2021-08-04) added ext1-4 to the league record in app/core/leagues/league.js, but only as destructured plumbing -- no calculation ever read them. Every later commit touching the name in libs-shared/, libs-server/, api/ or scripts/ is a refactor or migration (8c2320353 rename, dd04c20a6 data script, b324029ce leagues->seasons move), never a consumer. The live formula libs-shared/get-extension-amount.mjs:52 is `value + (extensions + 1) * 5`, a LINEAR +5/+10/+15/+20 ladder that has never matched the ext1-4 defaults of 5/10/20/35. All 122 season rows across 116 leagues carry the identical default (verified by query), the columns are absent from the settings allowlist in api/routes/leagues/league-settings.mjs so they cannot be set, the SPA exposes no extension-cost control, and libs-server/context-docs/generate-league-rules.mjs:132 publishes the rule as a flat \"$5 over the prior season salary\". These are speculative configurability that was never implemented, not a broken wiring to repair. If per-league extension pricing is wanted it is a NEW feature needing ladder semantics, settings API, SPA UI, rules-doc generation and a rule for the 5th extension (production rosters_players.extensions reaches 4, which a four-tier ladder does not cover) -- not a resurrection of these columns."
+    },
+    {
+      "table": "seasons",
+      "column": "ext2",
+      "proposed_name": null,
+      "disposition": "drop",
+      "confidence": "high",
+      "rationale": "NEVER FUNCTIONAL. Git archaeology: 5811f8ce4 (\"feat: dashboard extension salary & savings\", 2021-08-04) added ext1-4 to the league record in app/core/leagues/league.js, but only as destructured plumbing -- no calculation ever read them. Every later commit touching the name in libs-shared/, libs-server/, api/ or scripts/ is a refactor or migration (8c2320353 rename, dd04c20a6 data script, b324029ce leagues->seasons move), never a consumer. The live formula libs-shared/get-extension-amount.mjs:52 is `value + (extensions + 1) * 5`, a LINEAR +5/+10/+15/+20 ladder that has never matched the ext1-4 defaults of 5/10/20/35. All 122 season rows across 116 leagues carry the identical default (verified by query), the columns are absent from the settings allowlist in api/routes/leagues/league-settings.mjs so they cannot be set, the SPA exposes no extension-cost control, and libs-server/context-docs/generate-league-rules.mjs:132 publishes the rule as a flat \"$5 over the prior season salary\". These are speculative configurability that was never implemented, not a broken wiring to repair. If per-league extension pricing is wanted it is a NEW feature needing ladder semantics, settings API, SPA UI, rules-doc generation and a rule for the 5th extension (production rosters_players.extensions reaches 4, which a four-tier ladder does not cover) -- not a resurrection of these columns."
+    },
+    {
+      "table": "seasons",
+      "column": "ext3",
+      "proposed_name": null,
+      "disposition": "drop",
+      "confidence": "high",
+      "rationale": "NEVER FUNCTIONAL. Git archaeology: 5811f8ce4 (\"feat: dashboard extension salary & savings\", 2021-08-04) added ext1-4 to the league record in app/core/leagues/league.js, but only as destructured plumbing -- no calculation ever read them. Every later commit touching the name in libs-shared/, libs-server/, api/ or scripts/ is a refactor or migration (8c2320353 rename, dd04c20a6 data script, b324029ce leagues->seasons move), never a consumer. The live formula libs-shared/get-extension-amount.mjs:52 is `value + (extensions + 1) * 5`, a LINEAR +5/+10/+15/+20 ladder that has never matched the ext1-4 defaults of 5/10/20/35. All 122 season rows across 116 leagues carry the identical default (verified by query), the columns are absent from the settings allowlist in api/routes/leagues/league-settings.mjs so they cannot be set, the SPA exposes no extension-cost control, and libs-server/context-docs/generate-league-rules.mjs:132 publishes the rule as a flat \"$5 over the prior season salary\". These are speculative configurability that was never implemented, not a broken wiring to repair. If per-league extension pricing is wanted it is a NEW feature needing ladder semantics, settings API, SPA UI, rules-doc generation and a rule for the 5th extension (production rosters_players.extensions reaches 4, which a four-tier ladder does not cover) -- not a resurrection of these columns."
+    },
+    {
+      "table": "seasons",
+      "column": "ext4",
+      "proposed_name": null,
+      "disposition": "drop",
+      "confidence": "high",
+      "rationale": "NEVER FUNCTIONAL. Git archaeology: 5811f8ce4 (\"feat: dashboard extension salary & savings\", 2021-08-04) added ext1-4 to the league record in app/core/leagues/league.js, but only as destructured plumbing -- no calculation ever read them. Every later commit touching the name in libs-shared/, libs-server/, api/ or scripts/ is a refactor or migration (8c2320353 rename, dd04c20a6 data script, b324029ce leagues->seasons move), never a consumer. The live formula libs-shared/get-extension-amount.mjs:52 is `value + (extensions + 1) * 5`, a LINEAR +5/+10/+15/+20 ladder that has never matched the ext1-4 defaults of 5/10/20/35. All 122 season rows across 116 leagues carry the identical default (verified by query), the columns are absent from the settings allowlist in api/routes/leagues/league-settings.mjs so they cannot be set, the SPA exposes no extension-cost control, and libs-server/context-docs/generate-league-rules.mjs:132 publishes the rule as a flat \"$5 over the prior season salary\". These are speculative configurability that was never implemented, not a broken wiring to repair. If per-league extension pricing is wanted it is a NEW feature needing ladder semantics, settings API, SPA UI, rules-doc generation and a rule for the 5th extension (production rosters_players.extensions reaches 4, which a four-tier ladder does not cover) -- not a resurrection of these columns."
+    },
+    {
+      "table": "teams",
+      "column": "div",
+      "proposed_name": "division",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "scripts/process-matchups.mjs:150 writes division: tm.div; app/views/components/league-select-team/league-select-team.js:54 builds `division_${selected_team.div}_name`. The codebase already spells it out."
+    },
+    {
+      "table": "teams",
+      "column": "abbrv",
+      "proposed_name": "abbreviation",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "app/views/components/team-name/team-name.js:16 uses it as the short-code alternative to team.name; api/routes/leagues/teams.mjs:527 defaults it to `TM${count}`."
+    },
+    {
+      "table": "teams",
+      "column": "cap",
+      "proposed_name": "salary_cap",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "integer salary cap for the fantasy team. Distinct from league_formats.cap, which the auction-economy task removes."
+    },
+    {
+      "table": "teams",
+      "column": "faab",
+      "proposed_name": "faab_balance",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Remaining FAAB for the team, as against seasons.faab which is the season allocation."
+    },
+    {
+      "table": "transactions",
+      "column": "value",
+      "proposed_name": "player_salary",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "Settled against production across all 19 transaction types. Every type carries a dollar-salary distribution and none shows non-salary behaviour: ROSTER_RELEASE is 0 on all 2,481 rows (a released player carries no salary), FRANCHISE_TAG runs 10-47 matching the seasons.fqb/frb/fwr/fte tag prices, DRAFT runs 1-12 as rookie salary by pick, PRACTICE_ADD is 0-1, and TRADE tops out at 136 -- the SAME ceiling as ROSTER_ACTIVATE and RESERVE_IR, so trades carry the player's salary rather than any separate trade-value metric. That was the one gap that previously blocked this entry. Writers agree: libs-server/submit-acquisition.mjs:232, process-restricted-free-agency-bid.mjs:140, submit-activate.mjs:71, process-poach.mjs:123, api/routes/leagues/draft.mjs:384 (\"value based on draft position for salary purposes\"), process-release.mjs:304 (value 0). Named player_salary rather than bare `salary` so a grep returns its real uses, and rather than salary_value which is redundant."
+    },
+    {
+      "table": "users",
+      "column": "qbb",
+      "proposed_name": null,
+      "disposition": "drop",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: drop, after verification. PROVENANCE: added by 9ac198280 (\"feat: add manual and average starter value baselines\", 2020-07-21) as a per-position manual baseline PLAYER reference; the whole feature was removed by 2d250a67c (\"cleanup: remove manual baselines\", 2022-07-15), which deleted every consumer and dropped the columns from the then-current MySQL schema file -- but the DROP was never run against the live database, so the Postgres dump re-materialised them. Pure leftover debt from a feature removed in 2022. VERIFIED DEAD three ways: (1) zero code references tree-wide including private/, db/migrations/ and db/fixtures/, with the search method proven first by positive control (invite_code 25 hits, username 192); (2) only 11 of 133 rows non-null, one of those four empty strings; (3) the stored values are player ids in a retired format (KA-0737, MB-3537) and ZERO resolve against the current player.pid scheme (ANTO-CRAW-000002). NOTE for the drop author: api/routes/me.mjs:175 issues a bare db('users').where(...) with no .select(), so these four columns are currently serialised into the /me response payload; nothing in app/core reads them, so removal is a payload shrink with no consumer impact, but the response shape does change."
+    },
+    {
+      "table": "users",
+      "column": "rbb",
+      "proposed_name": null,
+      "disposition": "drop",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: drop, after verification. PROVENANCE: added by 9ac198280 (\"feat: add manual and average starter value baselines\", 2020-07-21) as a per-position manual baseline PLAYER reference; the whole feature was removed by 2d250a67c (\"cleanup: remove manual baselines\", 2022-07-15), which deleted every consumer and dropped the columns from the then-current MySQL schema file -- but the DROP was never run against the live database, so the Postgres dump re-materialised them. Pure leftover debt from a feature removed in 2022. VERIFIED DEAD three ways: (1) zero code references tree-wide including private/, db/migrations/ and db/fixtures/, with the search method proven first by positive control (invite_code 25 hits, username 192); (2) only 11 of 133 rows non-null, one of those four empty strings; (3) the stored values are player ids in a retired format (KA-0737, MB-3537) and ZERO resolve against the current player.pid scheme (ANTO-CRAW-000002). NOTE for the drop author: api/routes/me.mjs:175 issues a bare db('users').where(...) with no .select(), so these four columns are currently serialised into the /me response payload; nothing in app/core reads them, so removal is a payload shrink with no consumer impact, but the response shape does change."
+    },
+    {
+      "table": "users",
+      "column": "wrb",
+      "proposed_name": null,
+      "disposition": "drop",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: drop, after verification. PROVENANCE: added by 9ac198280 (\"feat: add manual and average starter value baselines\", 2020-07-21) as a per-position manual baseline PLAYER reference; the whole feature was removed by 2d250a67c (\"cleanup: remove manual baselines\", 2022-07-15), which deleted every consumer and dropped the columns from the then-current MySQL schema file -- but the DROP was never run against the live database, so the Postgres dump re-materialised them. Pure leftover debt from a feature removed in 2022. VERIFIED DEAD three ways: (1) zero code references tree-wide including private/, db/migrations/ and db/fixtures/, with the search method proven first by positive control (invite_code 25 hits, username 192); (2) only 11 of 133 rows non-null, one of those four empty strings; (3) the stored values are player ids in a retired format (KA-0737, MB-3537) and ZERO resolve against the current player.pid scheme (ANTO-CRAW-000002). NOTE for the drop author: api/routes/me.mjs:175 issues a bare db('users').where(...) with no .select(), so these four columns are currently serialised into the /me response payload; nothing in app/core reads them, so removal is a payload shrink with no consumer impact, but the response shape does change."
+    },
+    {
+      "table": "users",
+      "column": "teb",
+      "proposed_name": null,
+      "disposition": "drop",
+      "confidence": "high",
+      "rationale": "Operator ruling 2026-08-04: drop, after verification. PROVENANCE: added by 9ac198280 (\"feat: add manual and average starter value baselines\", 2020-07-21) as a per-position manual baseline PLAYER reference; the whole feature was removed by 2d250a67c (\"cleanup: remove manual baselines\", 2022-07-15), which deleted every consumer and dropped the columns from the then-current MySQL schema file -- but the DROP was never run against the live database, so the Postgres dump re-materialised them. Pure leftover debt from a feature removed in 2022. VERIFIED DEAD three ways: (1) zero code references tree-wide including private/, db/migrations/ and db/fixtures/, with the search method proven first by positive control (invite_code 25 hits, username 192); (2) only 11 of 133 rows non-null, one of those four empty strings; (3) the stored values are player ids in a retired format (KA-0737, MB-3537) and ZERO resolve against the current player.pid scheme (ANTO-CRAW-000002). NOTE for the drop author: api/routes/me.mjs:175 issues a bare db('users').where(...) with no .select(), so these four columns are currently serialised into the /me response payload; nothing in app/core reads them, so removal is a payload shrink with no consumer impact, but the response shape does change."
+    },
+    {
+      "table": "waivers",
+      "column": "bid",
+      "proposed_name": "bid_amount",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "api/routes/leagues/waivers/index.mjs documents `bid: 50`; ordered `waivers.bid desc` in libs-server/get-top-free-agency-waiver.mjs:39-44. Same FAAB dollar semantics as restricted_free_agency_bids.bid."
+    },
+    {
+      "table": "waivers",
+      "column": "po",
+      "proposed_name": "priority_order",
+      "disposition": "rename",
+      "confidence": "high",
+      "rationale": "api/routes/leagues/waivers/index.mjs:735 PUT /order sets po: index across a team's own claims; new claims default to po:9999 at :629; app/core/selectors.js:3889 uses `a.po - b.po` as the tiebreaker after bid. It orders a manager's own claims, not league-wide priority."
+    }
+  ]
+}
