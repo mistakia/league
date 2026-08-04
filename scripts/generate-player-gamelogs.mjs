@@ -972,13 +972,18 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['active']
  *     not reclaim a single one of the 885,617 rows written before the stamp
  *     existed. Counting stats are the durable ownership signal: the roster
  *     importers write roster status and never a stat, so a stat-bearing row can
- *     only have come from a play-stat build.
+ *     only have come from a play-stat build. A SNAP count is not that signal --
+ *     see OWNED_PARTICIPATION_COLUMNS below for the second writer of those
+ *     three columns.
  *   - `esbid` scopes it to games this run actually loaded play stats for, so a
  *     single-week or single-game run cannot touch anything outside its window.
- *   - a game the run produced NO rows for is skipped entirely. That is the
- *     signature of a run that failed to resolve rather than of a game whose
- *     rows are all stale, and deleting on it would turn a resolution
- *     regression into data loss.
+ *   - a game the run failed to substantially reproduce is skipped entirely.
+ *     That is the signature of a run that failed to resolve rather than of a
+ *     game whose rows are all stale, and deleting on it would turn a
+ *     resolution regression into data loss. The test is PROPORTIONAL, against
+ *     PRUNE_MIN_REPRODUCTION_RATE: a binary "produced at least one row" test
+ *     covers only TOTAL failure, and a run that resolved 10 of a game's 40
+ *     players passes it and then deletes the other 30.
  *
  * A row carrying neither this script's `source` nor a participation column is
  * never touched under any of the three. That is deliberately conservative and
@@ -1014,17 +1019,43 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['active']
  * Checking the predicate here rather than plumbing rejections out of the two
  * call sites covers both paths at once, and keeps holding if a third caller
  * starts filtering on era.
+ *
+ * An era-rejected row is also held OUT of the reproduction-rate denominator.
+ * The rate asks whether the run resolved normally; a row it was structurally
+ * unable to produce carries no evidence either way, and counting it would let a
+ * handful of conflated players suppress the prune for a whole game.
+ *
+ * Finally, the retraction reaches `player_receiving_gamelogs` and
+ * `player_rushing_gamelogs` for the same `(esbid, pid)`. Those tables hang off
+ * the game-level gamelog and nothing else prunes them, so retracting only the
+ * parent left orphans readable by anything querying them directly -- 239 of
+ * them after the 8f4292e08 repair (159 receiving, 80 rushing). They are keyed
+ * strictly on pairs already deleted above, so a pid this script never owned is
+ * never touched; where `private/scripts/import-gamelogs-ngs.mjs` has also
+ * written to such a pair, its row goes too, and correctly -- the attribution
+ * being retracted is the same one.
  */
 
-// Columns whose presence proves a row records PARTICIPATION -- that the player
-// was on the field -- rather than roster membership. The roster importers write
-// gameday status and never one of these, so a row carrying any of them was
-// built from play stats or from snaps, which are this script's two inputs.
+// Columns whose presence proves a row records a stat THIS SCRIPT produced.
+// Nothing else here writes a counting stat: the roster importers write gameday
+// status and never one of these, so a stat-bearing row can only have come from
+// a play-stat build.
 //
-// The snap columns are not optional. A defensive lineman's gamelog routinely
-// carries zero in every counting column while carrying 48 defensive snaps, and
-// that is precisely the row the snap path above creates -- a counting-stats-only
-// rule would have left every one of them unreclaimable.
+// `snaps_off` / `snaps_def` / `snaps_st` are deliberately ABSENT, and the
+// omission is the point. This script's snap path writes them, but so does
+// `scripts/generate-player-snaps.mjs`, which derives them from `nfl_snaps`
+// joined to `nfl_plays` -- a different derivation -- with a bare `.merge()`,
+// sets no `source`, and runs AFTER this script in both pipelines
+// (`libs-server/finalize-game.mjs`, `scripts/process-stats-for-week.mjs`).
+// Treating a snap count as proof of ownership let this script claim that
+// writer's rows: a later single-game regeneration that failed to reproduce a
+// player would see `snaps_def > 0`, call the row its own, and delete snap data
+// it never wrote.
+//
+// The cost is that a snap-only row predating the `source` stamp is no longer
+// reclaimable by the prune. That is the correct trade -- the stamp reclaims
+// every snap-only row this script writes from now on, and there is no column on
+// the row that distinguishes an unstamped one from the other writer's.
 const OWNED_PARTICIPATION_COLUMNS = [
   'passing_attempts',
   'rushing_attempts',
@@ -1033,11 +1064,14 @@ const OWNED_PARTICIPATION_COLUMNS = [
   'defensive_sacks',
   'defensive_interceptions',
   'field_goals_made',
-  'extra_points_made',
-  'snaps_off',
-  'snaps_def',
-  'snaps_st'
+  'extra_points_made'
 ]
+
+// A run must reproduce at least this share of the rows it owns for a game
+// before the prune will delete any of them. See the third bound in the
+// docstring: a binary "produced anything at all" test passes a run that
+// resolved 10 of 40 players and then deletes the other 30.
+const PRUNE_MIN_REPRODUCTION_RATE = 0.8
 export const prune_unreferenced_gamelogs = async ({
   unique_esbids,
   player_gamelog_inserts,
@@ -1054,18 +1088,9 @@ export const prune_unreferenced_gamelogs = async ({
     pids.add(gamelog.pid)
   }
 
-  const prunable_esbids = unique_esbids.filter((esbid) =>
-    produced_by_esbid.has(esbid)
-  )
-  const skipped = unique_esbids.length - prunable_esbids.length
-  if (skipped) {
-    log(`prune: skipping ${skipped} games this run produced no gamelogs for`)
-  }
-  if (!prunable_esbids.length) return 0
-
   const existing = await db('player_gamelogs')
     .select('esbid', 'pid')
-    .whereIn('esbid', prunable_esbids)
+    .whereIn('esbid', unique_esbids)
     .where((builder) => {
       builder.where({ source: PLAY_STATS_GAMELOG_SOURCE })
       for (const column of OWNED_PARTICIPATION_COLUMNS) {
@@ -1073,9 +1098,8 @@ export const prune_unreferenced_gamelogs = async ({
       }
     })
 
-  const unproduced = existing.filter(
-    (row) => !produced_by_esbid.get(row.esbid)?.has(row.pid)
-  )
+  const was_produced = (row) => produced_by_esbid.get(row.esbid)?.has(row.pid)
+  const unproduced = existing.filter((row) => !was_produced(row))
 
   // See the fourth bound in the docstring: a row the era predicate rejects was
   // never producible this run, so its absence is not evidence of staleness.
@@ -1092,14 +1116,44 @@ export const prune_unreferenced_gamelogs = async ({
     }
   }
 
-  const stale = unproduced.filter((row) => !era_rejected_pids.has(row.pid))
-
-  const era_retained = unproduced.length - stale.length
+  const era_retained = unproduced.filter((row) =>
+    era_rejected_pids.has(row.pid)
+  ).length
   if (era_retained) {
     log(
       `prune: retaining ${era_retained} rows for ${era_rejected_pids.size} players the era predicate rejects -- not producible this run, so not evidence of staleness`
     )
   }
+
+  // Rows the run was able to produce. The reproduction rate below is measured
+  // over these alone; an era-rejected row is not evidence about resolution.
+  const candidates = existing.filter((row) => !era_rejected_pids.has(row.pid))
+
+  const owned_by_esbid = new Map()
+  for (const row of candidates) {
+    let rows = owned_by_esbid.get(row.esbid)
+    if (!rows) {
+      rows = []
+      owned_by_esbid.set(row.esbid, rows)
+    }
+    rows.push(row)
+  }
+
+  const prunable_esbids = new Set()
+  for (const [esbid, rows] of owned_by_esbid) {
+    const reproduced = rows.filter(was_produced).length
+    if (reproduced >= rows.length * PRUNE_MIN_REPRODUCTION_RATE) {
+      prunable_esbids.add(esbid)
+      continue
+    }
+    log(
+      `prune: skipping ${esbid} -- run reproduced ${reproduced} of ${rows.length} owned gamelogs, below the ${PRUNE_MIN_REPRODUCTION_RATE} floor`
+    )
+  }
+
+  const stale = candidates.filter(
+    (row) => prunable_esbids.has(row.esbid) && !was_produced(row)
+  )
 
   if (!stale.length) {
     log('prune: no stale gamelogs')
@@ -1112,19 +1166,29 @@ export const prune_unreferenced_gamelogs = async ({
   }
 
   let deleted = 0
+  let facet_deleted = 0
   for (let index = 0; index < stale.length; index += 500) {
     const chunk = stale.slice(index, index + 500)
+    const pairs = chunk.map((row) => [row.esbid, row.pid])
     // Keyed only on the pairs already vetted by the ownership predicate above;
     // re-applying it here would drop the counting-stat half of the rule.
     deleted += await db('player_gamelogs')
-      .whereIn(
-        ['esbid', 'pid'],
-        chunk.map((row) => [row.esbid, row.pid])
-      )
+      .whereIn(['esbid', 'pid'], pairs)
       .del()
+
+    // The facet tables carry no ownership signal of their own, so the parent's
+    // retraction is what authorizes theirs -- see the docstring's last bound.
+    for (const table of [
+      'player_receiving_gamelogs',
+      'player_rushing_gamelogs'
+    ]) {
+      facet_deleted += await db(table).whereIn(['esbid', 'pid'], pairs).del()
+    }
   }
 
-  log(`prune: deleted ${deleted} stale gamelogs`)
+  log(
+    `prune: deleted ${deleted} stale gamelogs and ${facet_deleted} receiving/rushing gamelogs for the same pairs`
+  )
   return deleted
 }
 

@@ -23,6 +23,17 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
   const esbid = 2014090400
   const season_year = 2014
 
+  // Ten rows the run reproduces. The reproduction floor is proportional, so a
+  // fixture has to be large enough for one stale row to sit above it.
+  const produced_pids = Array.from(
+    { length: 10 },
+    (unused, index) => `PRUN-PROD-9000${String(index).padStart(2, '0')}`
+  )
+  const stale_pid = 'PRUN-STAL-900020'
+  const era_pid = 'PRUN-ERAX-900021'
+  const snap_only_pid = 'PRUN-SNAP-900022'
+  const all_pids = [...produced_pids, stale_pid, era_pid, snap_only_pid]
+
   const gamelog = (pid) => ({
     esbid,
     pid,
@@ -37,6 +48,18 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
     source: PLAY_STATS_GAMELOG_SOURCE
   })
 
+  // What `scripts/generate-player-snaps.mjs` writes: snap counts, no counting
+  // stat, no `source`. The prune must not read this as its own row.
+  const snap_only_gamelog = (pid) => ({
+    esbid,
+    pid,
+    season_year,
+    nfl_team: 'NE',
+    opponent_nfl_team: 'BUF',
+    pos: 'DE',
+    snaps_def: 48
+  })
+
   const player_row = ({ pid, last_name, date_of_birth }) => ({
     pid,
     first_name: 'prune',
@@ -49,20 +72,28 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
     date_of_birth
   })
 
+  const run_prune = (produced) =>
+    prune_unreferenced_gamelogs({
+      unique_esbids: [esbid],
+      player_gamelog_inserts: produced.map((pid) => ({ esbid, pid })),
+      year: season_year,
+      dry_run: false
+    })
+
   before(async () => {
     await db('player')
       .insert([
-        // Produced by the run. Present only so the game is prunable at all --
-        // the prune skips a game the run produced no rows for.
-        player_row({
-          pid: 'PRUN-PROD-900001',
-          last_name: 'produced',
-          date_of_birth: '1990-01-01'
-        }),
+        ...produced_pids.map((pid) =>
+          player_row({
+            pid,
+            last_name: 'produced',
+            date_of_birth: '1990-01-01'
+          })
+        ),
         // Not produced, and the predicate has nothing against them: a genuinely
         // stale attribution, which the prune must still delete.
         player_row({
-          pid: 'PRUN-STAL-900002',
+          pid: stale_pid,
           last_name: 'stale',
           date_of_birth: '1990-01-01'
         }),
@@ -70,9 +101,14 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
         // intruder's birth date, so it reads as 15 years old in 2014. This is
         // the CHRI-SMIT-007265 shape. Its row must survive.
         player_row({
-          pid: 'PRUN-ERAX-900003',
+          pid: era_pid,
           last_name: 'era rejected',
           date_of_birth: '1999-12-15'
+        }),
+        player_row({
+          pid: snap_only_pid,
+          last_name: 'snap only',
+          date_of_birth: '1990-01-01'
         })
       ])
       .onConflict('pid')
@@ -80,42 +116,36 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
   })
 
   beforeEach(async () => {
-    await db('player_gamelogs').where({ esbid }).del()
+    for (const table of [
+      'player_gamelogs',
+      'player_receiving_gamelogs',
+      'player_rushing_gamelogs'
+    ]) {
+      await db(table).where({ esbid }).del()
+    }
+
     await db('player_gamelogs').insert([
-      gamelog('PRUN-PROD-900001'),
-      gamelog('PRUN-STAL-900002'),
-      gamelog('PRUN-ERAX-900003')
+      ...produced_pids.map(gamelog),
+      gamelog(stale_pid),
+      gamelog(era_pid),
+      snap_only_gamelog(snap_only_pid)
     ])
   })
 
   it('deletes an unproduced row the era predicate does not reject', async () => {
-    const deleted = await prune_unreferenced_gamelogs({
-      unique_esbids: [esbid],
-      player_gamelog_inserts: [{ esbid, pid: 'PRUN-PROD-900001' }],
-      year: season_year,
-      dry_run: false
-    })
+    const deleted = await run_prune(produced_pids)
 
     expect(deleted).to.equal(1)
-
-    const remaining = await db('player_gamelogs')
-      .where({ esbid })
-      .pluck('pid')
-      .orderBy('pid')
-
-    expect(remaining).to.eql(['PRUN-ERAX-900003', 'PRUN-PROD-900001'])
+    expect(
+      await db('player_gamelogs').where({ esbid, pid: stale_pid }).first()
+    ).to.equal(undefined)
   })
 
   it('retains an unproduced row whose player the era predicate rejects', async () => {
-    await prune_unreferenced_gamelogs({
-      unique_esbids: [esbid],
-      player_gamelog_inserts: [{ esbid, pid: 'PRUN-PROD-900001' }],
-      year: season_year,
-      dry_run: false
-    })
+    await run_prune(produced_pids)
 
     const survivor = await db('player_gamelogs')
-      .where({ esbid, pid: 'PRUN-ERAX-900003' })
+      .where({ esbid, pid: era_pid })
       .first()
 
     // Without the era bound this row is indistinguishable from the stale one
@@ -123,19 +153,63 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
     expect(survivor).to.not.equal(undefined)
   })
 
+  it('never claims a snap-only row, which another writer also produces', async () => {
+    await run_prune(produced_pids)
+
+    // `generate-player-snaps.mjs` writes `snaps_off`/`snaps_def`/`snaps_st` from
+    // its own derivation, sets no `source`, and runs AFTER this script in both
+    // pipelines. Reading a snap count as proof of ownership let a single-game
+    // regeneration delete that writer's data.
+    const survivor = await db('player_gamelogs')
+      .where({ esbid, pid: snap_only_pid })
+      .first()
+
+    expect(survivor).to.not.equal(undefined)
+    expect(survivor.snaps_def).to.equal(48)
+  })
+
   it('deletes nothing for a game the run produced no rows for', async () => {
     // A run that resolved nothing is a resolution regression, not a game whose
     // rows are all stale. Deleting on it turns the first into data loss.
-    const deleted = await prune_unreferenced_gamelogs({
-      unique_esbids: [esbid],
-      player_gamelog_inserts: [],
-      year: season_year,
-      dry_run: false
-    })
+    const deleted = await run_prune([])
 
     expect(deleted).to.equal(0)
     expect(
       await db('player_gamelogs').where({ esbid }).pluck('pid')
-    ).to.have.length(3)
+    ).to.have.length(all_pids.length)
+  })
+
+  it('deletes nothing for a game the run only partly reproduced', async () => {
+    // The binary form of the bound above -- "produced at least one row" --
+    // passes this run and then deletes the six rows it failed to resolve.
+    const deleted = await run_prune(produced_pids.slice(0, 5))
+
+    expect(deleted).to.equal(0)
+    expect(
+      await db('player_gamelogs').where({ esbid }).pluck('pid')
+    ).to.have.length(all_pids.length)
+  })
+
+  it('retracts the receiving and rushing gamelogs of a deleted pair', async () => {
+    const facet_row = (pid) => ({ esbid, pid, season_year })
+    await db('player_receiving_gamelogs').insert([
+      facet_row(stale_pid),
+      facet_row(era_pid)
+    ])
+    await db('player_rushing_gamelogs').insert([
+      facet_row(stale_pid),
+      facet_row(era_pid)
+    ])
+
+    await run_prune(produced_pids)
+
+    // Nothing else prunes these tables, so retracting only the parent left
+    // orphans -- 239 of them after the 8f4292e08 repair.
+    for (const table of [
+      'player_receiving_gamelogs',
+      'player_rushing_gamelogs'
+    ]) {
+      expect(await db(table).where({ esbid }).pluck('pid')).to.eql([era_pid])
+    }
   })
 })
