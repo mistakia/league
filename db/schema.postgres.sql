@@ -4094,7 +4094,12 @@ CREATE TABLE public.league_format_player_seasonlogs (
     points_added_earned_per_game_position_rank smallint,
     points_added_net numeric(5,1),
     points_added_net_per_game numeric(3,1),
-    league_format_id text NOT NULL
+    league_format_id text NOT NULL,
+    points_added_net_rank smallint,
+    points_added_net_position_rank smallint,
+    points_added_net_per_game_rank smallint,
+    points_added_net_per_game_position_rank smallint,
+    points_added_net_cap_dollars numeric(6,2)
 );
 
 
