@@ -119,7 +119,8 @@ const build_player_index = async ({ gsis_ids }) => {
       'gsis_player_id',
       'first_name',
       'last_name',
-      'nfl_draft_year'
+      'nfl_draft_year',
+      'primary_position'
     )
     .whereIn('gsis_player_id', Array.from(gsis_ids))
   const by_gsis_id = new Map(rows.map((r) => [r.gsis_player_id, r]))
@@ -132,7 +133,8 @@ const build_name_year_index = async () => {
     'pid',
     'first_name',
     'last_name',
-    'nfl_draft_year'
+    'nfl_draft_year',
+    'primary_position'
   )
   const idx = new Map()
   for (const r of rows) {
@@ -161,12 +163,22 @@ const build_game_index = async ({ year }) => {
 const resolve_pid = ({ row, player_by_gsis_id, name_year_idx }) => {
   if (row.gsis_id) {
     const p = player_by_gsis_id.get(row.gsis_id)
-    if (p) return { pid: p.pid, via: 'gsis_id' }
+    if (p)
+      return {
+        pid: p.pid,
+        primary_position: p.primary_position,
+        via: 'gsis_id'
+      }
   }
   if (row.first_name && row.last_name) {
     const key = `${row.first_name.toLowerCase()}|${row.last_name.toLowerCase()}|${row.entry_year || ''}`
     const p = name_year_idx.get(key)
-    if (p) return { pid: p.pid, via: 'name_year' }
+    if (p)
+      return {
+        pid: p.pid,
+        primary_position: p.primary_position,
+        via: 'name_year'
+      }
   }
   return null
 }
@@ -253,7 +265,10 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
       season_year: year,
       nfl_team: game.tm,
       opponent_nfl_team: game.opp,
-      pos: row.position || 'UNK',
+      // player_gamelogs.pos is player.primary_position by definition -- the
+      // generator derives it the same way. Writing the vendor's spelling here
+      // is what put UNK, KR and PR in the column.
+      pos: pid_match.primary_position,
       active: STATUS_ACTIVE.has(row.status),
       source: SOURCE_SENTINEL
     })

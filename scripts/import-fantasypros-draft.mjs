@@ -13,6 +13,7 @@ import {
   throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -109,7 +110,7 @@ const import_single_fantasypros_draft_rankings = async ({
     const ranking = getRanking(item)
     inserts.push({
       pid: player_row.pid,
-      pos: params.pos,
+      pos: normalize_position(params.pos),
       season_year: year,
       source_id: 'FANTASYPROS',
       ranking_type: format_ranking_type({
