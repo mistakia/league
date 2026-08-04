@@ -22,10 +22,14 @@
 -- and confirm that commit carries `ON CONFLICT (config_digest)` in
 -- libs-server/find-or-create-format.mjs before running this file.
 --
--- Leaving the constraint in place indefinitely is not an option, which is why
--- this is a file rather than a note: it is strictly stricter than the digest,
--- so once formats start differing in the new kicking and DST columns it will
--- reject legitimately distinct configs that share the older 23 values.
+-- Apply this IMMEDIATELY after the deploy verifies -- minutes, not hours. It is
+-- not cleanup. The retained constraint is strictly stricter than the digest, so
+-- from the moment the new code is live it rejects legitimately distinct configs
+-- that differ only in the new kicking and DST columns. Reproduced on a scratch
+-- database: an insert differing from an existing row only in
+-- `defensive_touchdowns` raises a duplicate-key violation here that
+-- ON CONFLICT (config_digest) does not catch, so a commissioner editing a DST
+-- value in league settings gets a 500 until this file runs.
 --
 -- The transaction is required. No non-blocking index build is involved.
 

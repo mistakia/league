@@ -62,10 +62,26 @@
 -- find_or_create_scoring_format call -- including live external-league import --
 -- for the whole human-gated window between this apply and that deploy. The two
 -- oracles overlap instead, and the drop is its own file
--- (2026-08-04-drop-league-scoring-formats-config-unique.sql) applied after the
--- deploy. The overlap is safe: the retained constraint is strictly stricter
--- than the digest, and it can only reject a pair of formats differing solely in
--- the new columns, which nothing can create until the new code is running.
+-- (2026-08-04-drop-league-scoring-formats-config-unique.sql).
+--
+-- The overlap is NOT free, and an earlier draft of this comment was wrong about
+-- why. The retained constraint is strictly stricter than the digest, so it
+-- rejects a pair of formats differing solely in the new kicking and DST
+-- columns -- and the code that can create such a pair is running for exactly
+-- the part of the window that follows the deploy. Reproduced on a scratch
+-- database: with this file applied and the drop not, inserting a config
+-- differing from an existing row only in `defensive_touchdowns` raises a
+-- duplicate-key violation on league_scoring_formats_config_unique, which
+-- ON CONFLICT (config_digest) does not catch. A commissioner editing a DST
+-- value in league settings during that window gets a 500.
+--
+-- So the two windows are not symmetric, and the split is still the right call:
+-- BEFORE the deploy the retained constraint is what keeps the old code working
+-- and costs nothing, and AFTER the deploy it is a live hazard. Apply the drop
+-- IMMEDIATELY after the deploy verifies -- minutes, not hours -- rather than
+-- treating it as cleanup. Dropping it here instead would have failed every
+-- find_or_create_scoring_format call for the whole human-gated wait, which is
+-- strictly worse and lasts strictly longer.
 --
 --
 -- The transaction is REQUIRED. Nothing here is safe to half-apply: the digest

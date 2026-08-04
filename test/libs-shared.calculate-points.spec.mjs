@@ -36,6 +36,105 @@ const ppr_league = (overrides = {}) => ({
 })
 
 describe('LIBS-SHARED calculatePoints', function () {
+  // The whole result object is persisted, not just `total` --
+  // scripts/calculate-points.mjs and app/core/worker/index.js both store it as
+  // it comes. So the KEY SET is a contract, and a registry-driven rewrite that
+  // skips an entry carrying no config column, or that renames a key, changes
+  // the shape of every stored points object without changing a single number.
+  describe('result shape', function () {
+    it('carries the same forty keys on an empty stat line and on the band arm', () => {
+      const expected_keys = [
+        'total',
+        'passing_attempts',
+        'passing_completions',
+        'passing_yards',
+        'passing_interceptions',
+        'passing_touchdowns',
+        'rushing_attempts',
+        'rushing_yards',
+        'rushing_yards_excluding_kneels',
+        'rushing_touchdowns',
+        'rushing_first_downs',
+        'fumbles_lost',
+        'targets',
+        'receptions',
+        'receiving_yards',
+        'receiving_first_downs',
+        'receiving_touchdowns',
+        'two_point_conversions',
+        'punt_return_touchdowns',
+        'kickoff_return_touchdowns',
+        'fumble_return_touchdowns',
+        'extra_points_made',
+        'field_goals_made',
+        'field_goals_made_0_19_yards',
+        'field_goals_made_20_29_yards',
+        'field_goals_made_30_39_yards',
+        'field_goals_made_40_49_yards',
+        'field_goals_made_50_plus_yards',
+        'defensive_sacks',
+        'defensive_interceptions',
+        'defensive_forced_fumbles',
+        'defensive_recovered_fumbles',
+        'defensive_three_and_outs',
+        'defensive_fourth_down_stops',
+        'defensive_points_against',
+        'defensive_yards_against',
+        'defensive_blocked_kicks',
+        'defensive_safeties',
+        'defensive_two_point_returns',
+        'defensive_touchdowns'
+      ]
+
+      expect(
+        Object.keys(calculatePoints({ league: ppr_league(), stats: {} }))
+      ).to.eql(expected_keys)
+
+      expect(
+        Object.keys(
+          calculatePoints({
+            league: ppr_league(),
+            stats: { field_goals_made: 1, field_goals_made_40_49_yards: 1 }
+          })
+        )
+      ).to.eql(expected_keys)
+    })
+
+    // The per-yard arm is the narrower shape, and it is the one production
+    // takes for every kicker.
+    it('drops the five band keys on the per-yard arm and nothing else', () => {
+      const per_yard_keys = Object.keys(
+        calculatePoints({
+          league: ppr_league(),
+          stats: { field_goal_yards: 40 }
+        })
+      )
+      const empty_keys = Object.keys(
+        calculatePoints({ league: ppr_league(), stats: {} })
+      )
+
+      expect(empty_keys.filter((key) => !per_yard_keys.includes(key))).to.eql([
+        'field_goals_made_0_19_yards',
+        'field_goals_made_20_29_yards',
+        'field_goals_made_30_39_yards',
+        'field_goals_made_40_49_yards',
+        'field_goals_made_50_plus_yards'
+      ])
+      expect(per_yard_keys.filter((key) => !empty_keys.includes(key))).to.be
+        .empty
+    })
+
+    it('adds anytime_td as a forty-first key only when the stat is present', () => {
+      const with_anytime = calculatePoints({
+        league: ppr_league(),
+        stats: { anytime_td: 1 }
+      })
+
+      expect(Object.keys(with_anytime)).to.have.length(41)
+      expect(Object.keys(with_anytime)).to.include('anytime_td')
+    })
+  })
+
   describe('base scoring', function () {
     it('scores a full stat line against the ppr format', () => {
       const result = calculatePoints({
