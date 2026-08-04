@@ -571,7 +571,6 @@ ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXIS
 ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXISTS league_team_careerlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_scoring_formats DROP CONSTRAINT IF EXISTS league_scoring_formats_pkey;
-ALTER TABLE IF EXISTS ONLY public.league_scoring_formats DROP CONSTRAINT IF EXISTS league_scoring_formats_config_unique;
 ALTER TABLE IF EXISTS ONLY public.league_player_season_projection_values DROP CONSTRAINT IF EXISTS league_player_season_projection_values_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_player_rest_of_season_projection_values DROP CONSTRAINT IF EXISTS league_player_rest_of_season_projection_values_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_notifications DROP CONSTRAINT IF EXISTS league_notifications_unique;
@@ -28602,14 +28601,6 @@ ALTER TABLE ONLY public.league_player_rest_of_season_projection_values
 
 ALTER TABLE ONLY public.league_player_season_projection_values
     ADD CONSTRAINT league_player_season_projection_values_pkey UNIQUE (pid, lid, season_year);
-
-
---
--- Name: league_scoring_formats league_scoring_formats_config_unique; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.league_scoring_formats
-    ADD CONSTRAINT league_scoring_formats_config_unique UNIQUE (passing_attempts, passing_completions, passing_yards, passing_interceptions, passing_touchdowns, rushing_attempts, rushing_yards, rushing_touchdowns, receptions, running_back_reception, wide_receiver_reception, tight_end_reception, receiving_yards, two_point_conversions, receiving_touchdowns, fumbles_lost, punt_return_touchdowns, kickoff_return_touchdowns, fumble_return_touchdowns, targets, rushing_first_downs, receiving_first_downs, exclude_quarterback_kneels);
 
 
 --

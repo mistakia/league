@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-04 against league_production
 --
 -- Drop the 23-column config tuple constraint, now that config_digest is the
 -- dedup oracle.
