@@ -416,10 +416,13 @@ export default {
   player_special_teams_snap_percentage_from_plays:
     'The percentage of team special teams snaps played by the player (calculated from play-by-play data)',
 
-  player_week_projected_points_added: 'Projected Points Added for the week',
+  player_week_projected_points_added:
+    'Projected Points Added for the week. Signed — a projection below replacement returns a negative value.',
   player_season_projected_points_added: 'Projected Points Added for the season',
   player_rest_of_season_projected_points_added:
-    'Projected Points Added for the rest of the season',
+    'Projected Points Added for the rest of the season, counting only weeks above replacement — what a player adds when you can bench him in his bad weeks.',
+  player_rest_of_season_projected_points_added_net:
+    'Projected Points Added for the rest of the season, counting every remaining week including those below replacement — what a player adds when you start him every week. Can be negative.',
   player_week_projected_points: 'Projected Fantasy Points for the week',
   player_season_projected_points: 'Projected Fantasy Points for the season',
   player_rest_of_season_projected_points:

@@ -1,0 +1,24 @@
+{
+  "name": "rest of season projected points added positive and net alongside the week variant",
+  "description": "league_format_player_projection_values stores every period in one week column ('0', a numeric week, 'ros', 'ros_net'), and each period column pins its own sentinel. The table alias must therefore carry the period: without it these three columns hash to one alias, collapse into a single join group, and that join carries only the seeding column's week predicate -- so two of the three render the third's value under their own header. This fixture pins three distinct joins with three distinct period predicates, and pins that the two rest-of-season columns ignore the week param rather than following it. It fails at any revision where the alias omits the period. Params are explicit so nothing here is clock-derived.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_week_projected_points_added",
+        "params": { "year": [2023], "week": [5] }
+      },
+      {
+        "column_id": "player_rest_of_season_projected_points_added",
+        "params": { "year": [2023], "week": [5] }
+      },
+      {
+        "column_id": "player_rest_of_season_projected_points_added_net",
+        "params": { "year": [2023], "week": [5] }
+      }
+    ],
+    "where": []
+  },
+  "tags": ["projections", "points-added", "joins", "period-sentinel"],
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"t738f44cea6a941f740b7a0162ae8d288\".\"pts_added\" AS \"week_projected_points_added_0\", \"tab0aa06d7314afe4d490ecf1ce4390ac\".\"pts_added\" AS \"rest_of_season_projected_points_added_0\", \"ta1d37dadbb390dd1f0ac0fa34ac3a794\".\"pts_added\" AS \"rest_of_season_projected_points_added_net_0\", \"player\".\"primary_position\" from \"player\" left join \"league_format_player_projection_values\" as \"t738f44cea6a941f740b7a0162ae8d288\" on \"t738f44cea6a941f740b7a0162ae8d288\".\"pid\" = \"player\".\"pid\" and \"t738f44cea6a941f740b7a0162ae8d288\".\"year\" = 2023 and \"t738f44cea6a941f740b7a0162ae8d288\".\"week\" = '5' and \"t738f44cea6a941f740b7a0162ae8d288\".\"league_format_id\" = 'genesis_10_team' left join \"league_format_player_projection_values\" as \"tab0aa06d7314afe4d490ecf1ce4390ac\" on \"tab0aa06d7314afe4d490ecf1ce4390ac\".\"pid\" = \"player\".\"pid\" and \"tab0aa06d7314afe4d490ecf1ce4390ac\".\"year\" = 2023 and \"tab0aa06d7314afe4d490ecf1ce4390ac\".\"league_format_id\" = 'genesis_10_team' and \"tab0aa06d7314afe4d490ecf1ce4390ac\".\"week\" = 'ros' left join \"league_format_player_projection_values\" as \"ta1d37dadbb390dd1f0ac0fa34ac3a794\" on \"ta1d37dadbb390dd1f0ac0fa34ac3a794\".\"pid\" = \"player\".\"pid\" and \"ta1d37dadbb390dd1f0ac0fa34ac3a794\".\"year\" = 2023 and \"ta1d37dadbb390dd1f0ac0fa34ac3a794\".\"league_format_id\" = 'genesis_10_team' and \"ta1d37dadbb390dd1f0ac0fa34ac3a794\".\"week\" = 'ros_net' group by player.first_name, player.last_name, \"t738f44cea6a941f740b7a0162ae8d288\".\"pts_added\", \"tab0aa06d7314afe4d490ecf1ce4390ac\".\"pts_added\", \"ta1d37dadbb390dd1f0ac0fa34ac3a794\".\"pts_added\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}

@@ -135,14 +135,24 @@ const league_player_rest_of_season_projection_values_table_alias = ({
   )
 }
 
-const league_format_player_projection_values_table_alias = ({
-  params = {}
-}) => {
-  const p = get_default_params({ params })
-  return get_table_hash(
-    `league_format_player_projection_values_${get_alias_key(p)}_${p.league_format_id}`
-  )
-}
+// The period sentinel has to be part of the alias key. This table stores every
+// period in one `week` column ('0', a numeric week, 'ros', 'ros_net'), and each
+// period column pins its own value in `extra_predicates` / `attach`. Two columns
+// that hash to the same alias collapse into ONE join group, and that join
+// carries only the seeding column's predicate -- so a view holding both the
+// week and the rest-of-season variant of the same stat rendered one period's
+// value under the other's header, with no error and no failing test. Measured
+// 2026-08-04 at HEAD: `[week, ros]` emitted `week = 'ros'` for both, `[ros,
+// week]` emitted `week = '0'` for both. Nothing pinned it -- no golden exercises
+// any rest-of-season projected column.
+const league_format_player_projection_values_table_alias_for =
+  ({ period_week = null } = {}) =>
+  ({ params = {} }) => {
+    const p = get_default_params({ params })
+    return get_table_hash(
+      `league_format_player_projection_values_${get_alias_key(p)}_period_${period_week ?? 'week_param'}_${p.league_format_id}`
+    )
+  }
 
 // Year and week predicates follow query_context references when the cell
 // exposes them (player_year / player_year_week cells); otherwise they pin to
@@ -340,8 +350,11 @@ const make_league_player_rest_of_season_projection_source =
     table: 'league_player_rest_of_season_projection_values'
   })
 
+// `period_week` pins the period sentinel this source reads ('ros', 'ros_net').
+// Left null the source follows the request's week param, which is what the
+// `week` and `season` prefixes do.
 const make_league_format_player_projection_source = ({
-  is_rest_of_season = false
+  period_week = null
 } = {}) => ({
   grain: 'player',
   table: 'league_format_player_projection_values',
@@ -351,7 +364,7 @@ const make_league_format_player_projection_source = ({
     const { league_format_id, week } = get_default_params({ params })
     return [
       { column: 'league_format_id', value: league_format_id },
-      { column: 'week', value: is_rest_of_season ? 'ros' : String(week) }
+      { column: 'week', value: period_week ?? String(week) }
     ]
   },
   attach: ({ query_context, params, table_alias, join_type }) => {
@@ -363,7 +376,7 @@ const make_league_format_player_projection_source = ({
       join_type,
       join_table_clause: `league_format_player_projection_values as ${table_alias}`,
       join_year: true,
-      join_week: !is_rest_of_season,
+      join_week: !period_week,
       // This table's week is character varying(10); week_reference is smallint,
       // and Postgres will not compare them.
       cast_join_week_to_string: true,
@@ -373,8 +386,8 @@ const make_league_format_player_projection_source = ({
           '=',
           db.raw('?', [league_format_id])
         )
-        if (is_rest_of_season) {
-          this.andOn(`${table_alias}.week`, '=', db.raw('?', ['ros']))
+        if (period_week) {
+          this.andOn(`${table_alias}.week`, '=', db.raw('?', [period_week]))
         }
       }
     })
@@ -640,13 +653,13 @@ const projection_points_year_offset_range_sql = ({
 
 const player_projected_points_added = {
   column_name: 'pts_added',
-  table_alias: league_format_player_projection_values_table_alias,
+  table_alias_factory: league_format_player_projection_values_table_alias_for,
   source_factory: make_league_format_player_projection_source
 }
 
 const player_projected_market_salary = {
   column_name: 'market_salary',
-  table_alias: league_format_player_projection_values_table_alias,
+  table_alias_factory: league_format_player_projection_values_table_alias_for,
   source_factory: make_league_format_player_projection_source
 }
 
@@ -754,16 +767,25 @@ const projections_index_base = (column_name) => ({
 })
 
 const create_projected_stat = (base, stat_name) => {
-  const { source_factory, method_factories, ...rest } = base
+  const { source_factory, method_factories, table_alias_factory, ...rest } =
+    base
   const prefixes = ['week', 'season', 'rest_of_season']
   return prefixes.reduce((acc, prefix) => {
     const is_rest_of_season = prefix === 'rest_of_season'
+    // Only the rest-of-season prefix reads a period sentinel. `week` and
+    // `season` both follow the request's week param, which is pre-existing
+    // behaviour on this table and NOT changed here -- see the note on
+    // player_projected_salary_adjusted_points_added_periods.
+    const period_week = is_rest_of_season ? 'ros' : null
     const select_as = () => `${prefix}_projected_${stat_name}`
     const definition = {
       ...rest,
       select_as,
-      source: source_factory({ is_rest_of_season }),
+      source: source_factory({ is_rest_of_season, period_week }),
       get_cache_info: get_cache_info_for_player_projected_stats
+    }
+    if (table_alias_factory) {
+      definition.table_alias = table_alias_factory({ period_week })
     }
     // Columns that emit prefix-aware methods (player_projected_points) bind them
     // here so each prefix gets the right select alias / projection table. Other
@@ -778,10 +800,35 @@ const create_projected_stat = (base, stat_name) => {
   }, {})
 }
 
+// The signed rest-of-season aggregate, registered explicitly rather than fanned
+// out: it is a VARIANT of the rest-of-season period, not a fourth period, so it
+// has no week or season sibling. `scripts/process-projections.mjs` has written
+// it as a `week = 'ros_net'` row for months and
+// `libs-shared/calculate-player-values-rest-of-season.mjs` prices it, but until
+// now nothing could read it.
+//
+// Positive (`ros`) is the perfect-optionality bound -- what a player adds when
+// you can bench him below replacement. Net (`ros_net`) is the no-optionality
+// bound -- what he adds when you start him every week and eat the bad ones. They
+// bracket reality rather than competing, and they are not a rescale of one
+// another: a player can carry a positive `ros` and a negative `ros_net`.
+const player_rest_of_season_projected_points_added_net = {
+  column_name: 'pts_added',
+  table_alias: league_format_player_projection_values_table_alias_for({
+    period_week: 'ros_net'
+  }),
+  select_as: () => 'rest_of_season_projected_points_added_net',
+  source: make_league_format_player_projection_source({
+    period_week: 'ros_net'
+  }),
+  get_cache_info: get_cache_info_for_player_projected_stats
+}
+
 const projected_stat_column_defintions = {
   ...create_projected_stat(player_projected_market_salary, 'market_salary'),
   ...player_projected_salary_adjusted_points_added_periods,
   ...create_projected_stat(player_projected_points_added, 'points_added'),
+  player_rest_of_season_projected_points_added_net,
   ...create_projected_stat(player_projected_points, 'points'),
   ...create_projected_stat(
     projections_index_base('passing_attempts'),
