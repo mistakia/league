@@ -30,7 +30,19 @@
  * are a re-derivation of `nfl_play_stats.gsis_player_id` through a player-table
  * index lookup and never read `smart_player_id` at all, so agreeing with them
  * is checking a value against itself.
+ *
+ * Era plausibility is applied to the CANDIDATES, before any tier runs, rather
+ * than as one tiebreak among several. Until 2026-08-04 it was a tiebreak, which
+ * meant it could only ever fire on a row whose two identifiers disagreed AND
+ * whose two candidates shared a name -- so the tiers that carry no tiebreak at
+ * all (`smart_only`, `gsis_only`, `agreed`) accepted an era-impossible player
+ * unconditionally. That is the whole mechanism: of 4,531 play-stat rows
+ * resolving to someone who had not entered the league, 3,520 were `agreed` and
+ * 975 were single-identifier, against 36 that reached the tiebreak. Filtering
+ * first means no tier can return such a player, including any added later.
  */
+
+import { player_could_have_played } from './player-era.mjs'
 
 // Generational suffixes carried on the feed's name string but never on
 // `player.formatted_name`, so they have to come off before comparison.
@@ -164,12 +176,7 @@ const position_is_plausible = ({ stat_id, player }) => {
   return POSITIONS_BY_CLASS[position_class].has(player.primary_position)
 }
 
-const resolve_conflict = ({
-  play_stat,
-  season_year,
-  smart_player,
-  gsis_player
-}) => {
+const resolve_conflict = ({ play_stat, smart_player, gsis_player }) => {
   // The row agrees with itself once the smart id is decoded, so the smart-side
   // `player` row is the one holding a foreign encoding. No heuristic needed.
   if (
@@ -193,17 +200,9 @@ const resolve_conflict = ({
   if (gsis_name_matches && !smart_name_matches)
     return { pid: gsis_player.pid, tier: 'name' }
 
-  // Both names match -- the candidates share a surname and an initial. Whichever
-  // had not yet entered the league cannot have recorded the stat.
-  if (smart_name_matches && gsis_name_matches && season_year) {
-    const smart_debuted = smart_player.nfl_draft_year <= season_year
-    const gsis_debuted = gsis_player.nfl_draft_year <= season_year
-    if (smart_debuted && !gsis_debuted)
-      return { pid: smart_player.pid, tier: 'era' }
-    if (gsis_debuted && !smart_debuted)
-      return { pid: gsis_player.pid, tier: 'era' }
-  }
-
+  // Both names match -- the candidates share a surname and an initial. Era is
+  // not consulted here: both candidates were era-filtered before this function
+  // ran, so the only evidence left that can separate them is the stat itself.
   const smart_position_plausible = position_is_plausible({
     stat_id: play_stat.stat_id,
     player: smart_player
@@ -224,9 +223,9 @@ const resolve_conflict = ({
  * Resolve one play-stat row to a pid.
  *
  * @returns {{ pid: string, tier: string }|null} null when the row names no
- *   player, or names two the tiers cannot separate -- callers should drop and
- *   log rather than guess, since attributing a stat to the wrong player is
- *   worse than not counting it.
+ *   player, names only players who had not entered the league, or names two the
+ *   tiers cannot separate -- callers should drop and log rather than guess,
+ *   since attributing a stat to the wrong player is worse than not counting it.
  */
 export const resolve_play_stat_player = ({
   play_stat,
@@ -237,25 +236,49 @@ export const resolve_play_stat_player = ({
   // A `smart_player_id` that resolves to nothing is absent, not a signal --
   // 236,572 valid rows carry a fabricated one, and treating it as evidence
   // would resolve them to whichever player happens to hold the encoding.
-  const smart_player = play_stat.smart_player_id
+  const smart_candidate = play_stat.smart_player_id
     ? players_by_smart_player_id.get(play_stat.smart_player_id)
     : null
-  const gsis_player = play_stat.gsis_player_id
+  const gsis_candidate = play_stat.gsis_player_id
     ? players_by_gsis_player_id.get(play_stat.gsis_player_id)
     : null
 
+  // Drop any candidate who had not entered the league by this season. See the
+  // module docstring: doing this before the tiers rather than inside them is
+  // what extends era evidence to the single-identifier and agreed cases.
+  const smart_player =
+    smart_candidate &&
+    player_could_have_played({ player: smart_candidate, season_year })
+      ? smart_candidate
+      : null
+  const gsis_player =
+    gsis_candidate &&
+    player_could_have_played({ player: gsis_candidate, season_year })
+      ? gsis_candidate
+      : null
+
+  // Era evidence is what removed a candidate, so it is what decided the row --
+  // report it as the tier even when a single identifier is left standing, so a
+  // caller counting tiers can see the filter working.
+  const era_filtered_a_candidate =
+    Boolean(smart_candidate && !smart_player) ||
+    Boolean(gsis_candidate && !gsis_player)
+
   if (!smart_player && !gsis_player) return null
-  if (!gsis_player) return { pid: smart_player.pid, tier: 'smart_only' }
-  if (!smart_player) return { pid: gsis_player.pid, tier: 'gsis_only' }
+  if (!gsis_player)
+    return {
+      pid: smart_player.pid,
+      tier: era_filtered_a_candidate ? 'era' : 'smart_only'
+    }
+  if (!smart_player)
+    return {
+      pid: gsis_player.pid,
+      tier: era_filtered_a_candidate ? 'era' : 'gsis_only'
+    }
   if (smart_player.pid === gsis_player.pid)
     return { pid: gsis_player.pid, tier: 'agreed' }
 
-  return resolve_conflict({
-    play_stat,
-    season_year,
-    smart_player,
-    gsis_player
-  })
+  return resolve_conflict({ play_stat, smart_player, gsis_player })
 }
 
 export default resolve_play_stat_player

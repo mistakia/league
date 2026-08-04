@@ -7,6 +7,7 @@ import player_cache, {
   preload_active_players
 } from '#libs-server/player-cache.mjs'
 import { enrich_player_identifications } from '#libs-server/play-enrichment/player-identification-enrichment.mjs'
+import { build_snap_roster_by_esbid } from '#libs-server/play-enrichment/build-snap-roster.mjs'
 import db from '#db'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import {
@@ -39,7 +40,18 @@ const backfill_week = async ({ year, week, seas_type, dry_run }) => {
     .where({ season_year: year, week, season_type: seas_type })
     .whereIn('esbid', completed)
 
-  const enriched = enrich_player_identifications(plays, filtered, player_cache)
+  // This script passed no snap roster until 2026-08-04, so it silently ran
+  // without the source-NULL-gsisId fallback that `process-plays` gets -- an
+  // opt-out by omission rather than by decision. It backfills the psr/trg
+  // family, which is exactly where that fallback recovers actors.
+  const snap_roster_by_esbid = await build_snap_roster_by_esbid(completed)
+
+  const enriched = enrich_player_identifications(
+    plays,
+    filtered,
+    player_cache,
+    snap_roster_by_esbid
+  )
 
   const by_key = new Map()
   for (const p of plays) by_key.set(`${p.esbid}-${p.play_id}`, p)

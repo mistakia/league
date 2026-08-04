@@ -28,20 +28,27 @@ const encode_smart_player_id = (gsis_player_id) => {
   ].join('-')
 }
 
+// `draft_round` defaults to a real pick because that is what makes
+// `nfl_draft_year` a debut year -- see libs-server/player-era.mjs. A fixture
+// that omits it would be silently treated as undrafted and get the two-season
+// grace window, which would make the era assertions below pass for the wrong
+// reason.
 const build_player = ({
   pid,
   formatted_name,
   primary_position,
   nfl_draft_year,
   gsis_player_id,
-  smart_player_id
+  smart_player_id,
+  draft_round = 1
 }) => ({
   pid,
   formatted_name,
   primary_position,
   nfl_draft_year,
   gsis_player_id,
-  smart_player_id
+  smart_player_id,
+  draft_round
 })
 
 const build_indexes = (players) => ({
@@ -358,6 +365,82 @@ describe('LIBS SERVER resolve_play_stat_player', function () {
         season_year: 2005
       })
       expect(result).to.equal(null)
+    })
+
+    it('abstains when the only identifier names a player who had not entered the league', () => {
+      // The dominant shape this guard exists for. Until 2026-08-04 era was a
+      // tiebreak, so it could not run on a row with one identifier -- 975 of
+      // the 4,531 era-impossible rows resolved through this path.
+      const shi_smith = build_player({
+        pid: 'SHIX-SMIT-026046',
+        formatted_name: 'shi smith',
+        primary_position: 'WR',
+        nfl_draft_year: 2021,
+        draft_round: 6,
+        gsis_player_id: '00-0036572'
+      })
+      const result = resolve_play_stat_player({
+        play_stat: {
+          gsis_player_id: '00-0036572',
+          smart_player_id: null,
+          player_name: 'S.Smith',
+          stat_id: 21
+        },
+        ...build_indexes([shi_smith]),
+        season_year: 2003
+      })
+      expect(result).to.equal(null)
+    })
+
+    it('abstains when both identifiers agree on a player who had not entered the league', () => {
+      // 3,520 of the 4,531 rows are this: the row is self-consistent and still
+      // names someone who could not have been there, so agreement is not
+      // evidence of anything and the old `agreed` tier accepted it outright.
+      const shi_smith = build_player({
+        pid: 'SHIX-SMIT-026046',
+        formatted_name: 'shi smith',
+        primary_position: 'WR',
+        nfl_draft_year: 2021,
+        draft_round: 6,
+        gsis_player_id: '00-0036572',
+        smart_player_id: encode_smart_player_id('00-0036572')
+      })
+      const result = resolve_play_stat_player({
+        play_stat: {
+          gsis_player_id: '00-0036572',
+          smart_player_id: encode_smart_player_id('00-0036572'),
+          player_name: 'S.Smith',
+          stat_id: 21
+        },
+        ...build_indexes([shi_smith]),
+        season_year: 2003
+      })
+      expect(result).to.equal(null)
+    })
+
+    it('keeps an undrafted player inside the entry-year grace window', () => {
+      // The false-positive class the guard must not create: `nfl_draft_year` on
+      // an undrafted row is an entry year, and cory procter really did play in
+      // 2006 against a recorded 2007.
+      const cory_procter = build_player({
+        pid: 'CORY-PROC-003146',
+        formatted_name: 'cory procter',
+        primary_position: 'OL',
+        nfl_draft_year: 2007,
+        draft_round: 0,
+        gsis_player_id: '00-0025399'
+      })
+      const result = resolve_play_stat_player({
+        play_stat: {
+          gsis_player_id: '00-0025399',
+          smart_player_id: null,
+          player_name: 'C.Procter',
+          stat_id: 79
+        },
+        ...build_indexes([cory_procter]),
+        season_year: 2006
+      })
+      expect(result).to.eql({ pid: 'CORY-PROC-003146', tier: 'gsis_only' })
     })
 
     it('returns null when neither identifier names a player', () => {

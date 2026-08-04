@@ -37,20 +37,38 @@ import db from '#db'
 import {
   current_season,
   all_fantasy_stats,
-  nfl_team_abbreviations
+  nfl_team_abbreviations,
+  nfl_season_types
 } from '#constants'
 import { get_play_stats } from '#libs-server/play-stats-utils.mjs'
 import { merge_columns_on_conflict } from '#libs-server/merge-columns-on-conflict.mjs'
 import { resolve_play_stat_player } from '#libs-server/resolve-play-stat-player.mjs'
+import { player_could_have_played } from '#libs-server/player-era.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
 const initialize_cli = () => {
-  return yargs(hideBin(process.argv))
-    .option('esbid', {
-      type: 'string',
-      describe: 'Generate gamelogs for a specific game ID only'
-    })
-    .parse()
+  return (
+    yargs(hideBin(process.argv))
+      .option('esbid', {
+        type: 'string',
+        describe: 'Generate gamelogs for a specific game ID only'
+      })
+      // `seasType` was never declared, and yargs' camel-case expansion maps
+      // `--seas-type` but NOT `--seas_type` -- so the underscore spelling, which
+      // is what every other flag and every column in this repo uses, silently
+      // parsed to a key nothing read and left the run on the REG default. A
+      // 298-game preseason-inclusive backfill lost all 47 of its PRE games that
+      // way: each threw "no play stats for esbid", the throw was caught by
+      // handle_season_args_for_script, and the process still exited 0. Declaring
+      // the alias makes both spellings work; `choices` makes a typo loud.
+      .option('seasType', {
+        alias: 'seas_type',
+        type: 'string',
+        choices: nfl_season_types,
+        describe: 'Season type (PRE, REG, POST)'
+      })
+      .parse()
+  )
 }
 
 const log = debug('generate-player-gamelogs')
@@ -250,6 +268,21 @@ const format_base_gamelog = ({
   }
 }
 
+// Stat provenance for a gamelog this script derived from play stats, and the
+// ownership key the prune below is scoped by. `import-nflverse-weekly-rosters`
+// established the convention: `player_gamelogs.source` names the writer of
+// record, and that writer deletes-then-inserts its own rows by (year, source)
+// so a rerun is idempotent and a row it no longer supports goes away.
+//
+// This script had no such key until 2026-08-04, which is why it could only ever
+// add. When an identity repair upstream stopped a row being produced, the row
+// simply stayed: clearing 36 stolen `smart_player_id` encodings in league
+// a966d7fbd corrected the cause and moved the misattributed-gamelog count by
+// zero, because 1,559 rows across 37 players were already written and nothing
+// retracts. Stamping the source is what lets a regeneration be a correction
+// rather than an accumulation.
+export const PLAY_STATS_GAMELOG_SOURCE = 'play-stats'
+
 const format_player_gamelog = ({
   esbid,
   pid,
@@ -269,7 +302,8 @@ const format_player_gamelog = ({
     }),
     pid,
     pos,
-    active: true
+    active: true,
+    source: PLAY_STATS_GAMELOG_SOURCE
   }
 }
 
@@ -479,12 +513,14 @@ const generate_snap_based_gamelogs = async ({
 }) => {
   log('Checking for players with snaps but no stats...')
 
-  const players_with_snaps = await db('nfl_snaps')
+  const snap_candidates = await db('nfl_snaps')
     .select(
       'player.pid',
       'player.primary_position',
       'player.current_nfl_team',
       'player.smart_player_id',
+      'player.nfl_draft_year',
+      'player.draft_round',
       'nfl_snaps.esbid'
     )
     .join('player', 'player.gsis_it_player_id', 'nfl_snaps.gsis_it_id')
@@ -495,11 +531,30 @@ const generate_snap_based_gamelogs = async ({
       'player.primary_position',
       'player.current_nfl_team',
       'player.smart_player_id',
+      'player.nfl_draft_year',
+      'player.draft_round',
       'nfl_snaps.esbid'
     )
     .havingRaw('COUNT(*) > 0')
 
-  log(`Found ${players_with_snaps.length} players with snap data`)
+  // This join is a third identifier column that can name the wrong player, and
+  // it needs the same falsifier as the two on `nfl_play_stats`. `player`
+  // carries a `gsis_it_player_id` that belongs to an earlier player of the same
+  // name in at least this many cases: the 2022 devin taylor holds 40080, whose
+  // snaps are all 2016-2017 and belong to the 2013 devin taylor. Without this
+  // filter the snap path writes that gamelog no matter what the play-stat
+  // resolver decided, since it never consults it.
+  const players_with_snaps = snap_candidates.filter((candidate) =>
+    player_could_have_played({ player: candidate, season_year: year })
+  )
+
+  const era_rejected = snap_candidates.length - players_with_snaps.length
+  log(
+    `Found ${players_with_snaps.length} players with snap data` +
+      (era_rejected
+        ? `, ${era_rejected} rejected as not yet in the league`
+        : '')
+  )
 
   // Query existing gamelogs to get correct historical team data
   const existing_gamelogs = await db('player_gamelogs')
@@ -580,7 +635,8 @@ const generate_snap_based_gamelogs = async ({
         nfl_team: team,
         opponent_nfl_team: opponent,
         season_year: year,
-        active: true
+        active: true,
+        source: PLAY_STATS_GAMELOG_SOURCE
         // All counting stats default to NULL/0
       })
       added_count++
@@ -846,6 +902,123 @@ const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
 // so a regenerate can only write the same value.
 export const GAMELOG_COLUMNS_NOT_MERGED = ['active']
 
+/**
+ * Delete the gamelogs this run owns but no longer produces.
+ *
+ * Without this the script can only ever add, so a row whose attribution has
+ * since been falsified survives every regeneration -- see
+ * PLAY_STATS_GAMELOG_SOURCE above for the incident that made the cost concrete.
+ *
+ * Three things bound the delete, and all three matter:
+ *
+ *   - OWNERSHIP. A row is this script's to retract if it carries this script's
+ *     `source`, or if it carries counting stats. The second half is what makes
+ *     the prune work at all: `source` is only ever stamped on a row this script
+ *     PRODUCES, so a row it has stopped producing -- exactly the row needing
+ *     pruning -- would never carry the stamp, and a `source`-only rule could
+ *     not reclaim a single one of the 885,617 rows written before the stamp
+ *     existed. Counting stats are the durable ownership signal: the roster
+ *     importers write roster status and never a stat, so a stat-bearing row can
+ *     only have come from a play-stat build.
+ *   - `esbid` scopes it to games this run actually loaded play stats for, so a
+ *     single-week or single-game run cannot touch anything outside its window.
+ *   - a game the run produced NO rows for is skipped entirely. That is the
+ *     signature of a run that failed to resolve rather than of a game whose
+ *     rows are all stale, and deleting on it would turn a resolution
+ *     regression into data loss.
+ *
+ * A roster-only row -- on the gameday roster, no stats -- is never touched
+ * under any of the three. That claim is the importers' to make and this script
+ * has no evidence against it.
+ */
+
+// Columns whose presence proves a row records PARTICIPATION -- that the player
+// was on the field -- rather than roster membership. The roster importers write
+// gameday status and never one of these, so a row carrying any of them was
+// built from play stats or from snaps, which are this script's two inputs.
+//
+// The snap columns are not optional. A defensive lineman's gamelog routinely
+// carries zero in every counting column while carrying 48 defensive snaps, and
+// that is precisely the row the snap path above creates -- a counting-stats-only
+// rule would have left every one of them unreclaimable.
+const OWNED_PARTICIPATION_COLUMNS = [
+  'passing_attempts',
+  'rushing_attempts',
+  'targets',
+  'receptions',
+  'defensive_sacks',
+  'defensive_interceptions',
+  'field_goals_made',
+  'extra_points_made',
+  'snaps_off',
+  'snaps_def',
+  'snaps_st'
+]
+const prune_unreferenced_gamelogs = async ({
+  unique_esbids,
+  player_gamelog_inserts,
+  dry_run
+}) => {
+  const produced_by_esbid = new Map()
+  for (const gamelog of player_gamelog_inserts) {
+    let pids = produced_by_esbid.get(gamelog.esbid)
+    if (!pids) {
+      pids = new Set()
+      produced_by_esbid.set(gamelog.esbid, pids)
+    }
+    pids.add(gamelog.pid)
+  }
+
+  const prunable_esbids = unique_esbids.filter((esbid) =>
+    produced_by_esbid.has(esbid)
+  )
+  const skipped = unique_esbids.length - prunable_esbids.length
+  if (skipped) {
+    log(`prune: skipping ${skipped} games this run produced no gamelogs for`)
+  }
+  if (!prunable_esbids.length) return 0
+
+  const existing = await db('player_gamelogs')
+    .select('esbid', 'pid')
+    .whereIn('esbid', prunable_esbids)
+    .where((builder) => {
+      builder.where({ source: PLAY_STATS_GAMELOG_SOURCE })
+      for (const column of OWNED_PARTICIPATION_COLUMNS) {
+        builder.orWhere(column, '>', 0)
+      }
+    })
+
+  const stale = existing.filter(
+    (row) => !produced_by_esbid.get(row.esbid)?.has(row.pid)
+  )
+
+  if (!stale.length) {
+    log('prune: no stale gamelogs')
+    return 0
+  }
+
+  if (dry_run) {
+    log(`[DRY RUN] prune would delete ${stale.length} stale gamelogs`)
+    return 0
+  }
+
+  let deleted = 0
+  for (let index = 0; index < stale.length; index += 500) {
+    const chunk = stale.slice(index, index + 500)
+    // Keyed only on the pairs already vetted by the ownership predicate above;
+    // re-applying it here would drop the counting-stat half of the rule.
+    deleted += await db('player_gamelogs')
+      .whereIn(
+        ['esbid', 'pid'],
+        chunk.map((row) => [row.esbid, row.pid])
+      )
+      .del()
+  }
+
+  log(`prune: deleted ${deleted} stale gamelogs`)
+  return deleted
+}
+
 const save_gamelogs = async ({
   player_gamelog_inserts,
   player_receiving_gamelog_inserts,
@@ -1080,6 +1253,11 @@ const generate_player_gamelogs = async ({
     log(
       `Generated ${player_gamelog_inserts.length} player gamelogs, ${player_receiving_gamelog_inserts.length} receiving gamelogs, ${player_rushing_gamelog_inserts.length} rushing gamelogs, and ${team_gamelog_inserts.length} team gamelogs for ${year} week ${week}`
     )
+    await prune_unreferenced_gamelogs({
+      unique_esbids,
+      player_gamelog_inserts,
+      dry_run
+    })
     return
   }
 
@@ -1087,6 +1265,16 @@ const generate_player_gamelogs = async ({
     player_gamelog_inserts,
     player_receiving_gamelog_inserts,
     player_rushing_gamelog_inserts,
+    dry_run
+  })
+
+  // After the write, not before: the upsert re-stamps `source` on every row
+  // this run produced, so by the time the prune reads them the only
+  // `play-stats` rows it can see for these games that the run did not produce
+  // are genuinely unsupported.
+  await prune_unreferenced_gamelogs({
+    unique_esbids,
+    player_gamelog_inserts,
     dry_run
   })
 }
