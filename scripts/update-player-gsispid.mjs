@@ -4,6 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { is_main, updatePlayer } from '#libs-server'
+import { decode_smart_player_id } from '#libs-server/resolve-play-stat-player.mjs'
 // import { job_types } from '#libs-shared/job-.mjs'
 
 const initialize_cli = () => {
@@ -11,7 +12,31 @@ const initialize_cli = () => {
 }
 
 const log = debug('update-player-gsispid')
-debug.enable('update-player-gsispid,update-player')
+if (!process.env.DEBUG) {
+  debug.enable('update-player-gsispid,update-player')
+}
+
+/**
+ * Refuse a `smart_player_id` that encodes a DIFFERENT player's gsis id.
+ *
+ * `smart_player_id` is not an independent identifier -- it is a UUID template
+ * with a `gsis_player_id` hex-embedded in it, and 10,483 of the 10,897 player
+ * rows carrying one encode that row's own gsis id. So a value decoding to
+ * someone else's gsis id is corrupt by construction, and writing it hands this
+ * player another player's identity.
+ *
+ * This script assigns by majority vote over `nfl_play_stats`, and it clears the
+ * value off whatever player currently holds it before assigning -- so without
+ * this guard one bad majority moves an identity between two player rows. It is
+ * not what originally produced the 36 corrupt rows repaired in
+ * `db/adhoc/2026-08-04-clear-stolen-smart-player-id-encodings.sql` (24 of them
+ * have no play-stat evidence to vote from at all), but it WOULD have rewritten
+ * 10 of them on its next run, which is enough to make the repair temporary.
+ */
+const encodes_foreign_identity = ({ value, gsis_player_id }) => {
+  const decoded = decode_smart_player_id(value)
+  return Boolean(decoded) && decoded !== gsis_player_id
+}
 
 const updatePlayerGsispid = async ({ dry = false } = {}) => {
   const query = db('nfl_play_stats')
@@ -90,6 +115,13 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
         continue
       }
 
+      if (encodes_foreign_identity({ value, gsis_player_id })) {
+        log(
+          `refusing smart_player_id for ${pid}: ${value} encodes ${decode_smart_player_id(value)}, not ${gsis_player_id}`
+        )
+        continue
+      }
+
       // clear any duplicates
       await db('player')
         .update({ smart_player_id: null })
@@ -118,6 +150,13 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
 
       if (value === player_gsispid) {
         // skip, player gsispid matches most common pairing with play_stats, mismatch likely amonst play_stats
+        continue
+      }
+
+      if (encodes_foreign_identity({ value, gsis_player_id })) {
+        log(
+          `refusing smart_player_id for ${pid}: ${value} encodes ${decode_smart_player_id(value)}, not ${gsis_player_id}`
+        )
         continue
       }
 
