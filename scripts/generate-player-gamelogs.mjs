@@ -838,10 +838,13 @@ const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
 /**
  * Save gamelogs to database
  */
-// `active` is owned by import-nflverse-weekly-rosters.mjs and `pos` re-encodes
-// an uncontrolled vocabulary; see libs-server/merge-columns-on-conflict.mjs for
-// why each is held out of the UPDATE half.
-export const GAMELOG_COLUMNS_NOT_MERGED = ['active', 'pos']
+// `active` is owned by import-nflverse-weekly-rosters.mjs; see
+// libs-server/merge-columns-on-conflict.mjs for why it is held out of the
+// UPDATE half. `pos` was held out too while the position vocabulary was
+// uncontrolled -- a regenerate would have rewritten it from one unnormalized
+// snapshot to another. The vocabulary is canonical and CHECK-constrained now,
+// so a regenerate can only write the same value.
+export const GAMELOG_COLUMNS_NOT_MERGED = ['active']
 
 const save_gamelogs = async ({
   player_gamelog_inserts,

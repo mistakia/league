@@ -42,9 +42,10 @@ describe('LIBS-SERVER /merge-columns-on-conflict', function () {
 
   // `active` is owned by import-nflverse-weekly-rosters.mjs; merging it reverted
   // every game-day-inactive flag for any player a gamelog run touched. `pos`
-  // re-encodes an uncontrolled position vocabulary, so merging rewrites a stored
-  // value to a different spelling of itself.
-  it('keeps the gamelog generator holding back active and pos', () => {
-    expect(GAMELOG_COLUMNS_NOT_MERGED).to.have.members(['active', 'pos'])
+  // was held back alongside it while the position vocabulary was uncontrolled;
+  // it is canonical and CHECK-constrained now, so merging it is a no-op rather
+  // than a respelling.
+  it('keeps the gamelog generator holding back active', () => {
+    expect(GAMELOG_COLUMNS_NOT_MERGED).to.have.members(['active'])
   })
 })

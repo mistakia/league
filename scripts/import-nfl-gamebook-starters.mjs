@@ -176,7 +176,12 @@ const pdftotext = (pdf_path) =>
     })
   })
 
-const normalize_position = (label) => POSITION_ALIAS[label] || label
+// Lenient, parser-local, and deliberately NOT the canonical normalize_position
+// from #libs-shared/constants/position-constants.mjs: the STARTER_ROW regex
+// matches any 1-5 letter token, so a strict fold would throw on garbage lines.
+// Nothing here reaches the database -- this importer writes only `started` --
+// so the folded label is a parse aid, not a stored value.
+const fold_gamebook_position_label = (label) => POSITION_ALIAS[label] || label
 
 // A starter row looks like (with arbitrary leading whitespace):
 //   "      WR    19 C.Austin"
@@ -254,7 +259,7 @@ const parse_gamebook_lineups = async ({ pdf_path }) => {
       if (!m) continue
       const [, pos, jnum, name] = m
       quadrants[i].push({
-        pos: normalize_position(pos),
+        pos: fold_gamebook_position_label(pos),
         jnum: Number(jnum),
         name: name.trim()
       })
