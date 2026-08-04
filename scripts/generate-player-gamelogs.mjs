@@ -44,6 +44,7 @@ import { get_play_stats } from '#libs-server/play-stats-utils.mjs'
 import { merge_columns_on_conflict } from '#libs-server/merge-columns-on-conflict.mjs'
 import { resolve_play_stat_player } from '#libs-server/resolve-play-stat-player.mjs'
 import { player_could_have_played } from '#libs-server/player-era.mjs'
+import { create_snap_gamelog_team_resolver } from '#libs-server/resolve-snap-gamelog-team.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
 const initialize_cli = () => {
@@ -517,7 +518,7 @@ const generate_snap_based_gamelogs = async ({
     .select(
       'player.pid',
       'player.primary_position',
-      'player.current_nfl_team',
+      'player.gsis_it_player_id',
       'player.smart_player_id',
       'player.nfl_draft_year',
       'player.draft_round',
@@ -530,7 +531,7 @@ const generate_snap_based_gamelogs = async ({
     .groupBy(
       'player.pid',
       'player.primary_position',
-      'player.current_nfl_team',
+      'player.gsis_it_player_id',
       'player.smart_player_id',
       'player.nfl_draft_year',
       'player.draft_round',
@@ -558,12 +559,17 @@ const generate_snap_based_gamelogs = async ({
         : '')
   )
 
-  // Query existing gamelogs to get correct historical team data
+  // Query existing gamelogs to get correct historical team data.
+  // 'INA' is excluded alongside the empty string: it is not a franchise, it is
+  // the roster-status code this path used to write when it fell back to
+  // `player.current_nfl_team` for a retired player. Treating it as a valid
+  // historical team is what made the defect self-perpetuating -- a regeneration
+  // read the bad row back as priority-1 evidence and rewrote it unchanged.
   const existing_gamelogs = await db('player_gamelogs')
     .select('pid', 'esbid', 'nfl_team')
     .whereIn('esbid', unique_esbids)
     .whereNotNull('nfl_team')
-    .whereNot('nfl_team', '')
+    .whereNotIn('nfl_team', ['', 'INA'])
 
   const existing_gamelog_team_map = existing_gamelogs.reduce((acc, gl) => {
     acc[`${gl.pid}_${gl.esbid}`] = gl.nfl_team
@@ -580,7 +586,7 @@ const generate_snap_based_gamelogs = async ({
     .max('nfl_team as team')
     .whereIn('esbid', unique_esbids)
     .whereNotNull('nfl_team')
-    .whereNot('nfl_team', '')
+    .whereNotIn('nfl_team', ['', 'INA'])
     .groupBy('smart_player_id', 'esbid')
 
   const play_stats_team_map = play_stats_teams.reduce((acc, ps) => {
@@ -601,7 +607,14 @@ const generate_snap_based_gamelogs = async ({
       }, {})
     )
 
+  const resolve_snap_gamelog_team = await create_snap_gamelog_team_resolver({
+    candidates: players_with_snaps,
+    season_year: year
+  })
+
   let added_count = 0
+  const unresolved = []
+  const resolution_method_counts = {}
   for (const snap_player of players_with_snaps) {
     const already_has_gamelog = player_gamelog_inserts.some(
       (gamelog) =>
@@ -615,15 +628,42 @@ const generate_snap_based_gamelogs = async ({
         continue
       }
 
-      // Priority: 1) existing gamelog tm, 2) play_stats nfl_team, 3) current_nfl_team (fallback)
+      // Priority: 1) existing gamelog team, 2) play_stats nfl_team, 3) the
+      // snap-derived resolver. The fallback used to be
+      // `player.current_nfl_team` -- a property of the player TODAY rather than
+      // of this game, so it wrote 'INA' for a retired player and the wrong
+      // franchise for one who had since moved. See
+      // libs-server/resolve-snap-gamelog-team.mjs for what replaced it.
       const gamelog_lookup_key = `${snap_player.pid}_${snap_player.esbid}`
       const play_stats_lookup_key = `${snap_player.smart_player_id}_${snap_player.esbid}`
       const existing_team = existing_gamelog_team_map[gamelog_lookup_key]
       const play_stats_team = play_stats_team_map[play_stats_lookup_key]
 
-      const team = fixTeam(
-        existing_team || play_stats_team || snap_player.current_nfl_team
-      )
+      let team = existing_team || play_stats_team
+      let resolution_method = existing_team ? 'existing_gamelog' : 'play_stats'
+      if (!team) {
+        const resolved = resolve_snap_gamelog_team(snap_player)
+        team = resolved.nfl_team
+        resolution_method = resolved.method || `refused:${resolved.reason}`
+      }
+
+      // A gamelog with no establishable team is not written. A wrong team
+      // corrupts every team-scoped aggregate that reads this table, which is
+      // strictly worse than a gamelog that does not exist -- and inventing one
+      // is exactly what the `current_nfl_team` fallback did.
+      if (!team) {
+        unresolved.push({
+          pid: snap_player.pid,
+          esbid: snap_player.esbid,
+          reason: resolution_method
+        })
+        continue
+      }
+
+      resolution_method_counts[resolution_method] =
+        (resolution_method_counts[resolution_method] || 0) + 1
+
+      team = fixTeam(team)
       const opponent = calculate_opponent({
         team,
         home_team: game.home_nfl_team,
@@ -646,8 +686,19 @@ const generate_snap_based_gamelogs = async ({
   }
 
   log(
-    `Added ${added_count} snap-based gamelogs for players without counting stats`
+    `Added ${added_count} snap-based gamelogs for players without counting stats` +
+      ` (${JSON.stringify(resolution_method_counts)})`
   )
+
+  if (unresolved.length) {
+    log(
+      `Skipped ${unresolved.length} snap-based gamelogs whose team could not be established: ` +
+        unresolved
+          .slice(0, 10)
+          .map((row) => `${row.pid}/${row.esbid} (${row.reason})`)
+          .join(', ')
+    )
+  }
 
   return added_count
 }
