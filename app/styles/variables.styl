@@ -33,6 +33,7 @@ $z_floating_action = 1100        // floating action buttons
 $z_overlay_backdrop = 1200       // scrim behind a hand-rolled overlay panel
 $z_overlay_panel = 1300          // nav drawer, speed dial — MUI's drawer layer
 $z_selected_player = 1400        // selected-player drawer, above the nav drawer
+$z_react_table_base = 1450       // react-table's own six-rung band, 1451-1456
 $z_dialog = 1500                 // MUI dialogs and confirmations
 $z_snackbar = 1550               // async notifications, above any open dialog
 $z_popper = 1600                 // dropdowns, selects, autocompletes, menus
@@ -56,6 +57,16 @@ $dst_color = tint(black, 25%)
 // tint(red,25%)=#ff4040 tint(orange,25%)=#ffbc40 tint(green,25%)=#40a040
 // tint(blue,25%)=#4040ff tint(grey,25%)=#a0a0a0 tint(black,25%)=#404040
 :root
+  // react-table derives its whole layer band from this one value, so setting it
+  // slots the table's menus, overlays, modal and poppers into the scale above
+  // rather than leaving them on the lib's default 1001-1006 (which sits below
+  // everything here). The band lands between $z_selected_player and $z_dialog:
+  // the table's view modal is covered by our confirmations, and covers the
+  // selected-player drawer. It MUST be set here at :root — react-table builds
+  // its rungs with calc(), which substitutes where the token is declared, so an
+  // override on any descendant silently does nothing. See react-table STYLE.md.
+  --rt-z-base $z_react_table_base
+
   --pos-QB #ff4040
   --pos-WR #ffbc40
   --pos-RB #40a040
