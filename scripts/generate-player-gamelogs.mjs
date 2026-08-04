@@ -40,6 +40,7 @@ import {
   nfl_team_abbreviations
 } from '#constants'
 import { get_play_stats } from '#libs-server/play-stats-utils.mjs'
+import { merge_columns_on_conflict } from '#libs-server/merge-columns-on-conflict.mjs'
 import { resolve_play_stat_player } from '#libs-server/resolve-play-stat-player.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
@@ -837,38 +838,10 @@ const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
 /**
  * Save gamelogs to database
  */
-// Columns this script INSERTs but must not assert in the UPDATE half of the
-// upsert, because another writer owns them or because its own value carries no
-// more information than what is already stored.
-//
-// `active` is owned by import-nflverse-weekly-rosters.mjs, which maps game-day
-// roster status onto it (ACT -> true; INA / RES / DEV -> false). This script
-// hardcodes `active: true` on every gamelog it builds, because a player with
-// counting stats was dressed. Asserting that on INSERT is right; carrying it
-// into the UPDATE is not -- a blanket .merge() reverted every game-day-inactive
-// flag for any player the run touched, silently undoing the roster import.
-// Regenerating one 2014 game flipped six such rows.
-//
-// `pos` is a copy of `player.primary_position`, and neither that column nor
-// this one has a controlled vocabulary: `player.primary_position` holds 43
-// distinct values and `player_gamelogs.pos` holds 39, with `OLB` and `LB`,
-// `T`/`G`/`C` and `OL`, `SS`/`FS`/`CB` and `DB` all naming the same position
-// under different importers' spellings. Merging it therefore rewrites an
-// existing row to a DIFFERENT spelling of what it already said -- 1,183 rows
-// over one 277-game backfill, plus 111 K->P and 87 P->K flips -- which is churn
-// dressed as a correction. Held out until the vocabulary is canonical; see
-// user:task/league/normalize-nfl-position-values.md, whose last step is to
-// remove `pos` from this list.
-export const COLUMNS_NOT_MERGED_ON_CONFLICT = ['active', 'pos']
-
-export const merge_columns_on_conflict = (batch) => {
-  const columns = new Set()
-  for (const item of batch) {
-    for (const column of Object.keys(item)) columns.add(column)
-  }
-  for (const column of COLUMNS_NOT_MERGED_ON_CONFLICT) columns.delete(column)
-  return [...columns]
-}
+// `active` is owned by import-nflverse-weekly-rosters.mjs and `pos` re-encodes
+// an uncontrolled vocabulary; see libs-server/merge-columns-on-conflict.mjs for
+// why each is held out of the UPDATE half.
+export const GAMELOG_COLUMNS_NOT_MERGED = ['active', 'pos']
 
 const save_gamelogs = async ({
   player_gamelog_inserts,
@@ -883,7 +856,12 @@ const save_gamelogs = async ({
         await db('player_gamelogs')
           .insert(batch)
           .onConflict(['esbid', 'pid', 'season_year'])
-          .merge(merge_columns_on_conflict(batch))
+          .merge(
+            merge_columns_on_conflict({
+              batch,
+              exclude: GAMELOG_COLUMNS_NOT_MERGED
+            })
+          )
       },
       batch_size: 500
     })

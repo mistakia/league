@@ -7,6 +7,11 @@ import { current_season, create_empty_fantasy_stats } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
+import { merge_columns_on_conflict } from '#libs-server/merge-columns-on-conflict.mjs'
+
+// `pos` re-encodes `player.primary_position`, which has no controlled
+// vocabulary; see libs-server/merge-columns-on-conflict.mjs.
+const SEASONLOG_COLUMNS_NOT_MERGED = ['pos']
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -62,7 +67,12 @@ const processPlayerSeasonlogs = async ({
         await db('player_seasonlogs')
           .insert(batch)
           .onConflict(['pid', 'season_year', 'season_type'])
-          .merge()
+          .merge(
+            merge_columns_on_conflict({
+              batch,
+              exclude: SEASONLOG_COLUMNS_NOT_MERGED
+            })
+          )
       },
       batch_size: 500
     })
