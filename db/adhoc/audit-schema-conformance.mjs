@@ -145,8 +145,11 @@ const column_specific_shorthand = new Map([])
 // varchar on a thirtieth. Differing types under one name is the schema stating
 // outright that the name carries more than one meaning.
 //
-// Domain acronyms (`adp`, `faab`, `epa`, `cpoe`) are likewise not exempt -- they
-// are exactly the shorthand the standard prohibits.
+// Domain acronyms (`adp`, `faab`, `cpoe`) are likewise not exempt -- they are
+// exactly the shorthand the standard prohibits, and each has an unambiguous
+// expansion (average_draft_position, faab_budget,
+// completion_percentage_over_expected). The narrow exception is
+// `proprietary_metric_names` below.
 //
 // Some names this rule used to flag are bare BOOLEANS (`blitz`, `hurry`,
 // `spike`, `stunt`, `open`, `start`), whose more precise defect is the standard's
@@ -186,12 +189,36 @@ const accepted_short_words = new Set([
   'week'
 ])
 
+// Proprietary metric names retained by operator ruling. These are NOT
+// abbreviations of an English phrase we are declining to spell out -- they are
+// the published names of third-party metrics, and expanding them would name the
+// column something the vendor's own documentation does not use.
+//
+// The ruling is db/adhoc/2026-07-22-player-prospect-profile-sis-conform.sql:5,
+// which conformed 224 SIS columns and recorded "IQR kept (proprietary metric
+// name, like EPA)". Both were verified against production before being exempted
+// here rather than taken on the ruling alone:
+//
+//   epa -- Expected Points Added, the standard play-value metric. Already spelt
+//     out in docs/glossary.md:426, and carried schema-wide as `*_epa` compounds
+//     (pass_epa, rush_epa) that this rule never flagged because they contain an
+//     underscore. Flagging the bare form alone was inconsistent with that.
+//   iqr -- Sports Info Solutions' Independent Quarterback Rating, NOT the
+//     statistical interquartile range. Confirmed by scale: iqr_deep and
+//     iqr_pressure top out at exactly 158.3, the NFL passer-rating maximum, and
+//     the column is populated only for quarterbacks.
+//
+// Deliberately narrow. `adp`, `faab` and `cpoe` stay flagged -- each expands to
+// an ordinary English phrase, so the standard applies to them unchanged.
+const proprietary_metric_names = new Set(['epa', 'iqr'])
+
 // A bare name of five characters or fewer that is not a recognised word, not a
 // canonical app key, and not already covered by a more specific rule.
 function is_bare_shorthand(name) {
   if (name.includes('_')) return false
   if (name.length > 5) return false
   if (accepted_short_words.has(name)) return false
+  if (proprietary_metric_names.has(name)) return false
   if (allowlisted_identifiers.has(name)) return false
   // `year` is the season-grain rule's business; reserved words their own rule's.
   // The ambiguous-team names are handled by the caller, which knows whether the
