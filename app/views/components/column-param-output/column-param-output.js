@@ -1,9 +1,11 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import PropTypes from 'prop-types'
+import Checkbox from '@mui/material/Checkbox'
 import TextField from '@mui/material/TextField'
 
-import ColumnParamSelectFilter from 'react-table/src/column-param-select-filter'
-import ColumnParamSelectFilterWithOverrides from 'react-table/src/column-param-select-filter-with-overrides'
+import FilterBase from 'react-table/src/filter-base'
+import ColumnParamOverrideSection from 'react-table/src/column-param-override-section'
+import { render_column_param_item } from 'react-table/src/column-controls-column-param-item'
 import { output_column_param } from '@libs-shared'
 
 import './column-param-output.styl'
@@ -11,28 +13,14 @@ import './column-param-output.styl'
 // Editor for the `output` param, whose value is the object the server
 // consumes: { period, aggregation, threshold }.
 //
-// It is three controls over one value rather than three params, because the
-// three fields are not independently valid -- `rate` has no threshold, `count`
-// requires one, and the two aggregations draw their period from different
-// lists. Emitting them as separate params would let the UI produce
-// combinations the output-aggregator registry has no entry for.
+// One chip opening one panel, because the fields are one value rather than
+// three params: `rate` has no threshold, `count` requires one, and the two
+// aggregations draw their period from different lists. Picking a period is
+// what selects the aggregation -- there is no separate aggregation control,
+// since every valid pair is reachable by choosing a period from the section it
+// belongs to.
 
 const DEFAULT_THRESHOLD = { op: '>=', value: 0 }
-
-const first_value = (value) => (Array.isArray(value) ? value[0] : value)
-
-// The select controls treat this prop as a list -- they forEach and includes
-// over it -- so a bare scalar throws on mount. null is the correct "unset",
-// not [], because an empty array reads as a defined param and styles the chip
-// as though it carried a value.
-const as_selection = (value) => (value == null ? null : [value])
-
-const build_select_definition = ({ label, values }) => ({
-  label,
-  single: true,
-  default_value: null,
-  values
-})
 
 export default function ColumnParamOutput({
   column_param_name,
@@ -48,6 +36,8 @@ export default function ColumnParamOutput({
   const output = selected_param_values || null
   const aggregation = output?.aggregation || null
 
+  const [trigger_close, set_trigger_close] = useState(false)
+
   const rate_period_options = useMemo(
     () => column_param_definition?.values || [],
     [column_param_definition]
@@ -56,98 +46,29 @@ export default function ColumnParamOutput({
     column_param_definition?.count_periods ||
     output_column_param.COUNT_PERIOD_OPTIONS
 
-  const aggregation_definition = useMemo(
-    () =>
-      build_select_definition({
-        label: column_param_definition?.label || column_param_name,
-        values: [
-          { value: null, label: 'None' },
-          ...(column_param_definition?.aggregations ||
-            output_column_param.AGGREGATION_OPTIONS)
-        ]
-      }),
-    [column_param_definition, column_param_name]
-  )
+  const label = column_param_definition?.label || column_param_name
+  const selected_label = mixed_state
+    ? '-'
+    : output_column_param.format_output_value({ value: output }) || 'None'
 
-  const count_period_definition = useMemo(
-    () =>
-      build_select_definition({
-        label: 'Count Of',
-        values: count_period_options
-      }),
-    [count_period_options]
-  )
-
-  const threshold_operator_definition = useMemo(
-    () =>
-      build_select_definition({
-        label: 'Threshold',
-        values: output_column_param.THRESHOLD_OPERATOR_OPTIONS
-      }),
-    []
-  )
-
-  // The rate period select doubles as the denominator-override panel, so it
-  // needs the single-column handles. Where-clause records and bulk edit do not
-  // carry them; there the plain select is the correct degradation.
-  const has_single_column_handles = Boolean(
-    column && column_index !== undefined && set_local_table_state
-  )
-
-  const rate_period_definition = useMemo(
-    () => ({
-      label: 'Rate Per',
-      single: true,
-      default_value: null,
-      values: rate_period_options,
-      param_override_config: column_param_definition?.param_override_config
-    }),
-    [rate_period_options, column_param_definition]
-  )
-
-  const handle_aggregation_change = useCallback(
-    (value) => {
-      const next_aggregation = first_value(value)
-      if (!next_aggregation) return handle_change(null)
-
+  const handle_select_period = useCallback(
+    ({ period, next_aggregation }) => {
       if (next_aggregation === 'rate') {
-        const keeps_period = rate_period_options.some(
-          (option) => option.value === output?.period
-        )
-        return handle_change({
-          period: keeps_period ? output.period : rate_period_options[0]?.value,
-          aggregation: 'rate',
-          threshold: null
-        })
+        return handle_change({ period, aggregation: 'rate', threshold: null })
       }
-
-      const keeps_period = count_period_options.some(
-        (option) => option.value === output?.period
-      )
       return handle_change({
-        period: keeps_period ? output.period : count_period_options[0]?.value,
+        period,
         aggregation: 'count',
         threshold: output?.threshold || DEFAULT_THRESHOLD
       })
-    },
-    [handle_change, output, rate_period_options, count_period_options]
-  )
-
-  const handle_period_change = useCallback(
-    (value) => {
-      const period = first_value(value)
-      if (!period) return handle_change(null)
-      return handle_change({ ...output, period })
     },
     [handle_change, output]
   )
 
   const handle_threshold_operator_change = useCallback(
-    (value) => {
-      const op = first_value(value)
-      if (!op) return
+    (op) => {
       const threshold = output?.threshold || DEFAULT_THRESHOLD
-      return handle_change({ ...output, threshold: { ...threshold, op } })
+      handle_change({ ...output, threshold: { ...threshold, op } })
     },
     [handle_change, output]
   )
@@ -173,72 +94,128 @@ export default function ColumnParamOutput({
     handle_change({ ...output, threshold: { ...threshold, value: parsed } })
   }, [threshold_draft, output, handle_change])
 
-  return (
-    <div className='column-param-output'>
-      <ColumnParamSelectFilter
-        column_param_name={column_param_name}
-        column_param_definition={aggregation_definition}
-        selected_param_values={as_selection(aggregation)}
-        handle_change={handle_aggregation_change}
-        mixed_state={mixed_state}
-        row_axes={row_axes}
-      />
+  const render_period_item = ({ option, item_aggregation }) => {
+    const is_selected =
+      aggregation === item_aggregation && output?.period === option.value
+    const class_names = ['table-filter-item-dropdown-item']
+    if (is_selected) class_names.push('selected')
 
-      {aggregation === 'rate' &&
-        (has_single_column_handles &&
-        rate_period_definition.param_override_config ? (
-          <ColumnParamSelectFilterWithOverrides
-            column_param_name='period'
-            column_param_definition={rate_period_definition}
-            selected_param_values={as_selection(output?.period)}
-            handle_change={handle_period_change}
-            column={column}
-            column_index={column_index}
-            set_local_table_state={set_local_table_state}
-            row_axes={row_axes}
-          />
-        ) : (
-          <ColumnParamSelectFilter
-            column_param_name='period'
-            column_param_definition={rate_period_definition}
-            selected_param_values={as_selection(output?.period)}
-            handle_change={handle_period_change}
-            row_axes={row_axes}
-          />
-        ))}
+    return (
+      <div
+        key={`${item_aggregation}_${option.value}`}
+        className={class_names.join(' ')}
+        onClick={() =>
+          handle_select_period({
+            period: option.value,
+            next_aggregation: item_aggregation
+          })
+        }
+      >
+        <Checkbox checked={is_selected} size='small' />
+        <div className='table-filter-item-dropdown-item-label'>
+          {option.label}
+        </div>
+      </div>
+    )
+  }
 
-      {aggregation === 'count' && (
-        <>
-          <ColumnParamSelectFilter
-            column_param_name='period'
-            column_param_definition={count_period_definition}
-            selected_param_values={as_selection(output?.period)}
-            handle_change={handle_period_change}
-            row_axes={row_axes}
-          />
-          <ColumnParamSelectFilter
-            column_param_name='threshold_op'
-            column_param_definition={threshold_operator_definition}
-            selected_param_values={as_selection(output?.threshold?.op)}
-            handle_change={handle_threshold_operator_change}
-            row_axes={row_axes}
-          />
-          <TextField
-            className='column-param-output__threshold-value'
-            label='Value'
-            size='small'
-            variant='outlined'
-            value={threshold_draft}
-            onChange={(event) => set_threshold_draft(event.target.value)}
-            onBlur={commit_threshold_value}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') event.target.blur()
-            }}
-          />
-        </>
+  // The override panel writes sibling params on one column, so it needs the
+  // single-column handles. Where-clause records and bulk edit do not carry
+  // them; there the panel is correctly absent.
+  const has_single_column_handles = Boolean(
+    column && column_index !== undefined && set_local_table_state
+  )
+  const show_denominator_overrides =
+    aggregation === 'rate' &&
+    has_single_column_handles &&
+    column_param_definition?.param_override_config
+
+  const body = (
+    <div className='column-param-output-panel'>
+      <div className='table-filter-item-dropdown-head'>
+        <div className='controls-button' onClick={() => handle_change(null)}>
+          Clear
+        </div>
+        <div
+          className='controls-button close'
+          onClick={() => set_trigger_close((prev) => !prev)}
+        >
+          Close
+        </div>
+      </div>
+
+      <div className='column-param-output-panel-body'>
+        <div className='column-param-output-section'>
+          <div className='column-param-output-section-header'>Rate Per</div>
+          <div className='column-param-output-options'>
+            {rate_period_options.map((option) =>
+              render_period_item({ option, item_aggregation: 'rate' })
+            )}
+          </div>
+        </div>
+
+        <div className='column-param-output-section'>
+          <div className='column-param-output-section-header'>Count Of</div>
+          <div className='column-param-output-options'>
+            {count_period_options.map((option) =>
+              render_period_item({ option, item_aggregation: 'count' })
+            )}
+          </div>
+          {aggregation === 'count' && (
+            <div className='column-param-output-threshold'>
+              <div className='column-param-output-threshold-operators'>
+                {output_column_param.THRESHOLD_OPERATOR_OPTIONS.map(
+                  (operator) => {
+                    const class_names = ['column-param-output-threshold-op']
+                    if (output?.threshold?.op === operator.value) {
+                      class_names.push('selected')
+                    }
+                    return (
+                      <div
+                        key={operator.value}
+                        className={class_names.join(' ')}
+                        onClick={() =>
+                          handle_threshold_operator_change(operator.value)
+                        }
+                      >
+                        {operator.label}
+                      </div>
+                    )
+                  }
+                )}
+              </div>
+              <TextField
+                className='column-param-output-threshold-value'
+                label='Threshold'
+                size='small'
+                variant='outlined'
+                value={threshold_draft}
+                onChange={(event) => set_threshold_draft(event.target.value)}
+                onBlur={commit_threshold_value}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') event.target.blur()
+                }}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {show_denominator_overrides && (
+        <ColumnParamOverrideSection
+          param_override_config={column_param_definition.param_override_config}
+          effective_value={output?.period}
+          column={column}
+          column_index={column_index}
+          set_local_table_state={set_local_table_state}
+          row_axes={row_axes}
+          render_param_item={render_column_param_item}
+        />
       )}
     </div>
   )
+
+  return <FilterBase {...{ label, selected_label, body, trigger_close }} />
 }
 
 ColumnParamOutput.propTypes = {

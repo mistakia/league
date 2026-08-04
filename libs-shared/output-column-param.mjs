@@ -60,11 +60,6 @@ export const COUNT_PERIOD_OPTIONS = [
   period_option('season', 'Seasons')
 ]
 
-export const AGGREGATION_OPTIONS = [
-  { value: 'rate', label: 'Rate' },
-  { value: 'count', label: 'Count' }
-]
-
 export const THRESHOLD_OPERATOR_OPTIONS = [
   { value: '>=', label: '≥' },
   { value: '>', label: '>' },
@@ -144,7 +139,6 @@ const base_output_param = {
   default_value: null,
   format_value: format_output_value,
   param_override_config,
-  aggregations: AGGREGATION_OPTIONS,
   count_periods: COUNT_PERIOD_OPTIONS
 }
 

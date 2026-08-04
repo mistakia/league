@@ -1,15 +1,75 @@
-.column-param-output
+.column-param-output-panel
+  background white
+  border-radius 6px
   display flex
-  align-items center
-  flex-wrap wrap
-  gap 4px
+  flex-direction column
+  min-width 260px
+  max-width 800px
+  max-height 70vh
 
-.column-param-output__threshold-value
-  width 90px
+  .column-param-output-panel-body
+    display flex
+    flex-direction row
+    align-items stretch
+    flex 1 1 auto
+    min-height 180px
+    overflow hidden
 
-  .MuiInputBase-input
-    font-size 0.6875rem
-    padding 6px 8px
+  .column-param-output-section
+    display flex
+    flex-direction column
+    min-width 0
+    min-height 0
+    flex 1
 
-  .MuiInputLabel-root
-    font-size 0.6875rem
+    & + .column-param-output-section
+      border-left 1px solid rgba(0, 0, 0, 0.12)
+
+  .column-param-output-section-header
+    font-size 12px
+    font-weight 500
+    text-transform uppercase
+    color rgba(0, 0, 0, 0.54)
+    padding 8px
+
+  .column-param-output-options
+    display flex
+    flex-direction column
+    min-height 0
+    overflow-y auto
+
+  .column-param-output-threshold
+    display flex
+    align-items center
+    gap 8px
+    padding 8px
+    border-top 1px solid rgba(0, 0, 0, 0.12)
+
+  .column-param-output-threshold-operators
+    display flex
+
+  .column-param-output-threshold-op
+    cursor pointer
+    padding 4px 8px
+    font-size 13px
+    border 1px solid rgba(0, 0, 0, 0.12)
+    margin-right -1px
+    user-select none
+
+    &.selected
+      background rgba(25, 118, 210, 0.12)
+
+  .column-param-output-threshold-value
+    width 90px
+
+    .MuiInputBase-input
+      font-size 0.6875rem
+      padding 6px 8px
+
+    .MuiInputLabel-root
+      font-size 0.6875rem
+
+  .override-section
+    border-top 1px solid rgba(0, 0, 0, 0.12)
+    flex 0 1 auto
+    max-height 45vh
