@@ -733,7 +733,7 @@ const load_team_dropbacks = async ({ unique_esbids }) => {
     .select('possession_nfl_team as tm', 'esbid')
     .count('* as dropbacks')
     .whereIn('esbid', unique_esbids)
-    .where({ is_qb_dropback: true })
+    .where({ qb_dropback: true })
     .whereNot({ play_type: 'NOPL' })
     .groupBy('possession_nfl_team', 'esbid')
 
