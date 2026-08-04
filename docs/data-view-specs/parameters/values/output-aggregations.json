@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/output-aggregations.json",
+  "title": "Output Aggregation Values",
+  "description": "Measure shapes accepted by the output param. Canonical source is the aggregation enum in libs-server/validators.mjs and the plugin registrations in libs-server/data-views/output-aggregator-registry.mjs.",
+  "version": "1.0.0",
+
+  "aggregations": ["rate", "count"],
+
+  "aggregation_details": {
+    "rate": {
+      "description": "Divides the summed measure by the count of periods",
+      "requires_period": true,
+      "requires_threshold": false,
+      "valid_periods": "./output-periods.json#/periods_by_aggregation/rate",
+      "emission": "SUM(measure_total) / COUNT(period_key)",
+      "plugins": [
+        "output-aggregator/aggregator-rate.mjs",
+        "rate-type/rate-type-per-game.mjs",
+        "rate-type/rate-type-per-team-play.mjs",
+        "rate-type/rate-type-per-player.mjs",
+        "rate-type/rate-type-per-player-play.mjs",
+        "rate-type/rate-type-per-player-route.mjs"
+      ],
+      "replaces": "every legacy rate_type token",
+      "cell_format": "fixed: 2"
+    },
+    "count": {
+      "description": "Counts the periods whose aggregated measure total satisfies the threshold predicate",
+      "requires_period": true,
+      "requires_threshold": true,
+      "valid_periods": "./output-periods.json#/periods_by_aggregation/count",
+      "emission": "COUNT(DISTINCT period_key) FILTER (WHERE measure_total <op> <value>)",
+      "plugins": ["output-aggregator/aggregator-count.mjs"],
+      "replaces": null,
+      "cell_format": "integer",
+      "note": "The threshold applies to the per-period aggregate, not to individual source rows — a 100-yard-game count filters on the game's summed yards."
+    }
+  },
+
+  "implicit_default": {
+    "aggregation": "sum",
+    "description": "Omitting the output param entirely means a plain SUM over the column's measure with no period grain. 'sum' is not a valid value of the aggregation field; it is the behavior when the field is absent, and it bypasses the aggregator registry.",
+    "cell_format": "column definition default"
+  },
+
+  "validation_errors": {
+    "outputCountRequiresThreshold": "aggregation 'count' supplied without a threshold object",
+    "outputThresholdRequiresCount": "threshold supplied with an aggregation other than 'count'",
+    "no_output_aggregator": "the (period, aggregation) pair has no registered plugin"
+  }
+}

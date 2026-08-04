@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/output-parameter.json",
+  "title": "Output Aggregation Parameter",
+  "description": "Canonical per-column output-aggregation parameter under the identity model. Replaces the legacy rate_type token system with a (period, aggregation) tuple plus an optional threshold. Mirrors output_param_schema in libs-server/validators.mjs.",
+  "version": "1.0.0",
+
+  "source_files": {
+    "validator": "libs-server/validators.mjs",
+    "registry": "libs-server/data-views/output-aggregator-registry.mjs",
+    "normalizer": "libs-server/data-views/normalize-output-param.mjs",
+    "legacy_token_mapping": "libs-shared/data-views-output-tokens.mjs",
+    "column_param_definition": "libs-shared/output-column-param.mjs"
+  },
+
+  "definitions": {
+    "output_threshold": {
+      "type": "object",
+      "description": "Predicate applied to the aggregated per-period total. Required by, and only valid with, aggregation 'count'.",
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": [">=", ">", "<=", "<", "=", "!="],
+          "description": "Comparison operator applied to the per-period measure total"
+        },
+        "value": {
+          "type": "number",
+          "description": "Right-hand operand of the threshold comparison"
+        }
+      },
+      "required": ["op", "value"],
+      "additionalProperties": false
+    },
+
+    "output_parameter": {
+      "type": "object",
+      "description": "Parameterizes how a numeric measure column aggregates to rows. Absence of the parameter means aggregation 'sum' with no period, which is the default and bypasses the aggregator registry entirely.",
+      "properties": {
+        "period": {
+          "type": "string",
+          "description": "Denominator or counting grain. Valid values are enumerated in ./../values/output-periods.json and must resolve to a registered (period, aggregation) tuple.",
+          "$ref": "../values/output-periods.json#/all_periods"
+        },
+        "aggregation": {
+          "type": "string",
+          "enum": ["rate", "count"],
+          "description": "Measure shape. Enumerated with semantics in ./../values/output-aggregations.json."
+        },
+        "threshold": {
+          "$ref": "#/definitions/output_threshold"
+        }
+      },
+      "required": ["period", "aggregation"],
+      "additionalProperties": false,
+
+      "allOf": [
+        {
+          "description": "count requires a threshold (validator error outputCountRequiresThreshold)",
+          "if": {
+            "properties": { "aggregation": { "const": "count" } },
+            "required": ["aggregation"]
+          },
+          "then": { "required": ["threshold"] }
+        },
+        {
+          "description": "threshold is rejected on any aggregation other than count (validator error outputThresholdRequiresCount)",
+          "if": {
+            "properties": {
+              "aggregation": { "not": { "const": "count" } }
+            },
+            "required": ["aggregation"]
+          },
+          "then": { "not": { "required": ["threshold"] } }
+        }
+      ]
+    }
+  },
+
+  "parameters": {
+    "output": {
+      "$ref": "#/definitions/output_parameter",
+      "applies_to": "numeric measure columns declaring supports_output",
+      "default": null,
+      "legacy_alias": {
+        "parameter": "rate_type",
+        "translation": "normalize_output_param translates params.rate_type to params.output via translate_rate_type_to_output when params.output is absent",
+        "retirement": "retire-rate-type-compat-shims"
+      }
+    },
+    "output_match_column_params": {
+      "type": "boolean",
+      "description": "When true, the denominator CTE inherits the column's own play-filter params. Renamed from rate_type_match_column_params.",
+      "default": true
+    },
+    "output_column_params": {
+      "type": "object",
+      "description": "Explicit denominator play-filter params, used when output_match_column_params is false. Renamed from rate_type_column_params.",
+      "default": null
+    }
+  },
+
+  "emission": {
+    "rate": "SUM(measure_total) / COUNT(period_key) against the materialized period CTE, joined on the identity-derived references",
+    "count": "COUNT(DISTINCT period_key) FILTER (WHERE measure_total <op> <value>) — the threshold applies to the aggregated per-period total, not to individual source rows"
+  },
+
+  "examples": {
+    "yards_per_game": {
+      "output": { "period": "game", "aggregation": "rate" },
+      "equivalent_legacy": { "rate_type": "per_game" }
+    },
+    "target_share_per_team_pass_play": {
+      "output": { "period": "team_pass_play", "aggregation": "rate" },
+      "equivalent_legacy": { "rate_type": "per_team_pass_play" }
+    },
+    "hundred_yard_games": {
+      "output": {
+        "period": "game",
+        "aggregation": "count",
+        "threshold": { "op": ">=", "value": 100 }
+      },
+      "equivalent_legacy": null,
+      "note": "New capability with no rate_type equivalent"
+    }
+  }
+}

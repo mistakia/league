@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/output-periods.json",
+  "title": "Output Period Values",
+  "description": "Denominator and counting grains registered in the output-aggregator registry. Canonical source is libs-server/data-views/output-aggregator-registry.mjs; period names are the legacy rate_type tokens with the per_ prefix stripped.",
+  "version": "1.0.0",
+
+  "all_periods": {
+    "enum": [
+      "game",
+      "season",
+      "team_play",
+      "team_pass_play",
+      "team_rush_play",
+      "team_half",
+      "team_quarter",
+      "team_drive",
+      "team_series",
+      "player_rush_attempt",
+      "player_pass_attempt",
+      "player_target",
+      "player_catchable_target",
+      "player_deep_target",
+      "player_catchable_deep_target",
+      "player_reception",
+      "player_touch",
+      "player_opportunity",
+      "player_play",
+      "player_pass_play",
+      "player_rush_play",
+      "player_route"
+    ]
+  },
+
+  "periods_by_aggregation": {
+    "rate": [
+      "game",
+      "team_play",
+      "team_pass_play",
+      "team_rush_play",
+      "team_half",
+      "team_quarter",
+      "team_drive",
+      "team_series",
+      "player_rush_attempt",
+      "player_pass_attempt",
+      "player_target",
+      "player_catchable_target",
+      "player_deep_target",
+      "player_catchable_deep_target",
+      "player_reception",
+      "player_touch",
+      "player_opportunity",
+      "player_play",
+      "player_pass_play",
+      "player_rush_play",
+      "player_route"
+    ],
+    "count": ["game", "season"],
+    "note": "season is a count-only period; there is no (season, rate) tuple. A (period, aggregation) pair absent from these lists throws 'No output aggregator for (period=..., aggregation=...)' at dispatch."
+  },
+
+  "period_categories": {
+    "time_grain": {
+      "description": "Calendar periods materialized by build-period-cte.mjs",
+      "periods": ["game", "season"],
+      "mechanism": "Divides by, or counts, distinct periods keyed on (year, week, esbid) for game and (year, seas_type) for season",
+      "use_case": "Season-long averages, consistency metrics, threshold-game counts"
+    },
+    "team_unit": {
+      "description": "Team-level denominators from the per-team-play plugin family",
+      "periods": [
+        "team_play",
+        "team_pass_play",
+        "team_rush_play",
+        "team_half",
+        "team_quarter",
+        "team_drive",
+        "team_series"
+      ],
+      "mechanism": "Divides by team-level play, drive, series, or clock-segment counts",
+      "use_case": "Market share and team-context efficiency"
+    },
+    "player_opportunity": {
+      "description": "Player-specific opportunity denominators from the per-player plugin",
+      "periods": [
+        "player_rush_attempt",
+        "player_pass_attempt",
+        "player_target",
+        "player_catchable_target",
+        "player_deep_target",
+        "player_catchable_deep_target",
+        "player_reception",
+        "player_touch",
+        "player_opportunity"
+      ],
+      "mechanism": "Divides by the player's own countable opportunities",
+      "use_case": "Per-touch and per-target efficiency"
+    },
+    "player_participation": {
+      "description": "Playing-time denominators from the per-player-play and per-player-route plugins",
+      "periods": [
+        "player_play",
+        "player_pass_play",
+        "player_rush_play",
+        "player_route"
+      ],
+      "mechanism": "Divides by snaps or routes run",
+      "use_case": "Usage rate and per-snap efficiency"
+    }
+  },
+
+  "play_level_classification": {
+    "description": "Whether the denominator varies with the column's play-level filter params. Canonical source is NON_PLAY_LEVEL_PERIODS in libs-shared/data-views-output-tokens.mjs.",
+    "non_play_level": ["game", "season", "team_half", "team_quarter"],
+    "consequence": "Non-play-level periods ignore output_column_params / output_match_column_params; the column-param UI disables denominator-param overrides for them."
+  },
+
+  "row_axis_compatibility": {
+    "week": {
+      "silently_dropped": {
+        "tuples": [{ "period": "game", "aggregation": "rate" }],
+        "reason": "per-game normalization is meaningless when each row is already one week",
+        "behavior": "normalize_output_param removes the output param and logs at debug level"
+      },
+      "rejected": {
+        "tuples": [{ "period": "season", "aggregation": "count" }],
+        "reason": "a season-grain count cannot be attributed to a single week row",
+        "behavior": "normalize_output_param throws"
+      }
+    },
+    "year": {
+      "note": "All periods are compatible with a year row axis."
+    }
+  },
+
+  "legacy_token_mapping": {
+    "description": "Legacy rate_type tokens map onto (period, aggregation: 'rate') by stripping the per_ prefix. Full table in libs-shared/data-views-output-tokens.mjs.",
+    "example": {
+      "per_team_play": { "period": "team_play", "aggregation": "rate" }
+    }
+  }
+}

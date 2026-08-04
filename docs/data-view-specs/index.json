@@ -129,7 +129,14 @@
       "description": "Team unit and matchup parameters",
       "source_file": "libs-shared/nfl-plays-team-column-params.mjs"
     },
+    "output_parameter": {
+      "file": "./parameters/schemas/output-parameter.json",
+      "description": "Canonical output-aggregation param (period, aggregation, threshold); supersedes rate_type",
+      "source_file": "libs-server/validators.mjs"
+    },
     "parameter_values": {
+      "output_periods": "./parameters/values/output-periods.json",
+      "output_aggregations": "./parameters/values/output-aggregations.json",
       "rate_types": "./parameters/values/rate-types.json",
       "market_types": "./parameters/values/market-types.json",
       "team_attribution": "./parameters/values/team-attribution.json"

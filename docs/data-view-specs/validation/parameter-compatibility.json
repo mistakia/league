@@ -86,6 +86,53 @@
     }
   },
 
+  "output_compatibility": {
+    "description": "Validation rules for the canonical output param. Legacy rate_type input is translated to output by normalize_output_param before these rules apply, so rate_type_compatibility below describes the same restrictions in legacy vocabulary.",
+    "schema": "../parameters/schemas/output-parameter.json",
+    "shape_rules": {
+      "count_requires_threshold": {
+        "rule": "aggregation 'count' requires a threshold object with op and value",
+        "validator_error": "outputCountRequiresThreshold",
+        "severity": "error"
+      },
+      "threshold_requires_count": {
+        "rule": "threshold is only valid with aggregation 'count'",
+        "validator_error": "outputThresholdRequiresCount",
+        "severity": "error"
+      },
+      "tuple_must_be_registered": {
+        "rule": "the (period, aggregation) pair must resolve to a registered aggregator plugin",
+        "notable_gap": "season has a count aggregator but no rate aggregator",
+        "severity": "error"
+      },
+      "column_must_support_output": {
+        "rule": "the column definition must declare supports_output covering the requested period and aggregation",
+        "severity": "error"
+      }
+    },
+    "row_axis_restrictions": {
+      "week_axis_drops_game_rate": {
+        "tuple": { "period": "game", "aggregation": "rate" },
+        "reason": "per-game normalization is meaningless when each row is already one week",
+        "behavior": "silently dropped and logged at debug level",
+        "severity": "warning"
+      },
+      "week_axis_rejects_season_count": {
+        "tuple": { "period": "season", "aggregation": "count" },
+        "reason": "a season-grain count cannot be attributed to a single week row",
+        "behavior": "throws",
+        "severity": "error"
+      }
+    },
+    "denominator_param_restrictions": {
+      "non_play_level_periods_ignore_overrides": {
+        "periods": ["game", "season", "team_half", "team_quarter"],
+        "rule": "output_column_params and output_match_column_params have no effect because the denominator does not vary with play-level filters",
+        "severity": "warning"
+      }
+    }
+  },
+
   "rate_type_compatibility": {
     "split_restrictions": {
       "week_splits_incompatible": {
