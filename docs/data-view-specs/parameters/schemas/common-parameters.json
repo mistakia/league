@@ -92,12 +92,12 @@
     },
 
     "rate_type": {
-      "description": "Rate type for normalizing statistics",
+      "description": "Legacy rate-normalization token. Permanently accepted on the request path because shared short URLs carry it; normalize_output_param translates it to the canonical output param before anything reads it. New views should declare output directly -- see ./output-parameter.json.",
       "type": "array",
       "items": {
         "$ref": "../values/rate-types.json#/rate_types"
       },
-      "usage_pattern": "Convert raw stats to rate-based metrics",
+      "usage_pattern": "Legacy input only; translated to (period, aggregation) on the way in",
       "examples": [["per_game"], ["per_team_play"], ["per_player_target"]]
     },
 

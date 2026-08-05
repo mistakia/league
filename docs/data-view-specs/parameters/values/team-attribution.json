@@ -18,8 +18,8 @@
 
   "applies_to": {
     "families": ["team_stats_from_plays"],
-    "rate_types": ["per_game", "per_team_play"],
-    "note": "Honored only for the two team RATE types. Counting columns and other rate types do not declare the param and are unchanged (see deferred extension below)."
+    "output_periods": ["game", "team_play"],
+    "note": "Honored only for the two team rate periods. Counting columns and other rate types do not declare the param and are unchanged (see deferred extension below)."
   },
 
   "value_semantics": {

@@ -36,7 +36,7 @@
       "description": "Advanced statistics calculated from NFL play-by-play data",
       "table_name": "nfl_plays",
       "cache_strategy": "dynamic_by_season",
-      "supports": ["rate_types", "year_splits", "week_splits"]
+      "supports": ["output_aggregation", "year_row_axis", "week_row_axis"]
     },
     "player_fantasy_points": {
       "file": "./column-families/player-fantasy-points.json",
@@ -44,21 +44,21 @@
       "table_name": "nfl_plays",
       "cache_strategy": "dynamic_by_season",
       "requires_parameters": ["scoring_format_id"],
-      "supports": ["rate_types", "year_splits", "week_splits"]
+      "supports": ["output_aggregation", "year_row_axis", "week_row_axis"]
     },
     "team_stats_from_plays": {
       "file": "./column-families/team-stats-from-plays.json",
       "description": "Team-level statistics calculated from play-by-play data",
       "table_name": "nfl_plays",
       "cache_strategy": "dynamic_by_season",
-      "supports": ["year_splits", "week_splits"]
+      "supports": ["output_aggregation", "year_row_axis", "week_row_axis"]
     },
     "defensive_stats_from_plays": {
       "file": "./column-families/defensive-stats-from-plays.json",
       "description": "Defensive player statistics from play-by-play data",
       "table_name": "nfl_plays",
       "cache_strategy": "dynamic_by_season",
-      "supports": ["rate_types", "year_splits", "week_splits"]
+      "supports": ["output_aggregation", "year_row_axis", "week_row_axis"]
     },
     "nfl_team_seasonlogs": {
       "file": "./column-families/nfl-team-seasonlogs.json",
@@ -137,29 +137,28 @@
     "parameter_values": {
       "output_periods": "./parameters/values/output-periods.json",
       "output_aggregations": "./parameters/values/output-aggregations.json",
-      "rate_types": "./parameters/values/rate-types.json",
+      "legacy_rate_types": "./parameters/values/rate-types.json",
       "market_types": "./parameters/values/market-types.json",
       "team_attribution": "./parameters/values/team-attribution.json"
     }
   },
 
   "validation": {
-    "parameter_compatibility": "./validation/parameter-compatibility.json",
-    "split_rate_type_matrix": "./validation/split-rate-type-matrix.json"
+    "parameter_compatibility": "./validation/parameter-compatibility.json"
   },
 
   "advanced_features": {
-    "rate_type_support": {
+    "output_aggregation_support": {
       "families": [
         "player_stats_from_plays",
         "player_fantasy_points",
         "defensive_stats_from_plays"
       ]
     },
-    "split_support": {
-      "year_splits": 8,
-      "week_splits": 6,
-      "both_splits": 4
+    "row_axis_support": {
+      "year_axis": 8,
+      "week_axis": 6,
+      "both_axes": 4
     },
     "partitioned_table_optimization": {
       "description": "Single-year queries use partitioned tables for 10-100x performance",
@@ -185,7 +184,7 @@
       "quick_tips": {
         "single_year_queries": "Use year: [2024] instead of year: [2023, 2024] when possible",
         "minimal_prefix_columns": "Only include essential identification columns",
-        "appropriate_rate_types": "Choose rate types that match your analysis goals",
+        "appropriate_output_periods": "Choose output periods that match your analysis goals",
         "effective_filtering": "Use WHERE clauses to reduce result set early"
       }
     },

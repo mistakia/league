@@ -36,7 +36,6 @@
         "career_year",
         "career_game"
       ],
-      "supported_rate_types": [],
       "supported_row_axes": [],
       "data_type": "number",
       "market_scope": "season"
@@ -54,7 +53,6 @@
         "career_year",
         "career_game"
       ],
-      "supported_rate_types": [],
       "supported_row_axes": [],
       "data_type": "number",
       "market_scope": "game"
@@ -72,7 +70,6 @@
         "career_year",
         "career_game"
       ],
-      "supported_rate_types": [],
       "supported_row_axes": [],
       "data_type": "number"
     },
@@ -89,7 +86,6 @@
         "career_year",
         "career_game"
       ],
-      "supported_rate_types": [],
       "supported_row_axes": [],
       "data_type": "number"
     },
@@ -106,7 +102,6 @@
         "career_year",
         "career_game"
       ],
-      "supported_rate_types": [],
       "supported_row_axes": [],
       "data_type": "number"
     },
@@ -121,7 +116,6 @@
         "time_type",
         "selection_type"
       ],
-      "supported_rate_types": [],
       "supported_row_axes": [],
       "data_type": "number",
       "market_scope": "team"
@@ -130,7 +124,6 @@
     "player_prop_market_count_from_betting_markets": {
       "description": "Count of available prop markets for player",
       "parameters": ["year", "week", "source_id", "time_type"],
-      "supported_rate_types": [],
       "supported_row_axes": [],
       "data_type": "number",
       "use_case": "Market availability analysis"
@@ -146,7 +139,6 @@
         "career_year",
         "career_game"
       ],
-      "supported_rate_types": [],
       "supported_row_axes": [],
       "data_type": "number"
     }

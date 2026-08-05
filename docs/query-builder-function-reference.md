@@ -10,7 +10,7 @@ This document provides comprehensive documentation for every function in the dat
 4. [Hashing Functions](#hashing-functions)
 5. [Join Operations](#join-operations)
 6. [CTE Builders](#cte-builders)
-7. [Rate Type System](#rate-type-system)
+7. [Output Aggregation](#output-aggregation)
 8. [Utility Functions](#utility-functions)
 9. [Error Handling Patterns](#error-handling-patterns)
 10. [Performance Implications](#performance-implications)
@@ -170,29 +170,22 @@ if (from_table_name !== 'player') {
 
 ---
 
-#### `setup_central_references({ data_view_options, row_axes })`
+#### `resolve_references({ identity_id, from_table_name })`
 
-**Purpose**: Sets up centralized references for player PID, year, and week based on the from table configuration.
+**Module**: `libs-server/data-views/identities.mjs`
+
+**Purpose**: Resolves the four subject references a join fragment binds against — `pid_reference`, `team_reference`, `year_reference`, `week_reference` — from the active identity, adapted to the FROM table that sort optimization selected.
 
 **Parameters**:
 
-- `data_view_options` (Object): Query options including from_table_name
-- `row_axes` (Array): Active split dimensions
+- `identity_id` (String): one of `player`, `player_year`, `player_year_week`, `team`, `team_year`, `team_year_week`
+- `from_table_name` (String): the table the query FROMs, which may be a fact table rather than the identity's canonical source
 
-**Returns**: Updated data_view_options with centralized references
+**Returns**: `{ pid_reference, team_reference, year_reference, week_reference }`
 
-**Logic**:
+**Logic**: team identities resolve to the identity's own columns; a player query on the canonical `player` FROM resolves to the identity CTEs (`player.pid`, `player_years.year`); a player query optimized onto a fact table resolves to that table's own columns, so the reference needs no bridge CTE.
 
-```javascript
-// Setup player PID reference from the from table
-data_view_options.pid_reference = `${from_table_name}.pid`
-
-// Setup year and week references - use the from table directly
-data_view_options.year_reference = `${from_table_name}.year`
-data_view_options.week_reference = `${from_table_name}.week`
-```
-
-**Usage**: These centralized references are used throughout the system for consistent year/week joins and player ID references, replacing the previous `year_split_join_clause` and `week_split_join_clause` parameters. The references are automatically determined based on the from table configuration.
+**Usage**: `build_query_context` calls it to populate `query_context`, which is the identity-derived source of truth. The dispatcher mirrors the FROM-aware result onto `data_view_options` for the shared join helpers that still read from it. This replaced `setup_central_references`, which derived all three references from the FROM table name alone and had no notion of identity.
 
 ## String Generation Functions
 
@@ -523,105 +516,23 @@ return `t${hash.toString('hex')}`
 
 ## Join Operations
 
-### Data View Join Function (`data-view-join-function.mjs`)
+### Source Attach (`source-attach/dispatcher.mjs`)
 
-#### `data_view_join_function(params)`
+#### `attach_source({ players_query, query_context, column_def, params, table_alias, join_type, row_axes })`
 
-**Purpose**: Handles complex JOIN operations with extensive customization options and centralized reference system.
+**Purpose**: Attaches a column's data source to the query. This replaced `data-view-join-function.mjs`, which took a `join_on_team` flag and a long list of join-shape options; a column now declares a `source` descriptor and the registry decides the join.
 
-**Parameters** (extensive object with following properties):
+**Resolution**: derives the mode from `params.matchup_opponent_type`, looks up a rule by `(cell identity, source grain, mode)` in `source-attach/source-attach-registry.mjs`, and falls back to `'default'` mode when a non-default mode has no registered entry.
 
-- `query` (Knex.QueryBuilder): Active query builder
-- `table_name` (String): Table to join
-- `join_table_clause` (String): Custom join clause
-- `join_type` (String): 'LEFT' or 'INNER'
-- `row_axes` (Array): Active splits
-- `params` (Object): Query parameters
-  - `year` (Array): Years to filter
-  - `week` (Array): Weeks to filter
-  - `year_offset` (Number|Array): Year offset handling
-- `additional_conditions` (Function): Custom join conditions
-- `join_year` (Boolean): Whether to join on year
-- `join_week` (Boolean): Whether to join on week
-- `skip_week_split_join` (Boolean): Skip automatic week join when table lacks week column
-- `join_on_team` (Boolean): Whether to join on team
-- `on_alias` (String): Alias for ON clause
-- `data_view_options` (Object): Query options with centralized references
-  - `pid_reference` (String): Centralized player PID reference
-  - `year_reference` (String): Centralized year reference
-  - `week_reference` (String): Centralized week reference
-  - `from_table_name` (String): Primary table name for the query
-  - `from_table_type` (String): Type of from table ('table', 'cte')
-- `is_team` (Boolean): Team-level join
-- `week_table_name` (String): Week table name
-- `team_unit` (String): 'off' or 'def'
-- `opponent_clause_prefix` (String): Opponent matching prefix
+**Rules** live under `source-attach/rules/` and export `{ cell_identity, source_grain, mode, required_identity_bridges, emit_predicate }`. The dispatcher applies every bridge in `required_identity_bridges` via `apply_bridge`, then emits the join through `emit_predicate` unless the source sets `attach_owns_join`, then calls the source's own `attach()` if it declares one.
 
-**Complex Features**:
-
-**Centralized Reference System**:
-
-```javascript
-// Use centralized player PID reference
-this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
-
-// Use centralized year reference for joins
-this.andOn(db.raw(`${table_name}.year = ${data_view_options.year_reference}`))
-
-// Use centralized week reference for joins
-this.andOn(db.raw(`${table_name}.week = ${data_view_options.week_reference}`))
-```
-
-**Year Offset Handling**:
-
-```javascript
-// Single offset using centralized reference
-if (year_offset === -1) {
-  this.andOn(
-    db.raw(`${table_name}.year = ${data_view_options.year_reference} + ?`, [-1])
-  )
-}
-
-// Range offset (e.g., [-2, 0] for 3-year window)
-if (Array.isArray(year_offset)) {
-  this.andOn(
-    db.raw(
-      `${table_name}.year BETWEEN ${data_view_options.year_reference} + ? AND ${data_view_options.year_reference} + ?`,
-      [year_offset[0], year_offset[1]]
-    )
-  )
-}
-```
-
-**Self-Join Prevention**:
-
-```javascript
-// Skip join entirely if this table is the same as the from table (prevents self-join)
-if (table_name !== data_view_options.from_table_name) {
-  // Perform join logic
-} else {
-  log(`Skipping self-join for table: ${table_name}`)
-}
-```
-
-**Team Opponent Matching**:
-
-```javascript
-// For defensive stats
-if (team_unit === 'def' && matchup_opponent_type) {
-  this.on(
-    `${table_name}.${team}_team`,
-    `=`,
-    db.raw(`${opponent_table}.opponent`)
-  )
-}
-```
+**Constraint mechanism**: registry presence. A `(cell identity, source grain, mode)` combination with no rule fails resolution, which is how matchup-opponent columns are unavailable under the team row grain without any column declaring a restriction.
 
 **Performance Optimizations**:
 
 - Uses appropriate join type based on filtering
 - Leverages indexes through proper ON clauses
-- Centralized references ensure consistent joins across all tables
+- Identity-derived references ensure consistent joins across all tables
 
 ## CTE Builders
 
@@ -683,184 +594,47 @@ WITH ${table_name} AS (
 
 **Error Handling**: Throws if `with_table_name` is missing.
 
-## Rate Type System
+## Output Aggregation
 
-### Rate Type Index (`rate-type/index.mjs`)
+### Output Aggregator Registry (`output-aggregator-registry.mjs`)
 
-#### Rate Type Registry
+The registry is a `Map<period, Map<aggregation, plugin>>`. It replaced the `rate_type_handlers` dispatch map, which keyed on a `rate_type` string and exposed `{get_cte_table_name, add_cte, join_cte}`.
 
-```javascript
-const rate_type_handlers = {
-  per_game: { get_cte_table_name, add_cte, join_cte },
-  per_team_play: { ... },
-  per_team_pass_play: { ... },
-  per_team_rush_play: { ... },
-  per_team_half: { ... },
-  per_team_quarter: { ... },
-  per_team_drive: { ... },
-  per_team_series: { ... },
-  per_player_play: { ... },
-  per_player_pass_play: { ... },
-  per_player_rush_play: { ... },
-  per_player_recv_play: { ... },
-  per_player_rush_attempt: { ... },
-  per_player_pass_attempt: { ... },
-  per_player_target: { ... },
-  per_player_reception: { ... },
-  per_player_touch: { ... },
-  per_player_route: { ... },
-  per_player: { ... }
-}
-```
+#### `resolve({ period, aggregation, column_def })`
 
----
+Returns the plugin for a `(period, aggregation)` tuple. A column definition may override registry lookup with `column_def.output_aggregator`.
 
-#### `get_rate_type_cte_table_name({ params, rate_type, team_unit, is_team })`
+Registered `rate` periods: `game`, `team_play`, `team_pass_play`, `team_rush_play`, `team_half`, `team_quarter`, `team_drive`, `team_series`, `player_rush_attempt`, `player_pass_attempt`, `player_target`, `player_catchable_target`, `player_deep_target`, `player_catchable_deep_target`, `player_reception`, `player_touch`, `player_opportunity`, `player_play`, `player_pass_play`, `player_rush_play`, `player_route`. Registered `count` periods: `game`, `season`.
 
-**Purpose**: Dispatches to appropriate rate type handler for CTE name generation.
+#### `apply_output_aggregator({ query_context, column_def, params, identity_id, column_index })`
 
-**Parameters**:
+Orchestrates one column: resolve the plugin, name the CTE, `add_cte`, `join_cte` (deduped against `query_context.joined_output_ctes`), attach a separate numerator CTE when the plugin does not handle its own, then `emit_outer_select`.
 
-- `params` (Object): Query parameters
-- `rate_type` (String): Type of rate calculation
-- `team_unit` (String): 'off' or 'def' for team rates
-- `is_team` (Boolean): Team vs player rate
+### Plugin interface
 
-**Returns**: Unique CTE table name string
+Every plugin exports:
 
----
+- `consumes_params` (Array of String) — declarative allowlist of param keys the plugin reads, never inferred. It feeds the CTE-name hash, so a param that changes the CTE's contents but is missing here makes two columns differing only in that param share one CTE and return identical values.
+- `get_cte_name({ column_def, params, identity_id, dispatch_params })`
+- `add_cte(...)` — registers via `withMaterialized`, never `with`
+- `join_cte(...)` — joins on identity-derived references
+- `emit_outer_select(...)` — returns `{ sql, bindings }`
 
-#### `add_rate_type_cte({ players_query, params, rate_type_table_name, row_axes, rate_type, team_unit, is_team })`
+### Period CTE builder (`output-aggregator/build-period-cte.mjs`)
 
-**Purpose**: Adds rate type CTE to query.
+`period` is `game` (period key `year_week_esbid`), `season` (period key `year_seastype`), or `aggregate` (numerator-only, no period key). Anything else throws.
 
-**Parameters**: Similar to above plus:
+`build_role_union_period_cte` handles `measure_source: 'plays_role_union'` — one play attributing to several players — via `UNION ALL` over role attributions. `build_batched_period_cte` handles every other source and coalesces measures sharing a scan signature into one CTE.
 
-- `players_query` (Knex.QueryBuilder): Query builder
-- `rate_type_table_name` (String): CTE name
-- `row_axes` (Array): Active splits
+### Measure batching (`output-aggregator/measure-batch.mjs`)
 
-**Effect**: Modifies query by adding WITH clause
+`compute_group_key` keys on measure source, period, identity, sorted pid columns, rendered measure predicate, `apply_filters` body, team unit, and the consumed-params signature. CTE names are `rate_<period>_<md5 prefix>`. Registration is deferred until `flush_measure_batches` runs after the per-column dispatch loop.
 
----
+### Denominator CTE builders (`rate-type/`)
 
-#### `join_rate_type_cte({ players_query, params, rate_type_table_name, row_axes, rate_type, team_unit, is_team, data_view_options })`
+The per-period denominator builders still live under `libs-server/data-views/rate-type/` — `rate-type-per-game.mjs`, `rate-type-per-team-play.mjs`, `rate-type-per-player.mjs`, `rate-type-per-player-play.mjs`, `rate-type-per-player-route.mjs`. They are the live implementation, not a compat shim, and are bound to their `(period, 'rate')` tuples by the registry. There is no `rate-type/index.mjs` dispatcher.
 
-**Purpose**: Joins rate type CTE to main query.
-
-**Parameters**: Similar to above plus:
-
-- `data_view_options` (Object): Contains centralized references including:
-  - `pid_reference` (String): Centralized player PID reference
-  - `year_reference` (String): Centralized year reference
-  - `week_reference` (String): Centralized week reference
-
-**Effect**: Adds appropriate JOIN clause using centralized references
-
-### Rate Type Implementation Example (`rate-type-per-game.mjs`)
-
-#### `get_per_game_cte_table_name({ params, team_unit, is_team })`
-
-**Purpose**: Generates unique CTE name for per-game rates.
-
-**Naming Pattern**:
-
-```javascript
-// Player: rate_type_per_game_2023_2024_REG
-// Team: rate_type_per_team_game_off_2023_2024_REG
-// Career: rate_type_per_game_career_year_1_10_REG
-```
-
-**Parameters Considered**:
-
-- Years, weeks, career spans
-- Team unit (offensive/defensive)
-- Season type
-
----
-
-#### `add_per_game_cte({ players_query, params, rate_type_table_name, row_axes })`
-
-**Purpose**: Creates CTE counting games for rate calculations.
-
-**Player Version**:
-
-```sql
-WITH rate_type_per_game_2024_REG AS (
-  SELECT pid, COUNT(DISTINCT esbid) as rate_type_total_count
-  FROM player_gamelogs_2024  -- Year-specific optimization
-  WHERE seas_type = 'REG'
-  GROUP BY pid
-)
-```
-
-**Team Version**:
-
-Games per team are counted from `nfl_games` (~7K rows for 24 years), not via `COUNT(DISTINCT esbid)` over `nfl_plays` (~1.3M rows). Every game appears as both home (`home_nfl_team`) and away (`away_nfl_team`) exactly once, so a `UNION ALL` of the two sides with `COUNT(*)` per team yields the same denominator far more cheaply (measured 5.8s → 2.3s on a year-split column set):
-
-```sql
-WITH rate_type_per_team_game_off_2023_2024_2025_REG AS (
-  SELECT team, COUNT(*) as rate_type_total_count
-  FROM (
-    SELECT home_nfl_team as team FROM nfl_games WHERE season_type = 'REG' AND season_year IN (2023, 2024, 2025)
-    UNION ALL
-    SELECT away_nfl_team as team FROM nfl_games WHERE season_type = 'REG' AND season_year IN (2023, 2024, 2025)
-  ) g
-  GROUP BY team
-)
-```
-
-**Year-conditional grain (invariant)**: `year` is added to the `SELECT`/`GROUP BY` **only when a year split is active**, matching the established rate-CTE invariant (`build-period-cte`'s `include_year`, and the player per-game denominator above). Without a year split this yields one row per team (full-window game count, e.g. 51 over 2023-2025 REG); with a year split it yields one row per `(team, year)` for a year-correlated 1:1 join. Grouping by year unconditionally would fan the denominator into one row per `(team, year)` while the numerator stays a full multi-year total, and the outer `MAX()` would then collapse to a single season's game count — inflating every team per-game rate by ~N (N = years in the window). This was the 2026-06-20 grain bug (commit cbcfb8c4).
-
-**Optimizations**:
-
-- Counts games from `nfl_games` (home/away `UNION ALL`) rather than `DISTINCT esbid` over `nfl_plays`
-- Year-conditional partitioning keeps the denominator team-invariant when unsplit
-- Player version uses year-specific tables when possible and filters inactive players
-
----
-
-#### `join_per_game_cte({ players_query, rate_type_table_name, row_axes, params, team_unit, is_team, data_view_options })`
-
-**Purpose**: Joins game count CTE for rate calculations.
-
-**Parameters**:
-
-- `players_query` (Knex.QueryBuilder): Query builder instance
-- `rate_type_table_name` (String): CTE table name
-- `row_axes` (Array): Active split dimensions
-- `params` (Object): Query parameters including year_offset
-- `team_unit` (String): 'off' or 'def' for team rates
-- `is_team` (Boolean): Whether this is a team-level join
-- `data_view_options` (Object): Contains centralized references
-
-**Join Patterns**:
-
-```javascript
-// Simple join (no row_axes)
-query.leftJoin(cte_name, `${cte_name}.pid`, data_view_options.pid_reference)
-
-// Split-aware join using centralized references
-query.leftJoin(cte_name, function () {
-  this.on(`${cte_name}.pid`, data_view_options.pid_reference)
-  this.on(`${cte_name}.year`, data_view_options.year_reference)
-})
-
-// Year offset join using centralized reference
-query.leftJoin(cte_name, function () {
-  this.on(`${cte_name}.pid`, data_view_options.pid_reference)
-  this.on(
-    db.raw(`${cte_name}.year = ${data_view_options.year_reference} + ?`, [
-      year_offset
-    ])
-  )
-})
-
-// Week join using centralized reference
-if (row_axes.includes('week')) {
-  this.andOn(`${cte_name}.week`, '=', data_view_options.week_reference)
-}
-```
+Their author invariants — apply `effective_years` as a `WHERE ... IN` on every year-partitioned table scanned, and register every CTE with `withMaterialized` — are in `libs-server/data-views/rate-type/ABOUT.md`.
 
 ## Utility Functions
 
@@ -1037,18 +811,20 @@ function some_function({
 **After** (current approach):
 
 ```javascript
-// Functions receive data_view_options
-function some_function({ data_view_options, ...other_params }) {
-  // Use centralized references
-  this.on('table.year', data_view_options.year_reference)
-  this.on('table.week', data_view_options.week_reference)
-  this.on('table.pid', data_view_options.pid_reference)
+// Functions receive query_context
+function some_function({ query_context, ...other_params }) {
+  // Use identity-derived references
+  this.on('table.year', query_context.year_reference)
+  this.on('table.week', query_context.week_reference)
+  this.on('table.pid', query_context.pid_reference)
 }
 ```
 
+`query_context` (`libs-server/data-views/query-context.mjs`) is the identity-derived source of truth: `identity_id`, `row_grain_id`, `row_grain`, `row_axes`, `year_range`, `nfl_week_ids`, `params`, the four references, `is_team`, `having_clauses`, and the idempotency sets `applied_bridges`, `applied_output_ctes`, `joined_output_ctes`, `registered_ctes`.
+
 ### Data View Options Structure
 
-The `data_view_options` object now contains:
+`data_view_options` survives as the FROM-table-aware override layer, because sort optimization can promote a fact table to the FROM and the references then have to point at it. It contains:
 
 ```javascript
 {
@@ -1067,7 +843,6 @@ The `data_view_options` object now contains:
   player_seasonlogs_joined: Boolean,
   nfl_year_week_timestamp_joined: Boolean,
   year_coalesce_args: Array,
-  rate_type_tables: Object,
   matchup_opponent_types: Set
 }
 ```

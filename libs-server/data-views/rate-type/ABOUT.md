@@ -1,6 +1,8 @@
 # Rate-Type CTE Builders
 
-This directory contains the CTE builders that produce the denominator (rate-type) aggregations used by data-view columns. Each file targets a specific aggregation grain and is plugged into the rate-type dispatcher in `./index.mjs`.
+This directory contains the CTE builders that produce the denominator aggregations used by data-view columns. Each file targets a specific aggregation grain and is bound to its `(period, 'rate')` tuples by `../output-aggregator-registry.mjs`.
+
+These are the live implementation, not a compat shim — the directory keeps its `rate-type` name only because renaming it has not been done yet (`user:task/league/data-views/retire-rate-type-compat-shims.md`). The `rate_type` request param is separately permanent, since shared short URLs carry it; `../normalize-output-param.mjs` translates it to `output` before any of these builders run.
 
 ## Files
 
@@ -9,7 +11,10 @@ This directory contains the CTE builders that produce the denominator (rate-type
 - `rate-type-per-team-play.mjs` -- per-team-play denominators over `nfl_plays`.
 - `rate-type-per-player-route.mjs` -- per-player-route denominators over `nfl_plays_receiver` joined with `nfl_plays`.
 - `rate-type-per-player.mjs` -- per-player stat-counted denominators over `nfl_plays` (rush/pass/target/reception variants).
-- `index.mjs` -- dispatcher mapping `rate_type` strings to `{ get_cte_table_name, add_cte, join_cte }` handlers.
+- `emit-rate-outer-select.mjs` -- shared outer-SELECT emission for the legacy rate path.
+- `per-team-play-wrap.mjs` -- the multi-year-no-split wrap that re-attributes per-year team volume.
+
+Dispatch lives one level up in `../output-aggregator-registry.mjs`, which resolves `(period, aggregation)` to a plugin exposing `consumes_params`, `get_cte_name`, `add_cte`, `join_cte`, and `emit_outer_select`. There is no `index.mjs` here.
 
 ## Invariants for Authors
 
@@ -30,7 +35,7 @@ Every builder MUST register its CTE via `players_query.withMaterialized(...)`, n
 
 ### Forwarding data_view_options
 
-Column definitions that call these builders directly (rather than via `add_rate_type_cte`) MUST forward `data_view_options` into the builder call. The builder depends on `data_view_options.year_range` to compute `effective_years` in the row-axis-driven case; omitting it silently disables year pushdown for columns whose year signal comes only from row_axes.
+Column definitions that call these builders directly (rather than through the output-aggregator registry) MUST forward `data_view_options` into the builder call. The builder depends on `data_view_options.year_range` to compute `effective_years` in the row-axis-driven case; omitting it silently disables year pushdown for columns whose year signal comes only from row_axes.
 
 ## See Also
 

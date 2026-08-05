@@ -1,100 +1,51 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://xo.football/schemas/rate-types.json",
-  "title": "Rate Type Values",
-  "description": "Valid rate types for statistical normalization",
-  "version": "1.0.0",
+  "title": "Legacy Rate Type Values",
+  "description": "Legacy per_-prefixed rate tokens. Permanently accepted on the request path because shared short URLs carry them; normalize_output_param translates each to the canonical output param before anything reads it. Canonical source is libs-shared/data-views-output-tokens.mjs. New views should declare output directly -- see ../schemas/output-parameter.json and ./output-periods.json.",
+  "version": "2.0.0",
+
+  "status": "legacy_input_only",
 
   "rate_types": [
     "per_game",
-    "per_team_half",
-    "per_team_quarter",
     "per_team_play",
     "per_team_pass_play",
     "per_team_rush_play",
+    "per_team_half",
+    "per_team_quarter",
+    "per_team_drive",
+    "per_team_series",
     "per_player_rush_attempt",
     "per_player_pass_attempt",
     "per_player_target",
+    "per_player_catchable_target",
+    "per_player_deep_target",
+    "per_player_catchable_deep_target",
     "per_player_reception",
-    "per_player_route",
-    "per_player_snap"
+    "per_player_touch",
+    "per_player_opportunity",
+    "per_player_play",
+    "per_player_pass_play",
+    "per_player_rush_play",
+    "per_player_route"
   ],
 
-  "rate_type_categories": {
-    "game_based": {
-      "description": "Normalized per game played",
-      "rate_types": ["per_game"],
-      "mechanism": "Divides by games played",
-      "use_case": "Season-long averages and consistency metrics"
-    },
-    "team_based": {
-      "description": "Normalized per team unit (half, quarter, play)",
-      "rate_types": [
-        "per_team_half",
-        "per_team_quarter",
-        "per_team_play",
-        "per_team_pass_play",
-        "per_team_rush_play"
-      ],
-      "mechanism": "Divides by team-level denominators",
-      "use_case": "Team share and efficiency metrics"
-    },
-    "opportunity_based": {
-      "description": "Normalized per player opportunity",
-      "rate_types": [
-        "per_player_rush_attempt",
-        "per_player_pass_attempt",
-        "per_player_target",
-        "per_player_reception"
-      ],
-      "mechanism": "Divides by player-specific opportunities",
-      "use_case": "Efficiency and per-touch metrics"
-    },
-    "snap_based": {
-      "description": "Normalized per snap or route",
-      "rate_types": ["per_player_snap", "per_player_route"],
-      "mechanism": "Divides by playing time metrics",
-      "use_case": "Usage rate and snap efficiency"
+  "translation": {
+    "description": "Each token maps to (period, aggregation: 'rate') by stripping the per_ prefix. There is no legacy token for the count aggregation -- it is new capability with no rate_type equivalent.",
+    "rule": "per_<token> -> { period: '<token>', aggregation: 'rate' }",
+    "examples": {
+      "per_game": { "period": "game", "aggregation": "rate" },
+      "per_team_play": { "period": "team_play", "aggregation": "rate" },
+      "per_player_route": { "period": "player_route", "aggregation": "rate" }
     }
   },
 
-  "split_compatibility": {
-    "year_splits": {
-      "compatible": [
-        "per_game",
-        "per_team_play",
-        "per_team_pass_play",
-        "per_team_rush_play",
-        "per_player_target",
-        "per_player_rush_attempt"
-      ],
-      "description": "Rate types that work with year-based grouping"
-    },
-    "week_splits": {
+  "row_axis_compatibility": {
+    "week_axis": {
       "incompatible": ["per_game"],
-      "reason": "per_game normalization is meaningless at weekly level",
-      "compatible": [
-        "per_team_play",
-        "per_team_pass_play",
-        "per_team_rush_play",
-        "per_player_target",
-        "per_player_rush_attempt"
-      ]
-    }
-  },
-
-  "usage_examples": {
-    "efficiency_analysis": {
-      "rate_types": ["per_player_target", "per_player_rush_attempt"],
-      "use_case": "Analyze yards per carry, yards per target"
+      "reason": "The per-game denominator is always 1 at week grain, so normalize_output_param drops the output param silently under a week row axis."
     },
-    "market_share": {
-      "rate_types": ["per_team_play", "per_team_pass_play"],
-      "use_case": "Player's share of team opportunities"
-    },
-    "consistency": {
-      "rate_types": ["per_game"],
-      "use_case": "Game-by-game performance averages"
-    }
+    "note": "Every other token is compatible with the year and week row axes. Compatibility is a property of the resolved (period, aggregation) tuple, not of the legacy token -- see ../../validation/parameter-compatibility.json."
   }
 }
