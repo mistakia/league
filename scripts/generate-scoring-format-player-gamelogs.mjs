@@ -14,7 +14,14 @@ const initialize_cli = () => {
 }
 
 const log = debug('generate-scoring-format-player-gamelogs')
-debug.enable('generate-scoring-format-player-gamelogs')
+// Guarded: a module-scope debug.enable REPLACES the enabled namespace set, and
+// ESM evaluates imports before the importing module's body -- so an unguarded
+// call here is clobbered by any script that imports this one, taking its own
+// logging with it. An explicit DEBUG is authoritative; this stays the default
+// for a bare CLI run.
+if (!process.env.DEBUG) {
+  debug.enable('generate-scoring-format-player-gamelogs')
+}
 
 const generate_scoring_format_player_gamelogs = async ({
   scoring_format_id,

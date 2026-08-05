@@ -14,7 +14,92 @@ const initialize_cli = () => {
 }
 
 const log = debug('calculate-points')
-debug.enable('calculate-points')
+// Guarded: a module-scope debug.enable REPLACES the enabled namespace set, and
+// ESM evaluates imports before the importing module's body -- so an unguarded
+// call here is clobbered by any script that imports this one, taking its own
+// logging with it. An explicit DEBUG is authoritative; this stays the default
+// for a bare CLI run.
+if (!process.env.DEBUG) {
+  debug.enable('calculate-points')
+}
+
+// Per-play yardage arrays for big-play bonuses.
+//
+// A `big_play` rule scores per PLAY of at least N yards, which no gamelog
+// column can answer -- a gamelog carries game totals. calculatePoints reads the
+// arrays off `stats` and degrades to 0 when they are absent, which is what
+// projections and live weekly scoring get.
+//
+// Fetched ONLY when the format carries such a rule, and only for the stats its
+// rules actually name, so every existing format pays nothing: no rules, no
+// query. That matters because this runs per scoring format over a whole season.
+const BIG_PLAY_ROLES = {
+  passing_yards: {
+    pid_column: 'passer_pid',
+    yards_column: 'pass_yds',
+    stats_key: 'pass_play_yards'
+  },
+  rushing_yards: {
+    pid_column: 'ball_carrier_pid',
+    yards_column: 'rush_yds',
+    stats_key: 'rush_play_yards'
+  },
+  receiving_yards: {
+    pid_column: 'target_pid',
+    yards_column: 'recv_yds',
+    stats_key: 'recv_play_yards'
+  }
+}
+
+const load_big_play_yards = async ({ league, year, week }) => {
+  const rules = Array.isArray(league.bonuses) ? league.bonuses : []
+  const stats_needed = [
+    ...new Set(
+      rules
+        .filter((rule) => rule && rule.type === 'big_play')
+        .map((rule) => rule.stat)
+    )
+  ].filter((stat) => BIG_PLAY_ROLES[stat])
+
+  if (!stats_needed.length) {
+    return null
+  }
+
+  // Keyed by `${pid}__${esbid}` -- the grain a gamelog row is at, and the grain
+  // a big play must be counted within.
+  const by_player_game = new Map()
+
+  for (const stat of stats_needed) {
+    const { pid_column, yards_column, stats_key } = BIG_PLAY_ROLES[stat]
+    const query = db('nfl_plays')
+      .select(
+        `nfl_plays.${pid_column} as pid`,
+        'nfl_plays.esbid',
+        db.raw(`array_agg(nfl_plays.${yards_column}) as yards`)
+      )
+      .join('nfl_games', 'nfl_games.esbid', 'nfl_plays.esbid')
+      .where('nfl_games.season_year', year)
+      .where('nfl_games.season_type', 'REG')
+      .whereNotNull(`nfl_plays.${pid_column}`)
+      .whereNotNull(`nfl_plays.${yards_column}`)
+      .groupBy(`nfl_plays.${pid_column}`, 'nfl_plays.esbid')
+
+    if (week !== 'ALL') {
+      query.where('nfl_games.week', week)
+    }
+
+    for (const row of await query) {
+      const key = `${row.pid}__${row.esbid}`
+      if (!by_player_game.has(key)) by_player_game.set(key, {})
+      by_player_game.get(key)[stats_key] = row.yards.map(Number)
+    }
+  }
+
+  log(
+    `loaded big-play yardage for ${by_player_game.size} player-games across ${stats_needed.length} stat(s)`
+  )
+  return by_player_game
+}
 
 const calculate_points = async ({
   year,
@@ -63,6 +148,7 @@ const calculate_points = async ({
   }
 
   const rows = await query
+  const big_play_yards = await load_big_play_yards({ league, year, week })
   const weeks = [...new Set(rows.map((r) => r.week))]
   const grouped_by_pid = groupBy(rows, 'pid')
 
@@ -81,8 +167,13 @@ const calculate_points = async ({
 
     // calculate fantasy points
     for (const game of games) {
+      // Spread rather than mutate: `game` is also pushed onto item.games and
+      // read by the caller that builds the insert rows.
+      const play_yards = big_play_yards
+        ? big_play_yards.get(`${pid}__${game.esbid}`)
+        : null
       const points = calculatePoints({
-        stats: game,
+        stats: play_yards ? { ...game, ...play_yards } : game,
         position: game.primary_position,
         league
       })
