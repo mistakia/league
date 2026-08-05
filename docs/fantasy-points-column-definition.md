@@ -151,6 +151,130 @@ The `generate_scoring_sql()` function creates optimized SQL based on the scoring
 - Handles position-specific logic only when position data is available
 - **Fallback Logic**: Uses hardcoded default half-PPR SQL when no custom format is specified
 
+### Scoring is declared as data, not written as SQL
+
+`libs-server/data-views/fantasy-points-scoring-expressions.mjs` holds two role
+tables and both from-plays builders iterate them. Nothing here hand-writes a
+scoring expression any more.
+
+- **`PLAYS_SOURCED_ROLES`** — the three roles `nfl_plays` names with a pid column
+  (passing off `passer_pid`, rushing off `ball_carrier_pid`, receiving off
+  `target_pid`). Each declares a list of `terms`, one per scoring column.
+- **`STAT_SOURCED_ROLES`** — the seven roles whose player identity lives in
+  `nfl_play_stats` instead (both fumble roles, the two return touchdowns, two
+  point conversions, field goals, extra points).
+
+A scoring column is covered by this path exactly when some term or role names it,
+and `test/libs-server.fantasy-points-path-parity.spec.mjs` imports that derived
+map rather than grepping for column names. Adding a scoring column therefore
+means adding a term — and forgetting to is a test failure rather than a column
+that silently scores zero, which is the state `passing_completions` was in for
+years.
+
+#### Term kinds
+
+| kind          | emits                                           | used by                                                   |
+| ------------- | ----------------------------------------------- | --------------------------------------------------------- |
+| `rate`        | `<expr> * <value>`                              | a per-play quantity times a rate                          |
+| `flat`        | `<value>`                                       | a role whose join already restricts each row to one event |
+| `conditional` | `CASE WHEN <predicate> THEN <value> ELSE 0 END` | first downs                                               |
+
+These reproduce the previous hand-written output character for character. The
+`always` flag marks a term emitted even when the format scores it at 0, which is
+what keeps the data-view goldens stable — match an existing term's shape rather
+than inventing one.
+
+### Two term classes: linear and aggregate-conditional
+
+A term is either **linear** (a per-play value, summed) or
+**aggregate-conditional** (evaluated once per player-GAME against a game total).
+The second class exists because a milestone bonus, and the two DST
+points/yards-against thresholds, are conditions on a game aggregate that no
+per-play expression can express.
+
+`build_role_union_period_cte` supports it with a **per-game stage**: a role
+declares `game_aggregates: { <alias>: <per_play_expr> }`, the column declares
+`game_conditional_expr`, and the builder groups `(pid, esbid)` first, evaluates
+the conditional there, then groups to period grain.
+
+Two consequences worth knowing:
+
+- The stage is emitted **only** when something declares an aggregate or a
+  conditional. A format with neither gets the previous single-level aggregate,
+  so it costs nothing and its SQL is unchanged.
+- A cross-role aggregate works because every union arm projects every alias
+  (contributing 0 for the ones it does not source). That is what makes
+  `rush_rec_yd` — rushing yards from one arm plus receiving yards from another —
+  expressible at all.
+
+At season grain this sums one evaluation **per game** rather than testing the
+season total against the threshold, which is the whole point of the stage.
+
+### Bonuses
+
+`league_scoring_formats.bonuses` is a `jsonb` list of
+`{ type, stat, threshold, points }`.
+
+| type        | class                 | meaning                                                                      |
+| ----------- | --------------------- | ---------------------------------------------------------------------------- |
+| `milestone` | aggregate-conditional | adds `points` once when the player-game total for `stat` reaches `threshold` |
+| `big_play`  | linear                | adds `points` per play of `stat` gaining at least `threshold`                |
+
+`stat` is one of `passing_yards`, `rushing_yards`, `receiving_yards`, or the
+derived `rush_rec_yd`. Cumulative tiers are just several milestone rules.
+An unknown `type` or `stat` is ignored rather than thrown, so a config written
+for a newer engine does not crash an older one.
+
+**Array order is canonicalized on write.** `config_digest` dedups scoring formats
+by reading `bonuses::text`, and jsonb preserves array order — so `[A, B]` and
+`[B, A]` would digest differently and mint two format rows for one rule set,
+silently. `canonicalize_bonuses` runs in `resolve_scoring_config` before the
+value is stored. It cannot run inside the digest: a generated column must be
+IMMUTABLE and cannot contain the set-returning `jsonb_array_elements`.
+
+**Big-play bonuses are systematically under-counted on projections.** They need
+per-play yardage, which `scripts/calculate-points.mjs` attaches only when the
+format declares a `big_play` rule. Projections and live weekly scoring carry no
+such arrays, so those rules score 0 there. That is correct — a big play is
+realized, not projectable — but it means a projected total for a format carrying
+them is lower than a realized one by construction. Milestones are unaffected;
+they read projected aggregates normally.
+
+### Positional overrides
+
+A scoring column may override another column's value for one position. Two exist:
+
+- `running_back_reception` / `wide_receiver_reception` / `tight_end_reception`
+  override `receptions`.
+- `tight_end_receiving_first_downs` overrides `receiving_first_downs`.
+
+**An override of exactly 0 falls back to the base value rather than scoring
+nothing.** That is pinned behaviour on both paths (`calculate-points.mjs` reads
+it through `||`, not `??`), and it is load-bearing rather than incidental:
+`tight_end_receiving_first_downs` defaults to 0 while `receiving_first_downs` is
+commonly nonzero, so treating 0 as a real override would switch positional
+scoring on for existing formats and pay a tight end nothing.
+
+Both from-plays builders gate on the same `needs_position_data` predicate, which
+is derived from the role table. The role-union builder reaches the position
+through the `apply_joins` hook, the same one the `nfl_play_stats`-sourced roles
+use.
+
+### touchdown_is_first_down
+
+A boolean, defaulting to `true`, which is what the platform has always done. When
+`false`, each first-down stat is replaced by its excluding-touchdown twin
+(`rushing_first_downs_excluding_touchdowns`,
+`receiving_first_downs_excluding_touchdowns`), so a touchdown that also gained a
+first down scores once rather than twice.
+
+Those twins are derived in `libs-shared/calculate-stats-from-play-stats.mjs` by
+incrementing in the non-touchdown stat cases (10 rushing, 21 receiving) and
+deliberately **not** in the touchdown cases (11, 22). On the from-plays path the
+same switch appends an excluding-touchdown clause to the first-down term's
+predicate. The two paths must agree here or the same play scores twice on one of
+them.
+
 ### Table Aliasing
 
 Uses hash-based table aliasing to support multiple instances with different parameters:
