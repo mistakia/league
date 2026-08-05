@@ -57,7 +57,6 @@ const calculate_player_game_outcome_correlations = async ({
     .select(
       'player_gamelogs.pid',
       'player_gamelogs.esbid',
-      'player_gamelogs.pos',
       'player_gamelogs.snaps_off',
       'player_gamelogs.snaps_leading',
       'player_gamelogs.snaps_trailing',
@@ -71,8 +70,7 @@ const calculate_player_game_outcome_correlations = async ({
   for (const gl of gamelogs) {
     if (!player_games.has(gl.pid)) {
       player_games.set(gl.pid, {
-        games: [],
-        pos: gl.pos
+        games: []
       })
     }
 
