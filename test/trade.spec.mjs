@@ -1,4 +1,4 @@
-/* global describe before it beforeEach */
+/* global describe before it beforeEach afterEach */
 import * as chai from 'chai'
 import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
@@ -79,6 +79,18 @@ describe('API /trades', function () {
   before(async function () {
     this.timeout(60 * 1000)
     await knex.seed.run()
+  })
+
+  // MockDate is process-global, so a frozen clock left set here leaks into
+  // whatever spec file mocha loads next. The 'deadline has passed' test below
+  // advances 13 weeks past regular_season_start, which makes every later trade
+  // proposal fail its own deadline check. CI's alphabetical order happens to put
+  // trade-veto ahead of this file, so it does not fire today -- but running
+  // `trade.spec.mjs trade-veto.spec.mjs` in that order fails trade-veto's
+  // "returns players to their original rosters" with a 400, and any --grep run
+  // or future spec sorting after this one inherits the same clock.
+  afterEach(function () {
+    MockDate.reset()
   })
 
   describe('post', function () {
