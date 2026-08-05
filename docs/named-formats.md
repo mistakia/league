@@ -1,10 +1,8 @@
 # Named Scoring and League Formats
 
-_Generated at: 2026-05-29T15:23:53.767Z_
+_Generated at: 2026-08-05T05:21:20.632Z_
 
 This document shows the configuration for each named format in the system. Identities are stable opaque IDs; multiple source keys may share an ID when their configs are byte-identical (the alphabetical-first slug wins).
-
-**The scoring tables below list only the columns a format DECLARES, which since 2026-08-04 is no longer all of them.** Kicking and DST scoring became configurable on that date, adding 21 columns to `league_scoring_formats`; no named format declares any of them, so every one of these formats takes the registry defaults in `libs-shared/scoring-columns.mjs` — 0.1 per field goal yard, 1 per extra point, 6 per defensive touchdown, and so on. Those defaults are exactly the literals `calculate-points.mjs` used to hardcode, so no format's effective scoring changed; the stored rows do carry the values, and a format that wants different ones declares them like any other column. Read a format's kicking or DST scoring off the registry defaults, not off the absence of a row here.
 
 ## League Format Summary
 
@@ -60,24 +58,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 1     |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 3     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 0     |
-| `bench`                    | 0     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 0     |
-| `cap`                      | 50000 |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 1     |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 3     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 0     |
+| `bench_slot_count`          | 0     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 0     |
+| `cap`                       | 50000 |
+| `min_bid`                   | 0     |
 
 ### genesis_10_team
 
@@ -89,24 +87,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 10    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 1     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 0     |
-| `bench`                    | 7     |
-| `ps`                       | 4     |
-| `reserve_short_term_limit` | 99    |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 10    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 1     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 0     |
+| `bench_slot_count`          | 7     |
+| `practice_squad_slot_count` | 4     |
+| `reserve_short_term_limit`  | 99    |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### half_ppr_10_team
 
@@ -118,24 +116,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 10    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 10    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### half_ppr_10_team_superflex
 
@@ -147,24 +145,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 10    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 1     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 10    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 1     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### half_ppr_12_team
 
@@ -176,24 +174,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### half_ppr_12_team_superflex
 
@@ -205,24 +203,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 1     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 1     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### half_ppr_lower_turnover_10_team
 
@@ -234,24 +232,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 10    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 10    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### half_ppr_lower_turnover_10_team_superflex
 
@@ -263,24 +261,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 10    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 1     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 10    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 1     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### half_ppr_lower_turnover_12_team
 
@@ -292,24 +290,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### half_ppr_lower_turnover_12_team_superflex
 
@@ -321,24 +319,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 1     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 1     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### ppr_10_team
 
@@ -350,24 +348,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 10    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 10    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### ppr_10_team_superflex
 
@@ -379,24 +377,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 10    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 1     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 10    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 1     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### ppr_12_team
 
@@ -408,24 +406,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### ppr_12_team_superflex
 
@@ -437,24 +435,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 1     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 1     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### ppr_lower_turnover_10_team
 
@@ -466,24 +464,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 10    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 10    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### ppr_lower_turnover_10_team_superflex
 
@@ -495,24 +493,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 10    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 1     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 10    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 1     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### ppr_lower_turnover_12_team
 
@@ -524,24 +522,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### ppr_lower_turnover_12_team_superflex
 
@@ -553,24 +551,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 1     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 1     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### sfb15_mfl
 
@@ -582,24 +580,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 0     |
-| `swr`                      | 0     |
-| `ste`                      | 0     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 9     |
-| `sqbrbwrte`                | 2     |
-| `swrte`                    | 0     |
-| `sdst`                     | 0     |
-| `sk`                       | 0     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 0     |
+| `starter_slots_wr`          | 0     |
+| `starter_slots_te`          | 0     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 9     |
+| `sqbrbwrte`                 | 2     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 0     |
+| `starter_slots_k`           | 0     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### sfb15_sleeper
 
@@ -611,24 +609,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 0     |
-| `swr`                      | 0     |
-| `ste`                      | 0     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 9     |
-| `sqbrbwrte`                | 2     |
-| `swrte`                    | 0     |
-| `sdst`                     | 0     |
-| `sk`                       | 0     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 0     |
+| `starter_slots_wr`          | 0     |
+| `starter_slots_te`          | 0     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 9     |
+| `sqbrbwrte`                 | 2     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 0     |
+| `starter_slots_k`           | 0     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### standard_10_team
 
@@ -640,24 +638,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 10    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 10    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ### standard_12_team
 
@@ -669,24 +667,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                   | Value |
-| -------------------------- | ----- |
-| `num_teams`                | 12    |
-| `sqb`                      | 1     |
-| `srb`                      | 2     |
-| `swr`                      | 2     |
-| `ste`                      | 1     |
-| `srbwr`                    | 0     |
-| `srbwrte`                  | 1     |
-| `sqbrbwrte`                | 0     |
-| `swrte`                    | 0     |
-| `sdst`                     | 1     |
-| `sk`                       | 1     |
-| `bench`                    | 6     |
-| `ps`                       | 0     |
-| `reserve_short_term_limit` | 3     |
-| `cap`                      | 200   |
-| `min_bid`                  | 0     |
+| Property                    | Value |
+| --------------------------- | ----- |
+| `num_teams`                 | 12    |
+| `starter_slots_qb`          | 1     |
+| `starter_slots_rb`          | 2     |
+| `starter_slots_wr`          | 2     |
+| `starter_slots_te`          | 1     |
+| `starter_slots_rb_wr_flex`  | 0     |
+| `srbwrte`                   | 1     |
+| `sqbrbwrte`                 | 0     |
+| `starter_slots_wr_te_flex`  | 0     |
+| `starter_slots_dst`         | 1     |
+| `starter_slots_k`           | 1     |
+| `bench_slot_count`          | 6     |
+| `practice_squad_slot_count` | 0     |
+| `reserve_short_term_limit`  | 3     |
+| `cap`                       | 200   |
+| `min_bid`                   | 0     |
 
 ## Scoring Format Details
 
@@ -698,30 +696,31 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property          | Value |
-| ----------------- | ----- |
-| `pa`              | 0     |
-| `pc`              | 0     |
-| `py`              | 0.04  |
-| `ints`            | -1    |
-| `tdp`             | 4     |
-| `ra`              | 0     |
-| `ry`              | 0.1   |
-| `tdr`             | 6     |
-| `rec`             | 1     |
-| `rbrec`           | 1     |
-| `wrrec`           | 1     |
-| `terec`           | 1     |
-| `recy`            | 0.1   |
-| `tdrec`           | 6     |
-| `twoptc`          | 2     |
-| `fuml`            | -1    |
-| `prtd`            | 6     |
-| `krtd`            | 6     |
-| `fum_ret_td`      | 6     |
-| `trg`             | 0     |
-| `rush_first_down` | 0     |
-| `rec_first_down`  | 0     |
+| Property                          | Value |
+| --------------------------------- | ----- |
+| `passing_attempts`                | 0     |
+| `passing_completions`             | 0     |
+| `passing_yards`                   | 0.04  |
+| `passing_interceptions`           | -1    |
+| `passing_touchdowns`              | 4     |
+| `rushing_attempts`                | 0     |
+| `rushing_yards`                   | 0.1   |
+| `rushing_touchdowns`              | 6     |
+| `receptions`                      | 1     |
+| `running_back_reception`          | 1     |
+| `wide_receiver_reception`         | 1     |
+| `tight_end_reception`             | 1     |
+| `receiving_yards`                 | 0.1   |
+| `receiving_touchdowns`            | 6     |
+| `two_point_conversions`           | 2     |
+| `fumbles_lost`                    | -1    |
+| `punt_return_touchdowns`          | 6     |
+| `kickoff_return_touchdowns`       | 6     |
+| `fumble_return_touchdowns`        | 6     |
+| `targets`                         | 0     |
+| `rushing_first_downs`             | 0     |
+| `receiving_first_downs`           | 0     |
+| `is_excluding_quarterback_kneels` | false |
 
 ### fanduel
 
@@ -731,30 +730,31 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property          | Value |
-| ----------------- | ----- |
-| `pa`              | 0     |
-| `pc`              | 0     |
-| `py`              | 0.04  |
-| `ints`            | -1    |
-| `tdp`             | 4     |
-| `ra`              | 0     |
-| `ry`              | 0.1   |
-| `tdr`             | 6     |
-| `rec`             | 0.5   |
-| `rbrec`           | 0.5   |
-| `wrrec`           | 0.5   |
-| `terec`           | 0.5   |
-| `recy`            | 0.1   |
-| `tdrec`           | 6     |
-| `twoptc`          | 2     |
-| `fuml`            | -2    |
-| `prtd`            | 6     |
-| `krtd`            | 6     |
-| `fum_ret_td`      | 6     |
-| `trg`             | 0     |
-| `rush_first_down` | 0     |
-| `rec_first_down`  | 0     |
+| Property                          | Value |
+| --------------------------------- | ----- |
+| `passing_attempts`                | 0     |
+| `passing_completions`             | 0     |
+| `passing_yards`                   | 0.04  |
+| `passing_interceptions`           | -1    |
+| `passing_touchdowns`              | 4     |
+| `rushing_attempts`                | 0     |
+| `rushing_yards`                   | 0.1   |
+| `rushing_touchdowns`              | 6     |
+| `receptions`                      | 0.5   |
+| `running_back_reception`          | 0.5   |
+| `wide_receiver_reception`         | 0.5   |
+| `tight_end_reception`             | 0.5   |
+| `receiving_yards`                 | 0.1   |
+| `receiving_touchdowns`            | 6     |
+| `two_point_conversions`           | 2     |
+| `fumbles_lost`                    | -2    |
+| `punt_return_touchdowns`          | 6     |
+| `kickoff_return_touchdowns`       | 6     |
+| `fumble_return_touchdowns`        | 6     |
+| `targets`                         | 0     |
+| `rushing_first_downs`             | 0     |
+| `receiving_first_downs`           | 0     |
+| `is_excluding_quarterback_kneels` | false |
 
 ### genesis
 
@@ -764,31 +764,31 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property            | Value |
-| ------------------- | ----- |
-| `pa`                | 0     |
-| `pc`                | 0     |
-| `py`                | 0.05  |
-| `ints`              | -1    |
-| `tdp`               | 4     |
-| `ra`                | 0     |
-| `ry`                | 0.1   |
-| `tdr`               | 6     |
-| `rec`               | 0.5   |
-| `rbrec`             | 0.5   |
-| `wrrec`             | 0.5   |
-| `terec`             | 0.5   |
-| `recy`              | 0.1   |
-| `tdrec`             | 6     |
-| `twoptc`            | 2     |
-| `fuml`              | -1    |
-| `prtd`              | 6     |
-| `krtd`              | 6     |
-| `fum_ret_td`        | 6     |
-| `trg`               | 0     |
-| `rush_first_down`   | 0     |
-| `rec_first_down`    | 0     |
-| `exclude_qb_kneels` | true  |
+| Property                          | Value |
+| --------------------------------- | ----- |
+| `passing_attempts`                | 0     |
+| `passing_completions`             | 0     |
+| `passing_yards`                   | 0.05  |
+| `passing_interceptions`           | -1    |
+| `passing_touchdowns`              | 4     |
+| `rushing_attempts`                | 0     |
+| `rushing_yards`                   | 0.1   |
+| `rushing_touchdowns`              | 6     |
+| `receptions`                      | 0.5   |
+| `running_back_reception`          | 0.5   |
+| `wide_receiver_reception`         | 0.5   |
+| `tight_end_reception`             | 0.5   |
+| `receiving_yards`                 | 0.1   |
+| `receiving_touchdowns`            | 6     |
+| `two_point_conversions`           | 2     |
+| `fumbles_lost`                    | -1    |
+| `punt_return_touchdowns`          | 6     |
+| `kickoff_return_touchdowns`       | 6     |
+| `fumble_return_touchdowns`        | 6     |
+| `targets`                         | 0     |
+| `rushing_first_downs`             | 0     |
+| `receiving_first_downs`           | 0     |
+| `is_excluding_quarterback_kneels` | true  |
 
 ### half_ppr
 
@@ -798,30 +798,31 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property          | Value |
-| ----------------- | ----- |
-| `pa`              | 0     |
-| `pc`              | 0     |
-| `py`              | 0.04  |
-| `ints`            | -2    |
-| `tdp`             | 4     |
-| `ra`              | 0     |
-| `ry`              | 0.1   |
-| `tdr`             | 6     |
-| `rec`             | 0.5   |
-| `rbrec`           | 0.5   |
-| `wrrec`           | 0.5   |
-| `terec`           | 0.5   |
-| `recy`            | 0.1   |
-| `tdrec`           | 6     |
-| `twoptc`          | 2     |
-| `fuml`            | -2    |
-| `prtd`            | 6     |
-| `krtd`            | 6     |
-| `fum_ret_td`      | 6     |
-| `trg`             | 0     |
-| `rush_first_down` | 0     |
-| `rec_first_down`  | 0     |
+| Property                          | Value |
+| --------------------------------- | ----- |
+| `passing_attempts`                | 0     |
+| `passing_completions`             | 0     |
+| `passing_yards`                   | 0.04  |
+| `passing_interceptions`           | -2    |
+| `passing_touchdowns`              | 4     |
+| `rushing_attempts`                | 0     |
+| `rushing_yards`                   | 0.1   |
+| `rushing_touchdowns`              | 6     |
+| `receptions`                      | 0.5   |
+| `running_back_reception`          | 0.5   |
+| `wide_receiver_reception`         | 0.5   |
+| `tight_end_reception`             | 0.5   |
+| `receiving_yards`                 | 0.1   |
+| `receiving_touchdowns`            | 6     |
+| `two_point_conversions`           | 2     |
+| `fumbles_lost`                    | -2    |
+| `punt_return_touchdowns`          | 6     |
+| `kickoff_return_touchdowns`       | 6     |
+| `fumble_return_touchdowns`        | 6     |
+| `targets`                         | 0     |
+| `rushing_first_downs`             | 0     |
+| `receiving_first_downs`           | 0     |
+| `is_excluding_quarterback_kneels` | false |
 
 ### half_ppr_lower_turnover
 
@@ -831,30 +832,31 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property          | Value |
-| ----------------- | ----- |
-| `pa`              | 0     |
-| `pc`              | 0     |
-| `py`              | 0.04  |
-| `ints`            | -1    |
-| `tdp`             | 4     |
-| `ra`              | 0     |
-| `ry`              | 0.1   |
-| `tdr`             | 6     |
-| `rec`             | 0.5   |
-| `rbrec`           | 0.5   |
-| `wrrec`           | 0.5   |
-| `terec`           | 0.5   |
-| `recy`            | 0.1   |
-| `tdrec`           | 6     |
-| `twoptc`          | 2     |
-| `fuml`            | -1    |
-| `prtd`            | 6     |
-| `krtd`            | 6     |
-| `fum_ret_td`      | 6     |
-| `trg`             | 0     |
-| `rush_first_down` | 0     |
-| `rec_first_down`  | 0     |
+| Property                          | Value |
+| --------------------------------- | ----- |
+| `passing_attempts`                | 0     |
+| `passing_completions`             | 0     |
+| `passing_yards`                   | 0.04  |
+| `passing_interceptions`           | -1    |
+| `passing_touchdowns`              | 4     |
+| `rushing_attempts`                | 0     |
+| `rushing_yards`                   | 0.1   |
+| `rushing_touchdowns`              | 6     |
+| `receptions`                      | 0.5   |
+| `running_back_reception`          | 0.5   |
+| `wide_receiver_reception`         | 0.5   |
+| `tight_end_reception`             | 0.5   |
+| `receiving_yards`                 | 0.1   |
+| `receiving_touchdowns`            | 6     |
+| `two_point_conversions`           | 2     |
+| `fumbles_lost`                    | -1    |
+| `punt_return_touchdowns`          | 6     |
+| `kickoff_return_touchdowns`       | 6     |
+| `fumble_return_touchdowns`        | 6     |
+| `targets`                         | 0     |
+| `rushing_first_downs`             | 0     |
+| `receiving_first_downs`           | 0     |
+| `is_excluding_quarterback_kneels` | false |
 
 ### ppr
 
@@ -864,30 +866,31 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property          | Value |
-| ----------------- | ----- |
-| `pa`              | 0     |
-| `pc`              | 0     |
-| `py`              | 0.04  |
-| `ints`            | -2    |
-| `tdp`             | 4     |
-| `ra`              | 0     |
-| `ry`              | 0.1   |
-| `tdr`             | 6     |
-| `rec`             | 1     |
-| `rbrec`           | 1     |
-| `wrrec`           | 1     |
-| `terec`           | 1     |
-| `recy`            | 0.1   |
-| `tdrec`           | 6     |
-| `twoptc`          | 2     |
-| `fuml`            | -2    |
-| `prtd`            | 6     |
-| `krtd`            | 6     |
-| `fum_ret_td`      | 6     |
-| `trg`             | 0     |
-| `rush_first_down` | 0     |
-| `rec_first_down`  | 0     |
+| Property                          | Value |
+| --------------------------------- | ----- |
+| `passing_attempts`                | 0     |
+| `passing_completions`             | 0     |
+| `passing_yards`                   | 0.04  |
+| `passing_interceptions`           | -2    |
+| `passing_touchdowns`              | 4     |
+| `rushing_attempts`                | 0     |
+| `rushing_yards`                   | 0.1   |
+| `rushing_touchdowns`              | 6     |
+| `receptions`                      | 1     |
+| `running_back_reception`          | 1     |
+| `wide_receiver_reception`         | 1     |
+| `tight_end_reception`             | 1     |
+| `receiving_yards`                 | 0.1   |
+| `receiving_touchdowns`            | 6     |
+| `two_point_conversions`           | 2     |
+| `fumbles_lost`                    | -2    |
+| `punt_return_touchdowns`          | 6     |
+| `kickoff_return_touchdowns`       | 6     |
+| `fumble_return_touchdowns`        | 6     |
+| `targets`                         | 0     |
+| `rushing_first_downs`             | 0     |
+| `receiving_first_downs`           | 0     |
+| `is_excluding_quarterback_kneels` | false |
 
 ### sfb15_mfl
 
@@ -897,30 +900,31 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property          | Value |
-| ----------------- | ----- |
-| `pa`              | 0     |
-| `pc`              | 0     |
-| `py`              | 0.04  |
-| `ints`            | 0     |
-| `tdp`             | 6     |
-| `ra`              | 0.5   |
-| `ry`              | 0.1   |
-| `tdr`             | 6     |
-| `rec`             | 1     |
-| `rbrec`           | 1     |
-| `wrrec`           | 1     |
-| `terec`           | 2     |
-| `recy`            | 0.1   |
-| `tdrec`           | 6     |
-| `twoptc`          | 2     |
-| `fuml`            | 0     |
-| `prtd`            | 6     |
-| `krtd`            | 6     |
-| `fum_ret_td`      | 6     |
-| `trg`             | 1     |
-| `rush_first_down` | 1     |
-| `rec_first_down`  | 1     |
+| Property                          | Value |
+| --------------------------------- | ----- |
+| `passing_attempts`                | 0     |
+| `passing_completions`             | 0     |
+| `passing_yards`                   | 0.04  |
+| `passing_interceptions`           | 0     |
+| `passing_touchdowns`              | 6     |
+| `rushing_attempts`                | 0.5   |
+| `rushing_yards`                   | 0.1   |
+| `rushing_touchdowns`              | 6     |
+| `receptions`                      | 1     |
+| `running_back_reception`          | 1     |
+| `wide_receiver_reception`         | 1     |
+| `tight_end_reception`             | 2     |
+| `receiving_yards`                 | 0.1   |
+| `receiving_touchdowns`            | 6     |
+| `two_point_conversions`           | 2     |
+| `fumbles_lost`                    | 0     |
+| `punt_return_touchdowns`          | 6     |
+| `kickoff_return_touchdowns`       | 6     |
+| `fumble_return_touchdowns`        | 6     |
+| `targets`                         | 1     |
+| `rushing_first_downs`             | 1     |
+| `receiving_first_downs`           | 1     |
+| `is_excluding_quarterback_kneels` | false |
 
 ### sfb15_sleeper
 
@@ -930,30 +934,31 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property          | Value |
-| ----------------- | ----- |
-| `pa`              | 0     |
-| `pc`              | 0     |
-| `py`              | 0.04  |
-| `ints`            | 0     |
-| `tdp`             | 6     |
-| `ra`              | 0.5   |
-| `ry`              | 0.1   |
-| `tdr`             | 6     |
-| `rec`             | 2.5   |
-| `rbrec`           | 2.5   |
-| `wrrec`           | 2.5   |
-| `terec`           | 3.5   |
-| `recy`            | 0.1   |
-| `tdrec`           | 6     |
-| `twoptc`          | 2     |
-| `fuml`            | 0     |
-| `prtd`            | 6     |
-| `krtd`            | 6     |
-| `fum_ret_td`      | 6     |
-| `trg`             | 0     |
-| `rush_first_down` | 1     |
-| `rec_first_down`  | 1     |
+| Property                          | Value |
+| --------------------------------- | ----- |
+| `passing_attempts`                | 0     |
+| `passing_completions`             | 0     |
+| `passing_yards`                   | 0.04  |
+| `passing_interceptions`           | 0     |
+| `passing_touchdowns`              | 6     |
+| `rushing_attempts`                | 0.5   |
+| `rushing_yards`                   | 0.1   |
+| `rushing_touchdowns`              | 6     |
+| `receptions`                      | 2.5   |
+| `running_back_reception`          | 2.5   |
+| `wide_receiver_reception`         | 2.5   |
+| `tight_end_reception`             | 3.5   |
+| `receiving_yards`                 | 0.1   |
+| `receiving_touchdowns`            | 6     |
+| `two_point_conversions`           | 2     |
+| `fumbles_lost`                    | 0     |
+| `punt_return_touchdowns`          | 6     |
+| `kickoff_return_touchdowns`       | 6     |
+| `fumble_return_touchdowns`        | 6     |
+| `targets`                         | 0     |
+| `rushing_first_downs`             | 1     |
+| `receiving_first_downs`           | 1     |
+| `is_excluding_quarterback_kneels` | false |
 
 ### standard
 
@@ -963,27 +968,28 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property          | Value |
-| ----------------- | ----- |
-| `pa`              | 0     |
-| `pc`              | 0     |
-| `py`              | 0.04  |
-| `ints`            | -2    |
-| `tdp`             | 4     |
-| `ra`              | 0     |
-| `ry`              | 0.1   |
-| `tdr`             | 6     |
-| `rec`             | 0     |
-| `rbrec`           | 0     |
-| `wrrec`           | 0     |
-| `terec`           | 0     |
-| `recy`            | 0.1   |
-| `tdrec`           | 6     |
-| `twoptc`          | 2     |
-| `fuml`            | -2    |
-| `prtd`            | 6     |
-| `krtd`            | 6     |
-| `fum_ret_td`      | 6     |
-| `trg`             | 0     |
-| `rush_first_down` | 0     |
-| `rec_first_down`  | 0     |
+| Property                          | Value |
+| --------------------------------- | ----- |
+| `passing_attempts`                | 0     |
+| `passing_completions`             | 0     |
+| `passing_yards`                   | 0.04  |
+| `passing_interceptions`           | -2    |
+| `passing_touchdowns`              | 4     |
+| `rushing_attempts`                | 0     |
+| `rushing_yards`                   | 0.1   |
+| `rushing_touchdowns`              | 6     |
+| `receptions`                      | 0     |
+| `running_back_reception`          | 0     |
+| `wide_receiver_reception`         | 0     |
+| `tight_end_reception`             | 0     |
+| `receiving_yards`                 | 0.1   |
+| `receiving_touchdowns`            | 6     |
+| `two_point_conversions`           | 2     |
+| `fumbles_lost`                    | -2    |
+| `punt_return_touchdowns`          | 6     |
+| `kickoff_return_touchdowns`       | 6     |
+| `fumble_return_touchdowns`        | 6     |
+| `targets`                         | 0     |
+| `rushing_first_downs`             | 0     |
+| `receiving_first_downs`           | 0     |
+| `is_excluding_quarterback_kneels` | false |
