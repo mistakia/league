@@ -3,14 +3,8 @@ import path from 'path'
 
 import { JSDOM } from 'jsdom'
 import dayjs from 'dayjs'
-import debug from 'debug'
 
 import { fetch_with_retry } from './proxy-manager.mjs'
-
-// No module-scope debug.enable: this module is imported by several scripts, and
-// `debug.enable` REPLACES the enabled namespace set rather than adding to it, so
-// a call here would silently clobber whichever entry point imported us last.
-const log = debug('keeptradecut-liquidity')
 
 export const DYNASTY_RANKINGS_URL = 'https://keeptradecut.com/dynasty-rankings'
 
@@ -132,10 +126,12 @@ export const write_zero_liquidity_payload_summary = async (players_array) => {
       forensics_path,
       JSON.stringify(summarize_zero_liquidity_payload(players_array), null, 2)
     )
-    log(`zero-liquidity payload summary written to ${forensics_path}`)
+    console.log(`zero-liquidity payload summary written to ${forensics_path}`)
     return forensics_path
   } catch (err) {
-    log(`failed to persist zero-liquidity payload summary: ${err.message}`)
+    console.error(
+      `failed to persist zero-liquidity payload summary: ${err.message}`
+    )
     return null
   }
 }

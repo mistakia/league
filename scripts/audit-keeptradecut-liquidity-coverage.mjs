@@ -1,11 +1,17 @@
 import dayjs from 'dayjs'
-import debug from 'debug'
 
 import db from '#db'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const log = debug('audit-keeptradecut-liquidity-coverage')
+// console.log, not debug, for every line below. These lines ARE this job's
+// audit trail -- its log file is the only durable record that it ran and what
+// it found. `debug` resolves at write time against a namespace set any module
+// in the ESM import graph can replace, and a logger constructed at module scope
+// is not reliably re-enabled by a later `debug.enable`: measured on the league
+// host 2026-08-05, this script printed nothing at all that way while exiting 0.
+// An oracle whose verdict silently fails to reach its log is the exact defect
+// class this job exists to catch.
 
 // Coverage oracle for keeptradecut_liquidity, which is collected once per
 // calendar day and has no consumers -- so a silent multi-day collection loss
@@ -118,11 +124,11 @@ const audit_keeptradecut_liquidity_coverage = async () => {
     window_end
   })
 
-  log(
+  console.log(
     `coverage ${to_day(window_start)}..${to_day(window_end)}: ${result.collected_day_count}/${result.expected_day_count} days collected, ${result.missing_days.length} missing (${(result.trailing_miss_rate * 100).toFixed(1)}%), current gap streak ${result.current_gap_streak}`
   )
   if (result.missing_days.length) {
-    log(`missing days: ${result.missing_days.join(', ')}`)
+    console.log(`missing days: ${result.missing_days.join(', ')}`)
   }
 
   const shortfalls = []
@@ -139,20 +145,13 @@ const audit_keeptradecut_liquidity_coverage = async () => {
 }
 
 const main = async () => {
-  // Inside main(), not at module scope: `debug.enable` REPLACES the enabled
-  // namespace set, so a module-scope call in an importable script silently
-  // clobbers whichever entry point imported it.
-  if (!process.env.DEBUG) {
-    debug.enable('audit-keeptradecut-liquidity-coverage')
-  }
-
   let error
   try {
     const result = await audit_keeptradecut_liquidity_coverage()
     throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
-    log(err)
+    console.error(err)
   }
 
   // The finding is reported as this job's outcome rather than emitted as its

@@ -1,5 +1,4 @@
 import dayjs from 'dayjs'
-import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
@@ -18,7 +17,12 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const log = debug('import-keeptradecut-liquidity')
+// console.log, not debug, throughout. This job's log file is the only durable
+// record that a recovery slot fired and what it did. `debug` resolves against a
+// namespace set any module in the ESM import graph can replace, and a logger
+// constructed at module scope is not reliably re-enabled by a later
+// `debug.enable`: measured on the league host 2026-08-05, this script printed
+// nothing at all that way while exiting 0.
 
 // Recovery pass for the days KeepTradeCut serves an all-zero liquidity payload
 // at the 04:30 ET import slot. The daily importer correctly refuses to write a
@@ -139,7 +143,7 @@ const import_keeptradecut_liquidity = async ({ dry = false } = {}) => {
     // exiting quietly: a no-op and a silent failure must not share an
     // observable, and this line is what tomorrow's operator reads to confirm
     // the slot fired at all.
-    log(
+    console.log(
       `liquidity already collected for ${observed_day}: ${existing_rows} row(s) present; nothing to recover`
     )
     return {
@@ -150,7 +154,7 @@ const import_keeptradecut_liquidity = async ({ dry = false } = {}) => {
     }
   }
 
-  log(`no liquidity rows for ${observed_day}; attempting recovery`)
+  console.log(`no liquidity rows for ${observed_day}; attempting recovery`)
 
   const players_array = await fetch_dynasty_rankings_players()
   const page_player_count = players_array.length
@@ -176,7 +180,9 @@ const import_keeptradecut_liquidity = async ({ dry = false } = {}) => {
         keeptradecut_player_id: keeptradecut_player.playerID
       })
     } catch (err) {
-      log(`error resolving playerID ${keeptradecut_player.playerID}: ${err}`)
+      console.error(
+        `error resolving playerID ${keeptradecut_player.playerID}: ${err}`
+      )
       continue
     }
 
@@ -222,7 +228,7 @@ const import_keeptradecut_liquidity = async ({ dry = false } = {}) => {
     reference_rows
   })
 
-  log(
+  console.log(
     `recovered ${observed_day}: ${rows_written} row(s) from ${resolved_player_count} of ${eligible_players.length} eligible page players (reference best ${reference_rows}, coverage ${coverage_fraction === null ? 'n/a' : `${(coverage_fraction * 100).toFixed(1)}%`})${dry ? ' [DRY]' : ''}`
   )
 
@@ -238,14 +244,6 @@ const import_keeptradecut_liquidity = async ({ dry = false } = {}) => {
 }
 
 const main = async () => {
-  // Inside main(), not at module scope: `debug.enable` REPLACES the enabled
-  // namespace set, and ESM evaluates imports before the importing module's
-  // body, so a module-scope call in an importable script silently clobbers
-  // whichever entry point imported it.
-  if (!process.env.DEBUG) {
-    debug.enable('import-keeptradecut-liquidity,get-player,fetch')
-  }
-
   let error
   try {
     const argv = yargs(hideBin(process.argv)).argv
@@ -253,7 +251,7 @@ const main = async () => {
     throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
-    log(err)
+    console.error(err)
   }
 
   await report_job({
