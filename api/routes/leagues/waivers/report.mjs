@@ -7,78 +7,6 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     WaiverClaim:
- *       type: object
- *       description: Waiver wire claim record
- *       properties:
- *         uid:
- *           type: integer
- *           description: Waiver claim ID
- *           example: 12345
- *         lid:
- *           type: integer
- *           description: League ID
- *           example: 2
- *         tid:
- *           type: integer
- *           description: Team ID that made the claim
- *           example: 13
- *         userid:
- *           type: integer
- *           description: User ID who made the claim
- *           example: 5
- *         pid:
- *           type: string
- *           description: Player ID being claimed
- *           example: "4017"
- *         drop:
- *           type: string
- *           nullable: true
- *           description: Player ID being dropped (if any)
- *           example: "2041"
- *         type:
- *           type: integer
- *           description: Waiver type (constants.waiver_types)
- *           example: 1
- *         is_successful:
- *           type: integer
- *           description: Success status (1=successful, 0=failed)
- *           example: 1
- *         reason:
- *           type: string
- *           nullable: true
- *           description: Failure reason (if unsuccessful)
- *           example: null
- *         processed:
- *           type: integer
- *           description: Unix timestamp when processed
- *           example: 1698765432
- *         submitted:
- *           type: integer
- *           description: Unix timestamp when submitted
- *           example: 1698700000
- *         wo:
- *           type: integer
- *           description: Waiver order priority
- *           example: 5
- *         bid_amount:
- *           type: integer
- *           description: FAAB bid amount (if applicable)
- *           example: 15
- *         week:
- *           type: integer
- *           description: NFL week when claim was made
- *           example: 8
- *         year:
- *           type: integer
- *           description: Season year
- *           example: 2024
- */
-
-/**
- * @swagger
  * /leagues/{leagueId}/waivers/report:
  *   get:
  *     summary: Get waiver wire processing report
@@ -170,32 +98,30 @@ const router = express.Router({ mergeParams: true })
  *                     lid: 2
  *                     tid: 13
  *                     userid: 5
- *                     pid: "4017"
- *                     drop: "2041"
+ *                     pid: "ELIJ-HIGG-025009"
  *                     type: 1
- *                     is_successful: 1
+ *                     is_successful: true
  *                     reason: null
  *                     processed: 1698765432
  *                     submitted: 1698700000
- *                     wo: 5
+ *                     priority_order: 5
  *                     bid_amount: 15
- *                     week: 8
- *                     year: 2024
+ *                     cancelled: null
+ *                     super_priority: 0
  *                   - uid: 12346
  *                     lid: 2
  *                     tid: 14
  *                     userid: 7
- *                     pid: "4017"
- *                     drop: "1889"
+ *                     pid: "ELIJ-HIGG-025009"
  *                     type: 1
- *                     is_successful: 0
+ *                     is_successful: false
  *                     reason: "player is not a free agent"
  *                     processed: 1698765432
  *                     submitted: 1698700000
- *                     wo: 8
+ *                     priority_order: 8
  *                     bid_amount: 12
- *                     week: 8
- *                     year: 2024
+ *                     cancelled: null
+ *                     super_priority: 0
  *               team_specific_report:
  *                 summary: Team-specific waiver report with failed claims
  *                 value:
@@ -203,32 +129,30 @@ const router = express.Router({ mergeParams: true })
  *                     lid: 2
  *                     tid: 13
  *                     userid: 5
- *                     pid: "4017"
- *                     drop: null
+ *                     pid: "ELIJ-HIGG-025009"
  *                     type: 1
- *                     is_successful: 1
+ *                     is_successful: true
  *                     reason: null
  *                     processed: 1698765432
  *                     submitted: 1698700000
- *                     wo: 5
+ *                     priority_order: 5
  *                     bid_amount: 15
- *                     week: 8
- *                     year: 2024
+ *                     cancelled: null
+ *                     super_priority: 0
  *                   - uid: 12347
  *                     lid: 2
  *                     tid: 13
  *                     userid: 5
- *                     pid: "3892"
- *                     drop: "2041"
+ *                     pid: "MALI-WILL-007833"
  *                     type: 1
- *                     is_successful: 0
+ *                     is_successful: false
  *                     reason: "insufficient funds"
  *                     processed: 1698765432
  *                     submitted: 1698700000
- *                     wo: 5
+ *                     priority_order: 5
  *                     bid_amount: 25
- *                     week: 8
- *                     year: 2024
+ *                     cancelled: null
+ *                     super_priority: 0
  *       400:
  *         description: Bad request
  *         content:

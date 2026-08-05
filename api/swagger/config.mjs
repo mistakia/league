@@ -966,13 +966,31 @@ const options = {
               description: 'Whether super priority was used (0=false, 1=true)',
               example: 0
             },
-            release: {
-              type: 'array',
-              items: {
-                type: 'string'
-              },
-              description: 'Array of player IDs to release',
-              example: ['JORD-LOVE-001990']
+            is_successful: {
+              type: 'boolean',
+              nullable: true,
+              description: 'Whether the claim succeeded; null until processed',
+              example: true
+            },
+            reason: {
+              type: 'string',
+              nullable: true,
+              description: 'Failure reason when the claim was unsuccessful',
+              example: 'exceeds roster limits'
+            },
+            processed: {
+              type: 'integer',
+              nullable: true,
+              description:
+                'Unix timestamp when the claim was processed; null while pending',
+              example: 1766606404
+            },
+            cancelled: {
+              type: 'integer',
+              nullable: true,
+              description:
+                'Unix timestamp when the claim was cancelled, otherwise null',
+              example: null
             }
           },
           required: [
@@ -986,7 +1004,10 @@ const options = {
             'bid_amount',
             'type',
             'super_priority',
-            'release'
+            'is_successful',
+            'reason',
+            'processed',
+            'cancelled'
           ]
         },
         WaiverOrderRequest: {
