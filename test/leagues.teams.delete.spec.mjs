@@ -40,7 +40,7 @@ describe('API /leagues/teams - delete', function () {
       const team = {
         year: current_season.year,
         name: 'Team1',
-        abbrv: 'TM1',
+        abbreviation: 'TM1',
         lid: leagueId
       }
       const insert_query = await knex('teams').insert(team).returning('uid')
@@ -148,9 +148,9 @@ describe('API /leagues/teams - delete', function () {
           lid: 1,
           year: current_season.year,
           name: 'Team1',
-          abbrv: 'TM1',
-          cap: 200,
-          faab: 200
+          abbreviation: 'TM1',
+          salary_cap: 200,
+          faab_balance: 200
         })
         .returning('uid')
 

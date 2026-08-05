@@ -79,7 +79,7 @@ describe('API /teams - activate', function () {
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_ACTIVATE)
-      res.body.transaction.value.should.equal(value)
+      res.body.transaction.player_salary.should.equal(value)
       res.body.transaction.year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -168,7 +168,7 @@ describe('API /teams - activate', function () {
       res.body.pid.should.equal(activate_player.pid)
       res.body.slot.should.equal(roster_slot_types.BENCH)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_ACTIVATE)
-      res.body.transaction.value.should.equal(activate_value)
+      res.body.transaction.player_salary.should.equal(activate_value)
 
       // Verify activated player is now on bench
       const activateRosterRows = await knex('rosters_players')
@@ -212,7 +212,7 @@ describe('API /teams - activate', function () {
 
       expect(activate_transaction).to.exist
       expect(deactivate_transaction).to.exist
-      expect(deactivate_transaction.value).to.equal(deactivate_value)
+      expect(deactivate_transaction.player_salary).to.equal(deactivate_value)
     })
   })
 
@@ -414,7 +414,7 @@ describe('API /teams - activate', function () {
         lid: 1,
         pid: deactivate_player.pid,
         type: transaction_types.PRACTICE_ADD,
-        value: 2,
+        player_salary: 2,
         week: current_season.week,
         year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 10
@@ -485,17 +485,17 @@ describe('API /teams - activate', function () {
         lid: leagueId,
         pid: deactivate_player.pid,
         type: transaction_types.ROSTER_ADD,
-        value: 1,
+        player_salary: 1,
         week: current_season.week,
         year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 60 * 60 * 49 // 49 hours ago
       })
 
       await knex('rosters_players').insert({
-        rid: rosterId,
+        roster_id: rosterId,
         pid: deactivate_player.pid,
         slot: roster_slot_types.BENCH,
-        pos: deactivate_player.secondary_position,
+        player_position: deactivate_player.secondary_position,
         tag: player_tag_types.REGULAR,
         tid: teamId,
         lid: leagueId,

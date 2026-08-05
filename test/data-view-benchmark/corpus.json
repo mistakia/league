@@ -708,7 +708,7 @@
         "columns": [
           {
             "params": {
-              "qtr": [1],
+              "quarter": [1],
               "year": [2024],
               "team_unit": ["off"],
               "output": {
@@ -721,7 +721,7 @@
           },
           {
             "params": {
-              "qtr": [2],
+              "quarter": [2],
               "year": [2024],
               "team_unit": ["off"],
               "output": {
@@ -734,7 +734,7 @@
           },
           {
             "params": {
-              "qtr": [3],
+              "quarter": [3],
               "year": [2024],
               "team_unit": ["off"],
               "output": {
@@ -747,7 +747,7 @@
           },
           {
             "params": {
-              "qtr": [4],
+              "quarter": [4],
               "year": [2024],
               "team_unit": ["off"],
               "output": {
@@ -760,7 +760,7 @@
           },
           {
             "params": {
-              "qtr": [1, 2],
+              "quarter": [1, 2],
               "year": [2024],
               "team_unit": ["off"],
               "output": {
@@ -773,7 +773,7 @@
           },
           {
             "params": {
-              "qtr": [3, 4],
+              "quarter": [3, 4],
               "year": [2024],
               "team_unit": ["off"],
               "output": {
@@ -872,7 +872,7 @@
         "columns": [
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "team_unit": ["off"],
               "nfl_week_id": ["2024_REG_WEEK_1"],
               "yards_to_go": [10, 99],
@@ -886,7 +886,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "team_unit": ["off"],
               "nfl_week_id": ["2024_REG_WEEK_1"],
               "yards_to_go": [10, 99],
@@ -900,7 +900,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "team_unit": ["off"],
               "nfl_week_id": ["2024_REG_WEEK_2"],
               "yards_to_go": [10, 99],
@@ -914,7 +914,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "team_unit": ["off"],
               "nfl_week_id": ["2024_REG_WEEK_2"],
               "yards_to_go": [10, 99],
@@ -928,7 +928,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "team_unit": ["off"],
               "nfl_week_id": ["2024_REG_WEEK_3"],
               "yards_to_go": [10, 99],
@@ -942,7 +942,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "team_unit": ["off"],
               "nfl_week_id": ["2024_REG_WEEK_3"],
               "yards_to_go": [10, 99],
@@ -956,7 +956,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "team_unit": ["off"],
               "nfl_week_id": ["2024_REG_WEEK_4"],
               "yards_to_go": [10, 99],
@@ -970,7 +970,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "team_unit": ["off"],
               "nfl_week_id": ["2024_REG_WEEK_4"],
               "yards_to_go": [10, 99],
@@ -984,7 +984,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "team_unit": ["off"],
               "nfl_week_id": ["2024_REG_WEEK_5"],
               "yards_to_go": [10, 99],
@@ -998,7 +998,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "team_unit": ["off"],
               "nfl_week_id": ["2024_REG_WEEK_5"],
               "yards_to_go": [10, 99],
@@ -1012,7 +1012,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "week": null,
               "year": [2024],
               "team_unit": ["off"],
@@ -1027,7 +1027,7 @@
           },
           {
             "params": {
-              "dwn": [1],
+              "down_number": [1],
               "week": null,
               "year": [2024],
               "team_unit": ["off"],
@@ -1560,7 +1560,7 @@
           {
             "column_id": "player_rush_yards_from_plays",
             "params": {
-              "qtr": [1],
+              "quarter": [1],
               "nfl_week_id": [
                 "2024_REG_WEEK_12",
                 "2024_REG_WEEK_13",
@@ -1579,7 +1579,7 @@
           {
             "column_id": "player_rush_attempts_from_plays",
             "params": {
-              "qtr": [1],
+              "quarter": [1],
               "nfl_week_id": [
                 "2024_REG_WEEK_12",
                 "2024_REG_WEEK_13",
@@ -1599,7 +1599,7 @@
             "column_id": "team_pass_rate_over_expected_from_plays",
             "params": {
               "team_unit": ["off"],
-              "qtr": [1],
+              "quarter": [1],
               "nfl_week_id": [
                 "2024_REG_WEEK_12",
                 "2024_REG_WEEK_13",
@@ -1614,7 +1614,7 @@
             "column_id": "player_rush_yards_from_plays",
             "params": {
               "year": [2024],
-              "qtr": [1],
+              "quarter": [1],
               "output": {
                 "period": "game",
                 "aggregation": "rate",
@@ -1626,7 +1626,7 @@
             "column_id": "player_rush_attempts_from_plays",
             "params": {
               "year": [2024],
-              "qtr": [1],
+              "quarter": [1],
               "output": {
                 "period": "game",
                 "aggregation": "rate",
@@ -1639,7 +1639,7 @@
             "params": {
               "team_unit": ["off"],
               "year": [2024],
-              "qtr": [1]
+              "quarter": [1]
             }
           }
         ],
@@ -5731,7 +5731,7 @@
           },
           {
             "params": {
-              "dot": [20, 99],
+              "depth_of_target": [20, 99],
               "nfl_week_id": [
                 "2024_REG_WEEK_1",
                 "2024_REG_WEEK_2",
@@ -5834,7 +5834,7 @@
           },
           {
             "params": {
-              "dot": [20, 99],
+              "depth_of_target": [20, 99],
               "nfl_week_id": [
                 "2024_REG_WEEK_1",
                 "2024_REG_WEEK_2",
@@ -5934,7 +5934,7 @@
               },
               "output_match_column_params": true,
               "output_column_params": {
-                "dot": [20, 99],
+                "depth_of_target": [20, 99],
                 "nfl_week_id": [
                   {
                     "dynamic_type": "current_year_reg_weeks"
@@ -6179,7 +6179,7 @@
         "columns": [
           {
             "params": {
-              "wp": [0.15, 0.85],
+              "win_probability": [0.15, 0.85],
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_1"],
               "sec_rem_half": [112, 1800],
@@ -6194,7 +6194,7 @@
           },
           {
             "params": {
-              "wp": [0.15, 0.85],
+              "win_probability": [0.15, 0.85],
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_2"],
               "sec_rem_half": [112, 1800],
@@ -6209,7 +6209,7 @@
           },
           {
             "params": {
-              "wp": [0.15, 0.85],
+              "win_probability": [0.15, 0.85],
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_3"],
               "sec_rem_half": [112, 1800],
@@ -6224,7 +6224,7 @@
           },
           {
             "params": {
-              "wp": [0.15, 0.85],
+              "win_probability": [0.15, 0.85],
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_4"],
               "sec_rem_half": [112, 1800],
@@ -6239,7 +6239,7 @@
           },
           {
             "params": {
-              "wp": [0.15, 0.85],
+              "win_probability": [0.15, 0.85],
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_5"],
               "sec_rem_half": [112, 1800],
@@ -6254,7 +6254,7 @@
           },
           {
             "params": {
-              "wp": [0.15, 0.85],
+              "win_probability": [0.15, 0.85],
               "year": [2024],
               "team_unit": ["def"],
               "sec_rem_half": [112, 1800],

@@ -10,7 +10,7 @@ const log = debug('4for4')
 
 export const get_4for4_config = async () => {
   const config_row = await db('config').where({ key: '4for4_config' }).first()
-  return config_row.value
+  return config_row.config_value
 }
 
 export const get_4for4_projections = async ({

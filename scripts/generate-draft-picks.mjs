@@ -34,7 +34,7 @@ const run = async ({ future_year = current_season.year + 1 }) => {
     for (const team of teams) {
       for (let i = 1; i < 4; i++) {
         const rows = await db('draft').where({
-          otid: team.uid,
+          original_team_id: team.uid,
           round: i,
           lid: league.uid,
           year: future_year
@@ -49,7 +49,7 @@ const run = async ({ future_year = current_season.year + 1 }) => {
 
         await db('draft').insert({
           tid: team.uid,
-          otid: team.uid,
+          original_team_id: team.uid,
           lid: league.uid,
           round: i,
           year: future_year

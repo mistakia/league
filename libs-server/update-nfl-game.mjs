@@ -23,7 +23,7 @@ const normalize_stadium_name = (name) => {
 }
 
 const values_are_equivalent = (column_name, existing_value, new_value) => {
-  if (column_name === 'stad') {
+  if (column_name === 'stadium_name') {
     return (
       normalize_stadium_name(existing_value) ===
       normalize_stadium_name(new_value)

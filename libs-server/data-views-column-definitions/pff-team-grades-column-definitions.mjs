@@ -131,9 +131,13 @@ export default {
 
   // Team record and scoring stats -- additive counts, so a range year_offset
   // SUMs across the window rather than averaging.
-  pff_team_wins: create_pff_team_field('wins', 'pff_team_wins', 'SUM'),
-  pff_team_losses: create_pff_team_field('losses', 'pff_team_losses', 'SUM'),
-  pff_team_ties: create_pff_team_field('ties', 'pff_team_ties', 'SUM'),
+  pff_team_wins: create_pff_team_field('win_count', 'pff_team_wins', 'SUM'),
+  pff_team_losses: create_pff_team_field(
+    'loss_count',
+    'pff_team_losses',
+    'SUM'
+  ),
+  pff_team_ties: create_pff_team_field('tie_count', 'pff_team_ties', 'SUM'),
   pff_team_points_scored: create_pff_team_field(
     'points_scored',
     'pff_team_points_scored',

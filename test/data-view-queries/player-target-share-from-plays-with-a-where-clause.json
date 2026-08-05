@@ -6,24 +6,15 @@
     "columns": [
       {
         "column_id": "player_target_share_from_plays",
-        "params": {
-          "year": [2023],
-          "dwn": [3]
-        }
+        "params": { "year": [2023], "down_number": [3] }
       },
       {
         "column_id": "player_targets_from_plays",
-        "params": {
-          "year": [2023],
-          "dwn": [3]
-        }
+        "params": { "year": [2023], "down_number": [3] }
       },
       {
         "column_id": "player_target_share_from_plays",
-        "params": {
-          "year": [2023],
-          "qtr": [1, 2]
-        }
+        "params": { "year": [2023], "quarter": [1, 2] }
       }
     ],
     "where": [
@@ -31,24 +22,13 @@
         "column_id": "player_targets_from_plays",
         "operator": ">=",
         "value": "15",
-        "params": {
-          "year": [2023],
-          "dwn": [3]
-        }
+        "params": { "year": [2023], "down_number": [3] }
       }
     ],
-    "sort": [
-      {
-        "column_id": "player_target_share_from_plays",
-        "desc": true
-      }
-    ]
+    "sort": [{ "column_id": "player_target_share_from_plays", "desc": true }]
   },
-  "expected_query": "with \"td81e6dd3479d43a8f6c4713ff8320310\" as materialized (select COALESCE(target_pid) as pid, SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2023) and \"nfl_plays\".\"dwn\" in (3) group by COALESCE(target_pid) having SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) >= '15'), \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"t5cd6d5bdfe53e9f903b6dfd5839f916d\" as materialized (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"offense_nfl_team\" = \"pg\".\"nfl_team\" where not \"play_type\" = 'NOPL' and (\"target_pid\" is not null) and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2023) and \"nfl_plays\".\"dwn\" in (3) and \"pg\".\"season_year\" in (2023) group by \"pg\".\"pid\"), \"t0aa5dfbb2021a8860f0e0c4aad2e3995\" as materialized (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"offense_nfl_team\" = \"pg\".\"nfl_team\" where not \"play_type\" = 'NOPL' and (\"target_pid\" is not null) and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2023) and \"nfl_plays\".\"qtr\" in (1, 2) and \"pg\".\"season_year\" in (2023) group by \"pg\".\"pid\") select \"player\".\"pid\", \"td81e6dd3479d43a8f6c4713ff8320310\".\"trg_from_plays\" AS \"trg_from_plays_0\", player.first_name, player.last_name, \"t5cd6d5bdfe53e9f903b6dfd5839f916d\".\"trg_share_from_plays\" AS \"trg_share_from_plays_0\", \"t0aa5dfbb2021a8860f0e0c4aad2e3995\".\"trg_share_from_plays\" AS \"trg_share_from_plays_1\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"td81e6dd3479d43a8f6c4713ff8320310\" on \"td81e6dd3479d43a8f6c4713ff8320310\".\"pid\" = \"player\".\"pid\" left join \"t5cd6d5bdfe53e9f903b6dfd5839f916d\" on \"t5cd6d5bdfe53e9f903b6dfd5839f916d\".\"pid\" = \"player\".\"pid\" left join \"t0aa5dfbb2021a8860f0e0c4aad2e3995\" on \"t0aa5dfbb2021a8860f0e0c4aad2e3995\".\"pid\" = \"player\".\"pid\" group by \"td81e6dd3479d43a8f6c4713ff8320310\".\"trg_from_plays\", player.first_name, player.last_name, \"t5cd6d5bdfe53e9f903b6dfd5839f916d\".\"trg_share_from_plays\", \"t0aa5dfbb2021a8860f0e0c4aad2e3995\".\"trg_share_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "with \"t9135ab8d105074b554011c33c4ae5f7f\" as materialized (select COALESCE(target_pid) as pid, SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2023) and \"nfl_plays\".\"down_number\" in (3) group by COALESCE(target_pid) having SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) >= '15'), \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"t517d53fb5d5170e9ffd89e85f04981ec\" as materialized (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"offense_nfl_team\" = \"pg\".\"nfl_team\" where not \"play_type\" = 'NOPL' and (\"target_pid\" is not null) and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2023) and \"nfl_plays\".\"down_number\" in (3) and \"pg\".\"season_year\" in (2023) group by \"pg\".\"pid\"), \"t5766d426066994262f59dfcc190fb0af\" as materialized (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"offense_nfl_team\" = \"pg\".\"nfl_team\" where not \"play_type\" = 'NOPL' and (\"target_pid\" is not null) and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2023) and \"nfl_plays\".\"quarter\" in (1, 2) and \"pg\".\"season_year\" in (2023) group by \"pg\".\"pid\") select \"player\".\"pid\", \"t9135ab8d105074b554011c33c4ae5f7f\".\"trg_from_plays\" AS \"trg_from_plays_0\", player.first_name, player.last_name, \"t517d53fb5d5170e9ffd89e85f04981ec\".\"trg_share_from_plays\" AS \"trg_share_from_plays_0\", \"t5766d426066994262f59dfcc190fb0af\".\"trg_share_from_plays\" AS \"trg_share_from_plays_1\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"t9135ab8d105074b554011c33c4ae5f7f\" on \"t9135ab8d105074b554011c33c4ae5f7f\".\"pid\" = \"player\".\"pid\" left join \"t517d53fb5d5170e9ffd89e85f04981ec\" on \"t517d53fb5d5170e9ffd89e85f04981ec\".\"pid\" = \"player\".\"pid\" left join \"t5766d426066994262f59dfcc190fb0af\" on \"t5766d426066994262f59dfcc190fb0af\".\"pid\" = \"player\".\"pid\" group by \"t9135ab8d105074b554011c33c4ae5f7f\".\"trg_from_plays\", player.first_name, player.last_name, \"t517d53fb5d5170e9ffd89e85f04981ec\".\"trg_share_from_plays\", \"t5766d426066994262f59dfcc190fb0af\".\"trg_share_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["player", "plays", "filters", "parameters", "sorting", "cte"],
   "timeout_ms": 40000,
-  "expected_metadata": {
-    "cache_ttl": "one_week",
-    "cache_expire_at": null
-  }
+  "expected_metadata": { "cache_ttl": "one_week", "cache_expire_at": null }
 }

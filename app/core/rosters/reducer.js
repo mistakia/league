@@ -25,8 +25,18 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
       })
 
     case auction_actions.AUCTION_PROCESSED: {
-      const { tid, pid, rid, pos, userid, value, type, year, timestamp, lid } =
-        payload
+      const {
+        tid,
+        pid,
+        rid,
+        pos,
+        userid,
+        player_salary,
+        type,
+        year,
+        timestamp,
+        lid
+      } = payload
       return state.updateIn(
         [payload.tid, current_season.year, current_season.week, 'players'],
         (players) =>
@@ -37,7 +47,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
             pid,
             pos,
             userid,
-            value,
+            value: player_salary,
             type,
             year,
             timestamp,
@@ -100,7 +110,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
                   tid: t.tid,
                   lid: t.lid,
                   type: t.type,
-                  value: t.value,
+                  value: t.player_salary,
                   year: t.year,
                   timestamp: t.timestamp
                 })

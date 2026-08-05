@@ -50,9 +50,12 @@ const create_player_practice_field = (field, alias) => ({
   get_cache_info
 })
 
-const create_player_practice_designation_field = (practice_day) => ({
-  column_name: practice_day,
-  select_as: () => `player_practice_designation_${practice_day}`,
+// `day_suffix` is the exposed field suffix (e.g. player_practice_designation_m)
+// and is pinned independently of `column_name` -- deriving it from the renamed
+// physical column would change the output field name for every saved view.
+const create_player_practice_designation_field = (column_name, day_suffix) => ({
+  column_name,
+  select_as: () => `player_practice_designation_${day_suffix}`,
   table_alias: generate_table_alias,
   source: player_practice_source,
   get_cache_info
@@ -68,21 +71,29 @@ export default {
     'practice_roster_status'
   ),
   player_practice_injury: create_player_practice_field(
-    'inj',
+    'injury_type',
     'practice_injury'
   ),
-  player_practice_designation_monday:
-    create_player_practice_designation_field('m'),
-  player_practice_designation_tuesday:
-    create_player_practice_designation_field('tu'),
+  player_practice_designation_monday: create_player_practice_designation_field(
+    'monday_practice_status',
+    'm'
+  ),
+  player_practice_designation_tuesday: create_player_practice_designation_field(
+    'tuesday_practice_status',
+    'tu'
+  ),
   player_practice_designation_wednesday:
-    create_player_practice_designation_field('w'),
+    create_player_practice_designation_field('wednesday_practice_status', 'w'),
   player_practice_designation_thursday:
-    create_player_practice_designation_field('th'),
-  player_practice_designation_friday:
-    create_player_practice_designation_field('f'),
+    create_player_practice_designation_field('thursday_practice_status', 'th'),
+  player_practice_designation_friday: create_player_practice_designation_field(
+    'friday_practice_status',
+    'f'
+  ),
   player_practice_designation_saturday:
-    create_player_practice_designation_field('s'),
-  player_practice_designation_sunday:
-    create_player_practice_designation_field('su')
+    create_player_practice_designation_field('saturday_practice_status', 's'),
+  player_practice_designation_sunday: create_player_practice_designation_field(
+    'sunday_practice_status',
+    'su'
+  )
 }

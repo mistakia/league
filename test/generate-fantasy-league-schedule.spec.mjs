@@ -15,7 +15,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
       schedulePerTeam[i] = []
       teams.push({
         uid: i,
-        div: (i % 4) + 1
+        division: (i % 4) + 1
       })
     }
 
@@ -37,7 +37,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
       const count = countMatchups(schedulePerTeam[teamid])
       for (const [opponent, occurences] of count.entries()) {
         const oppoTeam = teams.find((t) => t.uid === opponent)
-        if (team.div === oppoTeam.div) {
+        if (team.division === oppoTeam.division) {
           occurences.should.equal(2)
         } else {
           // should equal 1 or 2
@@ -54,7 +54,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
       schedulePerTeam[i] = []
       teams.push({
         uid: i,
-        div: (i % 2) + 1
+        division: (i % 2) + 1
       })
     }
 
@@ -76,7 +76,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
       const count = countMatchups(schedulePerTeam[teamid])
       for (const [opponent, occurences] of count.entries()) {
         const oppoTeam = teams.find((t) => t.uid === opponent)
-        if (team.div === oppoTeam.div) {
+        if (team.division === oppoTeam.division) {
           occurences.should.equal(2)
         } else {
           // should equal 1 or 2

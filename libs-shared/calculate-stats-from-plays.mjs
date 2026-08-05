@@ -62,7 +62,8 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.ball_carrier_pid, 'successful_play', 1)
           addStat(play.ball_carrier_pid, 'rasucc', 1)
         }
-        if (play.mbt) addStat(play.ball_carrier_pid, 'mbt', play.mbt)
+        if (play.missed_or_broken_tackle)
+          addStat(play.ball_carrier_pid, 'mbt', play.missed_or_broken_tackle)
         if (play.rush_yds > 0) addStat(play.ball_carrier_pid, 'posra', 1)
         if (play.is_first_down) addStat(play.ball_carrier_pid, 'rfd', 1)
         if (play.is_touchdown)
@@ -77,9 +78,9 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.passer_pid, 'psucc', 1)
           addStat(play.passer_pid, 'successful_play', 1)
         }
-        if (play.dot) {
-          addStat(play.passer_pid, 'pdot', play.dot)
-          addTeamStat(play.offense_nfl_team, 'rdot', play.dot)
+        if (play.depth_of_target) {
+          addStat(play.passer_pid, 'pdot', play.depth_of_target)
+          addTeamStat(play.offense_nfl_team, 'rdot', play.depth_of_target)
         }
         if (play.is_qb_pressure) addStat(play.passer_pid, 'qb_pressure', 1)
         if (play.is_qb_hit) addStat(play.passer_pid, 'qb_hit', 1)
@@ -90,7 +91,7 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.passer_pid, 'int_worthy', 1)
         if (play.is_dropped_pass) {
           addStat(play.passer_pid, 'drpp', 1)
-          addStat(play.passer_pid, 'drppy', play.dot)
+          addStat(play.passer_pid, 'drppy', play.depth_of_target)
         }
 
         // receiver
@@ -98,13 +99,13 @@ const calculateStatsFromPlays = (plays) => {
           playerToTeam[play.target_pid] = play.offense_nfl_team
           addTeamStat(play.offense_nfl_team, 'targets', 1)
           addStat(play.target_pid, 'targets', 1)
-          addStat(play.target_pid, 'rdot', play.dot)
-          if (play.dot >= 20) addStat(play.target_pid, 'dptrg', 1)
+          addStat(play.target_pid, 'rdot', play.depth_of_target)
+          if (play.depth_of_target >= 20) addStat(play.target_pid, 'dptrg', 1)
           if (play.is_contested_ball)
             addStat(play.target_pid, 'contested_ball', 1)
           if (play.is_dropped_pass) {
             addStat(play.target_pid, 'drops', 1)
-            addStat(play.target_pid, 'drprecy', play.dot)
+            addStat(play.target_pid, 'drprecy', play.depth_of_target)
           }
         }
 
@@ -117,14 +118,15 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.target_pid, 'receptions', 1)
           addStat(play.target_pid, 'receiving_yards', play.recv_yds)
           addStat(play.target_pid, 'ryac', play.yards_after_catch)
-          addStat(play.target_pid, 'rcay', play.dot)
-          if (play.mbt) addStat(play.target_pid, 'mbt', play.mbt)
+          addStat(play.target_pid, 'rcay', play.depth_of_target)
+          if (play.missed_or_broken_tackle)
+            addStat(play.target_pid, 'mbt', play.missed_or_broken_tackle)
 
           // passer
           addStat(play.passer_pid, 'passing_attempts', 1)
           addStat(play.passer_pid, 'passing_yards', play.pass_yds)
           addStat(play.passer_pid, 'passing_completions', 1)
-          addStat(play.passer_pid, 'pcay', play.dot)
+          addStat(play.passer_pid, 'pcay', play.depth_of_target)
           if (play.yards_after_catch)
             addStat(play.passer_pid, 'pyac', play.yards_after_catch)
 

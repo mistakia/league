@@ -312,7 +312,7 @@ export class RosterSync {
         tid: internal_team_id,
         pid,
         slot: roster_slot_types.BENCH, // Default to bench
-        pos: 'BENCH',
+        player_position: 'BENCH',
         week,
         year,
         extensions: 0,

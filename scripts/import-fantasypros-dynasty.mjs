@@ -25,10 +25,10 @@ debug.enable('import-fantasypros-dynasty,get-player,fantasypros,fetch')
 const observed_at = new Date()
 
 const get_ranking = (item) => ({
-  min: Number(item.rank_min),
-  max: Number(item.rank_max),
-  avg: Number(item.rank_ave),
-  std: Number(item.rank_std),
+  min_rank: Number(item.rank_min),
+  max_rank: Number(item.rank_max),
+  average_rank: Number(item.rank_ave),
+  rank_standard_deviation: Number(item.rank_std),
   overall_rank: Number(item.rank_ecr),
   position_rank: Number(item.pos_rank.replace(/\D/g, ''))
 })
@@ -98,7 +98,7 @@ const import_individual_fantasypros_dynasty_rankings = async ({
     const ranking = get_ranking(item)
     inserts.push({
       pid: player_row.pid,
-      pos: normalize_position(params.pos),
+      player_position: normalize_position(params.pos),
       season_year: year,
       source_id: 'FANTASYPROS',
       ranking_type: format_ranking_type({

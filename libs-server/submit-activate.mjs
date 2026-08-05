@@ -58,7 +58,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
   }
 
   await db('rosters_players').update({ slot: roster_slot_types.BENCH }).where({
-    rid: rosterRow.uid,
+    roster_id: rosterRow.uid,
     pid: activate_pid
   })
 
@@ -68,7 +68,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     lid: leagueId,
     pid: activate_pid,
     type: transaction_types.ROSTER_ACTIVATE,
-    value: player_row.value,
+    player_salary: player_row.player_salary,
     week: current_season.week,
     year: current_season.year,
     timestamp
@@ -103,7 +103,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
   })
   const team = teams[0]
 
-  const message = `${team.name} (${team.abbrv}) has activated ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}).`
+  const message = `${team.name} (${team.abbreviation}) has activated ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}).`
 
   await sendNotifications({
     league,

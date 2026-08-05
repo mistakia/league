@@ -37,7 +37,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       release_ids:
         player_map.get('restricted_free_agency_conditional_releases') || [],
       untag: '',
-      bid: player_map.get('bid') ?? 0,
+      bid: player_map.get('bid_amount') ?? 0,
       error: false,
       missing_release: false,
       missing_untag: false
@@ -59,7 +59,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
     }
 
     const pid = player_map.get('pid')
-    const bid = player_map.get('bid')
+    const bid = player_map.get('bid_amount')
     const restricted_free_agency_bid_exists =
       bid !== null && bid !== undefined && Number(bid) >= 0
     this._isUpdate = Boolean(

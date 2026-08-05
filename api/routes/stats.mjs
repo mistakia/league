@@ -94,7 +94,7 @@ router.get('/gamelogs/players', async (req, res) => {
       .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
       .where('nfl_games.season_year', year)
       .where('nfl_games.season_type', 'REG')
-      .whereIn('player_gamelogs.pos', position)
+      .whereIn('player_gamelogs.player_position', position)
 
     if (week) {
       query.where('nfl_games.week', week)

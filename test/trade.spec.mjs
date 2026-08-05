@@ -38,14 +38,15 @@ const expect = chai.expect
 //
 // Both halves matter. Matching the two positions keeps the count the removal
 // frees equal to the count the addition consumes. Requiring the roster row's
-// pos to agree with player.primary_position keeps those two counts on the same
-// basis: the draft fixture writes rosters_players.pos from secondary_position
-// while validate_trade_slot_assignment reads primary_position, and a handful of
+// player_position to agree with player.primary_position keeps those two
+// counts on the same basis: the draft fixture writes
+// rosters_players.player_position from secondary_position while
+// validate_trade_slot_assignment reads primary_position, and a handful of
 // players in the seed pool differ across the two.
 const select_tradeable_pair = async () => {
   const roster_players_for_team = (tid) =>
     knex('rosters_players')
-      .select('rosters_players.pid', 'rosters_players.pos')
+      .select('rosters_players.pid', 'rosters_players.player_position')
       .join('player', 'player.pid', 'rosters_players.pid')
       .where({
         'rosters_players.lid': 1,
@@ -53,19 +54,23 @@ const select_tradeable_pair = async () => {
         'rosters_players.year': current_season.year,
         'rosters_players.week': current_season.week
       })
-      .whereRaw('player.primary_position = rosters_players.pos')
+      .whereRaw('player.primary_position = rosters_players.player_position')
 
   const proposing_pool = await roster_players_for_team(1)
   const accepting_pool = await roster_players_for_team(2)
 
-  const accepting_positions = new Set(accepting_pool.map((p) => p.pos))
+  const accepting_positions = new Set(
+    accepting_pool.map((p) => p.player_position)
+  )
   const proposing_row = proposing_pool.find((p) =>
-    accepting_positions.has(p.pos)
+    accepting_positions.has(p.player_position)
   )
   if (!proposing_row) {
     throw new Error('no shared position between team 1 and team 2 rosters')
   }
-  const accepting_row = accepting_pool.find((p) => p.pos === proposing_row.pos)
+  const accepting_row = accepting_pool.find(
+    (p) => p.player_position === proposing_row.player_position
+  )
 
   return [proposing_row, accepting_row]
 }
@@ -93,7 +98,7 @@ describe('API /trades', function () {
       // set values to zero
       await knex('transactions')
         .whereIn('pid', proposingTeamPlayers.concat(acceptingTeamPlayers))
-        .update('value', 0)
+        .update('player_salary', 0)
 
       // TODO - get trading player values
 
@@ -305,7 +310,7 @@ describe('API /trades', function () {
         lid: leagueId,
         pid: player1.pid,
         type: transaction_types.ROSTER_ACTIVATE,
-        value: 0,
+        player_salary: 0,
         week: current_season.week,
         year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)
@@ -435,7 +440,7 @@ describe('API /trades', function () {
       res.body.transaction.type.should.equal(
         transaction_types.ROSTER_DEACTIVATE
       )
-      res.body.transaction.value.should.equal(value)
+      res.body.transaction.player_salary.should.equal(value)
       res.body.transaction.year.should.equal(current_season.year)
       // The server stamps the transaction while handling the request and the
       // assertion reads the clock after the response, so an exact equality

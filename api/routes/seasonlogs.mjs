@@ -38,13 +38,13 @@ const router = express.Router()
  *                     stat_key: "points_scored"
  *                     stat_value: 345
  *                     points: 12.5
- *                     rank: 3
+ *                     points_rank: 3
  *                   - season_year: 2024
  *                     nfl_team: "KC"
  *                     stat_key: "points_allowed"
  *                     stat_value: 210
  *                     points: 8.2
- *                     rank: 7
+ *                     points_rank: 7
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -62,7 +62,7 @@ router.get('/teams', async (req, res) => {
       query
         .select(
           'league_nfl_team_seasonlogs.points',
-          'league_nfl_team_seasonlogs.rank'
+          'league_nfl_team_seasonlogs.points_rank'
         )
         .join('league_nfl_team_seasonlogs', function () {
           this.on(

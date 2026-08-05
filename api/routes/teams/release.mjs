@@ -77,11 +77,11 @@ const router = express.Router({ mergeParams: true })
  *                   type: integer
  *                   description: Previous slot
  *                   example: 4
- *                 rid:
+ *                 roster_id:
  *                   type: integer
  *                   description: Roster ID
  *                   example: 1234
- *                 pos:
+ *                 player_position:
  *                   type: string
  *                   description: Player position
  *                   example: "QB"
@@ -181,7 +181,7 @@ router.post('/?', async (req, res) => {
     })
 
     // send notification
-    const message = `${team.name} (${team.abbrv}) has released ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}).`
+    const message = `${team.name} (${team.abbreviation}) has released ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}).`
 
     await sendNotifications({
       league,

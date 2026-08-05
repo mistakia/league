@@ -1,28 +1,28 @@
 const getRosterSize = ({
-  sqb = 0,
-  srb = 0,
-  swr = 0,
-  ste = 0,
-  srbwr = 0,
+  starter_slots_qb = 0,
+  starter_slots_rb = 0,
+  starter_slots_wr = 0,
+  starter_slots_te = 0,
+  starter_slots_rb_wr_flex = 0,
   srbwrte = 0,
   sqbrbwrte = 0,
-  swrte = 0,
-  sdst = 0,
-  sk = 0,
-  bench = 0
+  starter_slots_wr_te_flex = 0,
+  starter_slots_dst = 0,
+  starter_slots_k = 0,
+  bench_slot_count = 0
 }) => {
   return (
-    sqb +
-    srb +
-    swr +
-    ste +
-    srbwr +
+    starter_slots_qb +
+    starter_slots_rb +
+    starter_slots_wr +
+    starter_slots_te +
+    starter_slots_rb_wr_flex +
     srbwrte +
     sqbrbwrte +
-    swrte +
-    sdst +
-    sk +
-    bench
+    starter_slots_wr_te_flex +
+    starter_slots_dst +
+    starter_slots_k +
+    bench_slot_count
   )
 }
 

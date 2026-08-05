@@ -69,8 +69,8 @@ export function* calculateStats() {
   const filtered = plays.filter((play) => {
     if (!weeks.has(play.nfl_week_id)) return false
     if (!days.includes(play.day)) return false
-    if (!quarters.includes(play.qtr)) return false
-    if (!downs.includes(play.dwn)) return false
+    if (!quarters.includes(play.quarter)) return false
+    if (!downs.includes(play.down_number)) return false
     if (yardline_start !== 0 || yardline_end !== 100) {
       if (!play.ydl_100) return false
       if (play.ydl_100 < yardline_start || play.ydl_100 > yardline_end)

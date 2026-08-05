@@ -37,7 +37,7 @@ export default function MatchupPage({
   const [show_bench, set_show_bench] = useState(false)
   const { lid, seas_year, seas_week, matchupId } = useParams()
   const [selected_tid, set_selected_tid] = useState(
-    is_head_to_head ? matchup.hid : matchup.getIn(['tids', '0'])
+    is_head_to_head ? matchup.home_team_id : matchup.getIn(['tids', '0'])
   )
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function MatchupPage({
 
   useEffect(() => {
     set_selected_tid(
-      is_head_to_head ? matchup.hid : matchup.getIn(['tids', '0'])
+      is_head_to_head ? matchup.home_team_id : matchup.getIn(['tids', '0'])
     )
     if (matchup.uid) {
       navigate(
@@ -125,7 +125,7 @@ export default function MatchupPage({
             <div className='scoreboard__main'>
               {is_head_to_head && (
                 <ScoreboardTeam
-                  tid={matchup.aid}
+                  tid={matchup.away_team_id}
                   week={matchup.week}
                   year={matchup.year}
                   type='away'

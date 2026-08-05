@@ -132,7 +132,7 @@ const process_waiver_claim = async (waiver, lid, timestamp) => {
     leagueId: lid,
     pid: waiver.pid,
     teamId: waiver.tid,
-    bid: waiver.bid,
+    bid: waiver.bid_amount,
     userId: waiver.userid,
     waiverId: waiver.wid
   })
@@ -142,7 +142,7 @@ const process_waiver_claim = async (waiver, lid, timestamp) => {
 
   // update team budget
   if (current_season.isRegularSeason) {
-    await update_team_budget(waiver.tid, waiver.bid)
+    await update_team_budget(waiver.tid, waiver.bid_amount)
   }
 
   // cancel any other pending waivers for this player
@@ -152,7 +152,7 @@ const process_waiver_claim = async (waiver, lid, timestamp) => {
 const handle_tied_waivers = async (waiver) => {
   const tied_waivers = await db('waivers')
     .where({
-      bid: waiver.bid,
+      bid_amount: waiver.bid_amount,
       pid: waiver.pid,
       lid: waiver.lid,
       type: waiver.waiver_type
@@ -168,7 +168,7 @@ const handle_tied_waivers = async (waiver) => {
 }
 
 const update_team_budget = async (team_id, bid) => {
-  await db('teams').decrement('faab', bid).where({
+  await db('teams').decrement('faab_balance', bid).where({
     uid: team_id,
     year: current_season.year
   })

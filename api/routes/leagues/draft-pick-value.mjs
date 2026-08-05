@@ -12,7 +12,7 @@ const router = express.Router({ mergeParams: true })
  *       type: object
  *       description: Draft pick value data based on league format
  *       properties:
- *         rank:
+ *         draft_pick_rank:
  *           type: integer
  *           description: Draft pick position/rank
  *           example: 12
@@ -84,13 +84,13 @@ const router = express.Router({ mergeParams: true })
  *               draft_pick_values:
  *                 summary: Draft pick value data
  *                 value:
- *                   - rank: 1
+ *                   - draft_pick_rank: 1
  *                     median_best_season_points_added_per_game: 12.8
  *                     median_career_points_added_per_game: 9.4
- *                   - rank: 2
+ *                   - draft_pick_rank: 2
  *                     median_best_season_points_added_per_game: 11.2
  *                     median_career_points_added_per_game: 8.7
- *                   - rank: 12
+ *                   - draft_pick_rank: 12
  *                     median_best_season_points_added_per_game: 8.5
  *                     median_career_points_added_per_game: 6.2
  *       400:
@@ -121,7 +121,7 @@ router.get('/?', async (req, res) => {
 
     const data = await db('league_format_draft_pick_value')
       .select(
-        'rank',
+        'draft_pick_rank',
         'median_best_season_points_added_per_game',
         'median_career_points_added_per_game'
       )

@@ -6,6 +6,7 @@ import Chip from '@mui/material/Chip'
 import LeagueTeamsValueOverTime from '@components/league-teams-value-over-time'
 
 import './league-header.styl'
+import { roster_slot_types, starter_slot_league_columns } from '@constants'
 
 export default function LeagueHeader({ league, is_in_league }) {
   const is_ppr_equal =
@@ -38,7 +39,8 @@ export default function LeagueHeader({ league, is_in_league }) {
 
   starting_labels.forEach((starting_label, index) => {
     const clean_label = starting_label.replaceAll('/', '')
-    const value = league[`s${clean_label}`]
+    const slot_id = roster_slot_types[clean_label.toUpperCase()]
+    const value = league[starter_slot_league_columns[slot_id]]
     if (!value) return
     scoring_chips.push(
       <Chip

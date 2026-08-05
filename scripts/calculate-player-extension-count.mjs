@@ -21,15 +21,15 @@ const run = async ({ lid }) => {
     .orderBy('week', 'desc')
 
   const rows = await db('rosters_players').whereIn(
-    'rid',
+    'roster_id',
     rosters.map((r) => r.uid)
   )
 
-  for (const { pid, rid } of rows) {
+  for (const { pid, roster_id } of rows) {
     const extensions = await getPlayerExtensions({ lid, pid })
     await db('rosters_players')
       .update({ extensions: extensions.length })
-      .where({ pid, rid })
+      .where({ pid, roster_id })
   }
 
   log(`set extensions for ${rows.length} players`)

@@ -83,7 +83,7 @@ describe('API /teams - deactivate', function () {
       res.body.transaction.type.should.equal(
         transaction_types.ROSTER_DEACTIVATE
       )
-      res.body.transaction.value.should.equal(value)
+      res.body.transaction.player_salary.should.equal(value)
       res.body.transaction.year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -121,9 +121,9 @@ describe('API /teams - deactivate', function () {
         userid: 1,
         lid: leagueId,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: value,
+        bid_amount: value,
         type: waiver_types.FREE_AGENCY
       })
 
@@ -159,7 +159,7 @@ describe('API /teams - deactivate', function () {
       res.body.transaction.type.should.equal(
         transaction_types.ROSTER_DEACTIVATE
       )
-      res.body.transaction.value.should.equal(value)
+      res.body.transaction.player_salary.should.equal(value)
       res.body.transaction.year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -352,7 +352,7 @@ describe('API /teams - deactivate', function () {
         lid: leagueId,
         pid: player.pid,
         type: transaction_types.PRACTICE_ADD,
-        value: 2,
+        player_salary: 2,
         week: current_season.week,
         year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 10
@@ -402,9 +402,9 @@ describe('API /teams - deactivate', function () {
           userid: 1,
           lid: leagueId,
           pid: player.pid,
-          po: 9999,
+          priority_order: 9999,
           submitted: timestamp,
-          bid: 1,
+          bid_amount: 1,
           type: waiver_types.FREE_AGENCY
         })
         .returning('uid')
@@ -425,9 +425,9 @@ describe('API /teams - deactivate', function () {
         userid: 1,
         lid: leagueId,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: timestamp,
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.FREE_AGENCY
       })
 

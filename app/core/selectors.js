@@ -44,7 +44,8 @@ import {
   waiver_types,
   fantasy_positions,
   player_nfl_status,
-  default_points_added
+  default_points_added,
+  starter_slot_league_columns
 } from '@constants'
 import { League } from '@core/leagues'
 import { fuzzy_search } from '@core/utils'
@@ -196,7 +197,7 @@ export function get_team_free_agency_auction_bid(state, { tid }) {
 
   const pid = last.pid
   const bid = auction.transactions.find((t) => t.pid === pid && t.tid === tid)
-  return bid ? bid.value : null
+  return bid ? bid.player_salary : null
 }
 
 export const get_rosters_for_current_league = createSelector(
@@ -576,7 +577,7 @@ const get_rookie_draft_pick_rank = ({ pick, round }) => {
 
 function get_draft_pick_value(values, pick) {
   const rank = get_rookie_draft_pick_rank(pick)
-  const item = values.find((value) => value.rank === rank)
+  const item = values.find((value) => value.draft_pick_rank === rank)
 
   if (!item) {
     return 0
@@ -879,7 +880,8 @@ export function get_filtered_matchups(state) {
 
     // Apply team filter if teams are selected
     if (teams.size > 0) {
-      if (!teams.includes(m.aid) && !teams.includes(m.hid)) return false
+      if (!teams.includes(m.away_team_id) && !teams.includes(m.home_team_id))
+        return false
     }
 
     // Apply week filter if weeks are selected
@@ -959,7 +961,9 @@ export function get_matchup_by_team_id(state, { tid, year, week }) {
   return (
     matchups.find(
       (m) =>
-        m.year === year && m.week === week && (m.hid === tid || m.aid === tid)
+        m.year === year &&
+        m.week === week &&
+        (m.home_team_id === tid || m.away_team_id === tid)
     ) || create_matchup()
   )
 }
@@ -1185,7 +1189,7 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
   const playerTag = player_map.get('tag')
   const playerSlot = player_map.get('slot')
   const playerId = player_map.get('pid')
-  const bid = player_map.get('bid')
+  const bid = player_map.get('bid_amount')
   status.restricted_free_agent_bid_exists =
     bid !== null && bid !== undefined && Number(bid) >= 0
   status.tagged.rookie = playerTag === player_tag_types.ROOKIE
@@ -1714,7 +1718,7 @@ export function getFilteredProps(state) {
         console.log(`unrecognized betype: ${prop.prop_type}`)
     }
 
-    prop.diff = prop.proj - prop.ln
+    prop.diff = prop.proj - prop.prop_line
     prop.abs = Math.abs(prop.diff)
   }
 
@@ -1935,7 +1939,9 @@ export const getRosterPositionalValueByTeamId = createSelector(
   get_rostered_player_maps,
   get_draft_pick_values,
   (rosterRecords, league, teams, team, player_maps, draft_pick_values) => {
-    const divTeamIds = teams.filter((t) => t.div === team.div).map((t) => t.uid)
+    const divTeamIds = teams
+      .filter((t) => t.division === team.division)
+      .map((t) => t.uid)
 
     const values = {
       league_min: {},
@@ -1965,7 +1971,7 @@ export const getRosterPositionalValueByTeamId = createSelector(
     const seasonType = current_season.isOffseason ? '0' : 'ros'
     for (const position of fantasy_positions) {
       // skip positions that don't start in the current league
-      if (!league[`s${position.toLowerCase()}`]) {
+      if (!league[starter_slot_league_columns[roster_slot_types[position]]]) {
         continue
       }
       const position_values_by_team = []
@@ -2248,8 +2254,14 @@ export function getScoreboardByMatchupId(state, { matchupId }) {
     }
   }
 
-  const home = getScoreboardByTeamId(state, { tid: matchup.hid, matchupId })
-  const away = getScoreboardByTeamId(state, { tid: matchup.aid, matchupId })
+  const home = getScoreboardByTeamId(state, {
+    tid: matchup.home_team_id,
+    matchupId
+  })
+  const away = getScoreboardByTeamId(state, {
+    tid: matchup.away_team_id,
+    matchupId
+  })
 
   return { home, away }
 }
@@ -2354,7 +2366,7 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
           lp.play_description === 'END GAME'
             ? 0
             : Number((lp.game_clock_start || '0:00').split(':')[0])
-        const quartersRemaining = lp.qtr === 5 ? 0 : 4 - lp.qtr
+        const quartersRemaining = lp.quarter === 5 ? 0 : 4 - lp.quarter
         minutes += quartersRemaining * 15 + quarterMinutes
       }
     } else {
@@ -2755,7 +2767,7 @@ export function get_player_game_progress(
   }
 
   return get_game_progress({
-    quarter: lastPlay.qtr,
+    quarter: lastPlay.quarter,
     game_clock: lastPlay.game_clock_start,
     is_final
   })
@@ -2975,12 +2987,12 @@ export const get_draft_pick_trade_counts = createSelector(
 export function get_overall_standings(state) {
   const teams = get_teams_for_current_league_and_year(state)
   const league = get_current_league(state)
-  const divisionTeams = teams.groupBy((x) => x.getIn(['div'], 0))
+  const divisionTeams = teams.groupBy((x) => x.getIn(['division'], 0))
 
   const flat_teams = teams
     .toList()
     .toJS()
-    .map((team) => ({ tid: team.uid, div: team.div, ...team.stats }))
+    .map((team) => ({ tid: team.uid, div: team.division, ...team.stats }))
 
   // get_playoff_seeding THROWS on a missing playoff format, which is right on
   // the server but wrong here: this runs inside mapStateToProps, so a throw
@@ -3574,7 +3586,9 @@ function getTeamTradeSummary(
   const get_draft_pick_value = (pick) => {
     if (!pick || !draft_pick_values) return 0
     const rank = get_rookie_draft_pick_rank(pick)
-    const item = draft_pick_values.find((value) => value.rank === rank)
+    const item = draft_pick_values.find(
+      (value) => value.draft_pick_rank === rank
+    )
     if (!item) return 0
     const avg =
       (3 * item.median_best_season_points_added_per_game +
@@ -3857,7 +3871,7 @@ export function get_waiver_report_items(state) {
   return result.sort((a, b) => {
     if (!a.tid) return 1
     if (!b.tid) return -1
-    return (b.bid || 0) - (a.bid || 0)
+    return (b.bid_amount || 0) - (a.bid_amount || 0)
   })
 }
 
@@ -3886,7 +3900,10 @@ export const get_waiver_players_for_current_team = createSelector(
 
     const waivers = teamWaivers.valueSeq().toList()
     const sorted = waivers.sort(
-      (a, b) => b.bid - a.bid || a.po - b.po || a.uid - b.uid
+      (a, b) =>
+        b.bid_amount - a.bid_amount ||
+        a.priority_order - b.priority_order ||
+        a.uid - b.uid
     )
     let poach = new List()
     let active = new List()
@@ -3987,9 +4004,9 @@ export const get_league_user_historical_ranks = createSelector(
 
     const user_careerlogs = league_careerlogs_data.get('user_careerlogs')
     const rankableFields = [
-      'wins',
-      'losses',
-      'ties',
+      'regular_season_wins',
+      'regular_season_losses',
+      'regular_season_ties',
       'all_play_wins',
       'all_play_losses',
       'all_play_ties',
@@ -4065,9 +4082,9 @@ export const get_league_team_historical_ranks = createSelector(
 
     const team_careerlogs = league_careerlogs_data.get('team_careerlogs')
     const rankableFields = [
-      'wins',
-      'losses',
-      'ties',
+      'regular_season_wins',
+      'regular_season_losses',
+      'regular_season_ties',
       'all_play_wins',
       'all_play_losses',
       'all_play_ties',

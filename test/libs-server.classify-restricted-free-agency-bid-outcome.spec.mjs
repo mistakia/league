@@ -12,7 +12,7 @@ const OTHER_COMPETING_TEAM_ID = 12
 
 describe('LIBS SERVER classify restricted free agency bid outcome', function () {
   it('marks the winning bid as won', () => {
-    const winning_bid = { uid: 1, tid: COMPETING_TEAM_ID, bid: 30 }
+    const winning_bid = { uid: 1, tid: COMPETING_TEAM_ID, bid_amount: 30 }
 
     const outcome = classify_restricted_free_agency_bid_outcome({
       winning_bid,
@@ -25,8 +25,8 @@ describe('LIBS SERVER classify restricted free agency bid outcome', function () 
 
   it('marks a competing bid as matched when the original team wins', () => {
     const outcome = classify_restricted_free_agency_bid_outcome({
-      winning_bid: { uid: 1, tid: ORIGINAL_TEAM_ID, bid: 30 },
-      losing_bid: { uid: 2, tid: COMPETING_TEAM_ID, bid: 30 },
+      winning_bid: { uid: 1, tid: ORIGINAL_TEAM_ID, bid_amount: 30 },
+      losing_bid: { uid: 2, tid: COMPETING_TEAM_ID, bid_amount: 30 },
       original_team_id: ORIGINAL_TEAM_ID
     })
 
@@ -38,8 +38,8 @@ describe('LIBS SERVER classify restricted free agency bid outcome', function () 
     // irrespective of what the competing bid offered, so a lower competing bid
     // is still MATCHED rather than OUTBID.
     const outcome = classify_restricted_free_agency_bid_outcome({
-      winning_bid: { uid: 1, tid: ORIGINAL_TEAM_ID, bid: 30 },
-      losing_bid: { uid: 2, tid: COMPETING_TEAM_ID, bid: 12 },
+      winning_bid: { uid: 1, tid: ORIGINAL_TEAM_ID, bid_amount: 30 },
+      losing_bid: { uid: 2, tid: COMPETING_TEAM_ID, bid_amount: 12 },
       original_team_id: ORIGINAL_TEAM_ID
     })
 
@@ -48,8 +48,8 @@ describe('LIBS SERVER classify restricted free agency bid outcome', function () 
 
   it('marks a lower competing bid as outbid', () => {
     const outcome = classify_restricted_free_agency_bid_outcome({
-      winning_bid: { uid: 1, tid: COMPETING_TEAM_ID, bid: 30 },
-      losing_bid: { uid: 2, tid: OTHER_COMPETING_TEAM_ID, bid: 22 },
+      winning_bid: { uid: 1, tid: COMPETING_TEAM_ID, bid_amount: 30 },
+      losing_bid: { uid: 2, tid: OTHER_COMPETING_TEAM_ID, bid_amount: 22 },
       original_team_id: ORIGINAL_TEAM_ID
     })
 
@@ -58,8 +58,8 @@ describe('LIBS SERVER classify restricted free agency bid outcome', function () 
 
   it('marks an equal competing bid as a lost tiebreak', () => {
     const outcome = classify_restricted_free_agency_bid_outcome({
-      winning_bid: { uid: 1, tid: COMPETING_TEAM_ID, bid: 30 },
-      losing_bid: { uid: 2, tid: OTHER_COMPETING_TEAM_ID, bid: 30 },
+      winning_bid: { uid: 1, tid: COMPETING_TEAM_ID, bid_amount: 30 },
+      losing_bid: { uid: 2, tid: OTHER_COMPETING_TEAM_ID, bid_amount: 30 },
       original_team_id: ORIGINAL_TEAM_ID
     })
 
@@ -68,8 +68,8 @@ describe('LIBS SERVER classify restricted free agency bid outcome', function () 
 
   it('treats a null bid amount as zero rather than dropping to the fallback', () => {
     const outcome = classify_restricted_free_agency_bid_outcome({
-      winning_bid: { uid: 1, tid: COMPETING_TEAM_ID, bid: 30 },
-      losing_bid: { uid: 2, tid: OTHER_COMPETING_TEAM_ID, bid: null },
+      winning_bid: { uid: 1, tid: COMPETING_TEAM_ID, bid_amount: 30 },
+      losing_bid: { uid: 2, tid: OTHER_COMPETING_TEAM_ID, bid_amount: null },
       original_team_id: ORIGINAL_TEAM_ID
     })
 
@@ -78,8 +78,8 @@ describe('LIBS SERVER classify restricted free agency bid outcome', function () 
 
   it('classifies two null amounts as a tiebreak, not as unreachable', () => {
     const outcome = classify_restricted_free_agency_bid_outcome({
-      winning_bid: { uid: 1, tid: COMPETING_TEAM_ID, bid: null },
-      losing_bid: { uid: 2, tid: OTHER_COMPETING_TEAM_ID, bid: null },
+      winning_bid: { uid: 1, tid: COMPETING_TEAM_ID, bid_amount: null },
+      losing_bid: { uid: 2, tid: OTHER_COMPETING_TEAM_ID, bid_amount: null },
       original_team_id: ORIGINAL_TEAM_ID
     })
 
@@ -89,7 +89,7 @@ describe('LIBS SERVER classify restricted free agency bid outcome', function () 
   it('falls back to player ineligible when there is no winning bid', () => {
     const outcome = classify_restricted_free_agency_bid_outcome({
       winning_bid: null,
-      losing_bid: { uid: 2, tid: COMPETING_TEAM_ID, bid: 30 },
+      losing_bid: { uid: 2, tid: COMPETING_TEAM_ID, bid_amount: 30 },
       original_team_id: ORIGINAL_TEAM_ID
     })
 
@@ -102,8 +102,8 @@ describe('LIBS SERVER classify restricted free agency bid outcome', function () 
     // Not reachable through the processing loop, which always settles the
     // higher bid first. Asserted so the branch cannot silently become OUTBID.
     const outcome = classify_restricted_free_agency_bid_outcome({
-      winning_bid: { uid: 1, tid: COMPETING_TEAM_ID, bid: 20 },
-      losing_bid: { uid: 2, tid: OTHER_COMPETING_TEAM_ID, bid: 44 },
+      winning_bid: { uid: 1, tid: COMPETING_TEAM_ID, bid_amount: 20 },
+      losing_bid: { uid: 2, tid: OTHER_COMPETING_TEAM_ID, bid_amount: 44 },
       original_team_id: ORIGINAL_TEAM_ID
     })
 

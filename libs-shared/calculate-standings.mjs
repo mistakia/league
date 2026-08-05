@@ -41,9 +41,9 @@ const calculateStandings = ({
         )
       : current_season.regularSeasonFinalWeek
   const teamStats = {}
-  for (const { uid: tid, div } of teams) {
+  for (const { uid: tid, division } of teams) {
     teamStats[tid] = {
-      div,
+      division,
       tid,
       gamelogs: [],
       games: {},
@@ -59,16 +59,16 @@ const calculateStandings = ({
   }
 
   const required_starter_count =
-    league.sqb +
-    league.srb +
-    league.swr +
-    league.ste +
-    league.srbwr +
+    league.starter_slots_qb +
+    league.starter_slots_rb +
+    league.starter_slots_wr +
+    league.starter_slots_te +
+    league.starter_slots_rb_wr_flex +
     league.srbwrte +
     league.sqbrbwrte +
-    league.swrte +
-    league.sdst +
-    league.sk
+    league.starter_slots_wr_te_flex +
+    league.starter_slots_dst +
+    league.starter_slots_k
 
   for (let week = 1; week <= finalWeek; week++) {
     let highest_score = -Infinity
@@ -147,34 +147,34 @@ const calculateStandings = ({
   for (let week = 1; week <= finalWeek; week++) {
     const weekMatchups = matchups.filter((m) => m.week === week)
     for (const m of weekMatchups) {
-      const homeScore = teamStats[m.hid].points.weeks[week]
-      const awayScore = teamStats[m.aid].points.weeks[week]
+      const homeScore = teamStats[m.home_team_id].points.weeks[week]
+      const awayScore = teamStats[m.away_team_id].points.weeks[week]
 
-      const pHomeScore = teamStats[m.hid].potential_points_weekly[week]
-      const pAwayScore = teamStats[m.aid].potential_points_weekly[week]
+      const pHomeScore = teamStats[m.home_team_id].potential_points_weekly[week]
+      const pAwayScore = teamStats[m.away_team_id].potential_points_weekly[week]
 
-      teamStats[m.hid].stats.points_against += awayScore
-      teamStats[m.aid].stats.points_against += homeScore
+      teamStats[m.home_team_id].stats.points_against += awayScore
+      teamStats[m.away_team_id].stats.points_against += homeScore
 
       if (homeScore > awayScore) {
-        teamStats[m.hid].stats.wins += 1
-        teamStats[m.aid].stats.losses += 1
+        teamStats[m.home_team_id].stats.regular_season_wins += 1
+        teamStats[m.away_team_id].stats.regular_season_losses += 1
 
         if (pAwayScore > homeScore) {
-          teamStats[m.aid].stats.potential_wins += 1
-          teamStats[m.hid].stats.potential_losses += 1
+          teamStats[m.away_team_id].stats.potential_wins += 1
+          teamStats[m.home_team_id].stats.potential_losses += 1
         }
       } else if (homeScore < awayScore) {
-        teamStats[m.hid].stats.losses += 1
-        teamStats[m.aid].stats.wins += 1
+        teamStats[m.home_team_id].stats.regular_season_losses += 1
+        teamStats[m.away_team_id].stats.regular_season_wins += 1
 
         if (pHomeScore > awayScore) {
-          teamStats[m.hid].stats.potential_wins += 1
-          teamStats[m.aid].stats.potential_losses += 1
+          teamStats[m.home_team_id].stats.potential_wins += 1
+          teamStats[m.away_team_id].stats.potential_losses += 1
         }
       } else {
-        teamStats[m.hid].stats.ties += 1
-        teamStats[m.aid].stats.ties += 1
+        teamStats[m.home_team_id].stats.regular_season_ties += 1
+        teamStats[m.away_team_id].stats.regular_season_ties += 1
       }
     }
 
@@ -242,20 +242,20 @@ const calculateStandings = ({
   // calculate division finish
   const divisions = {}
   for (const { uid: tid } of teams) {
-    const { div } = teams.find((t) => t.uid === tid)
-    if (!divisions[div]) divisions[div] = []
-    divisions[div].push(tid)
+    const { division } = teams.find((t) => t.uid === tid)
+    if (!divisions[division]) divisions[division] = []
+    divisions[division].push(tid)
   }
   const divisions_index = {}
-  for (const div in divisions) {
-    const div_teams = divisions[div]
+  for (const division in divisions) {
+    const div_teams = divisions[division]
     const div_teams_sorted = div_teams.sort((team_a_tid, team_b_tid) => {
-      const a_wins = teamStats[team_a_tid].stats.wins
-      const b_wins = teamStats[team_b_tid].stats.wins
-      const a_losses = teamStats[team_a_tid].stats.losses
-      const b_losses = teamStats[team_b_tid].stats.losses
-      const a_ties = teamStats[team_a_tid].stats.ties
-      const b_ties = teamStats[team_b_tid].stats.ties
+      const a_wins = teamStats[team_a_tid].stats.regular_season_wins
+      const b_wins = teamStats[team_b_tid].stats.regular_season_wins
+      const a_losses = teamStats[team_a_tid].stats.regular_season_losses
+      const b_losses = teamStats[team_b_tid].stats.regular_season_losses
+      const a_ties = teamStats[team_a_tid].stats.regular_season_ties
+      const b_ties = teamStats[team_b_tid].stats.regular_season_ties
       const a_points_for = teamStats[team_a_tid].stats.points_for
       const b_points_for = teamStats[team_b_tid].stats.points_for
       const a_all_play = teamStats[team_a_tid].stats.all_play_wins
@@ -275,7 +275,7 @@ const calculateStandings = ({
       return 0
     })
 
-    divisions_index[div] = div_teams_sorted
+    divisions_index[division] = div_teams_sorted
 
     for (let i = 0; i < div_teams_sorted.length; i++) {
       const tid = div_teams_sorted[i]
@@ -289,7 +289,7 @@ const calculateStandings = ({
   // module. division_finish above remains a reported standing either way.
   const flat_teams = Object.values(teamStats).map((p) => ({
     tid: p.tid,
-    div: p.div,
+    division: p.division,
     ...p.stats
   }))
 

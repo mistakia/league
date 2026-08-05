@@ -19,7 +19,7 @@ export default function DashboardTeamSummaryFAAB({ teams, tid }) {
     items.push(
       <tr key={team.uid}>
         <td>{team.name}</td>
-        <td>${team.faab}</td>
+        <td>${team.faab_balance}</td>
       </tr>
     )
   }
@@ -32,7 +32,7 @@ export default function DashboardTeamSummaryFAAB({ teams, tid }) {
             Free Agency Budget
           </Grid>
           <Grid item xs={3}>
-            ${team.faab}
+            ${team.faab_balance}
           </Grid>
           <Grid item xs={2}>
             <Rank rank={rank} size={teams.size} />

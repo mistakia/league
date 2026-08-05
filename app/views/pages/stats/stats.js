@@ -27,9 +27,9 @@ const careerlog_single_fields = {
 
 const careerlog_group_fields = {
   Record: {
-    wins: { label: 'Wins' },
-    losses: { label: 'Losses' },
-    ties: { label: 'Ties' }
+    regular_season_wins: { label: 'Wins' },
+    regular_season_losses: { label: 'Losses' },
+    regular_season_ties: { label: 'Ties' }
   },
   'All Play': {
     all_play_wins: { label: 'Wins' },

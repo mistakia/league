@@ -24,47 +24,47 @@ const router = express.Router()
  *           minimum: 0
  *           description: Salary cap limit
  *           example: 200
- *         faab:
+ *         starting_faab_budget:
  *           type: integer
  *           minimum: 0
  *           description: Free agent acquisition budget
  *           example: 100
- *         sqb:
+ *         starter_slots_qb:
  *           type: integer
  *           minimum: 0
  *           description: Starting QB roster slots
  *           example: 1
- *         srb:
+ *         starter_slots_rb:
  *           type: integer
  *           minimum: 0
  *           description: Starting RB roster slots
  *           example: 2
- *         swr:
+ *         starter_slots_wr:
  *           type: integer
  *           minimum: 0
  *           description: Starting WR roster slots
  *           example: 2
- *         ste:
+ *         starter_slots_te:
  *           type: integer
  *           minimum: 0
  *           description: Starting TE roster slots
  *           example: 1
- *         sdst:
+ *         starter_slots_dst:
  *           type: integer
  *           minimum: 0
  *           description: Starting DST roster slots
  *           example: 1
- *         sk:
+ *         starter_slots_k:
  *           type: integer
  *           minimum: 0
  *           description: Starting K roster slots
  *           example: 1
- *         bench:
+ *         bench_slot_count:
  *           type: integer
  *           minimum: 0
  *           description: Bench roster slots
  *           example: 8
- *         ps:
+ *         practice_squad_slot_count:
  *           type: integer
  *           minimum: 0
  *           description: Practice squad roster slots
@@ -141,7 +141,7 @@ const router = express.Router()
  *           type: integer
  *           minimum: 0
  *           description: Salary cap limit
- *         faab:
+ *         starting_faab_budget:
  *           type: integer
  *           minimum: 0
  *           description: Free agent acquisition budget
@@ -209,15 +209,15 @@ const router = express.Router()
  *                   name: "Dynasty Warriors League"
  *                   num_teams: 12
  *                   cap: 200
- *                   faab: 100
- *                   sqb: 1
- *                   srb: 2
- *                   swr: 2
- *                   ste: 1
- *                   sdst: 1
- *                   sk: 1
- *                   bench: 8
- *                   ps: 4
+ *                   starting_faab_budget: 100
+ *                   starter_slots_qb: 1
+ *                   starter_slots_rb: 2
+ *                   starter_slots_wr: 2
+ *                   starter_slots_te: 1
+ *                   starter_slots_dst: 1
+ *                   starter_slots_k: 1
+ *                   bench_slot_count: 8
+ *                   practice_squad_slot_count: 4
  *                   reserve_short_term_limit: 3
  *                   passing_yards: 0.04
  *                   passing_touchdowns: 4
@@ -297,14 +297,14 @@ const router = express.Router()
  *             roster_update:
  *               summary: Update roster requirements
  *               value:
- *                 bench: 10
- *                 ps: 6
+ *                 bench_slot_count: 10
+ *                 practice_squad_slot_count: 6
  *                 reserve_short_term_limit: 3
  *             budget_update:
  *               summary: Update financial settings
  *               value:
  *                 cap: 250
- *                 faab: 150
+ *                 starting_faab_budget: 150
  *     responses:
  *       200:
  *         description: League settings updated successfully

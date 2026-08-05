@@ -101,7 +101,7 @@ const router = express.Router()
  *             updateRosterSize:
  *               summary: Update starting QB slots
  *               value:
- *                 field: sqb
+ *                 field: starter_slots_qb
  *                 value: 1
  *             updateScoringSettings:
  *               summary: Update passing yards scoring
@@ -367,18 +367,18 @@ router.put('/:leagueId', async (req, res) => {
  *               commishid: 5
  *               is_hosted: false
  *               num_teams: 14
- *               sqb: 1
- *               srb: 2
- *               swr: 3
- *               ste: 1
+ *               starter_slots_qb: 1
+ *               starter_slots_rb: 2
+ *               starter_slots_wr: 3
+ *               starter_slots_te: 1
  *               srbwrte: 1
- *               sdst: 1
- *               sk: 1
- *               bench: 6
- *               ps: 4
+ *               starter_slots_dst: 1
+ *               starter_slots_k: 1
+ *               bench_slot_count: 6
+ *               practice_squad_slot_count: 4
  *               reserve_short_term_limit: 3
  *               cap: 200
- *               faab: 200
+ *               starting_faab_budget: 200
  *               years: [2022, 2023, 2024]
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
@@ -436,18 +436,18 @@ router.get('/:leagueId/?', async (req, res) => {
  *               commishid: 5
  *               is_hosted: false
  *               num_teams: 14
- *               sqb: 1
- *               srb: 2
- *               swr: 3
- *               ste: 1
+ *               starter_slots_qb: 1
+ *               starter_slots_rb: 2
+ *               starter_slots_wr: 3
+ *               starter_slots_te: 1
  *               srbwrte: 1
- *               sdst: 1
- *               sk: 1
- *               bench: 6
- *               ps: 4
+ *               starter_slots_dst: 1
+ *               starter_slots_k: 1
+ *               bench_slot_count: 6
+ *               practice_squad_slot_count: 4
  *               reserve_short_term_limit: 3
  *               cap: 200
- *               faab: 200
+ *               starting_faab_budget: 200
  *               league_format_id: "b5310a7f7c47c20ce372e47e8a0a188b22b78b1d34e2ea18829d94b94ffdc342"
  *               scoring_format_id: "eb75c8fd2acb21fea5d8754f53e9aa2e5d7c40327d5853c58592f658235ba756"
  *       400:

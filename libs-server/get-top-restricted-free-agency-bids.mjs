@@ -73,19 +73,19 @@ export default async function get_top_restricted_free_agency_bids(leagueId) {
 
     // If competing bid (not original team), use actual bid amount
     if (original_team_id !== bid.tid) {
-      bid._bid = bid.bid
+      bid._bid = bid.bid_amount
       return
     }
 
     // For original team, boost bid by 20% or $2, whichever is greater
     const percentage_boost = Math.round(
-      bid.bid * ORIGINAL_TEAM_BID_BOOST_PERCENT
+      bid.bid_amount * ORIGINAL_TEAM_BID_BOOST_PERCENT
     )
     const boost_amount = Math.max(
       ORIGINAL_TEAM_MIN_BOOST_DOLLARS,
       percentage_boost
     )
-    bid._bid = bid.bid + boost_amount
+    bid._bid = bid.bid_amount + boost_amount
   })
 
   // Find highest restricted free agency bids

@@ -76,11 +76,12 @@ export default {
     use_having: true
   },
   play_dot: {
-    column_name: 'dot',
+    column_name: 'depth_of_target',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.dot as play_dot'],
-    main_where: () => 'nfl_plays.dot',
-    aggregate_select: () => db.raw('AVG(nfl_plays.dot) as play_dot'),
+    main_select: () => ['nfl_plays.depth_of_target as play_dot'],
+    main_where: () => 'nfl_plays.depth_of_target',
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.depth_of_target) as play_dot'),
     use_having: true
   },
   play_highlight_pass: {

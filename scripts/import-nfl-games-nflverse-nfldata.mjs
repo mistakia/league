@@ -79,11 +79,11 @@ const format_game = (game) => ({
   total_line: format_number(game.total_line),
 
   roof: game.roof?.trim() || null,
-  surf: game.surface?.trim() || null,
-  temp: format_number(game.temp),
-  wind: format_number(game.wind),
+  playing_surface: game.surface?.trim() || null,
+  temperature_fahrenheit: format_number(game.temp),
+  wind_speed_mph: format_number(game.wind),
 
-  stad: game.stadium?.trim() || null,
+  stadium_name: game.stadium?.trim() || null,
 
   // nfl_games.{home,away}_play_caller are owned by scripts/import-nfl-coaches.mjs (samhoppen source) -- do not add them here.
   away_coach: game.away_coach?.trim() || null,

@@ -93,9 +93,9 @@ class PlayCache {
    * @param {number} params.season_year - Year (for context search)
    * @param {string} params.offense_nfl_team - Offensive team abbreviation
    * @param {string} params.defense_nfl_team - Defensive team abbreviation
-   * @param {number} params.qtr - Quarter
+   * @param {number} params.quarter - Quarter
    * @param {string} params.game_clock_start - Game clock start time
-   * @param {number} params.dwn - Down
+   * @param {number} params.down_number - Down
    * @param {number} params.yards_to_go - Yards to go
    * @param {string} params.play_type - Play type
    * @param {number} params.ydl_num - Yardline number
@@ -119,9 +119,9 @@ class PlayCache {
     season_year,
     offense_nfl_team,
     defense_nfl_team,
-    qtr,
+    quarter,
     game_clock_start,
-    dwn,
+    down_number,
     yards_to_go,
     play_type,
     ydl_num,
@@ -145,8 +145,8 @@ class PlayCache {
     if (esbid) {
       return this._find_play_by_context({
         esbid,
-        qtr,
-        dwn,
+        quarter,
+        down_number,
         yards_to_go,
         ydl_100,
         offense_nfl_team,
@@ -265,16 +265,16 @@ class PlayCache {
     for (const play of plays) {
       const has_required_fields =
         play.esbid &&
-        play.qtr !== null &&
-        play.dwn !== null &&
+        play.quarter !== null &&
+        play.down_number !== null &&
         play.yards_to_go !== null &&
         play.ydl_100 !== null
 
       if (has_required_fields) {
         const context_key = this._create_context_key(
           play.esbid,
-          play.qtr,
-          play.dwn,
+          play.quarter,
+          play.down_number,
           play.yards_to_go,
           play.ydl_100
         )
@@ -290,27 +290,27 @@ class PlayCache {
   /**
    * Creates a context key for indexing plays
    * @param {number} esbid - Game esbid
-   * @param {number} qtr - Quarter
-   * @param {number} dwn - Down
+   * @param {number} quarter - Quarter
+   * @param {number} down_number - Down
    * @param {number} yards_to_go - Yards to go
    * @param {number} ydl_100 - Yardline from 0-100
    * @returns {string} Context key
    * @private
    */
-  _create_context_key(esbid, qtr, dwn, yards_to_go, ydl_100) {
-    return `${esbid}_${qtr}_${dwn}_${yards_to_go}_${ydl_100}`
+  _create_context_key(esbid, quarter, down_number, yards_to_go, ydl_100) {
+    return `${esbid}_${quarter}_${down_number}_${yards_to_go}_${ydl_100}`
   }
 
   /**
    * Checks if all required context fields are defined (not null or undefined)
    * @private
    */
-  _has_context_fields(qtr, dwn, yards_to_go, ydl_100) {
+  _has_context_fields(quarter, down_number, yards_to_go, ydl_100) {
     return (
-      qtr !== undefined &&
-      qtr !== null &&
-      dwn !== undefined &&
-      dwn !== null &&
+      quarter !== undefined &&
+      quarter !== null &&
+      down_number !== undefined &&
+      down_number !== null &&
       yards_to_go !== undefined &&
       yards_to_go !== null &&
       ydl_100 !== undefined &&
@@ -324,8 +324,8 @@ class PlayCache {
    */
   _find_play_by_context({
     esbid,
-    qtr,
-    dwn,
+    quarter,
+    down_number,
     yards_to_go,
     ydl_100,
     offense_nfl_team,
@@ -342,14 +342,19 @@ class PlayCache {
     away_score,
     return_all_matches
   }) {
-    const has_context = this._has_context_fields(qtr, dwn, yards_to_go, ydl_100)
+    const has_context = this._has_context_fields(
+      quarter,
+      down_number,
+      yards_to_go,
+      ydl_100
+    )
 
     // Try indexed lookup first (fastest)
     if (has_context) {
       const context_key = this._create_context_key(
         esbid,
-        qtr,
-        dwn,
+        quarter,
+        down_number,
         yards_to_go,
         ydl_100
       )
@@ -385,8 +390,8 @@ class PlayCache {
     return this._scan_game_plays(
       esbid,
       {
-        qtr,
-        dwn,
+        quarter,
+        down_number,
         yards_to_go,
         ydl_100,
         offense_nfl_team,
@@ -460,7 +465,7 @@ class PlayCache {
       log(`Multiple plays matched (${matching_plays.length}):`)
       matching_plays.forEach((play, index) => {
         log(
-          `  [${index + 1}] esbid=${play.esbid} play_id=${play.play_id} qtr=${play.qtr} dwn=${play.dwn} ytg=${play.yards_to_go} ydl=${play.ydl_100}`
+          `  [${index + 1}] esbid=${play.esbid} play_id=${play.play_id} quarter=${play.quarter} down_number=${play.down_number} ytg=${play.yards_to_go} ydl=${play.ydl_100}`
         )
       })
       throw new MultiplePlayMatchError(
@@ -486,8 +491,14 @@ class PlayCache {
    * @private
    */
   _play_matches_filters(play, filters) {
-    const qtr_match = this._matches_numeric_field(play.qtr, filters.qtr)
-    const dwn_match = this._matches_nullable_field(play.dwn, filters.dwn)
+    const quarter_match = this._matches_numeric_field(
+      play.quarter,
+      filters.quarter
+    )
+    const down_number_match = this._matches_nullable_field(
+      play.down_number,
+      filters.down_number
+    )
     const ytg_match = this._matches_nullable_field(
       play.yards_to_go,
       filters.yards_to_go
@@ -532,8 +543,8 @@ class PlayCache {
     )
 
     return (
-      qtr_match &&
-      dwn_match &&
+      quarter_match &&
+      down_number_match &&
       ytg_match &&
       ydl_match &&
       off_match &&

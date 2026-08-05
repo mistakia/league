@@ -94,12 +94,12 @@ export const print_dry_mode_comparison = ({ sample_plays_by_type }) => {
     'right_tightends',
     'is_fake_punt',
     'is_fake_field_goal',
-    'route',
+    'charted_route',
     'pocket_time',
     'yards_after_catch',
     'broken_tackles_rush',
     'broken_tackles_rec',
-    'mbt',
+    'missed_or_broken_tackle',
     'kicker_sportradar_id',
     'punter_sportradar_id',
     'returner_sportradar_id',
@@ -118,7 +118,7 @@ export const print_dry_mode_comparison = ({ sample_plays_by_type }) => {
     log('='.repeat(80))
     log(`Description: ${sample.sportradar_play.description || 'N/A'}`)
     log(
-      `Game: ${sample.db_play.esbid} | Q${sample.db_play.qtr} | ${sample.db_play.game_clock_start || 'N/A'}`
+      `Game: ${sample.db_play.esbid} | Q${sample.db_play.quarter} | ${sample.db_play.game_clock_start || 'N/A'}`
     )
     log(`Play ID: ${sample.db_play.play_id}`)
     log('')
@@ -323,7 +323,7 @@ const print_collision_categorization = ({
   // Additional categorization for shared fields
   const expected_minor_diffs = [
     'box_defenders',
-    'route',
+    'charted_route',
     'yards_after_catch',
     'pass_rushers'
   ]

@@ -86,7 +86,7 @@ describe('API /teams - restricted free agency', function () {
       res.body.userid.should.equal(userId)
       res.body.pid.should.equal(player.pid)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
-      res.body.bid.should.equal(bid)
+      res.body.bid_amount.should.equal(bid)
       res.body.year.should.equal(current_season.year)
       res.body.original_team_id.should.equal(teamId)
       res.body.uid.should.be.a('number')
@@ -102,7 +102,7 @@ describe('API /teams - restricted free agency', function () {
       query1[0].uid.should.be.above(0)
       query1[0].pid.should.equal(player.pid)
       query1[0].userid.should.equal(userId)
-      query1[0].bid.should.equal(bid)
+      query1[0].bid_amount.should.equal(bid)
       query1[0].year.should.equal(current_season.year)
       query1[0].tid.should.equal(teamId)
 
@@ -178,7 +178,7 @@ describe('API /teams - restricted free agency', function () {
       res2.body.pid.should.equal(player.pid)
       res2.body.year.should.equal(current_season.year)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
-      res2.body.bid.should.equal(bid)
+      res2.body.bid_amount.should.equal(bid)
       res2.body.original_team_id.should.equal(playerTid)
       res2.body.release.length.should.equal(0)
     })
@@ -262,7 +262,7 @@ describe('API /teams - restricted free agency', function () {
       res2.body.year.should.equal(current_season.year)
       res2.body.pid.should.equal(tagPlayer.pid)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
-      res2.body.bid.should.equal(bid)
+      res2.body.bid_amount.should.equal(bid)
       res2.body.original_team_id.should.equal(teamId)
       res2.body.release.length.should.equal(1)
       res2.body.release[0].should.equal(releasePlayer.pid)
@@ -424,12 +424,12 @@ describe('API /teams - restricted free agency', function () {
         })
 
       res2.should.have.status(200)
-      res2.body.bid.should.equal(updatedBid)
+      res2.body.bid_amount.should.equal(updatedBid)
 
       const query = await knex('restricted_free_agency_bids')
         .where({ pid: player.pid })
         .first()
-      query.bid.should.equal(updatedBid)
+      query.bid_amount.should.equal(updatedBid)
     })
 
     it('update release players', async () => {

@@ -1139,7 +1139,7 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
         'player_seasonlogs.*',
         'scoring_format_player_seasonlogs.points',
         'scoring_format_player_seasonlogs.points_per_game',
-        'scoring_format_player_seasonlogs.games',
+        'scoring_format_player_seasonlogs.games_played',
         'scoring_format_player_seasonlogs.points_rnk',
         'scoring_format_player_seasonlogs.points_pos_rnk',
         'scoring_format_player_seasonlogs.points_per_game_rnk',

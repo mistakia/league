@@ -54,11 +54,11 @@ describe('API /leagues/teams - add', function () {
       res.body.roster.week.should.equal(current_season.week)
       res.body.roster.year.should.equal(current_season.year)
       res.body.team.name.should.equal('Team1')
-      res.body.team.abbrv.should.equal('TM1')
+      res.body.team.abbreviation.should.equal('TM1')
       res.body.team.waiver_order.should.equal(1)
       res.body.team.draft_order.should.equal(1)
-      res.body.team.cap.should.equal(200)
-      res.body.team.faab.should.equal(200)
+      res.body.team.salary_cap.should.equal(200)
+      res.body.team.faab_balance.should.equal(200)
       res.body.team.lid.should.equal(leagueId)
 
       const teams = await knex('teams').where({
@@ -67,7 +67,7 @@ describe('API /leagues/teams - add', function () {
       })
       expect(teams[0].lid).to.equal(leagueId)
       expect(teams[0].name).to.equal('Team1')
-      expect(teams[0].abbrv).to.equal('TM1')
+      expect(teams[0].abbreviation).to.equal('TM1')
     })
   })
 
@@ -125,7 +125,7 @@ describe('API /leagues/teams - add', function () {
           waiver_order: i,
           draft_order: i,
           name: `Team${i}`,
-          abbrv: `TM${i}`
+          abbreviation: `TM${i}`
         })
       }
 

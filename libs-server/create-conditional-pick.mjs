@@ -27,7 +27,7 @@ const create_conditional_pick = async function ({ tid, league }) {
   await db('draft').insert({
     tid,
     lid: league.uid,
-    otid: tid,
+    original_team_id: tid,
     is_compensatory: 1,
     round: 4,
     year,

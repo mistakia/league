@@ -107,7 +107,7 @@ describe('API /teams - reserve', function () {
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(transaction_types.RESERVE_IR)
-      res.body.transaction.value.should.equal(value)
+      res.body.transaction.player_salary.should.equal(value)
       res.body.transaction.year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -634,10 +634,10 @@ describe('API /teams - reserve', function () {
 
       // Add player to prior week roster
       await knex('rosters_players').insert({
-        rid: prior_roster_uid,
+        roster_id: prior_roster_uid,
         pid: player.pid,
         slot: roster_slot_types.BENCH,
-        pos: player.primary_position,
+        player_position: player.primary_position,
         tid: teamId,
         lid: leagueId,
         week: prior_week,
@@ -676,7 +676,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         nfl_team: player.current_nfl_team,
         opponent_nfl_team: 'OPP',
-        pos: player.primary_position,
+        player_position: player.primary_position,
         season_year: current_season.year,
         is_active: false
       })
@@ -771,7 +771,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         nfl_team: player.current_nfl_team,
         opponent_nfl_team: 'OPP',
-        pos: player.primary_position,
+        player_position: player.primary_position,
         season_year: current_season.year,
         is_active: false
       })
@@ -862,7 +862,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         nfl_team: player.current_nfl_team,
         opponent_nfl_team: 'OPP',
-        pos: player.primary_position,
+        player_position: player.primary_position,
         season_year: current_season.year,
         is_active: false
       })
@@ -951,7 +951,7 @@ describe('API /teams - reserve', function () {
         pid: player.pid,
         nfl_team: player.current_nfl_team,
         opponent_nfl_team: 'OPP',
-        pos: player.primary_position,
+        player_position: player.primary_position,
         season_year: current_season.year,
         is_active: false
       })
@@ -1147,7 +1147,7 @@ describe('API /teams - reserve', function () {
         week: current_season.week,
         season_year: current_season.year,
         season_type: 'REG',
-        w: 'DNP'
+        wednesday_practice_status: 'DNP'
       })
 
       const res = await chai_request
@@ -1200,7 +1200,7 @@ describe('API /teams - reserve', function () {
         week: current_season.week,
         season_year: current_season.year,
         season_type: 'REG',
-        th: 'LP'
+        thursday_practice_status: 'LP'
       })
 
       const res = await chai_request
@@ -1253,7 +1253,7 @@ describe('API /teams - reserve', function () {
         week: current_season.week,
         season_year: current_season.year,
         season_type: 'REG',
-        w: 'FULL'
+        wednesday_practice_status: 'FULL'
       })
 
       const request = chai_request

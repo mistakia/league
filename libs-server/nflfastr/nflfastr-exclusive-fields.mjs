@@ -18,7 +18,7 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   'is_qb_scramble', // nflfastR is authoritative - parses "scrambles" from play description; Sportradar over-reports (marks designed runs/sacks as scrambles)
 
   // Core EPA Metrics
-  'ep', // Expected Points pre-play
+  'expected_points', // Expected Points pre-play
   'epa', // Expected Points Added
   'is_epa_successful', // Expected Points success indicator
 
@@ -49,8 +49,8 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   'total_away_raw_yac_epa',
 
   // Core Win Probability Metrics
-  'wp', // Win probability pre-play
-  'wpa', // Win Probability Added
+  'win_probability', // Win probability pre-play
+  'win_probability_added', // Win Probability Added
   'home_wp', // Home team win probability
   'away_wp', // Away team win probability
   'vegas_wpa', // Vegas-adjusted WPA
@@ -104,8 +104,8 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   'pass_oe', // Pass play over expected
 
   // Completion Probability Metrics
-  'cp', // Completion probability
-  'cpoe', // Completion percentage over expected
+  'completion_probability', // Completion probability
+  'completion_percentage_over_expected', // Completion percentage over expected
 
   // Series Data
   'series_seq', // Series sequence number

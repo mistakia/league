@@ -10,7 +10,7 @@ const log = debug('pinnacle')
 
 const get_pinnacle_config = async () => {
   const config_row = await db('config').where('key', 'pinnacle_config').first()
-  return config_row.value
+  return config_row.config_value
 }
 
 export const format_selection_type = (selection_name) => {

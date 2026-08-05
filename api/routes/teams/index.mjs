@@ -58,7 +58,7 @@ const router = express.Router()
  *             updateAbbreviation:
  *               summary: Update fantasy team abbreviation
  *               value:
- *                 field: "abbrv"
+ *                 field: "abbreviation"
  *                 value: "DW"
  *             updateLogo:
  *               summary: Update fantasy team logo
@@ -104,7 +104,13 @@ router.put('/:teamId', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const fields = ['name', 'image', 'abbrv', 'primary_color', 'accent_color']
+    const fields = [
+      'name',
+      'image',
+      'abbreviation',
+      'primary_color',
+      'accent_color'
+    ]
 
     if (!field) {
       return res.status(400).send({ error: 'missing field' })

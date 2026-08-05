@@ -353,22 +353,22 @@ const options = {
               description: 'Number of fantasy teams in league',
               example: 14
             },
-            sqb: {
+            starter_slots_qb: {
               type: 'integer',
               description: 'Starting QB slots',
               example: 1
             },
-            srb: {
+            starter_slots_rb: {
               type: 'integer',
               description: 'Starting RB slots',
               example: 2
             },
-            swr: {
+            starter_slots_wr: {
               type: 'integer',
               description: 'Starting WR slots',
               example: 3
             },
-            ste: {
+            starter_slots_te: {
               type: 'integer',
               description: 'Starting TE slots',
               example: 1
@@ -378,22 +378,22 @@ const options = {
               description: 'RB/WR/TE flex slots',
               example: 1
             },
-            sdst: {
+            starter_slots_dst: {
               type: 'integer',
               description: 'Starting DEF/ST slots',
               example: 1
             },
-            sk: {
+            starter_slots_k: {
               type: 'integer',
               description: 'Starting kicker slots',
               example: 1
             },
-            bench: {
+            bench_slot_count: {
               type: 'integer',
               description: 'Bench spots',
               example: 6
             },
-            ps: {
+            practice_squad_slot_count: {
               type: 'integer',
               description: 'Practice squad spots',
               example: 4
@@ -408,7 +408,7 @@ const options = {
               description: 'Salary cap',
               example: 200
             },
-            faab: {
+            starting_faab_budget: {
               type: 'integer',
               description: 'Free Agent Acquisition Budget',
               example: 200
@@ -438,7 +438,7 @@ const options = {
               description: 'Fantasy team name',
               example: 'Dynasty Warriors'
             },
-            abbrv: {
+            abbreviation: {
               type: 'string',
               maxLength: 4,
               description: 'Fantasy team abbreviation',
@@ -450,7 +450,7 @@ const options = {
               description: 'Fantasy team logo/image URL',
               example: null
             },
-            div: {
+            division: {
               type: 'integer',
               nullable: true,
               description: 'Division number',
@@ -468,12 +468,12 @@ const options = {
               description: 'Draft position',
               example: 3
             },
-            cap: {
+            salary_cap: {
               type: 'integer',
               description: 'Fantasy team salary cap',
               example: 200
             },
-            faab: {
+            faab_balance: {
               type: 'integer',
               description: 'Free Agent Acquisition Budget remaining',
               example: 150
@@ -738,7 +738,13 @@ const options = {
         },
         TeamFieldEnum: {
           type: 'string',
-          enum: ['name', 'image', 'abbrv', 'primary_color', 'accent_color'],
+          enum: [
+            'name',
+            'image',
+            'abbreviation',
+            'primary_color',
+            'accent_color'
+          ],
           description: 'Fantasy team field that can be updated',
           example: 'name'
         },
@@ -786,7 +792,7 @@ const options = {
                 'Type of baseline calculation (e.g., "starter" for starting lineup baseline)',
               example: 'starter'
             },
-            pos: {
+            player_position: {
               type: 'string',
               maxLength: 4,
               enum: [...fantasy_positions, 'DEF'],
@@ -794,7 +800,7 @@ const options = {
               example: 'WR'
             }
           },
-          required: ['lid', 'week', 'type', 'pos']
+          required: ['lid', 'week', 'type', 'player_position']
         },
         WaiverTypeEnum: {
           type: 'integer',
@@ -935,7 +941,7 @@ const options = {
               description: 'Player ID',
               example: 'ALVI-KAMA-015215'
             },
-            po: {
+            priority_order: {
               type: 'integer',
               description: 'Priority order (lower values processed first)',
               example: 9999
@@ -945,7 +951,7 @@ const options = {
               description: 'Unix timestamp when claim was submitted',
               example: 1640995200
             },
-            bid: {
+            bid_amount: {
               type: 'integer',
               minimum: 0,
               description: 'Bid amount (FAAB)',
@@ -975,9 +981,9 @@ const options = {
             'userid',
             'lid',
             'pid',
-            'po',
+            'priority_order',
             'submitted',
-            'bid',
+            'bid_amount',
             'type',
             'super_priority',
             'release'
@@ -1610,7 +1616,7 @@ const options = {
               description: 'Type of statistic',
               example: 'PASSING'
             },
-            yards: {
+            stat_yards: {
               type: 'integer',
               nullable: true,
               description: 'Yards gained/lost',
@@ -1766,7 +1772,7 @@ const options = {
               description: 'Game ID (ESPN game identifier)',
               example: '2024120801'
             },
-            pos: {
+            player_position: {
               type: 'string',
               description: 'Player position',
               example: 'QB'
@@ -1816,7 +1822,7 @@ const options = {
               description: 'Whether player started the game',
               example: true
             },
-            jnum: {
+            jersey_number: {
               type: 'integer',
               description: 'Jersey number',
               example: 15
@@ -2074,7 +2080,7 @@ const options = {
           required: [
             'pid',
             'esbid',
-            'pos',
+            'player_position',
             'tm',
             'opp',
             'year',
@@ -2085,7 +2091,7 @@ const options = {
             'timestamp',
             'active',
             'started',
-            'jnum',
+            'jersey_number',
             'career_game'
           ]
         },
@@ -2109,12 +2115,12 @@ const options = {
               description: 'Roster slot number',
               example: 1
             },
-            rid: {
+            roster_id: {
               type: 'integer',
               description: 'Roster ID',
               example: 1234
             },
-            pos: {
+            player_position: {
               type: 'string',
               description: 'Player position',
               example: 'QB'
@@ -2123,7 +2129,14 @@ const options = {
               $ref: '#/components/schemas/Transaction'
             }
           },
-          required: ['pid', 'tid', 'slot', 'rid', 'pos', 'transaction']
+          required: [
+            'pid',
+            'tid',
+            'slot',
+            'roster_id',
+            'player_position',
+            'transaction'
+          ]
         },
         TradeDetails: {
           type: 'object',
@@ -2357,7 +2370,7 @@ const options = {
               description: 'Pick number within round',
               example: 3
             },
-            otid: {
+            original_team_id: {
               type: 'integer',
               nullable: true,
               description: 'Original team ID (if pick was traded)',
@@ -2910,55 +2923,55 @@ const options = {
               description: 'Salary cap limit',
               example: 200
             },
-            faab: {
+            starting_faab_budget: {
               type: 'integer',
               minimum: 0,
               description: 'Free agent acquisition budget',
               example: 100
             },
-            sqb: {
+            starter_slots_qb: {
               type: 'integer',
               minimum: 0,
               description: 'Starting QB roster slots',
               example: 1
             },
-            srb: {
+            starter_slots_rb: {
               type: 'integer',
               minimum: 0,
               description: 'Starting RB roster slots',
               example: 2
             },
-            swr: {
+            starter_slots_wr: {
               type: 'integer',
               minimum: 0,
               description: 'Starting WR roster slots',
               example: 2
             },
-            ste: {
+            starter_slots_te: {
               type: 'integer',
               minimum: 0,
               description: 'Starting TE roster slots',
               example: 1
             },
-            sdst: {
+            starter_slots_dst: {
               type: 'integer',
               minimum: 0,
               description: 'Starting DST roster slots',
               example: 1
             },
-            sk: {
+            starter_slots_k: {
               type: 'integer',
               minimum: 0,
               description: 'Starting K roster slots',
               example: 1
             },
-            bench: {
+            bench_slot_count: {
               type: 'integer',
               minimum: 0,
               description: 'Bench roster slots',
               example: 8
             },
-            ps: {
+            practice_squad_slot_count: {
               type: 'integer',
               minimum: 0,
               description: 'Practice squad roster slots',
@@ -3053,7 +3066,7 @@ const options = {
               minimum: 0,
               description: 'Salary cap limit'
             },
-            faab: {
+            starting_faab_budget: {
               type: 'integer',
               minimum: 0,
               description: 'Free agent acquisition budget'

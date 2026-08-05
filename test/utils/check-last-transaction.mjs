@@ -13,7 +13,7 @@ export default async function ({ leagueId, type, value, pid, teamId, userId }) {
 
   expect(transaction.lid).to.equal(leagueId)
   expect(transaction.type).to.equal(type)
-  expect(transaction.value).to.equal(value)
+  expect(transaction.player_salary).to.equal(value)
   expect(transaction.pid).to.equal(pid)
   expect(transaction.tid).to.equal(teamId)
   expect(transaction.userid).to.equal(userId)

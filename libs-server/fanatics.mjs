@@ -20,7 +20,7 @@ const get_fanatics_config = async () => {
   const config_row = await db('config')
     .where({ key: 'fanatics_config' })
     .first()
-  return config_row.value
+  return config_row.config_value
 }
 
 export const format_wager_payout = (payout) => {

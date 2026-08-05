@@ -81,11 +81,11 @@ const router = express.Router({ mergeParams: true })
  *                   type: integer
  *                   description: New slot (practice squad)
  *                   example: 5
- *                 rid:
+ *                 roster_id:
  *                   type: integer
  *                   description: Roster ID
  *                   example: 1234
- *                 pos:
+ *                 player_position:
  *                   type: string
  *                   description: Player position
  *                   example: "QB"

@@ -18,12 +18,12 @@ const expect = chai.expect
 // roster forces the LP to fill that slot entirely from the phantom, so the
 // phantom's value is exactly the returned baseline_total.
 const empty_starter_league = {
-  sqb: 1,
-  srb: 0,
-  swr: 0,
-  ste: 0,
-  sk: 0,
-  sdst: 0
+  starter_slots_qb: 1,
+  starter_slots_rb: 0,
+  starter_slots_wr: 0,
+  starter_slots_te: 0,
+  starter_slots_k: 0,
+  starter_slots_dst: 0
 }
 
 describe('LIBS-SHARED optimizeLineup', function () {

@@ -124,7 +124,9 @@ const run = async () => {
     for (const roster of rosters) {
       // get current roster players
       const { tid, lid, uid } = roster
-      const roster_player_rows = await db('rosters_players').where({ rid: uid })
+      const roster_player_rows = await db('rosters_players').where({
+        roster_id: uid
+      })
       if (roster_player_rows.length) {
         source_teams_with_players += 1
       }
@@ -147,7 +149,9 @@ const run = async () => {
       }
 
       // insert any missing players & remove excess players
-      const existing_rows = await db('rosters_players').where({ rid })
+      const existing_rows = await db('rosters_players').where({
+        roster_id: rid
+      })
       const existing_pids = existing_rows.map((p) => p.pid)
       const overlapping_pids = roster_player_rows.filter((p) =>
         existing_pids.includes(p.pid)
@@ -164,11 +168,11 @@ const run = async () => {
       const next_tag = (p) => (is_new_season ? player_tag_types.REGULAR : p.tag)
 
       const inserts = missing_pids.map((p) => ({
-        rid,
+        roster_id: rid,
         tag: next_tag(p),
         slot: p.slot,
         pid: p.pid,
-        pos: p.pos,
+        player_position: p.player_position,
         extensions: p.extensions, // Use previous week's value for new roster entries
         tid,
         lid,
@@ -193,7 +197,7 @@ const run = async () => {
       if (extra_pids.length) {
         await db('rosters_players')
           .del()
-          .where('rid', rid)
+          .where('roster_id', rid)
           .whereIn(
             'pid',
             extra_pids.map((p) => p.pid)
@@ -202,7 +206,9 @@ const run = async () => {
 
       if (updates.length) {
         for (const { pid, slot, tag } of updates) {
-          await db('rosters_players').where({ rid, pid }).update({ slot, tag })
+          await db('rosters_players')
+            .where({ roster_id: rid, pid })
+            .update({ slot, tag })
           // Extensions are preserved - not updated
         }
       }

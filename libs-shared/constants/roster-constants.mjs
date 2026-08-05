@@ -41,19 +41,44 @@ export const active_roster_slots = [
 // League-config keys holding the number of starters at each starting slot.
 // Enumerated rather than derived by prefix: the league object also carries
 // unrelated s-prefixed fields (salary_attribution_rule, sleeper_id,
-// scoring_format_id) that must not be summed into a starter count.
+// scoring_format_id) that must not be summed into a starter count. Most of
+// these conformed to full-word `starter_slots_*` columns; `srbwrte` and
+// `sqbrbwrte` were not part of that rename and still carry their shorthand
+// names -- see league_formats in the schema.
 export const starting_lineup_slot_league_keys = [
-  'sqb',
-  'srb',
-  'swr',
-  'ste',
-  'swrte',
-  'srbwr',
+  'starter_slots_qb',
+  'starter_slots_rb',
+  'starter_slots_wr',
+  'starter_slots_te',
+  'starter_slots_wr_te_flex',
+  'starter_slots_rb_wr_flex',
   'srbwrte',
   'sqbrbwrte',
-  'sk',
-  'sdst'
+  'starter_slots_k',
+  'starter_slots_dst'
 ]
+
+// League-config column for each roster slot's starting-lineup/bench/practice-
+// squad count. Keyed by roster_slot_types VALUE so a caller looks up
+// `league[column]` directly instead of deriving the column name from the slot
+// by string concatenation (`` `s${slot}` ``) -- that concatenation broke
+// silently the moment a column's physical name diverged from the bare
+// `s`-prefix pattern (see starter_slots_* above vs. the retained
+// srbwrte/sqbrbwrte shorthand).
+export const starter_slot_league_columns = {
+  [roster_slot_types.QB]: 'starter_slots_qb',
+  [roster_slot_types.RB]: 'starter_slots_rb',
+  [roster_slot_types.WR]: 'starter_slots_wr',
+  [roster_slot_types.TE]: 'starter_slots_te',
+  [roster_slot_types.WRTE]: 'starter_slots_wr_te_flex',
+  [roster_slot_types.RBWR]: 'starter_slots_rb_wr_flex',
+  [roster_slot_types.RBWRTE]: 'srbwrte',
+  [roster_slot_types.QBRBWRTE]: 'sqbrbwrte',
+  [roster_slot_types.K]: 'starter_slots_k',
+  [roster_slot_types.DST]: 'starter_slots_dst',
+  [roster_slot_types.BENCH]: 'bench_slot_count',
+  [roster_slot_types.PS]: 'practice_squad_slot_count'
+}
 
 export const practice_squad_slots = [
   roster_slot_types.PS,

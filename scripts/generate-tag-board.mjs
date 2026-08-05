@@ -34,12 +34,12 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
   }
 
   const teams = await db('teams')
-    .select('uid', 'name', 'cap', 'faab', 'draft_order')
+    .select('uid', 'name', 'salary_cap', 'faab_balance', 'draft_order')
     .where({ lid, year })
     .orderBy('uid')
 
   const roster_rows = await db('rosters_players')
-    .select('tid', 'pid', 'slot', 'pos', 'tag', 'extensions')
+    .select('tid', 'pid', 'slot', 'player_position', 'tag', 'extensions')
     .where({ lid, year, week: 0 })
 
   const pids = [...new Set(roster_rows.map((row) => row.pid))]
@@ -47,10 +47,10 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
   // Contract value is the latest transaction per team and player, not a column
   // on the roster row.
   const contract_rows = await db
-    .select('tid', 'pid', 'value')
+    .select('tid', 'pid', 'player_salary')
     .from(
       db
-        .select('tid', 'pid', 'value')
+        .select('tid', 'pid', 'player_salary')
         .distinctOn('tid', 'pid')
         .from('transactions')
         .where({ lid })
@@ -62,7 +62,10 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
         .as('latest')
     )
   const contracts = new Map(
-    contract_rows.map((row) => [contract_key(row.tid, row.pid), row.value])
+    contract_rows.map((row) => [
+      contract_key(row.tid, row.pid),
+      row.player_salary
+    ])
   )
 
   // Whether the extension deadline has actually been PROCESSED, which is a

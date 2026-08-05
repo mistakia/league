@@ -62,7 +62,7 @@ export default function TransactionRow({
         <div className='transaction__timestamp'>
           <Timestamp timestamp={transaction.timestamp} />
         </div>
-        <div className='transaction__value'>${transaction.value}</div>
+        <div className='transaction__value'>${transaction.player_salary}</div>
       </div>
     )
   } else {
@@ -90,7 +90,9 @@ export default function TransactionRow({
                 />
               </div>
             )}
-            <div className='transaction__value'>${transaction.value}</div>
+            <div className='transaction__value'>
+              ${transaction.player_salary}
+            </div>
           </div>
         </div>
       </div>

@@ -74,7 +74,7 @@ const router = express.Router({ mergeParams: true })
  *                           type: integer
  *                         tid:
  *                           type: integer
- *                         bid:
+ *                         bid_amount:
  *                           type: integer
  *                         is_successful:
  *                           type: boolean
@@ -119,7 +119,7 @@ router.get('/?', async (req, res) => {
         'restricted_free_agency_bids.nomination_id',
         'restricted_free_agency_bids.pid',
         'restricted_free_agency_bids.tid',
-        'restricted_free_agency_bids.bid',
+        'restricted_free_agency_bids.bid_amount',
         'restricted_free_agency_bids.is_successful',
         'restricted_free_agency_bids.outcome',
         'restricted_free_agency_bids.outcome_detail',
@@ -128,7 +128,7 @@ router.get('/?', async (req, res) => {
       )
       .whereIn('restricted_free_agency_bids.nomination_id', nomination_ids)
       .whereNull('restricted_free_agency_bids.cancelled')
-      .orderBy('restricted_free_agency_bids.bid', 'desc')
+      .orderBy('restricted_free_agency_bids.bid_amount', 'desc')
 
     // Resolved per season: a manager who held a different team in 2021 sees
     // that team's releases in the 2021 history, not their current team's.

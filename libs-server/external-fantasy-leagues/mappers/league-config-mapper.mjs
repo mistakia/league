@@ -122,46 +122,46 @@ export default class LeagueConfigMapper {
     // Platform-specific roster position mappings
     this.roster_mappings = {
       sleeper: {
-        QB: 'sqb',
-        RB: 'srb',
-        WR: 'swr',
-        TE: 'ste',
-        FLEX: 'srbwr',
-        REC_FLEX: 'swrte',
+        QB: 'starter_slots_qb',
+        RB: 'starter_slots_rb',
+        WR: 'starter_slots_wr',
+        TE: 'starter_slots_te',
+        FLEX: 'starter_slots_rb_wr_flex',
+        REC_FLEX: 'starter_slots_wr_te_flex',
         SUPER_FLEX: 'sqbrbwrte',
-        WR_TE_FLEX: 'swrte',
-        DEF: 'sdst',
-        K: 'sk',
-        BN: 'bench', // Sleeper's raw format uses BN
-        BENCH: 'bench', // Canonical format uses BENCH
+        WR_TE_FLEX: 'starter_slots_wr_te_flex',
+        DEF: 'starter_slots_dst',
+        K: 'starter_slots_k',
+        BN: 'bench_slot_count', // Sleeper's raw format uses BN
+        BENCH: 'bench_slot_count', // Canonical format uses BENCH
         IR: 'ir',
-        TAXI: 'ps'
+        TAXI: 'practice_squad_slot_count'
       },
       espn: {
-        QB: 'sqb',
-        RB: 'srb',
-        'RB/WR': 'srbwr',
-        WR: 'swr',
-        'WR/TE': 'swrte',
-        TE: 'ste',
+        QB: 'starter_slots_qb',
+        RB: 'starter_slots_rb',
+        'RB/WR': 'starter_slots_rb_wr_flex',
+        WR: 'starter_slots_wr',
+        'WR/TE': 'starter_slots_wr_te_flex',
+        TE: 'starter_slots_te',
         OP: 'sqbrbwrte',
-        'D/ST': 'sdst',
-        K: 'sk',
-        BE: 'bench',
+        'D/ST': 'starter_slots_dst',
+        K: 'starter_slots_k',
+        BE: 'bench_slot_count',
         IR: 'ir'
       },
       yahoo: {
-        QB: 'sqb',
-        WR: 'swr',
-        RB: 'srb',
-        TE: 'ste',
-        'W/R': 'srbwr',
-        'W/T': 'swrte',
+        QB: 'starter_slots_qb',
+        WR: 'starter_slots_wr',
+        RB: 'starter_slots_rb',
+        TE: 'starter_slots_te',
+        'W/R': 'starter_slots_rb_wr_flex',
+        'W/T': 'starter_slots_wr_te_flex',
         'W/R/T': 'srbwrte',
         'Q/W/R/T': 'sqbrbwrte',
-        DEF: 'sdst',
-        K: 'sk',
-        BN: 'bench',
+        DEF: 'starter_slots_dst',
+        K: 'starter_slots_k',
+        BN: 'bench_slot_count',
         IR: 'ir'
       }
     }
@@ -433,18 +433,18 @@ export default class LeagueConfigMapper {
   get_default_league_params() {
     return {
       num_teams: 12,
-      sqb: 0,
-      srb: 0,
-      swr: 0,
-      ste: 0,
-      srbwr: 0,
+      starter_slots_qb: 0,
+      starter_slots_rb: 0,
+      starter_slots_wr: 0,
+      starter_slots_te: 0,
+      starter_slots_rb_wr_flex: 0,
       srbwrte: 0,
       sqbrbwrte: 0,
-      swrte: 0,
-      sdst: 0,
-      sk: 0,
-      bench: 0,
-      ps: 0,
+      starter_slots_wr_te_flex: 0,
+      starter_slots_dst: 0,
+      starter_slots_k: 0,
+      bench_slot_count: 0,
+      practice_squad_slot_count: 0,
       ir: 0,
       reserve_short_term_limit: 0,
       cap: 0,
@@ -470,16 +470,16 @@ export default class LeagueConfigMapper {
     }
 
     const total_starters =
-      league_params.sqb +
-      league_params.srb +
-      league_params.swr +
-      league_params.ste +
-      league_params.srbwr +
+      league_params.starter_slots_qb +
+      league_params.starter_slots_rb +
+      league_params.starter_slots_wr +
+      league_params.starter_slots_te +
+      league_params.starter_slots_rb_wr_flex +
       league_params.srbwrte +
       league_params.sqbrbwrte +
-      league_params.swrte +
-      league_params.sdst +
-      league_params.sk
+      league_params.starter_slots_wr_te_flex +
+      league_params.starter_slots_dst +
+      league_params.starter_slots_k
 
     if (total_starters === 0) {
       log('Invalid league params: no starting roster positions')

@@ -31,7 +31,7 @@ const get_roster_player = async ({ tid }) => {
       year: current_season.year,
       week: current_season.week
     })
-    .whereNot('pos', 'K')
+    .whereNot('player_position', 'K')
     .limit(1)
   return rows[0]
 }
@@ -45,7 +45,7 @@ const propose_and_accept_one_for_one = async () => {
 
   await knex('transactions')
     .whereIn('pid', proposingTeamPlayers.concat(acceptingTeamPlayers))
-    .update('value', 0)
+    .update('player_salary', 0)
 
   const proposing_team_slots = {
     [acceptingTeamPlayers[0]]: roster_slot_types.BENCH

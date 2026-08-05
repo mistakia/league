@@ -75,11 +75,11 @@ const router = express.Router({ mergeParams: true })
  *                   type: integer
  *                   description: New slot (protected practice squad)
  *                   example: 6
- *                 rid:
+ *                 roster_id:
  *                   type: integer
  *                   description: Roster ID
  *                   example: 1234
- *                 pos:
+ *                 player_position:
  *                   type: string
  *                   description: Player position
  *                   example: "RB"
@@ -189,7 +189,7 @@ router.post('/?', async (req, res) => {
         ? roster_slot_types.PSP
         : roster_slot_types.PSDP
     await db('rosters_players').update({ slot }).where({
-      rid: rosterRow.uid,
+      roster_id: rosterRow.uid,
       pid
     })
 
@@ -199,7 +199,7 @@ router.post('/?', async (req, res) => {
       lid: leagueId,
       pid,
       type: transaction_types.PRACTICE_PROTECTED,
-      value: lastTransaction.value,
+      player_salary: lastTransaction.player_salary,
       week: current_season.week,
       year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
@@ -210,8 +210,8 @@ router.post('/?', async (req, res) => {
       pid,
       tid,
       slot,
-      rid: roster.uid,
-      pos: player_row.primary_position,
+      roster_id: roster.uid,
+      player_position: player_row.primary_position,
       transaction
     }
     res.send(data)
@@ -226,7 +226,7 @@ router.post('/?', async (req, res) => {
     })
     const team = teams[0]
 
-    const message = `${team.name} (${team.abbrv}) has designated ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) as a protected practice squad member.`
+    const message = `${team.name} (${team.abbreviation}) has designated ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) as a protected practice squad member.`
 
     await sendNotifications({
       league,

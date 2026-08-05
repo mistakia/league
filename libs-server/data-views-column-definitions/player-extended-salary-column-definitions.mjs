@@ -115,11 +115,11 @@ export const player_extended_salary_join = async ({
     : `CASE
           WHEN rp.slot IN (${ps_slot_list}) THEN COALESCE(s.salary_paid, 0)
           WHEN rp.tag = ${player_tag_types.FRANCHISE} THEN
-            CASE rp.pos
-              WHEN 'QB' THEN COALESCE(ssn.fqb, 0)
-              WHEN 'RB' THEN COALESCE(ssn.frb, 0)
-              WHEN 'WR' THEN COALESCE(ssn.fwr, 0)
-              WHEN 'TE' THEN COALESCE(ssn.fte, 0)
+            CASE rp.player_position
+              WHEN 'QB' THEN COALESCE(ssn.franchise_tag_salary_qb, 0)
+              WHEN 'RB' THEN COALESCE(ssn.franchise_tag_salary_rb, 0)
+              WHEN 'WR' THEN COALESCE(ssn.franchise_tag_salary_wr, 0)
+              WHEN 'TE' THEN COALESCE(ssn.franchise_tag_salary_te, 0)
               ELSE 0
             END
           WHEN rp.tag = ${player_tag_types.ROOKIE} THEN COALESCE(s.salary_paid, 0)

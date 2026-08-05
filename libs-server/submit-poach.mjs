@@ -109,7 +109,7 @@ export default async function ({
     .orderBy('uid', 'desc')
     .limit(1)
   const tran = transactions[0]
-  const playerPoachValue = tran.value + 2
+  const playerPoachValue = tran.player_salary + 2
   if (
     !current_season.isRegularSeason &&
     roster.availableCap - playerPoachValue < 0

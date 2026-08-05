@@ -80,7 +80,7 @@ export default function SelectedPlayerTransactions({
             fontWeight: 600
           }}
         >
-          ${transaction.value}
+          ${transaction.player_salary}
         </TableCell>
         <TableCell
           sx={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}
@@ -165,7 +165,7 @@ export default function SelectedPlayerTransactions({
               </TableRow>
               <TableRow>
                 <TableCell variant='head'>Max Salary</TableCell>
-                <TableCell>${maxTransaction.value}</TableCell>
+                <TableCell>${maxTransaction.player_salary}</TableCell>
                 <TableCell>
                   <Timestamp timestamp={maxTransaction.timestamp} />
                 </TableCell>

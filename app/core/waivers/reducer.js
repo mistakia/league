@@ -27,7 +27,7 @@ export function waivers_reducer(state = initialState, { payload, type }) {
     case waiver_actions.PUT_WAIVER_FULFILLED: {
       const uid = Number(payload.data.uid)
       return state.mergeIn(['teams', payload.opts.teamId, uid], {
-        bid: payload.data.bid,
+        bid_amount: payload.data.bid_amount,
         release: new List(payload.data.release)
       })
     }
@@ -42,14 +42,20 @@ export function waivers_reducer(state = initialState, { payload, type }) {
     case waiver_actions.POST_WAIVER_ORDER_PENDING:
       return state.withMutations((state) => {
         for (const [index, wid] of payload.opts.waivers.entries()) {
-          state.setIn(['teams', payload.opts.teamId, wid, 'po'], index)
+          state.setIn(
+            ['teams', payload.opts.teamId, wid, 'priority_order'],
+            index
+          )
         }
       })
 
     case waiver_actions.POST_WAIVER_ORDER_FAILED:
       return state.withMutations((state) => {
         for (const w of payload.opts.reset) {
-          state.setIn(['teams', payload.opts.teamId, w.uid, 'po'], w.po)
+          state.setIn(
+            ['teams', payload.opts.teamId, w.uid, 'priority_order'],
+            w.priority_order
+          )
         }
       })
 

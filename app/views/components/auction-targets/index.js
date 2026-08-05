@@ -48,22 +48,28 @@ const map_state_to_props = createSelector(
       team,
       rosteredPlayerIds,
       watchlist: playerState.get('watchlist'),
-      show_qb: Boolean(league.sqb || league.sqbrbwrte),
+      show_qb: Boolean(league.starter_slots_qb || league.sqbrbwrte),
       show_rb: Boolean(
-        league.srb || league.sqbrbwrte || league.srbwr || league.srbwrte
+        league.starter_slots_rb ||
+          league.sqbrbwrte ||
+          league.starter_slots_rb_wr_flex ||
+          league.srbwrte
       ),
       show_wr: Boolean(
-        league.swr ||
-          league.srbwr ||
+        league.starter_slots_wr ||
+          league.starter_slots_rb_wr_flex ||
           league.srbwrte ||
-          league.swrte ||
+          league.starter_slots_wr_te_flex ||
           league.sqbrbwrte
       ),
       show_te: Boolean(
-        league.ste || league.srbwrte || league.swrte || league.sqbrbwrte
+        league.starter_slots_te ||
+          league.srbwrte ||
+          league.starter_slots_wr_te_flex ||
+          league.sqbrbwrte
       ),
-      show_k: Boolean(league.sk),
-      show_dst: Boolean(league.sdst)
+      show_k: Boolean(league.starter_slots_k),
+      show_dst: Boolean(league.starter_slots_dst)
     }
   }
 )

@@ -10,8 +10,8 @@ export default async function ({ lid, random_seed }) {
   for (const [index, value] of schedule.entries()) {
     for (const matchup of value) {
       inserts.push({
-        hid: matchup.home.uid,
-        aid: matchup.away.uid,
+        home_team_id: matchup.home.uid,
+        away_team_id: matchup.away.uid,
         lid,
         week: index + 1,
         year: current_season.year

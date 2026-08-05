@@ -23,8 +23,8 @@ const nfl_play_fields = [
   'sequence',
   'state',
 
-  'dwn',
-  'qtr',
+  'down_number',
+  'quarter',
 
   'play_description',
   'desc_nflfastr',
@@ -44,10 +44,10 @@ const nfl_play_fields = [
   'off_personnel',
   'def_personnel',
   'box_defenders',
-  'pru',
+  'ngs_pass_rushers',
   'air_yards',
   'time_to_throw',
-  'route',
+  'charted_route',
   // 'man_zone',
   // 'cov_type',
 
@@ -151,7 +151,7 @@ const nfl_play_fields = [
   'recv_yds',
   'rush_yds',
 
-  'dot',
+  'depth_of_target',
   // 'true_air_yards',
   'yards_after_catch',
   'yards_after_any_contact',
@@ -183,8 +183,8 @@ const nfl_play_fields = [
   'is_contested_ball',
   'is_created_reception',
 
-  'mbt',
-  'avsk',
+  'missed_or_broken_tackle',
+  'avoided_sacks',
 
   'run_location',
   'run_gap',
@@ -216,18 +216,18 @@ const nfl_play_fields = [
   // 'ttsk',
   // 'time_to_pressure',
 
-  'back',
-  'xlm',
-  'db',
+  'backfield_player_count',
+  'extra_men_on_line',
+  'defensive_back_count',
   'box_defenders_charted',
-  'boxdb',
+  'defensive_backs_in_box',
   'pass_rushers',
   'blitzers',
   'db_blitzers',
   // 'oopd',
   // 'cov_charted',
 
-  'ep',
+  'expected_points',
   'epa',
   'is_epa_successful',
 
@@ -253,8 +253,8 @@ const nfl_play_fields = [
   'total_home_raw_yac_epa',
   'total_away_raw_yac_epa',
 
-  'wp',
-  'wpa',
+  'win_probability',
+  'win_probability_added',
   'home_wp',
   'away_wp',
   'vegas_wpa',
@@ -326,8 +326,8 @@ const nfl_play_fields = [
   'xpass_prob',
   'pass_oe',
 
-  'cp',
-  'cpoe'
+  'completion_probability',
+  'completion_percentage_over_expected'
 ]
 
 const export_data_nfl_plays = async ({

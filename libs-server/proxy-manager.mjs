@@ -185,10 +185,10 @@ class ProxyManager {
       // Load all proxy configs from database
       const configs = await db('config')
         .where('key', 'like', 'proxy_config%')
-        .select('key', 'value')
+        .select('key', 'config_value')
 
       for (const config of configs) {
-        if (!config.value) continue
+        if (!config.config_value) continue
 
         // Determine pool name from config key
         // proxy_config -> default, proxy_config_pinnacle -> pinnacle
@@ -198,7 +198,7 @@ class ProxyManager {
             : config.key.replace('proxy_config_', '')
 
         const pool = new ProxyPool(pool_name)
-        const proxy_list = config.value
+        const proxy_list = config.config_value
 
         for (const proxy_str of proxy_list) {
           pool.add_proxy(proxy_str)

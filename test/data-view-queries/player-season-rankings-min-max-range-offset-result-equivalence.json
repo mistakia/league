@@ -6,40 +6,25 @@
     "columns": [
       {
         "column_id": "player_season_min_ranking",
-        "params": {
-          "year": [2023],
-          "year_offset": [1, 2]
-        }
+        "params": { "year": [2023], "year_offset": [1, 2] }
       },
       {
         "column_id": "player_season_max_ranking",
-        "params": {
-          "year": [2023],
-          "year_offset": [1, 2]
-        }
+        "params": { "year": [2023], "year_offset": [1, 2] }
       }
     ],
     "where": [
-      {
-        "column_id": "player_position",
-        "operator": "IN",
-        "value": ["MLB"]
-      }
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT MIN(player_rankings_index.min) FROM player_rankings_index WHERE player_rankings_index.pid = player.pid AND player_rankings_index.season_year IN (2024,2025) AND player_rankings_index.source_id IN ('FANTASYPROS') AND player_rankings_index.ranking_type IN ('PPR_REDRAFT')) AS \"min_rank_0\", (SELECT MAX(player_rankings_index.max) FROM player_rankings_index WHERE player_rankings_index.pid = player.pid AND player_rankings_index.season_year IN (2024,2025) AND player_rankings_index.source_id IN ('FANTASYPROS') AND player_rankings_index.ranking_type IN ('PPR_REDRAFT')) AS \"max_rank_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT MIN(player_rankings_index.min_rank) FROM player_rankings_index WHERE player_rankings_index.pid = player.pid AND player_rankings_index.season_year IN (2024,2025) AND player_rankings_index.source_id IN ('FANTASYPROS') AND player_rankings_index.ranking_type IN ('PPR_REDRAFT')) AS \"min_rank_0\", (SELECT MAX(player_rankings_index.max_rank) FROM player_rankings_index WHERE player_rankings_index.pid = player.pid AND player_rankings_index.season_year IN (2024,2025) AND player_rankings_index.source_id IN ('FANTASYPROS') AND player_rankings_index.ranking_type IN ('PPR_REDRAFT')) AS \"max_rank_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-RANK-000918', 'Test', 'Rank', 'T.Rank', 'Test Rank', 'MLB', 'MLB', '2000-01-01', 2020)",
-      "INSERT INTO player_rankings_index (pid, pos, season_year, min, max, avg, std, overall_rank, position_rank, source_id, ranking_type) VALUES ('TEST-RANK-000918', 'MLB', 2024, 5, 20, 12.00, 1.00, 50, 10, 'FANTASYPROS', 'PPR_REDRAFT')",
-      "INSERT INTO player_rankings_index (pid, pos, season_year, min, max, avg, std, overall_rank, position_rank, source_id, ranking_type) VALUES ('TEST-RANK-000918', 'MLB', 2025, 2, 30, 15.00, 1.00, 40, 8, 'FANTASYPROS', 'PPR_REDRAFT')"
+      "INSERT INTO player_rankings_index (pid, player_position, season_year, min_rank, max_rank, average_rank, rank_standard_deviation, overall_rank, position_rank, source_id, ranking_type) VALUES ('TEST-RANK-000918', 'MLB', 2024, 5, 20, 12.00, 1.00, 50, 10, 'FANTASYPROS', 'PPR_REDRAFT')",
+      "INSERT INTO player_rankings_index (pid, player_position, season_year, min_rank, max_rank, average_rank, rank_standard_deviation, overall_rank, position_rank, source_id, ranking_type) VALUES ('TEST-RANK-000918', 'MLB', 2025, 2, 30, 15.00, 1.00, 40, 8, 'FANTASYPROS', 'PPR_REDRAFT')"
     ],
-    "expected_rows": [
-      {
-        "min_rank_0": 2,
-        "max_rank_0": 30
-      }
-    ],
+    "expected_rows": [{ "min_rank_0": 2, "max_rank_0": 30 }],
     "compare_columns": ["min_rank_0", "max_rank_0"]
   },
   "tags": ["year_offset", "rankings", "range", "result-equivalence"]

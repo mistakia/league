@@ -57,7 +57,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
 
   // Check if player was originally a PS (signed) player, not PSD (drafted)
   const original_roster = await db('rosters_players')
-    .join('rosters', 'rosters_players.rid', 'rosters.uid')
+    .join('rosters', 'rosters_players.roster_id', 'rosters.uid')
     .where({
       'rosters_players.pid': pid,
       'rosters_players.tid': super_priority_status.original_tid,
@@ -79,7 +79,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
     const league = await getLeague({ lid })
     const roster = new Roster({ roster: original_team_roster, league })
 
-    if (roster.practice.length >= league.ps) {
+    if (roster.practice.length >= league.practice_squad_slot_count) {
       requires_waiver = 1 // No open PS slot, requires manual waiver
     }
   }
@@ -122,8 +122,8 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
     tid: super_priority_status.original_tid,
     lid,
     submitted: Math.round(Date.now() / 1000),
-    bid: 0,
-    po: 0,
+    bid_amount: 0,
+    priority_order: 0,
     type: waiver_types.FREE_AGENCY_PRACTICE,
     super_priority: 1
   })
@@ -245,11 +245,11 @@ export default async function ({
     await db('rosters_players')
       .update({ slot: roster_slot_types.BENCH })
       .where({
-        rid: rosterRow.uid,
+        roster_id: rosterRow.uid,
         pid: activate_pid
       })
 
-    const { value } = await getLastTransaction({
+    const { player_salary } = await getLastTransaction({
       pid: activate_pid,
       lid,
       tid
@@ -260,7 +260,7 @@ export default async function ({
       lid,
       pid: activate_pid,
       type: transaction_types.ROSTER_ACTIVATE,
-      value,
+      player_salary,
       week: current_season.week,
       year: current_season.year,
       timestamp
@@ -288,8 +288,8 @@ export default async function ({
       pid: activate_pid,
       tid,
       slot: roster_slot_types.BENCH,
-      rid: roster.uid,
-      pos: activate_player_row.primary_position,
+      roster_id: roster.uid,
+      player_position: activate_player_row.primary_position,
       transaction
     })
   }
@@ -301,7 +301,7 @@ export default async function ({
     lid,
     pid: release_pid,
     type: transaction_types.ROSTER_RELEASE,
-    value: 0,
+    player_salary: 0,
     week: current_season.week,
     year: current_season.year,
     timestamp
@@ -318,7 +318,7 @@ export default async function ({
     .where('tid', tid)
   const rosterIds = teamRosters.map((r) => r.uid)
   await db('rosters_players')
-    .whereIn('rid', rosterIds)
+    .whereIn('roster_id', rosterIds)
     .where('pid', release_pid)
     .del()
   await db('league_cutlist')
@@ -332,8 +332,8 @@ export default async function ({
     pid: release_pid,
     slot: null,
     tid,
-    rid: roster.uid,
-    pos: release_player_row.primary_position,
+    roster_id: roster.uid,
+    player_position: release_player_row.primary_position,
     transaction
   })
 
@@ -355,9 +355,9 @@ export default async function ({
 
     let message
     if (activate_pid) {
-      message = `${team.name} (${team.abbrv}) has activated ${activate_player_row.first_name} ${activate_player_row.last_name} (${activate_player_row.primary_position}). ${release_player_row.first_name} ${release_player_row.last_name} (${release_player_row.primary_position}) has been released.`
+      message = `${team.name} (${team.abbreviation}) has activated ${activate_player_row.first_name} ${activate_player_row.last_name} (${activate_player_row.primary_position}). ${release_player_row.first_name} ${release_player_row.last_name} (${release_player_row.primary_position}) has been released.`
     } else {
-      message = `${team.name} (${team.abbrv}) has released ${release_player_row.first_name} ${release_player_row.last_name} (${release_player_row.primary_position}).`
+      message = `${team.name} (${team.abbreviation}) has released ${release_player_row.first_name} ${release_player_row.last_name} (${release_player_row.primary_position}).`
     }
 
     await sendNotifications({

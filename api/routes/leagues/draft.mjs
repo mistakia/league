@@ -63,7 +63,7 @@ const router = express.Router({ mergeParams: true })
  *           type: string
  *           description: Formatted pick string (e.g., "1.03")
  *           example: "1.03"
- *         otid:
+ *         original_team_id:
  *           type: integer
  *           nullable: true
  *           description: Original team ID (if pick was traded)
@@ -167,7 +167,7 @@ const router = express.Router({ mergeParams: true })
  *       **Pick Status:**
  *       - Unused picks have null pid (player ID)
  *       - Used picks have pid and selection_timestamp populated
- *       - Original team ID (otid) shows if pick was traded
+ *       - Original team ID (original_team_id) shows if pick was traded
  *     tags:
  *       - Fantasy Leagues
  *     parameters:
@@ -201,7 +201,7 @@ const router = express.Router({ mergeParams: true })
  *                       round: 1
  *                       pick: 3
  *                       pick_str: "1.03"
- *                       otid: null
+ *                       original_team_id: null
  *                       pid: "4017"
  *                       selection_timestamp: 1698765432
  *                     - uid: 1543
@@ -211,7 +211,7 @@ const router = express.Router({ mergeParams: true })
  *                       round: 1
  *                       pick: 4
  *                       pick_str: "1.04"
- *                       otid: 13
+ *                       original_team_id: 13
  *                       pid: null
  *                       selection_timestamp: null
  *                   trade_history_by_pick:
@@ -648,9 +648,9 @@ router.post('/?', async (req, res) => {
         : 1
 
     await db('rosters_players').insert({
-      rid: roster.uid,
+      roster_id: roster.uid,
       pid,
-      pos: player_row.primary_position,
+      player_position: player_row.primary_position,
       slot: roster_slot_types.PSD,
       extensions: 0,
       tid: teamId,
@@ -668,7 +668,7 @@ router.post('/?', async (req, res) => {
       week: current_season.week,
       year: current_season.year,
       timestamp: Math.round(Date.now() / 1000),
-      value
+      player_salary: value
     })
 
     const selection_timestamp = Math.round(Date.now() / 1000)

@@ -64,7 +64,7 @@ export const insert_restricted_free_agency_bid = async ({
   pid,
   lid,
   tid,
-  bid,
+  bid_amount,
   userid = 1,
   original_team_id = tid,
   nominated_at = null,
@@ -88,7 +88,7 @@ export const insert_restricted_free_agency_bid = async ({
     .insert({
       pid,
       userid,
-      bid,
+      bid_amount,
       tid,
       lid,
       nomination_id,

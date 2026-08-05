@@ -16,7 +16,7 @@ export default function LeagueSettingsStartingLineup({
   const body = (
     <>
       <EditableLeagueField
-        field='sqb'
+        field='starter_slots_qb'
         label='QB'
         type='int'
         max={2}
@@ -25,7 +25,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='RB'
-        field='srb'
+        field='starter_slots_rb'
         type='int'
         max={3}
         min={0}
@@ -33,7 +33,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='WR'
-        field='swr'
+        field='starter_slots_wr'
         type='int'
         max={3}
         min={0}
@@ -41,7 +41,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='TE'
-        field='ste'
+        field='starter_slots_te'
         type='int'
         max={2}
         min={0}
@@ -49,7 +49,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='K'
-        field='sk'
+        field='starter_slots_k'
         type='int'
         max={1}
         min={0}
@@ -57,7 +57,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='DST'
-        field='sdst'
+        field='starter_slots_dst'
         type='int'
         max={1}
         min={0}
@@ -65,7 +65,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='RB/WR'
-        field='srbwr'
+        field='starter_slots_rb_wr_flex'
         type='int'
         max={3}
         min={0}
@@ -89,7 +89,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='WR/TE'
-        field='swrte'
+        field='starter_slots_wr_te_flex'
         type='int'
         max={2}
         min={0}

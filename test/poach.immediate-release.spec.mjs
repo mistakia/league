@@ -106,7 +106,7 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
         })
         .first()
       expect(waiver).to.not.equal(undefined)
-      expect(waiver.po).to.equal(0) // super priority
+      expect(waiver.priority_order).to.equal(0) // super priority
       expect(waiver.super_priority).to.equal(1)
     })
 

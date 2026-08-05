@@ -21,7 +21,12 @@ const { expect } = chai
 // wrong in the other direction -- defaulting an absent bid to 0 before the call, which
 // two components did -- hands the team a free roster spot instead.
 
-const league = { fqb: 20, frb: 15, fwr: 18, fte: 10 }
+const league = {
+  franchise_tag_salary_qb: 20,
+  franchise_tag_salary_rb: 15,
+  franchise_tag_salary_wr: 18,
+  franchise_tag_salary_te: 10
+}
 
 describe('LIBS-SHARED getExtensionAmount', function () {
   describe('restricted free agency tag', function () {

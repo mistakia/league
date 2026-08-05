@@ -47,7 +47,7 @@ const at_large_comparators = {
  *   - taking an at-large berth: at_large_selection_method
  *
  * @param {Object} params
- * @param {Array} params.teams - flat objects with tid, div, and the stat keys
+ * @param {Array} params.teams - flat objects with tid, division, and the stat keys
  *   the comparators read
  * @param {number} params.playoff_team_count - size of the playoff field
  * @param {number} params.bye_count - how many top seeds skip the first round
@@ -111,8 +111,8 @@ const get_playoff_seeding = ({
   const division_winners = []
   const divisions_seen = new Set()
   for (const team of by_record) {
-    if (!divisions_seen.has(team.div)) {
-      divisions_seen.add(team.div)
+    if (!divisions_seen.has(team.division)) {
+      divisions_seen.add(team.division)
       division_winners.push(team)
     }
   }

@@ -46,18 +46,18 @@ const router = express.Router()
  *                     defense_nfl_team: "LV"
  *                     down: 1
  *                     yards_to_go: 10
- *                     yfog: 25
+ *                     yards_from_own_goal: 25
  *                     play_type: "PASS"
  *                     yards_gained: 15
  *                     playStats:
  *                       - pid: "PATR-MAHO-005785"
  *                         stat_type: "PASSING"
- *                         yards: 15
+ *                         stat_yards: 15
  *                         touchdown: false
  *                         interception: false
  *                       - pid: "TRAV-KELC-002004"
  *                         stat_type: "RECEIVING"
- *                         yards: 15
+ *                         stat_yards: 15
  *                         touchdown: false
  *                         targets: 1
  *                         receptions: 1

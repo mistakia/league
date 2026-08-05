@@ -39,7 +39,7 @@ export default class PlayerRosterTotal extends React.Component {
       // restricted free agent at $0 through `getExtensionAmount`'s `??` branch.
       // Immutable's default only fires when the key is absent and reducers clear
       // this field to an explicit null, so coalesce rather than rely on it.
-      const bid = player_map.get('bid') ?? undefined
+      const bid = player_map.get('bid_amount') ?? undefined
       const tag = player_map.get('tag')
       const isRestrictedFreeAgent =
         tag === player_tag_types.RESTRICTED_FREE_AGENCY

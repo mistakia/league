@@ -31,7 +31,7 @@ const set_draft_pick_number = async ({ lid }) => {
   for (const pick of filtered_picks) {
     const num = calculatePick({
       round: pick.round,
-      order: draftOrder.indexOf(pick.otid) + 1,
+      order: draftOrder.indexOf(pick.original_team_id) + 1,
       league
     })
     const pick_number_in_round = num - (pick.round - 1) * league.num_teams

@@ -39,7 +39,7 @@ class PlayerRosterRow extends Player {
       current_season.now.isBefore(deadline)
     const extensions = player_map.get('extensions', 0)
     const value = player_map.get('value')
-    const bid = player_map.get('bid')
+    const bid = player_map.get('bid_amount')
     const salary = calculate_extension
       ? getExtensionAmount({
           pos: player_map.get('primary_position'),

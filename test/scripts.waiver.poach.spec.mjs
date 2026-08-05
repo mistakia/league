@@ -90,9 +90,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -134,9 +134,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -180,9 +180,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -259,9 +259,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -339,9 +339,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -351,9 +351,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 4,
         lid: 1,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -453,9 +453,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player1.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -465,9 +465,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 4,
         lid: 1,
         pid: player2.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -579,9 +579,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player1.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -591,9 +591,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 4,
         lid: 1,
         pid: player2.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -603,9 +603,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 6,
         lid: 1,
         pid: player1.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -719,9 +719,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.POACH
       })
 
@@ -735,7 +735,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         type: transaction_types.ROSTER_ACTIVATE,
-        value: 1,
+        player_salary: 1,
         week: current_season.week,
         year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)

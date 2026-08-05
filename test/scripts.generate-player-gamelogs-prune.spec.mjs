@@ -40,7 +40,7 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
     season_year,
     nfl_team: 'NE',
     opponent_nfl_team: 'BUF',
-    pos: 'WR',
+    player_position: 'WR',
     targets: 4,
     rushing_first_downs: 0,
     receiving_first_downs: 0,
@@ -56,7 +56,7 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
     season_year,
     nfl_team: 'NE',
     opponent_nfl_team: 'BUF',
-    pos: 'DE',
+    player_position: 'DE',
     snaps_def: 48
   })
 

@@ -125,12 +125,15 @@ export async function load_player_projections({
       week: String(week),
       scoring_format_id
     })
-    .select('pid', 'total')
+    .select('pid', 'projected_points_total')
 
   const projections_map = new Map()
 
   for (const projection of projections) {
-    projections_map.set(projection.pid, parseFloat(projection.total))
+    projections_map.set(
+      projection.pid,
+      parseFloat(projection.projected_points_total)
+    )
   }
 
   log(`Loaded projections for ${projections_map.size} players`)

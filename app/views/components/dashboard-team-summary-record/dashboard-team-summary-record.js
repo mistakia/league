@@ -25,8 +25,9 @@ export default function DashboardTeamSummaryRecord({
       <tr key={t.uid}>
         <td>{t.name}</td>
         <td style={{ minWidth: '58px' }}>
-          {t.getIn(['stats', 'wins'], 0)}-{t.getIn(['stats', 'losses'], 0)}-
-          {t.getIn(['stats', 'ties'], 0)}
+          {t.getIn(['stats', 'regular_season_wins'], 0)}-
+          {t.getIn(['stats', 'regular_season_losses'], 0)}-
+          {t.getIn(['stats', 'regular_season_ties'], 0)}
         </td>
         <td style={{ minWidth: '58px' }}>
           {t.getIn(['stats', 'points_for'], 0).toFixed(1)}
@@ -55,11 +56,12 @@ export default function DashboardTeamSummaryRecord({
       )
     }
 
-    if (t.div === team.div) divStandings.push(item)
+    if (t.division === team.division) divStandings.push(item)
   }
 
   // With a single division the divisional table is a copy of the overall one.
-  const has_divisions = standings.teams.groupBy((t) => t.get('div')).size > 1
+  const has_divisions =
+    standings.teams.groupBy((t) => t.get('division')).size > 1
 
   return (
     <Accordion TransitionProps={{ unmountOnExit: true }}>
@@ -69,9 +71,9 @@ export default function DashboardTeamSummaryRecord({
             Record
           </Grid>
           <Grid item xs={3}>
-            {team.getIn(['stats', 'wins'], 0)}-
-            {team.getIn(['stats', 'losses'], 0)}-
-            {team.getIn(['stats', 'ties'], 0)}
+            {team.getIn(['stats', 'regular_season_wins'], 0)}-
+            {team.getIn(['stats', 'regular_season_losses'], 0)}-
+            {team.getIn(['stats', 'regular_season_ties'], 0)}
           </Grid>
           <Grid item xs={2}>
             <Rank rank={rank} size={standings.teams.size} />

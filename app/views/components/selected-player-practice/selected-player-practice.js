@@ -9,27 +9,41 @@ const Row = ({ data }) => (
       <div className='table__cell metric'>{data.season_type || '-'}</div>
       <div className='table__cell metric'>{data.week}</div>
       <div className='table__cell text'>{data.status || '-'}</div>
-      <div className='table__cell text'>{data.inj || '-'}</div>
+      <div className='table__cell text'>{data.injury_type || '-'}</div>
       <div className='table__cell'>
-        <div className='table__cell-text'>{data.m || '-'}</div>
+        <div className='table__cell-text'>
+          {data.monday_practice_status || '-'}
+        </div>
       </div>
       <div className='table__cell'>
-        <div className='table__cell-text'>{data.tu || '-'}</div>
+        <div className='table__cell-text'>
+          {data.tuesday_practice_status || '-'}
+        </div>
       </div>
       <div className='table__cell'>
-        <div className='table__cell-text'>{data.w || '-'}</div>
+        <div className='table__cell-text'>
+          {data.wednesday_practice_status || '-'}
+        </div>
       </div>
       <div className='table__cell'>
-        <div className='table__cell-text'>{data.th || '-'}</div>
+        <div className='table__cell-text'>
+          {data.thursday_practice_status || '-'}
+        </div>
       </div>
       <div className='table__cell'>
-        <div className='table__cell-text'>{data.f || '-'}</div>
+        <div className='table__cell-text'>
+          {data.friday_practice_status || '-'}
+        </div>
       </div>
       <div className='table__cell'>
-        <div className='table__cell-text'>{data.s || '-'}</div>
+        <div className='table__cell-text'>
+          {data.saturday_practice_status || '-'}
+        </div>
       </div>
       <div className='table__cell'>
-        <div className='table__cell-text'>{data.su || '-'}</div>
+        <div className='table__cell-text'>
+          {data.sunday_practice_status || '-'}
+        </div>
       </div>
     </div>
   </div>

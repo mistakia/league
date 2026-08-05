@@ -87,7 +87,7 @@ export const enrich_yardage_stats = (plays, play_stats) => {
       enrichment_data.is_first_down = stats_data.is_first_down
 
     // Air yards and yards after catch
-    if (stats_data.dot != null) enrichment_data.dot = stats_data.dot
+    if (stats_data.dot != null) enrichment_data.depth_of_target = stats_data.dot
     if (stats_data.yards_after_catch != null)
       enrichment_data.yards_after_catch = stats_data.yards_after_catch
 

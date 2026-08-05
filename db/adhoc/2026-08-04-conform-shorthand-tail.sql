@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-05 against league_production
 --
 -- Shorthand conformance: the remaining tables
 --
@@ -283,3 +283,31 @@ ALTER TABLE public.transactions RENAME COLUMN value TO player_salary;
 -- waivers (2)
 ALTER TABLE public.waivers RENAME COLUMN bid TO bid_amount;
 ALTER TABLE public.waivers RENAME COLUMN po TO priority_order;
+
+-- PL/pgSQL repair. ALTER TABLE ... RENAME COLUMN rewrites the parsed trees
+-- behind views, indexes and constraints, but a function body is stored as
+-- TEXT: it keeps compiling after the rename and throws only when called. This
+-- trigger fires BEFORE INSERT OR UPDATE on league_formats and reads NEW.sqb,
+-- which this file renames to starter_slots_qb, so without the replacement
+-- below every write to league_formats fails with
+--   record "new" has no field "sqb"
+-- Caught by the test suite against the candidate schema, not by any grep of
+-- the code tree -- the stale reference lives in the database, not in a file.
+--
+-- Only this one function needs repair. All 13 public PL/pgSQL bodies were
+-- checked against the full old-name set: cmv_derive_format_category is the
+-- only other hit and its `sqb` is an input PARAMETER, not a column reference.
+-- It is deliberately left alone -- CREATE OR REPLACE cannot rename an input
+-- parameter, and the parameter is a local identifier that no rename touches.
+CREATE OR REPLACE FUNCTION public.cmv_classify_league_format()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  rec_val numeric;
+BEGIN
+  SELECT receptions INTO rec_val FROM league_scoring_formats WHERE id = NEW.scoring_format_id;
+  NEW.format_category := cmv_derive_format_category(NEW.starter_slots_qb, NEW.sqbrbwrte, rec_val);
+  RETURN NEW;
+END;
+$function$;

@@ -12,18 +12,18 @@ const expect = chai.expect
 // sits in QB's eligible-slot list and accepts RB, WR and TE as well.
 const two_team_league = {
   num_teams: 2,
-  sqb: 1,
-  srb: 1,
-  swr: 1,
-  ste: 1,
-  swrte: 0,
-  srbwr: 0,
+  starter_slots_qb: 1,
+  starter_slots_rb: 1,
+  starter_slots_wr: 1,
+  starter_slots_te: 1,
+  starter_slots_wr_te_flex: 0,
+  starter_slots_rb_wr_flex: 0,
   srbwrte: 0,
   sqbrbwrte: 1,
-  sk: 0,
-  sdst: 0,
-  bench: 2,
-  ps: 0,
+  starter_slots_k: 0,
+  starter_slots_dst: 0,
+  bench_slot_count: 2,
+  practice_squad_slot_count: 0,
   ir: 0
 }
 

@@ -211,7 +211,7 @@ const calculate_historical_hit_rates = async ({
       'esbid',
       player_gamelogs.map((g) => g.esbid)
     )
-    .where('qtr', 1)
+    .where('quarter', 1)
     .whereNot('play_type', 'NOPL')
 
   // Process first quarter stats into lookup
@@ -265,7 +265,7 @@ const calculate_historical_hit_rates = async ({
       'esbid',
       player_gamelogs.map((g) => g.esbid)
     )
-    .whereIn('qtr', [1, 2])
+    .whereIn('quarter', [1, 2])
     .whereNot('play_type', 'NOPL')
 
   // Process first half stats into lookup

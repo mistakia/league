@@ -136,7 +136,7 @@ const router = express.Router()
  *                   teams:
  *                     - uid: 13
  *                       name: 'Dynasty Warriors'
- *                       abbrv: 'DW'
+ *                       abbreviation: 'DW'
  *                       lid: 2
  *                       year: 2024
  *                   leagues:

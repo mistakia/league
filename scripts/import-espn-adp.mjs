@@ -75,9 +75,9 @@ const import_espn_adp = async ({
       matched_espn_ids.add(Number(source_player.espn_id))
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.primary_position,
+        player_position: player_row.primary_position,
         season_year: year,
-        adp: source_player.average_draft_position,
+        average_draft_position: source_player.average_draft_position,
         min_pick: null,
         max_pick: null,
         std_dev: null,
@@ -131,9 +131,9 @@ const import_espn_adp = async ({
       matched_espn_ids.add(Number(source_player.espn_id))
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.primary_position,
+        player_position: player_row.primary_position,
         season_year: year,
-        adp: source_player.average_draft_position,
+        average_draft_position: source_player.average_draft_position,
         min_pick: null,
         max_pick: null,
         std_dev: null,

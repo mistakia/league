@@ -59,7 +59,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: 2,
-      bid: 30,
+      bid_amount: 30,
       original_team_id,
       announced_at: processed - 3600,
       processed,
@@ -71,7 +71,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: 3,
-      bid: 12,
+      bid_amount: 12,
       original_team_id,
       processed,
       succ: false,
@@ -100,11 +100,11 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
     expect(auction.bids.length).to.equal(2)
 
     // sorted high to low, so the winner leads
-    expect(auction.bids[0].bid).to.equal(30)
+    expect(auction.bids[0].bid_amount).to.equal(30)
     expect(auction.bids[0].outcome).to.equal(
       restricted_free_agency_bid_outcomes.WON
     )
-    expect(auction.bids[1].bid).to.equal(12)
+    expect(auction.bids[1].bid_amount).to.equal(12)
     expect(auction.bids[1].outcome).to.equal(
       restricted_free_agency_bid_outcomes.OUTBID
     )
@@ -122,7 +122,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: original_team_id,
-      bid: 40,
+      bid_amount: 40,
       original_team_id,
       announced_at: processed - 3600,
       processed,
@@ -134,7 +134,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: 4,
-      bid: 38,
+      bid_amount: 38,
       original_team_id,
       processed,
       succ: false,
@@ -153,7 +153,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
 
     res.should.have.status(200)
     const losing_bid = res.body[0].bids.find((b) => b.tid === 4)
-    expect(losing_bid.bid).to.equal(38)
+    expect(losing_bid.bid_amount).to.equal(38)
     expect(losing_bid.outcome).to.equal(
       restricted_free_agency_bid_outcomes.MATCHED
     )
@@ -184,7 +184,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: 2,
-      bid: 30,
+      bid_amount: 30,
       original_team_id,
       announced_at: processed - 3600,
       processed,
@@ -197,7 +197,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: original_team_id,
-      bid: 20,
+      bid_amount: 20,
       original_team_id,
       processed,
       succ: false,
@@ -208,7 +208,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: 3,
-      bid: 12,
+      bid_amount: 12,
       original_team_id,
       processed,
       succ: false,
@@ -268,7 +268,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: 2,
-      bid: 25,
+      bid_amount: 25,
       original_team_id: 1,
       announced_at: Math.round(Date.now() / 1000) - 3600
     })
@@ -290,7 +290,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: original_team_id,
-      bid: 20,
+      bid_amount: 20,
       original_team_id,
       announced_at: processed - 3600,
       processed,
@@ -302,7 +302,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: 5,
-      bid: 18,
+      bid_amount: 18,
       original_team_id,
       cancelled: processed - 100
     })
@@ -331,7 +331,7 @@ describe('API /leagues/:leagueId/restricted-free-agency', function () {
       pid: player.pid,
       lid: league_id,
       tid: original_team_id,
-      bid: 20,
+      bid_amount: 20,
       original_team_id,
       processed,
       succ: true,

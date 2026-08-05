@@ -188,11 +188,14 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
         (row) => row.type === transaction_types.ROSTER_ADD
       )
       add_row.should.exist
-      add_row.should.have.property('value', waiver_with_bid.settings.waiver_bid)
+      add_row.should.have.property(
+        'player_salary',
+        waiver_with_bid.settings.waiver_bid
+      )
 
       for (const row of mapped) {
         if (row.type === transaction_types.ROSTER_RELEASE) {
-          row.should.not.have.property('value')
+          row.should.not.have.property('player_salary')
         }
       }
     })

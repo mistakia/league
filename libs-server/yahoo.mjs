@@ -7,7 +7,7 @@ const log = debug('yahoo')
 
 export const get_yahoo_config = async () => {
   const config_row = await db('config').where('key', 'yahoo_config').first()
-  return config_row.value
+  return config_row.config_value
 }
 
 export const get_yahoo_adp = async () => {

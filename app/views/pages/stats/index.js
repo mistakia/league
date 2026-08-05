@@ -46,9 +46,9 @@ const map_state_to_props = createSelector(
     })
 
     const careerlog_fields = [
-      'wins',
-      'losses',
-      'ties',
+      'regular_season_wins',
+      'regular_season_losses',
+      'regular_season_ties',
       'all_play_wins',
       'all_play_losses',
       'all_play_ties',
@@ -86,7 +86,7 @@ const map_state_to_props = createSelector(
 
     const sorted_league_user_historical_ranks = Object.values(
       league_user_historical_ranks
-    ).sort((a, b) => b.wins - a.wins)
+    ).sort((a, b) => b.regular_season_wins - a.regular_season_wins)
 
     const careerlog_percentiles = calculatePercentiles({
       items: sorted_league_user_historical_ranks,

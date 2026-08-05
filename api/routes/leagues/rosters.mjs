@@ -24,7 +24,7 @@ const router = express.Router({ mergeParams: true })
  *       type: object
  *       description: Player on a team roster
  *       properties:
- *         rid:
+ *         roster_id:
  *           type: integer
  *           description: Roster ID
  *           example: 1234
@@ -32,7 +32,7 @@ const router = express.Router({ mergeParams: true })
  *           type: string
  *           description: Player ID
  *           example: "4017"
- *         pos:
+ *         player_position:
  *           type: string
  *           description: Player position
  *           example: "RB"
@@ -214,11 +214,11 @@ const router = express.Router({ mergeParams: true })
  *                   teams:
  *                     - uid: 13
  *                       name: "Dynasty Warriors"
- *                       cap: 200
+ *                       salary_cap: 200
  *                       players:
- *                         - rid: 1234
+ *                         - roster_id: 1234
  *                           pid: "4017"
- *                           pos: "RB"
+ *                           player_position: "RB"
  *                           slot: 0
  *                           extensions: 0
  *                           tid: 13
@@ -322,9 +322,9 @@ router.get('/?', async (req, res) => {
  *               player_added:
  *                 summary: Successfully added player
  *                 value:
- *                   rid: 1234
+ *                   roster_id: 1234
  *                   pid: "4017"
- *                   pos: "RB"
+ *                   player_position: "RB"
  *                   slot: 20
  *                   extensions: 0
  *                   tid: 13
@@ -338,7 +338,7 @@ router.get('/?', async (req, res) => {
  *                     pid: "4017"
  *                     type: 1
  *                     userid: 5
- *                     value: 15
+ *                     player_salary: 15
  *                     week: 8
  *                     year: 2024
  *                     timestamp: 1698765432
@@ -455,7 +455,7 @@ router.post('/?', async (req, res) => {
       lid: leagueId,
       pid,
       type: transaction_types.ROSTER_ADD,
-      value: val,
+      player_salary: val,
       week: current_season.week,
       year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
@@ -464,9 +464,9 @@ router.post('/?', async (req, res) => {
 
     // add player to roster
     const rosterInsert = {
-      rid: roster.uid,
+      roster_id: roster.uid,
       pid,
-      pos: player_row.primary_position,
+      player_position: player_row.primary_position,
       slot: roster_slot_types.BENCH,
       extensions: 0,
       tid: teamId,
@@ -681,7 +681,7 @@ router.put('/?', async (req, res) => {
         lid: leagueId
       })
       .update({
-        value: val
+        player_salary: val
       })
 
     res.send({ value: val })
@@ -865,7 +865,7 @@ router.delete('/?', async (req, res) => {
 
     const rosterRes = await db('rosters_players')
       .where({
-        rid: roster.uid,
+        roster_id: roster.uid,
         pid
       })
       .del()

@@ -259,7 +259,7 @@ describe('API /waivers - update', function () {
         .where({ uid: res.body.uid })
         .limit(1)
       expect(waivers.length).to.equal(1)
-      expect(waivers[0].bid).to.equal(bid)
+      expect(waivers[0].bid_amount).to.equal(bid)
     })
 
     it('update release', async () => {

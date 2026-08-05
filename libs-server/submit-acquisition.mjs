@@ -64,7 +64,7 @@ export default async function ({
     .limit(1)
   const team = teams[0]
 
-  if (team.faab - bid < 0) {
+  if (team.faab_balance - bid < 0) {
     throw new Error('exceeds available free agent auction budget')
   }
 
@@ -211,9 +211,9 @@ export default async function ({
 
   // add player to roster
   await db('rosters_players').insert({
-    rid: roster.uid,
+    roster_id: roster.uid,
     pid,
-    pos: player_row.primary_position,
+    player_position: player_row.primary_position,
     slot,
     extensions: 0,
     tid: teamId,
@@ -229,7 +229,7 @@ export default async function ({
     lid: leagueId,
     pid,
     type,
-    value: bid,
+    player_salary: bid,
     week: current_season.week,
     year: current_season.year,
     waiverid: waiverId,
@@ -246,7 +246,7 @@ export default async function ({
   })
 
   // send notification
-  let message = `${team.name} (${team.abbrv}) has signed free agent ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) for $${bid}.`
+  let message = `${team.name} (${team.abbreviation}) has signed free agent ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) for $${bid}.`
   if (releasePlayers.length) {
     for (const release_pid of releasePlayers) {
       const release_player_row = player_rows.find((p) => p.pid === release_pid)

@@ -58,10 +58,10 @@ export default {
     main_where: () => 'nfl_plays.defense_nfl_team'
   },
   play_down: {
-    column_name: 'dwn',
+    column_name: 'down_number',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.dwn as play_down'],
-    main_where: () => 'nfl_plays.dwn'
+    main_select: () => ['nfl_plays.down_number as play_down'],
+    main_where: () => 'nfl_plays.down_number'
   },
   play_yards_to_go: {
     column_name: 'yards_to_go',
@@ -81,10 +81,10 @@ export default {
     use_having: true
   },
   play_quarter: {
-    column_name: 'qtr',
+    column_name: 'quarter',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.qtr as play_quarter'],
-    main_where: () => 'nfl_plays.qtr'
+    main_select: () => ['nfl_plays.quarter as play_quarter'],
+    main_where: () => 'nfl_plays.quarter'
   },
   play_game_clock: {
     column_name: 'game_clock_start',

@@ -19,8 +19,8 @@ export default function ScoreboardTeam({
 }) {
   const { matchup } = scoreboard
   const is_home = useMemo(
-    () => team.uid === matchup.hid,
-    [team.uid, matchup.hid]
+    () => team.uid === matchup.home_team_id,
+    [team.uid, matchup.home_team_id]
   )
   const final_projection = useMemo(
     () => (is_home ? matchup.home_projection : matchup.away_projection),
@@ -45,23 +45,25 @@ export default function ScoreboardTeam({
 
   const rows = useMemo(() => {
     let result = []
+    // Each league field is paired with its roster_slot_types key directly --
+    // the field names no longer share the single-letter-prefix shape
+    // (`s` + slot key) that let this derive slot_key from the field name.
     const league_slots = [
-      'sqb',
-      'srb',
-      'swr',
-      'srbwr',
-      'srbwrte',
-      'sqbrbwrte',
-      'swrte',
-      'ste',
-      'sk',
-      'sdst'
+      { field: 'starter_slots_qb', slot_key: 'QB' },
+      { field: 'starter_slots_rb', slot_key: 'RB' },
+      { field: 'starter_slots_wr', slot_key: 'WR' },
+      { field: 'starter_slots_rb_wr_flex', slot_key: 'RBWR' },
+      { field: 'srbwrte', slot_key: 'RBWRTE' },
+      { field: 'sqbrbwrte', slot_key: 'QBRBWRTE' },
+      { field: 'starter_slots_wr_te_flex', slot_key: 'WRTE' },
+      { field: 'starter_slots_te', slot_key: 'TE' },
+      { field: 'starter_slots_k', slot_key: 'K' },
+      { field: 'starter_slots_dst', slot_key: 'DST' }
     ]
-    for (const slot of league_slots) {
-      if (league[slot]) {
-        const slot_key = slot.substring(1).toUpperCase()
+    for (const { field, slot_key } of league_slots) {
+      if (league[field]) {
         const slot_id = roster_slot_types[slot_key]
-        result = result.concat(generateRows(slot_id, league[slot]))
+        result = result.concat(generateRows(slot_id, league[field]))
       }
     }
     return result

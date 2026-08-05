@@ -50,9 +50,9 @@ const calculate_league_careerlogs = async ({ lid }) => {
   const calculate_careerlog = async ({ league_team_seasonlogs }) => {
     const careerlog = {
       lid,
-      wins: 0,
-      losses: 0,
-      ties: 0,
+      regular_season_wins: 0,
+      regular_season_losses: 0,
+      regular_season_ties: 0,
       all_play_wins: 0,
       all_play_losses: 0,
       all_play_ties: 0,
@@ -92,9 +92,10 @@ const calculate_league_careerlogs = async ({ lid }) => {
     }
 
     for (const league_team_seasonlog of league_team_seasonlogs) {
-      careerlog.wins += league_team_seasonlog.wins
-      careerlog.losses += league_team_seasonlog.losses
-      careerlog.ties += league_team_seasonlog.ties
+      careerlog.regular_season_wins += league_team_seasonlog.regular_season_wins
+      careerlog.regular_season_losses +=
+        league_team_seasonlog.regular_season_losses
+      careerlog.regular_season_ties += league_team_seasonlog.regular_season_ties
       careerlog.all_play_wins += league_team_seasonlog.all_play_wins
       careerlog.all_play_losses += league_team_seasonlog.all_play_losses
       careerlog.all_play_ties += league_team_seasonlog.all_play_ties
@@ -159,10 +160,10 @@ const calculate_league_careerlogs = async ({ lid }) => {
         league_team_seasonlog.regular_season_finish <= 2 ? 1 : 0
       careerlog.best_season_win_pct = Math.max(
         careerlog.best_season_win_pct,
-        league_team_seasonlog.wins /
-          (league_team_seasonlog.wins +
-            league_team_seasonlog.losses +
-            league_team_seasonlog.ties)
+        league_team_seasonlog.regular_season_wins /
+          (league_team_seasonlog.regular_season_wins +
+            league_team_seasonlog.regular_season_losses +
+            league_team_seasonlog.regular_season_ties)
       )
       careerlog.best_season_all_play_pct = Math.max(
         careerlog.best_season_all_play_pct,

@@ -275,7 +275,7 @@ const get_keeptradecut_config = async () => {
   const config_row = await db('config')
     .where('key', 'keeptradecut_config')
     .first()
-  return config_row.value
+  return config_row.config_value
 }
 
 // Value staleness: cron runs daily and the daily branch always writes

@@ -18,8 +18,8 @@ function get_pick_label({ pick, teams }) {
     label_string += ` #${pick.pick}`
   }
 
-  const team = teams.get(pick.otid, new Team())
-  label_string += ` (${team.abbrv})`
+  const team = teams.get(pick.original_team_id, new Team())
+  label_string += ` (${team.abbreviation})`
 
   return label_string
 }

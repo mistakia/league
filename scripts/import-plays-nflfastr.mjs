@@ -631,8 +631,8 @@ const format_probability_data = (play) => {
     two_conv_prob: format_number(play.two_conv_prob),
     xpass_prob: format_number(play.xpass),
     pass_oe: format_number(play.pass_oe),
-    cp: format_number(play.cp),
-    cpoe: format_number(play.cpoe)
+    completion_probability: format_number(play.cp),
+    completion_percentage_over_expected: format_number(play.cpoe)
   }
 }
 

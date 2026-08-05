@@ -90,9 +90,9 @@ const create_adp_entries = ({ player_row, adp, format_id_by_type }) => {
     ({ adp_key }) => adp[adp_key] != null && adp[adp_key] < 999
   ).map(({ type, adp_key }) => ({
     pid: player_row.pid,
-    pos: player_row.primary_position,
+    player_position: player_row.primary_position,
     season_year: current_season.year,
-    adp: adp[adp_key],
+    average_draft_position: adp[adp_key],
     min_pick: null,
     max_pick: null,
     std_dev: null,

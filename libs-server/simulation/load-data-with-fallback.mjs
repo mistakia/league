@@ -167,7 +167,7 @@ export async function load_bench_players_with_fallback({
     .select(
       'rosters_players.pid',
       'rosters_players.slot',
-      'scoring_format_player_projection_points.total as projection'
+      'scoring_format_player_projection_points.projected_points_total as projection'
     )
 
   // Filter out starters
@@ -190,7 +190,7 @@ export async function load_bench_players_with_fallback({
           year,
           scoring_format_id
         })
-        .select('pid', 'total as projection')
+        .select('pid', 'projected_points_total as projection')
 
       const fallback_map = new Map()
       for (const row of fallback_projections) {
@@ -286,7 +286,11 @@ export async function load_bench_player_ids({
     })
     .whereNotIn('rosters_players.pid', starter_pids)
     .whereIn('rosters_players.slot', slots_to_include)
-    .where('scoring_format_player_projection_points.total', '>', 0)
+    .where(
+      'scoring_format_player_projection_points.projected_points_total',
+      '>',
+      0
+    )
     .select('rosters_players.pid')
 
   log(`Found ${bench_result.length} bench players with valid projections`)

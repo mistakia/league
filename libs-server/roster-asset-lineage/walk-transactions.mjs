@@ -41,7 +41,7 @@ import {
 //   AUCTION_BID: non-state-changing, explicitly ignored.
 //
 // Pick chain-gap contract: a pick's owner sequence is walked forward from
-// `draft.otid` across its accepted trades, so it depends on trades_picks
+// `draft.original_team_id` across its accepted trades, so it depends on trades_picks
 // recording every hop. Where a hop is missing the chain reaches a trade whose
 // participants do not include the holder -- observed on league 1, where three
 // 2026 picks are traded by teams that never acquired them in any recorded
@@ -63,7 +63,7 @@ import {
 // team the chain lands on after the last accepted trade must equal `draft.tid`.
 // The identity-preserving way to restate draft order is to fix
 // `teams.draft_order` and re-run scripts/set-draft-pick-number.mjs, which
-// derives `pick`/`pick_str` from `draft.otid` keyed on `draft.uid`.
+// derives `pick`/`pick_str` from `draft.original_team_id` keyed on `draft.uid`.
 //   Unhandled flows (super-priority chains, decommission_reassignment,
 //   failed_poach_sanctuary, auto_cap_release, season_rollover for picks):
 //   accumulated as coverage_warnings; surfaced by the generator's row-count
@@ -707,7 +707,7 @@ const build_event_stream = async ({ lid }) => {
 
   // 2. Player transactions (excluding those that resolve via a trade).
   const transactions = await db('transactions')
-    .select('uid', 'tid', 'pid', 'type', 'timestamp', 'year', 'value')
+    .select('uid', 'tid', 'pid', 'type', 'timestamp', 'year', 'player_salary')
     .where('lid', lid)
     .whereNotNull('pid')
     .orderBy('timestamp', 'asc')
@@ -742,7 +742,7 @@ const build_event_stream = async ({ lid }) => {
         player_id: tran.pid,
         occurred_at: ts,
         year: tran.year,
-        value: tran.value,
+        value: tran.player_salary,
         transaction_id: tran.uid
       })
       continue
@@ -789,7 +789,7 @@ const build_event_stream = async ({ lid }) => {
         transaction_type: tran.type,
         occurred_at: ts,
         year: tran.year,
-        value: tran.value,
+        value: tran.player_salary,
         transaction_id: tran.uid
       })
     } else if (tran.type === transaction_types.RESTRICTED_FREE_AGENCY_TAG) {
@@ -804,7 +804,7 @@ const build_event_stream = async ({ lid }) => {
         transaction_type: tran.type,
         occurred_at: ts,
         year: tran.year,
-        value: tran.value,
+        value: tran.player_salary,
         transaction_id: tran.uid
       })
     } else {
@@ -831,7 +831,7 @@ const build_event_stream = async ({ lid }) => {
       'restricted_free_agency_nominations.original_team_id',
       'restricted_free_agency_bids.processed',
       'restricted_free_agency_bids.year',
-      'restricted_free_agency_bids.bid'
+      'restricted_free_agency_bids.bid_amount'
     )
     .where({ 'restricted_free_agency_bids.lid': lid, is_successful: true })
     .whereNotNull('restricted_free_agency_bids.processed')
@@ -844,7 +844,7 @@ const build_event_stream = async ({ lid }) => {
       player_id: r.pid,
       from_tid: r.original_team_id,
       to_tid: r.tid,
-      bid: r.bid,
+      bid: r.bid_amount,
       occurred_at: new Date(r.processed * 1000),
       year: r.year,
       transaction_id: cross_team_rfa_transaction_id_by_key.get(
@@ -871,11 +871,11 @@ const build_event_stream = async ({ lid }) => {
   const picks_meta = pickids.length
     ? await db('draft')
         .whereIn('uid', pickids)
-        .select('uid', 'round', 'year', 'otid', 'pick', 'tid')
+        .select('uid', 'round', 'year', 'original_team_id', 'pick', 'tid')
     : []
   const pick_meta_by_id = new Map(picks_meta.map((p) => [p.uid, p]))
   // Compute per-pick chronological from/to per trade by walking forward from
-  // the standings-allocated owner (`draft.otid`, which trade.mjs preserves --
+  // the standings-allocated owner (`draft.original_team_id`, which trade.mjs preserves --
   // only `draft.tid` is mutated by trades). For each successive trade
   // involving the pick, the next owner is the OTHER team in the trade
   // (propose_tid or accept_tid -- whichever is NOT the current holder). This
@@ -886,7 +886,7 @@ const build_event_stream = async ({ lid }) => {
   // (e.g. pick 3 traded 9->1 in 2020-07-25 but `tid=1` looked like a giver).
   const pick_leg_dir = new Map() // `${tradeid}__${pickid}` -> {from_tid, to_tid}
   // Picks whose chain is broken at its head: the endowment opens on this team
-  // instead of `draft.otid` so the first trade closes a holding the trade's own
+  // instead of `draft.original_team_id` so the first trade closes a holding the trade's own
   // participants own. See the chain-gap contract in this module's header.
   const endowment_holder_tid_by_pickid = new Map()
   const trade_by_id = new Map(trades.map((t) => [t.uid, t]))
@@ -908,7 +908,7 @@ const build_event_stream = async ({ lid }) => {
     tradeids.sort(
       (a, b) => trade_by_id.get(a).accepted - trade_by_id.get(b).accepted
     )
-    let current = meta.otid
+    let current = meta.original_team_id
     let leg_index = 0
     for (const tradeid of tradeids) {
       const trade = trade_by_id.get(tradeid)
@@ -1010,7 +1010,7 @@ const build_event_stream = async ({ lid }) => {
         pickid: tpi.pickid,
         pick_year: meta.year,
         pick_round: meta.round,
-        pick_original_owner_tid: meta.otid,
+        pick_original_owner_tid: meta.original_team_id,
         pick_draft_overall_position: meta.pick,
         from_tid: dir.from_tid,
         to_tid: dir.to_tid
@@ -1036,7 +1036,7 @@ const build_event_stream = async ({ lid }) => {
       'uid',
       'pid',
       'tid',
-      'otid',
+      'original_team_id',
       'round',
       'pick',
       'year',
@@ -1065,9 +1065,9 @@ const build_event_stream = async ({ lid }) => {
     if (earliest_trade && earliest_trade * 1000 < endow_date.getTime()) {
       endow_date = new Date(earliest_trade * 1000 - 60_000)
     }
-    // `draft.otid` is the standings-allocated owner. trade.mjs's accept
+    // `draft.original_team_id` is the standings-allocated owner. trade.mjs's accept
     // handler only mutates `draft.tid` (the eventual draft-time owner), so
-    // `draft.otid` persists through all trades and is the correct endowment
+    // `draft.original_team_id` persists through all trades and is the correct endowment
     // target. Trade legs are walked forward from this otid by the per-pick
     // chain logic above to produce accurate (from_tid, to_tid) pairs.
     events.push({
@@ -1077,11 +1077,12 @@ const build_event_stream = async ({ lid }) => {
       // `pick_original_owner_tid` stays `otid` -- the standings fact is
       // unchanged. Only the holder of the synthesized pre-trade window moves,
       // and only for a pick whose first trade does not include `otid`.
-      tid: endowment_holder_tid_by_pickid.get(pick.uid) ?? pick.otid,
+      tid:
+        endowment_holder_tid_by_pickid.get(pick.uid) ?? pick.original_team_id,
       pickid: pick.uid,
       pick_year: pick.year,
       pick_round: pick.round,
-      pick_original_owner_tid: pick.otid,
+      pick_original_owner_tid: pick.original_team_id,
       pick_draft_overall_position: pick.pick,
       occurred_at: endow_date
     })

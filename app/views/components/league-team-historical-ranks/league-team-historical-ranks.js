@@ -10,8 +10,8 @@ export default function LeagueTeamHistoricalRanks({ historical_ranks }) {
     <div className='league-team-historical-ranks'>
       <MetricCard
         label='Wins'
-        value={historical_ranks.wins}
-        rank={historical_ranks.wins_rank}
+        value={historical_ranks.regular_season_wins}
+        rank={historical_ranks.regular_season_wins_rank}
       />
       <MetricCard
         label='All Play Wins'

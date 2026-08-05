@@ -2,27 +2,27 @@ const get_eligible_slots = ({ pos, ps, bench, reserve_short_term, league }) => {
   let eligible = []
 
   if (pos) {
-    for (let i = 0; i < league.sqb; i++) {
+    for (let i = 0; i < league.starter_slots_qb; i++) {
       eligible.push('QB')
     }
 
-    for (let i = 0; i < league.srb; i++) {
+    for (let i = 0; i < league.starter_slots_rb; i++) {
       eligible.push('RB')
     }
 
-    for (let i = 0; i < league.swr; i++) {
+    for (let i = 0; i < league.starter_slots_wr; i++) {
       eligible.push('WR')
     }
 
-    for (let i = 0; i < league.ste; i++) {
+    for (let i = 0; i < league.starter_slots_te; i++) {
       eligible.push('TE')
     }
 
-    for (let i = 0; i < league.swrte; i++) {
+    for (let i = 0; i < league.starter_slots_wr_te_flex; i++) {
       eligible.push('WRTE')
     }
 
-    for (let i = 0; i < league.srbwr; i++) {
+    for (let i = 0; i < league.starter_slots_rb_wr_flex; i++) {
       eligible.push('RBWR')
     }
 
@@ -34,11 +34,11 @@ const get_eligible_slots = ({ pos, ps, bench, reserve_short_term, league }) => {
       eligible.push('QBRBWRTE')
     }
 
-    for (let i = 0; i < league.sk; i++) {
+    for (let i = 0; i < league.starter_slots_k; i++) {
       eligible.push('K')
     }
 
-    for (let i = 0; i < league.sdst; i++) {
+    for (let i = 0; i < league.starter_slots_dst; i++) {
       eligible.push('DST')
     }
 
@@ -48,7 +48,7 @@ const get_eligible_slots = ({ pos, ps, bench, reserve_short_term, league }) => {
   }
 
   if (ps) {
-    for (let i = 0; i < league.ps; i++) {
+    for (let i = 0; i < league.practice_squad_slot_count; i++) {
       eligible.push('PS')
     }
   }
@@ -60,7 +60,7 @@ const get_eligible_slots = ({ pos, ps, bench, reserve_short_term, league }) => {
   }
 
   if (bench) {
-    for (let i = 0; i < league.bench; i++) {
+    for (let i = 0; i < league.bench_slot_count; i++) {
       eligible.push('BENCH')
     }
   }

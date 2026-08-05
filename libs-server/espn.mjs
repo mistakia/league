@@ -102,7 +102,7 @@ export const teamId = {
 
 export const get_espn_config = async () => {
   const config_row = await db('config').where('key', 'espn_config').first()
-  return config_row.value
+  return config_row.config_value
 }
 
 export const getPlayer = async ({ espn_id }) => {

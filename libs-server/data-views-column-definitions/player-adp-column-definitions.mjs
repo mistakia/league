@@ -102,7 +102,9 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
     .select(
       'player_adp_index.pid',
       'player_adp_index.season_year',
-      'player_adp_index.adp',
+      // renamed physical column aliased back to 'adp' so this CTE's own
+      // output (read downstream via column_name: 'adp') is unchanged.
+      'player_adp_index.average_draft_position as adp',
       'player_adp_index.min_pick',
       'player_adp_index.max_pick',
       'player_adp_index.std_dev',
@@ -124,7 +126,7 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
     // any source approaches 999 (observed max ~240), so this is a universal
     // guard. Excluding the row makes player_adp resolve to NULL (LEFT join
     // absence) for undrafted players, the correct "no meaningful ADP" value.
-    .where('player_adp_index.adp', '<', 999)
+    .where('player_adp_index.average_draft_position', '<', 999)
 
   query.with(cte_name, cte_query)
   query_context.registered_adp_ctes.add(cte_name)

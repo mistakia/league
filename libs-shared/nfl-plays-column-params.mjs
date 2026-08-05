@@ -65,7 +65,7 @@ export const nfl_games_params = {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.GAME]
   },
-  surf: {
+  playing_surface: {
     values: [
       'grass',
       'astroturf',
@@ -79,7 +79,7 @@ export const nfl_games_params = {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.GAME]
   },
-  wind: {
+  wind_speed_mph: {
     label: 'Wind',
     show_key_in_short: true,
     min: 0,
@@ -87,7 +87,7 @@ export const nfl_games_params = {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.WEATHER]
   },
-  temp: {
+  temperature_fahrenheit: {
     label: 'Temp',
     show_key_in_short: true,
     min: -30,
@@ -264,7 +264,7 @@ export default {
 
   ...nfl_games_params,
 
-  dwn: {
+  down_number: {
     values: nfl_downs,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION],
@@ -279,7 +279,7 @@ export default {
       }
     ]
   },
-  qtr: {
+  quarter: {
     values: nfl_quarters,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION],
@@ -392,7 +392,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
   // TODO data missing
-  // yfog: {
+  // yards_from_own_goal: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
 
@@ -513,7 +513,7 @@ export default {
       }
     ]
   },
-  pru: {
+  ngs_pass_rushers: {
     label: 'Pass Rushers (unblocked)',
     short_label: 'Unblk PR',
     show_key_in_short: true,
@@ -545,7 +545,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  route: {
+  charted_route: {
     values: [
       'SLANT',
       'SCREEN',
@@ -1049,6 +1049,10 @@ export default {
   },
 
   dot: {
+    // The PARAM key stays `dot` -- it is a user-facing API key that saved views
+    // persist, and renaming it would silently drop the filter on every view
+    // holding the old key. Only the physical column moved.
+    column_name: 'depth_of_target',
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1194,14 +1198,14 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
 
-  mbt: {
+  missed_or_broken_tackle: {
     label: 'Missed/Broken Tackles',
     show_key_in_short: true,
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
-  avsk: {
+  avoided_sacks: {
     label: 'Avoided Sacks',
     show_key_in_short: true,
     min: 0,
@@ -1349,7 +1353,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   // TODO
-  // ttsk: {
+  // time_to_sack: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
   time_to_pressure: {
@@ -1362,13 +1366,13 @@ export default {
   },
 
   // TODO
-  // back: {
+  // backfield_player_count: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
-  // xlm: {
+  // extra_men_on_line: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
-  db: {
+  defensive_back_count: {
     label: 'DBs in Box',
     show_key_in_short: true,
     min: 0,
@@ -1391,7 +1395,7 @@ export default {
     ],
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
-  boxdb: {
+  defensive_backs_in_box: {
     label: 'Box DBs',
     show_key_in_short: true,
     min: 0,
@@ -1423,17 +1427,17 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
-  oopd: {
+  out_of_pocket_details: {
     values: ['C', 'P', 'D', 'DR', 'BT', 'BL'],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
-  cov: {
+  coverage_on_target: {
     values: [0, 1, 2],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.COVERAGE]
   },
 
-  ep: {
+  expected_points: {
     label: 'EP',
     show_key_in_short: true,
     min: -4,
@@ -1582,7 +1586,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
 
-  wp: {
+  win_probability: {
     label: 'Win Prob',
     show_key_in_short: true,
     min: 0,
@@ -1601,7 +1605,7 @@ export default {
       }
     ]
   },
-  wpa: {
+  win_probability_added: {
     label: 'Win Prob Added',
     show_key_in_short: true,
     min: -1,
@@ -2082,7 +2086,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
 
-  cp: {
+  completion_probability: {
     label: 'Completion Prob',
     show_key_in_short: true,
     min: 0,
@@ -2091,7 +2095,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  cpoe: {
+  completion_percentage_over_expected: {
     label: 'CPOE',
     show_key_in_short: true,
     min: -99,

@@ -3,15 +3,15 @@ import { Record, List } from 'immutable'
 export const Matchup = new Record({
   uid: null,
   tids: new List(),
-  hid: null,
-  aid: null,
+  home_team_id: null,
+  away_team_id: null,
   type: null,
   year: null,
   week: null,
   lid: null,
 
-  ap: null,
-  hp: null,
+  away_points: null,
+  home_points: null,
 
   away_projection: null,
   home_projection: null,
@@ -24,15 +24,15 @@ export const Matchup = new Record({
 export function create_matchup({
   uid,
   tids,
-  hid,
-  aid,
+  home_team_id,
+  away_team_id,
   type,
   year,
   week,
   lid,
 
-  ap,
-  hp,
+  away_points,
+  home_points,
 
   away_projection,
   home_projection,
@@ -44,14 +44,14 @@ export function create_matchup({
   return new Matchup({
     uid,
     tids: new List(tids),
-    hid,
-    aid,
+    home_team_id,
+    away_team_id,
     type,
     year,
     week,
     lid,
-    ap,
-    hp,
+    away_points,
+    home_points,
     away_projection,
     home_projection,
 

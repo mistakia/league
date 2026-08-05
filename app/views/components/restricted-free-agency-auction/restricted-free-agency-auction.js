@@ -70,7 +70,7 @@ export default function RestrictedFreeAgencyAuction({ auction }) {
           )}
         </div>
         <div className='restricted-free-agency-auction__bid-amount'>
-          ${bid.get('bid')}
+          ${bid.get('bid_amount')}
         </div>
         <div className='restricted-free-agency-auction__bid-outcome'>
           <BidOutcome
@@ -134,7 +134,7 @@ export default function RestrictedFreeAgencyAuction({ auction }) {
               </span>
               <TeamName tid={winning_bid.get('tid')} year={season_year} />
               <span className='restricted-free-agency-auction__meta-amount'>
-                ${winning_bid.get('bid')}
+                ${winning_bid.get('bid_amount')}
               </span>
             </div>
           ) : (

@@ -68,7 +68,7 @@ export default function validate_trade_roster_slots({
         slot: assigned_slot,
         pid,
         pos: player_row.primary_position,
-        value: player_row.value,
+        value: player_row.player_salary,
         extensions: player_extensions[pid] || 0
       })
     }

@@ -51,9 +51,9 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         userid: 1,
         lid,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE
       })
 
@@ -107,7 +107,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         type: transaction_types.PRACTICE_ADD
       })
 
-      expect(team1.faab).to.equal(200)
+      expect(team1.faab_balance).to.equal(200)
     })
 
     it('rookie post draft multiple waivers - offseason', async () => {
@@ -147,9 +147,9 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         userid: 1,
         lid,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE
       })
 
@@ -186,7 +186,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       expect(team3.waiver_order).to.equal(3)
       expect(team4.waiver_order).to.equal(4)
 
-      expect(team1.faab).to.equal(200)
+      expect(team1.faab_balance).to.equal(200)
     })
   })
 

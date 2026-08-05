@@ -11,7 +11,7 @@ export default async function (waiver_id) {
       'waivers.*',
       'teams.*',
       'waivers.uid as wid',
-      'waivers.bid',
+      'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
       'waivers.userid',

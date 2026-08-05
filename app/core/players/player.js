@@ -16,13 +16,13 @@ export function createPlayer({
   transactions,
   stats,
   betting_markets,
-  m,
-  tu,
-  w,
-  th,
-  f,
-  s,
-  su,
+  monday_practice_status,
+  tuesday_practice_status,
+  wednesday_practice_status,
+  thursday_practice_status,
+  friday_practice_status,
+  saturday_practice_status,
+  sunday_practice_status,
   source_status,
   game_designation,
   roster_status,
@@ -37,22 +37,22 @@ export function createPlayer({
 
   // Handle practice day columns from get-players query
   if (
-    m !== undefined ||
-    tu !== undefined ||
-    w !== undefined ||
-    th !== undefined ||
-    f !== undefined ||
-    s !== undefined ||
-    su !== undefined
+    monday_practice_status !== undefined ||
+    tuesday_practice_status !== undefined ||
+    wednesday_practice_status !== undefined ||
+    thursday_practice_status !== undefined ||
+    friday_practice_status !== undefined ||
+    saturday_practice_status !== undefined ||
+    sunday_practice_status !== undefined
   ) {
     params.practice_week = new Map({
-      m,
-      tu,
-      w,
-      th,
-      f,
-      s,
-      su,
+      monday_practice_status,
+      tuesday_practice_status,
+      wednesday_practice_status,
+      thursday_practice_status,
+      friday_practice_status,
+      saturday_practice_status,
+      sunday_practice_status,
       source_status,
       // Use practice table values for practice_week sub-map if available,
       // otherwise fall back to top-level values

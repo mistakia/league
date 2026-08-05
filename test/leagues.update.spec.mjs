@@ -47,7 +47,7 @@ describe('API /leagues - update', function () {
       expect(league.name).to.equal(value)
     })
 
-    it('update sqb', async () => {
+    it('update starter_slots_qb', async () => {
       const lid = 1
       const value = 2
       const res = await chai_request
@@ -55,7 +55,7 @@ describe('API /leagues - update', function () {
         .put(`/api/leagues/${lid}`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          field: 'sqb',
+          field: 'starter_slots_qb',
           value
         })
 
@@ -67,7 +67,7 @@ describe('API /leagues - update', function () {
       res.body.value.should.equal(value)
       const league = await getLeague({ lid })
 
-      expect(league.sqb).to.equal(value)
+      expect(league.starter_slots_qb).to.equal(value)
     })
 
     it('update rec', async () => {
@@ -152,7 +152,7 @@ describe('API /leagues - update', function () {
         .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          field: 'sqb',
+          field: 'starter_slots_qb',
           value: 'x'
         })
 
@@ -165,7 +165,7 @@ describe('API /leagues - update', function () {
         .put('/api/leagues/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          field: 'sqb',
+          field: 'starter_slots_qb',
           value: -1
         })
 

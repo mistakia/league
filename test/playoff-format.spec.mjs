@@ -16,7 +16,7 @@ const expect = chai.expect
 const make_teams = (num_teams, num_divisions) =>
   Array.from({ length: num_teams }, (unused, i) => ({
     uid: i + 1,
-    div: (i % num_divisions) + 1
+    division: (i % num_divisions) + 1
   }))
 
 const opponent_counts = (schedule, uid) => {
@@ -32,12 +32,12 @@ const opponent_counts = (schedule, uid) => {
 
 describe('playoff format and division schedule', function () {
   describe('get_playoff_seeding', function () {
-    const team = (tid, div, overrides) => ({
+    const team = (tid, division, overrides) => ({
       tid,
-      div,
-      wins: 0,
-      losses: 0,
-      ties: 0,
+      division,
+      regular_season_wins: 0,
+      regular_season_losses: 0,
+      regular_season_ties: 0,
       all_play_wins: 0,
       all_play_losses: 0,
       all_play_ties: 0,
@@ -48,16 +48,19 @@ describe('playoff format and division schedule', function () {
     // Three teams per division across four divisions, with tid ascending in
     // strength so the expected seed order is simply 1..12.
     const twelve = Array.from({ length: 12 }, (unused, i) =>
-      team(i + 1, (i % 4) + 1, { wins: 12 - i, losses: i })
+      team(i + 1, (i % 4) + 1, {
+        regular_season_wins: 12 - i,
+        regular_season_losses: i
+      })
     )
 
     // All-play records that run OPPOSITE to head-to-head: tid 12 is the best
     // all-play team and tid 1 the worst. Any test whose expectation differs
     // between the two ladders is therefore unambiguous about which one ran.
     const all_play_inverted = twelve.map((t) =>
-      team(t.tid, t.div, {
-        wins: t.wins,
-        losses: t.losses,
+      team(t.tid, t.division, {
+        regular_season_wins: t.regular_season_wins,
+        regular_season_losses: t.regular_season_losses,
         all_play_wins: 10 * t.tid,
         all_play_losses: 126 - 10 * t.tid
       })
@@ -104,8 +107,8 @@ describe('playoff format and division schedule', function () {
     it('selects byes on all play across the whole league', function () {
       const ten = Array.from({ length: 10 }, (unused, i) =>
         team(i + 1, 1, {
-          wins: 12 - i,
-          losses: i,
+          regular_season_wins: 12 - i,
+          regular_season_losses: i,
           all_play_wins: 10 * (i + 1),
           all_play_losses: 110 - 10 * (i + 1)
         })
@@ -169,21 +172,29 @@ describe('playoff format and division schedule', function () {
       // points for -- so tid 1 wins the division and takes the bye.
       const teams = [
         team(1, 1, {
-          wins: 9,
-          losses: 5,
+          regular_season_wins: 9,
+          regular_season_losses: 5,
           points_for: 100,
           all_play_wins: 116,
           all_play_losses: 10
         }),
         team(2, 1, {
-          wins: 9,
-          losses: 5,
+          regular_season_wins: 9,
+          regular_season_losses: 5,
           points_for: 900,
           all_play_wins: 10,
           all_play_losses: 116
         }),
-        team(3, 2, { wins: 4, losses: 10, points_for: 50 }),
-        team(4, 2, { wins: 3, losses: 11, points_for: 40 })
+        team(3, 2, {
+          regular_season_wins: 4,
+          regular_season_losses: 10,
+          points_for: 50
+        }),
+        team(4, 2, {
+          regular_season_wins: 3,
+          regular_season_losses: 11,
+          points_for: 40
+        })
       ]
 
       const result = get_playoff_seeding({
@@ -201,9 +212,9 @@ describe('playoff format and division schedule', function () {
     // byes, and the last two places at large on points for.
     it('fills at-large berths on points for', function () {
       const teams = all_play_inverted.map((t) =>
-        team(t.tid, t.div, {
-          wins: t.wins,
-          losses: t.losses,
+        team(t.tid, t.division, {
+          regular_season_wins: t.regular_season_wins,
+          regular_season_losses: t.regular_season_losses,
           all_play_wins: t.all_play_wins,
           all_play_losses: t.all_play_losses,
           // tids 11 and 12 have the worst records in the league and the most
@@ -234,8 +245,8 @@ describe('playoff format and division schedule', function () {
     it('leaves the at-large ladder off the seed order', function () {
       const teams = all_play_inverted.map((t) =>
         team(t.tid, 1, {
-          wins: t.wins,
-          losses: t.losses,
+          regular_season_wins: t.regular_season_wins,
+          regular_season_losses: t.regular_season_losses,
           points_for: t.tid >= 11 ? 2000 : 100
         })
       )
@@ -287,7 +298,10 @@ describe('playoff format and division schedule', function () {
 
     it('throws when the division winner pool cannot fill the byes', function () {
       const single_division = Array.from({ length: 10 }, (unused, i) =>
-        team(i + 1, 1, { wins: 12 - i, losses: i })
+        team(i + 1, 1, {
+          regular_season_wins: 12 - i,
+          regular_season_losses: i
+        })
       )
 
       expect(() =>
@@ -302,12 +316,12 @@ describe('playoff format and division schedule', function () {
 
     it('guarantees a losing division winner a berth when configured to', function () {
       const teams = [
-        team(1, 1, { wins: 12, losses: 2 }),
-        team(2, 1, { wins: 11, losses: 3 }),
-        team(3, 1, { wins: 10, losses: 4 }),
-        team(4, 2, { wins: 4, losses: 10 }),
-        team(5, 2, { wins: 3, losses: 11 }),
-        team(6, 2, { wins: 2, losses: 12 })
+        team(1, 1, { regular_season_wins: 12, regular_season_losses: 2 }),
+        team(2, 1, { regular_season_wins: 11, regular_season_losses: 3 }),
+        team(3, 1, { regular_season_wins: 10, regular_season_losses: 4 }),
+        team(4, 2, { regular_season_wins: 4, regular_season_losses: 10 }),
+        team(5, 2, { regular_season_wins: 3, regular_season_losses: 11 }),
+        team(6, 2, { regular_season_wins: 2, regular_season_losses: 12 })
       ]
 
       const without = get_playoff_seeding({
@@ -329,12 +343,12 @@ describe('playoff format and division schedule', function () {
 
     it('guarantees a berth without promoting the seed', function () {
       const teams = [
-        team(1, 1, { wins: 12, losses: 2 }),
-        team(2, 1, { wins: 11, losses: 3 }),
-        team(3, 1, { wins: 10, losses: 4 }),
-        team(4, 1, { wins: 9, losses: 5 }),
-        team(5, 2, { wins: 4, losses: 10 }),
-        team(6, 2, { wins: 3, losses: 11 })
+        team(1, 1, { regular_season_wins: 12, regular_season_losses: 2 }),
+        team(2, 1, { regular_season_wins: 11, regular_season_losses: 3 }),
+        team(3, 1, { regular_season_wins: 10, regular_season_losses: 4 }),
+        team(4, 1, { regular_season_wins: 9, regular_season_losses: 5 }),
+        team(5, 2, { regular_season_wins: 4, regular_season_losses: 10 }),
+        team(6, 2, { regular_season_wins: 3, regular_season_losses: 11 })
       ]
 
       const result = get_playoff_seeding({
@@ -406,8 +420,16 @@ describe('playoff format and division schedule', function () {
     })
 
     it('orders on points for, ignoring record entirely', function () {
-      const higher = team({ points_for: 1500, wins: 2, losses: 12 })
-      const lower = team({ points_for: 1400, wins: 12, losses: 2 })
+      const higher = team({
+        points_for: 1500,
+        regular_season_wins: 2,
+        regular_season_losses: 12
+      })
+      const lower = team({
+        points_for: 1400,
+        regular_season_wins: 12,
+        regular_season_losses: 2
+      })
       expect(compare_at_large_berth(higher, lower)).to.be.below(0)
     })
 
@@ -475,9 +497,9 @@ describe('playoff format and division schedule', function () {
     // fixture that sets only all_play_wins gives every team 1.000 and the term
     // silently drops out.
     const team = (overrides) => ({
-      wins: 0,
-      losses: 0,
-      ties: 0,
+      regular_season_wins: 0,
+      regular_season_losses: 0,
+      regular_season_ties: 0,
       all_play_wins: 0,
       all_play_losses: 0,
       all_play_ties: 0,
@@ -487,14 +509,14 @@ describe('playoff format and division schedule', function () {
 
     it('orders on head-to-head record first', function () {
       const better = team({
-        wins: 9,
-        losses: 5,
+        regular_season_wins: 9,
+        regular_season_losses: 5,
         all_play_wins: 40,
         all_play_losses: 86
       })
       const worse = team({
-        wins: 8,
-        losses: 6,
+        regular_season_wins: 8,
+        regular_season_losses: 6,
         all_play_wins: 90,
         all_play_losses: 36
       })
@@ -503,15 +525,15 @@ describe('playoff format and division schedule', function () {
 
     it('breaks a record tie on all play before points for', function () {
       const a = team({
-        wins: 8,
-        losses: 6,
+        regular_season_wins: 8,
+        regular_season_losses: 6,
         all_play_wins: 70,
         all_play_losses: 56,
         points_for: 100
       })
       const b = team({
-        wins: 8,
-        losses: 6,
+        regular_season_wins: 8,
+        regular_season_losses: 6,
         all_play_wins: 60,
         all_play_losses: 66,
         points_for: 900
@@ -521,15 +543,15 @@ describe('playoff format and division schedule', function () {
 
     it('breaks a full record and all play tie on points for', function () {
       const a = team({
-        wins: 8,
-        losses: 6,
+        regular_season_wins: 8,
+        regular_season_losses: 6,
         all_play_wins: 70,
         all_play_losses: 56,
         points_for: 900
       })
       const b = team({
-        wins: 8,
-        losses: 6,
+        regular_season_wins: 8,
+        regular_season_losses: 6,
         all_play_wins: 70,
         all_play_losses: 56,
         points_for: 100
@@ -538,8 +560,16 @@ describe('playoff format and division schedule', function () {
     })
 
     it('does not consult division standing', function () {
-      const a = { ...team({ wins: 5, losses: 9 }), div: 1, division_finish: 1 }
-      const b = { ...team({ wins: 9, losses: 5 }), div: 2, division_finish: 3 }
+      const a = {
+        ...team({ regular_season_wins: 5, regular_season_losses: 9 }),
+        division: 1,
+        division_finish: 1
+      }
+      const b = {
+        ...team({ regular_season_wins: 9, regular_season_losses: 5 }),
+        division: 2,
+        division_finish: 3
+      }
       expect(compare_playoff_seed(a, b)).to.be.above(0)
     })
   })
@@ -590,7 +620,7 @@ describe('playoff format and division schedule', function () {
       for (const team of teams) {
         const counts = opponent_counts(schedule, team.uid)
         const division_opponents = teams.filter(
-          (t) => t.div === team.div && t.uid !== team.uid
+          (t) => t.division === team.division && t.uid !== team.uid
         )
         for (const opponent of division_opponents) {
           expect(counts[opponent.uid]).to.equal(2)

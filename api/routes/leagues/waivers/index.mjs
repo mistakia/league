@@ -255,9 +255,9 @@ router.get('/?', async (req, res) => {
  *                   userid: 1
  *                   lid: 2
  *                   pid: 'ALVI-KAMA-015215'
- *                   po: 9999
+ *                   priority_order: 9999
  *                   submitted: 1640995200
- *                   bid: 50
+ *                   bid_amount: 50
  *                   type: 1
  *                   super_priority: 0
  *                   release: ['JORD-LOVE-001990']
@@ -502,7 +502,7 @@ router.post('/?', async (req, res) => {
         .whereNull('cancelled')
 
       if (bid) {
-        claimsQuery.where('bid', bid)
+        claimsQuery.where('bid_amount', bid)
       }
 
       const claims = await claimsQuery
@@ -626,9 +626,9 @@ router.post('/?', async (req, res) => {
       userid: req.auth.userId,
       lid: leagueId,
       pid,
-      po: 9999,
+      priority_order: 9999,
       submitted: Math.round(Date.now() / 1000),
-      bid,
+      bid_amount: bid,
       type,
       super_priority: super_priority ? 1 : 0
     }
@@ -732,7 +732,7 @@ router.put('/order', async (req, res) => {
 
     const result = []
     for (const [index, waiverId] of waivers.entries()) {
-      await db('waivers').update('po', index).where({
+      await db('waivers').update('priority_order', index).where({
         uid: waiverId,
         tid,
         lid: leagueId
@@ -868,7 +868,7 @@ router.put('/:waiverId', async (req, res) => {
     const waiver = waivers[0]
 
     // if bid - make sure it is below available faab
-    if (bid > team.faab) {
+    if (bid > team.faab_balance) {
       return res.status(400).send({ error: 'bid exceeds available faab' })
     }
 
@@ -903,7 +903,7 @@ router.put('/:waiverId', async (req, res) => {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }
 
-    await db('waivers').update({ bid }).where({ uid: waiverId })
+    await db('waivers').update({ bid_amount: bid }).where({ uid: waiverId })
     if (release.length) {
       const releaseInserts = release.map((pid) => ({
         waiverid: waiverId,

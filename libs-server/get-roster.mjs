@@ -3,7 +3,7 @@ import { current_season, transaction_types, player_tag_types } from '#constants'
 import db from '#db'
 import { build_active_restricted_free_agency_bids_query } from './restricted-free-agency-bids-query.mjs'
 
-// A rostered player's salary is `transactions.value` -- `rosters_players` carries no
+// A rostered player's salary is `transactions.player_salary` -- `rosters_players` carries no
 // value column -- so the transaction is the only source of the salary that `Roster`
 // sums into `availableCap`. That makes this an INNER join by design, not a degraded
 // LEFT join: admitting a player with no team transaction would hand `Roster` an
@@ -18,7 +18,13 @@ import { build_active_restricted_free_agency_bids_query } from './restricted-fre
 // Both the team id and the as-of bound qualify which transactions may match rather
 // than filtering the result, so both belong in the ON clause. The ordering feeds the
 // `uniqBy` below, which keeps the newest surviving row per player.
-export const build_roster_players_query = ({ db, rid, tid, year, week }) =>
+export const build_roster_players_query = ({
+  db,
+  roster_id,
+  tid,
+  year,
+  week
+}) =>
   db('rosters_players')
     .join('transactions', function () {
       this.on('rosters_players.pid', '=', 'transactions.pid')
@@ -30,7 +36,21 @@ export const build_roster_players_query = ({ db, rid, tid, year, week }) =>
           ])
         )
     })
-    .where('rid', rid)
+    .where('roster_id', roster_id)
+    // See the note in get-league-rosters-from-database.mjs: `pos`/`rid` is the
+    // in-memory and wire vocabulary, player_position/roster_id are the physical
+    // columns, and the Roster constructor destructures the former. Translate
+    // here rather than renaming a non-column field across the SPA.
+    //
+    // `value` is likewise in-memory vocabulary: rosters_players carries no
+    // salary column at all, so the Roster constructor's `value` has to come
+    // from the joined transaction's player_salary (formerly `transactions.value`).
+    .select(
+      '*',
+      'player_position as pos',
+      'roster_id as rid',
+      'transactions.player_salary as value'
+    )
     .orderBy('transactions.timestamp', 'desc')
     .orderBy('transactions.uid', 'desc')
 
@@ -48,7 +68,7 @@ export default async function ({
 
   const players = await build_roster_players_query({
     db,
-    rid: roster_row.uid,
+    roster_id: roster_row.uid,
     tid,
     year: roster_row.year,
     week: roster_row.week
@@ -104,7 +124,7 @@ export default async function ({
           bid &&
           roster_player.tag === player_tag_types.RESTRICTED_FREE_AGENCY
         ) {
-          roster_player.bid = bid.bid
+          roster_player.bid = bid.bid_amount
           roster_player.restricted_free_agency_original_team =
             bid.original_team_id
 

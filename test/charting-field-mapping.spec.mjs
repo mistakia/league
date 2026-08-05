@@ -142,8 +142,8 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       }
 
       const result = map_charting_play_to_db_fields(source)
-      expect(result.qtr).to.equal(2)
-      expect(result.dwn).to.equal(3)
+      expect(result.quarter).to.equal(2)
+      expect(result.down_number).to.equal(3)
       expect(result.yards_to_go).to.equal(7)
       expect(result.is_passing_play).to.equal(true)
       expect(result.is_rushing_play).to.equal(false)
@@ -154,7 +154,7 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       expect(result.is_qb_pressure).to.equal(false)
       expect(result.is_blitz).to.equal(true)
       expect(result.time_to_throw).to.equal(2.8)
-      expect(result.dot).to.equal(12)
+      expect(result.depth_of_target).to.equal(12)
     })
 
     it('maps a rush play', () => {
@@ -321,8 +321,8 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       }
 
       const result = map_charting_play_to_db_fields(source)
-      expect(result.qtr).to.equal(1)
-      expect(result).to.not.have.property('dwn')
+      expect(result.quarter).to.equal(1)
+      expect(result).to.not.have.property('down_number')
       expect(result).to.not.have.property('pass')
       expect(result).to.not.have.property('epa_charting')
     })

@@ -128,9 +128,9 @@ const import_cbs_adp = async ({
         matched_cbs_ids.add(Number(source_player.cbs_id))
         adp_inserts.push({
           pid: player_row.pid,
-          pos: player_row.primary_position,
+          player_position: player_row.primary_position,
           season_year: year,
-          adp: source_player.adp,
+          average_draft_position: source_player.adp,
           min_pick: source_player.low_adp,
           max_pick: source_player.high_adp,
           std_dev: null,
@@ -184,9 +184,9 @@ const import_cbs_adp = async ({
         matched_cbs_ids.add(Number(source_player.cbs_id))
         adp_inserts.push({
           pid: player_row.pid,
-          pos: player_row.primary_position,
+          player_position: player_row.primary_position,
           season_year: year,
-          adp: source_player.adp,
+          average_draft_position: source_player.adp,
           min_pick: source_player.low_adp,
           max_pick: source_player.high_adp,
           std_dev: null,

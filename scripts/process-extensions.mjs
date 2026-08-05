@@ -65,7 +65,11 @@ const createTransaction = async ({ roster_player, tid, league }) => {
     lid: league.uid,
     pid
   })
-  const { value } = await getLastTransaction({ pid, tid, lid: league.uid })
+  const { player_salary: value } = await getLastTransaction({
+    pid,
+    tid,
+    lid: league.uid
+  })
   const extensionValue = getExtensionAmount({
     extensions: extensions.length,
     tag:
@@ -83,7 +87,7 @@ const createTransaction = async ({ roster_player, tid, league }) => {
     lid: league.uid,
     pid,
     type: getTransactionType(tag),
-    value: extensionValue,
+    player_salary: extensionValue,
     week: current_season.week,
     year: current_season.year,
     timestamp: league.ext_date

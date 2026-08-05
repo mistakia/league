@@ -31,7 +31,7 @@ const generate_player_career_game_counts = async () => {
         'player_gamelogs.esbid',
         'player_gamelogs.opponent_nfl_team',
         'player_gamelogs.nfl_team',
-        'player_gamelogs.pos',
+        'player_gamelogs.player_position',
         'nfl_games.season_year as year',
         'nfl_games.week',
         'nfl_games.season_type as seas_type'
@@ -83,7 +83,7 @@ const generate_player_career_game_counts = async () => {
           esbid: game.esbid,
           opponent_nfl_team: game.opponent_nfl_team,
           nfl_team: game.nfl_team,
-          pos: game.pos,
+          player_position: game.player_position,
           season_year: game.year,
           career_game: player_career_games[pid]
         })
@@ -93,7 +93,7 @@ const generate_player_career_game_counts = async () => {
           season_updates[season_key] = {
             pid: game.pid,
             season_year: game.year,
-            pos: game.pos,
+            player_position: game.player_position,
             career_year: player_career_years[pid].size,
             season_type: game.seas_type
           }

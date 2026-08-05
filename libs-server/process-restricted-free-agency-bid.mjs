@@ -20,7 +20,7 @@ const log = debug('process-restricted-free-agency-bids')
 
 export default async function ({
   pid,
-  bid,
+  bid_amount,
   tid,
   lid,
   userid,
@@ -46,7 +46,7 @@ export default async function ({
     })
   }
 
-  const pos = playerRosterRow.pos
+  const pos = playerRosterRow.player_position
   const slot = roster_slot_types.BENCH
   const league = await getLeague({ lid })
   const rosterRow = await getRoster({ tid })
@@ -63,7 +63,7 @@ export default async function ({
 
   const isValid = () =>
     roster.availableSpace >= 1 &&
-    roster.availableCap >= bid &&
+    roster.availableCap >= bid_amount &&
     roster.isEligibleForSlot({ slot, pos })
 
   if (isOriginalTeam) {
@@ -102,13 +102,13 @@ export default async function ({
     // remove player from original team roster
     await db('rosters_players')
       .del()
-      .where({ rid: originalTeamRoster.uid, pid })
+      .where({ roster_id: originalTeamRoster.uid, pid })
 
     // add player to competing team roster
     await db('rosters_players').insert({
-      rid: roster.uid,
+      roster_id: roster.uid,
       pid,
-      pos,
+      player_position: pos,
       slot: roster_slot_types.BENCH,
       tag: player_tag_types.RESTRICTED_FREE_AGENCY,
       extensions: 0,
@@ -137,7 +137,7 @@ export default async function ({
     lid,
     pid,
     type: transaction_types.RESTRICTED_FREE_AGENCY_TAG,
-    value: bid,
+    player_salary: bid_amount,
     week: current_season.week,
     year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
@@ -188,7 +188,7 @@ export default async function ({
   const team = await getTeam(tid)
 
   // send notification
-  let message = `${team.name} (${team.abbrv}) has signed restricted free agent ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) for $${bid}. `
+  let message = `${team.name} (${team.abbreviation}) has signed restricted free agent ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) for $${bid_amount}. `
   if (release_pids.length) {
     const releaseMessages = []
     for (const release_pid of release_pids) {

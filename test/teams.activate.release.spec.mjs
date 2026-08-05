@@ -83,7 +83,7 @@ describe('API /teams - activate', function () {
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player1.pid)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_ACTIVATE)
-      res.body.transaction.value.should.equal(value)
+      res.body.transaction.player_salary.should.equal(value)
       res.body.transaction.year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -107,7 +107,7 @@ describe('API /teams - activate', function () {
       expect(activateTransaction.type).to.equal(
         transaction_types.ROSTER_ACTIVATE
       )
-      expect(activateTransaction.value).to.equal(value)
+      expect(activateTransaction.player_salary).to.equal(value)
       expect(activateTransaction.pid).to.equal(player1.pid)
       expect(activateTransaction.tid).to.equal(teamId)
       expect(activateTransaction.userid).to.equal(userId)
@@ -117,7 +117,7 @@ describe('API /teams - activate', function () {
       )
       expect(releaseTransaction.lid).to.equal(leagueId)
       expect(releaseTransaction.type).to.equal(transaction_types.ROSTER_RELEASE)
-      expect(releaseTransaction.value).to.equal(value)
+      expect(releaseTransaction.player_salary).to.equal(value)
       expect(releaseTransaction.pid).to.equal(player2.pid)
       expect(releaseTransaction.tid).to.equal(teamId)
       expect(releaseTransaction.userid).to.equal(userId)

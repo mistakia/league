@@ -20,16 +20,16 @@ const make_league = () => ({
   bye_count: 2,
   has_division_winner_berths: false,
   // starter slot counts -- required_starter_count = 7
-  sqb: 1,
-  srb: 2,
-  swr: 2,
-  ste: 1,
-  srbwr: 0,
+  starter_slots_qb: 1,
+  starter_slots_rb: 2,
+  starter_slots_wr: 2,
+  starter_slots_te: 1,
+  starter_slots_rb_wr_flex: 0,
   srbwrte: 0,
   sqbrbwrte: 0,
-  swrte: 0,
-  sdst: 0,
-  sk: 1,
+  starter_slots_wr_te_flex: 0,
+  starter_slots_dst: 0,
+  starter_slots_k: 1,
   // calculate-points needs at least nominal scoring config; the optimizer only
   // cares about totals, and we provide gamelogs whose `points.total` is set
   // directly via stats.
@@ -47,10 +47,10 @@ const make_league = () => ({
 // count, so any division layout works here. Assertions target the detector
 // behavior on team 1 only.
 const teams = [
-  { uid: 1, div: 1 },
-  { uid: 2, div: 1 },
-  { uid: 3, div: 2 },
-  { uid: 4, div: 2 }
+  { uid: 1, division: 1 },
+  { uid: 2, division: 1 },
+  { uid: 3, division: 2 },
+  { uid: 4, division: 2 }
 ]
 
 // optimizeStandingsLineup post-filters its result keys with player_id_regex,

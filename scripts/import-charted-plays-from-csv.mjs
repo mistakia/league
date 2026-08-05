@@ -28,7 +28,7 @@ const formatPlay = (play) => ({
   is_qb_pressure: Boolean(parseInt(play.qb_pressure, 10)),
   is_qb_hit: Boolean(parseInt(play.qb_hit, 10)),
   is_interception_worthy: Boolean(parseInt(play.int_worthy, 10)),
-  mbt: parseInt(play.mbt, 10) || null,
+  missed_or_broken_tackle: parseInt(play.mbt, 10) || null,
   yards_after_any_contact: parseInt(play.yaco, 10) || null,
   is_no_huddle: Boolean(parseInt(play.nh, 10)),
   starting_hash: format_starting_hash(play.hash),
@@ -38,7 +38,7 @@ const formatPlay = (play) => ({
 
   true_air_yards: parseInt(play.tay, 10) || null,
   is_created_reception: Boolean(parseInt(play.crr, 10)),
-  avsk: Boolean(parseInt(play.avsk, 10)),
+  avoided_sacks: Boolean(parseInt(play.avsk, 10)),
   is_play_action: Boolean(parseInt(play.pap, 10)),
 
   // TODO - unexpected value: PASS
@@ -67,21 +67,21 @@ const formatPlay = (play) => ({
 
   ttscrm: parseFloat(play.ttscrm) || null,
   time_to_pass: parseFloat(play.ttp) || null,
-  ttsk: parseFloat(play.ttsk) || null,
+  time_to_sack: parseFloat(play.ttsk) || null,
   time_to_pressure: parseFloat(play.ttpr) || null,
 
-  back: parseInt(play.back, 10) || null,
-  xlm: parseInt(play.xlm, 10) || null,
-  db: parseInt(play.db, 10) || null,
+  backfield_player_count: parseInt(play.back, 10) || null,
+  extra_men_on_line: parseInt(play.xlm, 10) || null,
+  defensive_back_count: parseInt(play.db, 10) || null,
   box_defenders_charted: parseInt(play.box, 10) || null,
-  boxdb: parseInt(play.boxdb, 10) || null,
+  defensive_backs_in_box: parseInt(play.boxdb, 10) || null,
   pass_rushers: parseInt(play.pru, 10) || null,
   blitzers: parseInt(play.blz, 10) || null,
   db_blitzers: parseInt(play.dblz, 10) || null,
-  oopd: play.oopd || null,
-  cov: play.cov || null,
+  out_of_pocket_details: play.oopd || null,
+  coverage_on_target: play.cov || null,
   cov_type_charted: play.cov_type || null,
-  sep: play.sep || null
+  receiver_separation: play.sep || null
 })
 
 const run = async ({ dry = false, filepath } = {}) => {
@@ -113,9 +113,9 @@ const run = async ({ dry = false, filepath } = {}) => {
       season_year: game.year,
       offense_nfl_team: cPlay.off,
       defense_nfl_team: cPlay.def,
-      qtr: cPlay.qtr,
+      quarter: cPlay.qtr,
       game_clock_start,
-      dwn: cPlay.dwn,
+      down_number: cPlay.dwn,
       ...getYardlineInfoFromString(cPlay.los)
     }
     const dbPlay = await getPlay(opts)

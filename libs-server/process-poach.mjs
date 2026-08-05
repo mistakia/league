@@ -83,12 +83,12 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   }
 
   // verify team has enough cap if during the offseason
-  const { value } = await getLastTransaction({
+  const { player_salary } = await getLastTransaction({
     pid,
     lid,
     tid: rosterSlot.tid
   })
-  const playerPoachValue = value + 2
+  const playerPoachValue = player_salary + 2
   if (
     !current_season.isRegularSeason &&
     roster.availableCap - playerPoachValue < 0
@@ -110,7 +110,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     .where('year', current_season.year)
   const poachedTeamRosterIds = poachedTeamRosters.map((r) => r.uid)
   await db('rosters_players')
-    .whereIn('rid', poachedTeamRosterIds)
+    .whereIn('roster_id', poachedTeamRosterIds)
     .where('pid', pid)
     .del()
 
@@ -120,7 +120,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     lid,
     pid,
     type: transaction_types.POACHED,
-    value: playerPoachValue,
+    player_salary: playerPoachValue,
     week: current_season.week,
     year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
@@ -129,10 +129,10 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
 
   // add player to poaching team roster
   await db('rosters_players').insert({
-    rid: rosterRow.uid,
+    roster_id: rosterRow.uid,
     slot: roster_slot_types.BENCH,
     pid,
-    pos: poach_player_row.primary_position,
+    player_position: poach_player_row.primary_position,
     extensions: 0,
     tid,
     lid,

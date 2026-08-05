@@ -76,7 +76,7 @@ describe('API /teams - add', function () {
       res.body[0].transaction.lid.should.equal(leagueId)
       res.body[0].transaction.pid.should.equal(player.pid)
       res.body[0].transaction.type.should.equal(transaction_types.ROSTER_ADD)
-      res.body[0].transaction.value.should.equal(0)
+      res.body[0].transaction.player_salary.should.equal(0)
       res.body[0].transaction.year.should.equal(current_season.year)
 
       const rosters = await knex('rosters_players').where({
@@ -89,7 +89,7 @@ describe('API /teams - add', function () {
       expect(rosters.length).to.equal(1)
       expect(rosters[0].slot).to.equal(roster_slot_types.BENCH)
       expect(rosters[0].pid).to.equal(player.pid)
-      expect(rosters[0].pos).to.equal(player.secondary_position)
+      expect(rosters[0].player_position).to.equal(player.secondary_position)
       expect(rosters[0].tid).to.equal(teamId)
       expect(rosters[0].lid).to.equal(leagueId)
       expect(rosters[0].week).to.equal(current_season.week)
@@ -144,7 +144,7 @@ describe('API /teams - add', function () {
       res.body[0].transaction.lid.should.equal(leagueId)
       res.body[0].transaction.pid.should.equal(player.pid)
       res.body[0].transaction.type.should.equal(transaction_types.PRACTICE_ADD)
-      res.body[0].transaction.value.should.equal(0)
+      res.body[0].transaction.player_salary.should.equal(0)
       res.body[0].transaction.year.should.equal(current_season.year)
 
       const rosters = await knex('rosters_players').where({
@@ -157,7 +157,7 @@ describe('API /teams - add', function () {
       expect(rosters.length).to.equal(1)
       expect(rosters[0].slot).to.equal(roster_slot_types.PS)
       expect(rosters[0].pid).to.equal(player.pid)
-      expect(rosters[0].pos).to.equal(player.secondary_position)
+      expect(rosters[0].player_position).to.equal(player.secondary_position)
       expect(rosters[0].tid).to.equal(teamId)
       expect(rosters[0].lid).to.equal(leagueId)
       expect(rosters[0].week).to.equal(current_season.week)
@@ -323,7 +323,7 @@ describe('API /teams - add', function () {
         tid: 2,
         lid: 1,
         submitted: Math.round(Date.now() / 1000),
-        po: 9999,
+        priority_order: 9999,
         type: waiver_types.FREE_AGENCY
       })
 
@@ -347,7 +347,9 @@ describe('API /teams - add', function () {
       const teamId = 1
 
       // Set position limit for RB to 3
-      await knex('seasons').update({ mrb: 3 }).where({ lid: leagueId })
+      await knex('seasons')
+        .update({ max_roster_rb: 3 })
+        .where({ lid: leagueId })
 
       // Add 1 RB to bench
       const player1 = await selectPlayer({ pos: 'RB' })
@@ -390,7 +392,7 @@ describe('API /teams - add', function () {
           tid: teamId,
           week: current_season.week,
           year: current_season.year,
-          pos: 'RB'
+          player_position: 'RB'
         })
         .whereIn('slot', [
           roster_slot_types.BENCH,
@@ -424,7 +426,9 @@ describe('API /teams - add', function () {
       const teamId = 1
 
       // Set position limit for RB to 3
-      await knex('seasons').update({ mrb: 3 }).where({ lid: leagueId })
+      await knex('seasons')
+        .update({ max_roster_rb: 3 })
+        .where({ lid: leagueId })
 
       // Add 1 RB to bench
       const player1 = await selectPlayer({ pos: 'RB' })

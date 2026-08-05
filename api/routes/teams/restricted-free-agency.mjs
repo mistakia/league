@@ -66,7 +66,7 @@ const router = express.Router({ mergeParams: true })
  *                     type: integer
  *                     description: Year
  *                     example: 2024
- *                   bid:
+ *                   bid_amount:
  *                     type: integer
  *                     description: Bid amount
  *                     example: 25
@@ -228,7 +228,7 @@ router.get('/?', async (req, res) => {
  *                   type: integer
  *                   description: Year
  *                   example: 2024
- *                 bid:
+ *                 bid_amount:
  *                   type: integer
  *                   description: Bid amount
  *                   example: 25
@@ -462,7 +462,7 @@ router.post('/?', async (req, res) => {
       await db('rosters_players')
         .update({ tag: player_tag_types.RESTRICTED_FREE_AGENCY })
         .where({
-          rid: rosterRow.uid,
+          roster_id: rosterRow.uid,
           pid
         })
 
@@ -475,7 +475,7 @@ router.post('/?', async (req, res) => {
 
       if (remove) {
         await db('rosters_players').update({ tag: 1 }).where({
-          rid: rosterRow.uid,
+          roster_id: rosterRow.uid,
           pid: remove
         })
 
@@ -515,7 +515,7 @@ router.post('/?', async (req, res) => {
       pid,
       submitted: Math.round(Date.now() / 1000),
       year: current_season.year,
-      bid,
+      bid_amount: bid,
       nomination_id
     }
 
@@ -706,7 +706,7 @@ router.delete('/?', async (req, res) => {
     await db('rosters_players')
       .update({ tag: player_tag_types.REGULAR })
       .where({
-        rid: rosterRow.uid,
+        roster_id: rosterRow.uid,
         pid
       })
 
@@ -779,7 +779,7 @@ router.delete('/?', async (req, res) => {
  *                   type: integer
  *                   description: Bid ID
  *                   example: 123
- *                 bid:
+ *                 bid_amount:
  *                   type: integer
  *                   description: Updated bid amount
  *                   example: 30
@@ -962,7 +962,7 @@ router.put('/?', async (req, res) => {
       await db('rosters_players')
         .update({ tag: player_tag_types.RESTRICTED_FREE_AGENCY })
         .where({
-          rid: rosterRow.uid,
+          roster_id: rosterRow.uid,
           pid
         })
     }
@@ -971,7 +971,7 @@ router.put('/?', async (req, res) => {
     await db('restricted_free_agency_bids')
       .update({
         userid: req.auth.userId,
-        bid
+        bid_amount: bid
       })
       .where('uid', restrictedFreeAgencyBid.uid)
 
@@ -993,7 +993,7 @@ router.put('/?', async (req, res) => {
 
     res.send({
       ...restrictedFreeAgencyBid,
-      bid,
+      bid_amount: bid,
       userid: req.auth.userId,
       release
     })

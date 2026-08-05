@@ -11,8 +11,8 @@ export default async function (knex) {
   for (const [index, value] of schedule.entries()) {
     for (const matchup of value) {
       await knex('matchups').insert({
-        hid: matchup.home.uid,
-        aid: matchup.away.uid,
+        home_team_id: matchup.home.uid,
+        away_team_id: matchup.away.uid,
         lid: 1,
         week: index + 1,
         year: current_season.year

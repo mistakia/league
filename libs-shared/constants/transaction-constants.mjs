@@ -90,3 +90,12 @@ export const player_tag_display_names = {
   3: 'Rookie',
   4: 'Restricted Free Agency'
 }
+
+// seasons.tag2/tag3/tag4 conformed to full-word columns that no longer share
+// a `tag${n}` prefix with the tag type id -- see roster.mjs for the computed
+// key this replaced.
+export const tag_limit_season_columns = {
+  [player_tag_types.FRANCHISE]: 'franchise_tag_limit',
+  [player_tag_types.ROOKIE]: 'rookie_tag_limit',
+  [player_tag_types.RESTRICTED_FREE_AGENCY]: 'restricted_free_agency_tag_limit'
+}

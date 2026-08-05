@@ -29,13 +29,13 @@ const router = express.Router({ mergeParams: true })
  *                 year: 2024
  *                 pid: "JAKO-MEYE-017624"
  *                 type: "starter"
- *                 pos: "WR"
+ *                 player_position: "WR"
  *               - lid: 2
  *                 week: "1"
  *                 year: 2024
  *                 pid: "DEON-JACK-006958"
  *                 type: "starter"
- *                 pos: "RB"
+ *                 player_position: "RB"
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *         examples:

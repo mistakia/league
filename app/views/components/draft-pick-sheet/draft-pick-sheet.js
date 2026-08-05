@@ -54,7 +54,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
     const ownership_timeline = []
 
     // Start with the original team (who the pick was initially issued to)
-    let current_owner = pick.otid
+    let current_owner = pick.original_team_id
 
     if (current_owner) {
       ownership_timeline.push({

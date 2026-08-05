@@ -150,7 +150,7 @@ export default class Auction {
   async sold() {
     this._locked = true
     const bid = this._transactions[0]
-    const { tid, pid, value } = bid
+    const { tid, pid, player_salary: value } = bid
 
     this.logger(`processing ${pid} bid`)
 
@@ -560,9 +560,9 @@ export default class Auction {
       return false
     }
 
-    if (value <= current.value) {
+    if (value <= current.player_salary) {
       this.logger(
-        `received bid of ${value} is not greater than current value of ${current.value}`
+        `received bid of ${value} is not greater than current value of ${current.player_salary}`
       )
       this.reply(userid, 'invalid bid')
       this._start_bid_timer()
@@ -672,9 +672,9 @@ export default class Auction {
     }
 
     // Validate team eligibility
-    if (team.cap - current.value < 1 || !team.availableSpace) {
+    if (team.cap - current.player_salary < 1 || !team.availableSpace) {
       this.logger(
-        `pass nomination rejected - team ${tid} not eligible (cap: ${team.cap}, bid: ${current.value}, space: ${team.availableSpace})`
+        `pass nomination rejected - team ${tid} not eligible (cap: ${team.cap}, bid: ${current.player_salary}, space: ${team.availableSpace})`
       )
       return false
     }
@@ -730,7 +730,7 @@ export default class Auction {
       pid,
       lid: this._lid,
       type: transaction_types.AUCTION_BID,
-      value,
+      player_salary: value,
       week: 0,
       year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
@@ -755,7 +755,7 @@ export default class Auction {
       tid: nominating_team_id,
       pid,
       type: transaction_types.AUCTION_BID,
-      value,
+      player_salary: value,
       lid: this._lid,
       week: 0,
       year: current_season.year,
@@ -776,9 +776,9 @@ export default class Auction {
   async _add_player_to_roster(roster_obj, player_info, tid, value) {
     try {
       await db('rosters_players').insert({
-        rid: roster_obj.uid,
+        roster_id: roster_obj.uid,
         slot: roster_slot_types.BENCH,
-        pos: player_info.primary_position,
+        player_position: player_info.primary_position,
         pid: player_info.pid,
         extensions: 0,
         tid,
@@ -804,7 +804,7 @@ export default class Auction {
     try {
       await db('teams')
         .where({ uid: tid, year: current_season.year })
-        .update('cap', new_cap)
+        .update('salary_cap', new_cap)
     } catch (err) {
       this.logger(err)
       this.logger('unable to update cap space')
@@ -819,7 +819,7 @@ export default class Auction {
       pid: bid.pid,
       lid: this._lid,
       type: transaction_types.AUCTION_PROCESSED,
-      value: bid.value,
+      player_salary: bid.player_salary,
       week: 0,
       year: bid.year,
       timestamp: Math.round(Date.now() / 1000)
@@ -944,7 +944,7 @@ export default class Auction {
       try {
         const format_message = await format_nomination_complete_message({
           player_id: current.pid,
-          winning_bid_amount: current.value,
+          winning_bid_amount: current.player_salary,
           winning_team_id: current.tid
         })
 

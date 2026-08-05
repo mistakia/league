@@ -13,7 +13,7 @@ const log = debug('play-enrichment:success-metric')
  * - 2nd down: gain 60% of yards to go
  * - 3rd/4th down: gain 100% of yards to go (convert)
  *
- * @param {Array} plays - Array of play objects with yds_gained, yards_to_go, and dwn
+ * @param {Array} plays - Array of play objects with yds_gained, yards_to_go, and down_number
  * @returns {Array} Plays with successful_play field populated
  */
 export const enrich_play_success = (plays) => {
@@ -24,7 +24,7 @@ export const enrich_play_success = (plays) => {
     const successful_play = is_successful_play({
       yds_gained: play.yds_gained,
       yards_to_go: play.yards_to_go,
-      dwn: play.dwn
+      down_number: play.down_number
     })
 
     // successful_play can be true, false, or null (if missing required data)

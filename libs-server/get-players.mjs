@@ -46,13 +46,13 @@ export default async function ({
       .where({ tid: teamId, year: current_season.year })
       .groupBy(
         'rosters_players.pid',
-        'rosters_players.rid',
+        'rosters_players.roster_id',
         'rosters_players.tid',
         'rosters_players.lid',
         'rosters_players.week',
         'rosters_players.year',
         'rosters_players.slot',
-        'rosters_players.pos',
+        'rosters_players.player_position',
         'rosters_players.tag',
         'rosters_players.extensions'
       )
@@ -68,13 +68,13 @@ export default async function ({
       .where({ lid: leagueId, year: current_season.year })
       .groupBy(
         'rosters_players.pid',
-        'rosters_players.rid',
+        'rosters_players.roster_id',
         'rosters_players.tid',
         'rosters_players.lid',
         'rosters_players.week',
         'rosters_players.year',
         'rosters_players.slot',
-        'rosters_players.pos',
+        'rosters_players.player_position',
         'rosters_players.tag',
         'rosters_players.extensions'
       )
@@ -199,24 +199,24 @@ export default async function ({
 
     // Include practice day columns for reserve eligibility checking
     query.select(
-      'practice.m',
-      'practice.tu',
-      'practice.w',
-      'practice.th',
-      'practice.f',
-      'practice.s',
-      'practice.su',
+      'practice.monday_practice_status',
+      'practice.tuesday_practice_status',
+      'practice.wednesday_practice_status',
+      'practice.thursday_practice_status',
+      'practice.friday_practice_status',
+      'practice.saturday_practice_status',
+      'practice.sunday_practice_status',
       'practice.source_status',
       'practice.roster_status as practice_roster_status'
     )
     query.groupBy(
-      'practice.m',
-      'practice.tu',
-      'practice.w',
-      'practice.th',
-      'practice.f',
-      'practice.s',
-      'practice.su',
+      'practice.monday_practice_status',
+      'practice.tuesday_practice_status',
+      'practice.wednesday_practice_status',
+      'practice.thursday_practice_status',
+      'practice.friday_practice_status',
+      'practice.saturday_practice_status',
+      'practice.sunday_practice_status',
       'practice.source_status',
       'practice.roster_status'
     )
@@ -358,14 +358,14 @@ export default async function ({
 
     for (const tran of playerTransactions) {
       const player_row = player_rows.find((p) => p.pid === tran.pid)
-      player_row.value = tran.value
+      player_row.value = tran.player_salary
     }
   }
 
   if (scoring_format_id) {
     // include projected fantasy point values
     const leaguePointsProj = await db('scoring_format_player_projection_points')
-      .select('pid', 'week', 'total')
+      .select('pid', 'week', 'projected_points_total as total')
       .where({
         scoring_format_id,
         year: current_season.year
@@ -493,21 +493,32 @@ export default async function ({
     ).where(contribution_params)
 
     for (const player_contribution of contributions) {
-      const { pid, starts, sp, bp } = player_contribution
+      const { pid, starts, starter_plus_points, bench_plus_points } =
+        player_contribution
       if (!players_by_pid[pid]) continue
 
       const player_contribution_weeks = contribution_weeks.filter(
         (w) => w.pid === player_contribution.pid
       )
       const weeks = {}
-      for (const { week, is_starter, sp, bp } of player_contribution_weeks) {
-        weeks[week] = { week, is_starter, sp, bp }
+      for (const {
+        week,
+        is_starter,
+        starter_plus_points,
+        bench_plus_points
+      } of player_contribution_weeks) {
+        weeks[week] = {
+          week,
+          is_starter,
+          starter_plus_points,
+          bench_plus_points
+        }
       }
 
       players_by_pid[pid].lineups = {
         starts,
-        sp,
-        bp,
+        starter_plus_points,
+        bench_plus_points,
         weeks
       }
     }

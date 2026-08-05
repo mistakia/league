@@ -56,16 +56,17 @@ const player_season_rankings_source = {
 
 // Range year_offset reduction per column (select-string defaults to SUM).
 // Rankings are not additive: the consensus/overall/position ranks and the
-// dispersion (std) average across the window; min is the best (lowest) rank
-// seen in the window -> MIN, max the worst -> MAX. Summing ranks across years
+// dispersion (rank_standard_deviation) average across the window; min is the
+// best (lowest) rank seen in the window -> MIN, max the worst -> MAX. Summing
+// ranks across years
 // is meaningless.
 const SEASON_RANKINGS_RANGE_OFFSET_AGGREGATE = {
-  avg: 'AVG',
+  average_rank: 'AVG',
   overall_rank: 'AVG',
   position_rank: 'AVG',
-  std: 'AVG',
-  min: 'MIN',
-  max: 'MAX'
+  rank_standard_deviation: 'AVG',
+  min_rank: 'MIN',
+  max_rank: 'MAX'
 }
 
 const create_player_season_rankings_field = (field, select_as) => ({
@@ -80,7 +81,7 @@ const create_player_season_rankings_field = (field, select_as) => ({
 
 export default {
   player_season_average_ranking: create_player_season_rankings_field(
-    'avg',
+    'average_rank',
     'average_rank'
   ),
   player_season_overall_ranking: create_player_season_rankings_field(
@@ -92,15 +93,15 @@ export default {
     'position_rank'
   ),
   player_season_min_ranking: create_player_season_rankings_field(
-    'min',
+    'min_rank',
     'min_rank'
   ),
   player_season_max_ranking: create_player_season_rankings_field(
-    'max',
+    'max_rank',
     'max_rank'
   ),
   player_season_ranking_standard_deviation: create_player_season_rankings_field(
-    'std',
+    'rank_standard_deviation',
     'rank_stddev'
   )
 }

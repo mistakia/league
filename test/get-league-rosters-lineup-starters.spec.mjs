@@ -49,7 +49,7 @@ describe('get-league-rosters-from-database lineup starters', function () {
         tid,
         year,
         week,
-        total: 100 + week,
+        optimal_total: 100 + week,
         baseline_total: 100 + week
       }))
     )

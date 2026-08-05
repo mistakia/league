@@ -63,8 +63,8 @@ export async function simulate_season_forecast({
     const completed_matchups = await db('matchups')
       .where({ lid: league_id, year })
       .where('week', '<', current_week)
-      .whereNotNull('hp')
-      .whereNotNull('ap')
+      .whereNotNull('home_points')
+      .whereNotNull('away_points')
 
     for (const team of teams) {
       team_stats_by_tid[team.uid] = {
@@ -80,22 +80,22 @@ export async function simulate_season_forecast({
     }
 
     for (const m of completed_matchups) {
-      const hp = parseFloat(m.hp)
-      const ap = parseFloat(m.ap)
+      const hp = parseFloat(m.home_points)
+      const ap = parseFloat(m.away_points)
 
       if (hp > ap) {
-        team_stats_by_tid[m.hid].wins++
-        team_stats_by_tid[m.aid].losses++
+        team_stats_by_tid[m.home_team_id].wins++
+        team_stats_by_tid[m.away_team_id].losses++
       } else if (ap > hp) {
-        team_stats_by_tid[m.aid].wins++
-        team_stats_by_tid[m.hid].losses++
+        team_stats_by_tid[m.away_team_id].wins++
+        team_stats_by_tid[m.home_team_id].losses++
       } else {
-        team_stats_by_tid[m.hid].ties++
-        team_stats_by_tid[m.aid].ties++
+        team_stats_by_tid[m.home_team_id].ties++
+        team_stats_by_tid[m.away_team_id].ties++
       }
 
-      team_stats_by_tid[m.hid].points_for += hp
-      team_stats_by_tid[m.aid].points_for += ap
+      team_stats_by_tid[m.home_team_id].points_for += hp
+      team_stats_by_tid[m.away_team_id].points_for += ap
     }
   } else {
     // Use end-of-season stats
@@ -107,7 +107,12 @@ export async function simulate_season_forecast({
       )
 
     for (const stats of team_stats) {
-      team_stats_by_tid[stats.tid] = stats
+      team_stats_by_tid[stats.tid] = {
+        ...stats,
+        wins: stats.regular_season_wins,
+        losses: stats.regular_season_losses,
+        ties: stats.regular_season_ties
+      }
     }
   }
 
@@ -169,8 +174,8 @@ export async function simulate_season_forecast({
       const probs = new Map()
       for (const matchup of matchups_by_week[sim_week]) {
         probs.set(matchup.uid, {
-          home_team_id: matchup.hid,
-          away_team_id: matchup.aid,
+          home_team_id: matchup.home_team_id,
+          away_team_id: matchup.away_team_id,
           home_win_prob: 0.5,
           away_win_prob: 0.5
         })
@@ -184,7 +189,7 @@ export async function simulate_season_forecast({
   for (const team of teams) {
     result[team.uid] = {
       tid: team.uid,
-      div: team.div,
+      div: team.division,
       playoff_appearances: 0,
       division_wins: 0,
       byes: 0,
@@ -210,7 +215,7 @@ export async function simulate_season_forecast({
       }
       standings[team.uid] = {
         tid: team.uid,
-        div: team.div,
+        div: team.division,
         wins: stats.wins || 0,
         losses: stats.losses || 0,
         ties: stats.ties || 0,
@@ -236,9 +241,9 @@ export async function simulate_season_forecast({
         // Handle force win/loss for first matchup
         if (is_first_matchup && (force_win_tid || force_loss_tid)) {
           if (force_win_tid) {
-            home_wins = matchup.hid === Number(force_win_tid)
+            home_wins = matchup.home_team_id === Number(force_win_tid)
           } else if (force_loss_tid) {
-            home_wins = matchup.hid !== Number(force_loss_tid)
+            home_wins = matchup.home_team_id !== Number(force_loss_tid)
           }
           is_first_matchup = false
         } else {
@@ -247,11 +252,11 @@ export async function simulate_season_forecast({
         }
 
         if (home_wins) {
-          standings[matchup.hid].wins++
-          standings[matchup.aid].losses++
+          standings[matchup.home_team_id].wins++
+          standings[matchup.away_team_id].losses++
         } else {
-          standings[matchup.aid].wins++
-          standings[matchup.hid].losses++
+          standings[matchup.away_team_id].wins++
+          standings[matchup.home_team_id].losses++
         }
       }
     }

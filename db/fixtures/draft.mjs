@@ -70,8 +70,8 @@ export default async function (knex) {
     roster_player_rows.push({
       slot: roster_slot_types.BENCH,
       pid: player.pid,
-      pos: player.secondary_position,
-      rid: roster.uid,
+      player_position: player.secondary_position,
+      roster_id: roster.uid,
       tid: roster.tid,
       lid: league.uid,
       year: current_season.year,
@@ -88,7 +88,7 @@ export default async function (knex) {
         lid: league.uid,
         pid: player.pid,
         type,
-        value,
+        player_salary: value,
         week: current_season.week,
         year: current_season.year,
         timestamp

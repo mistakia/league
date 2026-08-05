@@ -91,10 +91,10 @@ const format = (item) => {
     home_score: (score.homeTeamScore || {}).pointTotal,
     away_score: (score.visitorTeamScore || {}).pointTotal,
 
-    stad: item.site.siteFullName,
+    stadium_name: item.site.siteFullName,
     ngs_site_id: item.site.siteId,
 
-    clock: score.time,
+    game_clock: score.time,
     status: score.phase
   }
 }

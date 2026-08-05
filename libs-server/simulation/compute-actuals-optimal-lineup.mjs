@@ -44,7 +44,7 @@ export async function compute_actuals_optimal_lineup({
   const roster_rows = await db('rosters_players')
     .where({ lid, tid, week, year })
     .whereIn('slot', active_roster_slots)
-    .select('pid', 'pos')
+    .select('pid', 'player_position')
 
   if (roster_rows.length === 0) {
     return { starter_pids: [], total_points: 0 }
@@ -65,8 +65,12 @@ export async function compute_actuals_optimal_lineup({
   const players = []
   for (const row of roster_rows) {
     const points = points_by_pid.get(row.pid)
-    if (row.pos == null || points == null) continue
-    players.push({ pid: row.pid, pos: row.pos, points: Number(points) })
+    if (row.player_position == null || points == null) continue
+    players.push({
+      pid: row.pid,
+      pos: row.player_position,
+      points: Number(points)
+    })
   }
 
   if (players.length === 0) {

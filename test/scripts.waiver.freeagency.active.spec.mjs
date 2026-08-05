@@ -43,9 +43,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         userid: 1,
         lid: leagueId,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: value,
+        bid_amount: value,
         type: waiver_types.FREE_AGENCY
       })
 
@@ -99,7 +99,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       })
 
       // verify team faab budget
-      expect(team1.faab).to.equal(200 - value)
+      expect(team1.faab_balance).to.equal(200 - value)
     })
 
     it('process multiple faab waivers', async () => {
@@ -114,9 +114,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         userid: 1,
         lid: leagueId,
         pid: player1.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: value1,
+        bid_amount: value1,
         type: waiver_types.FREE_AGENCY
       })
 
@@ -125,9 +125,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         userid: 1,
         lid: leagueId,
         pid: player1.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 80,
+        bid_amount: 80,
         type: waiver_types.FREE_AGENCY
       })
 
@@ -139,9 +139,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         userid: 1,
         lid: leagueId,
         pid: player2.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: value2,
+        bid_amount: value2,
         type: waiver_types.FREE_AGENCY
       })
 
@@ -153,9 +153,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         userid: 1,
         lid: leagueId,
         pid: player3.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 30,
+        bid_amount: 30,
         type: waiver_types.FREE_AGENCY
       })
       await knex('waivers').insert({
@@ -163,9 +163,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         userid: 1,
         lid: leagueId,
         pid: player3.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: value3,
+        bid_amount: value3,
         type: waiver_types.FREE_AGENCY
       })
 
@@ -177,9 +177,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         userid: 1,
         lid: leagueId,
         pid: player4.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: value4,
+        bid_amount: value4,
         type: waiver_types.FREE_AGENCY
       })
       await knex('waivers').insert({
@@ -187,9 +187,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         userid: 1,
         lid: leagueId,
         pid: player4.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: value4,
+        bid_amount: value4,
         type: waiver_types.FREE_AGENCY
       })
 
@@ -283,22 +283,22 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(transactions.length).to.equal(4)
       expect(transactions[0].pid).to.equal(player1.pid)
       expect(transactions[0].tid).to.equal(1)
-      expect(transactions[0].value).to.equal(value1)
+      expect(transactions[0].player_salary).to.equal(value1)
       expect(transactions[0].type).to.equal(transaction_types.ROSTER_ADD)
 
       expect(transactions[1].pid).to.equal(player2.pid)
       expect(transactions[1].tid).to.equal(2)
-      expect(transactions[1].value).to.equal(value2)
+      expect(transactions[1].player_salary).to.equal(value2)
       expect(transactions[1].type).to.equal(transaction_types.ROSTER_ADD)
 
       expect(transactions[2].pid).to.equal(player3.pid)
       expect(transactions[2].tid).to.equal(2)
-      expect(transactions[2].value).to.equal(value3)
+      expect(transactions[2].player_salary).to.equal(value3)
       expect(transactions[2].type).to.equal(transaction_types.ROSTER_ADD)
 
       expect(transactions[3].pid).to.equal(player4.pid)
       expect(transactions[3].tid).to.equal(1)
-      expect(transactions[3].value).to.equal(value4)
+      expect(transactions[3].player_salary).to.equal(value4)
       expect(transactions[3].type).to.equal(transaction_types.ROSTER_ADD)
     })
 
@@ -312,7 +312,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         lid: leagueId,
         pid: player.pid,
         type: transaction_types.ROSTER_RELEASE,
-        value: 0,
+        player_salary: 0,
         week: current_season.week,
         year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)
@@ -325,9 +325,9 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         userid: 1,
         lid: leagueId,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: value,
+        bid_amount: value,
         type: waiver_types.FREE_AGENCY
       })
 

@@ -25,8 +25,9 @@ function StandingsTeam({ team, year, is_current_year, is_regular_season }) {
         <div className='table__cell-text'>{team.name}</div>
       </div>
       <div className='table__cell metric wide_cell'>
-        {team.getIn(['stats', 'wins'], 0)}-{team.getIn(['stats', 'losses'], 0)}-
-        {team.getIn(['stats', 'ties'], 0)}
+        {team.getIn(['stats', 'regular_season_wins'], 0)}-
+        {team.getIn(['stats', 'regular_season_losses'], 0)}-
+        {team.getIn(['stats', 'regular_season_ties'], 0)}
       </div>
       <div className='table__cell metric wide_cell'>
         {team.getIn(['stats', 'all_play_wins'], 0)}-
@@ -64,7 +65,8 @@ StandingsTeam.propTypes = {
 function Standings({ teams, title, year, is_current_year, is_regular_season }) {
   const sorted = teams.sort(
     (a, b) =>
-      b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) ||
+      b.getIn(['stats', 'regular_season_wins'], 0) -
+        a.getIn(['stats', 'regular_season_wins'], 0) ||
       b.getIn(['stats', 'points_for'], 0) - a.getIn(['stats', 'points_for'], 0)
   )
 

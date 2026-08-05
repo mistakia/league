@@ -22,12 +22,12 @@ export default function ScoreboardScores({
         onClick={() => select_matchup({ matchupId: matchup.uid })}
       >
         <ScoreboardScoreTeam
-          tid={matchup.aid}
+          tid={matchup.away_team_id}
           week={matchup.week}
           year={matchup.year}
         />
         <ScoreboardScoreTeam
-          tid={matchup.hid}
+          tid={matchup.home_team_id}
           week={matchup.week}
           year={matchup.year}
         />

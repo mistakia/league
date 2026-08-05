@@ -18,7 +18,7 @@ function SeasonDraftPicks({ picks, year }) {
           {pick.pick_str ? pick.pick_str : `${pick.round}${nth(pick.round)}`}
         </div>
         <div className='table__cell draft-pick__team'>
-          <TeamName tid={pick.otid} />
+          <TeamName tid={pick.original_team_id} />
         </div>
       </div>
     )

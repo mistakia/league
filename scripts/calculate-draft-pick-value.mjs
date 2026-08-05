@@ -36,7 +36,7 @@ const calculateDraftPickValue = async ({ league_format_id } = {}) => {
     const players = league_format_player_careerlogs_by_draft_rank[rank]
     inserts.push({
       league_format_id,
-      rank: Number(rank),
+      draft_pick_rank: Number(rank),
       median_best_season_points_added_per_game: median(
         players.map((p) => p.best_season_points_added_earned_per_game)
       ),
@@ -50,7 +50,7 @@ const calculateDraftPickValue = async ({ league_format_id } = {}) => {
     log(`updated ${inserts.length} draft pick values`)
     await db('league_format_draft_pick_value')
       .insert(inserts)
-      .onConflict(['rank', 'league_format_id'])
+      .onConflict(['draft_pick_rank', 'league_format_id'])
       .merge()
   }
 }

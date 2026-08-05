@@ -42,7 +42,8 @@ const project_lineups = async (lid) => {
   for (const baseline of baselines) {
     if (baseline.type !== 'starter') continue
     baseline_points[baseline.week] = baseline_points[baseline.week] || {}
-    baseline_points[baseline.week][baseline.pos] = Number(baseline.points) || 0
+    baseline_points[baseline.week][baseline.player_position] =
+      Number(baseline.points) || 0
   }
 
   for (const team of teams) {
@@ -80,7 +81,7 @@ const project_lineups = async (lid) => {
         tid,
         lid,
         year,
-        total: lineup.total,
+        optimal_total: lineup.total,
         baseline_total: baseline_lineups[week].baseline_total
       })
       for (const pid of lineup.starter_pids) {
@@ -151,7 +152,7 @@ const project_lineups = async (lid) => {
           const baseline = baselines.find(
             (b) =>
               b.week === week &&
-              b.pos === player_row.primary_position &&
+              b.player_position === player_row.primary_position &&
               b.type === 'available'
           )
 
@@ -173,8 +174,8 @@ const project_lineups = async (lid) => {
         pid,
         year,
         starts,
-        sp,
-        bp
+        starter_plus_points: sp,
+        bench_plus_points: bp
       })
       for (const week in playerData.weeks) {
         const { is_starter, sp, bp } = playerData.weeks[week]
@@ -185,8 +186,8 @@ const project_lineups = async (lid) => {
           pid,
           year,
           is_starter,
-          sp,
-          bp
+          starter_plus_points: sp,
+          bench_plus_points: bp
         })
       }
     }

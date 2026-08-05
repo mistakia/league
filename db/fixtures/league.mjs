@@ -81,11 +81,11 @@ export default async function (knex, league_params = {}) {
       lid: 1,
       waiver_order: i,
       draft_order: i,
-      cap: league.cap,
-      faab: league.faab,
-      div: (i % 4) + 1,
+      salary_cap: league.cap,
+      faab_balance: league.starting_faab_budget,
+      division: (i % 4) + 1,
       name: `Team${i}`,
-      abbrv: `TM${i}`
+      abbreviation: `TM${i}`
     })
 
     for (let week = 0; week <= current_season.finalWeek; week++) {

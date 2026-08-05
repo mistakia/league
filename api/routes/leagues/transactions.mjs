@@ -43,7 +43,7 @@ const router = express.Router({ mergeParams: true })
  *           nullable: true
  *           description: User ID who made the transaction
  *           example: 5
- *         value:
+ *         player_salary:
  *           type: integer
  *           description: Transaction value/cost
  *           example: 15
@@ -200,7 +200,7 @@ const router = express.Router({ mergeParams: true })
  *                     pid: "4017"
  *                     type: 1
  *                     userid: 5
- *                     value: 15
+ *                     player_salary: 15
  *                     week: 8
  *                     year: 2024
  *                     timestamp: 1698765432
@@ -212,7 +212,7 @@ const router = express.Router({ mergeParams: true })
  *                     pid: "3892"
  *                     type: 3
  *                     userid: 7
- *                     value: 8
+ *                     player_salary: 8
  *                     week: 8
  *                     year: 2024
  *                     timestamp: 1698765400
@@ -334,7 +334,7 @@ router.get('/?', async (req, res) => {
  *                     pid: "2041"
  *                     type: 5
  *                     userid: 5
- *                     value: 0
+ *                     player_salary: 0
  *                     week: 8
  *                     year: 2024
  *                     timestamp: 1698765000
@@ -346,7 +346,7 @@ router.get('/?', async (req, res) => {
  *                     pid: "1889"
  *                     type: 4
  *                     userid: 7
- *                     value: 3
+ *                     player_salary: 3
  *                     week: 8
  *                     year: 2024
  *                     timestamp: 1698764800
@@ -448,7 +448,7 @@ router.get('/release', async (req, res) => {
  *                       pid: "4017"
  *                       type: 4
  *                       userid: 5
- *                       value: 12
+ *                       player_salary: 12
  *                       week: 5
  *                       year: 2024
  *                       timestamp: 1698600000
@@ -461,7 +461,7 @@ router.get('/release', async (req, res) => {
  *                       pid: "4017"
  *                       type: 4
  *                       userid: 5
- *                       value: 12
+ *                       player_salary: 12
  *                       week: 5
  *                       year: 2024
  *                       timestamp: 1698600000

@@ -215,12 +215,12 @@ const load_indexes = async ({
     const pv_rows = await db('league_format_draft_pick_value')
       .select(
         'league_format_id',
-        'rank',
+        'draft_pick_rank',
         'median_best_season_points_added_per_game'
       )
       .whereIn('league_format_id', format_ids)
     for (const r of pv_rows) {
-      const k = `${r.league_format_id}__${r.rank}`
+      const k = `${r.league_format_id}__${r.draft_pick_rank}`
       idx.pick_values.set(
         k,
         r.median_best_season_points_added_per_game != null

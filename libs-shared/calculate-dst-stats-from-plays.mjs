@@ -32,34 +32,34 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 10:
         // rushing yards
-        dstStats.defensive_yards_against += playStat.yards
+        dstStats.defensive_yards_against += playStat.stat_yards
         break
 
       case 11:
         // rushing touchdown
-        dstStats.defensive_yards_against += playStat.yards
+        dstStats.defensive_yards_against += playStat.stat_yards
         dstStats.defensive_points_against += 6
         break
 
       case 12:
         // lateral rush
-        dstStats.defensive_yards_against += playStat.yards
+        dstStats.defensive_yards_against += playStat.stat_yards
         break
 
       case 13:
         // lateral rushing touchdown
-        dstStats.defensive_yards_against += playStat.yards
+        dstStats.defensive_yards_against += playStat.stat_yards
         dstStats.defensive_points_against += 6
         break
 
       case 15:
         // completed pass
-        dstStats.defensive_yards_against += playStat.yards
+        dstStats.defensive_yards_against += playStat.stat_yards
         break
 
       case 16:
         // passing touchdown
-        dstStats.defensive_yards_against += playStat.yards
+        dstStats.defensive_yards_against += playStat.stat_yards
         dstStats.defensive_points_against += 6
         break
 
@@ -69,7 +69,7 @@ const calculateDstStatsFromPlays = (plays, team) => {
 
       case 20:
         // sack (team)
-        dstStats.defensive_yards_against += playStat.yards
+        dstStats.defensive_yards_against += playStat.stat_yards
         dstStats.defensive_sacks += 1
         break
 

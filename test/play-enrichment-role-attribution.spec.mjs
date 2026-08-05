@@ -639,7 +639,7 @@ describe('yardage-stat-enrichment _gsis emission contract', function () {
       stat_id: 11,
       gsis_player_id: 'GSIS_BC'
     })
-    stat.yards = 5
+    stat.stat_yards = 5
 
     const [enriched] = enrich_yardage_stats([{ esbid, play_id }], [stat])
 

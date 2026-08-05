@@ -57,9 +57,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         is_successful: 1,
         processed: Math.round(Date.now() / 1000),
         type: waiver_types.POACH
@@ -118,7 +118,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(draft.length).to.equal(1)
       expect(draft[0].round).to.equal(4)
       expect(draft[0].tid).to.equal(1)
-      expect(draft[0].otid).to.equal(1)
+      expect(draft[0].original_team_id).to.equal(1)
       expect(draft[0].year).to.equal(current_season.year + 1)
     })
 
@@ -140,9 +140,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player1.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         is_successful: 1,
         processed: Math.round(Date.now() / 1000),
         type: waiver_types.POACH
@@ -182,9 +182,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 4,
         lid: 1,
         pid: player2.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         is_successful: 1,
         processed: Math.round(Date.now() / 1000),
         type: waiver_types.POACH
@@ -276,9 +276,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         is_successful: 1,
         processed: Math.round(Date.now() / 1000),
         type: waiver_types.POACH
@@ -354,9 +354,9 @@ describe('SCRIPTS /waivers - poach', function () {
           userid: 2,
           lid: 1,
           pid: player.pid,
-          po: 9999,
+          priority_order: 9999,
           submitted: Math.round(Date.now() / 1000),
-          bid: 0,
+          bid_amount: 0,
           is_successful: 1,
           processed: Math.round(Date.now() / 1000),
           type: waiver_types.POACH
@@ -450,9 +450,9 @@ describe('SCRIPTS /waivers - poach', function () {
         userid: 2,
         lid: 1,
         pid: player.pid,
-        po: 9999,
+        priority_order: 9999,
         submitted: Math.round(Date.now() / 1000),
-        bid: 0,
+        bid_amount: 0,
         is_successful: 1,
         processed: Math.round(Date.now() / 1000),
         type: waiver_types.POACH
@@ -477,7 +477,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         type: transaction_types.ROSTER_ACTIVATE,
-        value: 1,
+        player_salary: 1,
         week: current_season.week,
         year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)

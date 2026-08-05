@@ -21,13 +21,13 @@ const season = {
   lid: 1,
   year: 2026,
   league_format_id: 'genesis_10_team',
-  fqb: 39,
-  frb: 41,
-  fwr: 28,
-  fte: 10,
-  tag2: 1,
-  tag3: 1,
-  tag4: 2,
+  franchise_tag_salary_qb: 39,
+  franchise_tag_salary_rb: 41,
+  franchise_tag_salary_wr: 28,
+  franchise_tag_salary_te: 10,
+  franchise_tag_limit: 1,
+  rookie_tag_limit: 1,
+  restricted_free_agency_tag_limit: 2,
   ext_date: 1785470399,
   restricted_free_agency_period_start: 1785556800,
   restricted_free_agency_period_end: 1787371199,
@@ -39,17 +39,17 @@ const league_format = {
   id: 'genesis_10_team',
   cap: 200,
   format_category: 5,
-  sqb: 1,
-  srb: 2,
-  swr: 2,
-  ste: 1,
-  srbwr: 0,
+  starter_slots_qb: 1,
+  starter_slots_rb: 2,
+  starter_slots_wr: 2,
+  starter_slots_te: 1,
+  starter_slots_rb_wr_flex: 0,
   srbwrte: 1,
   sqbrbwrte: 1,
-  swrte: 0,
-  sdst: 1,
-  sk: 0,
-  bench: 7
+  starter_slots_wr_te_flex: 0,
+  starter_slots_dst: 1,
+  starter_slots_k: 0,
+  bench_slot_count: 7
 }
 
 const now_unix = 1785000000
@@ -75,7 +75,7 @@ const make_player = ({
   // test silently sensitive to that threshold moving.
   pts_added = 10
 }) => ({
-  row: { tid, pid, pos, slot, tag, extensions },
+  row: { tid, pid, player_position: pos, slot, tag, extensions },
   contract: [contract_key(tid, pid), value],
   market_salary: market_salary === null ? null : [pid, market_salary],
   pts_added: pts_added === null ? null : [pid, pts_added],
@@ -1519,8 +1519,8 @@ describe('tag board', function () {
       { tid: 2, pid: 'B1', sort_order: 0 }
     ]
     const bids = [
-      { tid: 1, pid: 'A1', bid: 21, submitted: 1, announced: null },
-      { tid: 2, pid: 'B1', bid: 40, submitted: 1, announced: null }
+      { tid: 1, pid: 'A1', bid_amount: 21, submitted: 1, announced: null },
+      { tid: 2, pid: 'B1', bid_amount: 40, submitted: 1, announced: null }
     ]
     const players = [
       { tid: 1, pid: 'A1', value: 10 },
@@ -1562,8 +1562,8 @@ describe('tag board', function () {
           players,
           viewer_tid: 1,
           viewer_rfa_bids: [
-            { tid: 1, pid: 'A1', bid: 21, submitted: 1 },
-            { tid: 1, pid: 'A2', bid: 5, submitted: 1 }
+            { tid: 1, pid: 'A1', bid_amount: 21, submitted: 1 },
+            { tid: 1, pid: 'A2', bid_amount: 5, submitted: 1 }
           ]
         })
       )
@@ -1571,13 +1571,13 @@ describe('tag board', function () {
       const offers = board.private.restricted_free_agency_offers
       offers.map((row) => row.pid).should.eql(['A1', 'A2'])
       for (const offer of offers) {
-        expect(offer.bid).to.equal(undefined)
+        expect(offer.bid_amount).to.equal(undefined)
         expect(offer.retention_threshold).to.equal(undefined)
       }
       // The amounts and both derived thresholds (25 and 7) stay out entirely.
       const serialized = JSON.stringify(board)
       serialized.should.not.include('retention_threshold')
-      serialized.should.not.include('"bid"')
+      serialized.should.not.include('bid_amount')
       rules_fired(board, 1).should.not.include('own_nomination_exposure')
     })
   })

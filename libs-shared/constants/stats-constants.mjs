@@ -470,9 +470,9 @@ export const nfl_team_stats = [
 ]
 
 export const fantasy_team_stats = [
-  'wins',
-  'losses',
-  'ties',
+  'regular_season_wins',
+  'regular_season_losses',
+  'regular_season_ties',
 
   'all_play_wins',
   'all_play_losses',

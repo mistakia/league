@@ -220,7 +220,7 @@ const handle_regular_practice_claim = async (waiver, lid, timestamp) => {
     })
 
     if (transactions.length) {
-      value = transactions[0].value
+      value = transactions[0].player_salary
     }
   }
 

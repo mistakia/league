@@ -68,7 +68,7 @@ const KNOWN_VIOLATION_BASELINE = {
  * diverge exactly when one drive_seq value spans both halves, which is what
  * makes the drive key address two drives at once.
  *
- * @param {Array} rows - Rows carrying esbid, qtr, and drive_seq
+ * @param {Array} rows - Rows carrying esbid, quarter, and drive_seq
  * @returns {Object} games_checked, violations, violation_counts_by_class
  */
 export const classify_drive_seq_coherence = (rows) => {
@@ -76,7 +76,7 @@ export const classify_drive_seq_coherence = (rows) => {
 
   for (const row of rows) {
     if (row.drive_seq === null || row.drive_seq === undefined) continue
-    if (row.qtr === null || row.qtr === undefined) continue
+    if (row.quarter === null || row.quarter === undefined) continue
 
     if (!games.has(row.esbid)) {
       games.set(row.esbid, {
@@ -146,7 +146,7 @@ export const classify_drive_seq_coherence = (rows) => {
 }
 
 /**
- * Read the distinct (esbid, qtr, drive_seq) triples from nfl_plays and classify
+ * Read the distinct (esbid, quarter, drive_seq) triples from nfl_plays and classify
  * them. One row per drive per quarter -- roughly 200k rows, not 1.5M plays.
  */
 export const find_drive_seq_coherence_violations = async () => {
@@ -156,9 +156,9 @@ export const find_drive_seq_coherence_violations = async () => {
   // there; `is_deleted = false` here would silently exclude those rows and
   // undercount.
   const rows = await db('nfl_plays')
-    .distinct('esbid', 'qtr', 'drive_seq')
+    .distinct('esbid', 'quarter', 'drive_seq')
     .whereNotNull('drive_seq')
-    .whereNotNull('qtr')
+    .whereNotNull('quarter')
     .whereRaw('is_deleted is not true')
 
   // Oracle: assert the query actually resolved something. A renamed column or a

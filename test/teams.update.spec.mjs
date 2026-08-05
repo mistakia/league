@@ -96,14 +96,14 @@ describe('API /teams - update', function () {
       expect(team.image).to.equal(value)
     })
 
-    it('abbrv', async () => {
+    it('abbreviation', async () => {
       const value = 'TT'
       const res = await chai_request
         .execute(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          field: 'abbrv',
+          field: 'abbreviation',
           value
         })
 
@@ -117,7 +117,7 @@ describe('API /teams - update', function () {
         .where({ uid: 1, year: current_season.year })
         .first()
 
-      expect(team.abbrv).to.equal(value)
+      expect(team.abbreviation).to.equal(value)
     })
 
     it('primary_color', async () => {
@@ -197,7 +197,7 @@ describe('API /teams - update', function () {
       // TODO
     })
 
-    it('abbrv is too long', async () => {
+    it('abbreviation is too long', async () => {
       // TODO
     })
   })

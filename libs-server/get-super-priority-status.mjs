@@ -256,7 +256,7 @@ async function calculate_super_priority_from_source({
 
     if (regular_season_started) {
       const active_at_regular_season_start = await db('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .join('rosters', 'rosters_players.roster_id', 'rosters.uid')
         .where({
           'rosters_players.pid': pid,
           'rosters_players.tid': poaching_tid,
@@ -280,7 +280,7 @@ async function calculate_super_priority_from_source({
   // Check if player has been rostered for 4+ weeks on poaching team
   // (counted within the poach year)
   const weeks_rostered_query = db('rosters_players')
-    .join('rosters', 'rosters_players.rid', 'rosters.uid')
+    .join('rosters', 'rosters_players.roster_id', 'rosters.uid')
     .where({
       'rosters_players.pid': pid,
       'rosters_players.tid': poaching_tid,
@@ -305,7 +305,7 @@ async function calculate_super_priority_from_source({
 
   // Check if player started 1+ games (was in a starting slot) in the poach year
   const games_started_query = db('rosters_players')
-    .join('rosters', 'rosters_players.rid', 'rosters.uid')
+    .join('rosters', 'rosters_players.roster_id', 'rosters.uid')
     .where({
       'rosters_players.pid': pid,
       'rosters_players.tid': poaching_tid,

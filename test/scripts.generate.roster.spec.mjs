@@ -77,10 +77,10 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       const teamId = 1
       const roster1 = await getRoster({ tid: teamId })
       const roster1Players = roster1.players.map(
-        ({ lid, pid, pos, slot, tid, type }) => ({
+        ({ lid, pid, player_position, slot, tid, type }) => ({
           lid,
           pid,
-          pos,
+          player_position,
           slot,
           tid,
           type
@@ -91,10 +91,10 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         week: current_season.week + 1
       })
       const roster2Players = roster2.players.map(
-        ({ lid, pid, pos, slot, tid, type }) => ({
+        ({ lid, pid, player_position, slot, tid, type }) => ({
           lid,
           pid,
-          pos,
+          player_position,
           slot,
           tid,
           type
@@ -112,10 +112,10 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       const roster3 = await getRoster({ tid: teamId })
       const roster3Players = roster3.players.map(
-        ({ lid, pid, pos, slot, tid, type }) => ({
+        ({ lid, pid, player_position, slot, tid, type }) => ({
           lid,
           pid,
-          pos,
+          player_position,
           slot,
           tid,
           type
@@ -126,10 +126,10 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         week: current_season.week + 1
       })
       const roster4Players = roster4.players.map(
-        ({ lid, pid, pos, slot, tid, type }) => ({
+        ({ lid, pid, player_position, slot, tid, type }) => ({
           lid,
           pid,
-          pos,
+          player_position,
           slot,
           tid,
           type
@@ -164,10 +164,10 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         year: current_season.year - 1
       })
       const roster1Players = roster1.players.map(
-        ({ lid, pid, pos, slot, tid, type }) => ({
+        ({ lid, pid, player_position, slot, tid, type }) => ({
           lid,
           pid,
-          pos,
+          player_position,
           slot,
           tid,
           type
@@ -177,10 +177,10 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         tid: teamId
       })
       const roster2Players = roster2.players.map(
-        ({ lid, pid, pos, slot, tid, type }) => ({
+        ({ lid, pid, player_position, slot, tid, type }) => ({
           lid,
           pid,
-          pos,
+          player_position,
           slot,
           tid,
           type
@@ -203,10 +203,10 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         year: current_season.year - 1
       })
       const roster3Players = roster3.players.map(
-        ({ lid, pid, pos, slot, tid, type }) => ({
+        ({ lid, pid, player_position, slot, tid, type }) => ({
           lid,
           pid,
-          pos,
+          player_position,
           slot,
           tid,
           type
@@ -216,10 +216,10 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
         tid: teamId
       })
       const roster4Players = roster4.players.map(
-        ({ lid, pid, pos, slot, tid, type }) => ({
+        ({ lid, pid, player_position, slot, tid, type }) => ({
           lid,
           pid,
-          pos,
+          player_position,
           slot,
           tid,
           type
@@ -252,10 +252,10 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       // Plant a FRANCHISE and a ROOKIE tag on year=Y0 final-week as carry-forward fodder.
       await knex('rosters_players').insert([
         {
-          rid: final_week_roster.uid,
+          roster_id: final_week_roster.uid,
           slot: franchise_player.slot,
           pid: franchise_player.pid,
-          pos: franchise_player.pos,
+          player_position: franchise_player.player_position,
           tag: player_tag_types.FRANCHISE,
           extensions: 0,
           tid: team_id,
@@ -264,10 +264,10 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
           week: final_week
         },
         {
-          rid: final_week_roster.uid,
+          roster_id: final_week_roster.uid,
           slot: rookie_player.slot,
           pid: rookie_player.pid,
-          pos: rookie_player.pos,
+          player_position: rookie_player.player_position,
           tag: player_tag_types.ROOKIE,
           extensions: 0,
           tid: team_id,

@@ -109,7 +109,7 @@ const router = express.Router({
  *           type: integer
  *           description: Pick number within round
  *           example: 3
- *         otid:
+ *         original_team_id:
  *           type: integer
  *           nullable: true
  *           description: Original team ID (if pick was traded)
@@ -267,13 +267,13 @@ const router = express.Router({
  *                       year: 2024
  *                       lid: 2
  *                       name: Dynasty Warriors
- *                       abbrv: DW
+ *                       abbreviation: DW
  *                       image: null
- *                       div: 1
+ *                       division: 1
  *                       waiver_order: 5
  *                       draft_order: 3
- *                       cap: 200
- *                       faab: 150
+ *                       salary_cap: 200
+ *                       faab_balance: 150
  *                       primary_color: null
  *                       accent_color: null
  *                       playoff_odds: 0.85
@@ -295,7 +295,7 @@ const router = express.Router({
  *                           year: 2025
  *                           round: 1
  *                           pick: 3
- *                           otid: null
+ *                           original_team_id: null
  *                           pid: null
  *       400:
  *         description: Invalid year parameter
@@ -452,11 +452,11 @@ router.get('/?', async (req, res) => {
  *                     uid: 13
  *                     year: 2024
  *                     name: Team5
- *                     abbrv: TM5
+ *                     abbreviation: TM5
  *                     waiver_order: 5
  *                     draft_order: 5
- *                     cap: 200
- *                     faab: 200
+ *                     salary_cap: 200
+ *                     faab_balance: 200
  *                     lid: 2
  *                   roster:
  *                     uid: 1234
@@ -524,11 +524,11 @@ router.post('/?', async (req, res) => {
     const team = {
       year: current_season.year,
       name: `Team${count}`,
-      abbrv: `TM${count}`,
+      abbreviation: `TM${count}`,
       waiver_order: count,
       draft_order: count,
-      cap: league.cap,
-      faab: league.faab,
+      salary_cap: league.cap,
+      faab_balance: league.starting_faab_budget,
       lid: leagueId
     }
 

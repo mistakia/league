@@ -44,9 +44,9 @@ export function matchups_reducer(state = initialState, { payload, type }) {
         payload.data.matchups.forEach((m) => {
           const matchup = create_matchup({
             ...m,
-            tids: [m.hid, m.aid],
+            tids: [m.home_team_id, m.away_team_id],
             type: matchup_types.H2H,
-            points: [m.hp, m.ap],
+            points: [m.home_points, m.away_points],
             projections: [m.home_projection, m.away_projection]
           })
           state.setIn(['matchups_by_id', m.uid], matchup)

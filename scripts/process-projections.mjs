@@ -421,7 +421,7 @@ const process_league = async ({ year, lid }) => {
   // update player rows with current salary
   for (const tran of transactions) {
     const player_row = player_rows.find((p) => p.pid === tran.pid)
-    player_row.value = tran.value
+    player_row.value = tran.player_salary
   }
 
   week = first_projection_week_to_recompute({ year })
@@ -550,7 +550,7 @@ const process_league = async ({ year, lid }) => {
           lid,
           week,
           year: current_season.year,
-          pos: position,
+          player_position: position,
           // Null for the season 'starter' baseline, which is an expectation over
           // drawn seasons rather than a player. `points` carries it there.
           pid: baseline.pid,
@@ -567,7 +567,7 @@ const process_league = async ({ year, lid }) => {
       save: (items) =>
         db('league_baselines')
           .insert(items)
-          .onConflict(['lid', 'week', 'pos', 'type'])
+          .onConflict(['lid', 'week', 'player_position', 'type'])
           .merge(),
       batch_size: 100
     })
@@ -805,7 +805,7 @@ const check_lineup_starter_identity_oracle = async () => {
     with rostered_teams as (
       select r.lid, r.tid
       from rosters r
-      join rosters_players rp on rp.rid = r.uid
+      join rosters_players rp on rp.roster_id = r.uid
       join player p on p.pid = rp.pid
       where r.year = ? and p.primary_position <> 'DST'
       group by r.lid, r.tid
@@ -827,7 +827,7 @@ const check_lineup_starter_identity_oracle = async () => {
     where l.year = ?
       and lg.is_hosted = true
       and lg.archived_at is null
-      and l.total > 0
+      and l.optimal_total > 0
       and ps.week is null
     group by l.lid, l.tid
     order by l.lid, l.tid

@@ -8,5 +8,5 @@ export const get_fanduel_dfs_config = async () => {
   const config_row = await db('config')
     .where('key', 'fanduel_dfs_config')
     .first()
-  return config_row.value
+  return config_row.config_value
 }

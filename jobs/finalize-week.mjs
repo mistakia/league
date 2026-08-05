@@ -232,8 +232,9 @@ const finalize_week = async () => {
  * process_matchups only populates scores during REG season (it caps at
  * regularSeasonFinalWeek). Skip the check during POST to avoid false positives.
  *
- * Oracle: matchups WHERE lid=$lid AND year=$year AND week=$week AND hp IS NOT
- * NULL AND ap IS NOT NULL must have at least floor(team_count / 2) rows.
+ * Oracle: matchups WHERE lid=$lid AND year=$year AND week=$week AND
+ * home_points IS NOT NULL AND away_points IS NOT NULL must have at least
+ * floor(team_count / 2) rows.
  *
  * @param {object} params
  * @param {number[]} params.league_ids
@@ -255,8 +256,8 @@ const verify_matchup_scores = async ({ league_ids, year, week, seas_type }) => {
     const [scored_row, team_row] = await Promise.all([
       db('matchups')
         .where({ lid, year, week })
-        .whereNotNull('hp')
-        .whereNotNull('ap')
+        .whereNotNull('home_points')
+        .whereNotNull('away_points')
         .count({ n: '*' })
         .first(),
       db('teams').where({ lid, year }).count({ n: '*' }).first()

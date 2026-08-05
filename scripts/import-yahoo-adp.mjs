@@ -77,9 +77,9 @@ const import_yahoo_adp = async ({
       matched_yahoo_ids.add(Number(source_player.yahoo_id))
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.primary_position,
+        player_position: player_row.primary_position,
         season_year: year,
-        adp: source_player.adp,
+        average_draft_position: source_player.adp,
         min_pick: null,
         max_pick: null,
         std_dev: null,
@@ -132,9 +132,9 @@ const import_yahoo_adp = async ({
       matched_yahoo_ids.add(Number(source_player.yahoo_id))
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.primary_position,
+        player_position: player_row.primary_position,
         season_year: year,
-        adp: source_player.adp,
+        average_draft_position: source_player.adp,
         min_pick: null,
         max_pick: null,
         std_dev: null,

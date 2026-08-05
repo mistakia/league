@@ -39,7 +39,7 @@ describe('Data View CTE dedupe', () => {
           column_id: 'player_receptions_from_plays',
           params: {
             year: [2023, 2024],
-            route: ['SLANT'],
+            charted_route: ['SLANT'],
             rate_type: ['per_team_pass_play']
           }
         },
@@ -47,7 +47,7 @@ describe('Data View CTE dedupe', () => {
           column_id: 'player_receptions_from_plays',
           params: {
             year: [2023, 2024],
-            route: ['SCREEN'],
+            charted_route: ['SCREEN'],
             rate_type: ['per_team_pass_play']
           }
         },
@@ -55,7 +55,7 @@ describe('Data View CTE dedupe', () => {
           column_id: 'player_receptions_from_plays',
           params: {
             year: [2023, 2024],
-            route: ['POST'],
+            charted_route: ['POST'],
             rate_type: ['per_team_pass_play']
           }
         }

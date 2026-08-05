@@ -41,7 +41,7 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
     // No draw to run: every team is in the one division.
     if (!dry_run) {
       await db('teams')
-        .update({ div: 1 })
+        .update({ division: 1 })
         .where({ lid, year: current_season.year })
     }
     return
@@ -64,8 +64,8 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
     const team_seasonlogs = league_team_seasonlogs.filter(
       (t) => t.tid === team.uid
     )
-    team.wins = sum(team_seasonlogs.map((s) => s.wins))
-    team.losses = sum(team_seasonlogs.map((s) => s.losses))
+    team.wins = sum(team_seasonlogs.map((s) => s.regular_season_wins))
+    team.losses = sum(team_seasonlogs.map((s) => s.regular_season_losses))
     team.pf = sum(team_seasonlogs.map((s) => s.points_for))
 
     if (team.wins > maxWin) maxWin = team.wins
@@ -118,7 +118,7 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
     if (!dry_run) {
       for (const team of division) {
         await db('teams')
-          .update({ div })
+          .update({ division: div })
           .where({ uid: team.tid, year: current_season.year })
       }
     }

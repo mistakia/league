@@ -90,8 +90,8 @@ const get_round_robin_sched = (teams) => {
   return weeks
 }
 
-// teams should be an array of objects with a uid and div property
-// num_divisions is derived from the teams' div values and must be 1, 2 or 4 --
+// teams should be an array of objects with a uid and division property
+// num_divisions is derived from the teams' division values and must be 1, 2 or 4 --
 // those are the constructions implemented here. Any other count throws rather
 // than emitting a partial season.
 // teams in the same division should play each other exactly twice
@@ -130,8 +130,8 @@ const generate_fantasy_league_schedule = (teams, random_seed) => {
 
   const divisions = {}
   for (const team of teams) {
-    if (!divisions[team.div]) divisions[team.div] = []
-    divisions[team.div].push(team)
+    if (!divisions[team.division]) divisions[team.division] = []
+    divisions[team.division].push(team)
   }
 
   // shuffle each division

@@ -88,7 +88,7 @@ export default async function generate_team_context({
   const matchups = await db('matchups')
     .where({ lid, year })
     .where(function () {
-      this.where('hid', tid).orWhere('aid', tid)
+      this.where('home_team_id', tid).orWhere('away_team_id', tid)
     })
     .orderBy('week')
   const other_teams = await db('teams')
@@ -127,10 +127,10 @@ export default async function generate_team_context({
 
   const manager = (managers[team.uid] || []).join(', ') || '—'
   const division =
-    league[`division_${team.div}_name`] ||
-    (team.div ? `Division ${team.div}` : '—')
+    league[`division_${team.division}_name`] ||
+    (team.division ? `Division ${team.division}` : '—')
   const record = seasonlog
-    ? `${seasonlog.wins || 0}-${seasonlog.losses || 0}-${seasonlog.ties || 0}`
+    ? `${seasonlog.regular_season_wins || 0}-${seasonlog.regular_season_losses || 0}-${seasonlog.regular_season_ties || 0}`
     : '0-0-0'
   const finish =
     seasonlog && seasonlog.overall_finish
@@ -152,7 +152,7 @@ export default async function generate_team_context({
             : `Cap space (${year})`,
           `$${roster.availableCap} of $${league.cap}`
         ],
-        ['FAAB remaining', `$${team.faab}`]
+        ['FAAB remaining', `$${team.faab_balance}`]
       ]
     )
   ])
@@ -185,12 +185,16 @@ export default async function generate_team_context({
   )
 
   const schedule_rows = matchups.map((matchup) => {
-    const is_home = matchup.hid === tid
-    const opponent_tid = is_home ? matchup.aid : matchup.hid
+    const is_home = matchup.home_team_id === tid
+    const opponent_tid = is_home ? matchup.away_team_id : matchup.home_team_id
     const opponent =
       team_name_by_tid.get(opponent_tid) || `Team ${opponent_tid}`
-    const own_points = Number(is_home ? matchup.hp : matchup.ap)
-    const opp_points = Number(is_home ? matchup.ap : matchup.hp)
+    const own_points = Number(
+      is_home ? matchup.home_points : matchup.away_points
+    )
+    const opp_points = Number(
+      is_home ? matchup.away_points : matchup.home_points
+    )
     const outcome =
       own_points > 0 || opp_points > 0
         ? `${own_points.toFixed(2)} - ${opp_points.toFixed(2)}`
@@ -215,7 +219,7 @@ export default async function generate_team_context({
             format_date_et(t.timestamp),
             transaction_type_display_names[t.type] || `Type ${t.type}`,
             t.pid ? players[t.pid]?.name || t.pid : '—',
-            `$${t.value}`
+            `$${t.player_salary}`
           ])
         )
       : '_No transactions yet._'

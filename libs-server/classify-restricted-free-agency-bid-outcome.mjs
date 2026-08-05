@@ -38,8 +38,8 @@ export default function classify_restricted_free_agency_bid_outcome({
     return restricted_free_agency_bid_outcomes.MATCHED
   }
 
-  const losing_amount = losing_bid.bid ?? 0
-  const winning_amount = winning_bid.bid ?? 0
+  const losing_amount = losing_bid.bid_amount ?? 0
+  const winning_amount = winning_bid.bid_amount ?? 0
 
   if (losing_amount < winning_amount) {
     return restricted_free_agency_bid_outcomes.OUTBID

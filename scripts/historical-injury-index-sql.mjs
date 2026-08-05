@@ -24,7 +24,7 @@ gl AS (
 ),
 practice_signal AS (
   SELECT pid, season_year, week,
-         BOOL_OR(inj IS NOT NULL AND inj <> '') AS has_practice_listed_injury,
+         BOOL_OR(injury_type IS NOT NULL AND injury_type <> '') AS has_practice_listed_injury,
          BOOL_OR(UPPER(game_designation) IN ('OUT','DOUBTFUL','QUESTIONABLE')) AS is_practice_questionable_or_worse,
          MAX(UPPER(game_designation)) AS practice_designation
   FROM practice

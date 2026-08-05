@@ -4,11 +4,11 @@ export const Waiver = new Record({
   uid: null,
   tid: null,
   pid: null,
-  po: 0,
+  priority_order: 0,
   release: new List(),
   is_successful: null,
   reason: null,
-  bid: null,
+  bid_amount: null,
   type: null,
   player_map: new Map()
 })
@@ -17,22 +17,22 @@ export function createWaiver({
   uid,
   tid,
   pid,
-  po,
+  priority_order,
   release,
   is_successful,
   reason,
-  bid,
+  bid_amount,
   type
 }) {
   return new Waiver({
     uid,
     tid,
     pid,
-    po,
+    priority_order,
     release: new List(release),
     is_successful,
     reason,
-    bid,
+    bid_amount,
     type
   })
 }

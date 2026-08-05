@@ -79,26 +79,26 @@ export const scoring_field_labels = {
 }
 
 export const starting_lineup_labels = {
-  sqb: 'QB',
-  srb: 'RB',
-  swr: 'WR',
-  ste: 'TE',
-  sk: 'K',
-  sdst: 'DST',
-  srbwr: 'RB/WR',
+  starter_slots_qb: 'QB',
+  starter_slots_rb: 'RB',
+  starter_slots_wr: 'WR',
+  starter_slots_te: 'TE',
+  starter_slots_k: 'K',
+  starter_slots_dst: 'DST',
+  starter_slots_rb_wr_flex: 'RB/WR',
   srbwrte: 'RB/WR/TE',
   sqbrbwrte: 'QB/RB/WR/TE',
-  swrte: 'WR/TE'
+  starter_slots_wr_te_flex: 'WR/TE'
 }
 
 export const roster_limit_labels = {
-  mqb: 'QB',
-  mrb: 'RB',
-  mwr: 'WR',
-  mte: 'TE',
-  mk: 'K',
-  mdst: 'DST',
-  bench: 'Bench',
-  ps: 'PS',
+  max_roster_qb: 'QB',
+  max_roster_rb: 'RB',
+  max_roster_wr: 'WR',
+  max_roster_te: 'TE',
+  max_roster_k: 'K',
+  max_roster_dst: 'DST',
+  bench_slot_count: 'Bench',
+  practice_squad_slot_count: 'PS',
   reserve_short_term_limit: 'Short Term Reserve Limit'
 }

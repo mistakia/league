@@ -253,7 +253,7 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
       // Apply quarter filter if specified
       if (mapping.quarter_filter) {
         filtered_plays = filtered_plays.filter(
-          (play) => play.qtr === mapping.quarter_filter
+          (play) => play.quarter === mapping.quarter_filter
         )
       }
 
@@ -261,11 +261,11 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
       if (mapping.half_filter) {
         if (mapping.half_filter === 1) {
           filtered_plays = filtered_plays.filter(
-            (play) => play.qtr === 1 || play.qtr === 2
+            (play) => play.quarter === 1 || play.quarter === 2
           )
         } else if (mapping.half_filter === 2) {
           filtered_plays = filtered_plays.filter(
-            (play) => play.qtr === 3 || play.qtr === 4
+            (play) => play.quarter === 3 || play.quarter === 4
           )
         }
       }
@@ -290,7 +290,7 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
     // Filter by quarter if specified
     if (mapping.quarter_filter) {
       filtered_plays = filtered_plays.filter(
-        (play) => play.qtr === mapping.quarter_filter
+        (play) => play.quarter === mapping.quarter_filter
       )
     }
 
@@ -299,12 +299,12 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
       if (mapping.half_filter === 1) {
         // First half: quarters 1 and 2
         filtered_plays = filtered_plays.filter(
-          (play) => play.qtr === 1 || play.qtr === 2
+          (play) => play.quarter === 1 || play.quarter === 2
         )
       } else if (mapping.half_filter === 2) {
         // Second half: quarters 3 and 4
         filtered_plays = filtered_plays.filter(
-          (play) => play.qtr === 3 || play.qtr === 4
+          (play) => play.quarter === 3 || play.quarter === 4
         )
       }
     }

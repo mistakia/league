@@ -30,7 +30,7 @@ export default async function setupSuperPriority({
       lid: league_id,
       pid: player.pid,
       type: transaction_types.ROSTER_RELEASE,
-      value: 0,
+      player_salary: 0,
       week: current_season.week,
       year: current_season.year,
       timestamp: previousReleaseTimestamp
@@ -55,7 +55,7 @@ export default async function setupSuperPriority({
     lid: league_id,
     pid: player.pid,
     type: transaction_types.PRACTICE_ADD,
-    value: 0,
+    player_salary: 0,
     week: current_season.week,
     year: current_season.year,
     timestamp: originalAddTimestamp
@@ -63,10 +63,10 @@ export default async function setupSuperPriority({
 
   // Insert roster entry
   await db('rosters_players').insert({
-    rid: originalRosterId,
+    roster_id: originalRosterId,
     pid: player.pid,
     slot: roster_slot_types.PS,
-    pos: player.secondary_position,
+    player_position: player.secondary_position,
     tag: player_tag_types.REGULAR,
     tid: original_team_id,
     lid: league_id,
@@ -81,7 +81,7 @@ export default async function setupSuperPriority({
     lid: league_id,
     pid: player.pid,
     type: transaction_types.POACHED,
-    value: 0,
+    player_salary: 0,
     week: current_season.week,
     year: current_season.year,
     timestamp: poachTimestamp
@@ -91,7 +91,7 @@ export default async function setupSuperPriority({
   await db('rosters_players')
     .where({
       pid: player.pid,
-      rid: originalRosterId
+      roster_id: originalRosterId
     })
     .del()
 
@@ -108,10 +108,10 @@ export default async function setupSuperPriority({
 
   // Insert roster entry for poaching team
   await db('rosters_players').insert({
-    rid: poachingRosterId,
+    roster_id: poachingRosterId,
     pid: player.pid,
     slot: roster_slot_types.PS,
-    pos: player.secondary_position,
+    player_position: player.secondary_position,
     tag: player_tag_types.REGULAR,
     tid: poaching_team_id,
     lid: league_id,
@@ -131,7 +131,7 @@ export default async function setupSuperPriority({
       lid: league_id,
       pid: player.pid,
       type: transaction_types.ROSTER_RELEASE,
-      value: 0,
+      player_salary: 0,
       week: current_season.week,
       year: current_season.year,
       timestamp: releaseTimestamp
@@ -141,7 +141,7 @@ export default async function setupSuperPriority({
     await db('rosters_players')
       .where({
         pid: player.pid,
-        rid: poachingRosterId
+        roster_id: poachingRosterId
       })
       .del()
   }

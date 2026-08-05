@@ -56,12 +56,12 @@ const get_teams_with_restricted_free_agency_transactions = async ({ lid }) => {
  */
 const get_team_display_name = async ({ tid }) => {
   const team = await db('teams')
-    .select('name', 'abbrv')
+    .select('name', 'abbreviation')
     .where('uid', tid)
     .where('year', CURRENT_YEAR)
     .first()
 
-  return team ? `${team.name} (${team.abbrv})` : `Team ${tid}`
+  return team ? `${team.name} (${team.abbreviation})` : `Team ${tid}`
 }
 
 /**
@@ -110,7 +110,7 @@ const log_restricted_free_agency_transactions = async ({ tid, lid }) => {
       const player_name = format_player_name(transaction)
       const transaction_type = 'Restricted Free Agency Tagged'
       log(
-        `     - ${player_name}: ${transaction_type}, Value: $${transaction.value || 'N/A'}`
+        `     - ${player_name}: ${transaction_type}, Value: $${transaction.player_salary || 'N/A'}`
       )
     }
   }

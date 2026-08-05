@@ -40,7 +40,12 @@ const { expect } = chai
 const base_url = 'https://xo.football'
 
 // Franchise-tag amounts are not part of the default league, so seed them.
-const league_params = { fqb: 15, frb: 10, fwr: 12, fte: 8 }
+const league_params = {
+  franchise_tag_salary_qb: 15,
+  franchise_tag_salary_rb: 10,
+  franchise_tag_salary_wr: 12,
+  franchise_tag_salary_te: 8
+}
 
 const parse_frontmatter = (markdown) => {
   const match = markdown.match(/^---\n([\s\S]*?)\n---\n/)
@@ -67,9 +72,9 @@ const seed_full_league = async () => {
       tid: i,
       year,
       division: (i % 4) + 1,
-      wins: 12 - i,
-      losses: i - 1,
-      ties: 0,
+      regular_season_wins: 12 - i,
+      regular_season_losses: i - 1,
+      regular_season_ties: 0,
       points_for: 1000 + i,
       points_against: 900 + i,
       overall_finish: i
@@ -99,7 +104,7 @@ const seed_full_league = async () => {
       tid: 1,
       lid: 1,
       type: transaction_types.RESTRICTED_FREE_AGENCY_TAG,
-      value: 50,
+      player_salary: 50,
       week: 0,
       year,
       timestamp: Math.round(Date.now() / 1000) - 100,
@@ -110,7 +115,7 @@ const seed_full_league = async () => {
       tid: 1,
       lid: 1,
       type: transaction_types.PRACTICE_ADD,
-      value: 5,
+      player_salary: 5,
       week: 0,
       year,
       timestamp: Math.round(Date.now() / 1000) - 200,
@@ -119,10 +124,10 @@ const seed_full_league = async () => {
   ])
   await knex('rosters_players').insert([
     {
-      rid: roster0.uid,
+      roster_id: roster0.uid,
       slot: roster_slot_types.QB,
       pid: rfa_player.pid,
-      pos: rfa_player.primary_position,
+      player_position: rfa_player.primary_position,
       tag: player_tag_types.RESTRICTED_FREE_AGENCY,
       extensions: 0,
       tid: 1,
@@ -131,10 +136,10 @@ const seed_full_league = async () => {
       year
     },
     {
-      rid: roster0.uid,
+      roster_id: roster0.uid,
       slot: roster_slot_types.PS,
       pid: ps_player.pid,
-      pos: ps_player.primary_position,
+      player_position: ps_player.primary_position,
       tag: player_tag_types.REGULAR,
       extensions: 0,
       tid: 1,
@@ -150,19 +155,27 @@ const seed_full_league = async () => {
     userid: 1,
     original_team_id: 1,
     year,
-    bid: 10
+    bid_amount: 10
   })
 
   await knex('matchups').insert([
-    { aid: 2, hid: 1, lid: 1, year, week: 1, hp: 100.5, ap: 90.25 },
     {
-      aid: 4,
-      hid: 3,
+      away_team_id: 2,
+      home_team_id: 1,
       lid: 1,
       year,
       week: 1,
-      hp: 0,
-      ap: 0,
+      home_points: 100.5,
+      away_points: 90.25
+    },
+    {
+      away_team_id: 4,
+      home_team_id: 3,
+      lid: 1,
+      year,
+      week: 1,
+      home_points: 0,
+      away_points: 0,
       home_projection: 110.5,
       away_projection: 105.25
     }
@@ -173,7 +186,7 @@ const seed_full_league = async () => {
     pick: 3,
     pick_str: '1.03',
     tid: 1,
-    otid: 1,
+    original_team_id: 1,
     lid: 1,
     year
   })
@@ -355,7 +368,7 @@ describe('context documents', function () {
       doc.should.include('Salary cap')
       doc.should.include('Free agency budget (FAAB)')
       doc.should.include('Salary attribution rule')
-      doc.should.include('$15') // fqb
+      doc.should.include('$15') // franchise_tag_salary_qb
 
       // Genesis league (lid 1) points to the authored constitution for governance
       doc.should.include('League Constitution')
@@ -447,17 +460,17 @@ describe('context documents', function () {
         tid: 1,
         lid: 1,
         type: transaction_types.AUCTION_PROCESSED,
-        value: 20,
+        player_salary: 20,
         week: 0,
         year,
         timestamp: Math.round(Date.now() / 1000) - 300,
         userid: 1
       })
       await knex('rosters_players').insert({
-        rid: roster0.uid,
+        roster_id: roster0.uid,
         slot: roster_slot_types.BENCH,
         pid: player.pid,
-        pos: player.primary_position,
+        player_position: player.primary_position,
         tag: player_tag_types.REGULAR,
         extensions: 1,
         tid: 1,

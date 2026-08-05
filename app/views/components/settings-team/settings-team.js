@@ -99,7 +99,7 @@ export default class SettingsTeam extends React.Component {
         />
         <EditableSettingField
           label='Abbreviation'
-          field='abbrv'
+          field='abbreviation'
           limit={5}
           {...props}
         />

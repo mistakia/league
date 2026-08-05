@@ -340,7 +340,7 @@ export function players_reducer(state = initialState, { payload, type }) {
           roster.players.forEach((rosterSlot) => {
             const {
               pid,
-              value,
+              player_salary,
               type,
               slot,
               tag,
@@ -350,7 +350,7 @@ export function players_reducer(state = initialState, { payload, type }) {
               restricted_free_agency_tag_announced
             } = rosterSlot
             const params = {
-              value,
+              value: player_salary,
               tag,
               type,
               tid: roster.tid,
@@ -396,9 +396,9 @@ export function players_reducer(state = initialState, { payload, type }) {
       )
 
     case auction_actions.AUCTION_PROCESSED: {
-      const { tid, pid, value, type } = payload
+      const { tid, pid, player_salary, type } = payload
       return state.mergeIn(['items', pid], {
-        value,
+        value: player_salary,
         type,
         tid,
         slot: roster_slot_types.BENCH
@@ -437,7 +437,7 @@ export function players_reducer(state = initialState, { payload, type }) {
             })
           } else {
             state.mergeIn(['items', t.pid], {
-              value: t.value,
+              value: t.player_salary,
               type: t.type,
               tid: t.tid,
               slot: p.slot
@@ -468,7 +468,7 @@ export function players_reducer(state = initialState, { payload, type }) {
 
         state.mergeIn(['items', payload.data.pid], {
           tag: player_tag_types.RESTRICTED_FREE_AGENCY,
-          bid: payload.data.bid,
+          bid_amount: payload.data.bid_amount,
           restricted_free_agency_conditional_releases:
             payload.data.release || []
         })
@@ -486,7 +486,7 @@ export function players_reducer(state = initialState, { payload, type }) {
       // it to an empty list rather than null — a null here is a shape the API
       // never returns and read sites do not expect.
       const data = {
-        bid: null,
+        bid_amount: null,
         restricted_free_agency_conditional_releases: []
       }
       if (
@@ -512,9 +512,9 @@ export function players_reducer(state = initialState, { payload, type }) {
     case roster_actions.POST_RESERVE_FULFILLED:
     case roster_actions.ROSTER_TRANSACTION: {
       const { pid, slot, transaction } = payload.data
-      const { value, type, tid } = transaction
+      const { player_salary, type, tid } = transaction
       return state.mergeIn(['items', pid], {
-        value,
+        value: player_salary,
         type,
         slot,
         tid

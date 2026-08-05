@@ -308,7 +308,7 @@ const format_player_gamelog = ({
       season_year
     }),
     pid,
-    pos,
+    player_position: pos,
     is_active: true,
     source: PLAY_STATS_GAMELOG_SOURCE
   }

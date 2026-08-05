@@ -30,30 +30,30 @@ const seed_slice = async ({ lid = 1, tid = 1, week }) => {
 
   await knex('rosters_players').insert([
     {
-      rid,
+      roster_id: rid,
       slot: roster_slot_types.PSP,
       pid: 'TEST-PSPP-000001',
-      pos: 'RB',
+      player_position: 'RB',
       tid,
       lid,
       week,
       year
     },
     {
-      rid,
+      roster_id: rid,
       slot: roster_slot_types.PSDP,
       pid: 'TEST-PSDP-000002',
-      pos: 'WR',
+      player_position: 'WR',
       tid,
       lid,
       week,
       year
     },
     {
-      rid,
+      roster_id: rid,
       slot: roster_slot_types.BENCH,
       pid: 'TEST-BNCH-000003',
-      pos: 'TE',
+      player_position: 'TE',
       tid,
       lid,
       week,

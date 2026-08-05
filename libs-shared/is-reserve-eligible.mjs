@@ -27,13 +27,13 @@ function has_final_practice_report({ practice, game_day, current_date }) {
 
   // Map day numbers (0=Sunday, 6=Saturday) to practice object properties
   const practice_day_map = {
-    0: 'su', // Sunday
-    1: 'm', // Monday
-    2: 'tu', // Tuesday
-    3: 'w', // Wednesday
-    4: 'th', // Thursday
-    5: 'f', // Friday
-    6: 's' // Saturday
+    0: 'sunday_practice_status', // Sunday
+    1: 'monday_practice_status', // Monday
+    2: 'tuesday_practice_status', // Tuesday
+    3: 'wednesday_practice_status', // Wednesday
+    4: 'thursday_practice_status', // Thursday
+    5: 'friday_practice_status', // Friday
+    6: 'saturday_practice_status' // Saturday
   }
 
   const final_practice_day = get_final_practice_day({ game_day })

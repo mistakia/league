@@ -67,7 +67,7 @@ const espn_team_source = {
 // Range year_offset reduction per column (select-string's correlated-aggregate
 // path defaults to SUM). Win rates are percentages, not additive, so a
 // multi-year window must AVG rather than SUM -- summing two ~55% seasons renders
-// as 110. `wins` is an additive count and keeps the SUM default. A snap-weighted
+// as 110. `line_win_count` is an additive count and keeps the SUM default. A snap-weighted
 // pooled rate would be more precise, but the per-season denominator (total reps)
 // is not stored on these indexes, so AVG is the least-wrong closed form.
 const create_player_espn_line_column = (
@@ -95,7 +95,7 @@ const create_team_espn_line_column = (column_name) => ({
 
 export default {
   player_espn_line_win_rate: create_player_espn_line_column('win_rate', 'AVG'),
-  player_espn_line_wins: create_player_espn_line_column('wins'),
+  player_espn_line_wins: create_player_espn_line_column('line_win_count'),
   team_espn_pass_rush_win_rate:
     create_team_espn_line_column('pass_rush_win_rate'),
   team_espn_pass_block_win_rate: create_team_espn_line_column(

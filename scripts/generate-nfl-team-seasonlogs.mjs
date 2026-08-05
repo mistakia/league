@@ -27,9 +27,9 @@ const passing_stats = [
   'pass_rating',
   'pass_yards_per_attempt',
   'pass_comp_pct',
-  'sacks',
+  'passing_sacks',
   'expected_pass_comp',
-  'cpoe',
+  'completion_percentage_over_expected',
   'dropbacks',
   'pass_epa',
   'pass_epa_per_db',
@@ -166,6 +166,16 @@ const sanitize_passing_stats_for_position = (stats, position) => {
   return cleaned
 }
 
+// nfl_team_seasonlogs.sacks_taken vs player_passing_gamelogs.passing_sacks --
+// the aggregation pipeline above reads/sums/averages every stat under its
+// SOURCE (player_passing_gamelogs) column name, so the one field whose
+// nfl_team_seasonlogs name diverges from its source name has to be renamed
+// at the insert boundary, not upstream.
+const to_nfl_team_seasonlogs_stats = (stats) => {
+  const { passing_sacks, ...rest } = stats
+  return { ...rest, sacks_taken: passing_sacks }
+}
+
 const copy = ({ opp, tm }) => ({ opp, tm })
 const sum = (items = [], keys = [], fixed_weight) => {
   const r = copy(items[0])
@@ -277,7 +287,15 @@ const format_percentile_inserts = (percentiles, percentile_key) => {
       inserts.push({
         percentile_key,
         field,
-        ...value
+        percentile_25: value.p25,
+        percentile_50: value.p50,
+        percentile_75: value.p75,
+        percentile_90: value.p90,
+        percentile_95: value.p95,
+        percentile_98: value.p98,
+        percentile_99: value.p99,
+        minimum_value: value.min,
+        maximum_value: value.max
       })
     }
   }
@@ -368,7 +386,7 @@ const generate_seasonlogs = async ({
     `loaded ${merged_gamelogs.length} gamelogs for ${year} REG weeks: ${weeks}`
   )
 
-  const positions = groupBy(merged_gamelogs, 'pos')
+  const positions = groupBy(merged_gamelogs, 'player_position')
 
   // remove non fantasy relevant position gamelogs
   for (const position in positions) {
@@ -479,7 +497,9 @@ const generate_seasonlogs = async ({
           stat_key,
           nfl_team: opp,
           season_year: year,
-          ...sanitize_passing_stats_for_position(stats, position)
+          ...to_nfl_team_seasonlogs_stats(
+            sanitize_passing_stats_for_position(stats, position)
+          )
         })
       }
 
@@ -511,7 +531,9 @@ const generate_seasonlogs = async ({
           stat_key,
           nfl_team: tm,
           season_year: year,
-          ...sanitize_passing_stats_for_position(stats, position)
+          ...to_nfl_team_seasonlogs_stats(
+            sanitize_passing_stats_for_position(stats, position)
+          )
         })
       }
 
@@ -584,7 +606,7 @@ const generate_seasonlogs = async ({
         league_team_seasonlog_inserts.push({
           lid: leagueId,
           season_year: year,
-          rank,
+          points_rank: rank,
           ...item
         })
       })

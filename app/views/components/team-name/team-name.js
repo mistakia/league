@@ -13,7 +13,7 @@ export default class TeamName extends React.Component {
     const style = { color: `#${team.primary_color || '00000'}` }
     const name = (
       <div className='team__name' style={style}>
-        {abbrv ? team.abbrv : team.name}
+        {abbrv ? team.abbreviation : team.name}
       </div>
     )
 

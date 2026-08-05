@@ -63,7 +63,7 @@ const generate_scoring_format_player_seasonlogs = async ({
       pos,
       points,
       points_per_game: points / games,
-      games
+      games_played: games
     })
   }
 

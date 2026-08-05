@@ -72,9 +72,9 @@ describe('API /waivers - free agency', function () {
       res.body.userid.should.equal(1)
       res.body.lid.should.equal(leagueId)
       res.body.pid.should.equal(player.pid)
-      res.body.po.should.equal(9999)
+      res.body.priority_order.should.equal(9999)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
-      res.body.bid.should.equal(0)
+      res.body.bid_amount.should.equal(0)
       res.body.type.should.equal(waiver_types.FREE_AGENCY)
 
       res.body.uid.should.exist
@@ -130,9 +130,9 @@ describe('API /waivers - free agency', function () {
       res.body.userid.should.equal(1)
       res.body.lid.should.equal(leagueId)
       res.body.pid.should.equal(player.pid)
-      res.body.po.should.equal(9999)
+      res.body.priority_order.should.equal(9999)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
-      res.body.bid.should.equal(0)
+      res.body.bid_amount.should.equal(0)
       res.body.type.should.equal(waiver_types.FREE_AGENCY_PRACTICE)
 
       res.body.uid.should.exist

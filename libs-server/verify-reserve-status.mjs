@@ -85,13 +85,13 @@ export default async function ({ team_id, league_id }) {
     })
     player_query.select(
       'player.*',
-      'practice.m',
-      'practice.tu',
-      'practice.w',
-      'practice.th',
-      'practice.f',
-      'practice.s',
-      'practice.su',
+      'practice.monday_practice_status as m',
+      'practice.tuesday_practice_status as tu',
+      'practice.wednesday_practice_status as w',
+      'practice.thursday_practice_status as th',
+      'practice.friday_practice_status as f',
+      'practice.saturday_practice_status as s',
+      'practice.sunday_practice_status as su',
       'nfl_games.day as game_day',
       db.raw(
         'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.is_active = false THEN true ELSE false END as prior_week_inactive'
@@ -103,13 +103,13 @@ export default async function ({ team_id, league_id }) {
   } else {
     player_query.select(
       'player.*',
-      'practice.m',
-      'practice.tu',
-      'practice.w',
-      'practice.th',
-      'practice.f',
-      'practice.s',
-      'practice.su',
+      'practice.monday_practice_status as m',
+      'practice.tuesday_practice_status as tu',
+      'practice.wednesday_practice_status as w',
+      'practice.thursday_practice_status as th',
+      'practice.friday_practice_status as f',
+      'practice.saturday_practice_status as s',
+      'practice.sunday_practice_status as su',
       'nfl_games.day as game_day'
     )
   }

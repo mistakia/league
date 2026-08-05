@@ -164,9 +164,9 @@ const import_underdog_bestball_adp = async ({
       matched += 1
       adp_inserts.push({
         pid: player_row.pid,
-        pos: player_row.primary_position,
+        player_position: player_row.primary_position,
         season_year: year,
-        adp,
+        average_draft_position: adp,
         min_pick: null,
         max_pick: null,
         std_dev: null,

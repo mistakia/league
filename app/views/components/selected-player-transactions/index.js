@@ -20,19 +20,19 @@ const map_state_to_props = createSelector(
   (player_map, league, is_before_extension_deadline) => {
     const transactions = player_map.get('transactions', new List())
     const teams = {}
-    let max_transaction = { value: 0 }
+    let max_transaction = { player_salary: 0 }
 
     // Process transactions to find max per team and overall max
     for (const transaction of transactions.valueSeq()) {
       if (
         !teams[transaction.tid] ||
-        transaction.value > teams[transaction.tid].value
+        transaction.player_salary > teams[transaction.tid].player_salary
       ) {
         teams[transaction.tid] = transaction
       }
       if (
         !max_transaction.timestamp ||
-        transaction.value > max_transaction.value
+        transaction.player_salary > max_transaction.player_salary
       ) {
         max_transaction = transaction
       }

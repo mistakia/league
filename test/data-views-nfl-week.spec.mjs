@@ -48,8 +48,8 @@ describe('DATA VIEWS nfl_week parameter integration', function () {
     })
 
     it('retains play-condition parameters', () => {
-      expect(nfl_plays_column_params).to.have.property('dwn')
-      expect(nfl_plays_column_params).to.have.property('qtr')
+      expect(nfl_plays_column_params).to.have.property('down_number')
+      expect(nfl_plays_column_params).to.have.property('quarter')
       expect(nfl_plays_column_params).to.have.property('play_type')
     })
   })

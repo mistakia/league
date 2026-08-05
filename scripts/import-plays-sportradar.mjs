@@ -108,12 +108,12 @@ const load_team_mappings = async () => {
     .where({ key: 'sportradar_team_mappings' })
     .first()
 
-  if (!config_row || !config_row.value) {
+  if (!config_row || !config_row.config_value) {
     log('No team mappings found in config table')
     return new Map()
   }
 
-  const team_mappings = new Map(Object.entries(config_row.value))
+  const team_mappings = new Map(Object.entries(config_row.config_value))
   log(`Loaded ${team_mappings.size} team mappings`)
   return team_mappings
 }

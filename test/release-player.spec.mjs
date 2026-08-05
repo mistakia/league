@@ -240,7 +240,7 @@ describe('CLI release-player script', function () {
       // First, clear any existing players with common first names from the roster
       // to ensure a clean test environment
       await knex('rosters_players')
-        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .join('rosters', 'rosters_players.roster_id', 'rosters.uid')
         .where({
           'rosters.tid': 1,
           'rosters.lid': 1,

@@ -72,11 +72,13 @@ const run = async ({ lid = 1, year = current_season.year }) => {
 
   for (const matchup of matchups) {
     const { week } = matchup
-    matchup.hp = result[matchup.hid].points.weeks[week]
-    matchup.ap = result[matchup.aid].points.weeks[week]
+    matchup.home_points = result[matchup.home_team_id].points.weeks[week]
+    matchup.away_points = result[matchup.away_team_id].points.weeks[week]
 
-    matchup.hpp = result[matchup.hid].potential_points_weekly[week]
-    matchup.app = result[matchup.aid].potential_points_weekly[week]
+    matchup.home_potential_points =
+      result[matchup.home_team_id].potential_points_weekly[week]
+    matchup.away_potential_points =
+      result[matchup.away_team_id].potential_points_weekly[week]
   }
 
   // Constitution Article XI section 3 + Amendment XXVI: when a team had a
@@ -104,7 +106,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
         lid,
         year: year + 1,
         round: 1,
-        otid: team.tid,
+        original_team_id: team.tid,
         tid: team.tid,
         is_compensatory: false
       })
@@ -147,7 +149,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
       tid,
       lid,
       year,
-      division: tm.div,
+      division: tm.division,
       ...remainingStats
     })
   }

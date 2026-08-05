@@ -50,11 +50,11 @@ export const get_nfl_api_config = async () => {
   }
 
   const config_row = await db('config').where({ key: 'nfl_api_config' }).first()
-  if (!config_row?.value) {
+  if (!config_row?.config_value) {
     throw new Error('nfl_api_config not found in database config table')
   }
 
-  nfl_api_config_cache = config_row.value
+  nfl_api_config_cache = config_row.config_value
   return nfl_api_config_cache
 }
 

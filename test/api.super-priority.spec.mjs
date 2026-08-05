@@ -47,7 +47,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           tid: 1,
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
-          value: 0,
+          player_salary: 0,
           year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 1,
@@ -58,7 +58,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           tid: 2,
           lid: 1,
           type: transaction_types.POACHED,
-          value: 0,
+          player_salary: 0,
           year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 1,
@@ -339,7 +339,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         tid: 1,
         lid: 1,
         type: transaction_types.ROSTER_ADD,
-        value: 0,
+        player_salary: 0,
         year: current_season.year,
         timestamp: poach_timestamp + 12 * 60 * 60, // 12 hours later
         week: current_season.week - 1,
@@ -516,7 +516,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         lid: 1,
         pid: player.pid,
         type: transaction_types.PRACTICE_ADD,
-        value: 0,
+        player_salary: 0,
         week: current_season.week,
         year: current_season.year,
         timestamp: originalTimestamp
@@ -530,7 +530,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         lid: 1,
         pid: player.pid,
         type: transaction_types.POACHED,
-        value: 0,
+        player_salary: 0,
         week: current_season.week,
         year: current_season.year,
         timestamp: poachTimestamp
@@ -544,7 +544,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         lid: 1,
         pid: player.pid,
         type: transaction_types.ROSTER_RELEASE,
-        value: 0,
+        player_salary: 0,
         week: current_season.week,
         year: current_season.year,
         timestamp: releaseTimestamp
@@ -558,7 +558,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         lid: 1,
         pid: player.pid,
         type: transaction_types.ROSTER_ADD,
-        value: 0,
+        player_salary: 0,
         week: current_season.week,
         year: current_season.year,
         timestamp: readdTimestamp

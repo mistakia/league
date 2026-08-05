@@ -5,7 +5,11 @@ import HighchartsReact from 'highcharts-react-official'
 import 'highcharts/highcharts-more'
 
 import { nth } from '@libs-shared'
-import { fantasy_positions } from '@constants'
+import {
+  fantasy_positions,
+  roster_slot_types,
+  starter_slot_league_columns
+} from '@constants'
 
 export default function DashboardTeamValue({
   summary,
@@ -29,7 +33,10 @@ export default function DashboardTeamValue({
   )
   fantasy_positions.forEach((position, idx) => {
     // check if this league starts this position
-    if (!league || !league[`s${position.toLowerCase()}`]) {
+    if (
+      !league ||
+      !league[starter_slot_league_columns[roster_slot_types[position]]]
+    ) {
       return
     }
     const values = summary.league[position].sort((a, b) => b - a)
@@ -66,7 +73,7 @@ export default function DashboardTeamValue({
   )
 
   const starting_positions = fantasy_positions.filter(
-    (p) => league[`s${p.toLowerCase()}`]
+    (p) => league[starter_slot_league_columns[roster_slot_types[p]]]
   )
 
   const options = {

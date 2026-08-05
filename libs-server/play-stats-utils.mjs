@@ -9,7 +9,7 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
       'nfl_plays.play_type_nfl',
       'nfl_plays.possession_nfl_team',
       'nfl_plays.ydl_100',
-      'nfl_plays.dot',
+      'nfl_plays.depth_of_target',
       'nfl_plays.is_qb_kneel',
       'nfl_plays.is_first_down',
       'nfl_plays.play_type',
@@ -34,15 +34,24 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
     .where('nfl_plays.season_type', seas_type)
 }
 
-export const is_successful_play = ({ yds_gained, yards_to_go, dwn }) => {
-  if (!dwn || !yards_to_go || yds_gained === null || yds_gained === undefined)
+export const is_successful_play = ({
+  yds_gained,
+  yards_to_go,
+  down_number
+}) => {
+  if (
+    !down_number ||
+    !yards_to_go ||
+    yds_gained === null ||
+    yds_gained === undefined
+  )
     return null
 
-  if (dwn === 1) {
+  if (down_number === 1) {
     return yds_gained >= 0.4 * yards_to_go
-  } else if (dwn === 2) {
+  } else if (down_number === 2) {
     return yds_gained >= 0.6 * yards_to_go
-  } else if (dwn === 3 || dwn === 4) {
+  } else if (down_number === 3 || down_number === 4) {
     return yds_gained >= yards_to_go
   }
 

@@ -247,7 +247,7 @@ describe('API /teams - tag', function () {
         lid: leagueId,
         pid: player.pid,
         type: transaction_types.FRANCHISE_TAG,
-        value: 0,
+        player_salary: 0,
         week: 0,
         year: two_years_ago,
         timestamp: Math.round(Date.now() / 1000) - 63072000 // Approx 2 years ago
@@ -260,7 +260,7 @@ describe('API /teams - tag', function () {
         lid: leagueId,
         pid: player.pid,
         type: transaction_types.FRANCHISE_TAG,
-        value: 0,
+        player_salary: 0,
         week: 0,
         year: one_year_ago,
         timestamp: Math.round(Date.now() / 1000) - 31536000 // Approx 1 year ago

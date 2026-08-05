@@ -140,7 +140,7 @@ export const format_nomination_complete_message = async ({
   }
 
   const team_name = winning_team.name
-  const team_abbrv = winning_team.abbrv || ''
+  const team_abbrv = winning_team.abbreviation || ''
 
   return `${team_name}${team_abbrv ? ` (${team_abbrv})` : ''} has signed free agent ${player.first_name} ${player.last_name} (${player.primary_position}) for $${winning_bid_amount}.`
 }

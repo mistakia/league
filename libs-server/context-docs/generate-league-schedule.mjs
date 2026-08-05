@@ -25,10 +25,14 @@ function render_matchups(matchups, team_name_by_tid) {
   }
 
   const rows = matchups.map((matchup) => {
-    const home = team_name_by_tid.get(matchup.hid) || `Team ${matchup.hid}`
-    const away = team_name_by_tid.get(matchup.aid) || `Team ${matchup.aid}`
-    const home_points = Number(matchup.hp)
-    const away_points = Number(matchup.ap)
+    const home =
+      team_name_by_tid.get(matchup.home_team_id) ||
+      `Team ${matchup.home_team_id}`
+    const away =
+      team_name_by_tid.get(matchup.away_team_id) ||
+      `Team ${matchup.away_team_id}`
+    const home_points = Number(matchup.home_points)
+    const away_points = Number(matchup.away_points)
     const is_completed = home_points > 0 || away_points > 0
 
     let outcome

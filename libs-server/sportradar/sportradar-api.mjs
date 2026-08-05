@@ -74,14 +74,14 @@ const get_sportradar_config = async () => {
     .where({ key: 'sportradar_config' })
     .first()
 
-  if (!config_row?.value?.api_key) {
+  if (!config_row?.config_value?.api_key) {
     throw new Error('sportradar_config not found in database config table')
   }
 
   return {
-    api_key: config_row.value.api_key,
+    api_key: config_row.config_value.api_key,
     base_url:
-      config_row.value.base_url ||
+      config_row.config_value.base_url ||
       'https://api.sportradar.com/nfl/official/trial/v7/en'
   }
 }

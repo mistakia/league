@@ -65,7 +65,7 @@ const store_team_mappings = async ({ team_mappings }) => {
   await db('config')
     .insert({
       key: 'sportradar_team_mappings',
-      value: JSON.stringify(team_mappings_obj)
+      config_value: JSON.stringify(team_mappings_obj)
     })
     .onConflict('key')
     .merge()

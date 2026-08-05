@@ -54,15 +54,15 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
         roster_config: league.roster_positions
       })
 
-      result.league_params.should.have.property('sqb', 1)
-      result.league_params.should.have.property('srb', 2)
-      result.league_params.should.have.property('swr', 3)
-      result.league_params.should.have.property('ste', 1)
-      result.league_params.should.have.property('srbwr', 2)
+      result.league_params.should.have.property('starter_slots_qb', 1)
+      result.league_params.should.have.property('starter_slots_rb', 2)
+      result.league_params.should.have.property('starter_slots_wr', 3)
+      result.league_params.should.have.property('starter_slots_te', 1)
+      result.league_params.should.have.property('starter_slots_rb_wr_flex', 2)
       result.league_params.should.have.property('sqbrbwrte', 1)
-      result.league_params.should.have.property('sdst', 0)
-      result.league_params.should.have.property('sk', 0)
-      result.league_params.should.have.property('bench', 15)
+      result.league_params.should.have.property('starter_slots_dst', 0)
+      result.league_params.should.have.property('starter_slots_k', 0)
+      result.league_params.should.have.property('bench_slot_count', 15)
     })
   })
 

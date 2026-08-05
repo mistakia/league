@@ -10,6 +10,15 @@ import StackedMetric from '@components/stacked-metric'
 import NFLTeamBye from '@components/nfl-team-bye'
 import { current_season, player_tag_types } from '@constants'
 
+// league.franchise_tag_salary_<pos> no longer shares a shape with the
+// position code, so the per-position lookup needs an explicit map.
+const franchise_tag_salary_field_by_position = {
+  qb: 'franchise_tag_salary_qb',
+  rb: 'franchise_tag_salary_rb',
+  wr: 'franchise_tag_salary_wr',
+  te: 'franchise_tag_salary_te'
+}
+
 class PlayerRoster extends Player {
   render() {
     const {
@@ -41,7 +50,7 @@ class PlayerRoster extends Player {
     )
 
     const value = player_map.get('value', 0)
-    const bid = player_map.get('bid')
+    const bid = player_map.get('bid_amount')
     const salary = is_before_extension_deadline
       ? value
       : is_before_restricted_free_agency_end &&
@@ -141,7 +150,8 @@ class PlayerRoster extends Player {
 
       franchise_tag_savings =
         Math.max(
-          regular_extended_salary - league[`f${pos.toLowerCase()}`],
+          regular_extended_salary -
+            league[franchise_tag_salary_field_by_position[pos.toLowerCase()]],
           0
         ) || null
     }
@@ -200,7 +210,7 @@ class PlayerRoster extends Player {
         )}
         {isWaiver && (
           <div className='metric table__cell'>
-            {isNaN(claim.bid) ? '-' : `$${claim.bid}`}
+            {isNaN(claim.bid_amount) ? '-' : `$${claim.bid_amount}`}
           </div>
         )}
         {!isWaiver && (

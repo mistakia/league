@@ -373,7 +373,7 @@ const import_ownership = async ({
           source_draft_group_id: contest.source_draft_group_id,
           ownership_pct: row.ownership_pct,
           roster_position: row.roster_position,
-          fpts: row.fpts,
+          fantasy_points: row.fpts,
           source_player_display_name: row.player_name,
           season_year: contest.season_year,
           week: contest.week

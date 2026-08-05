@@ -188,8 +188,8 @@ export default {
   player_pff_defense: create_field_from_pff_player_seasonlogs('defense'),
   player_pff_receiving: create_field_from_pff_player_seasonlogs('receiving'),
   player_pff_coverage: create_field_from_pff_player_seasonlogs('coverage'),
-  player_pff_speed: create_field_from_pff_player_seasonlogs('speed'),
-  player_pff_run: create_field_from_pff_player_seasonlogs('run'),
+  player_pff_speed: create_field_from_pff_player_seasonlogs('speed_rating'),
+  player_pff_run: create_field_from_pff_player_seasonlogs('run_grade'),
   player_pff_run_defense_snaps:
     create_field_from_pff_player_seasonlogs('run_defense_snaps'),
   player_pff_defense_ranked:
@@ -208,7 +208,7 @@ export default {
   ),
   player_pff_kickoff_kicker:
     create_field_from_pff_player_seasonlogs('kickoff_kicker'),
-  player_pff_pass: create_field_from_pff_player_seasonlogs('pass'),
+  player_pff_pass: create_field_from_pff_player_seasonlogs('pass_grade'),
   player_pff_receiving_snaps:
     create_field_from_pff_player_seasonlogs('receiving_snaps'),
   player_pff_weight: create_field_from_pff_player_seasonlogs('weight'),

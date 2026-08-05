@@ -742,7 +742,7 @@ const create_field_goal_role_scoring = () => {
       return { expression: '0', scores: false }
     }
 
-    const yards = `"${FIELD_GOAL_STATS_ALIAS}"."yards"`
+    const yards = `"${FIELD_GOAL_STATS_ALIAS}"."stat_yards"`
     const band_expression =
       `CASE ` +
       bands
@@ -814,7 +814,7 @@ const field_goal_role_scoring = create_field_goal_role_scoring()
 // The two kicking roles take a `_role_stats` suffix deliberately. Deriving
 // theirs would produce `field_goal_stats`, which is already the alias of the
 // nfl_play_stats JOIN inside that same subquery (the field-goal scoring
-// expression reads its `yards`). Postgres resolves the two by nesting, but an
+// expression reads its `stat_yards`). Postgres resolves the two by nesting, but an
 // alias collision in this exact path is what 67278d518 had to repair, so they
 // are kept distinct.
 const STAT_SOURCED_ROLES = [

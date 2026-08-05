@@ -96,13 +96,13 @@ export const contract_key = (tid, pid) => `${tid}:${pid}`
 const franchise_price_for = ({ pos, season }) => {
   switch (pos) {
     case 'QB':
-      return season.fqb
+      return season.franchise_tag_salary_qb
     case 'RB':
-      return season.frb
+      return season.franchise_tag_salary_rb
     case 'WR':
-      return season.fwr
+      return season.franchise_tag_salary_wr
     case 'TE':
-      return season.fte
+      return season.franchise_tag_salary_te
     default:
       return null
   }
@@ -305,15 +305,15 @@ export default function build_tag_board({
   const cap_total = league_format.cap
   const active_roster_limit = get_active_roster_limit(league_format)
   const franchise_prices = {
-    QB: season.fqb,
-    RB: season.frb,
-    WR: season.fwr,
-    TE: season.fte
+    QB: season.franchise_tag_salary_qb,
+    RB: season.franchise_tag_salary_rb,
+    WR: season.franchise_tag_salary_wr,
+    TE: season.franchise_tag_salary_te
   }
   const tag_limits = {
-    franchise: season.tag2,
-    rookie: season.tag3,
-    restricted_free_agency: season.tag4
+    franchise: season.franchise_tag_limit,
+    rookie: season.rookie_tag_limit,
+    restricted_free_agency: season.restricted_free_agency_tag_limit
   }
   const team_ids = teams.map((team) => team.uid)
   const team_name_by_tid = new Map(teams.map((team) => [team.uid, team.name]))
@@ -328,7 +328,7 @@ export default function build_tag_board({
       tid: row.tid,
       pid: row.pid,
       name: player.name || row.pid,
-      pos: row.pos,
+      pos: row.player_position,
       slot: row.slot,
       tag: row.tag,
       extensions: row.extensions || 0,
@@ -1161,7 +1161,7 @@ export const build_rfa_schedule = ({ season, teams }) => {
   const sorted = [...teams].sort(
     (a, b) => (b.draft_order || 0) - (a.draft_order || 0)
   )
-  const turns = season.tag4 || 2
+  const turns = season.restricted_free_agency_tag_limit || 2
 
   return sorted.map((team, index) => {
     const windows = []

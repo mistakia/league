@@ -54,7 +54,7 @@ const run = async () => {
       .where('draft.lid', league.uid)
       .whereNull('draft.pid')
       .orderBy('draft.pick')
-      .select('draft.pick', 'draft.tid', 'teams.name', 'teams.abbrv')
+      .select('draft.pick', 'draft.tid', 'teams.name', 'teams.abbreviation')
       .first()
 
     if (!frontier) continue // draft complete for this league
@@ -107,7 +107,7 @@ const run = async () => {
     }).unix()
 
     const clock_hours = Math.round(((deadline - on_clock_at) / 3600) * 10) / 10
-    const message = `${frontier.name} (${frontier.abbrv}) is now on the clock with the #${frontier.pick} pick in the ${current_season.year} draft. The window closes ${dayjs.unix(deadline).format('ddd MMM D h:mm A')} (${clock_hours} hours).`
+    const message = `${frontier.name} (${frontier.abbreviation}) is now on the clock with the #${frontier.pick} pick in the ${current_season.year} draft. The window closes ${dayjs.unix(deadline).format('ddd MMM D h:mm A')} (${clock_hours} hours).`
 
     log(message)
 

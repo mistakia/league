@@ -94,7 +94,7 @@ export default class PoachConfirmation extends React.Component {
         extensions,
         league,
         value: activePlayerMap.get('value'),
-        bid: activePlayerMap.get('bid')
+        bid: activePlayerMap.get('bid_amount')
       })
       options.push({
         id: activePlayerMap.get('pid'),
@@ -163,7 +163,7 @@ export default class PoachConfirmation extends React.Component {
         <DialogContent>
           <DialogContentText>
             {`Poach ${player_map.get('name')} (${player_map.get('primary_position')}). If your claim is successful, he will be added to your active roster with a salary of $${
-              rosterInfo.value + 2
+              rosterInfo.player_salary + 2
             } and will not be eligible for the practice squad. The player's current manager can choose to process the claim at any time.`}
           </DialogContentText>
           <DialogContentText>

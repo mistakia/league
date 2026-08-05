@@ -17,13 +17,13 @@ function AlternateClaims({ waivers }) {
     return null
   }
 
-  const sorted = waivers.sort((a, b) => b.bid - a.bid)
+  const sorted = waivers.sort((a, b) => b.bid_amount - a.bid_amount)
 
   const items = []
   for (const [index, item] of sorted.entries()) {
     items.push(
       <TableRow key={index}>
-        <TableCell className='metric'>${item.bid}</TableCell>
+        <TableCell className='metric'>${item.bid_amount}</TableCell>
         <TableCell>
           <TeamName tid={item.tid} abbrv />
         </TableCell>
@@ -67,7 +67,7 @@ export default class WaiverReportItem extends React.Component {
         </div>
         <div className='waiver__report-item-head'>
           <div className='waiver__report-item-winning-bid metric'>
-            ${waiver.bid || 0}
+            ${waiver.bid_amount || 0}
           </div>
           <div className='waiver__report-meta'>
             <PlayerNameExpanded pid={waiver.pid} hideActions headshot_square />

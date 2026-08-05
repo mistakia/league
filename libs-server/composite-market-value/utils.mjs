@@ -12,12 +12,12 @@ export const median = (xs) => {
 // Used by ADP and rankings extractors as the format-aware nonlinear pre-transform.
 export const load_pick_value_curve = async ({ league_format_id }) => {
   const rows = await db('league_format_draft_pick_value')
-    .select('rank', 'median_best_season_points_added_per_game')
+    .select('draft_pick_rank', 'median_best_season_points_added_per_game')
     .where('league_format_id', league_format_id)
   const curve = new Map()
   for (const r of rows) {
     curve.set(
-      r.rank,
+      r.draft_pick_rank,
       r.median_best_season_points_added_per_game != null
         ? Number(r.median_best_season_points_added_per_game)
         : null

@@ -82,8 +82,8 @@ const map_boolean_to_two_point_result = (made) => {
 // Source field -> nfl_plays column mappings
 const FIELD_MAPPINGS = {
   // Existing columns (direct mappings)
-  quarter: 'qtr',
-  down: 'dwn',
+  quarter: 'quarter',
+  down: 'down_number',
   distance: 'yards_to_go',
   isPassAttempt: 'is_passing_play',
   rushAttempt: 'is_rushing_play',
@@ -114,7 +114,7 @@ const FIELD_MAPPINGS = {
   runPassOption: 'is_run_play_option',
   timeToPressure: 'time_to_pressure',
   timeToThrow: 'time_to_throw',
-  depthOfTarget: 'dot',
+  depthOfTarget: 'depth_of_target',
   isDropback: 'is_qb_dropback',
   passRushCount: 'pass_rushers',
   blitz: 'is_blitz',

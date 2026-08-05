@@ -63,40 +63,40 @@ const calculate_dst_delta_from_play = ({
 
       case 10:
         // rushing yards
-        play_yards_against += play_stat.yards || 0
+        play_yards_against += play_stat.stat_yards || 0
         break
 
       case 11:
         // rushing touchdown
-        play_yards_against += play_stat.yards || 0
+        play_yards_against += play_stat.stat_yards || 0
         play_points_against += 6
         break
 
       case 12:
         // lateral rush
-        play_yards_against += play_stat.yards || 0
+        play_yards_against += play_stat.stat_yards || 0
         break
 
       case 13:
         // lateral rushing touchdown
-        play_yards_against += play_stat.yards || 0
+        play_yards_against += play_stat.stat_yards || 0
         play_points_against += 6
         break
 
       case 15:
         // completed pass
-        play_yards_against += play_stat.yards || 0
+        play_yards_against += play_stat.stat_yards || 0
         break
 
       case 16:
         // passing touchdown
-        play_yards_against += play_stat.yards || 0
+        play_yards_against += play_stat.stat_yards || 0
         play_points_against += 6
         break
 
       case 20:
         // sack (team)
-        play_yards_against += play_stat.yards || 0
+        play_yards_against += play_stat.stat_yards || 0
         delta_stats.defensive_sacks += 1
         break
 

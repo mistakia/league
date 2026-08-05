@@ -107,13 +107,13 @@ export default async function ({
     })
     player_query.select(
       'player.*',
-      'practice.m',
-      'practice.tu',
-      'practice.w',
-      'practice.th',
-      'practice.f',
-      'practice.s',
-      'practice.su',
+      'practice.monday_practice_status',
+      'practice.tuesday_practice_status',
+      'practice.wednesday_practice_status',
+      'practice.thursday_practice_status',
+      'practice.friday_practice_status',
+      'practice.saturday_practice_status',
+      'practice.sunday_practice_status',
       'nfl_games.day as game_day',
       db.raw(
         'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.is_active = false THEN true ELSE false END as prior_week_inactive'
@@ -125,13 +125,13 @@ export default async function ({
   } else {
     player_query.select(
       'player.*',
-      'practice.m',
-      'practice.tu',
-      'practice.w',
-      'practice.th',
-      'practice.f',
-      'practice.s',
-      'practice.su',
+      'practice.monday_practice_status',
+      'practice.tuesday_practice_status',
+      'practice.wednesday_practice_status',
+      'practice.thursday_practice_status',
+      'practice.friday_practice_status',
+      'practice.saturday_practice_status',
+      'practice.sunday_practice_status',
       'nfl_games.day as game_day'
     )
   }
@@ -203,24 +203,32 @@ export default async function ({
       prior_week_inactive,
       prior_week_ruled_out,
       game_day,
-      m,
-      tu,
-      w,
-      th,
-      f,
-      s,
-      su
+      monday_practice_status,
+      tuesday_practice_status,
+      wednesday_practice_status,
+      thursday_practice_status,
+      friday_practice_status,
+      saturday_practice_status,
+      sunday_practice_status
     } = player_row
 
     const practice_data =
-      m !== undefined ||
-      tu !== undefined ||
-      w !== undefined ||
-      th !== undefined ||
-      f !== undefined ||
-      s !== undefined ||
-      su !== undefined
-        ? { m, tu, w, th, f, s, su }
+      monday_practice_status !== undefined ||
+      tuesday_practice_status !== undefined ||
+      wednesday_practice_status !== undefined ||
+      thursday_practice_status !== undefined ||
+      friday_practice_status !== undefined ||
+      saturday_practice_status !== undefined ||
+      sunday_practice_status !== undefined
+        ? {
+            monday_practice_status,
+            tuesday_practice_status,
+            wednesday_practice_status,
+            thursday_practice_status,
+            friday_practice_status,
+            saturday_practice_status,
+            sunday_practice_status
+          }
         : null
 
     if (
@@ -303,11 +311,11 @@ export default async function ({
     await db('rosters_players')
       .update({ slot: roster_slot_types.BENCH })
       .where({
-        rid: rosterRow.uid,
+        roster_id: rosterRow.uid,
         pid: activate_pid
       })
 
-    const { value } = await getLastTransaction({
+    const { player_salary } = await getLastTransaction({
       pid: activate_pid,
       lid: league_id,
       tid
@@ -318,7 +326,7 @@ export default async function ({
       lid: league_id,
       pid: activate_pid,
       type: transaction_types.ROSTER_ACTIVATE,
-      value,
+      player_salary,
       week: current_season.week,
       year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
@@ -353,11 +361,11 @@ export default async function ({
         ? transaction_types.RESERVE_LONG_TERM
         : transaction_types.RESERVE_COV
   await db('rosters_players').update({ slot }).where({
-    rid: rosterRow.uid,
+    roster_id: rosterRow.uid,
     pid: reserve_pid
   })
 
-  const { value } = await getLastTransaction({
+  const { player_salary } = await getLastTransaction({
     pid: reserve_pid,
     lid: league_id,
     tid
@@ -368,7 +376,7 @@ export default async function ({
     lid: league_id,
     pid: reserve_pid,
     type,
-    value,
+    player_salary,
     week: current_season.week,
     year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
@@ -387,7 +395,7 @@ export default async function ({
     year: current_season.year
   })
   const team = teams[0]
-  let message = `${team.name} (${team.abbrv}) has placed ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) on ${transaction_type_display_names[type]}.`
+  let message = `${team.name} (${team.abbreviation}) has placed ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) on ${transaction_type_display_names[type]}.`
 
   if (activate_player_row) {
     message += ` ${activate_player_row.first_name} ${activate_player_row.last_name} (${activate_player_row.primary_position}) has been activated`

@@ -136,7 +136,7 @@ export default async function ({
   const slot = isDraftedRookie ? roster_slot_types.PSD : roster_slot_types.PS
 
   await db('rosters_players').update({ slot }).where({
-    rid: roster.uid,
+    roster_id: roster.uid,
     pid: deactivate_pid
   })
 
@@ -148,7 +148,7 @@ export default async function ({
     lid: leagueId,
     pid: deactivate_pid,
     type: transaction_types.ROSTER_DEACTIVATE,
-    value: lastTransaction.value,
+    player_salary: lastTransaction.player_salary,
     week: current_season.week,
     year: current_season.year,
     timestamp
@@ -170,7 +170,7 @@ export default async function ({
   })
   const team = teams[0]
 
-  const message = `${team.name} (${team.abbrv}) has placed ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) on the practice squad.`
+  const message = `${team.name} (${team.abbreviation}) has placed ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) on the practice squad.`
 
   await sendNotifications({
     league,

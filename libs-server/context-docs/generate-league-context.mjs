@@ -54,14 +54,14 @@ function build_standings({ teams, seasonlogs, managers, league }) {
       tid: team.uid,
       name: team.name,
       manager: (managers[team.uid] || []).join(', ') || '—',
-      wins: log.wins || 0,
-      losses: log.losses || 0,
-      ties: log.ties || 0,
+      wins: log.regular_season_wins || 0,
+      losses: log.regular_season_losses || 0,
+      ties: log.regular_season_ties || 0,
       points_for: Number(log.points_for || 0),
       points_against: Number(log.points_against || 0),
       division:
-        league[`division_${team.div}_name`] ||
-        (team.div ? `Division ${team.div}` : '—')
+        league[`division_${team.division}_name`] ||
+        (team.division ? `Division ${team.division}` : '—')
     }
   })
 
@@ -170,7 +170,7 @@ export default async function generate_league_context({
             team_name_by_tid.get(t.tid) || `Team ${t.tid}`,
             transaction_type_display_names[t.type] || `Type ${t.type}`,
             t.pid ? transaction_players[t.pid]?.name || t.pid : '—',
-            `$${t.value}`
+            `$${t.player_salary}`
           ])
         )
       : '_No transactions yet._'

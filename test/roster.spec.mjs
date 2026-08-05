@@ -10,26 +10,26 @@ chai.should()
 describe('LIBS-SHARED Roster', function () {
   it('constructor', () => {
     const league = {
-      sqb: 1,
-      srb: 2,
-      swr: 2,
-      ste: 1,
-      srbwr: 1,
+      starter_slots_qb: 1,
+      starter_slots_rb: 2,
+      starter_slots_wr: 2,
+      starter_slots_te: 1,
+      starter_slots_rb_wr_flex: 1,
       srbwrte: 1,
       srqbrbwrte: 1,
-      swrte: 1,
-      sdst: 1,
-      sk: 1,
-      bench: 6,
-      ps: 4,
+      starter_slots_wr_te_flex: 1,
+      starter_slots_dst: 1,
+      starter_slots_k: 1,
+      bench_slot_count: 6,
+      practice_squad_slot_count: 4,
       reserve_short_term_limit: 3,
 
-      mqb: 0,
-      mrb: 0,
-      mwr: 0,
-      mte: 0,
-      mk: 3,
-      mdst: 3
+      max_roster_qb: 0,
+      max_roster_rb: 0,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 3,
+      max_roster_dst: 3
     }
 
     const roster = {
@@ -53,26 +53,26 @@ describe('LIBS-SHARED Roster', function () {
 
   it('should not exceed active roster limit', () => {
     const league = {
-      sqb: 1,
-      srb: 1,
-      swr: 2,
-      ste: 1,
-      srbwr: 2,
+      starter_slots_qb: 1,
+      starter_slots_rb: 1,
+      starter_slots_wr: 2,
+      starter_slots_te: 1,
+      starter_slots_rb_wr_flex: 2,
       srbwrte: 1,
       sqbrbwrte: 1,
-      swrte: 2,
-      sdst: 1,
-      sk: 1,
-      bench: 5,
-      ps: 4,
+      starter_slots_wr_te_flex: 2,
+      starter_slots_dst: 1,
+      starter_slots_k: 1,
+      bench_slot_count: 5,
+      practice_squad_slot_count: 4,
       reserve_short_term_limit: 3,
 
-      mqb: 0,
-      mrb: 0,
-      mwr: 0,
-      mte: 0,
-      mk: 3,
-      mdst: 3
+      max_roster_qb: 0,
+      max_roster_rb: 0,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 3,
+      max_roster_dst: 3
     }
 
     const roster = {
@@ -100,26 +100,26 @@ describe('LIBS-SHARED Roster', function () {
 
   it('should not exceed position limit', () => {
     const league = {
-      sqb: 0,
-      srb: 1,
-      swr: 1,
-      ste: 0,
-      srbwr: 0,
+      starter_slots_qb: 0,
+      starter_slots_rb: 1,
+      starter_slots_wr: 1,
+      starter_slots_te: 0,
+      starter_slots_rb_wr_flex: 0,
       srbwrte: 1,
       sqbrbwrte: 0,
-      swrte: 0,
-      sdst: 0,
-      sk: 0,
-      bench: 2,
-      ps: 4,
+      starter_slots_wr_te_flex: 0,
+      starter_slots_dst: 0,
+      starter_slots_k: 0,
+      bench_slot_count: 2,
+      practice_squad_slot_count: 4,
       reserve_short_term_limit: 3,
 
-      mqb: 0,
-      mrb: 2,
-      mwr: 0,
-      mte: 0,
-      mk: 3,
-      mdst: 3
+      max_roster_qb: 0,
+      max_roster_rb: 2,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 3,
+      max_roster_dst: 3
     }
 
     const roster = {
@@ -155,26 +155,26 @@ describe('LIBS-SHARED Roster', function () {
 
   it('remove/add player + roster limit + get open slot', () => {
     const league = {
-      sqb: 0,
-      srb: 1,
-      swr: 1,
-      ste: 0,
-      srbwr: 0,
+      starter_slots_qb: 0,
+      starter_slots_rb: 1,
+      starter_slots_wr: 1,
+      starter_slots_te: 0,
+      starter_slots_rb_wr_flex: 0,
       srbwrte: 1,
       sqbrbwrte: 0,
-      swrte: 0,
-      sdst: 0,
-      sk: 0,
-      bench: 2,
-      ps: 4,
+      starter_slots_wr_te_flex: 0,
+      starter_slots_dst: 0,
+      starter_slots_k: 0,
+      bench_slot_count: 2,
+      practice_squad_slot_count: 4,
       reserve_short_term_limit: 3,
 
-      mqb: 0,
-      mrb: 0,
-      mwr: 0,
-      mte: 0,
-      mk: 3,
-      mdst: 3
+      max_roster_qb: 0,
+      max_roster_rb: 0,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 3,
+      max_roster_dst: 3
     }
 
     const roster = {
@@ -223,25 +223,25 @@ describe('LIBS-SHARED Roster', function () {
 
   it('addPlayer preserves extensions', () => {
     const league = {
-      sqb: 1,
-      srb: 2,
-      swr: 2,
-      ste: 1,
-      srbwr: 1,
+      starter_slots_qb: 1,
+      starter_slots_rb: 2,
+      starter_slots_wr: 2,
+      starter_slots_te: 1,
+      starter_slots_rb_wr_flex: 1,
       srbwrte: 1,
       srqbrbwrte: 1,
-      swrte: 1,
-      sdst: 1,
-      sk: 1,
-      bench: 6,
-      ps: 4,
+      starter_slots_wr_te_flex: 1,
+      starter_slots_dst: 1,
+      starter_slots_k: 1,
+      bench_slot_count: 6,
+      practice_squad_slot_count: 4,
       reserve_short_term_limit: 3,
-      mqb: 0,
-      mrb: 0,
-      mwr: 0,
-      mte: 0,
-      mk: 3,
-      mdst: 3
+      max_roster_qb: 0,
+      max_roster_rb: 0,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 3,
+      max_roster_dst: 3
     }
 
     const roster = {
@@ -278,25 +278,25 @@ describe('LIBS-SHARED Roster', function () {
 
   it('addPlayer defaults extensions to 0', () => {
     const league = {
-      sqb: 1,
-      srb: 2,
-      swr: 2,
-      ste: 1,
-      srbwr: 1,
+      starter_slots_qb: 1,
+      starter_slots_rb: 2,
+      starter_slots_wr: 2,
+      starter_slots_te: 1,
+      starter_slots_rb_wr_flex: 1,
       srbwrte: 1,
       srqbrbwrte: 1,
-      swrte: 1,
-      sdst: 1,
-      sk: 1,
-      bench: 6,
-      ps: 4,
+      starter_slots_wr_te_flex: 1,
+      starter_slots_dst: 1,
+      starter_slots_k: 1,
+      bench_slot_count: 6,
+      practice_squad_slot_count: 4,
       reserve_short_term_limit: 3,
-      mqb: 0,
-      mrb: 0,
-      mwr: 0,
-      mte: 0,
-      mk: 3,
-      mdst: 3
+      max_roster_qb: 0,
+      max_roster_rb: 0,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 3,
+      max_roster_dst: 3
     }
 
     const roster = {
@@ -332,26 +332,26 @@ describe('LIBS-SHARED Roster', function () {
 
   it('should include signed practice squad in position limits', () => {
     const league = {
-      sqb: 0,
-      srb: 1,
-      swr: 1,
-      ste: 0,
-      srbwr: 0,
+      starter_slots_qb: 0,
+      starter_slots_rb: 1,
+      starter_slots_wr: 1,
+      starter_slots_te: 0,
+      starter_slots_rb_wr_flex: 0,
       srbwrte: 1,
       sqbrbwrte: 0,
-      swrte: 0,
-      sdst: 0,
-      sk: 0,
-      bench: 5,
-      ps: 4,
+      starter_slots_wr_te_flex: 0,
+      starter_slots_dst: 0,
+      starter_slots_k: 0,
+      bench_slot_count: 5,
+      practice_squad_slot_count: 4,
       reserve_short_term_limit: 3,
 
-      mqb: 0,
-      mrb: 0,
-      mwr: 0,
-      mte: 0,
-      mk: 0,
-      mdst: 3 // Position limit of 3 DST
+      max_roster_qb: 0,
+      max_roster_rb: 0,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 0,
+      max_roster_dst: 3 // Position limit of 3 DST
     }
 
     const roster = {
@@ -392,26 +392,26 @@ describe('LIBS-SHARED Roster', function () {
 
   it('should exclude drafted practice squad from position limits', () => {
     const league = {
-      sqb: 0,
-      srb: 1,
-      swr: 1,
-      ste: 0,
-      srbwr: 0,
+      starter_slots_qb: 0,
+      starter_slots_rb: 1,
+      starter_slots_wr: 1,
+      starter_slots_te: 0,
+      starter_slots_rb_wr_flex: 0,
       srbwrte: 1,
       sqbrbwrte: 0,
-      swrte: 0,
-      sdst: 0,
-      sk: 0,
-      bench: 5,
-      ps: 4,
+      starter_slots_wr_te_flex: 0,
+      starter_slots_dst: 0,
+      starter_slots_k: 0,
+      bench_slot_count: 5,
+      practice_squad_slot_count: 4,
       reserve_short_term_limit: 3,
 
-      mqb: 0,
-      mrb: 0,
-      mwr: 0,
-      mte: 0,
-      mk: 0,
-      mdst: 3 // Position limit of 3 DST
+      max_roster_qb: 0,
+      max_roster_rb: 0,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 0,
+      max_roster_dst: 3 // Position limit of 3 DST
     }
 
     const roster = {
@@ -460,26 +460,26 @@ describe('LIBS-SHARED Roster', function () {
 
   it('should respect position limits even when practice squad has space', () => {
     const league = {
-      sqb: 0,
-      srb: 1,
-      swr: 1,
-      ste: 0,
-      srbwr: 0,
+      starter_slots_qb: 0,
+      starter_slots_rb: 1,
+      starter_slots_wr: 1,
+      starter_slots_te: 0,
+      starter_slots_rb_wr_flex: 0,
       srbwrte: 1,
       sqbrbwrte: 0,
-      swrte: 0,
-      sdst: 0,
-      sk: 0,
-      bench: 5,
-      ps: 4, // 4 practice squad slots available
+      starter_slots_wr_te_flex: 0,
+      starter_slots_dst: 0,
+      starter_slots_k: 0,
+      bench_slot_count: 5,
+      practice_squad_slot_count: 4, // 4 practice squad slots available
       reserve_short_term_limit: 3,
 
-      mqb: 2, // Position limit of 2 QB
-      mrb: 0,
-      mwr: 0,
-      mte: 0,
-      mk: 0,
-      mdst: 0
+      max_roster_qb: 2, // Position limit of 2 QB
+      max_roster_rb: 0,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 0,
+      max_roster_dst: 0
     }
 
     const roster = {
@@ -516,26 +516,26 @@ describe('LIBS-SHARED Roster', function () {
 
   it('should keep practice squad size limit independent from position limits', () => {
     const league = {
-      sqb: 0,
-      srb: 1,
-      swr: 1,
-      ste: 0,
-      srbwr: 0,
+      starter_slots_qb: 0,
+      starter_slots_rb: 1,
+      starter_slots_wr: 1,
+      starter_slots_te: 0,
+      starter_slots_rb_wr_flex: 0,
       srbwrte: 1,
       sqbrbwrte: 0,
-      swrte: 0,
-      sdst: 0,
-      sk: 0,
-      bench: 5,
-      ps: 2, // Only 2 practice squad slots
+      starter_slots_wr_te_flex: 0,
+      starter_slots_dst: 0,
+      starter_slots_k: 0,
+      bench_slot_count: 5,
+      practice_squad_slot_count: 2, // Only 2 practice squad slots
       reserve_short_term_limit: 3,
 
-      mqb: 5, // High position limit
-      mrb: 0,
-      mwr: 0,
-      mte: 0,
-      mk: 0,
-      mdst: 0
+      max_roster_qb: 5, // High position limit
+      max_roster_rb: 0,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 0,
+      max_roster_dst: 0
     }
 
     const roster = {
@@ -583,29 +583,25 @@ describe('LIBS-SHARED Roster', function () {
   describe('salary pricing', function () {
     const base_league = {
       cap: 200,
-      sqb: 1,
-      srb: 2,
-      swr: 2,
-      ste: 1,
-      srbwr: 1,
+      starter_slots_qb: 1,
+      starter_slots_rb: 2,
+      starter_slots_wr: 2,
+      starter_slots_te: 1,
+      starter_slots_rb_wr_flex: 1,
       srbwrte: 1,
       srqbrbwrte: 1,
-      swrte: 1,
-      sdst: 1,
-      sk: 1,
-      bench: 6,
-      ps: 4,
+      starter_slots_wr_te_flex: 1,
+      starter_slots_dst: 1,
+      starter_slots_k: 1,
+      bench_slot_count: 6,
+      practice_squad_slot_count: 4,
       reserve_short_term_limit: 3,
-      mqb: 0,
-      mrb: 0,
-      mwr: 0,
-      mte: 0,
-      mk: 3,
-      mdst: 3,
-      ext1: 5,
-      ext2: 10,
-      ext3: 20,
-      ext4: 35
+      max_roster_qb: 0,
+      max_roster_rb: 0,
+      max_roster_wr: 0,
+      max_roster_te: 0,
+      max_roster_k: 3,
+      max_roster_dst: 3
     }
 
     // 1970 and 2100 -- far enough either side of any mocked clock that these

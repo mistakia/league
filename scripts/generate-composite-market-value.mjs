@@ -28,7 +28,7 @@ import { run_cmv_script } from '#libs-server/composite-market-value/script-runne
 //   PROPS    N=30   (per Topic 1 resolution: season-long market cadence ~2 weeks)
 //
 // Picks: v1 emits no pick composite rows. draft_pick_model is the only intended
-// pick source but slot-to-otid mapping is deferred.
+// pick source but slot-to-original_team_id mapping is deferred.
 //
 // CRITICAL: if no calibration row exists for a non-KTC source on a given
 // (format_category, date) cell, the cell is skipped with a warning rather than

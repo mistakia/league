@@ -101,9 +101,9 @@ const import_mfl_adp = async ({
         matched_mfl_ids.add(player.id)
         adp_inserts.push({
           pid: player_row.pid,
-          pos: player_row.primary_position,
+          player_position: player_row.primary_position,
           season_year: year,
-          adp: player.average_pick,
+          average_draft_position: player.average_pick,
           min_pick: player.min_pick,
           max_pick: player.max_pick,
           std_dev: null,

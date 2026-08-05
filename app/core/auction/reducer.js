@@ -73,7 +73,7 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         selected_pid: null,
         isPaused: false,
         transactions: state.transactions.unshift(payload),
-        bid: payload.value,
+        bid: payload.player_salary,
         nominated_pid: payload.pid,
         timer: Math.round((Date.now() + state.bidTimer) / 1000),
         isLocked: true
@@ -110,7 +110,7 @@ export function auction_reducer(state = initialState(), { payload, type }) {
       return state.merge({
         bid:
           latest && latest.type === transaction_types.AUCTION_BID
-            ? latest.value
+            ? latest.player_salary
             : null,
         nominated_pid:
           latest && latest.type === transaction_types.AUCTION_BID

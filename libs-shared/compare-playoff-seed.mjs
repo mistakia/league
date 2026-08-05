@@ -25,9 +25,9 @@ import { get_all_play_win_percentage } from './compare-all-play-seed.mjs'
  * simulation can share one ladder.
  */
 const compare_playoff_seed = (a, b) =>
-  (b.wins || 0) - (a.wins || 0) ||
-  (a.losses || 0) - (b.losses || 0) ||
-  (b.ties || 0) - (a.ties || 0) ||
+  (b.regular_season_wins || 0) - (a.regular_season_wins || 0) ||
+  (a.regular_season_losses || 0) - (b.regular_season_losses || 0) ||
+  (b.regular_season_ties || 0) - (a.regular_season_ties || 0) ||
   get_all_play_win_percentage(b) - get_all_play_win_percentage(a) ||
   (b.points_for || 0) - (a.points_for || 0)
 

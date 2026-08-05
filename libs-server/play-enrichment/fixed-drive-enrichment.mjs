@@ -240,14 +240,14 @@ const is_timeout_or_warning = (play) => {
 /**
  * The half a play belongs to for drive-boundary purposes.
  *
- * Overtime (qtr >= 5) is deliberately folded into the second-half bucket rather
+ * Overtime (quarter >= 5) is deliberately folded into the second-half bucket rather
  * than given its own. The bucket exists only to isolate lookback -- a drive
  * cannot span halftime -- and the end of regulation is not a possession break
  * the way halftime is. Splitting overtime out would force a spurious drive
  * boundary at the start of OT; under a per-bucket counter it would also have
  * reintroduced the numbering restart this module was fixed to remove.
  */
-export const get_half = (play) => (play.qtr <= 2 ? 1 : 2)
+export const get_half = (play) => (play.quarter <= 2 ? 1 : 2)
 
 /**
  * Calculates drive_seq for all plays using nflfastr's fixed_drive methodology.

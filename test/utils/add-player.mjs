@@ -48,7 +48,7 @@ export default async function ({
     lid: leagueId,
     pid: player.pid,
     type: transaction,
-    value,
+    player_salary: value,
     week: current_season.week,
     year: current_season.year,
     timestamp: Math.round(Date.now() / 1000),
@@ -56,10 +56,10 @@ export default async function ({
   })
 
   await db('rosters_players').insert({
-    rid: rosterId,
+    roster_id: rosterId,
     pid: player.pid,
     slot,
-    pos: player.secondary_position,
+    player_position: player.secondary_position,
     tag,
     tid: teamId,
     lid: leagueId,

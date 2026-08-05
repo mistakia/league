@@ -63,7 +63,7 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: Waiver order priority
  *           example: 5
- *         bid:
+ *         bid_amount:
  *           type: integer
  *           description: FAAB bid amount (if applicable)
  *           example: 15
@@ -178,7 +178,7 @@ const router = express.Router({ mergeParams: true })
  *                     processed: 1698765432
  *                     submitted: 1698700000
  *                     wo: 5
- *                     bid: 15
+ *                     bid_amount: 15
  *                     week: 8
  *                     year: 2024
  *                   - uid: 12346
@@ -193,7 +193,7 @@ const router = express.Router({ mergeParams: true })
  *                     processed: 1698765432
  *                     submitted: 1698700000
  *                     wo: 8
- *                     bid: 12
+ *                     bid_amount: 12
  *                     week: 8
  *                     year: 2024
  *               team_specific_report:
@@ -211,7 +211,7 @@ const router = express.Router({ mergeParams: true })
  *                     processed: 1698765432
  *                     submitted: 1698700000
  *                     wo: 5
- *                     bid: 15
+ *                     bid_amount: 15
  *                     week: 8
  *                     year: 2024
  *                   - uid: 12347
@@ -226,7 +226,7 @@ const router = express.Router({ mergeParams: true })
  *                     processed: 1698765432
  *                     submitted: 1698700000
  *                     wo: 5
- *                     bid: 25
+ *                     bid_amount: 25
  *                     week: 8
  *                     year: 2024
  *       400:

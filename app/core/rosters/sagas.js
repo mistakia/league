@@ -536,7 +536,7 @@ export function* export_rosters() {
       data.push({
         tid,
         team: team.name,
-        salary: rosterPlayer.value,
+        salary: rosterPlayer.player_salary,
         market_salary: (
           player_map.getIn(['market_salary', projectionType]) || 0
         ).toFixed(0),

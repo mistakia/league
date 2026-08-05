@@ -81,11 +81,11 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 10:
         // Rushing Yards - rushing yards with credit for rushing attempt
         stats.rushing_attempts += 1
-        stats.rushing_yards += playStat.yards
+        stats.rushing_yards += playStat.stat_yards
 
         // Track rushing yards excluding QB kneels
         if (!playStat.is_qb_kneel) {
-          stats.rushing_yards_excluding_kneels += playStat.yards
+          stats.rushing_yards_excluding_kneels += playStat.stat_yards
         }
 
         // Track rushing first downs using play-level first_down flag
@@ -93,7 +93,7 @@ const calculateStatsFromPlayStats = (playStats) => {
           stats.rushing_first_downs += 1
         }
 
-        stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
+        stats.longest_rush = Math.max(stats.longest_rush, playStat.stat_yards)
         if (playStat.ydl_100 <= 20) {
           stats.rush_attempts_redzone += 1
         }
@@ -105,11 +105,11 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 11:
         // Rushing Touchdown - rushing TD with yards and attempt credit
         stats.rushing_attempts += 1
-        stats.rushing_yards += playStat.yards
+        stats.rushing_yards += playStat.stat_yards
 
         // Track rushing yards excluding QB kneels
         if (!playStat.is_qb_kneel) {
-          stats.rushing_yards_excluding_kneels += playStat.yards
+          stats.rushing_yards_excluding_kneels += playStat.stat_yards
         }
 
         // Track rushing first downs using play-level first_down flag
@@ -117,7 +117,7 @@ const calculateStatsFromPlayStats = (playStats) => {
           stats.rushing_first_downs += 1
         }
 
-        stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
+        stats.longest_rush = Math.max(stats.longest_rush, playStat.stat_yards)
         if (playStat.ydl_100 <= 20) {
           stats.rush_attempts_redzone += 1
         }
@@ -129,26 +129,26 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 12:
         // Lateral Rushing - yards after lateral (no attempt credit)
-        stats.rushing_yards += playStat.yards
+        stats.rushing_yards += playStat.stat_yards
 
         // Track rushing yards excluding QB kneels
         if (!playStat.is_qb_kneel) {
-          stats.rushing_yards_excluding_kneels += playStat.yards
+          stats.rushing_yards_excluding_kneels += playStat.stat_yards
         }
 
-        stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
+        stats.longest_rush = Math.max(stats.longest_rush, playStat.stat_yards)
         break
 
       case 13:
         // Lateral Rushing Touchdown - rushing TD after lateral (no attempt credit)
-        stats.rushing_yards += playStat.yards
+        stats.rushing_yards += playStat.stat_yards
 
         // Track rushing yards excluding QB kneels
         if (!playStat.is_qb_kneel) {
-          stats.rushing_yards_excluding_kneels += playStat.yards
+          stats.rushing_yards_excluding_kneels += playStat.stat_yards
         }
 
-        stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
+        stats.longest_rush = Math.max(stats.longest_rush, playStat.stat_yards)
         stats.rushing_touchdowns += 1
         break
 
@@ -161,14 +161,14 @@ const calculateStatsFromPlayStats = (playStats) => {
         // Passing Yards - completed pass with yards
         stats.passing_attempts += 1
         stats.passing_completions += 1
-        stats.passing_yards += playStat.yards
+        stats.passing_yards += playStat.stat_yards
         break
 
       case 16:
         // Passing Touchdown - passing TD with yards
         stats.passing_attempts += 1
         stats.passing_completions += 1
-        stats.passing_yards += playStat.yards
+        stats.passing_yards += playStat.stat_yards
         stats.passing_touchdowns += 1
         break
 
@@ -185,12 +185,12 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 21:
         // Receiving Yards - reception with yards
         stats.receptions += 1
-        stats.receiving_yards += playStat.yards
+        stats.receiving_yards += playStat.stat_yards
         stats.longest_reception = Math.max(
           stats.longest_reception,
-          playStat.yards
+          playStat.stat_yards
         )
-        if (playStat.yards >= 15) {
+        if (playStat.stat_yards >= 15) {
           stats.recv_yards_15_plus_count += 1
         }
         // Track receiving first downs using play-level first_down flag
@@ -203,12 +203,12 @@ const calculateStatsFromPlayStats = (playStats) => {
         // Receiving Touchdown - receiving TD with yards
         stats.receptions += 1
         stats.receiving_touchdowns += 1
-        stats.receiving_yards += playStat.yards
+        stats.receiving_yards += playStat.stat_yards
         stats.longest_reception = Math.max(
           stats.longest_reception,
-          playStat.yards
+          playStat.stat_yards
         )
-        if (playStat.yards >= 15) {
+        if (playStat.stat_yards >= 15) {
           stats.recv_yards_15_plus_count += 1
         }
         // Track receiving first downs using play-level first_down flag
@@ -219,12 +219,12 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 23:
         // Lateral Receiving - yards after lateral (no reception credit)
-        stats.receiving_yards += playStat.yards
+        stats.receiving_yards += playStat.stat_yards
         break
 
       case 24:
         // Lateral Receiving Touchdown - receiving TD after lateral (no reception credit)
-        stats.receiving_yards += playStat.yards
+        stats.receiving_yards += playStat.stat_yards
         stats.receiving_touchdowns += 1
         break
 
@@ -363,22 +363,22 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 69:
         // Field Goal Missed - missed field goal attempt
         stats.fga += 1
-        stats._fga.push(playStat.yards)
+        stats._fga.push(playStat.stat_yards)
         break
 
       case 70:
         // Field Goal Made - made field goal with distance
         stats.field_goals_made += 1
         stats.fga += 1
-        stats.field_goal_yards += Math.max(playStat.yards, 30)
-        stats._fgm.push(playStat.yards)
-        if (playStat.yards < 20) {
+        stats.field_goal_yards += Math.max(playStat.stat_yards, 30)
+        stats._fgm.push(playStat.stat_yards)
+        if (playStat.stat_yards < 20) {
           stats.field_goals_made_0_19_yards += 1
-        } else if (playStat.yards < 30) {
+        } else if (playStat.stat_yards < 30) {
           stats.field_goals_made_20_29_yards += 1
-        } else if (playStat.yards < 40) {
+        } else if (playStat.stat_yards < 40) {
           stats.field_goals_made_30_39_yards += 1
-        } else if (playStat.yards < 50) {
+        } else if (playStat.stat_yards < 50) {
           stats.field_goals_made_40_49_yards += 1
         } else {
           stats.field_goals_made_50_plus_yards += 1
@@ -502,12 +502,12 @@ const calculateStatsFromPlayStats = (playStats) => {
 
       case 111:
         // Air Yards Complete - completed pass air yards (depth of target)
-        stats.passing_air_yards += playStat.yards
+        stats.passing_air_yards += playStat.stat_yards
         break
 
       case 112:
         // Air Yards Incomplete - incomplete pass air yards (depth of target)
-        stats.passing_air_yards += playStat.yards
+        stats.passing_air_yards += playStat.stat_yards
         break
 
       case 113:
@@ -517,7 +517,7 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 115:
         // Target - pass target (intended receiver)
         stats.targets += 1
-        stats.targeted_air_yards += playStat.dot
+        stats.targeted_air_yards += playStat.depth_of_target
         if (playStat.ydl_100 <= 20) {
           stats.redzone_targets += 1
         }

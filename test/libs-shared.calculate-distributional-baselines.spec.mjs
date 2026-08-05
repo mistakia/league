@@ -14,16 +14,16 @@ const expect = chai.expect
 // A two-team league: one QB, one RB, one WR, one TE and one superflex per team.
 const two_team_league = {
   num_teams: 2,
-  sqb: 1,
-  srb: 1,
-  swr: 1,
-  ste: 1,
-  swrte: 0,
-  srbwr: 0,
+  starter_slots_qb: 1,
+  starter_slots_rb: 1,
+  starter_slots_wr: 1,
+  starter_slots_te: 1,
+  starter_slots_wr_te_flex: 0,
+  starter_slots_rb_wr_flex: 0,
   srbwrte: 0,
   sqbrbwrte: 1,
-  sk: 0,
-  sdst: 0
+  starter_slots_k: 0,
+  starter_slots_dst: 0
 }
 
 const make_player = ({ pid, position, total, week = 0 }) => ({
@@ -183,8 +183,8 @@ describe('LIBS-SHARED calculate-distributional-baselines', function () {
       const slots = build_league_starting_slots({
         league: {
           ...two_team_league,
-          bench: 6,
-          ps: 4,
+          bench_slot_count: 6,
+          practice_squad_slot_count: 4,
           reserve_short_term_limit: 3
         }
       })

@@ -79,7 +79,7 @@ export const process_scoring_format_year = async ({
         year,
         scoring_format_id,
         week,
-        total
+        projected_points_total: total
       })
     }
 
@@ -96,7 +96,7 @@ export const process_scoring_format_year = async ({
         year,
         scoring_format_id,
         week: 'ros',
-        total
+        projected_points_total: total
       })
     }
   }

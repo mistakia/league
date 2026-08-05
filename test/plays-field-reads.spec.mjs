@@ -16,20 +16,21 @@ import calculateStatsFromPlays from '#libs-shared/calculate-stats-from-plays.mjs
 const expect = chai.expect
 
 // A nfl_play_stats DB row as get_play_stats() returns it. The full column set
-// is esbid, play_id, nfl_team, player_name, stat_id, yards, gsis_player_id,
-// smart_player_id, nfl_team_id, valid -- note there is no `teamAbbr`.
+// is esbid, play_id, nfl_team, player_name, stat_id, stat_yards,
+// gsis_player_id, smart_player_id, nfl_team_id, valid -- note there is no
+// `teamAbbr`.
 const play_stat_row = ({
   stat_id,
   nfl_team = null,
   gsis_player_id = null,
-  yards = 0
+  stat_yards = 0
 }) => ({
   esbid: 1,
   play_id: 100,
   stat_id,
   nfl_team,
   gsis_player_id,
-  yards
+  stat_yards
 })
 
 describe('get-play-from-play-stats scoring/return team attribution', function () {
@@ -53,7 +54,7 @@ describe('get-play-from-play-stats scoring/return team attribution', function ()
   for (const stat_id of td_tm_stat_ids) {
     it(`statId ${stat_id} sets td_tm from the stat row nfl_team`, () => {
       const play_row = getPlayFromPlayStats({
-        playStats: [play_stat_row({ stat_id, nfl_team: 'KC', yards: 7 })]
+        playStats: [play_stat_row({ stat_id, nfl_team: 'KC', stat_yards: 7 })]
       })
 
       expect(play_row.td_tm).to.equal('KC')
@@ -63,7 +64,7 @@ describe('get-play-from-play-stats scoring/return team attribution', function ()
   for (const stat_id of ret_tm_stat_ids) {
     it(`statId ${stat_id} sets ret_tm from the stat row nfl_team`, () => {
       const play_row = getPlayFromPlayStats({
-        playStats: [play_stat_row({ stat_id, nfl_team: 'NE', yards: 12 })]
+        playStats: [play_stat_row({ stat_id, nfl_team: 'NE', stat_yards: 12 })]
       })
 
       expect(play_row.ret_tm).to.equal('NE')
@@ -74,7 +75,7 @@ describe('get-play-from-play-stats scoring/return team attribution', function ()
     // A row carrying only the vendor key must not populate the team fields --
     // this function is fed DB rows, never the raw play-stats payload.
     const play_row = getPlayFromPlayStats({
-      playStats: [{ stat_id: 11, teamAbbr: 'KC', yards: 7 }]
+      playStats: [{ stat_id: 11, teamAbbr: 'KC', stat_yards: 7 }]
     })
 
     expect(play_row.td_tm).to.equal(undefined)
@@ -82,7 +83,7 @@ describe('get-play-from-play-stats scoring/return team attribution', function ()
 
   it('leaves td_tm unset when the stat row has no team', () => {
     const play_row = getPlayFromPlayStats({
-      playStats: [play_stat_row({ stat_id: 11, yards: 7 })]
+      playStats: [play_stat_row({ stat_id: 11, stat_yards: 7 })]
     })
 
     expect(play_row.td_tm).to.equal(null)
@@ -93,7 +94,7 @@ describe('get-play-from-play-stats scoring/return team attribution', function ()
 // left unset so enrich_fixed_drives computes it.
 const build_play = ({ play_id, play_type, offense_nfl_team, ...rest }) => ({
   esbid: 1,
-  qtr: 1,
+  quarter: 1,
   play_id,
   play_type,
   offense_nfl_team,
@@ -227,12 +228,12 @@ describe('fixed-drive-enrichment drive boundaries', function () {
 // share one 1..N sequence.
 const two_half_game = ({ esbid = 1, drive_seq_by_play_id = {} } = {}) =>
   [
-    { play_id: 1, qtr: 1, offense_nfl_team: 'KC' },
-    { play_id: 2, qtr: 1, offense_nfl_team: 'KC' },
-    { play_id: 3, qtr: 2, offense_nfl_team: 'NE' },
-    { play_id: 4, qtr: 3, offense_nfl_team: 'KC' },
-    { play_id: 5, qtr: 3, offense_nfl_team: 'NE' },
-    { play_id: 6, qtr: 4, offense_nfl_team: 'KC' }
+    { play_id: 1, quarter: 1, offense_nfl_team: 'KC' },
+    { play_id: 2, quarter: 1, offense_nfl_team: 'KC' },
+    { play_id: 3, quarter: 2, offense_nfl_team: 'NE' },
+    { play_id: 4, quarter: 3, offense_nfl_team: 'KC' },
+    { play_id: 5, quarter: 3, offense_nfl_team: 'NE' },
+    { play_id: 6, quarter: 4, offense_nfl_team: 'KC' }
   ].map((play) => ({
     esbid,
     play_type: 'RUSH',
@@ -245,7 +246,7 @@ const two_half_game = ({ esbid = 1, drive_seq_by_play_id = {} } = {}) =>
     ...play
   }))
 
-const half_of = (play) => (play.qtr <= 2 ? 1 : 2)
+const half_of = (play) => (play.quarter <= 2 ? 1 : 2)
 
 describe('fixed-drive-enrichment game continuity', function () {
   it('numbers drives continuously across halftime rather than restarting', () => {
@@ -263,8 +264,8 @@ describe('fixed-drive-enrichment game continuity', function () {
     // Possession did not change, but halftime is a drive boundary, so the
     // lookback must not reach across it.
     const plays = [
-      { play_id: 1, qtr: 2, offense_nfl_team: 'KC' },
-      { play_id: 2, qtr: 3, offense_nfl_team: 'KC' }
+      { play_id: 1, quarter: 2, offense_nfl_team: 'KC' },
+      { play_id: 2, quarter: 3, offense_nfl_team: 'KC' }
     ].map((play) => ({ esbid: 1, play_type: 'RUSH', drive_seq: null, ...play }))
 
     expect(
@@ -388,11 +389,11 @@ describe('import-plays-nfl-v1 live upsert drive_seq protection', function () {
   it('leaves every other column on blanket-merge semantics', async () => {
     const build_plays_merge = await load_build_plays_merge()
     const merge = build_plays_merge('nfl_plays', [
-      { esbid: 1, play_id: 2, drive_seq: null, drive_yds: 30, qtr: 1 }
+      { esbid: 1, play_id: 2, drive_seq: null, drive_yds: 30, quarter: 1 }
     ])
 
     expect(merge_sql(merge, 'drive_yds')).to.equal('EXCLUDED."drive_yds"')
-    expect(merge_sql(merge, 'qtr')).to.equal('EXCLUDED."qtr"')
+    expect(merge_sql(merge, 'quarter')).to.equal('EXCLUDED."quarter"')
   })
 
   it('qualifies the coalesce with the table being written', async () => {
@@ -470,7 +471,7 @@ describe('import-plays-nfl-v1 live upsert drive_seq protection', function () {
 })
 
 describe('audit-drive-seq-coherence classification', function () {
-  // Real production rows -- the distinct (esbid, qtr, drive_seq) triples for
+  // Real production rows -- the distinct (esbid, quarter, drive_seq) triples for
   // three games, one of each class, read 2026-07-24. A synthetic fixture cannot
   // distinguish correct game-continuous numbering from a per-half restart that
   // happens to look right over a handful of plays, which is exactly the failure
@@ -492,8 +493,8 @@ describe('audit-drive-seq-coherence classification', function () {
     [2025122900, 2, [5, 6, 7, 8, 9, 10, 11]],
     [2025122900, 3, [12, 13, 14, 15, 16]],
     [2025122900, 4, [16, 17, 18, 19, 20, 21, 22]]
-  ].flatMap(([esbid, qtr, drive_seq_values]) =>
-    drive_seq_values.map((drive_seq) => ({ esbid, qtr, drive_seq }))
+  ].flatMap(([esbid, quarter, drive_seq_values]) =>
+    drive_seq_values.map((drive_seq) => ({ esbid, quarter, drive_seq }))
   )
 
   // Hoisted into a before hook with its own timeout: the auditor pulls in
@@ -538,10 +539,10 @@ describe('audit-drive-seq-coherence classification', function () {
     // are missing from the feed, not because numbering broke. Asserting
     // contiguity would leave those permanently red.
     const rows = [
-      { esbid: 1, qtr: 1, drive_seq: 1 },
-      { esbid: 1, qtr: 2, drive_seq: 2 },
-      { esbid: 1, qtr: 3, drive_seq: 9 },
-      { esbid: 1, qtr: 4, drive_seq: 10 }
+      { esbid: 1, quarter: 1, drive_seq: 1 },
+      { esbid: 1, quarter: 2, drive_seq: 2 },
+      { esbid: 1, quarter: 3, drive_seq: 9 },
+      { esbid: 1, quarter: 4, drive_seq: 10 }
     ]
 
     const { violations } = await classify(rows)
@@ -626,7 +627,7 @@ describe('prop-market-settlement nfl_plays select coverage', function () {
       if (mapping.player_column) required_columns.add(mapping.player_column)
       if (mapping.team_aggregate) required_columns.add('offense_nfl_team')
       if (mapping.quarter_filter || mapping.half_filter) {
-        required_columns.add('qtr')
+        required_columns.add('quarter')
       }
       if (mapping.special_logic === 'first_touchdown_scorer') {
         // The first-scorer branch reads these directly off the play.

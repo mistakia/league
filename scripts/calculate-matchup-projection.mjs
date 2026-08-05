@@ -29,10 +29,10 @@ const calculate_matchup_projection = async ({
 
   for (const matchup of matchups) {
     const home_lineup = lineups.find(
-      (l) => l.tid === matchup.hid && l.week === matchup.week
+      (l) => l.tid === matchup.home_team_id && l.week === matchup.week
     )
     const away_lineup = lineups.find(
-      (l) => l.tid === matchup.aid && l.week === matchup.week
+      (l) => l.tid === matchup.away_team_id && l.week === matchup.week
     )
 
     if (!home_lineup || !away_lineup) {

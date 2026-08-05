@@ -47,18 +47,18 @@ const generate_scoring_format_title = (scoring_format) => {
 const generate_league_formats = async () => {
   const options = {
     num_teams: [10, 12],
-    sqb: [1],
-    srb: [2],
-    swr: [2],
-    ste: [1],
-    srbwr: [0],
+    starter_slots_qb: [1],
+    starter_slots_rb: [2],
+    starter_slots_wr: [2],
+    starter_slots_te: [1],
+    starter_slots_rb_wr_flex: [0],
     srbwrte: [1, 2],
     sqbrbwrte: [0, 1],
-    swrte: [0],
-    sdst: [1],
-    sk: [0, 1],
-    bench: [7],
-    ps: [4],
+    starter_slots_wr_te_flex: [0],
+    starter_slots_dst: [1],
+    starter_slots_k: [0, 1],
+    bench_slot_count: [7],
+    practice_squad_slot_count: [4],
     reserve_short_term_limit: [3],
     passing_attempts: [0],
     passing_completions: [0],
@@ -91,11 +91,18 @@ const generate_league_formats = async () => {
         options[key].forEach((option) => {
           const new_combination = { ...combination, [key]: option }
           if (
-            !(new_combination.srb + new_combination.swr > 5) &&
+            !(
+              new_combination.starter_slots_rb +
+                new_combination.starter_slots_wr >
+              5
+            ) &&
             !(
               new_combination.srbwrte +
-                new_combination.srbwr -
-                Math.max(new_combination.srbwrte, new_combination.srbwr) >
+                new_combination.starter_slots_rb_wr_flex -
+                Math.max(
+                  new_combination.srbwrte,
+                  new_combination.starter_slots_rb_wr_flex
+                ) >
               0
             )
           ) {
@@ -137,18 +144,18 @@ const generate_league_formats = async () => {
 
   const extract_league = (c) => ({
     num_teams: c.num_teams,
-    sqb: c.sqb,
-    srb: c.srb,
-    swr: c.swr,
-    ste: c.ste,
-    srbwr: c.srbwr,
+    starter_slots_qb: c.starter_slots_qb,
+    starter_slots_rb: c.starter_slots_rb,
+    starter_slots_wr: c.starter_slots_wr,
+    starter_slots_te: c.starter_slots_te,
+    starter_slots_rb_wr_flex: c.starter_slots_rb_wr_flex,
     srbwrte: c.srbwrte,
     sqbrbwrte: c.sqbrbwrte,
-    swrte: c.swrte,
-    sdst: c.sdst,
-    sk: c.sk,
-    bench: c.bench,
-    ps: c.ps,
+    starter_slots_wr_te_flex: c.starter_slots_wr_te_flex,
+    starter_slots_dst: c.starter_slots_dst,
+    starter_slots_k: c.starter_slots_k,
+    bench_slot_count: c.bench_slot_count,
+    practice_squad_slot_count: c.practice_squad_slot_count,
     reserve_short_term_limit: c.reserve_short_term_limit,
     cap: c.cap,
     min_bid: c.min_bid

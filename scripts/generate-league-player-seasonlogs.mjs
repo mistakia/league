@@ -65,7 +65,7 @@ const generate_league_player_seasonlogs = async ({
         .orderBy('timestamp', 'desc')
         .limit(1)
 
-      salary = salary_query.length ? salary_query[0].value : 0
+      salary = salary_query.length ? salary_query[0].player_salary : 0
     }
 
     // get end team

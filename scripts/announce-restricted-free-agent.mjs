@@ -153,7 +153,7 @@ const announce_restricted_free_agent = async ({
     }
 
     log(
-      `Using overridden nominating team: ${nominating_team.name} (${nominating_team.abbrv})`
+      `Using overridden nominating team: ${nominating_team.name} (${nominating_team.abbreviation})`
     )
   } else {
     const team_index = get_restricted_free_agency_nominating_team_index({
@@ -170,7 +170,7 @@ const announce_restricted_free_agent = async ({
   log(
     `Window ${target_window_index} (opens ${format_et(
       announcement_timestamp
-    )}) belongs to ${nominating_team.name} (${nominating_team.abbrv})`
+    )}) belongs to ${nominating_team.name} (${nominating_team.abbreviation})`
   )
 
   // The nomination is the auction, so the pending-announcement question is asked
@@ -202,7 +202,7 @@ const announce_restricted_free_agent = async ({
       )
     }
 
-    message = `${nominating_team.name} (${nominating_team.abbrv}) has announced ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) as a restricted free agent`
+    message = `${nominating_team.name} (${nominating_team.abbreviation}) has announced ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) as a restricted free agent`
     metadata = {
       tid: nominating_team.uid,
       pid: nomination.player_id,

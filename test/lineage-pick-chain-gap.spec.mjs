@@ -14,7 +14,7 @@ const expect = chai.expect
 const LID = 1
 const PICK_YEAR = current_season.year + 2
 
-// The pick chain is walked forward from `draft.otid` across a pick's accepted
+// The pick chain is walked forward from `draft.original_team_id` across a pick's accepted
 // trades, which assumes trades_picks records every hop that moved it. League 1
 // has three 2026 picks where it does not: the chain reaches a trade whose two
 // teams do not include the holder, and walking forward from that holder emitted
@@ -41,14 +41,14 @@ describe('LINEAGE - pick chain gap', function () {
     await league(knex)
   })
 
-  const insert_pick = async ({ pickid, otid, tid, round }) => {
+  const insert_pick = async ({ pickid, original_team_id, tid, round }) => {
     await knex('draft').insert({
       uid: pickid,
       lid: LID,
       year: PICK_YEAR,
       round,
       tid,
-      otid
+      original_team_id
     })
   }
 
@@ -107,7 +107,7 @@ describe('LINEAGE - pick chain gap', function () {
     this.timeout(60 * 1000)
     // Team 3 is endowed the pick but team 1 is the team that trades it away, so
     // the hop that moved it from 3 to 1 is missing from trades_picks.
-    await insert_pick({ pickid: 1, otid: 3, tid: 2, round: 1 })
+    await insert_pick({ pickid: 1, original_team_id: 3, tid: 2, round: 1 })
     await insert_trade({
       tradeid: 1,
       propose_tid: 1,
@@ -133,7 +133,7 @@ describe('LINEAGE - pick chain gap', function () {
 
   it('leaves an intact chain alone', async function () {
     this.timeout(60 * 1000)
-    await insert_pick({ pickid: 2, otid: 4, tid: 5, round: 2 })
+    await insert_pick({ pickid: 2, original_team_id: 4, tid: 5, round: 2 })
     await insert_trade({
       tradeid: 2,
       propose_tid: 4,
@@ -165,7 +165,7 @@ describe('LINEAGE - pick chain gap', function () {
     // draft.tid says team 5 holds the pick. That is the signature of a pickid
     // pointed at the wrong team's pick: the identity and the trade history
     // disagree about ownership, and only the end state exposes it.
-    await insert_pick({ pickid: 5, otid: 3, tid: 5, round: 2 })
+    await insert_pick({ pickid: 5, original_team_id: 3, tid: 5, round: 2 })
     await insert_trade({
       tradeid: 6,
       propose_tid: 3,
@@ -192,7 +192,7 @@ describe('LINEAGE - pick chain gap', function () {
     // never received the pick, so nothing but a synthetic hop could put its
     // source holding on a participant. Direction is still recovered from the
     // recorded trades_picks.tid, and the oracle counts the leg that is left.
-    await insert_pick({ pickid: 3, otid: 6, tid: 9, round: 3 })
+    await insert_pick({ pickid: 3, original_team_id: 6, tid: 9, round: 3 })
     await insert_trade({
       tradeid: 3,
       propose_tid: 6,
@@ -224,7 +224,7 @@ describe('LINEAGE - pick chain gap', function () {
     // Neither the chain holder (10) nor the recorded trades_picks.tid (12) is
     // in the trade, so the giver cannot be recovered -- but the leg must still
     // name only the trade's own two teams.
-    await insert_pick({ pickid: 4, otid: 10, tid: 11, round: 1 })
+    await insert_pick({ pickid: 4, original_team_id: 10, tid: 11, round: 1 })
     await insert_trade({
       tradeid: 5,
       propose_tid: 1,

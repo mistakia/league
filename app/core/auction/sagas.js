@@ -17,7 +17,9 @@ import {
   fantasy_positions,
   player_id_regex,
   team_id_regex,
-  starting_lineup_slot_league_keys
+  starting_lineup_slot_league_keys,
+  roster_slot_types,
+  starter_slot_league_columns
 } from '@constants'
 import { beep } from '@core/audio'
 
@@ -77,7 +79,7 @@ export function* optimize() {
   for (const pos of fantasy_positions) {
     roster_constraints[pos] = {
       max: get_eligible_slots({ pos, league }).length,
-      min: league[`s${pos.toLowerCase()}`]
+      min: league[starter_slot_league_columns[roster_slot_types[pos]]]
     }
   }
 

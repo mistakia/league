@@ -17,7 +17,7 @@ export default function LeagueSettingsRosterLimits({
     <>
       <EditableLeagueField
         label='QB'
-        field='mqb'
+        field='max_roster_qb'
         type='int'
         max={7}
         min={0}
@@ -25,7 +25,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='RB'
-        field='mrb'
+        field='max_roster_rb'
         type='int'
         max={20}
         min={0}
@@ -33,7 +33,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='WR'
-        field='mwr'
+        field='max_roster_wr'
         type='int'
         max={20}
         min={0}
@@ -41,7 +41,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='TE'
-        field='mte'
+        field='max_roster_te'
         type='int'
         max={10}
         min={0}
@@ -49,7 +49,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='K'
-        field='mk'
+        field='max_roster_k'
         type='int'
         max={5}
         min={0}
@@ -57,7 +57,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='DST'
-        field='mdst'
+        field='max_roster_dst'
         type='int'
         max={4}
         min={0}
@@ -65,7 +65,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='Bench'
-        field='bench'
+        field='bench_slot_count'
         type='int'
         max={20}
         min={0}
@@ -73,7 +73,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='PS'
-        field='ps'
+        field='practice_squad_slot_count'
         type='int'
         max={10}
         min={0}

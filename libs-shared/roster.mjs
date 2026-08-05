@@ -4,7 +4,9 @@ import {
   starting_lineup_slots,
   practice_squad_slots,
   player_tag_types,
-  current_season
+  current_season,
+  starter_slot_league_columns,
+  tag_limit_season_columns
 } from '#constants'
 import getExtensionAmount from './get-extension-amount.mjs'
 import is_before_extension_deadline from './is-before-extension-deadline.mjs'
@@ -97,7 +99,7 @@ export default class Roster {
   }
 
   get availablePracticeSpace() {
-    return this._league.ps - this.practice_signed.length
+    return this._league.practice_squad_slot_count - this.practice_signed.length
   }
 
   get availableReserveSpace() {
@@ -131,7 +133,18 @@ export default class Roster {
       tag,
       extensions
     } of this._players.values()) {
-      arr.push({ slot, pid, pos, rid, tag, extensions, tid, lid, year, week })
+      arr.push({
+        slot,
+        pid,
+        player_position: pos,
+        roster_id: rid,
+        tag,
+        extensions,
+        tid,
+        lid,
+        year,
+        week
+      })
     }
     return arr
   }
@@ -166,7 +179,7 @@ export default class Roster {
   }
 
   // Returns players that count toward position limits (active roster + signed practice squad)
-  // Position limits (mdst, mqb, mrb, mwr, mte, mk) apply to:
+  // Position limits (max_roster_dst, max_roster_qb, max_roster_rb, max_roster_wr, max_roster_te, max_roster_k) apply to:
   // - Active roster slots (bench, starter slots)
   // - Signed practice squad slots (PS, PSP)
   // Excludes drafted practice squad (PSD, PSDP) and reserve slots
@@ -312,16 +325,13 @@ export default class Roster {
       }
 
       const count = this.getCountBySlot(slot)
-      return count < this._league[`s${slotName.toLowerCase()}`]
+      return count < this._league[starter_slot_league_columns[slot]]
     }
   }
 
   hasOpenSlot(slot) {
-    const slotName = Object.keys(roster_slot_types).find(
-      (key) => roster_slot_types[key] === slot
-    )
     const count = this.getCountBySlot(slot)
-    return count < this._league[`s${slotName.toLowerCase()}`]
+    return count < this._league[starter_slot_league_columns[slot]]
   }
 
   isStarter(pid) {
@@ -343,11 +353,14 @@ export default class Roster {
           (!player.restricted_free_agency_original_team ||
             player.restricted_free_agency_original_team === this.tid)
       )
-      return originalTeamTaggedPlayers.length < this._league[`tag${tag}`]
+      return (
+        originalTeamTaggedPlayers.length <
+        this._league[tag_limit_season_columns[tag]]
+      )
     }
 
     const count = this.getCountByTag(tag)
-    return count < this._league[`tag${tag}`]
+    return count < this._league[tag_limit_season_columns[tag]]
   }
 
   has_open_reserve_short_term_slot() {
@@ -362,7 +375,7 @@ export default class Roster {
   }
 
   hasOpenPracticeSquadSlot() {
-    return this.practice_signed.length < this._league.ps
+    return this.practice_signed.length < this._league.practice_squad_slot_count
   }
 
   // Check if there's practice squad space for adding new players (includes position limit check)
@@ -384,16 +397,18 @@ export default class Roster {
     ).length
 
     const originalTeamTagLimit =
-      this._league[`tag${player_tag_types.RESTRICTED_FREE_AGENCY}`]
+      this._league[
+        tag_limit_season_columns[player_tag_types.RESTRICTED_FREE_AGENCY]
+      ]
     return processed_restricted_free_agency_tags !== originalTeamTagLimit
   }
 
   has_position_capacity(pos) {
-    // Position limits (mdst, mqb, etc.) apply to active roster + signed practice squad combined
+    // Position limits (max_roster_dst, max_roster_qb, etc.) apply to active roster + signed practice squad combined
     const count = this.roster_players_for_position_limits.filter(
       (p) => p.pos === pos
     ).length
-    const limit = this._league[`m${pos.toLowerCase()}`]
+    const limit = this._league[`max_roster_${pos.toLowerCase()}`]
     return !limit || count < limit
   }
 

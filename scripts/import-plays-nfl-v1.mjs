@@ -143,7 +143,7 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
   const data = {
     play_description: clean_string(play.playDescription),
     // Normalize down to null for special teams plays (0 should be null)
-    dwn: play.down === 0 ? null : play.down,
+    down_number: play.down === 0 ? null : play.down,
     // NOTE: drive_play_count is calculated by the play enrichment pipeline, not imported from NFL API
     // The NFL API's drivePlayCount is unreliable (live-updating, often inaccurate)
     game_clock_start: normalize_game_clock(play.clockTime),
@@ -176,7 +176,7 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
       : null,
     // Normalize yards_to_go to null for special teams plays (0 should be null)
     yards_to_go: play.yardsToGo === 0 ? null : play.yardsToGo,
-    qtr: play.quarter,
+    quarter: play.quarter,
     play_type_nfl
   }
 
@@ -253,7 +253,7 @@ const extract_elias = (smart_id) => {
 }
 
 const getPlayStatData = (playStat) => ({
-  yards: playStat.yards,
+  stat_yards: playStat.yards,
   nfl_team_id: playStat.team.id,
   player_name: clean_string(playStat.playerName), // Clean the player name here to remove null bytes
   nfl_team: playStat.team
@@ -406,7 +406,7 @@ const importPlaysForWeek = async ({
 
       // TODO re-enable and add `esbid` column to play_stats table
       for (const playStat of play.playStats) {
-        const { esbid, player_name, nfl_team, nfl_team_id, yards } =
+        const { esbid, player_name, nfl_team, nfl_team_id, stat_yards } =
           getPlayStatData(playStat)
         const gsis_player_id = esbid_to_gsis_id_index[esbid] || null
         if (esbid && !gsis_player_id) {
@@ -422,7 +422,7 @@ const importPlaysForWeek = async ({
           player_name,
           nfl_team,
           nfl_team_id,
-          yards
+          stat_yards
         })
       }
     }
@@ -462,7 +462,7 @@ const importPlaysForWeek = async ({
         play_description: play.play_description
           ? play.play_description.substring(0, 60) + '...'
           : null,
-        dwn: play.dwn,
+        down_number: play.down_number,
         ytg: play.yards_to_go,
         possession_nfl_team: play.possession_nfl_team,
         play_type_nfl: play.play_type_nfl,
@@ -483,7 +483,7 @@ const importPlaysForWeek = async ({
         player_name: stat.player_name,
         nfl_team: stat.nfl_team,
         gsis_player_id: stat.gsis_player_id,
-        yards: stat.yards
+        stat_yards: stat.stat_yards
       })
 
       // In dry mode, sample some plays and play_stats for verification

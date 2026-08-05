@@ -3,49 +3,22 @@
   "description": "Test case for player_practice",
   "request": {
     "columns": [
-      {
-        "column_id": "player_practice_game_designation"
-      },
-      {
-        "column_id": "player_practice_injury"
-      },
+      { "column_id": "player_practice_game_designation" },
+      { "column_id": "player_practice_injury" },
       {
         "column_id": "player_practice_designation_monday",
-        "params": {
-          "single_week": [
-            {
-              "dynamic_type": "current_week"
-            }
-          ]
-        }
+        "params": { "single_week": [{ "dynamic_type": "current_week" }] }
       },
-      {
-        "column_id": "player_practice_designation_tuesday"
-      },
-      {
-        "column_id": "player_practice_designation_wednesday"
-      },
-      {
-        "column_id": "player_practice_designation_thursday"
-      },
-      {
-        "column_id": "player_practice_designation_friday"
-      },
-      {
-        "column_id": "player_practice_designation_saturday"
-      },
-      {
-        "column_id": "player_practice_designation_sunday"
-      }
+      { "column_id": "player_practice_designation_tuesday" },
+      { "column_id": "player_practice_designation_wednesday" },
+      { "column_id": "player_practice_designation_thursday" },
+      { "column_id": "player_practice_designation_friday" },
+      { "column_id": "player_practice_designation_saturday" },
+      { "column_id": "player_practice_designation_sunday" }
     ],
-    "sort": [
-      {
-        "column_id": "player_practice_game_designation",
-        "desc": true
-      }
-    ]
+    "sort": [{ "column_id": "player_practice_game_designation", "desc": true }]
   },
-  "expected_query": "select \"player\".\"pid\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"game_designation\" AS \"practice_game_designation_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"inj\" AS \"practice_injury_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"m\" AS \"player_practice_designation_m_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"tu\" AS \"player_practice_designation_tu_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"w\" AS \"player_practice_designation_w_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"th\" AS \"player_practice_designation_th_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"f\" AS \"player_practice_designation_f_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"s\" AS \"player_practice_designation_s_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"su\" AS \"player_practice_designation_su_0\", \"player\".\"primary_position\" from \"player\" left join \"practice\" as \"t1d9e4fce3859e5dd7cee84fec5e36af6\" on \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"pid\" = \"player\".\"pid\" and \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"nfl_week_id\" in ('2025_REG_WEEK_1') group by \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"game_designation\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"inj\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"m\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"tu\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"w\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"th\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"f\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"s\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"su\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"game_designation\" AS \"practice_game_designation_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"injury_type\" AS \"practice_injury_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"monday_practice_status\" AS \"player_practice_designation_m_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"tuesday_practice_status\" AS \"player_practice_designation_tu_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"wednesday_practice_status\" AS \"player_practice_designation_w_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"thursday_practice_status\" AS \"player_practice_designation_th_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"friday_practice_status\" AS \"player_practice_designation_f_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"saturday_practice_status\" AS \"player_practice_designation_s_0\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"sunday_practice_status\" AS \"player_practice_designation_su_0\", \"player\".\"primary_position\" from \"player\" left join \"practice\" as \"t1d9e4fce3859e5dd7cee84fec5e36af6\" on \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"pid\" = \"player\".\"pid\" and \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"nfl_week_id\" in ('2025_REG_WEEK_1') group by \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"game_designation\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"injury_type\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"monday_practice_status\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"tuesday_practice_status\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"wednesday_practice_status\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"thursday_practice_status\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"friday_practice_status\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"saturday_practice_status\", \"t1d9e4fce3859e5dd7cee84fec5e36af6\".\"sunday_practice_status\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["player", "plays", "parameters", "sorting", "cte"],
   "timeout_ms": 40000
 }

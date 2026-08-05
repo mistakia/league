@@ -21,7 +21,7 @@ import {
   nfl_player_status_descriptions
 } from '@constants'
 
-function getClock({ desc, game_clock_start, qtr }) {
+function getClock({ desc, game_clock_start, quarter }) {
   switch (desc) {
     case 'END QUARTER 1':
       return 'End of 1st'
@@ -36,7 +36,9 @@ function getClock({ desc, game_clock_start, qtr }) {
       return 'Final'
 
     default:
-      return qtr ? `${game_clock_start || ''} ${qtr}${nth(qtr)}` : '-'
+      return quarter
+        ? `${game_clock_start || ''} ${quarter}${nth(quarter)}`
+        : '-'
   }
 }
 

@@ -87,7 +87,7 @@ const import_espn_receiving_tracking_metrics = async ({
     const player_seasonlogs_insert = {
       pid: player.pid,
       season_year: item.min_season,
-      pos: player.primary_position,
+      player_position: player.primary_position,
       season_type: 'REG',
       espn_rtm_routes: item.rtm_routes,
       espn_rtm_targets: item.rtm_targets,
@@ -120,7 +120,7 @@ const import_espn_receiving_tracking_metrics = async ({
       (i) => ({
         pid: i.pid,
         season_year: i.season_year,
-        pos: i.pos,
+        player_position: i.player_position,
         season_type: i.season_type,
         espn_rtm_routes: i.espn_rtm_routes,
         espn_rtm_targets: i.espn_rtm_targets,

@@ -22,7 +22,7 @@ export default async function (leagueId) {
     .select(
       'teams.*',
       'waivers.uid as wid',
-      'waivers.bid',
+      'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
       'waivers.userid',
@@ -39,7 +39,7 @@ export default async function (leagueId) {
     .where('waivers.type', waiver_types.FREE_AGENCY)
     .orderBy([
       {
-        column: 'waivers.bid',
+        column: 'waivers.bid_amount',
         order: 'desc'
       },
       {
@@ -47,7 +47,7 @@ export default async function (leagueId) {
         order: 'asc'
       },
       {
-        column: 'waivers.po',
+        column: 'waivers.priority_order',
         order: 'asc'
       },
       {

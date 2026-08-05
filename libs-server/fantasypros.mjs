@@ -11,7 +11,7 @@ export const get_fantasypros_config = async () => {
   const config_row = await db('config')
     .where({ key: 'fantasypros_config' })
     .first()
-  return config_row.value
+  return config_row.config_value
 }
 
 export const get_fantasypros_rankings = async ({

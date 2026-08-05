@@ -48,7 +48,7 @@ const generate_player_snaps_for_week = async ({
       'player.gsis_it_player_id',
       'player_gamelogs.nfl_team',
       'player_gamelogs.opponent_nfl_team',
-      'player_gamelogs.pos'
+      'player_gamelogs.player_position'
     )
     .join('player', 'player.pid', 'player_gamelogs.pid')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
@@ -68,12 +68,12 @@ const generate_player_snaps_for_week = async ({
       'nfl_plays.play_type',
       'nfl_plays.ydl_100',
       'nfl_plays.score_diff',
-      'nfl_plays.wp',
+      'nfl_plays.win_probability as wp',
       'nfl_plays.is_no_huddle',
       'nfl_plays.sec_rem_half',
       'nfl_plays.yards_to_go',
-      'nfl_plays.dwn',
-      'nfl_plays.qtr'
+      'nfl_plays.down_number as dwn',
+      'nfl_plays.quarter as qtr'
     )
     .leftJoin('nfl_plays', function () {
       this.on('nfl_plays.esbid', '=', 'nfl_snaps.esbid').andOn(
@@ -228,7 +228,7 @@ const generate_player_snaps_for_week = async ({
       continue
     }
 
-    const { opp, pos } = player_gamelog
+    const { opp, player_position: pos } = player_gamelog
     const player_snap_rows = nfl_snap_rows_by_gsis_it_id[gsis_it_id]
     const { esbid } = player_snap_rows[0]
 

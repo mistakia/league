@@ -178,7 +178,7 @@ const router = express.Router({ mergeParams: true })
  *                         round: 1
  *                         pick: 4
  *                         pick_str: "1.04"
- *                         otid: 13
+ *                         original_team_id: 13
  *                         pid: null
  *                     proposingTeamReleasePlayers: []
  *                     acceptingTeamReleasePlayers: []
@@ -249,7 +249,7 @@ router.get('/?', async (req, res) => {
         'draft.round',
         'draft.year',
         'draft.lid',
-        'draft.otid'
+        'draft.original_team_id'
       )
       .whereIn('tradeid', tradeids)
       .join('draft', 'trades_picks.pickid', 'draft.uid')
@@ -704,7 +704,11 @@ router.post(
         .as('sub_query')
 
       const players = await db
-        .select('player.*', 'transactions.value', 'rosters_players.slot')
+        .select(
+          'player.*',
+          'transactions.player_salary',
+          'rosters_players.slot'
+        )
         .from(sub)
         .join('transactions', 'sub_query.uid', 'transactions.uid')
         .join('player', 'transactions.pid', 'player.pid')

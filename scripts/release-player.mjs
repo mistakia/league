@@ -256,7 +256,7 @@ const display_dry_run_results = ({
 }) => {
   console.log('\n=== DRY RUN - No changes will be made ===')
   console.log(`League: ${league.name} (ID: ${lid})`)
-  console.log(`Team: ${team.name} (${team.abbrv})`)
+  console.log(`Team: ${team.name} (${team.abbreviation})`)
   console.log(`Release: ${format_player_display(release_player)}`)
 
   if (activate_player) {
@@ -276,7 +276,7 @@ const display_success_results = ({
 }) => {
   console.log('\n=== Release Successful ===')
   console.log(`League: ${league.name} (ID: ${lid})`)
-  console.log(`Team: ${team.name} (${team.abbrv})`)
+  console.log(`Team: ${team.name} (${team.abbreviation})`)
   console.log(`Released: ${format_player_display(release_player)}`)
 
   if (activate_player) {

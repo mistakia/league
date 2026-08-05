@@ -20,6 +20,15 @@ import { player_actions } from '@core/players'
 
 import LeagueTeam from './league-team'
 
+// league.franchise_tag_salary_<pos> no longer shares a shape with the
+// position code, so the per-position lookup needs an explicit map.
+const franchise_tag_salary_field_by_position = {
+  qb: 'franchise_tag_salary_qb',
+  rb: 'franchise_tag_salary_rb',
+  wr: 'franchise_tag_salary_wr',
+  te: 'franchise_tag_salary_te'
+}
+
 const map_state_to_props = createSelector(
   get_current_league,
   getRosterByTeamId,
@@ -57,7 +66,7 @@ const map_state_to_props = createSelector(
       // restricted free agent at $0 through `getExtensionAmount`'s `??` branch.
       // Immutable's default only fires when the key is absent and reducers clear
       // this field to an explicit null, so coalesce rather than rely on it.
-      const bid = p.get('bid') ?? undefined
+      const bid = p.get('bid_amount') ?? undefined
       const has_bid = bid !== undefined
       const extensions = p.get('extensions', 0)
       const pos = p.get('primary_position')
@@ -99,7 +108,10 @@ const map_state_to_props = createSelector(
 
         franchise_tag_savings =
           Math.max(
-            regular_extended_salary - (league[`f${pos?.toLowerCase()}`] || 0),
+            regular_extended_salary -
+              (league[
+                franchise_tag_salary_field_by_position[pos?.toLowerCase()]
+              ] || 0),
             0
           ) || null
       }

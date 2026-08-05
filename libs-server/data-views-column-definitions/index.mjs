@@ -274,12 +274,12 @@ export default {
     })
   },
   player_league_salary: {
-    column_name: 'value',
+    column_name: 'player_salary',
     table_name: 'transactions',
     source: { grain: 'player' },
     table_alias: () => 'latest_transactions',
     select_as: () => 'player_salary',
-    main_where: ({ table_name }) => `${table_name}.value`,
+    main_where: ({ table_name }) => `${table_name}.player_salary`,
     join: ({ query, params = {}, data_view_options = {} }) => {
       const { lid = 1 } = params
       query.leftJoin(

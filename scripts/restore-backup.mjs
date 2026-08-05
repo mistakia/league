@@ -208,10 +208,10 @@ const generate_config_upsert = async (config_rows, output_file) => {
 
     // PostgreSQL upsert command
     const sql = `
-INSERT INTO public.config (key, value, updated_at) 
+INSERT INTO public.config (key, config_value, updated_at)
 VALUES ('${key}', '${escaped_value}', '${timestamp || 'NOW()'}')
-ON CONFLICT (key) 
-DO UPDATE SET value = '${escaped_value}', updated_at = '${timestamp || 'NOW()'}';`
+ON CONFLICT (key)
+DO UPDATE SET config_value = '${escaped_value}', updated_at = '${timestamp || 'NOW()'}';`
 
     sql_statements.push(sql)
   }

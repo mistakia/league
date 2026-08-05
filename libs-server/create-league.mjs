@@ -59,28 +59,24 @@ export default async function ({ lid, commishid, ...params } = {}) {
     league_format_id,
     scoring_format_id,
 
-    mqb: league_params.mqb,
-    mrb: league_params.mrb,
-    mwr: league_params.mwr,
-    mte: league_params.mte,
-    mdst: league_params.mdst,
-    mk: league_params.mk,
+    max_roster_qb: league_params.max_roster_qb,
+    max_roster_rb: league_params.max_roster_rb,
+    max_roster_wr: league_params.max_roster_wr,
+    max_roster_te: league_params.max_roster_te,
+    max_roster_dst: league_params.max_roster_dst,
+    max_roster_k: league_params.max_roster_k,
 
-    faab: league_params.faab,
+    starting_faab_budget: league_params.starting_faab_budget,
 
-    tag2: league_params.tag2,
-    tag3: league_params.tag3,
-    tag4: league_params.tag4,
+    franchise_tag_limit: league_params.franchise_tag_limit,
+    rookie_tag_limit: league_params.rookie_tag_limit,
+    restricted_free_agency_tag_limit:
+      league_params.restricted_free_agency_tag_limit,
 
-    ext1: league_params.ext1,
-    ext2: league_params.ext2,
-    ext3: league_params.ext3,
-    ext4: league_params.ext4,
-
-    fqb: league_params.fqb,
-    frb: league_params.frb,
-    fwr: league_params.fwr,
-    fte: league_params.fte,
+    franchise_tag_salary_qb: league_params.franchise_tag_salary_qb,
+    franchise_tag_salary_rb: league_params.franchise_tag_salary_rb,
+    franchise_tag_salary_wr: league_params.franchise_tag_salary_wr,
+    franchise_tag_salary_te: league_params.franchise_tag_salary_te,
 
     restricted_free_agency_period_start:
       league_params.restricted_free_agency_period_start,

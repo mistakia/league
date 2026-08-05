@@ -33,14 +33,14 @@ const HISTORICAL_PLAYS_FIELDS = [
   'nfl_plays.esbid',
   'nfl_plays.play_id',
   'nfl_plays.sequence',
-  'nfl_plays.dwn',
+  'nfl_plays.down_number',
   'nfl_plays.play_description',
   'nfl_plays.possession_nfl_team',
   'nfl_plays.offense_nfl_team',
   'nfl_plays.defense_nfl_team',
   'nfl_plays.season_year',
   'nfl_plays.week',
-  'nfl_plays.qtr',
+  'nfl_plays.quarter',
   'nfl_plays.yards_to_go',
   'nfl_plays.game_clock_start',
   'nfl_plays.ydl_end',
@@ -249,7 +249,7 @@ function get_cache_ttl_for_season_type() {
  *                     defense_nfl_team: "LV"
  *                     down: 1
  *                     yards_to_go: 10
- *                     yfog: 25
+ *                     yards_from_own_goal: 25
  *                     play_type: "RUSH"
  *                     yards_gained: 7
  *       500:
@@ -312,7 +312,7 @@ router.get('/?', async (req, res) => {
  *                     defense_nfl_team: "LV"
  *                     down: 1
  *                     yards_to_go: 10
- *                     yfog: 25
+ *                     yards_from_own_goal: 25
  *                     play_type: "RUSH"
  *                     yards_gained: 7
  *       500:
@@ -383,7 +383,7 @@ router.get('/all', async (req, res) => {
  *                     week: 13
  *                     pid: "PATR-MAHO-005785"
  *                     stat_type: "PASSING"
- *                     yards: 15
+ *                     stat_yards: 15
  *                     touchdown: false
  *                     interception: false
  *                     is_valid: true
@@ -499,16 +499,16 @@ router.get('/stats', async (req, res) => {
  *                     def: "LV"
  *                     down: 1
  *                     yards_to_go: 10
- *                     yfog: 25
- *                     qtr: 1
+ *                     yards_from_own_goal: 25
+ *                     quarter: 1
  *                     play_type: "RUSH"
  *                     yards_gained: 7
  *                     ball_carrier_pid: "PATR-MAHO-005785"
  *                     rush_yds: 7
  *                     is_first_down: false
  *                     is_successful_play: true
- *                     dwn: 1
- *                     dot: 75
+ *                     down_number: 1
+ *                     depth_of_target: 75
  *                     ydl_100: 25
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
@@ -537,7 +537,7 @@ router.get('/charted', async (req, res) => {
     const seas_types = seas_types_param.length ? seas_types_param : ['REG']
     const { pid } = req.query
 
-    // TODO filter by yfog range
+    // TODO filter by yards_from_own_goal range
     // TODO filter by yards_to_go range
     // TODO filter by first drive
     // TODO filter by temperature
@@ -582,10 +582,10 @@ router.get('/charted', async (req, res) => {
       query = query.whereIn('nfl_games.day', days)
     }
     if (quarters.length) {
-      query = query.whereIn('nfl_plays.qtr', quarters)
+      query = query.whereIn('nfl_plays.quarter', quarters)
     }
     if (downs.length) {
-      query = query.whereIn('nfl_plays.dwn', downs)
+      query = query.whereIn('nfl_plays.down_number', downs)
     }
 
     // Check cache

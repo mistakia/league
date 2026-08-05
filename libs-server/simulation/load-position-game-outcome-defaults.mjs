@@ -24,7 +24,7 @@ export async function load_position_game_outcome_defaults({
     .where('outcome_type', outcome_type)
     .orderBy('season_year', 'desc')
     .select(
-      'pos',
+      'player_position',
       'archetype',
       'season_year',
       'default_correlation',
@@ -36,7 +36,9 @@ export async function load_position_game_outcome_defaults({
   const result = new Map()
 
   for (const row of defaults) {
-    const key = row.archetype ? `${row.pos}:${row.archetype}` : row.pos
+    const key = row.archetype
+      ? `${row.player_position}:${row.archetype}`
+      : row.player_position
 
     if (seen.has(key)) {
       continue

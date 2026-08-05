@@ -62,7 +62,7 @@ export default async function (lid) {
     .select(
       'teams.*',
       'waivers.uid as wid',
-      'waivers.bid',
+      'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
       'waivers.userid',
@@ -80,7 +80,7 @@ export default async function (lid) {
         order: 'asc'
       },
       {
-        column: 'waivers.po',
+        column: 'waivers.priority_order',
         order: 'asc'
       },
       {
@@ -110,7 +110,7 @@ export default async function (lid) {
     .select(
       'teams.*',
       'waivers.uid as wid',
-      'waivers.bid',
+      'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
       'waivers.userid',

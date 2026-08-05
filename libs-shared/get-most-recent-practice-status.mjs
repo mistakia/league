@@ -7,13 +7,13 @@
  *
  * @param {Object} params - The parameters object
  * @param {Object} params.practice - Practice object with day-of-week properties
- * @param {string|null} params.practice.m - Monday practice status (FP, LP, DNP or legacy FULL, LIMITED; or null)
- * @param {string|null} params.practice.tu - Tuesday practice status
- * @param {string|null} params.practice.w - Wednesday practice status
- * @param {string|null} params.practice.th - Thursday practice status
- * @param {string|null} params.practice.f - Friday practice status
- * @param {string|null} params.practice.s - Saturday practice status
- * @param {string|null} params.practice.su - Sunday practice status
+ * @param {string|null} params.practice.monday_practice_status - Monday practice status (FP, LP, DNP or legacy FULL, LIMITED; or null)
+ * @param {string|null} params.practice.tuesday_practice_status - Tuesday practice status
+ * @param {string|null} params.practice.wednesday_practice_status - Wednesday practice status
+ * @param {string|null} params.practice.thursday_practice_status - Thursday practice status
+ * @param {string|null} params.practice.friday_practice_status - Friday practice status
+ * @param {string|null} params.practice.saturday_practice_status - Saturday practice status
+ * @param {string|null} params.practice.sunday_practice_status - Sunday practice status
  * @param {Date} params.current_date - The current date to determine which practice day is most recent
  * @returns {string|null} The most recent practice status ('FP', 'LP', 'DNP' or an unrecognized value) or null if no status exists
  */
@@ -39,13 +39,13 @@ export default function get_most_recent_practice_status({
 
   // Map day numbers (0=Sunday, 6=Saturday) to practice object properties
   const practice_day_map = {
-    0: 'su', // Sunday
-    1: 'm', // Monday
-    2: 'tu', // Tuesday
-    3: 'w', // Wednesday
-    4: 'th', // Thursday
-    5: 'f', // Friday
-    6: 's' // Saturday
+    0: 'sunday_practice_status', // Sunday
+    1: 'monday_practice_status', // Monday
+    2: 'tuesday_practice_status', // Tuesday
+    3: 'wednesday_practice_status', // Wednesday
+    4: 'thursday_practice_status', // Thursday
+    5: 'friday_practice_status', // Friday
+    6: 'saturday_practice_status' // Saturday
   }
 
   // Get current day of week (0=Sunday, 6=Saturday)

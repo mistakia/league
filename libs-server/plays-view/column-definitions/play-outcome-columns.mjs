@@ -69,31 +69,35 @@ export default {
     use_having: true
   },
   play_wpa: {
-    column_name: 'wpa',
+    column_name: 'win_probability_added',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.wpa as play_wpa'],
-    main_where: () => 'nfl_plays.wpa',
-    aggregate_select: () => db.raw('AVG(nfl_plays.wpa) as play_wpa'),
+    main_select: () => ['nfl_plays.win_probability_added as play_wpa'],
+    main_where: () => 'nfl_plays.win_probability_added',
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.win_probability_added) as play_wpa'),
     use_having: true
   },
   play_ep: {
-    column_name: 'ep',
+    column_name: 'expected_points',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.ep as play_ep'],
-    main_where: () => 'nfl_plays.ep'
+    main_select: () => ['nfl_plays.expected_points as play_ep'],
+    main_where: () => 'nfl_plays.expected_points'
   },
   play_wp: {
-    column_name: 'wp',
+    column_name: 'win_probability',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.wp as play_wp'],
-    main_where: () => 'nfl_plays.wp'
+    main_select: () => ['nfl_plays.win_probability as play_wp'],
+    main_where: () => 'nfl_plays.win_probability'
   },
   play_cpoe: {
-    column_name: 'cpoe',
+    column_name: 'completion_percentage_over_expected',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.cpoe as play_cpoe'],
-    main_where: () => 'nfl_plays.cpoe',
-    aggregate_select: () => db.raw('AVG(nfl_plays.cpoe) as play_cpoe'),
+    main_select: () => [
+      'nfl_plays.completion_percentage_over_expected as play_cpoe'
+    ],
+    main_where: () => 'nfl_plays.completion_percentage_over_expected',
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.completion_percentage_over_expected) as play_cpoe'),
     use_having: true
   },
   play_xpass_prob: {

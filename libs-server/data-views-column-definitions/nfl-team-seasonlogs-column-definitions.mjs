@@ -115,7 +115,7 @@ const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
   'pass_yards_per_attempt',
   'pass_comp_pct',
   'expected_pass_comp',
-  'cpoe',
+  'completion_percentage_over_expected',
   'pass_epa_per_db',
   'avg_time_to_throw',
   'avg_time_to_pressure',
@@ -187,9 +187,9 @@ const create_field_from_league_nfl_team_seasonlogs = (column_name) => ({
   table_name: 'league_nfl_team_seasonlogs',
   table_alias: league_nfl_team_seasonlogs_table_alias,
   source: league_nfl_team_source,
-  // rank is a league rank (AVG across the window); points is additive fantasy
-  // points (SUM default).
-  range_offset_aggregate: column_name === 'rank' ? 'AVG' : undefined,
+  // points_rank is a league rank (AVG across the window); points is additive
+  // fantasy points (SUM default).
+  range_offset_aggregate: column_name === 'points_rank' ? 'AVG' : undefined,
   get_cache_info
 })
 
@@ -197,7 +197,7 @@ export default {
   league_nfl_team_seasonlogs_points:
     create_field_from_league_nfl_team_seasonlogs('points'),
   league_nfl_team_seasonlogs_rank:
-    create_field_from_league_nfl_team_seasonlogs('rank'),
+    create_field_from_league_nfl_team_seasonlogs('points_rank'),
   nfl_team_seasonlogs_passing_attempts:
     create_field_from_nfl_team_seasonlogs('passing_attempts'),
   nfl_team_seasonlogs_passing_completions:
@@ -275,10 +275,13 @@ export default {
     create_field_from_nfl_team_seasonlogs('pass_yards_per_attempt'),
   nfl_team_seasonlogs_pass_comp_pct:
     create_field_from_nfl_team_seasonlogs('pass_comp_pct'),
-  nfl_team_seasonlogs_sacks: create_field_from_nfl_team_seasonlogs('sacks'),
+  nfl_team_seasonlogs_sacks:
+    create_field_from_nfl_team_seasonlogs('sacks_taken'),
   nfl_team_seasonlogs_expected_pass_comp:
     create_field_from_nfl_team_seasonlogs('expected_pass_comp'),
-  nfl_team_seasonlogs_cpoe: create_field_from_nfl_team_seasonlogs('cpoe'),
+  nfl_team_seasonlogs_cpoe: create_field_from_nfl_team_seasonlogs(
+    'completion_percentage_over_expected'
+  ),
   nfl_team_seasonlogs_dropbacks:
     create_field_from_nfl_team_seasonlogs('dropbacks'),
   nfl_team_seasonlogs_pass_epa:

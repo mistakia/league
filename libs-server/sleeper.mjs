@@ -8,7 +8,7 @@ const log = debug('sleeper')
 
 export const get_sleeper_config = async () => {
   const config_row = await db('config').where({ key: 'sleeper_config' }).first()
-  return config_row.value
+  return config_row.config_value
 }
 
 export const get_sleeper_projections = async ({

@@ -49,10 +49,10 @@ export default {
     use_having: true
   },
   play_route: {
-    column_name: 'route',
+    column_name: 'charted_route',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.route as play_route'],
-    main_where: () => 'nfl_plays.route'
+    main_select: () => ['nfl_plays.charted_route as play_route'],
+    main_where: () => 'nfl_plays.charted_route'
   },
   play_contested_ball: {
     column_name: 'is_contested_ball',

@@ -111,7 +111,7 @@ const team_stat_from_plays = ({
   rate_with_selects,
   // Non-is_rate columns that are nonetheless pooled as a quotient in a
   // multi-year year_offset RANGE (the AVG carve-outs PROE / CPOE). They keep
-  // their raw `select_string` season render (e.g. AVG(cpoe)) in every
+  // their raw `select_string` season render (e.g. AVG(completion_percentage_over_expected)) in every
   // non-range path, and only emit numerator/denominator selects when the
   // request is a year_offset range so the window can pool SUM(num)/SUM(den)
   // instead of summing per-season means. is_rate columns already carry their
@@ -360,9 +360,9 @@ const stat_specs = {
     supported_rate_types: []
   },
   team_completion_percentage_over_expected_from_plays: {
-    select_string: `AVG(cpoe)`,
-    numerator_select: `SUM(cpoe)`,
-    denominator_select: `SUM(CASE WHEN cpoe IS NOT NULL THEN 1 ELSE 0 END)`,
+    select_string: `AVG(completion_percentage_over_expected)`,
+    numerator_select: `SUM(completion_percentage_over_expected)`,
+    denominator_select: `SUM(CASE WHEN completion_percentage_over_expected IS NOT NULL THEN 1 ELSE 0 END)`,
     stat_name: 'team_completion_percentage_over_expected_from_plays',
     supported_rate_types: []
   },
@@ -388,7 +388,7 @@ const stat_specs = {
     stat_name: 'team_pass_td_from_plays'
   },
   team_pass_air_yards_from_plays: {
-    measure: { kind: 'additive', expr: `dot` },
+    measure: { kind: 'additive', expr: `depth_of_target` },
     stat_name: 'team_pass_air_yds_from_plays'
   },
   team_yards_after_catch_from_plays: {
@@ -418,7 +418,7 @@ const stat_specs = {
     stat_name: 'team_ep_added_from_plays'
   },
   team_win_percentage_added_from_plays: {
-    measure: { kind: 'additive', expr: `wpa` },
+    measure: { kind: 'additive', expr: `win_probability_added` },
     stat_name: 'team_wp_added_from_plays'
   },
   team_success_rate_from_plays: {

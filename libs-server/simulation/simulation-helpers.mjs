@@ -217,7 +217,7 @@ export async function load_league_matchups({ league_id, week, year }) {
 
   const rows = await db('matchups')
     .where({ lid: league_id, week, year })
-    .select('uid as matchup_id', 'hid as home_team_id', 'aid as away_team_id')
+    .select('uid as matchup_id', 'home_team_id', 'away_team_id')
 
   log(`Loaded ${rows.length} matchups`)
   return rows

@@ -103,7 +103,7 @@ const format_prop_row = ({
           }
         }
 
-        if (play.qtr === 1) {
+        if (play.quarter === 1) {
           if (play.passer_pid === prop_row.selection_pid) {
             acc[play.esbid].first_quarter_stats.passing_yards +=
               play.pass_yds || 0
@@ -368,7 +368,7 @@ const calculate_weekly_market_selections_analysis = async ({
       'week',
       'season_year',
       'season_type',
-      'qtr',
+      'quarter',
       'pass_yds',
       'recv_yds',
       'rush_yds',

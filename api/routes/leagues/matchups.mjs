@@ -35,11 +35,11 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: NFL week number
  *           example: 8
- *         hid:
+ *         home_team_id:
  *           type: integer
  *           description: Home team ID
  *           example: 13
- *         aid:
+ *         away_team_id:
  *           type: integer
  *           description: Away team ID
  *           example: 14
@@ -181,15 +181,15 @@ const router = express.Router({ mergeParams: true })
  *                       lid: 2
  *                       year: 2024
  *                       week: 1
- *                       hid: 13
- *                       aid: 14
+ *                       home_team_id: 13
+ *                       away_team_id: 14
  *                       week_type: "REG"
  *                     - uid: 1235
  *                       lid: 2
  *                       year: 2024
  *                       week: 1
- *                       hid: 15
- *                       aid: 16
+ *                       home_team_id: 15
+ *                       away_team_id: 16
  *                       week_type: "REG"
  *                   message: "Schedule generated successfully"
  *       401:
@@ -303,15 +303,15 @@ router.post('/?', async (req, res) => {
  *                       lid: 2
  *                       year: 2024
  *                       week: 1
- *                       hid: 13
- *                       aid: 14
+ *                       home_team_id: 13
+ *                       away_team_id: 14
  *                       week_type: "REG"
  *                     - uid: 1235
  *                       lid: 2
  *                       year: 2024
  *                       week: 2
- *                       hid: 15
- *                       aid: 16
+ *                       home_team_id: 15
+ *                       away_team_id: 16
  *                       week_type: "REG"
  *                   playoffs:
  *                     - uid: 5678

@@ -336,18 +336,18 @@ export const league_formats = {
     label: 'Standard 10 Team (No PPR)',
     config: {
       num_teams: 10, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -361,18 +361,18 @@ export const league_formats = {
     label: 'Half PPR 10 Team',
     config: {
       num_teams: 10, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -385,18 +385,18 @@ export const league_formats = {
     label: 'PPR 10 Team',
     config: {
       num_teams: 10, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -410,18 +410,18 @@ export const league_formats = {
     label: 'Standard 12 Team (No PPR)',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -435,18 +435,18 @@ export const league_formats = {
     label: 'Half PPR 12 Team',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -459,18 +459,18 @@ export const league_formats = {
     label: 'PPR 12 Team',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -484,18 +484,18 @@ export const league_formats = {
     label: 'Half PPR 10 Team Superflex',
     config: {
       num_teams: 10, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 1, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -509,18 +509,18 @@ export const league_formats = {
     label: 'PPR 10 Team Superflex',
     config: {
       num_teams: 10, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 1, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -535,18 +535,18 @@ export const league_formats = {
     label: 'Half PPR 12 Team Superflex',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 1, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -560,18 +560,18 @@ export const league_formats = {
     label: 'PPR 12 Team Superflex',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 1, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -586,18 +586,18 @@ export const league_formats = {
     label: 'Scott Fish Bowl 15 (MFL)',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 0, // starting RB
-      swr: 0, // starting WR
-      ste: 0, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 0, // starting RB
+      starter_slots_wr: 0, // starting WR
+      starter_slots_te: 0, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 9, // starting RB/WR/TE flex (9 flex slots)
       sqbrbwrte: 2, // starting superflex (2 superflex slots)
-      swrte: 0, // starting WR/TE flex
-      sdst: 0, // starting D/ST (no D/ST)
-      sk: 0, // starting K (no K)
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 0, // starting D/ST (no D/ST)
+      starter_slots_k: 0, // starting K (no K)
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -611,18 +611,18 @@ export const league_formats = {
     label: 'Scott Fish Bowl 15 (Sleeper)',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 0, // starting RB
-      swr: 0, // starting WR
-      ste: 0, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 0, // starting RB
+      starter_slots_wr: 0, // starting WR
+      starter_slots_te: 0, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 9, // starting RB/WR/TE flex (9 flex slots)
       sqbrbwrte: 2, // starting superflex (2 superflex slots)
-      swrte: 0, // starting WR/TE flex
-      sdst: 0, // starting D/ST (no D/ST)
-      sk: 0, // starting K (no K)
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 0, // starting D/ST (no D/ST)
+      starter_slots_k: 0, // starting K (no K)
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -642,18 +642,18 @@ export const league_formats = {
     pricing_model: 'dfs_fixed',
     config: {
       num_teams: 1, // single entry (DFS)
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 3, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 3, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 0, // starting K (no K in DraftKings)
-      bench: 0, // no bench (DFS)
-      ps: 0, // no practice squad
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 0, // starting K (no K in DraftKings)
+      bench_slot_count: 0, // no bench (DFS)
+      practice_squad_slot_count: 0, // no practice squad
       reserve_short_term_limit: 0, // no short term reserve
       cap: 50000, // salary cap ($50k)
       min_bid: 0 // minimum bid
@@ -668,18 +668,18 @@ export const league_formats = {
     label: 'Half PPR Lower Turnover 10 Team',
     config: {
       num_teams: 10, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -693,18 +693,18 @@ export const league_formats = {
     label: 'Half PPR Lower Turnover 12 Team',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -718,18 +718,18 @@ export const league_formats = {
     label: 'Half PPR Lower Turnover 10 Team Superflex',
     config: {
       num_teams: 10, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 1, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -743,18 +743,18 @@ export const league_formats = {
     label: 'Half PPR Lower Turnover 12 Team Superflex',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 1, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -769,18 +769,18 @@ export const league_formats = {
     label: 'PPR Lower Turnover 10 Team',
     config: {
       num_teams: 10, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -794,18 +794,18 @@ export const league_formats = {
     label: 'PPR Lower Turnover 12 Team',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 0, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -819,18 +819,18 @@ export const league_formats = {
     label: 'PPR Lower Turnover 10 Team Superflex',
     config: {
       num_teams: 10, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 1, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -844,18 +844,18 @@ export const league_formats = {
     label: 'PPR Lower Turnover 12 Team Superflex',
     config: {
       num_teams: 12, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 1, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 1, // starting K
-      bench: 6, // bench spots
-      ps: 0, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 1, // starting K
+      bench_slot_count: 6, // bench spots
+      practice_squad_slot_count: 0, // practice squad spots
       reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
@@ -870,18 +870,18 @@ export const league_formats = {
     label: 'Genesis League 10 Team',
     config: {
       num_teams: 10, // number of teams
-      sqb: 1, // starting QB
-      srb: 2, // starting RB
-      swr: 2, // starting WR
-      ste: 1, // starting TE
-      srbwr: 0, // starting RB/WR flex
+      starter_slots_qb: 1, // starting QB
+      starter_slots_rb: 2, // starting RB
+      starter_slots_wr: 2, // starting WR
+      starter_slots_te: 1, // starting TE
+      starter_slots_rb_wr_flex: 0, // starting RB/WR flex
       srbwrte: 1, // starting RB/WR/TE flex
       sqbrbwrte: 1, // starting superflex
-      swrte: 0, // starting WR/TE flex
-      sdst: 1, // starting D/ST
-      sk: 0, // starting K (no kicker)
-      bench: 7, // bench spots
-      ps: 4, // practice squad spots
+      starter_slots_wr_te_flex: 0, // starting WR/TE flex
+      starter_slots_dst: 1, // starting D/ST
+      starter_slots_k: 0, // starting K (no kicker)
+      bench_slot_count: 7, // bench spots
+      practice_squad_slot_count: 4, // practice squad spots
       reserve_short_term_limit: 99, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid

@@ -11,8 +11,8 @@ import { current_season } from '@constants'
 
 export default function Matchup({ matchup, teams, scoreboard }) {
   const navigate = useNavigate()
-  const home = teams.find((t) => t.uid === matchup.hid) || {}
-  const away = teams.find((t) => t.uid === matchup.aid) || {}
+  const home = teams.find((t) => t.uid === matchup.home_team_id) || {}
+  const away = teams.find((t) => t.uid === matchup.away_team_id) || {}
   const handleClick = () =>
     navigate(
       `/leagues/${matchup.lid}/matchups/${matchup.year}/${matchup.week}/${matchup.uid}`
@@ -22,11 +22,11 @@ export default function Matchup({ matchup, teams, scoreboard }) {
 
   const is_current_week =
     matchup.week === current_season.week && matchup.year === current_season.year
-  const is_final = Boolean(matchup.ap && matchup.hp)
+  const is_final = Boolean(matchup.away_points && matchup.home_points)
   const home_score =
-    !is_final && is_current_week ? scoreboard.home.points : matchup.hp
+    !is_final && is_current_week ? scoreboard.home.points : matchup.home_points
   const away_score =
-    !is_final && is_current_week ? scoreboard.away.points : matchup.ap
+    !is_final && is_current_week ? scoreboard.away.points : matchup.away_points
   const home_proj =
     !is_final && is_current_week
       ? Math.round(scoreboard.home.projected)
@@ -46,7 +46,7 @@ export default function Matchup({ matchup, teams, scoreboard }) {
       <div
         className={get_string_from_object({
           matchup__away: true,
-          winner: matchup.ap > matchup.hp
+          winner: matchup.away_points > matchup.home_points
         })}
       >
         <div
@@ -55,21 +55,21 @@ export default function Matchup({ matchup, teams, scoreboard }) {
             backgroundColor: `#${away.primary_color}`
           }}
         />
-        <TeamImage tid={matchup.aid} year={matchup.year} />
-        <TeamName tid={matchup.aid} year={matchup.year} />
+        <TeamImage tid={matchup.away_team_id} year={matchup.year} />
+        <TeamName tid={matchup.away_team_id} year={matchup.year} />
         <div className='matchup__col metric spread'>
           {formatSpread(matchup.home_projection - matchup.away_projection)}
         </div>
         <div className='matchup__col metric proj'>{away_proj}</div>
         <div className='matchup__col metric score'>{away_score || '-'}</div>
-        {matchup.ap > matchup.hp && (
+        {matchup.away_points > matchup.home_points && (
           <div className='matchup__winner-arrow-left' />
         )}
       </div>
       <div
         className={get_string_from_object({
           matchup__home: true,
-          winner: matchup.hp > matchup.ap
+          winner: matchup.home_points > matchup.away_points
         })}
       >
         <div
@@ -78,14 +78,14 @@ export default function Matchup({ matchup, teams, scoreboard }) {
             backgroundColor: `#${home.primary_color}`
           }}
         />
-        <TeamImage tid={matchup.hid} year={matchup.year} />
-        <TeamName tid={matchup.hid} year={matchup.year} />
+        <TeamImage tid={matchup.home_team_id} year={matchup.year} />
+        <TeamName tid={matchup.home_team_id} year={matchup.year} />
         <div className='matchup__col metric spread'>
           {formatSpread(matchup.away_projection - matchup.home_projection)}
         </div>
         <div className='matchup__col metric proj'>{home_proj}</div>
         <div className='matchup__col metric score'>{home_score || '-'}</div>
-        {matchup.hp > matchup.ap && (
+        {matchup.home_points > matchup.away_points && (
           <div className='matchup__winner-arrow-left' />
         )}
       </div>

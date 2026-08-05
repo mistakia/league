@@ -98,10 +98,10 @@ export const add_per_team_play_cte = ({
     switch (group_by) {
       case 'half':
         count_expression =
-          'COUNT(DISTINCT CONCAT(nfl_plays.esbid, CASE WHEN qtr <= 2 THEN 1 ELSE 2 END))'
+          'COUNT(DISTINCT CONCAT(nfl_plays.esbid, CASE WHEN quarter <= 2 THEN 1 ELSE 2 END))'
         break
       case 'quarter':
-        count_expression = 'COUNT(DISTINCT CONCAT(nfl_plays.esbid, qtr))'
+        count_expression = 'COUNT(DISTINCT CONCAT(nfl_plays.esbid, quarter))'
         break
       case 'drive':
         count_expression = 'COUNT(DISTINCT CONCAT(nfl_plays.esbid, drive_seq))'

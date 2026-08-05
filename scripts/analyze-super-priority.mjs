@@ -104,9 +104,9 @@ async function analyze_all_players({ year, lid, validate }) {
       'player.last_name',
       'player.primary_position',
       'original.name as original_team_name',
-      'original.abbrv as original_team_abbrv',
+      'original.abbreviation as original_team_abbrv',
       'poaching.name as poaching_team_name',
-      'poaching.abbrv as poaching_team_abbrv'
+      'poaching.abbreviation as poaching_team_abbrv'
     )
 
   if (lid) {

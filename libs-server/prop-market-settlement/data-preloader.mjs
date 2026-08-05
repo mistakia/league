@@ -53,7 +53,7 @@ const load_player_gamelogs = async (esbids) => {
       'player_gamelogs.esbid',
       'player_gamelogs.pid',
       'player_gamelogs.season_year',
-      'player_gamelogs.pos',
+      'player_gamelogs.player_position',
       'player_gamelogs.nfl_team',
       'player_gamelogs.opponent_nfl_team',
       'player_gamelogs.is_active',
@@ -104,7 +104,7 @@ const load_player_gamelogs = async (esbids) => {
  * Load NFL plays for specified games
  *
  * The select list must cover every column the NFL_PLAYS handler reads: each
- * mapping's metric_columns and player_column, plus qtr for the quarter/half
+ * mapping's metric_columns and player_column, plus quarter for the quarter/half
  * filters and offense_nfl_team for the team_aggregate filter. A column missing
  * here does not raise -- the handler reads undefined and silently settles the
  * market against a zero metric. Keep it in sync with market-type-mappings.mjs.
@@ -113,7 +113,7 @@ const load_nfl_plays = async (esbids) => {
   return await db('nfl_plays')
     .select(
       'esbid',
-      'qtr',
+      'quarter',
       // Team attribution for team_aggregate markets
       'offense_nfl_team',
       // Player identification columns

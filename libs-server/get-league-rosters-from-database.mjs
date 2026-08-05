@@ -38,12 +38,21 @@ export default async function ({
   const players = await db('rosters_players')
     .select(
       'rosters_players.*',
+      // The in-memory and wire vocabulary for a rostered player is `pos`/`rid`
+      // (libs-shared/roster.mjs, app/core/rosters/reducer.js, and every API
+      // response that mirrors a roster row). The physical columns are
+      // player_position/roster_id, so translate at this read boundary rather
+      // than renaming a field that is not a column across the SPA. Without
+      // these aliases the Roster constructor destructures `pos` off a row that
+      // no longer has it and silently gets undefined.
+      'rosters_players.player_position as pos',
+      'rosters_players.roster_id as rid',
       'transactions.type',
-      'transactions.value',
+      'transactions.player_salary',
       'transactions.timestamp',
       'transactions.year'
     )
-    .join('rosters', 'rosters_players.rid', '=', 'rosters.uid')
+    .join('rosters', 'rosters_players.roster_id', '=', 'rosters.uid')
     .leftJoin('transactions', function () {
       this.on(
         'transactions.uid',
@@ -54,12 +63,12 @@ export default async function ({
       )
     })
     .whereIn(
-      'rid',
+      'roster_id',
       rosters.map((r) => r.uid)
     )
 
   rosters.forEach((r) => {
-    r.players = players.filter((p) => p.rid === r.uid)
+    r.players = players.filter((p) => p.roster_id === r.uid)
     r.lineups = {}
     const teamLineups = lineups.filter((l) => l.tid === r.tid)
     const teamStarters = lineupStarters.filter((l) => l.tid === r.tid)
@@ -135,7 +144,7 @@ export default async function ({
             player &&
             player.tag === player_tag_types.RESTRICTED_FREE_AGENCY
           ) {
-            player.bid = bid.bid
+            player.bid = bid.bid_amount
             player.restricted_free_agency_tag_nominated = bid.nominated_at
             player.restricted_free_agency_original_team = bid.original_team_id
 

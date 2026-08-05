@@ -51,7 +51,7 @@ export default function LeagueSelectTeam({
     )
   })
 
-  const division_name = league[`division_${selected_team.div}_name`]
+  const division_name = league[`division_${selected_team.division}_name`]
 
   return (
     <ClickAwayListener onClickAway={handle_click_away}>

@@ -22,7 +22,7 @@ export default function getPlayFromPlayStats(play) {
       case 2:
         // playRow.is_punt_blocked = true
         // playRow.punt_attempt = true
-        // playRow.kick_distance = playStat.yards
+        // playRow.kick_distance = playStat.stat_yards
         break
 
       // 1st Down Rushing (TEAM STAT - no player association)
@@ -63,8 +63,8 @@ export default function getPlayFromPlayStats(play) {
       // Rushing Yards - rushing yards with credit for rushing attempt
       case 10:
         playRow.bc_gsis = playStat.gsis_player_id
-        playRow.rush_yds = playStat.yards
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
+        playRow.rush_yds = playStat.stat_yards
+        playRow.yds_gained = playStat.stat_yards + (playRow.yds_gained || 0)
         break
 
       // Rushing Touchdown - rushing TD with yards and attempt credit
@@ -73,14 +73,14 @@ export default function getPlayFromPlayStats(play) {
         playRow.is_touchdown = true
         playRow.is_rushing_touchdown = true
         playRow.bc_gsis = playStat.gsis_player_id
-        playRow.rush_yds = playStat.yards
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
+        playRow.rush_yds = playStat.stat_yards
+        playRow.yds_gained = playStat.stat_yards + (playRow.yds_gained || 0)
         playRow.td_tm = playStat.nfl_team
         break
 
       // Lateral Rushing - yards after lateral (no attempt credit)
       case 12:
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
+        playRow.yds_gained = playStat.stat_yards + (playRow.yds_gained || 0)
         break
 
       // Lateral Rushing Touchdown - rushing TD after lateral (no attempt credit)
@@ -88,7 +88,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.is_first_down = true
         playRow.is_touchdown = true
         playRow.is_rushing_touchdown = true
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
+        playRow.yds_gained = playStat.stat_yards + (playRow.yds_gained || 0)
         playRow.td_tm = playStat.nfl_team
         break
 
@@ -102,8 +102,8 @@ export default function getPlayFromPlayStats(play) {
       case 15:
         playRow.is_completion = true
         playRow.psr_gsis = playStat.gsis_player_id
-        playRow.pass_yds = playStat.yards
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
+        playRow.pass_yds = playStat.stat_yards
+        playRow.yds_gained = playStat.stat_yards + (playRow.yds_gained || 0)
         break
 
       // Passing Touchdown - passing TD with yards
@@ -113,8 +113,8 @@ export default function getPlayFromPlayStats(play) {
         playRow.is_touchdown = true
         playRow.is_passing_touchdown = true
         playRow.psr_gsis = playStat.gsis_player_id
-        playRow.pass_yds = playStat.yards
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
+        playRow.pass_yds = playStat.stat_yards
+        playRow.yds_gained = playStat.stat_yards + (playRow.yds_gained || 0)
         break
 
       // Interception - pass intercepted
@@ -127,14 +127,14 @@ export default function getPlayFromPlayStats(play) {
       case 20:
         playRow.is_sack = true
         playRow.psr_gsis = playStat.gsis_player_id
-        playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
+        playRow.yds_gained = playStat.stat_yards + (playRow.yds_gained || 0)
         break
 
       // Receiving Yards - reception with yards
       case 21:
         playRow.is_completion = true
         playRow.trg_gsis = playStat.gsis_player_id
-        playRow.recv_yds = playStat.yards
+        playRow.recv_yds = playStat.stat_yards
         break
 
       // Receiving Touchdown - receiving TD with yards
@@ -144,7 +144,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.is_touchdown = true
         playRow.is_passing_touchdown = true
         playRow.trg_gsis = playStat.gsis_player_id
-        playRow.recv_yds = playStat.yards
+        playRow.recv_yds = playStat.stat_yards
         playRow.td_tm = playStat.nfl_team
         break
 
@@ -166,7 +166,7 @@ export default function getPlayFromPlayStats(play) {
       case 25:
         playRow.intp_gsis = playStat.gsis_player_id
         playRow.ret_tm = playStat.nfl_team
-        playRow.ret_yds = playStat.yards
+        playRow.ret_yds = playStat.stat_yards
         break
 
       // Interception Return Touchdown - interception returned for TD
@@ -176,13 +176,13 @@ export default function getPlayFromPlayStats(play) {
         playRow.td_tm = playStat.nfl_team
         playRow.intp_gsis = playStat.gsis_player_id
         playRow.ret_tm = playStat.nfl_team
-        playRow.ret_yds = playStat.yards
+        playRow.ret_yds = playStat.stat_yards
         break
 
       // Lateral Interception Return - INT return yards after lateral
       case 27:
         playRow.ret_tm = playStat.nfl_team
-        playRow.ret_yds = playStat.yards
+        playRow.ret_yds = playStat.stat_yards
         break
 
       // Lateral Interception Return Touchdown - INT return TD after lateral
@@ -191,7 +191,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.is_return_touchdown = true
         playRow.td_tm = playStat.nfl_team
         playRow.ret_tm = playStat.nfl_team
-        playRow.ret_yds = playStat.yards
+        playRow.ret_yds = playStat.stat_yards
         break
 
       // Punt Yards - punt with yards
@@ -508,20 +508,20 @@ export default function getPlayFromPlayStats(play) {
       case 111:
         playRow.is_completion = true
         playRow.psr_gsis = playStat.gsis_player_id
-        playRow.dot = playStat.yards
+        playRow.depth_of_target = playStat.stat_yards
         break
 
       // Air Yards Incomplete - incomplete pass air yards (depth of target)
       case 112:
         playRow.psr_gsis = playStat.gsis_player_id
-        playRow.dot = playStat.yards
+        playRow.depth_of_target = playStat.stat_yards
         break
 
       // Yards After Catch - yards gained after the catch
       case 113:
         playRow.is_completion = true
         playRow.trg_gsis = playStat.gsis_player_id
-        playRow.yards_after_catch = playStat.yards
+        playRow.yards_after_catch = playStat.stat_yards
         break
 
       // Target - pass target (intended receiver)

@@ -7,12 +7,13 @@ import { build_roster_players_query } from '#libs-server/get-roster.mjs'
 
 // Regression: the team id used to be applied as a WHERE filter on a LEFT JOIN,
 // which silently degraded the join to an INNER JOIN. That reading is right for
-// this query -- `transactions.value` is the only source of a rostered player's
-// salary, so a player with no team transaction has no cap value and must not be
-// admitted with a null one -- but nothing in the SQL said so, and two separate
-// sweeps had to re-derive it from the schema. Locking the shape here: the join
-// is declared INNER, and the team id lives in the ON clause where a join
-// qualifier belongs rather than in the WHERE where it reads as a row filter.
+// this query -- `transactions.player_salary` is the only source of a rostered
+// player's salary, so a player with no team transaction has no cap value and
+// must not be admitted with a null one -- but nothing in the SQL said so, and
+// two separate sweeps had to re-derive it from the schema. Locking the shape
+// here: the join is declared INNER, and the team id lives in the ON clause
+// where a join qualifier belongs rather than in the WHERE where it reads as a
+// row filter.
 
 const { expect } = chai
 
@@ -25,7 +26,7 @@ const { expect } = chai
 
 const sql = build_roster_players_query({
   db: knex({ client: 'pg' }),
-  rid: 9261,
+  roster_id: 9261,
   tid: 7,
   year: 2025,
   week: 4

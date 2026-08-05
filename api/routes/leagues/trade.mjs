@@ -187,7 +187,7 @@ export const get_trade = async (req, res) => {
         'draft.round',
         'draft.year',
         'draft.lid',
-        'draft.otid'
+        'draft.original_team_id'
       )
       .where({ tradeid: tradeId })
       .join('draft', 'trades_picks.pickid', 'draft.uid')
@@ -315,7 +315,7 @@ export const get_trade = async (req, res) => {
  *                       round: 1
  *                       pick: 4
  *                       pick_str: "1.04"
- *                       otid: 13
+ *                       original_team_id: 13
  *                       pid: null
  *                   proposingTeamReleasePlayers: []
  *                   acceptingTeamReleasePlayers: []
@@ -655,7 +655,11 @@ router.post(
         .as('sub_query')
 
       const player_rows = await db
-        .select('player.*', 'transactions.value', 'rosters_players.slot')
+        .select(
+          'player.*',
+          'transactions.player_salary',
+          'rosters_players.slot'
+        )
         .from(sub)
         .join('transactions', 'sub_query.uid', 'transactions.uid')
         .join('player', 'transactions.pid', 'player.pid')
@@ -921,7 +925,8 @@ router.post(
             lid: leagueId,
             pid,
             type: transaction_types.TRADE,
-            value: transaction_history.find((t) => t.pid === pid).value,
+            player_salary: transaction_history.find((t) => t.pid === pid)
+              .player_salary,
             week: current_season.week,
             year: current_season.year,
             timestamp: Math.round(Date.now() / 1000)
@@ -934,7 +939,8 @@ router.post(
             lid: leagueId,
             pid,
             type: transaction_types.TRADE,
-            value: transaction_history.find((t) => t.pid === pid).value,
+            player_salary: transaction_history.find((t) => t.pid === pid)
+              .player_salary,
             week: current_season.week,
             year: current_season.year,
             timestamp: Math.round(Date.now() / 1000)
@@ -960,7 +966,7 @@ router.post(
               lid: leagueId,
               pid,
               type: transaction_types.ROSTER_RELEASE,
-              value: 0,
+              player_salary: 0,
               week: current_season.week,
               year: current_season.year,
               timestamp: Math.round(Date.now() / 1000)
@@ -974,7 +980,7 @@ router.post(
               lid: leagueId,
               pid,
               type: transaction_types.ROSTER_RELEASE,
-              value: 0,
+              player_salary: 0,
               week: current_season.week,
               year: current_season.year,
               timestamp: Math.round(Date.now() / 1000)
@@ -988,7 +994,7 @@ router.post(
         if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
           await trx('rosters_players')
             .del()
-            .where({ rid: acceptingTeamRoster.uid })
+            .where({ roster_id: acceptingTeamRoster.uid })
           await trx('rosters_players').insert(
             acceptingTeamRoster.rosters_players
           )
@@ -998,7 +1004,7 @@ router.post(
         if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
           await trx('rosters_players')
             .del()
-            .where({ rid: proposingTeamRoster.uid })
+            .where({ roster_id: proposingTeamRoster.uid })
           await trx('rosters_players').insert(
             proposingTeamRoster.rosters_players
           )
@@ -1098,7 +1104,7 @@ router.post(
         pickRows.map((p) => p.pickid)
       )
       for (const pick of picks) {
-        const pick_team = teams.find((t) => t.uid === pick.otid)
+        const pick_team = teams.find((t) => t.uid === pick.original_team_id)
         let pick_str = pick.pick_str
           ? `${pick.pick_str}`
           : `${pick.year} ${pick.round}${nth(pick.round)}`
@@ -1585,9 +1591,9 @@ router.post(
           'trades_transactions.transactionid'
         )
         .where('trades_transactions.tradeid', tradeId)
-        .select('transactions.pid', 'transactions.value')
+        .select('transactions.pid', 'transactions.player_salary')
       const value_by_pid = new Map(
-        trade_transaction_rows.map((t) => [t.pid, t.value])
+        trade_transaction_rows.map((t) => [t.pid, t.player_salary])
       )
 
       const proposing_roster_row = await getRoster({ tid: trade.propose_tid })
@@ -1659,7 +1665,7 @@ router.post(
           lid: leagueId,
           pid: row.pid,
           type: transaction_types.TRADE_REVERSAL,
-          value: value_by_pid.get(row.pid) ?? 0,
+          player_salary: value_by_pid.get(row.pid) ?? 0,
           week: current_season.week,
           year: current_season.year,
           timestamp: vetoed_at
@@ -1672,7 +1678,7 @@ router.post(
             lid: leagueId,
             pid: row.pid,
             type: transaction_types.TRADE_REVERSAL,
-            value: value_by_pid.get(row.pid) ?? 0,
+            player_salary: value_by_pid.get(row.pid) ?? 0,
             week: current_season.week,
             year: current_season.year,
             timestamp: vetoed_at
@@ -1691,10 +1697,14 @@ router.post(
           )
         }
 
-        await trx('rosters_players').del().where({ rid: proposing_roster.uid })
+        await trx('rosters_players')
+          .del()
+          .where({ roster_id: proposing_roster.uid })
         await trx('rosters_players').insert(proposing_roster.rosters_players)
 
-        await trx('rosters_players').del().where({ rid: accepting_roster.uid })
+        await trx('rosters_players')
+          .del()
+          .where({ roster_id: accepting_roster.uid })
         await trx('rosters_players').insert(accepting_roster.rosters_players)
 
         // Return traded picks to the team that gave them up.

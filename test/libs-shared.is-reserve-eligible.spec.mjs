@@ -459,13 +459,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: null,
-          w: 'DNP',
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: 'DNP',
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         current_date: new Date('2024-01-10') // Wednesday
       })
@@ -477,13 +477,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: null,
-          w: null,
-          th: 'LP',
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: null,
+          thursday_practice_status: 'LP',
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         current_date: new Date('2024-01-11') // Thursday
       })
@@ -495,13 +495,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: null,
-          w: 'FP',
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: 'FP',
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         current_date: new Date('2024-01-10') // Wednesday
       })
@@ -513,13 +513,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: null,
-          w: null,
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: null,
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         current_date: new Date('2024-01-10') // Wednesday
       })
@@ -531,13 +531,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: player_nfl_injury_status.QUESTIONABLE,
         practice: {
-          m: null,
-          tu: null,
-          w: 'DNP',
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: 'DNP',
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         current_date: new Date('2024-01-10') // Wednesday
       })
@@ -549,13 +549,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: 'LP',
-          w: null,
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: 'LP',
+          wednesday_practice_status: null,
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         current_date: new Date('2024-01-09T12:00:00') // Tuesday noon local time
       })
@@ -567,13 +567,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: player_nfl_injury_status.OUT,
         practice: {
-          m: null,
-          tu: null,
-          w: 'FULL',
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: 'FULL',
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         current_date: new Date('2024-01-10') // Wednesday
       })
@@ -597,13 +597,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: 'FP',
-          tu: 'LP',
-          w: null,
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: 'FP',
+          tuesday_practice_status: 'LP',
+          wednesday_practice_status: null,
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         current_date: new Date('2024-01-10') // Wednesday
       })
@@ -618,13 +618,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: 'LP',
-          w: null,
-          th: null,
-          f: null,
-          s: null,
-          su: null,
+          monday_practice_status: null,
+          tuesday_practice_status: 'LP',
+          wednesday_practice_status: null,
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null,
           source_status: 'OUT'
         },
         game_day: 'SUN',
@@ -640,13 +640,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: 'DNP',
-          w: null,
-          th: null,
-          f: null,
-          s: null,
-          su: null,
+          monday_practice_status: null,
+          tuesday_practice_status: 'DNP',
+          wednesday_practice_status: null,
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null,
           game_designation: 'Questionable'
         },
         game_day: 'SUN',
@@ -662,13 +662,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: 'LP',
-          w: null,
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: 'LP',
+          wednesday_practice_status: null,
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         game_day: 'SUN',
         current_date: new Date('2024-01-13T12:00:00') // Saturday (day 6)
@@ -683,13 +683,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: null,
-          w: 'LP',
-          th: null,
-          f: 'FP',
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: 'LP',
+          thursday_practice_status: null,
+          friday_practice_status: 'FP',
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         game_day: 'SUN',
         current_date: new Date('2024-01-10') // Wednesday
@@ -704,13 +704,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: 'LP',
-          w: null,
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: 'LP',
+          wednesday_practice_status: null,
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         game_day: 'SUN',
         current_date: new Date('2024-01-09T12:00:00') // Tuesday noon local time (day 2)
@@ -739,13 +739,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: null,
-          w: 'DNP',
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: 'DNP',
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         game_day: 'SUN',
         current_date: new Date('2024-01-10') // Wednesday
@@ -760,13 +760,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: null,
-          w: 'LP',
-          th: null,
-          f: null,
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: 'LP',
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         game_day: 'SUN',
         current_date: new Date('2024-01-10') // Wednesday
@@ -781,13 +781,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: null,
-          w: 'DNP',
-          th: null,
-          f: null,
-          s: null,
-          su: null,
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: 'DNP',
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null,
           source_status: 'OUT'
         },
         game_day: 'SUN',
@@ -803,13 +803,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: null,
-          w: 'LP',
-          th: null,
-          f: null,
-          s: null,
-          su: null,
+          monday_practice_status: null,
+          tuesday_practice_status: null,
+          wednesday_practice_status: 'LP',
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null,
           game_designation: 'Questionable'
         },
         game_day: 'SUN',
@@ -825,13 +825,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: player_nfl_injury_status.QUESTIONABLE,
         practice: {
-          m: null,
-          tu: 'LP',
-          w: null,
-          th: null,
-          f: null,
-          s: null,
-          su: null,
+          monday_practice_status: null,
+          tuesday_practice_status: 'LP',
+          wednesday_practice_status: null,
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null,
           source_status: 'QUESTIONABLE'
         },
         game_day: 'SUN',
@@ -849,13 +849,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: player_nfl_injury_status.OUT,
         practice: {
-          m: null,
-          tu: 'LP',
-          w: null,
-          th: null,
-          f: null,
-          s: null,
-          su: null,
+          monday_practice_status: null,
+          tuesday_practice_status: 'LP',
+          wednesday_practice_status: null,
+          thursday_practice_status: null,
+          friday_practice_status: null,
+          saturday_practice_status: null,
+          sunday_practice_status: null,
           source_status: 'OUT'
         },
         game_day: 'SUN',
@@ -872,13 +872,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
         roster_status: player_nfl_status.ACTIVE,
         game_designation: null,
         practice: {
-          m: null,
-          tu: 'DNP',
-          w: 'DNP',
-          th: 'DNP',
-          f: 'DNP',
-          s: null,
-          su: null
+          monday_practice_status: null,
+          tuesday_practice_status: 'DNP',
+          wednesday_practice_status: 'DNP',
+          thursday_practice_status: 'DNP',
+          friday_practice_status: 'DNP',
+          saturday_practice_status: null,
+          sunday_practice_status: null
         },
         game_day: 'SUN',
         current_date: new Date('2024-01-13T12:00:00') // Saturday (day 6)

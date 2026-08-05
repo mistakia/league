@@ -58,7 +58,7 @@ const generate_scoring_format_player_careerlogs = async ({
     const seasons = seasons_by_pid[pid]
 
     const points = sum(seasons.map((s) => s.points))
-    const games = sum(seasons.map((s) => s.games))
+    const games = sum(seasons.map((s) => s.games_played))
 
     const draft_rank =
       sorted_pids_by_draft_classes[draft_class].indexOf(pid) + 1
@@ -78,7 +78,7 @@ const generate_scoring_format_player_careerlogs = async ({
 
       points,
       points_per_game: points / games,
-      games,
+      games_played: games,
       top_1,
       top_3,
       top_6,

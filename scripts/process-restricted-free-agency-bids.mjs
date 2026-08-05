@@ -292,7 +292,7 @@ const run = async ({ dry_run = false } = {}) => {
             .first()
           if (winning_team) {
             log(
-              `DRY RUN: ${winning_team.name} (${winning_team.abbrv}) would win the player based on waiver order`
+              `DRY RUN: ${winning_team.name} (${winning_team.abbreviation}) would win the player based on waiver order`
             )
           } else {
             log(

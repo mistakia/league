@@ -20,14 +20,14 @@ const { week, year } = current_season
 const getReport = (item) => {
   const data = {
     source_status: item.status,
-    inj: item.injtype,
-    m: item.monday === '-' ? null : item.monday,
-    tu: item.tuesday === '-' ? null : item.tuesday,
-    w: item.wednesday === '-' ? null : item.wednesday,
-    th: item.thursday === '-' ? null : item.thursday,
-    f: item.friday === '-' ? null : item.friday,
-    s: item.saturday === '-' ? null : item.saturday,
-    su: item.sunday === '-' ? null : item.sunday
+    injury_type: item.injtype,
+    monday_practice_status: item.monday === '-' ? null : item.monday,
+    tuesday_practice_status: item.tuesday === '-' ? null : item.tuesday,
+    wednesday_practice_status: item.wednesday === '-' ? null : item.wednesday,
+    thursday_practice_status: item.thursday === '-' ? null : item.thursday,
+    friday_practice_status: item.friday === '-' ? null : item.friday,
+    saturday_practice_status: item.saturday === '-' ? null : item.saturday,
+    sunday_practice_status: item.sunday === '-' ? null : item.sunday
   }
 
   // Try to parse as game designation first (OUT, QUESTIONABLE, DOUBTFUL, PROBABLE)

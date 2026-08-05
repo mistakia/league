@@ -113,7 +113,7 @@ export default async function generate_league_rules({
       ['Setting', 'Value'],
       [
         ['Salary cap', `$${league.cap}`],
-        ['Free agency budget (FAAB)', `$${league.faab}`],
+        ['Free agency budget (FAAB)', `$${league.starting_faab_budget}`],
         ['Minimum bid', `$${league.min_bid}`],
         [
           'Salary attribution rule',
@@ -140,10 +140,10 @@ export default async function generate_league_rules({
     markdown_table(
       ['Position', 'Salary'],
       [
-        ['QB', `$${league.fqb}`],
-        ['RB', `$${league.frb}`],
-        ['WR', `$${league.fwr}`],
-        ['TE', `$${league.fte}`]
+        ['QB', `$${league.franchise_tag_salary_qb}`],
+        ['RB', `$${league.franchise_tag_salary_rb}`],
+        ['WR', `$${league.franchise_tag_salary_wr}`],
+        ['TE', `$${league.franchise_tag_salary_te}`]
       ]
     ),
     `Restricted free agency window: ${format_date_et(

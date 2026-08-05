@@ -1,5 +1,9 @@
 import get_eligible_slots from './get-eligible-slots.mjs'
-import { fantasy_positions } from '#constants'
+import {
+  fantasy_positions,
+  roster_slot_types,
+  starter_slot_league_columns
+} from '#constants'
 
 const getPositionCount = (players) =>
   players.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map())
@@ -9,7 +13,7 @@ export default function ({ positions, league }) {
   for (const pos of fantasy_positions) {
     rosterConstraints[pos] = {
       max: get_eligible_slots({ pos, league }).length,
-      min: league[`s${pos.toLowerCase()}`]
+      min: league[starter_slot_league_columns[roster_slot_types[pos]]]
     }
   }
 
@@ -46,12 +50,12 @@ export default function ({ positions, league }) {
     if (min < flexCount && positions.length) processFlex(positions, flexCount)
   }
 
-  if (league.srbwr) {
-    processFlex(['RB', 'WR'], league.srbwr)
+  if (league.starter_slots_rb_wr_flex) {
+    processFlex(['RB', 'WR'], league.starter_slots_rb_wr_flex)
   }
 
-  if (league.swrte) {
-    processFlex(['WR', 'TE'], league.swrte)
+  if (league.starter_slots_wr_te_flex) {
+    processFlex(['WR', 'TE'], league.starter_slots_wr_te_flex)
   }
 
   if (league.srbwrte) {

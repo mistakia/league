@@ -114,10 +114,10 @@ export default async function process_super_priority({
   }
 
   await db('rosters_players').insert({
-    rid: current_week_roster.uid,
+    roster_id: current_week_roster.uid,
     slot: target_slot,
     pid,
-    pos: player_row.primary_position,
+    player_position: player_row.primary_position,
     tag: player_tag_types.REGULAR,
     extensions: 0,
     tid: original_tid,
@@ -144,7 +144,7 @@ export default async function process_super_priority({
     throw new Error('No last transaction found')
   }
 
-  const value = last_transaction[0].value
+  const player_salary = last_transaction[0].player_salary
 
   const transaction = {
     userid: userid || 0, // use provided userid or default to system user
@@ -152,7 +152,7 @@ export default async function process_super_priority({
     lid,
     pid,
     type: transaction_type,
-    value,
+    player_salary,
     week: current_season.week,
     year: current_season.year,
     timestamp
@@ -178,7 +178,7 @@ export default async function process_super_priority({
   if (team_rows.length) {
     const team = team_rows[0]
 
-    let message = `${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) has been claimed via Super Priority by ${team.name} (${team.abbrv}).`
+    let message = `${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) has been claimed via Super Priority by ${team.name} (${team.abbreviation}).`
 
     // Add release information if players were released
     if (releasePlayers.length) {

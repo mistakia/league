@@ -17,6 +17,13 @@ debug.enable('calculate:franchise-tags')
 
 const average = (array) => array.reduce((a, b) => a + b) / array.length
 
+const franchise_tag_salary_columns = {
+  QB: 'franchise_tag_salary_qb',
+  RB: 'franchise_tag_salary_rb',
+  WR: 'franchise_tag_salary_wr',
+  TE: 'franchise_tag_salary_te'
+}
+
 const run = async ({ year = current_season.year, dry_run = false } = {}) => {
   const seasons = await db('seasons')
     .select('seasons.*')
@@ -30,7 +37,7 @@ const run = async ({ year = current_season.year, dry_run = false } = {}) => {
       .select(
         'rosters_players.*',
         'transactions.type',
-        'transactions.value',
+        'transactions.player_salary',
         'transactions.timestamp',
         'transactions.year'
       )
@@ -52,7 +59,7 @@ const run = async ({ year = current_season.year, dry_run = false } = {}) => {
       continue
     }
 
-    const grouped = groupBy(rosters, 'pos')
+    const grouped = groupBy(rosters, 'player_position')
     const key = {
       QB: 10,
       RB: 10,
@@ -67,11 +74,11 @@ const run = async ({ year = current_season.year, dry_run = false } = {}) => {
         continue
       }
 
-      const sorted = players.sort((a, b) => b.value - a.value)
+      const sorted = players.sort((a, b) => b.player_salary - a.player_salary)
       const top = sorted.slice(0, key[pos])
-      const values = top.map((p) => p.value)
+      const values = top.map((p) => p.player_salary)
       const avg = average(values)
-      update[`f${pos.toLowerCase()}`] = Math.round(avg)
+      update[franchise_tag_salary_columns[pos]] = Math.round(avg)
     }
 
     if (dry_run) {

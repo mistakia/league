@@ -102,7 +102,7 @@ const calculate_position_game_outcome_defaults = async ({ year } = {}) => {
       weight_total > 0 ? weighted_sum / weight_total : 0
 
     defaults_to_insert.push({
-      pos,
+      player_position: pos,
       archetype: null,
       season_year: year,
       outcome_type: 'game_script',
@@ -134,7 +134,7 @@ const calculate_position_game_outcome_defaults = async ({ year } = {}) => {
       weight_total > 0 ? weighted_sum / weight_total : 0
 
     defaults_to_insert.push({
-      pos: data.pos,
+      player_position: data.pos,
       archetype: data.archetype,
       season_year: year,
       outcome_type: 'game_script',

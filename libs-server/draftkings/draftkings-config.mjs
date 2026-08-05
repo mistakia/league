@@ -8,5 +8,5 @@ export const get_draftkings_config = async () => {
   const config_row = await db('config')
     .where('key', 'draftkings_config')
     .first()
-  return config_row.value
+  return config_row.config_value
 }

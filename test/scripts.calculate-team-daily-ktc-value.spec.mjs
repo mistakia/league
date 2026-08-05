@@ -32,7 +32,7 @@ const insert_transaction = async ({ uid, tid, pid, type, date }) =>
     lid,
     pid,
     type,
-    value: 0,
+    player_salary: 0,
     week: 1,
     year,
     timestamp: local_noon(date)
@@ -76,9 +76,9 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
         year,
         lid,
         name: `team ${uid}`,
-        abbrv: `T${uid}`,
-        cap: 200,
-        faab: 200
+        abbreviation: `T${uid}`,
+        salary_cap: 200,
+        faab_balance: 200
       })
     }
   })

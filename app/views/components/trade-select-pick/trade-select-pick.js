@@ -20,7 +20,7 @@ export default class TradeSelectPick extends React.Component {
       class_names.push('selected')
     }
 
-    const team = teams.get(pick.otid, new Team())
+    const team = teams.get(pick.original_team_id, new Team())
 
     return (
       <div className={class_names.join(' ')}>

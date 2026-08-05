@@ -35,10 +35,10 @@ export default class Roster extends React.Component {
     const show_bid = team_id === roster.tid
 
     const rows = []
-    if (league.sqb) {
+    if (league.starter_slots_qb) {
       const slot = roster_slot_types.QB
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.sqb; i++) {
+      for (let i = 0; i < league.starter_slots_qb; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -50,10 +50,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.srb) {
+    if (league.starter_slots_rb) {
       const slot = roster_slot_types.RB
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.srb; i++) {
+      for (let i = 0; i < league.starter_slots_rb; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -65,10 +65,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.swr) {
+    if (league.starter_slots_wr) {
       const slot = roster_slot_types.WR
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.swr; i++) {
+      for (let i = 0; i < league.starter_slots_wr; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -80,10 +80,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.ste) {
+    if (league.starter_slots_te) {
       const slot = roster_slot_types.TE
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.ste; i++) {
+      for (let i = 0; i < league.starter_slots_te; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -95,10 +95,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.sk) {
+    if (league.starter_slots_k) {
       const slot = roster_slot_types.K
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.sk; i++) {
+      for (let i = 0; i < league.starter_slots_k; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -110,10 +110,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.sdst) {
+    if (league.starter_slots_dst) {
       const slot = roster_slot_types.DST
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.sdst; i++) {
+      for (let i = 0; i < league.starter_slots_dst; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -125,10 +125,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.srbwr) {
+    if (league.starter_slots_rb_wr_flex) {
       const slot = roster_slot_types.RBWR
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.srbwr; i++) {
+      for (let i = 0; i < league.starter_slots_rb_wr_flex; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -170,10 +170,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.swrte) {
+    if (league.starter_slots_wr_te_flex) {
       const slot = roster_slot_types.WRTE
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.swrte; i++) {
+      for (let i = 0; i < league.starter_slots_wr_te_flex; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -198,7 +198,7 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.ps) {
+    if (league.practice_squad_slot_count) {
       const signed_players = r.practice_signed.sort((a, b) => b.value - a.value)
       for (let i = 0; i < ps_signed_count_max; i++) {
         const { pid } = signed_players[i] || {}

@@ -25,7 +25,7 @@ export const extract_adp_per_asset = async ({
   const adp_rows = await db('player_adp_history')
     .select(
       db.raw(
-        "pid, TO_CHAR(observed_at, 'YYYY-MM-DD') AS date_iso, adp, source_id"
+        "pid, TO_CHAR(observed_at, 'YYYY-MM-DD') AS date_iso, average_draft_position, source_id"
       )
     )
     .whereIn('pid', player_ids)
@@ -36,13 +36,13 @@ export const extract_adp_per_asset = async ({
       '<=',
       new Date(new Date(end_date).getTime() + 86400 * 1000)
     )
-    .whereNotNull('adp')
+    .whereNotNull('average_draft_position')
 
   const buckets = new Map()
   for (const r of adp_rows) {
     const key = `${r.pid}__${r.date_iso}`
     if (!buckets.has(key)) buckets.set(key, [])
-    buckets.get(key).push(Number(r.adp))
+    buckets.get(key).push(Number(r.average_draft_position))
   }
 
   const pv_curve = await load_pick_value_curve({ league_format_id })

@@ -11,9 +11,9 @@ export default async function ({
   offense_nfl_team,
   defense_nfl_team,
 
-  qtr,
+  quarter,
   game_clock_start,
-  dwn,
+  down_number,
   yards_to_go,
   play_type,
   ydl_num,
@@ -47,16 +47,16 @@ export default async function ({
     query.where({ defense_nfl_team: fixTeam(defense_nfl_team) })
   }
 
-  if (qtr) {
-    query.where({ qtr: Number(qtr) })
+  if (quarter) {
+    query.where({ quarter: Number(quarter) })
   }
 
   if (game_clock_start) {
     query.where({ game_clock_start })
   }
 
-  if (dwn) {
-    query.where({ dwn: Number(dwn) })
+  if (down_number) {
+    query.where({ down_number: Number(down_number) })
   }
 
   if (play_type) {

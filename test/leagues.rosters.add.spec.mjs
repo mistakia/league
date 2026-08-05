@@ -60,13 +60,13 @@ describe('API /leagues/rosters - add', function () {
       res.should.be.json
 
       res.body.pid.should.equal(player.pid)
-      res.body.pos.should.equal(player.secondary_position)
+      res.body.player_position.should.equal(player.secondary_position)
       res.body.slot.should.equal(roster_slot_types.BENCH)
       res.body.transaction.userid.should.equal(1)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_ADD)
-      res.body.transaction.value.should.equal(value)
+      res.body.transaction.player_salary.should.equal(value)
 
       const rosterRow = await getRoster({ tid: 2 })
       expect(rosterRow.tid).to.equal(teamId)
@@ -74,12 +74,14 @@ describe('API /leagues/rosters - add', function () {
       expect(rosterRow.players.length).to.equal(1)
       expect(rosterRow.players[0].slot).to.equal(roster_slot_types.BENCH)
       expect(rosterRow.players[0].pid).to.equal(player.pid)
-      expect(rosterRow.players[0].pos).to.equal(player.secondary_position)
+      expect(rosterRow.players[0].player_position).to.equal(
+        player.secondary_position
+      )
       expect(rosterRow.players[0].userid).to.equal(1)
       expect(rosterRow.players[0].tid).to.equal(teamId)
       expect(rosterRow.players[0].lid).to.equal(leagueId)
       expect(rosterRow.players[0].type).to.equal(transaction_types.ROSTER_ADD)
-      expect(rosterRow.players[0].value).to.equal(value)
+      expect(rosterRow.players[0].player_salary).to.equal(value)
       expect(rosterRow.players[0].year).to.equal(current_season.year)
     })
   })

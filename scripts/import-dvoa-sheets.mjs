@@ -1004,7 +1004,7 @@ const process_total_dvoa = async (worksheet, { dry_run, observed_at }) => {
 
 const get_dvoa_config = async () => {
   const config_row = await db('config').where({ key: 'dvoa_config' }).first()
-  return config_row?.value
+  return config_row?.config_value
 }
 
 const import_dvoa_sheets = async ({

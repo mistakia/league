@@ -104,7 +104,13 @@ export default class TransactionMapper {
 
     // Standard transaction fields
     this.required_fields = ['pid', 'type', 'timestamp', 'tid', 'lid']
-    this.optional_fields = ['userid', 'value', 'week', 'year', 'waiverid']
+    this.optional_fields = [
+      'userid',
+      'player_salary',
+      'week',
+      'year',
+      'waiverid'
+    ]
   }
 
   /**
@@ -223,7 +229,7 @@ export default class TransactionMapper {
           waiver_bid !== undefined &&
           waiver_bid !== null
         ) {
-          row.value = waiver_bid
+          row.player_salary = waiver_bid
         }
         rows.push(row)
       }
@@ -455,7 +461,7 @@ export default class TransactionMapper {
     }
 
     if (external_transaction.bidAmount) {
-      transaction.value = external_transaction.bidAmount
+      transaction.player_salary = external_transaction.bidAmount
     }
   }
 
@@ -507,7 +513,7 @@ export default class TransactionMapper {
     }
 
     if (external_transaction.amount) {
-      transaction.value = external_transaction.amount
+      transaction.player_salary = external_transaction.amount
     }
   }
 
@@ -546,7 +552,7 @@ export default class TransactionMapper {
 
     for (const field of value_fields) {
       if (external_transaction[field]) {
-        transaction.value = external_transaction[field]
+        transaction.player_salary = external_transaction[field]
         break
       }
     }

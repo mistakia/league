@@ -53,7 +53,7 @@ const run = async ({ dry_run = false } = {}) => {
   }
 
   const config_row = await db('config').where({ key: 'fbg_config' }).first()
-  const fbg_config = config_row.value
+  const fbg_config = config_row.config_value
 
   if (!fbg_config) {
     throw new Error('fbg_config not found')
