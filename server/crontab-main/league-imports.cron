@@ -78,17 +78,24 @@ JOB_PROJECT=league
 ## At 11:00 AM on Sunday during the NFL Season
 0 11 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
 
-## nfl.com shield ids (player.nfl_player_id) -- weekly, Tuesday 04:10.
-## Weekly rather than daily because the id universe turns over slowly: ids are
-## minted for new entrants and never reissued to a live player, so the only
-## thing a run catches is roster churn bringing a player into nfl.com's listing.
-## It makes ~11 vendor requests, paced against elapsed time.
+## nfl.com shield ids (player.nfl_player_id) -- MONTHLY, 1st at 04:10.
+## The id universe turns over ANNUALLY, not weekly: ids are minted for new
+## entrants and are not reissued to a live player, so a run's whole yield is one
+## draft class plus roster churn bringing a player into nfl.com's listing.
+## Monthly picks the rookie class up shortly after it reaches the listing and
+## again through training camp, which is as fine-grained as the source gets.
+## Staleness is cheap here besides -- the only consumers are the nfl.com
+## external-league adapter, which has never run in production, and one
+## data-views column -- so a missing id costs nothing that a month's wait makes
+## worse. Anything more frequent is vendor traffic buying no information: the
+## 2026-08-05 backfill run attached 384, and the run immediately after it
+## attached 0.
 ## This column had NO live writer between roughly 2021 and 2026-08-05 -- MFL and
 ## dynastyprocess both stopped publishing shield ids for players entering from
 ## 2016 -- which is the gap this closes. Note it can only ever fill the ~1,036
 ## players nfl.com lists, so a coverage figure short of the full roster is the
 ## feed's boundary and not a failed run.
-10 4 * * 2 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-player-ids.mjs >> /var/log/league/import-nfl-player-ids.log 2>&1
+10 4 1 * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-player-ids.mjs >> /var/log/league/import-nfl-player-ids.log 2>&1
 
 ## At 12:00 AM on Sunday during the NFL Season
 0 12 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
