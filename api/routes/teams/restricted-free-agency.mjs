@@ -526,6 +526,39 @@ router.post('/?', async (req, res) => {
       }
     }
 
+    // A team gets ONE live bid per player. This route inserted unconditionally
+    // until 2026-08-05, so a manager who submitted twice ended up with two rows
+    // both `cancelled IS NULL AND processed IS NULL` -- and every reader that
+    // resolves a bid by `(pid, tid, year)` then picked between them arbitrarily.
+    // Four settled `(team, player, year)` groups in league 1 carry duplicates
+    // from this, going back to 2021, so it is longstanding rather than new.
+    //
+    // Rejecting is the honest answer rather than silently superseding: PUT is
+    // the affordance for changing a bid, and a manager who lands here has
+    // usually been shown a stale or blank amount (which is exactly what the
+    // 2026-08-05 display defect did) and is re-entering a bid they already
+    // hold. Telling them it exists is more use than quietly replacing it.
+    //
+    // The database enforces this too, via a partial unique index -- see
+    // db/adhoc/2026-08-05-one-live-restricted-free-agency-bid-per-team-player.sql.
+    // This check is the good error message, not the guarantee.
+    const existing_live_bid = await db('restricted_free_agency_bids')
+      .where({
+        pid,
+        tid,
+        lid: leagueId,
+        year: current_season.year
+      })
+      .whereNull('cancelled')
+      .whereNull('processed')
+      .first()
+
+    if (existing_live_bid) {
+      return res.status(400).send({
+        error: 'existing restricted free agency bid, update it instead'
+      })
+    }
+
     // The auction is the nomination, so a bid attaches to one rather than
     // carrying its own copy of who holds the player's rights. Both the original
     // team's tag and a competing team's offer reach this path, and whichever
@@ -717,6 +750,18 @@ router.delete('/?', async (req, res) => {
     }
 
     // verify restricted free agency bid exists
+    //
+    // Ordered explicitly because the predicate is not unique: it filters
+    // `cancelled` but not `processed`, so a team that settled a bid on this
+    // player in a prior auction matches here alongside its live one, and the
+    // four historical duplicate groups match twice on their own. Taking
+    // `query1[0]` off an unordered select meant cancelling whichever row
+    // Postgres happened to return first.
+    //
+    // Live bids sort ahead of processed ones so the cancel lands on the row the
+    // manager can actually still act on, and `uid DESC` breaks the remaining tie
+    // toward the most recent. The processed check below then fires only when
+    // EVERY matching bid is settled, which is when that message is true.
     const query1 = await select_restricted_free_agency_bid_with_nomination({
       db
     })
@@ -726,6 +771,9 @@ router.delete('/?', async (req, res) => {
         'restricted_free_agency_bids.year': current_season.year
       })
       .whereNull('restricted_free_agency_bids.cancelled')
+      .orderByRaw(
+        '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.uid DESC'
+      )
 
     if (!query1.length) {
       return res.status(400).send({ error: 'invalid player' })
@@ -909,6 +957,20 @@ router.put('/?', async (req, res) => {
     }
 
     // verify restricted free agency bid exists
+    //
+    // Same unordered-pick defect as DELETE, with a sharper symptom: this query
+    // does not filter `processed` either, and the handler checks
+    // `restrictedFreeAgencyBid.processed` further down on whichever row came
+    // back first. So a team holding one settled and one live bid on the same
+    // player could have a perfectly legitimate edit rejected as "bid has
+    // already been processed" -- the live bid was there, the query just did not
+    // return it first.
+    //
+    // Sorting live bids ahead of processed ones fixes both: the edit lands on
+    // the live row, and the processed check still guards the case where every
+    // matching bid is settled. Filtering `processed` out instead would collapse
+    // that case into "invalid player", which is a worse message for a manager
+    // trying to edit a bid the auction already resolved.
     const query1 = await select_restricted_free_agency_bid_with_nomination({
       db
     })
@@ -918,6 +980,9 @@ router.put('/?', async (req, res) => {
         'restricted_free_agency_bids.year': current_season.year
       })
       .whereNull('restricted_free_agency_bids.cancelled')
+      .orderByRaw(
+        '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.uid DESC'
+      )
 
     if (!query1.length) {
       return res.status(400).send({ error: 'invalid player' })
@@ -1170,6 +1235,10 @@ router.post('/nominate/?', async (req, res) => {
     }
 
     // Check if the restricted free agency bid exists and belongs to the original manager
+    // `.first()` with no ORDER BY is the same arbitrary pick as the `query1[0]`
+    // sites above -- it is LIMIT 1 over an unordered set. Live bids first, then
+    // most recent, so the checks below describe the row a manager can still act
+    // on.
     const restricted_free_agency_bid =
       await select_restricted_free_agency_bid_with_nomination({ db })
         .where({
@@ -1179,6 +1248,9 @@ router.post('/nominate/?', async (req, res) => {
           'restricted_free_agency_nominations.original_team_id': tid
         })
         .whereNull('restricted_free_agency_bids.cancelled')
+        .orderByRaw(
+          '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.uid DESC'
+        )
         .first()
 
     if (!restricted_free_agency_bid) {
@@ -1312,6 +1384,10 @@ router.delete('/nominate/?', async (req, res) => {
     }
 
     // Check if the restricted free agency bid exists and belongs to the original manager
+    // `.first()` with no ORDER BY is the same arbitrary pick as the `query1[0]`
+    // sites above -- it is LIMIT 1 over an unordered set. Live bids first, then
+    // most recent, so the checks below describe the row a manager can still act
+    // on.
     const restricted_free_agency_bid =
       await select_restricted_free_agency_bid_with_nomination({ db })
         .where({
@@ -1321,6 +1397,9 @@ router.delete('/nominate/?', async (req, res) => {
           'restricted_free_agency_nominations.original_team_id': tid
         })
         .whereNull('restricted_free_agency_bids.cancelled')
+        .orderByRaw(
+          '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.uid DESC'
+        )
         .first()
 
     if (!restricted_free_agency_bid) {

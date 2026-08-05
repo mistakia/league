@@ -1,0 +1,52 @@
+-- STATUS: PENDING
+--
+-- One live restricted free agency bid per (league, season, team, player).
+--
+-- WHY. api/routes/teams/restricted-free-agency.mjs POST inserted
+-- unconditionally: it never cancelled, rejected or updated a prior live bid from
+-- the same team on the same player. A manager who submitted twice ended up with
+-- two rows both `cancelled IS NULL AND processed IS NULL`, and every reader that
+-- resolves a bid by (pid, tid, year) then chose between them arbitrarily -- the
+-- PUT and DELETE handlers in that file took `query1[0]` off an unordered select,
+-- so an edit or a cancel landed on whichever row Postgres returned first.
+--
+-- This is longstanding rather than a regression. Four settled (team, player,
+-- year) groups in league 1 carry duplicates, the oldest from 2021:
+--
+--   2021 DEVI-SING-015648 team 6   uids 6, 20, 39   (outcomes matched/won/matched)
+--   2022 CHRI-GODW-016044 team 5   uids 188, 209
+--   2022 CHRI-GODW-016044 team 11  uids 165, 210
+--   2023 RASH-BATE-000115 team 11  uids 275, 276    (outcomes outbid/won)
+--
+-- Those are deliberately NOT repaired. They are settled with coherent outcomes,
+-- there is no damage to undo, and rewriting them would destroy the only evidence
+-- of how long this ran. The partial predicate excludes them by construction.
+--
+-- WHY AN INDEX AND NOT JUST THE ROUTE CHECK. The route now returns a 400 when a
+-- live bid already exists, but that is a message, not a guarantee: it is a
+-- read-then-write with a window between them, and it binds only the one writer
+-- that remembers to call it. The index makes the bad state unwritable for every
+-- future writer, including scripts and backfills that never see the route.
+--
+-- APPLICABILITY CHECK, run against production 2026-08-05 -- zero live duplicate
+-- groups, so this builds without touching data:
+--
+--   SELECT lid, year, tid, pid, count(*)
+--   FROM restricted_free_agency_bids
+--   WHERE cancelled IS NULL AND processed IS NULL
+--   GROUP BY lid, year, tid, pid HAVING count(*) > 1;
+--
+-- The one live pair that DID exist (league 1, 2026, team 5, ANDR-MCCO-004333,
+-- uids 600 and 601) was resolved by hand before this file was written: 600
+-- cancelled, 601 kept. Re-run the query above immediately before applying --
+-- a duplicate created between now and then fails the CREATE INDEX on data
+-- rather than on anything in this file.
+--
+-- Deliberately a plain, blocking CREATE INDEX: the table is small (low hundreds
+-- of rows), and db-exec.sh runs this file as one transaction, which a
+-- non-blocking index build is not permitted to join. This file must stay
+-- transactional, so do NOT pass --no-transaction.
+
+CREATE UNIQUE INDEX restricted_free_agency_bids_one_live_per_team_player
+  ON restricted_free_agency_bids (lid, year, tid, pid)
+  WHERE cancelled IS NULL AND processed IS NULL;
