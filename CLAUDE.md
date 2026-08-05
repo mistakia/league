@@ -352,6 +352,21 @@ Three things about the registry that are not obvious from reading it. The three 
 
 **Kicking scores PER-YARD at 0.1 in production, not in 3/3/3/4/5 distance bands.** The old code branched on `if (stats.field_goal_yards)` and the band arm was unreachable whenever that stat was populated, which it always is -- 2025 REG kickers: 453 gamelogs with band counts, all 453 also with field goal yards, ZERO with bands alone. The backfill therefore sets the per-yard rate to 0.1 and every band to 0, and "correcting" it to the bands would silently cut every kicker's score. Scoring is now additive (bands plus the per-yard term) so a banded league sets the bands and zeroes the rate. `test/libs-shared.scoring-format-equivalence.spec.mjs` checks all 65 production formats against a fixed stat-line corpus and is mutation-checked.
 
+**Before sourcing a from-plays role off an `nfl_plays` pid column, MEASURE that column against production — it has been effectively empty three times out of three, and the role passes every gate while returning nothing.** The pid column is the obvious source and the cheap one, so the instinct is to reach for it and move on. But the join is valid, the SQL EXPLAINs, the suite is green, the goldens regenerate, and the column simply produces no rows: return touchdowns resolved 4 of 732 valid stat rows, two-point conversions 2 of 2,221, field goals 0 of 931 and extra points 2 of 1,210. Two of the three read as obviously fine beforehand — a two-point conversion IS a rush or a pass, and a field goal obviously has a kicker — which is exactly why reading the schema is not a substitute for counting. The measurement is one query:
+
+```sql
+SELECT ps.stat_id, count(*) AS valid_stat_rows, count(p.<pid_column>) AS rows_with_pid
+FROM nfl_play_stats ps
+JOIN nfl_plays p ON p.esbid = ps.esbid AND p.play_id = ps.play_id
+WHERE ps.is_valid = true AND ps.stat_id IN (<ids>)
+  AND p.season_year = 2025 AND p.season_type = 'REG'
+GROUP BY 1 ORDER BY 1
+```
+
+Scope it on `nfl_plays` rather than joining `nfl_games` — the games join times out through `base db query`. When `rows_with_pid` is near zero, the role has to take the `nfl_play_stats` attribution shape plus the EXISTS gate widening, which is what `libs-server/data-views/nfl-play-stats-attribution.mjs` exists for; its header carries the per-role evidence.
+
+**A registry-driven scoring path and a hand-written one must have their COVERAGE compared by a spec, because nothing else can see the gap.** `calculate-points.mjs` scores every column in `libs-shared/scoring-columns.mjs` by construction — it loops the registry — while the from-plays path hand-writes each term into a generator. So a column nobody remembered to add scores correctly on one path and silently ZERO on the other, with no error, no failing golden and no red gate. `passing_completions` was in that state for as long as the from-plays path has existed: 2 of the 65 production formats score it at 0.50 and 0.20, so a 350-completion quarterback was under-reported by up to 175 points a season. It was found by writing a spec, not by any gate. `test/libs-server.fantasy-points-path-parity.spec.mjs` is the shape to copy — assert the coverage MAP rather than an executed residual (the suite's seeded database has no real season, so a residual measures the fixtures), require every gap to be declared with a reason, and carry a positive control so a matcher that stops matching cannot report perfect parity over a path scoring nothing.
+
 ## Key Documentation
 
 | Document                                                                             | Description                                                             |
