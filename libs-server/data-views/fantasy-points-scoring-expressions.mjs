@@ -26,9 +26,11 @@ import {
 // the query BUILDER -- it decides which subqueries to emit and how to join
 // them, and does not need to know how a field goal is scored.
 //
-// test/libs-server.fantasy-points-path-parity.spec.mjs reads this file as text
-// to build its coverage map, so a scoring column referenced only here is still
-// seen. It reads the column-definitions file too; neither path may be dropped.
+// test/libs-server.fantasy-points-path-parity.spec.mjs imports
+// `from_plays_scored_columns` below as its coverage map. That export is derived
+// from the two role tables in this file, so adding a term or a role updates the
+// map by construction -- there is no list to keep in step and no file path for
+// the spec to go stale against.
 
 // Get scoring format from database if scoring_format_id is provided
 export const get_scoring_format = async (scoring_format_id) => {
@@ -65,73 +67,232 @@ export const get_scoring_format = async (scoring_format_id) => {
   return format
 }
 
-// Per-row passing scoring inner expression (no SUM / ROUND wrapper).
-export const generate_passing_scoring_inner = async (scoring_format) => {
+// The three roles nfl_plays names with a pid column of its own, as declarative
+// terms rather than three hand-written string builders.
+//
+// WHY THIS IS A TABLE. STAT_SOURCED_ROLES below has been one since the roles it
+// covers were written, and every column in it is checkable by reading it. These
+// three were the residue: passing, rushing and receiving each built their SQL by
+// `let sql = ...` plus a chain of `if`s, and that is where every divergence this
+// path has suffered actually lived -- passing_completions unscored for years
+// while two production formats paid 0.50 and 0.20 for it, and a dead Sleeper
+// hash branch that could never be true. Neither was visible without reading the
+// function line by line.
+//
+// With the terms declared, test/libs-server.fantasy-points-path-parity.spec.mjs
+// READS the coverage map instead of grepping this file for column names. A
+// scoring column is covered exactly when some term names it.
+//
+// BYTE-IDENTICAL EMISSION IS THE CONSTRAINT. The three `kind`s and the `always`
+// flag exist to reproduce the previous output character for character, not to be
+// a general expression language:
+//
+//   rate         `<expr> * <value>`   -- a per-play quantity times a rate
+//   flat         `<value>`            -- the role's join already restricts the
+//                                       rows, so one row IS one event (a rush
+//                                       attempt, a target); there is nothing to
+//                                       multiply
+//   conditional  `(CASE WHEN <predicate> THEN <value> ELSE 0 END)`
+//
+// `always: true` emits the term even when the format scores it at 0, which the
+// previous code did for the leading terms of each role and did NOT for the
+// trailing ones. Preserving that split is what keeps 248 goldens from moving.
+//
+// Values are read as `scoring_format[column] || 0`, deliberately NOT through the
+// registry's default_value fallback: a format row missing a column must keep
+// emitting 0 here, or existing SQL changes.
+const PLAYS_SOURCED_ROLES = [
+  {
+    name: 'passing',
+    pid_column: 'passer_pid',
+    // Used only when no scoring format resolves at all, which happens in the
+    // test environment. Not derived from the terms -- it predates them and
+    // carries its own values.
+    fallback:
+      'COALESCE(pass_yds, 0) * 0.04 + COALESCE(is_passing_touchdown::int, 0) * 4 + COALESCE("is_interception"::int, 0) * -1',
+    terms: [
+      {
+        column: 'passing_yards',
+        kind: 'rate',
+        expr: 'COALESCE(pass_yds, 0)',
+        always: true
+      },
+      {
+        column: 'passing_touchdowns',
+        kind: 'rate',
+        expr: 'COALESCE(is_passing_touchdown::int, 0)',
+        always: true
+      },
+      {
+        column: 'passing_interceptions',
+        kind: 'rate',
+        expr: 'COALESCE("is_interception"::int, 0)',
+        always: true
+      },
+      {
+        // A completion credited to the PASSER, off the same nfl_plays column the
+        // receiving role reads for a reception. Emitted only when scored, so the
+        // 63 production formats carrying 0 keep byte-identical SQL.
+        column: 'passing_completions',
+        kind: 'rate',
+        expr: 'COALESCE(is_completion::int, 0)'
+      }
+    ]
+  },
+  {
+    name: 'rushing',
+    pid_column: 'ball_carrier_pid',
+    fallback:
+      'COALESCE(rush_yds, 0) * 0.1 + COALESCE(is_rushing_touchdown::int, 0) * 6',
+    terms: [
+      {
+        column: 'rushing_yards',
+        kind: 'rate',
+        expr: 'COALESCE(rush_yds, 0)',
+        always: true
+      },
+      {
+        column: 'rushing_touchdowns',
+        kind: 'rate',
+        expr: 'COALESCE(is_rushing_touchdown::int, 0)',
+        always: true
+      },
+      { column: 'rushing_attempts', kind: 'flat' },
+      {
+        column: 'rushing_first_downs',
+        kind: 'conditional',
+        predicate: "is_first_down = true AND play_type = 'RUSH'"
+      }
+    ]
+  },
+  {
+    name: 'receiving',
+    pid_column: 'target_pid',
+    fallback:
+      'COALESCE(is_completion::int, 0) * 1 + COALESCE(recv_yds, 0) * 0.1 + COALESCE(is_passing_touchdown::int, 0) * 6',
+    terms: [
+      {
+        column: 'receiving_yards',
+        kind: 'rate',
+        expr: 'COALESCE(recv_yds, 0)',
+        always: true
+      },
+      {
+        column: 'receiving_touchdowns',
+        kind: 'rate',
+        expr: 'COALESCE(is_passing_touchdown::int, 0)',
+        always: true
+      },
+      {
+        column: 'receptions',
+        kind: 'rate',
+        expr: 'COALESCE(is_completion::int, 0)',
+        always: true,
+        // Applied only when the caller supplies position data AND some position
+        // value differs from the base -- otherwise the plain rate form is
+        // emitted, which is what every uniform-reception format gets.
+        position_override: {
+          predicate: 'is_completion = true',
+          position_column: 'trg_pos',
+          columns: [
+            ['RB', 'running_back_reception'],
+            ['WR', 'wide_receiver_reception'],
+            ['TE', 'tight_end_reception']
+          ]
+        }
+      },
+      { column: 'targets', kind: 'flat' },
+      {
+        column: 'receiving_first_downs',
+        kind: 'conditional',
+        predicate: "is_first_down = true AND play_type = 'PASS'"
+      }
+    ]
+  }
+]
+
+const scoring_value = (scoring_format, column) => scoring_format[column] || 0
+
+const render_position_override = (term, scoring_format, base_value) => {
+  const { predicate, position_column, columns } = term.position_override
+  const cases = columns
+    .map(
+      ([position, column]) =>
+        `WHEN '${position}' THEN ${scoring_value(scoring_format, column)}`
+    )
+    .join(' ')
+  return `CASE WHEN ${predicate} THEN CASE ${position_column} ${cases} ELSE ${base_value} END ELSE 0 END`
+}
+
+const uses_position_override = (term, scoring_format, has_position_data) => {
+  if (!has_position_data || !term.position_override) {
+    return false
+  }
+  const base_value = scoring_value(scoring_format, term.column)
+  return term.position_override.columns.some(
+    ([, column]) => scoring_value(scoring_format, column) !== base_value
+  )
+}
+
+const render_term = (term, scoring_format, has_position_data) => {
+  const value = scoring_value(scoring_format, term.column)
+
+  if (uses_position_override(term, scoring_format, has_position_data)) {
+    return render_position_override(term, scoring_format, value)
+  }
+
+  switch (term.kind) {
+    case 'rate':
+      return `${term.expr} * ${value}`
+    case 'flat':
+      return `${value}`
+    case 'conditional':
+      return `(CASE WHEN ${term.predicate} THEN ${value} ELSE 0 END)`
+    default:
+      throw new Error(`unknown scoring term kind: ${term.kind}`)
+  }
+}
+
+// A term is emitted when it is declared `always` or when the format scores it
+// nonzero. A position override counts as scoring even if the base value is 0.
+const term_is_emitted = (term, scoring_format, has_position_data) =>
+  Boolean(term.always) ||
+  scoring_value(scoring_format, term.column) !== 0 ||
+  uses_position_override(term, scoring_format, has_position_data)
+
+const generate_role_scoring_inner = async (
+  role,
+  scoring_format,
+  has_position_data = false
+) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
     if (!scoring_format) {
-      return 'COALESCE(pass_yds, 0) * 0.04 + COALESCE(is_passing_touchdown::int, 0) * 4 + COALESCE("is_interception"::int, 0) * -1'
+      return role.fallback
     }
   }
 
-  const py = scoring_format.passing_yards || 0
-  const ptd = scoring_format.passing_touchdowns || 0
-  const ints = scoring_format.passing_interceptions || 0
-  const pc = scoring_format.passing_completions || 0
-
-  let sql = `COALESCE(pass_yds, 0) * ${py} + COALESCE(is_passing_touchdown::int, 0) * ${ptd} + COALESCE("is_interception"::int, 0) * ${ints}`
-
-  // A completion credited to the PASSER, off the same nfl_plays column the
-  // receiving generator reads for a reception. Appended only when scored, so a
-  // format carrying 0 emits byte-identical SQL -- which is every named format
-  // and 63 of the 65 production formats.
-  //
-  // This was missing entirely until 2026-08-05 while two production formats
-  // scored it at 0.50 and 0.20, so their from-plays points under-reported a
-  // 350-completion quarterback by up to 175 a season with nothing failing.
-  if (pc) {
-    sql += ` + COALESCE(is_completion::int, 0) * ${pc}`
-  }
-
-  return sql
+  return role.terms
+    .filter((term) => term_is_emitted(term, scoring_format, has_position_data))
+    .map((term) => render_term(term, scoring_format, has_position_data))
+    .join(' + ')
 }
+
+const role_by_name = Object.fromEntries(
+  PLAYS_SOURCED_ROLES.map((role) => [role.name, role])
+)
+
+// Per-row inner expressions (no SUM / ROUND wrapper) and their aggregated forms.
+// The role-union builder consumes the inner shape and lets its aggregator wrap
+// it; the legacy `with` builder aggregates inside its UNION arm.
+export const generate_passing_scoring_inner = async (scoring_format) =>
+  generate_role_scoring_inner(role_by_name.passing, scoring_format)
 
 export const generate_passing_scoring_sql = async (scoring_format) =>
   `ROUND(SUM(${await generate_passing_scoring_inner(scoring_format)}), 2)`
 
-export const generate_rushing_scoring_inner = async (scoring_format) => {
-  if (!scoring_format) {
-    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
-    if (!scoring_format) {
-      return 'COALESCE(rush_yds, 0) * 0.1 + COALESCE(is_rushing_touchdown::int, 0) * 6'
-    }
-  }
-
-  const ry = scoring_format.rushing_yards || 0
-  const rtd = scoring_format.rushing_touchdowns || 0
-  const rufd = scoring_format.rushing_first_downs || 0
-  const ra = scoring_format.rushing_attempts || 0
-
-  let sql = `COALESCE(rush_yds, 0) * ${ry} + COALESCE(is_rushing_touchdown::int, 0) * ${rtd}`
-
-  if (ra) {
-    sql += ` + ${ra}`
-  }
-
-  if (rufd) {
-    const is_sleeper_sfb =
-      scoring_format &&
-      scoring_format.scoring_format_id ===
-        'ed9c2daa0f00d9389f450b577c16fb0864fa22c6e261c0161db5f2da54457286'
-    if (is_sleeper_sfb) {
-      sql += ` + (CASE WHEN is_first_down = true AND play_type = 'RUSH' AND COALESCE(is_rushing_touchdown::int, 0) = 0 THEN ${rufd} ELSE 0 END)`
-    } else {
-      sql += ` + (CASE WHEN is_first_down = true AND play_type = 'RUSH' THEN ${rufd} ELSE 0 END)`
-    }
-  }
-
-  return sql
-}
+export const generate_rushing_scoring_inner = async (scoring_format) =>
+  generate_role_scoring_inner(role_by_name.rushing, scoring_format)
 
 export const generate_rushing_scoring_sql = async (scoring_format) =>
   `ROUND(SUM(${await generate_rushing_scoring_inner(scoring_format)}), 2)`
@@ -139,49 +300,12 @@ export const generate_rushing_scoring_sql = async (scoring_format) =>
 export const generate_receiving_scoring_inner = async (
   scoring_format,
   has_position_data = false
-) => {
-  if (!scoring_format) {
-    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
-    if (!scoring_format) {
-      return 'COALESCE(is_completion::int, 0) * 1 + COALESCE(recv_yds, 0) * 0.1 + COALESCE(is_passing_touchdown::int, 0) * 6'
-    }
-  }
-
-  const recy = scoring_format.receiving_yards || 0
-  const rctd = scoring_format.receiving_touchdowns || 0
-  const rec = scoring_format.receptions || 0
-  const rbrec = scoring_format.running_back_reception || 0
-  const wrrec = scoring_format.wide_receiver_reception || 0
-  const terec = scoring_format.tight_end_reception || 0
-  const trg = scoring_format.targets || 0
-  const recfd = scoring_format.receiving_first_downs || 0
-
-  let sql = `COALESCE(recv_yds, 0) * ${recy} + COALESCE(is_passing_touchdown::int, 0) * ${rctd}`
-
-  if (has_position_data && (rbrec !== rec || wrrec !== rec || terec !== rec)) {
-    sql += ` + CASE WHEN is_completion = true THEN CASE trg_pos WHEN 'RB' THEN ${rbrec} WHEN 'WR' THEN ${wrrec} WHEN 'TE' THEN ${terec} ELSE ${rec} END ELSE 0 END`
-  } else {
-    sql += ` + COALESCE(is_completion::int, 0) * ${rec}`
-  }
-
-  if (trg) {
-    sql += ` + ${trg}`
-  }
-
-  if (recfd) {
-    const is_sleeper_sfb =
-      scoring_format &&
-      scoring_format.scoring_format_id ===
-        'ed9c2daa0f00d9389f450b577c16fb0864fa22c6e261c0161db5f2da54457286'
-    if (is_sleeper_sfb) {
-      sql += ` + (CASE WHEN is_first_down = true AND play_type = 'PASS' AND COALESCE(is_passing_touchdown::int, 0) = 0 THEN ${recfd} ELSE 0 END)`
-    } else {
-      sql += ` + (CASE WHEN is_first_down = true AND play_type = 'PASS' THEN ${recfd} ELSE 0 END)`
-    }
-  }
-
-  return sql
-}
+) =>
+  generate_role_scoring_inner(
+    role_by_name.receiving,
+    scoring_format,
+    has_position_data
+  )
 
 export const generate_receiving_scoring_sql = async (
   scoring_format,
@@ -222,6 +346,7 @@ const create_flat_role_scoring = ({ column, fallback }) => {
   }
 
   return {
+    columns: [column],
     inner,
     sql: async (scoring_format) =>
       `ROUND(SUM(${await inner(scoring_format)}), 2)`,
@@ -301,6 +426,11 @@ const create_field_goal_role_scoring = () => {
   }
 
   return {
+    columns: [
+      ...FIELD_GOAL_BANDS.map(({ column }) => column),
+      FIELD_GOAL_50_PLUS_COLUMN,
+      'field_goal_yards'
+    ],
     resolve,
     sql: async (scoring_format) => {
       const { expression } = await resolve(scoring_format)
@@ -405,6 +535,35 @@ const STAT_SOURCED_ROLES = [
     gate_stat_ids: EXTRA_POINT_STAT_IDS,
     subquery_alias: 'extra_point_role_stats'
   }
+]
+
+// Every league_scoring_formats column this path can score, derived from the two
+// role tables rather than asserted anywhere.
+//
+// This is the from-plays half of the coverage map that
+// test/libs-server.fantasy-points-path-parity.spec.mjs checks against the
+// scoring registry. It used to be recovered by grepping this file's TEXT with
+// three regexes -- one per shape a column name could reach a generator in --
+// plus a positive control, because a matcher that quietly stopped matching would
+// have reported perfect parity over a path scoring nothing. None of that is
+// needed now: a column is scored here exactly when a term or a role names it,
+// and both are data.
+//
+// A column added to a role but never emitted would still be reported covered.
+// That is a real limit of any coverage map and is why it is a map rather than a
+// residual -- the spec's header carries the full argument.
+export const from_plays_scored_columns = [
+  ...new Set([
+    ...PLAYS_SOURCED_ROLES.flatMap((role) =>
+      role.terms.flatMap((term) => [
+        term.column,
+        ...(term.position_override
+          ? term.position_override.columns.map(([, column]) => column)
+          : [])
+      ])
+    ),
+    ...STAT_SOURCED_ROLES.flatMap((role) => role.scoring.columns)
+  ])
 ]
 
 // Resolve every stat-sourced role against a format, keeping only the ones it

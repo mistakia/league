@@ -1,22 +1,19 @@
 /* global describe it */
 
-import fs from 'node:fs'
-import path from 'node:path'
 import * as chai from 'chai'
-import { fileURLToPath } from 'node:url'
 
 import { scoring_registry } from '#libs-shared/scoring-columns.mjs'
+import { from_plays_scored_columns } from '#libs-server/data-views/fantasy-points-scoring-expressions.mjs'
 
 const expect = chai.expect
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Parity between the two fantasy-points paths.
 //
 // The gamelogs path scores every column in libs-shared/scoring-columns.mjs by
 // construction -- calculate-points.mjs loops the registry. The from-plays path
-// does NOT: each term is hand-written into a scoring generator, so a registry
-// column with no generator reference is scored as zero there and the two paths
-// disagree with nothing failing anywhere.
+// does NOT: each term is declared in a role table, so a registry column with no
+// term is scored as zero there and the two paths disagree with nothing failing
+// anywhere.
 //
 // That is not hypothetical. passing_completions was missing from the passing
 // generator while two production formats scored it at 0.50 and 0.20, which
@@ -31,49 +28,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // CI can own is the COVERAGE MAP -- which columns the from-plays path can score
 // at all -- and that is what actually regresses silently.
 //
-// The path spans TWO files -- the scoring expressions and the query builder
-// that emits them -- and both are read. Reading only one would make the matcher
-// blind to every term in the other, which is a coverage map that reports gaps
-// that are not gaps (or, once a term moves, parity that is not parity). The
-// positive control below is what catches a stale path here.
-const from_plays_source = [
-  path.join(
-    __dirname,
-    '..',
-    'libs-server',
-    'data-views',
-    'fantasy-points-scoring-expressions.mjs'
-  ),
-  path.join(
-    __dirname,
-    '..',
-    'libs-server',
-    'data-views-column-definitions',
-    'player-fantasy-points-from-plays-column-definitions.mjs'
-  )
-]
-  .map((file) => fs.readFileSync(file, 'utf8'))
-  .join('\n')
-
-// Column names reach the generators three ways, and a matcher that knows only
-// the first reports a covered column as uncovered. field_goals_made_50_plus_yards
-// is held in a module constant and is invisible to a `scoring_format.<name>`
-// pattern -- the constants-defeat-the-matcher hazard, hit while writing this.
-const referenced_columns = () => {
-  const found = new Set()
-  const patterns = [
-    /scoring_format\??\.([a-z0-9_]+)/g, // scoring_format.passing_yards
-    /column: '([a-z0-9_]+)'/g, // create_flat_role_scoring({ column: ... })
-    /'([a-z0-9_]+)'/g // FIELD_GOAL_50_PLUS_COLUMN = '...'
-  ]
-  for (const pattern of patterns) {
-    for (const match of from_plays_source.matchAll(pattern)) {
-      found.add(match[1])
-    }
-  }
-  return found
-}
-
+// THE MAP IS NOW IMPORTED, NOT MATCHED. Until 2026-08-05 the from-plays half was
+// recovered by reading two source files as TEXT and running three regexes over
+// them, one per shape a column name could take. That was coupled to file layout
+// in a way nothing declared -- moving the generators into their own module
+// emptied the corpus and the positive control failed 3 of 5 cases -- and its
+// broadest pattern (any single-quoted lowercase token) would have counted a
+// column named in any unrelated string as covered, the same over-permissive
+// tokenizer that made check-saved-view-param-coverage unable to report the very
+// orphans it existed to find.
+//
+// The scoring module now derives `from_plays_scored_columns` from its two role
+// tables, so a column is covered exactly when a term or a role names it. No
+// regex, no file paths, and nothing to go stale when a term moves.
 const scoring_columns = scoring_registry
   .filter((entry) => entry.column)
   .map((entry) => entry.column)
@@ -115,23 +82,19 @@ const EXPECTED_UNCOVERED = {
 }
 
 describe('fantasy points path parity', () => {
-  const referenced = referenced_columns()
+  const referenced = new Set(from_plays_scored_columns)
 
-  // POSITIVE CONTROL. Every assertion below rests on the matcher finding real
-  // references, and a matcher that silently stops matching would make the
-  // coverage assertion pass vacuously -- reporting perfect parity over a path
-  // that scores nothing. These three cover all three reference shapes.
-  it('the reference matcher still finds known-covered columns', () => {
-    expect(
-      referenced.has('passing_yards'),
-      'scoring_format.<name> shape'
-    ).to.eq(true)
-    expect(referenced.has('fumbles_lost'), 'flat-factory column shape').to.eq(
-      true
-    )
+  // The map is derived from both role tables, and a column reaching it from
+  // only one of them would make the coverage assertion silently partial. These
+  // three are one per source: a plays-sourced term, a flat stat-sourced role,
+  // and the field-goal role, whose columns come from its band list rather than
+  // from a `column` property like every other role's.
+  it('the derived map draws from every role source', () => {
+    expect(referenced.has('passing_yards'), 'plays-sourced term').to.eq(true)
+    expect(referenced.has('fumbles_lost'), 'flat stat-sourced role').to.eq(true)
     expect(
       referenced.has('field_goals_made_50_plus_yards'),
-      'module-constant shape'
+      'field-goal role band list'
     ).to.eq(true)
   })
 
