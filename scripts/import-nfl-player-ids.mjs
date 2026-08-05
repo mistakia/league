@@ -120,7 +120,7 @@ export const parse_listing_page = (html) => {
   return players
 }
 
-const fetch_all_listed_players = async () => {
+export const fetch_all_listed_players = async () => {
   const by_id = new Map()
 
   for (let page = 0; page < MAX_PAGES; page++) {
@@ -156,8 +156,14 @@ const fetch_all_listed_players = async () => {
  * being too recent an entrant to have any yet. `roster_status` alone is not
  * enough — 5,459 rows carry none at all — and `current_nfl_team` alone is not
  * enough either, since it goes stale in both directions.
+ *
+ * @param {boolean} only_unfilled - the importer wants only rows it can fill, so
+ *   it passes true. The attribution audit needs the same scope over rows that
+ *   ALREADY hold a value, in order to find one contradicting the feed, so it
+ *   passes false. The scope must be identical either way or the audit would
+ *   measure a population the importer cannot act on.
  */
-const load_name_match_scope = async () => {
+export const load_name_match_scope = async ({ only_unfilled = true } = {}) => {
   const earliest_participation_season =
     current_season.year - PARTICIPATION_LOOKBACK_SEASONS
 
@@ -170,7 +176,9 @@ const load_name_match_scope = async () => {
       'player.nfl_player_id',
       'player.nfl_draft_year'
     )
-    .whereNull('player.nfl_player_id')
+    .modify((query) => {
+      if (only_unfilled) query.whereNull('player.nfl_player_id')
+    })
     .whereNot(function () {
       this.where('player.roster_status', 'RETIRED')
     })
@@ -205,7 +213,7 @@ const load_name_match_scope = async () => {
   }
 
   log(
-    `name-match scope: ${rows.length} unfilled player rows across ${by_formatted_name.size} names`
+    `name-match scope: ${rows.length} player rows across ${by_formatted_name.size} names`
   )
 
   return by_formatted_name
@@ -258,7 +266,7 @@ const import_nfl_player_ids = async ({ dry = false } = {}) => {
     existing_rows.map((row) => [Number(row.nfl_player_id), row])
   )
 
-  const name_match_scope = await load_name_match_scope()
+  const name_match_scope = await load_name_match_scope({ only_unfilled: true })
 
   const counts = {
     listed: listed_players.length,

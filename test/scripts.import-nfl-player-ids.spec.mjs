@@ -5,6 +5,10 @@ import {
   parse_listing_page,
   resolve_unique_candidate
 } from '../scripts/import-nfl-player-ids.mjs'
+import {
+  last_name_of,
+  is_accepted_name_difference
+} from '../scripts/audit-nfl-player-id-attribution.mjs'
 
 const expect = chai.expect
 
@@ -187,6 +191,72 @@ describe('scripts - import nfl player ids', function () {
       })
 
       expect(player_row).to.equal(null)
+    })
+  })
+})
+
+describe('scripts - audit nfl player id attribution', function () {
+  describe('last_name_of', function () {
+    it('drops a generational suffix', () => {
+      expect(last_name_of('Ricky White III')).to.equal('white')
+      expect(last_name_of('Michael Pittman Jr.')).to.equal('pittman')
+    })
+
+    it('matches a display name against a legal name on the surname alone', () => {
+      // nfl.com serves display names and we store legal ones, so these pairs
+      // are the SAME person and must not be reported as misattribution.
+      expect(last_name_of('Kenny Gainwell')).to.equal(
+        last_name_of('kenneth gainwell')
+      )
+      expect(last_name_of('JJ McCarthy')).to.equal(
+        last_name_of('jonathan mccarthy')
+      )
+      expect(last_name_of('Tank Dell')).to.equal(last_name_of('nathaniel dell'))
+    })
+
+    it('separates two genuinely different people', () => {
+      expect(last_name_of('Jordan Love')).to.not.equal(
+        last_name_of('jeff okudah')
+      )
+    })
+  })
+
+  describe('is_accepted_name_difference', function () {
+    // A legal name change is the one disagreement the surname test cannot
+    // absorb, and treating it as a defect would destroy a correct value.
+    const robbie = {
+      pid: 'ROBB-ANDE-017101',
+      nfl_player_id: 2556462,
+      card_name: 'Robbie Chosen'
+    }
+
+    it('accepts the recorded legal name change', () => {
+      expect(is_accepted_name_difference(robbie)).to.equal(true)
+    })
+
+    it('does NOT accept the same pid once its id has moved', () => {
+      // The adjudication is pinned to the value it was granted for, so a row
+      // that later acquires a different id is re-reported rather than
+      // inheriting the exception.
+      expect(
+        is_accepted_name_difference({ ...robbie, nfl_player_id: 2564007 })
+      ).to.equal(false)
+    })
+
+    it('does NOT accept a different pid holding the same id', () => {
+      expect(
+        is_accepted_name_difference({ ...robbie, pid: 'JEFF-OKUD-007629' })
+      ).to.equal(false)
+    })
+
+    it('does NOT accept an unrelated disagreement', () => {
+      expect(
+        is_accepted_name_difference({
+          pid: 'JEFF-OKUD-007629',
+          nfl_player_id: 2564007,
+          card_name: 'Jordan Love'
+        })
+      ).to.equal(false)
     })
   })
 })
