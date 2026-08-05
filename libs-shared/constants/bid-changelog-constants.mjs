@@ -49,7 +49,23 @@ export const bid_change_sources = {
   API_BID_UPDATE: 'api_bid_update',
   API_BID_CANCEL: 'api_bid_cancel',
   SETTLEMENT_SCRIPT: 'settlement_script',
-  DAILY_SNAPSHOT_BACKFILL: 'daily_snapshot_backfill'
+  // An operator changing a row by hand, with no route and no user request
+  // behind it. This is a real class rather than a defensive placeholder: league
+  // 1's uid 600 was cancelled directly in production on 2026-08-05 to clear a
+  // duplicate bid a display defect had caused a manager to submit twice. An
+  // audit trail whose vocabulary cannot express "a human edited the database"
+  // records such a change as whichever API path it least resembles, which is
+  // worse than recording it as unexplained.
+  MANUAL_DATABASE_CORRECTION: 'manual_database_correction',
+  // Reconstructed from the daily pg_dump backups; see
+  // db/adhoc/2026-08-05-backfill-bid-changelog-from-snapshots.sql for what that
+  // reconstruction can and cannot see.
+  DAILY_SNAPSHOT_BACKFILL: 'daily_snapshot_backfill',
+  // The floor row written for every bid that already existed when the trail was
+  // created, snapshotting the live table at that instant. Distinct from
+  // daily_snapshot_backfill because it is read from the live table rather than
+  // from a backup, so it is the one reconstructed source that cannot be stale.
+  INITIAL_TABLE_SEED: 'initial_table_seed'
 }
 
 export const bid_change_source_values = Object.values(bid_change_sources)

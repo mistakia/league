@@ -140,9 +140,21 @@ GRANT SELECT ON SEQUENCE public.bid_changelog_change_id_seq TO league_reader;
 -- this state is not recoverable. `bid_user_id` carries the row's `userid`, which
 -- is a real fact (the last writer) and is not the same claim.
 --
--- The companion file 2026-08-05-backfill-bid-changelog-from-snapshots.sql adds
+-- The source is `initial_table_seed` rather than `daily_snapshot_backfill`,
+-- which the two are easy to conflate. This one reads the LIVE table, so it is
+-- the only reconstructed source that cannot be stale, and it is what catches any
+-- change made after the last backup -- including changes no route made. League
+-- 1's uid 600 is exactly that case: an operator cancelled it directly in
+-- production on 2026-08-05, after the final snapshot, to clear a duplicate bid.
+-- Labelling this seed as snapshot-derived would have described that state as
+-- coming from a backup that never contained it.
+--
+-- Two companion files. 2026-08-05-backfill-bid-changelog-from-snapshots.sql adds
 -- the eight daily observations preceding this one; its header states what that
 -- reconstruction can and cannot see.
+-- 2026-08-05-record-manual-bid-600-cancellation.sql records the operator
+-- cancellation above as its own event at the instant it happened, rather than
+-- leaving it absorbed silently into this apply-time seed.
 INSERT INTO public.bid_changelog (
   bid_type,
   bid_id,
@@ -171,7 +183,7 @@ SELECT
   bids.pid,
   bids.year,
   'backfilled_snapshot',
-  'daily_snapshot_backfill',
+  'initial_table_seed',
   NULL,
   now(),
   bids.bid_amount,
