@@ -15,19 +15,33 @@ debug.enable('audit-conflated-player-identity')
 // visible when independent fields are asked which ERA the person belongs to and
 // they disagree.
 //
-// Four identifier spaces are independently monotone in entry cohort, so each one
-// votes for an entry year:
+// Three identifier spaces are independently monotone in entry cohort, so each
+// one votes for an entry year:
 //
 //   gsis_player_id      00-00NNNNN, usable from the 2000 cohort onward
 //   gsis_it_player_id   integer, usable from the 2003 cohort onward
-//   nfl_player_id       only the 25xxxxx block is monotone; below 2503900 the
-//                       curve is flat across the 1990s and cannot resolve a year
 //   nfl_draft_year      the recorded value itself
 //
 // date_of_birth is deliberately NOT a hard vote. Its implied entry year (birth +
 // 22) is legitimately off by several years for late entrants — AFL punters,
 // rugby and CFL converts, two-sport players — and treating it as exact floods
 // the result with those false positives. It is reported alongside for context.
+//
+// nfl_player_id is NOT a hard vote either, for a different reason: its dissent is
+// unactionable rather than untrustworthy. Every row it has ever flagged alone is
+// a retired player, and NFL.com serves player cards only for its current fantasy
+// player universe — so no external oracle can adjudicate them, and six audit
+// passes closed none. Demoting it suppresses exactly those rows and flags nothing
+// new: at threshold 5 the flagged set goes from 25 to 4, removing the 21 known
+// lone-dissenter rows and adding zero. It is reported alongside for context.
+//
+// Note the column is also NOT range-bounded the way the calibration below
+// implies. The 25xxxxx block is the monotone part, but NFL.com's id space
+// genuinely includes small legacy values — 744 is Calais Campbell, 264 is Josh
+// Johnson and 79860 is Matthew Stafford, all confirmed live against
+// fantasy.nfl.com. Calibration restricts to the monotone block because that is
+// where a nearest-median vote means anything, not because values outside it are
+// corrupt.
 
 const CALIBRATION = `
   cohort AS (
@@ -116,13 +130,13 @@ const VOTES = `
     SELECT
       voted.*,
       (SELECT max(vote) FROM unnest(ARRAY[
-        era_from_draft_year, era_from_gsis, era_from_gsis_it, era_from_nfl_player_id
+        era_from_draft_year, era_from_gsis, era_from_gsis_it
       ]) vote) -
       (SELECT min(vote) FROM unnest(ARRAY[
-        era_from_draft_year, era_from_gsis, era_from_gsis_it, era_from_nfl_player_id
+        era_from_draft_year, era_from_gsis, era_from_gsis_it
       ]) vote) AS hard_spread,
       (SELECT count(vote) FROM unnest(ARRAY[
-        era_from_draft_year, era_from_gsis, era_from_gsis_it, era_from_nfl_player_id
+        era_from_draft_year, era_from_gsis, era_from_gsis_it
       ]) vote) AS hard_vote_count
     FROM voted
   )
