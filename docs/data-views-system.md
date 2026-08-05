@@ -121,7 +121,7 @@ Each stage makes key decisions that affect query performance:
 
   main_where: ({ table_name, params, case_insensitive }) => {
     // Return SQL WHERE clause string
-    return `${table_name}.pos = ?`
+    return `${table_name}.primary_position = ?`
   },
 
   main_group_by: ({ table_name, column_index }) => [
@@ -579,7 +579,7 @@ WITH base_years AS (
 player_years AS (
   SELECT DISTINCT player.pid, base_years.year
   FROM player CROSS JOIN base_years
-  WHERE player.pos IN ('QB', 'RB', 'WR')  -- Early position filtering
+  WHERE player.primary_position IN ('QB', 'RB', 'WR')  -- Early position filtering
 )
 ```
 
@@ -1628,7 +1628,7 @@ To ensure future maintainability, all functions should follow these parameter do
  *   column_definition: playerPositionDef,
  *   table_name: 'player'
  * })
- * // Returns: "player.pos IN ('QB', 'RB')"
+ * // Returns: "player.primary_position IN ('QB', 'RB')"
  */
 ```
 
