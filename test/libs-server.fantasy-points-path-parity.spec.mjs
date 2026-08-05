@@ -30,16 +30,30 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // rather than about the code. The residual belongs in a production check. What
 // CI can own is the COVERAGE MAP -- which columns the from-plays path can score
 // at all -- and that is what actually regresses silently.
-const from_plays_source = fs.readFileSync(
+//
+// The path spans TWO files -- the scoring expressions and the query builder
+// that emits them -- and both are read. Reading only one would make the matcher
+// blind to every term in the other, which is a coverage map that reports gaps
+// that are not gaps (or, once a term moves, parity that is not parity). The
+// positive control below is what catches a stale path here.
+const from_plays_source = [
+  path.join(
+    __dirname,
+    '..',
+    'libs-server',
+    'data-views',
+    'fantasy-points-scoring-expressions.mjs'
+  ),
   path.join(
     __dirname,
     '..',
     'libs-server',
     'data-views-column-definitions',
     'player-fantasy-points-from-plays-column-definitions.mjs'
-  ),
-  'utf8'
-)
+  )
+]
+  .map((file) => fs.readFileSync(file, 'utf8'))
+  .join('\n')
 
 // Column names reach the generators three ways, and a matcher that knows only
 // the first reports a covered column as uncovered. field_goals_made_50_plus_yards
