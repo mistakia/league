@@ -405,103 +405,50 @@ router.get('/:pid', async (req, res) => {
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   pid:
- *                     type: string
- *                     description: Player ID
- *                     example: "PATR-MAHO-005785"
- *                   date:
- *                     type: string
- *                     format: date
- *                     description: Practice date
- *                     example: "2024-01-15"
- *                   status:
- *                     type: string
- *                     enum: ["FP", "LP", "DNP", "OUT", "QUESTIONABLE", "DOUBTFUL"]
- *                     description: |
- *                       Practice participation status:
- *                       - FP: Full participation
- *                       - LP: Limited participation
- *                       - DNP: Did not participate
- *                       - OUT: Out (will not play)
- *                       - QUESTIONABLE: Questionable (game-time decision)
- *                       - DOUBTFUL: Doubtful (unlikely to play)
- *                     example: "FP"
- *                   week:
- *                     type: integer
- *                     description: NFL week number
- *                     example: 18
- *                     minimum: 1
- *                     maximum: 18
- *                   season_year:
- *                     type: integer
- *                     description: Season year
- *                     example: 2024
- *                     minimum: 2020
- *                   season_type:
- *                     $ref: '#/components/schemas/SeasonTypeEnum'
- *                   injury:
- *                     type: string
- *                     nullable: true
- *                     description: Injury description or body part
- *                     example: "Ankle"
- *                   source:
- *                     type: string
- *                     description: Source of the practice report
- *                     example: "NFL Injury Report"
- *                   timestamp:
- *                     type: string
- *                     format: date-time
- *                     description: When the practice report was recorded
- *                     example: "2024-01-15T15:30:00Z"
- *                 required:
- *                   - pid
- *                   - date
- *                   - status
+ *                 $ref: '#/components/schemas/PracticeReport'
  *             examples:
- *               full_participation:
- *                 summary: Player with full practice participation
- *                 value:
- *                   - pid: "PATR-MAHO-005785"
- *                     date: "2024-01-15"
- *                     status: "FULL"
- *                     week: 18
- *                     season_year: 2024
- *                     season_type: "REG"
- *                     injury: null
- *                     source: "NFL Injury Report"
- *                     timestamp: "2024-01-15T15:30:00Z"
- *                   - pid: "PATR-MAHO-005785"
- *                     date: "2024-01-16"
- *                     status: "FULL"
- *                     week: 18
- *                     season_year: 2024
- *                     season_type: "REG"
- *                     injury: null
- *                     source: "NFL Injury Report"
- *                     timestamp: "2024-01-16T15:30:00Z"
  *               limited_participation:
- *                 summary: Player with limited practice participation due to injury
+ *                 summary: Player limited in practice, questionable for the game
  *                 value:
- *                   - pid: "CHRI-MCCA-005372"
- *                     date: "2024-01-15"
- *                     status: "LP"
- *                     week: 18
- *                     season_year: 2024
- *                     season_type: "REG"
- *                     injury: "Ankle"
- *                     source: "NFL Injury Report"
- *                     timestamp: "2024-01-15T15:30:00Z"
- *                   - pid: "CHRI-MCCA-005372"
- *                     date: "2024-01-16"
- *                     status: "DNP"
- *                     week: 18
- *                     season_year: 2024
- *                     season_type: "REG"
- *                     injury: "Ankle"
- *                     source: "NFL Injury Report"
- *                     timestamp: "2024-01-16T15:30:00Z"
+ *                   - pid: "ROBB-OUZT-003883"
+ *                     week: 23
+ *                     season_year: 2025
+ *                     season_type: "PRO"
+ *                     nfl_week_id: "2025_PRO_WEEK_23"
+ *                     injury_type: "Neck"
+ *                     monday_practice_status: null
+ *                     tuesday_practice_status: null
+ *                     wednesday_practice_status: "LP"
+ *                     thursday_practice_status: "LP"
+ *                     friday_practice_status: "LP"
+ *                     saturday_practice_status: null
+ *                     sunday_practice_status: null
+ *                     practice_status: null
+ *                     roster_status: "INACTIVE"
+ *                     game_designation: "QUESTIONABLE"
+ *                     source_status: "Inactive"
+ *                     source: "rotowire"
+ *               full_participation:
+ *                 summary: Player practicing fully, no designation
+ *                 value:
+ *                   - pid: "ERIC-SAUB-008033"
+ *                     week: 23
+ *                     season_year: 2025
+ *                     season_type: "PRO"
+ *                     nfl_week_id: "2025_PRO_WEEK_23"
+ *                     injury_type: ""
+ *                     monday_practice_status: null
+ *                     tuesday_practice_status: null
+ *                     wednesday_practice_status: "FP"
+ *                     thursday_practice_status: "FP"
+ *                     friday_practice_status: "FP"
+ *                     saturday_practice_status: null
+ *                     sunday_practice_status: null
+ *                     practice_status: null
+ *                     roster_status: null
+ *                     game_designation: null
+ *                     source_status: ""
+ *                     source: "rotowire"
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       404:

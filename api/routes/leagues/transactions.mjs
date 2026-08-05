@@ -13,63 +13,6 @@ const router = express.Router({ mergeParams: true })
  * @swagger
  * components:
  *   schemas:
- *     Transaction:
- *       type: object
- *       description: Fantasy league transaction record
- *       properties:
- *         uid:
- *           type: integer
- *           description: Transaction ID
- *           example: 12345
- *         tid:
- *           type: integer
- *           description: Team ID
- *           example: 13
- *         lid:
- *           type: integer
- *           description: League ID
- *           example: 2
- *         pid:
- *           type: string
- *           description: Player ID
- *           example: "4017"
- *         type:
- *           type: integer
- *           description: Transaction type (constants.transaction_types)
- *           enum: [1, 2, 3, 4, 5, 6, 7, 8, 9]
- *           example: 1
- *         userid:
- *           type: integer
- *           nullable: true
- *           description: User ID who made the transaction
- *           example: 5
- *         player_salary:
- *           type: integer
- *           description: Transaction value/cost
- *           example: 15
- *         week:
- *           type: integer
- *           description: NFL week when transaction occurred
- *           example: 8
- *         season_year:
- *           type: integer
- *           description: Season year
- *           example: 2024
- *         timestamp:
- *           type: integer
- *           description: Unix timestamp when transaction occurred
- *           example: 1698765432
- *         pick:
- *           type: integer
- *           nullable: true
- *           description: Draft pick number (for draft transactions)
- *           example: 15
- *         pick_str:
- *           type: string
- *           nullable: true
- *           description: Formatted draft pick string (for draft transactions)
- *           example: "2.03"
- *
  *     TransactionPlayerHistory:
  *       type: object
  *       description: Player transaction history for a team
@@ -189,7 +132,7 @@ const router = express.Router({ mergeParams: true })
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Transaction'
+ *                 $ref: '#/components/schemas/TransactionWithDraft'
  *             examples:
  *               recent_transactions:
  *                 summary: Recent league transactions

@@ -1135,7 +1135,7 @@ const options = {
         PlacedWager: {
           type: 'object',
           properties: {
-            id: {
+            wager_id: {
               type: 'integer',
               description: 'Unique wager ID',
               example: 12345
@@ -1176,7 +1176,7 @@ const options = {
               description: 'Number of selections that have lost',
               example: 0
             },
-            status: {
+            wager_status: {
               type: 'string',
               enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
               description: 'Current status of the wager',
@@ -1263,14 +1263,14 @@ const options = {
             }
           },
           required: [
-            'id',
+            'wager_id',
             'userid',
             'wager_type',
             'placed_at',
             'bet_count',
             'selection_count',
             'selection_lost',
-            'status',
+            'wager_status',
             'bet_wager_amount',
             'total_wager_amount',
             'wager_returned_amount',
@@ -1718,13 +1718,128 @@ const options = {
           },
           required: ['season_year', 'tm', 'stat_key', 'stat_value']
         },
+        // Exactly the columns of the `practice` table. Note the grain: one
+        // row per (pid, season_year, week) carrying a status column per
+        // weekday -- NOT one row per practice date.
+        PracticeReport: {
+          type: 'object',
+          description: 'Weekly practice participation report for a player',
+          properties: {
+            pid: {
+              $ref: '#/components/schemas/PlayerId'
+            },
+            week: {
+              type: 'integer',
+              description: 'NFL week number',
+              example: 18
+            },
+            season_year: {
+              type: 'integer',
+              description: 'Season year',
+              example: 2025
+            },
+            season_type: {
+              $ref: '#/components/schemas/SeasonTypeEnum'
+            },
+            nfl_week_id: {
+              type: 'string',
+              nullable: true,
+              description: 'Composite NFL week identifier',
+              example: '2025_REG_WEEK_18'
+            },
+            injury_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Injury description or body part; empty when none',
+              example: 'Neck'
+            },
+            monday_practice_status: {
+              $ref: '#/components/schemas/PracticeParticipationStatus'
+            },
+            tuesday_practice_status: {
+              $ref: '#/components/schemas/PracticeParticipationStatus'
+            },
+            wednesday_practice_status: {
+              $ref: '#/components/schemas/PracticeParticipationStatus'
+            },
+            thursday_practice_status: {
+              $ref: '#/components/schemas/PracticeParticipationStatus'
+            },
+            friday_practice_status: {
+              $ref: '#/components/schemas/PracticeParticipationStatus'
+            },
+            saturday_practice_status: {
+              $ref: '#/components/schemas/PracticeParticipationStatus'
+            },
+            sunday_practice_status: {
+              $ref: '#/components/schemas/PracticeParticipationStatus'
+            },
+            practice_status: {
+              $ref: '#/components/schemas/PracticeParticipationStatus'
+            },
+            roster_status: {
+              type: 'string',
+              nullable: true,
+              description: 'Roster status reported alongside the practice week',
+              example: 'INACTIVE'
+            },
+            game_designation: {
+              type: 'string',
+              nullable: true,
+              description: 'Game-status designation for the week',
+              example: 'QUESTIONABLE'
+            },
+            source_status: {
+              type: 'string',
+              nullable: true,
+              description: 'Status string as published by the source',
+              example: 'Inactive'
+            },
+            source: {
+              type: 'string',
+              nullable: true,
+              description: 'Source of the practice report',
+              example: 'rotowire'
+            }
+          },
+          required: [
+            'pid',
+            'week',
+            'season_year',
+            'season_type',
+            'nfl_week_id',
+            'injury_type',
+            'monday_practice_status',
+            'tuesday_practice_status',
+            'wednesday_practice_status',
+            'thursday_practice_status',
+            'friday_practice_status',
+            'saturday_practice_status',
+            'sunday_practice_status',
+            'practice_status',
+            'roster_status',
+            'game_designation',
+            'source_status',
+            'source'
+          ]
+        },
+        PracticeParticipationStatus: {
+          type: 'string',
+          nullable: true,
+          enum: ['FP', 'LP', 'DNP', null],
+          description:
+            'Practice participation: FP full, LP limited, DNP did not participate; null when not reported',
+          example: 'LP'
+        },
+        // Exactly the columns of the `transactions` table. Routes that join
+        // draft picks onto a transaction row use TransactionWithDraft below.
+        // Deliberately does NOT compose TimeContext: that carries `year` and
+        // `seas_type`, and this table has `season_year` and no season-type
+        // column at all.
         Transaction: {
           allOf: [
             {
               $ref: '#/components/schemas/LeagueTeamContext'
-            },
-            {
-              $ref: '#/components/schemas/TimeContext'
             },
             {
               type: 'object',
@@ -1743,10 +1858,21 @@ const options = {
                   description: 'Transaction type code',
                   example: 1
                 },
-                value: {
+                player_salary: {
                   type: 'integer',
-                  description: 'Transaction value/bid amount',
+                  nullable: true,
+                  description: 'Player salary at the time of the transaction',
                   example: 50
+                },
+                week: {
+                  type: 'integer',
+                  description: 'NFL week when the transaction occurred',
+                  example: 8
+                },
+                season_year: {
+                  type: 'integer',
+                  description: 'Season year',
+                  example: 2024
                 },
                 timestamp: {
                   $ref: '#/components/schemas/UnixTimestamp'
@@ -1758,7 +1884,17 @@ const options = {
                   example: null
                 }
               },
-              required: ['uid', 'userid', 'pid', 'type', 'timestamp']
+              required: [
+                'uid',
+                'userid',
+                'pid',
+                'type',
+                'player_salary',
+                'week',
+                'season_year',
+                'timestamp',
+                'waiverid'
+              ]
             }
           ]
         },
