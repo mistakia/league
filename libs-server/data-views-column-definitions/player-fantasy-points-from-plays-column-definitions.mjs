@@ -539,8 +539,23 @@ const generate_passing_scoring_inner = async (scoring_format) => {
   const py = scoring_format.passing_yards || 0
   const ptd = scoring_format.passing_touchdowns || 0
   const ints = scoring_format.passing_interceptions || 0
+  const pc = scoring_format.passing_completions || 0
 
-  return `COALESCE(pass_yds, 0) * ${py} + COALESCE(is_passing_touchdown::int, 0) * ${ptd} + COALESCE("is_interception"::int, 0) * ${ints}`
+  let sql = `COALESCE(pass_yds, 0) * ${py} + COALESCE(is_passing_touchdown::int, 0) * ${ptd} + COALESCE("is_interception"::int, 0) * ${ints}`
+
+  // A completion credited to the PASSER, off the same nfl_plays column the
+  // receiving generator reads for a reception. Appended only when scored, so a
+  // format carrying 0 emits byte-identical SQL -- which is every named format
+  // and 63 of the 65 production formats.
+  //
+  // This was missing entirely until 2026-08-05 while two production formats
+  // scored it at 0.50 and 0.20, so their from-plays points under-reported a
+  // 350-completion quarterback by up to 175 a season with nothing failing.
+  if (pc) {
+    sql += ` + COALESCE(is_completion::int, 0) * ${pc}`
+  }
+
+  return sql
 }
 
 const generate_passing_scoring_sql = async (scoring_format) =>
