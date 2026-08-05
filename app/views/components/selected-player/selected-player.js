@@ -24,8 +24,7 @@ import StackedMetric from '@components/stacked-metric'
 import { current_season, nfl_player_status_display_names } from '@constants'
 /* import SelectedPlayerTeamStats from '@components/selected-player-team-stats'
  * import SelectedPlayerTeamSituationSplits from '@components/selected-player-team-situation-splits'
- * import SelectedPlayerTeamPositionSplits from '@components/selected-player-team-position-splits'
- * import SelectedPlayerEfficiencyStats from '@components/selected-player-efficiency-stats' */
+ * import SelectedPlayerTeamPositionSplits from '@components/selected-player-team-position-splits' */
 import SelectedPlayerLineupImpact from '@components/selected-player-lineup-impact'
 import SelectedPlayerValue from '@components/selected-player-value'
 import SelectedPlayerGamelogs from '@components/selected-player-gamelogs'
@@ -415,7 +414,6 @@ export default function SelectedPlayer({
             <Tab>Schedule</Tab>
             <Tab>Projections</Tab>
             {/* <Tab>Team Splits</Tab> */}
-            {/* <Tab>Efficiency</Tab> */}
             <Tab>Practice</Tab>
             <Tab>Betting Markets</Tab>
             {is_logged_in && is_hosted_league && (
@@ -445,9 +443,6 @@ export default function SelectedPlayer({
               <SelectedPlayerTeamStats />
               <SelectedPlayerTeamSituationSplits />
               <SelectedPlayerTeamPositionSplits />
-              </TabPanel> */}
-          {/* <TabPanel value={6}>
-              <SelectedPlayerEfficiencyStats />
               </TabPanel> */}
           <TabPanel value={5}>
             <SelectedPlayerPractice />
