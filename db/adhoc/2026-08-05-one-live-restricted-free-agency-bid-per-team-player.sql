@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-05 against league_production
 --
 -- One live restricted free agency bid per (league, season, team, player).
 --

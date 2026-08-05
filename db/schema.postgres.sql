@@ -77,6 +77,7 @@ DROP INDEX IF EXISTS public.roster_asset_holding_team_period_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_player_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_pick_unique_idx;
 DROP INDEX IF EXISTS public.roster_asset_holding_asset_lookup_idx;
+DROP INDEX IF EXISTS public.restricted_free_agency_bids_one_live_per_team_player;
 DROP INDEX IF EXISTS public.players_status_pid_observed_at_key;
 DROP INDEX IF EXISTS public.player_underdog_id_unique;
 DROP INDEX IF EXISTS public.player_nfl_player_id_unique;
@@ -44413,6 +44414,13 @@ CREATE INDEX projections_index_y2026_nfl_week_id_idx ON public.projections_index
 --
 
 CREATE INDEX projections_index_y2026_pid_idx ON public.projections_index_y2026 USING btree (pid);
+
+
+--
+-- Name: restricted_free_agency_bids_one_live_per_team_player; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX restricted_free_agency_bids_one_live_per_team_player ON public.restricted_free_agency_bids USING btree (lid, year, tid, pid) WHERE ((cancelled IS NULL) AND (processed IS NULL));
 
 
 --
