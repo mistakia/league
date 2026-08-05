@@ -29,6 +29,29 @@ const KEEPALIVE_STACK_LIMIT = 16000
 const CHUNK_RELOAD_KEY = 'xo_chunk_reload_at'
 const CHUNK_RELOAD_WINDOW_MS = 60 * 1000
 
+// Browser-extension scripts inject into the user's page and share our window,
+// so their unhandled rejections reach our 'unhandledrejection' listener and
+// were shipped as league-client log_error signals — e.g. MetaMask's inpage.js
+// rejecting "Failed to connect to MetaMask" when the wallet is locked
+// (signals #124239, #124431, same fingerprint 546a1cde). Nothing in that class
+// is ours to fix and no stack we symbolicate can recover it.
+//
+// The test mirrors the window.onerror opaque-cross-origin guard below: webpack
+// serves the SPA same-origin from publicPath '/dist/', so a stack whose frames
+// are ALL extension-scheme cannot be our bundle. Requiring every URL-bearing
+// frame to be an extension (rather than just the topmost) keeps an app error
+// that merely calls into an extension reportable.
+const EXTENSION_SCHEME_RE =
+  /\b(?:chrome-extension|moz-extension|safari-extension|safari-web-extension|ms-browser-extension):\/\//
+
+const is_extension_origin_error = (err) => {
+  const stack = err?.stack
+  if (typeof stack !== 'string') return false
+  const frame_urls = stack.match(/\b[a-z][a-z0-9+.-]*:\/\/\S+/gi)
+  if (!frame_urls || !frame_urls.length) return false
+  return frame_urls.every((url) => EXTENSION_SCHEME_RE.test(url))
+}
+
 const is_chunk_load_error = (err) => {
   if (!err) return false
   if (err.name === 'ChunkLoadError') return true
@@ -159,6 +182,8 @@ export const init_error_reporting = () => {
         : new Error(
             typeof reason === 'string' ? reason : 'Unhandled promise rejection'
           )
+    // An injected extension's rejection lands on our window but is not ours.
+    if (is_extension_origin_error(error)) return
     post_to_league_api(error, { handler: 'unhandledrejection' })
   })
 }
