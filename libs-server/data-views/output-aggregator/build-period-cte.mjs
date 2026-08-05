@@ -82,6 +82,9 @@ const SOURCES = {
   // player_fantasy_points_from_plays where a play credits QB + receiver
   // simultaneously and a COALESCE(pid_columns) shape would drop one
   // attribution.
+  //
+  // A role may additionally declare `game_aggregates` -- see the per-game stage
+  // in build_role_union_period_cte below.
   plays_role_union: {
     table: 'nfl_plays',
     team_col: null,
@@ -108,6 +111,7 @@ export const build_period_cte = ({
   measure_expr,
   measure_predicate,
   role_attributions,
+  game_conditional_expr,
   pid_columns,
   apply_filters,
   period,
@@ -121,6 +125,7 @@ export const build_period_cte = ({
     return build_role_union_period_cte({
       measure_predicate,
       role_attributions,
+      game_conditional_expr,
       apply_filters,
       period,
       query_context,
@@ -142,9 +147,31 @@ export const build_period_cte = ({
   })
 }
 
+// The per-game stage. `role_attributions` emits one row per PLAY, so grouping
+// it straight to period grain can only express measures that are a plain SUM of
+// per-play values. Every non-linear scoring rule is a condition on a PLAYER-GAME
+// aggregate -- a 300-yard passing milestone, a DST points-against threshold --
+// and there is no grain at which the outer aggregate can evaluate one.
+//
+// A role declares `game_aggregates: { <alias>: <per_play_expr> }`; the column
+// def declares `game_conditional_expr`, a SQL expression over those aliases
+// evaluated ONCE per (pid, esbid) and added to the summed per-play points. So
+// the shape becomes: sum per play -> group per game, evaluate conditions ->
+// group to period grain.
+//
+// The stage is emitted ONLY when something declares an aggregate or a
+// conditional. A column with neither gets the previous single-level aggregate
+// character for character, which is what keeps the 248 goldens from moving --
+// and is also correct on the merits, since an extra HashAggregate over a scan of
+// nfl_plays buys nothing for a measure that is linear in the plays.
+//
+// The stage carries the `role_union` alias so the nfl_games join and the
+// career_year / career_game joins below reference it unchanged; the inner union
+// takes `role_plays`.
 const build_role_union_period_cte = ({
   measure_predicate,
   role_attributions,
+  game_conditional_expr,
   apply_filters,
   period,
   query_context,
@@ -163,12 +190,27 @@ const build_role_union_period_cte = ({
       `measure_source 'plays_role_union' requires role_attributions`
     )
   }
+  // Union of every alias any role declares. Each arm must project all of them
+  // in the same order for the UNION ALL to be compatible, so a role that
+  // sources none of a given aggregate contributes a literal 0 -- which is also
+  // the arithmetically correct contribution to the per-game sum.
+  const game_aggregate_aliases = [
+    ...new Set(
+      role_attributions.flatMap(({ game_aggregates }) =>
+        Object.keys(game_aggregates || {})
+      )
+    )
+  ]
+  const has_game_stage = Boolean(
+    game_aggregate_aliases.length || game_conditional_expr
+  )
   const union_subs = role_attributions.map(
     ({
       pid_column,
       pid_expr,
       apply_joins,
-      measure_expr: role_measure_expr
+      measure_expr: role_measure_expr,
+      game_aggregates
     }) => {
       // A role normally names a pid column on the source table. A role whose
       // player is not identified by any column on nfl_plays (the fumble roles,
@@ -182,6 +224,10 @@ const build_role_union_period_cte = ({
         .select(db.raw(`${pid_reference} AS pid`))
         .select(`${source_table}.esbid`)
         .select(db.raw(`${role_measure_expr} AS pts`))
+      for (const alias of game_aggregate_aliases) {
+        const expr = (game_aggregates && game_aggregates[alias]) || '0'
+        sub.select(db.raw(`${expr} AS ${alias}`))
+      }
       if (apply_joins) apply_joins({ query: sub, plays_table: source_table })
       sub.whereRaw(`${pid_reference} IS NOT NULL`)
       if (measure_predicate) sub.whereRaw(measure_predicate)
@@ -206,15 +252,34 @@ const build_role_union_period_cte = ({
   const inner_union = union_subs
     .slice(1)
     .reduce((acc, sub) => acc.unionAll(sub), union_subs[0])
+  let outer_source = inner_union
+  if (has_game_stage) {
+    outer_source = db
+      .from(inner_union.as('role_plays'))
+      .select('role_plays.pid AS pid')
+      .select('role_plays.esbid AS esbid')
+      .select(db.raw('SUM(role_plays.pts) AS pts'))
+      .groupByRaw('"role_plays"."pid"')
+      .groupByRaw('"role_plays"."esbid"')
+    for (const alias of game_aggregate_aliases) {
+      outer_source.select(db.raw(`SUM(role_plays.${alias}) AS ${alias}`))
+    }
+  }
+  // A conditional fires once per player-game, so it is added INSIDE the outer
+  // SUM rather than beside it -- at season grain that sums one milestone per
+  // qualifying game, which is the whole point of the stage.
+  const measure_sql = game_conditional_expr
+    ? `SUM(role_union.pts + (${game_conditional_expr}))`
+    : 'SUM(role_union.pts)'
   const include_year =
     !is_aggregate || query_context.row_axes.includes('year') || force_year_grain
   const outer = db
-    .from(inner_union.as('role_union'))
+    .from(outer_source.as('role_union'))
     .innerJoin('nfl_games', 'nfl_games.esbid', 'role_union.esbid')
     .select('role_union.pid AS pid')
-    .select(db.raw('SUM(role_union.pts) AS measure_total'))
+    .select(db.raw(`${measure_sql} AS measure_total`))
     .groupByRaw('"role_union"."pid"')
-    .havingRaw('SUM(role_union.pts) > 0')
+    .havingRaw(`${measure_sql} > 0`)
   if (include_year) {
     outer
       .select('nfl_games.season_year as year')
@@ -531,9 +596,13 @@ export const add_period_cte = async ({
     params,
     identity_id
   })
+  const game_conditional_expr = column_def.game_conditional_expr
+    ? await column_def.game_conditional_expr({ params, identity_id })
+    : null
   const sub = build_period_cte({
     measure_source: column_def.measure_source,
     measure_expr: null,
+    game_conditional_expr,
     measure_predicate: column_def.measure_predicate
       ? column_def.measure_predicate({ params, identity_id })
       : null,
