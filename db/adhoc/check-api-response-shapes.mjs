@@ -683,11 +683,45 @@ const run_gate_1 = () => {
   return findings
 }
 
+// Which operations use each named component schema as their 200 response. A
+// schema shared by a covered route and an uncovered one changes what a finding
+// MEANS: the property may be absent from the table and still genuinely emitted
+// by the other route, in which case the fix is to split the schema, not to
+// delete the property.
+//
+// This is not hypothetical and it is not cheap. `WaiverClaim` was the 200 of
+// both `GET /waivers/report` (covered, a wholesale read) and `POST /waivers`
+// (uncovered — it sends a constructed object that adds `release`). Acting on an
+// unannotated finding, a repair pass deleted `release` from the schema, which
+// left `POST /waivers` documented as not emitting a field it does emit and
+// contradicting its own 200 example. The finding was right about the covered
+// route and misleading about the schema, and nothing in the output said so.
+const build_schema_usage = () => {
+  const usage = new Map()
+  for (const [route_path, methods] of Object.entries(specs.paths || {})) {
+    for (const [method, operation] of Object.entries(methods)) {
+      if (!HTTP_METHODS.includes(method)) continue
+      const { schema } = success_schema(operation)
+      if (!schema) continue
+      const name =
+        (schema.$ref && schema.$ref.split('/').pop()) ||
+        (schema.items &&
+          schema.items.$ref &&
+          schema.items.$ref.split('/').pop())
+      if (!name) continue
+      if (!usage.has(name)) usage.set(name, [])
+      usage.get(name).push(`${method.toUpperCase()} ${route_path}`)
+    }
+  }
+  return usage
+}
+
 const run_gate_2 = ({ tables, tier_of }) => {
   const findings = []
   const covered = []
   const uncovered = []
 
+  const schema_usage = build_schema_usage()
   const files = walk_files(routes_dir)
 
   for (const file of files) {
@@ -802,15 +836,21 @@ const run_gate_2 = ({ tables, tier_of }) => {
         columns: columns.length
       })
 
+      const this_operation = `${op.method.toUpperCase()} ${op.path}`
+      const other_operations = (schema_usage.get(schema_name) || []).filter(
+        (entry) => entry !== this_operation
+      )
+
       for (const name of documented_but_absent) {
         findings.push({
           gate: 2,
           kind: 'documented_property_not_a_column',
-          location: `${relative} ${op.method.toUpperCase()} ${op.path}`,
+          location: `${relative} ${this_operation}`,
           schema_name,
           property: name,
           table,
           tier,
+          shared_with: other_operations,
           detail: `${schema_name}.${name} is documented on the response, but '${table}' has no such column — the handler echoes the row wholesale, so this field is never emitted`
         })
       }
@@ -1064,6 +1104,17 @@ const main = () => {
       console.log(`  GATE ${finding.gate} ${tier}${finding.kind}`)
       console.log(`    ${finding.location}`)
       console.log(`    ${finding.detail}`)
+      if (finding.shared_with && finding.shared_with.length) {
+        console.log(
+          `    DO NOT JUST DELETE IT — ${finding.schema_name} is also the 200 of ${finding.shared_with.join(', ')},`
+        )
+        console.log(
+          '    which this gate does not cover. Check what that route actually sends first; if it emits'
+        )
+        console.log(
+          '    this property, split the schema rather than removing the property from both.'
+        )
+      }
     }
   }
 

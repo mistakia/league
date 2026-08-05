@@ -246,7 +246,7 @@ router.get('/?', async (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/WaiverClaim'
+ *               $ref: '#/components/schemas/SubmittedWaiverClaim'
  *             examples:
  *               successful_claim:
  *                 value:

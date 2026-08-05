@@ -1010,6 +1010,29 @@ const options = {
             'cancelled'
           ]
         },
+        SubmittedWaiverClaim: {
+          allOf: [
+            {
+              $ref: '#/components/schemas/WaiverClaim'
+            },
+            {
+              type: 'object',
+              description:
+                'The submit response echoes the inserted waivers row and adds the conditional releases, which live in waiver_releases rather than on the row.',
+              properties: {
+                release: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/PlayerId'
+                  },
+                  description:
+                    'Player IDs to release if the claim is successful',
+                  example: ['JORD-LOVE-001990']
+                }
+              }
+            }
+          ]
+        },
         WaiverOrderRequest: {
           type: 'object',
           properties: {
