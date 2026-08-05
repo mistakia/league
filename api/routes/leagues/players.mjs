@@ -58,7 +58,7 @@ if (process.env.NODE_ENV !== 'test') {
  *                   - $ref: '#/components/schemas/Player'
  *                   - type: object
  *                     properties:
- *                       bid:
+ *                       bid_amount:
  *                         type: number
  *                         description: "User's restricted free agency bid amount (only present if authenticated and bid exists)"
  *                         example: 25
@@ -111,7 +111,7 @@ if (process.env.NODE_ENV !== 'test') {
  *                     roster_status: 'ACTIVE'
  *                     game_designation: null
  *                     date_of_birth: '1995-09-17'
- *                     bid: 45
+ *                     bid_amount: 45
  *                     restricted_free_agency_conditional_releases:
  *                       - 'JAKO-MEYE-017624'
  *                       - 'DANT-JONE-018140'
@@ -146,7 +146,7 @@ router.get('/?', async (req, res) => {
       })
 
       if (bids.length) {
-        const bidMap = new Map(bids.map((b) => [b.pid, b.bid]))
+        const bidMap = new Map(bids.map((b) => [b.pid, b.bid_amount]))
         const releases_map = new Map(
           bids.map((b) => [
             b.pid,
@@ -157,7 +157,7 @@ router.get('/?', async (req, res) => {
           ...p,
           // `??`, not `||` -- a $0 bid is a real bid, and coalescing on falsiness
           // strips it from the payload so the client reads the player as unbid.
-          bid: bidMap.get(p.pid) ?? undefined,
+          bid_amount: bidMap.get(p.pid) ?? undefined,
           restricted_free_agency_conditional_releases: releases_map.get(p.pid)
         }))
       }

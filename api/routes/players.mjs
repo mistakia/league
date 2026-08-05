@@ -93,7 +93,7 @@ if (process.env.NODE_ENV !== 'test') {
  *                   - $ref: '#/components/schemas/Player'
  *                   - type: object
  *                     properties:
- *                       bid:
+ *                       bid_amount:
  *                         type: number
  *                         nullable: true
  *                         description: User's current bid on player in restricted free agency (only present when authenticated and bidding is active)
@@ -124,7 +124,7 @@ if (process.env.NODE_ENV !== 'test') {
  *                     college: "Texas Tech"
  *                     roster_status: "ACTIVE"
  *                     game_designation: null
- *                     bid: 200
+ *                     bid_amount: 200
  *                     restricted_free_agency_conditional_releases: []
  *               specific_player:
  *                 summary: Specific player by ID
@@ -190,7 +190,7 @@ router.post('/?', async (req, res) => {
         leagueId
       })
       if (bids.length) {
-        const bid_map = new Map(bids.map((b) => [b.pid, b.bid]))
+        const bid_map = new Map(bids.map((b) => [b.pid, b.bid_amount]))
         const releases_map = new Map(
           bids.map((b) => [
             b.pid,
@@ -199,7 +199,7 @@ router.post('/?', async (req, res) => {
         )
         players = players.map((p) => ({
           ...p,
-          bid: bid_map.get(p.pid),
+          bid_amount: bid_map.get(p.pid),
           restricted_free_agency_conditional_releases: releases_map.get(p.pid)
         }))
       }

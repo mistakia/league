@@ -39,7 +39,7 @@ const router = express.Router({ mergeParams: true })
  *                   - $ref: '#/components/schemas/Player'
  *                   - type: object
  *                     properties:
- *                       bid:
+ *                       bid_amount:
  *                         type: integer
  *                         description: Restricted free agency bid (if applicable)
  *                         example: 50
@@ -89,7 +89,7 @@ router.get('/?', async (req, res) => {
             const bid = bids.find((b) => b.pid === p.pid)
             return {
               ...p,
-              bid: bid?.bid,
+              bid_amount: bid?.bid_amount,
               restricted_free_agency_conditional_releases:
                 bid?.restricted_free_agency_conditional_releases || []
             }
@@ -125,7 +125,7 @@ router.get('/?', async (req, res) => {
           const bid = bids.find((b) => b.pid === p.pid)
           return {
             ...p,
-            bid: bid?.bid,
+            bid_amount: bid?.bid_amount,
             restricted_free_agency_conditional_releases:
               bid?.restricted_free_agency_conditional_releases || []
           }
