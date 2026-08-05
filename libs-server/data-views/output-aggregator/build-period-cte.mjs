@@ -236,28 +236,37 @@ const build_role_union_period_cte = ({
   // career_year games while the numerator sums all-time, inflating the rate.
   const career_year = params && params.career_year
   const career_game = params && params.career_game
-  if (career_year || career_game) {
+  // The two params live on DIFFERENT tables and need their own joins:
+  // career_year is a season-grain column on player_seasonlogs, career_game is a
+  // game-grain column on player_gamelogs. Joining player_seasonlogs for both and
+  // filtering `player_seasonlogs.career_game` raises 42703 -- that column has
+  // never existed there. Matches add-player-stats-play-by-play-with-statement.
+  if (career_year) {
     outer.innerJoin('player_seasonlogs', function () {
       this.on('player_seasonlogs.pid', '=', 'role_union.pid')
       this.andOn('player_seasonlogs.season_year', '=', 'nfl_games.season_year')
       this.andOn('player_seasonlogs.season_type', '=', 'nfl_games.season_type')
     })
-    if (career_year) {
-      const arr = Array.isArray(career_year)
-        ? career_year
-        : [career_year, career_year]
-      outer.whereBetween(
-        'player_seasonlogs.career_year',
-        normalize_career_year_range(arr)
-      )
-    }
-    if (career_game) {
-      const arr = Array.isArray(career_game)
-        ? career_game
-        : [career_game, career_game]
-      const [lo, hi] = normalize_career_year_range(arr)
-      outer.whereBetween('player_seasonlogs.career_game', [lo, hi])
-    }
+    const arr = Array.isArray(career_year)
+      ? career_year
+      : [career_year, career_year]
+    outer.whereBetween(
+      'player_seasonlogs.career_year',
+      normalize_career_year_range(arr)
+    )
+  }
+  if (career_game) {
+    outer.innerJoin('player_gamelogs', function () {
+      this.on('player_gamelogs.pid', '=', 'role_union.pid')
+      this.andOn('player_gamelogs.esbid', '=', 'role_union.esbid')
+    })
+    const arr = Array.isArray(career_game)
+      ? career_game
+      : [career_game, career_game]
+    outer.whereBetween(
+      'player_gamelogs.career_game',
+      normalize_career_year_range(arr)
+    )
   }
   return outer
 }
