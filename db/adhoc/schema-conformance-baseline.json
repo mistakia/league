@@ -1,7 +1,7 @@
 {
   "note": "Checked-in ratchet baseline for db/adhoc/audit-schema-conformance.mjs, enforced by db/adhoc/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/adhoc/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-05T05:18:16.186Z",
-  "count": 95,
+  "generated_at": "2026-08-05T06:21:03.700Z",
+  "count": 93,
   "violations": [
     {
       "table": "config",
@@ -357,16 +357,6 @@
       "table": "pff_player_seasonlogs",
       "column": "position",
       "rule": "reserved_word"
-    },
-    {
-      "table": "pff_team_gamelogs",
-      "column": "ties",
-      "rule": "shorthand"
-    },
-    {
-      "table": "pff_team_gamelogs",
-      "column": "wins",
-      "rule": "shorthand"
     },
     {
       "table": "pff_unresolved_players",
