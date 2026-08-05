@@ -165,7 +165,10 @@ export const job_types = {
   // daily import opened, and would flap the ledger's one-cadence-per-source
   // between the two schedules.
   CRAWL_SLEEPER_EXTERNAL_LEAGUE_GRAPH: 134,
-  CLOSE_EXPIRED_ROOKIE_DRAFTS: 135
+  CLOSE_EXPIRED_ROOKIE_DRAFTS: 135,
+
+  IMPORT_KEEPTRADECUT_LIQUIDITY: 136,
+  AUDIT_KEEPTRADECUT_LIQUIDITY_COVERAGE: 137
 }
 
 export const job_title_by_id = {
@@ -303,5 +306,7 @@ export const job_title_by_id = {
   132: 'Generate DST Market Projections',
   133: 'Refresh Roster Asset Lineage',
   134: 'Crawl Sleeper External League Graph',
-  135: 'Close Expired Rookie Drafts'
+  135: 'Close Expired Rookie Drafts',
+  136: 'Import KeepTradeCut Liquidity (recovery)',
+  137: 'Audit KeepTradeCut Liquidity Coverage'
 }

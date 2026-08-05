@@ -5,7 +5,7 @@ import * as chai from 'chai'
 import {
   has_liquidity_data,
   build_liquidity_inserts
-} from '#scripts/import-keeptradecut.mjs'
+} from '#libs-server/keeptradecut-liquidity.mjs'
 
 chai.should()
 const expect = chai.expect

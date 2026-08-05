@@ -1,6 +1,3 @@
-import fs from 'fs/promises'
-import path from 'path'
-
 import { JSDOM } from 'jsdom'
 import dayjs from 'dayjs'
 import debug from 'debug'
@@ -16,7 +13,12 @@ import {
   report_job,
   fetch_with_retry,
   batch_insert,
-  throw_if_shortfall
+  throw_if_shortfall,
+  fetch_dynasty_rankings_players,
+  has_liquidity_data,
+  write_zero_liquidity_payload_summary,
+  build_liquidity_inserts,
+  liquidity_observed_at
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -116,130 +118,6 @@ export const create_valuation_accumulator = ({ pid, merge_columns }) => {
   }
 
   return { add, complete_rows }
-}
-
-// KTC publishes rawLiquidity/stdLiquidity/tradeCount inline on the dynasty-rankings
-// page, for every player, on every request. Intermittently — 15 of the first 70
-// collected days — it serves that page with all three fields zeroed for every player,
-// which is indistinguishable, row by row, from a player KTC genuinely reports no
-// trades for. A stored zero must mean "KTC reported zero", never "we did not
-// collect it", so a wholly-zeroed payload is treated as uncollected and no liquidity
-// rows are written for that run.
-export const has_liquidity_data = (players_array) =>
-  (players_array || []).some(
-    (player) =>
-      Number(player?.oneQBValues?.tradeCount) > 0 ||
-      Number(player?.superflexValues?.tradeCount) > 0
-  )
-
-// Summarise a zeroed liquidity payload so the NEXT occurrence is diagnosable
-// rather than merely detectable. has_liquidity_data tells us the payload was
-// uncollectable; it cannot tell us WHY, and the leading hypothesis (KTC's
-// liquidity recompute is mid-flight when the 04:30 ET cron fires) is inference,
-// not evidence. The distinguishing question is whether the fields were present
-// and zero, or absent entirely -- a recompute-in-flight should look different
-// from a schema change or a stripped response. Counting the shapes separates
-// them; the sample carries a handful of verbatim value objects for the case
-// where neither explanation fits.
-export const summarize_zero_liquidity_payload = (
-  players_array,
-  sample_size = 5
-) => {
-  const players = players_array || []
-  // Buckets are mutually exclusive and must describe what was OBSERVED, not what
-  // we expect. all_three_zero is deliberately distinct from present_nonzero:
-  // KTC legitimately serves rawLiquidity=0 alongside a nonzero stdLiquidity and
-  // tradeCount, so collapsing every finite triple into a single "zero" bucket
-  // would record a claim the data does not support.
-  const shape_counts = {
-    missing_values_object: 0,
-    fields_absent: 0,
-    all_three_zero: 0,
-    present_nonzero: 0,
-    fields_non_numeric: 0
-  }
-
-  for (const player of players) {
-    for (const values of [player?.oneQBValues, player?.superflexValues]) {
-      if (!values) {
-        shape_counts.missing_values_object++
-        continue
-      }
-      const has_all_keys =
-        'rawLiquidity' in values &&
-        'stdLiquidity' in values &&
-        'tradeCount' in values
-      if (!has_all_keys) {
-        shape_counts.fields_absent++
-        continue
-      }
-      const numbers = [
-        Number(values.rawLiquidity),
-        Number(values.stdLiquidity),
-        Number(values.tradeCount)
-      ]
-      if (numbers.some((n) => !Number.isFinite(n))) {
-        shape_counts.fields_non_numeric++
-      } else if (numbers.every((n) => n === 0)) {
-        shape_counts.all_three_zero++
-      } else {
-        shape_counts.present_nonzero++
-      }
-    }
-  }
-
-  return {
-    captured_at: new Date().toISOString(),
-    player_count: players.length,
-    shape_counts,
-    sample: players.slice(0, sample_size).map((player) => ({
-      playerID: player?.playerID,
-      playerName: player?.playerName,
-      oneQBValues: player?.oneQBValues,
-      superflexValues: player?.superflexValues
-    }))
-  }
-}
-
-export const build_liquidity_inserts = ({
-  pid,
-  keeptradecut_player,
-  observed_at
-}) => {
-  const rows = []
-  const by_format = [
-    [false, keeptradecut_player.oneQBValues],
-    [true, keeptradecut_player.superflexValues]
-  ]
-
-  for (const [is_superflex, values] of by_format) {
-    if (!values) continue
-
-    const raw_liquidity = Number(values.rawLiquidity)
-    const std_liquidity = Number(values.stdLiquidity)
-    const trade_count = Number(values.tradeCount)
-
-    // absent fields arrive as undefined; writing them as 0 would fabricate a
-    // measurement, so skip the row entirely
-    if (
-      !Number.isFinite(raw_liquidity) ||
-      !Number.isFinite(std_liquidity) ||
-      !Number.isFinite(trade_count)
-    ) {
-      continue
-    }
-
-    rows.push({
-      pid,
-      is_superflex,
-      observed_at,
-      raw_liquidity,
-      std_liquidity,
-      trade_count
-    })
-  }
-
-  return rows
 }
 
 // The dynasty-rankings PAGE and the dynasty-rankings POST endpoint are two
@@ -345,16 +223,7 @@ export const compute_freshness_shortfalls = async ({
 // health -- unlike pinnacle.mjs and the plays/matchup charting importers,
 // which already pass use_proxy: true.
 const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
-  const dynasty_rankings_html = await fetch_with_retry({
-    url: 'https://keeptradecut.com/dynasty-rankings',
-    response_type: 'text',
-    use_proxy: true
-  })
-  const dynasty_rankings_dom = new JSDOM(dynasty_rankings_html, {
-    runScripts: 'dangerously'
-  })
-
-  const { playersArray } = dynasty_rankings_dom.window
+  const playersArray = await fetch_dynasty_rankings_players()
   const players_index = {}
   for (const player of playersArray) {
     players_index[player.playerID] = player
@@ -365,32 +234,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
     log(
       'keeptradecut published zero liquidity for every player; skipping liquidity writes for this run'
     )
-    // Preserve the offending payload. The shortfall below makes the skip
-    // DETECTABLE; without this it is not DIAGNOSABLE -- the page is fetched
-    // fresh each run, so by the time anyone looks the evidence is gone and the
-    // cause stays a hypothesis. Best-effort: a forensics write must never be
-    // able to fail the import it is describing.
-    try {
-      // Beside the league logs, not /tmp: this evidence must survive a reboot to
-      // be worth writing, and the next occurrence may be weeks out. One small
-      // JSON per zeroed run; not matched by the *.log logrotate glob, so it is
-      // not rotated away before anyone reads it.
-      const forensics_dir =
-        process.env.LEAGUE_FORENSICS_DIR ||
-        '/var/log/league/keeptradecut-zero-liquidity'
-      await fs.mkdir(forensics_dir, { recursive: true })
-      const forensics_path = path.join(
-        forensics_dir,
-        `${dayjs().format('YYYY-MM-DD-HHmmss')}.json`
-      )
-      await fs.writeFile(
-        forensics_path,
-        JSON.stringify(summarize_zero_liquidity_payload(playersArray), null, 2)
-      )
-      log(`zero-liquidity payload summary written to ${forensics_path}`)
-    } catch (err) {
-      log(`failed to persist zero-liquidity payload summary: ${err.message}`)
-    }
+    await write_zero_liquidity_payload_summary(playersArray)
   }
 
   const keeptradecut_config = await get_keeptradecut_config()
@@ -405,7 +249,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
   log(`Processing ${data.length} players`)
 
-  const liquidity_observed_at = dayjs().startOf('day').toDate()
+  const observed_at = liquidity_observed_at()
 
   let value_less_entries_skipped = 0
   let unresolvable_missing_page_records = 0
@@ -661,7 +505,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       const liquidity_inserts = build_liquidity_inserts({
         pid,
         keeptradecut_player,
-        observed_at: liquidity_observed_at
+        observed_at
       })
 
       log(
@@ -717,7 +561,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
   if (!liquidity_collected) {
     shortfalls.push(
-      `liquidity: keeptradecut published zero liquidity for all ${playersArray.length} players; no rows written for observed_at=${dayjs(liquidity_observed_at).format('YYYY-MM-DD')}`
+      `liquidity: keeptradecut published zero liquidity for all ${playersArray.length} players; no rows written for observed_at=${dayjs(observed_at).format('YYYY-MM-DD')}`
     )
   }
 
@@ -752,7 +596,12 @@ const main = async () => {
     error
   })
 
-  process.exit()
+  // Carry the outcome in the exit code, not only in the jobs table and the runs
+  // ledger. A bare process.exit() exits 0 even when throw_if_shortfall threw, so
+  // a zeroed-liquidity run was indistinguishable from a clean one to anything
+  // reading the exit status -- the "diligent error REPORTING hides a failed run"
+  // shape from user:guideline/surface-pipeline-failures.md.
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

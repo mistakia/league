@@ -34,6 +34,16 @@
 ## Every day at 4:30AM
 30 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-league-team-player-seasonlogs.mjs --all >> /var/log/league/league-generate-league-team-player-seasonlogs.log 2>&1
 
+## Every day at 9:00AM -- coverage oracle for keeptradecut_liquidity. That table
+## is collected once per calendar day and read by nothing, so a sustained
+## collection loss has no other surface: the daily importer's pipeline_failure
+## auto-resolves on the next morning's clean run, clearing the queue while the
+## data gap persists. Grades through YESTERDAY only, so both liquidity recovery
+## slots (12:30 and 20:30, league-imports.cron) have already had their chance at
+## every day it counts. Fires only on 2+ CONSECUTIVE missing days -- a single
+## missing day is what the recovery slots exist to absorb.
+0 9 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/audit-keeptradecut-liquidity-coverage.mjs >> /var/log/league/audit-keeptradecut-liquidity-coverage.log 2>&1
+
 ## Every Monday at 5:00AM (with optimal-lineup pass)
 0 5 * * 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/generate-league-team-player-seasonlogs.mjs --all --with-optimal >> /var/log/league/league-generate-league-team-player-seasonlogs-with-optimal.log 2>&1
 

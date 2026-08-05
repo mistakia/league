@@ -97,6 +97,23 @@ JOB_PROJECT=league
 ## At 4:30AM Everyday
 30 4 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-keeptradecut.mjs >> /var/log/league/import-keeptradecut.log 2>&1
 
+## Liquidity recovery, 12:30PM and 8:30PM ET daily. KTC intermittently serves an
+## all-zero liquidity payload at the 04:30 slot (~16 of the first 72 collected
+## days); the daily importer correctly refuses to write it, and until these lines
+## existed that day's liquidity was lost outright. Each run no-ops when the day
+## already has rows, so the cost on a healthy day is one page fetch.
+##
+## Deliberately OUTSIDE the 04:00-05:45 ET chain: keeptradecut_liquidity has no
+## consumers, so these carry no ordering constraint, and the one measured
+## recovery (2026-07-30) only bounds the zeroed window as 04:30-21:54 -- two
+## widely-spaced slots cover it and record which one recovered, which is the
+## measurement of that window.
+##
+## Separate script, not a flag on import-keeptradecut.mjs: it reports under its
+## own job_type so its failures cannot auto-close the daily importer's signal.
+30 12 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-keeptradecut-liquidity.mjs >> /var/log/league/import-keeptradecut-liquidity.log 2>&1
+30 20 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-keeptradecut-liquidity.mjs >> /var/log/league/import-keeptradecut-liquidity.log 2>&1
+
 ## Weekly --full run at 8:00AM ET on Wednesday -- outside the 04:00-05:45 ET
 ## window the daily KTC chain and adjacent maintenance jobs occupy. This is the
 ## only path that writes position_rank/overall_rank; RANK_STALENESS_THRESHOLD_HOURS
