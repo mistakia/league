@@ -180,6 +180,16 @@ Later stages attach `data_view_options`, `week_range`, `measure_batches`, `joine
 
 **An output aggregator.** One file under `output-aggregator/` implementing the five-member interface. Declare `consumes_params` exhaustively — enumerate every param that changes the CTE's contents, not just the ones that feel significant. Register the `(period, aggregation)` tuples in `output-aggregator-registry.mjs`.
 
+## Params that change caching but not SQL
+
+A param can be inert in the emitted SQL and still change behavior, because cache TTL is resolved on a separate path from query construction. `params.week` is the live instance.
+
+`libs-server/data-views/cache-info-utils.mjs` branches the TTL on the requested weeks: no weeks means current data and a short TTL, all-past weeks means historical and a long one. Meanwhile `libs-server/data-views/get-cache-info-for-fields-from-plays.mjs` extracts `week` and then ignores it, carrying an explicit `// TODO factor in week`.
+
+The consequence for anyone debugging: dropping `week` from a request can emit byte-identical SQL and still land on a different redis key lifetime. A golden fixture comparison cannot see it, and neither can `EXPLAIN`. When a data fix appears not to have taken effect, check the TTL tier before concluding the emitter is wrong.
+
+This is also the reason `consumes_params` on an output-aggregator plugin is a different list from the params a column's cache info reads. The two are resolved independently and neither implies the other.
+
 ## Gates
 
 - `test/libs-server.data-view-queries.mjs` — 247 golden fixtures under `test/data-view-queries/`, compared as generated SQL. The primary regression gate.
