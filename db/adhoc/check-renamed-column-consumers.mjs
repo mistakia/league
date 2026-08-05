@@ -72,17 +72,32 @@
 // Gate 2 fails only on findings no adjudication covers.
 //
 // ACCEPTANCE TEST -- a gate is worthless unless it goes red at the pre-fix
-// revision, so this one has a named one. From a worktree at `72346e579`:
+// revision, so this one has a named one, and the full cycle was VERIFIED on
+// 2026-08-05 rather than merely asserted. In a worktree at `42699c774^` (which
+// carries this gate and its adjudications but not the fix):
 //
 //   node db/adhoc/check-renamed-column-consumers.mjs --gate 2 \
-//     --base 72346e579^ --unadjudicated
+//     --base 62ca45544 --unadjudicated
 //
-// must report `total` on `scripts/process-projections-for-league-format.mjs`.
-// Note the file contains no occurrence of the string `total` anywhere -- it is
-// reachable only because the anchor is the table, which is the whole argument
-// for the redesign. Removing an adjudication must make its sites reappear;
-// that is the negative control, and it is the only thing distinguishing "no
-// findings" from "cannot see findings".
+// reports exactly ONE unadjudicated finding -- `total` on
+// `scripts/process-projections-for-league-format.mjs:158` -- and exits 1. The
+// same command at `42699c774` or later reports none and exits 0. Same gate, same
+// adjudication file, same base; the only variable is the fix.
+//
+// Note the flagged file contains no occurrence of the string `total` anywhere.
+// It is reachable only because the anchor is the table, which is the whole
+// argument for the redesign: no name-anchored scan of that file could have found
+// it, and the stoplist version returned 129 findings there without naming it.
+//
+// The fix (`42699c774`) added an explicit projection, so the site left the
+// candidate set entirely rather than needing an adjudication -- which is the
+// right end state, and worth knowing before you go looking for its entry.
+//
+// NEGATIVE CONTROL, equally required: remove an adjudication entry and confirm
+// its sites reappear. Verified twice -- deleting `teams.cap` took the gate from
+// 1 finding to 49, and `nfl_plays.dwn` from 1 to 14. This is the only thing
+// distinguishing "no findings" from "cannot see findings", and the gate this
+// replaced had never been controlled that way.
 //
 // BLIND SPOTS -- this is a FLOOR, not a proof.
 //   - Gate 1 only sees TABLE-QUALIFIED string literals. A bare `.select('pos')`
