@@ -173,6 +173,31 @@
 // This file contains the authoritative list of league settings fields
 // that can be updated via the API
 
+import {
+  scoring_columns,
+  scoring_column_names
+} from '#libs-shared/scoring-columns.mjs'
+
+// The scoring contribution to the three lists below is DERIVED from
+// libs-shared/scoring-columns.mjs rather than repeated here. Listed by hand,
+// this file was a fifth enumeration of the same knowledge, and the failure mode
+// is silent in the direction that matters: a scoring column absent from
+// league_scoring_format_fields is rejected as 'invalid field', so a
+// commissioner's edit fails with the column fully wired everywhere else.
+//
+// Note `integer_fields` gates numeric validation for BOTH integer and float
+// fields -- `float_fields` is only consulted inside that branch, so a field in
+// float_fields alone reaches Postgres unvalidated. `targets`,
+// `rushing_first_downs` and `receiving_first_downs` were in exactly that state;
+// deriving both lists from `input_type` closes it.
+const scoring_numeric_fields = scoring_columns
+  .filter((entry) => entry.input_type === 'int' || entry.input_type === 'float')
+  .map((entry) => entry.column)
+
+const scoring_float_fields = scoring_columns
+  .filter((entry) => entry.input_type === 'float')
+  .map((entry) => entry.column)
+
 export const league_fields = [
   'name',
   'espn_id',
@@ -200,31 +225,7 @@ export const league_format_fields = [
   'min_bid'
 ]
 
-export const league_scoring_format_fields = [
-  'passing_attempts',
-  'passing_completions',
-  'passing_yards',
-  'passing_interceptions',
-  'passing_touchdowns',
-  'rushing_attempts',
-  'rushing_yards',
-  'rushing_touchdowns',
-  'receptions',
-  'running_back_reception',
-  'wide_receiver_reception',
-  'tight_end_reception',
-  'receiving_yards',
-  'two_point_conversions',
-  'receiving_touchdowns',
-  'fumbles_lost',
-  'punt_return_touchdowns',
-  'kickoff_return_touchdowns',
-  'fumble_return_touchdowns',
-  'targets',
-  'rushing_first_downs',
-  'receiving_first_downs',
-  'exclude_quarterback_kneels'
-]
+export const league_scoring_format_fields = scoring_column_names
 
 export const season_fields = [
   'mqb',
@@ -275,31 +276,13 @@ export const integer_fields = [
   'playoff_team_count',
   'bye_count',
   'cap',
-  'passing_attempts',
-  'passing_completions',
-  'passing_yards',
-  'passing_interceptions',
-  'passing_touchdowns',
-  'rushing_attempts',
-  'rushing_yards',
-  'rushing_touchdowns',
-  'running_back_reception',
-  'wide_receiver_reception',
-  'tight_end_reception',
-  'receptions',
-  'receiving_yards',
-  'two_point_conversions',
-  'receiving_touchdowns',
-  'fumbles_lost',
   'num_teams',
   'min_bid',
-  'punt_return_touchdowns',
-  'kickoff_return_touchdowns',
-  'fumble_return_touchdowns',
   'espn_id',
   'sleeper_id',
   'mfl_id',
-  'fleaflicker_id'
+  'fleaflicker_id',
+  ...scoring_numeric_fields
 ]
 
 export const positive_integer_fields = [
@@ -335,18 +318,4 @@ export const positive_integer_fields = [
   'fleaflicker_id'
 ]
 
-export const float_fields = [
-  'passing_attempts',
-  'passing_completions',
-  'passing_yards',
-  'rushing_attempts',
-  'rushing_yards',
-  'running_back_reception',
-  'wide_receiver_reception',
-  'tight_end_reception',
-  'receptions',
-  'receiving_yards',
-  'targets',
-  'rushing_first_downs',
-  'receiving_first_downs'
-]
+export const float_fields = scoring_float_fields
