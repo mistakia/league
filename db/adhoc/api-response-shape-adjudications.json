@@ -1,0 +1,5 @@
+{
+  "note": "Per-property verdicts for db/adhoc/check-api-response-shapes.mjs gate 2. An entry declares that a documented response property is legitimately NOT a column of the table the handler reads. Key is \"<SchemaName>.<property>\", matching what the gate prints. Never add a name filter or a blanket suppression to quiet this gate -- adjudicate the property, one at a time, with a reason someone can check. Negative control: delete an entry, re-run, confirm the property reappears, put it back.",
+  "when_an_entry_is_correct": "The gate only covers handlers that echo a wholesale single-table read, so for a covered route the response key set IS the table's column set and a documented non-column is a real defect nearly every time. The narrow legitimate case is a property the handler adds AFTER the read on a path the analysis cannot see. If you find yourself reaching for an entry, first check whether the route still matches the wholesale shape -- if it does not, the fix is in the gate's handler analysis, not here.",
+  "adjudications": {}
+}
