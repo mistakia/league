@@ -228,7 +228,7 @@ const generate_player_snaps_for_week = async ({
       continue
     }
 
-    const { opp, player_position: pos } = player_gamelog
+    const { opponent_nfl_team, player_position } = player_gamelog
     const player_snap_rows = nfl_snap_rows_by_gsis_it_id[gsis_it_id]
     const { esbid } = player_snap_rows[0]
 
@@ -329,9 +329,9 @@ const generate_player_snaps_for_week = async ({
       esbid,
       pid: player_row.pid,
       is_active: true,
-      year,
-      opp,
-      pos,
+      season_year: year,
+      opponent_nfl_team,
+      player_position,
       snaps_off,
       snaps_def,
       snaps_st,

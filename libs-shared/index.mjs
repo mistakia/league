@@ -22,7 +22,6 @@ export { default as calculate_live_projection } from './calculate-live-projectio
 export { default as calculatePrices } from './calculate-prices.mjs'
 export { default as getRosterSize } from './get-roster-size.mjs'
 export { default as get_discretionary_cap } from './get-discretionary-cap.mjs'
-export { default as getProjectedSnapsRemaining } from './get-projected-snaps-remaining.mjs'
 export { default as create_default_league } from './create-default-league.mjs'
 export { default as getOptimizerPositionConstraints } from './get-optimizer-position-constraints.mjs'
 export { default as isOnReleaseWaivers } from './is-on-release-waivers.mjs'
