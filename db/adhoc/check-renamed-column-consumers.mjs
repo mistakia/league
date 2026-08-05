@@ -368,10 +368,14 @@ const statement_at = (source, start_index) => {
 // which is exactly this gate's class. Treating any `.select(` as an explicit
 // projection missed both wildcard forms, including `db('nfl_plays').select('*')`
 // behind the play cache.
+// `.first('teams.uid')` projects exactly as `.select` does; a bare `.first()`
+// takes one row of everything and is wholesale.
 const has_explicit_projection = (statement) => {
-  const selects = statement.match(/\.select\(([\s\S]*?)\)/g)
-  if (!selects) return false
-  return selects.some((select) => !select.includes('*'))
+  const projections = statement.match(/\.(?:select|first|pluck)\(([\s\S]*?)\)/g)
+  if (!projections) return false
+  return projections.some(
+    (projection) => !projection.includes('*') && !/\((\s*)\)$/.test(projection)
+  )
 }
 
 // A statement that WRITES is not a consumer -- its column references are gate-1
@@ -477,26 +481,28 @@ const run_gate_2 = ({ tables, base_ref }) => {
 // Adjudication is per (table, column), and records the site list that was
 // reviewed -- so an already-settled pair does NOT inherit a site that appeared
 // afterwards. That is what keeps this per-site rather than a blanket rule.
+// A pair may need MORE than one verdict: fixing one consumer of
+// `player_gamelogs.pos` does not make that table's other three wholesale selects
+// defects, so each entry carries its own site list and a pair can appear more
+// than once. Matching is (table, column, file) -- never (table, column) alone.
 const load_adjudications = () => {
-  if (!fs.existsSync(adjudications_path)) return new Map()
-  const parsed = JSON.parse(fs.readFileSync(adjudications_path, 'utf8'))
-  return new Map(
-    parsed.adjudications.map((entry) => [
-      `${entry.table}.${entry.column}`,
-      entry
-    ])
-  )
+  if (!fs.existsSync(adjudications_path)) return []
+  return JSON.parse(fs.readFileSync(adjudications_path, 'utf8')).adjudications
 }
 
 const apply_adjudications = (findings, adjudications) =>
   findings.map((finding) => {
-    const entry = adjudications.get(`${finding.table}.${finding.column}`)
-    const covered = Boolean(entry) && entry.sites.includes(finding.file)
+    const entry = adjudications.find(
+      (candidate) =>
+        candidate.table === finding.table &&
+        candidate.column === finding.column &&
+        candidate.sites.includes(finding.file)
+    )
     return {
       ...finding,
-      adjudicated: covered,
-      verdict: covered ? entry.verdict : null,
-      reason: covered ? entry.reason : null
+      adjudicated: Boolean(entry),
+      verdict: entry ? entry.verdict : null,
+      reason: entry ? entry.reason : null
     }
   })
 
@@ -557,6 +563,17 @@ const main = () => {
         `  ${finding.table}.${finding.column}  ${finding.file}:${finding.line}`
       )
       console.log(`     ${finding.text}`)
+    }
+
+    if (argv.gate === 1) {
+      console.log(`\nGATE 2 -- not run (--gate 1)`)
+      console.log(
+        all.length
+          ? `\nGATE FAIL: ${all.length} finding(s) -- repoint before shipping.`
+          : `\nGATE OK.`
+      )
+      process.exitCode = all.length ? 1 : 0
+      return
     }
 
     console.log(`\nGATE 2 -- consumers of a column removed since ${argv.base}`)

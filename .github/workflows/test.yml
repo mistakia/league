@@ -51,6 +51,20 @@ jobs:
       - name: z-index scale guard
         run: yarn check:z-index-scale
 
+      # Fails when a table-qualified column literal in server code does not
+      # resolve against db/schema.postgres.sql. GATE 1 ONLY, deliberately: it
+      # needs no rename list and no base ref, so it cannot drift and cannot go
+      # red on a sibling's in-flight migration. Static read, no database.
+      #
+      # Gate 2 is NOT wired and must not be until it can see `year`. It diffs
+      # the schema against a base ref, which makes it depend on which ref CI
+      # picks, and its findings need per-site adjudication by someone who knows
+      # the cluster. Run it by hand per rename cluster:
+      #   node db/adhoc/check-renamed-column-consumers.mjs --gate 2 \
+      #     --base <pre-cluster-ref> --unadjudicated
+      - name: Renamed-column consumer gate (gate 1)
+        run: node db/adhoc/check-renamed-column-consumers.mjs --gate 1
+
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update
