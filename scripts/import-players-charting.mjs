@@ -140,7 +140,12 @@ export async function import_players_charting({
       continue
     }
 
-    const pid = await match_charting_player(player_info)
+    // Scope the match to the season being imported, not to the player's team
+    // today -- see libs-server/charting-data/player-matching.mjs.
+    const pid = await match_charting_player({
+      ...player_info,
+      season_year: year
+    })
 
     if (pid) {
       matched += 1

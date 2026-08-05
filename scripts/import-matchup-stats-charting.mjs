@@ -121,7 +121,7 @@ function determine_matchup_type(matchup) {
 const BATCH_SIZE = 500
 
 async function process_game({ game, client, stats, dry = false }) {
-  const { esbid, shield_game_id, week } = game
+  const { esbid, shield_game_id, week, year: season_year } = game
 
   log(
     `processing matchup stats for game ${esbid} (shield: ${shield_game_id}, week ${week})`
@@ -153,7 +153,10 @@ async function process_game({ game, client, stats, dry = false }) {
       last_name: matchup.offensePlayerLastName,
       team_code: matchup.offensePlayerTeamCode,
       jersey_number: matchup.offensePlayerJerseyNumber,
-      position: matchup.offensePlayerPosition
+      position: matchup.offensePlayerPosition,
+      // The game's own season, not the player's team today -- see
+      // libs-server/charting-data/player-matching.mjs.
+      season_year
     })
 
     const defense_pid = await match_charting_player({
@@ -162,7 +165,8 @@ async function process_game({ game, client, stats, dry = false }) {
       last_name: matchup.defensePlayerLastName,
       team_code: matchup.defensePlayerTeamCode,
       jersey_number: matchup.defensePlayerJerseyNumber,
-      position: matchup.defensePlayerPosition
+      position: matchup.defensePlayerPosition,
+      season_year
     })
 
     if (!offense_pid || !defense_pid) {
