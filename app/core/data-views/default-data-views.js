@@ -71,7 +71,7 @@ export const default_data_views = {
           params: {
             year: [current_season.year],
             seas_type: ['REG'],
-            rate_type: ['per_player_play']
+            output: { period: 'player_play', aggregation: 'rate' }
           }
         },
         {
@@ -79,7 +79,7 @@ export const default_data_views = {
           params: {
             year: [current_season.year],
             seas_type: ['REG'],
-            rate_type: ['per_team_drive']
+            output: { period: 'team_drive', aggregation: 'rate' }
           }
         }
       ]

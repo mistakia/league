@@ -77,6 +77,7 @@ const doc_groups = {
     description:
       'External stats, research, and news sources used by the platform and its managers.'
   },
+  'data-views-architecture.md': { group: 'data_views' },
   'data-views-system.md': { group: 'data_views' },
   'guides/data-views.md': {
     group: 'data_views',
