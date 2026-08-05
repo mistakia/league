@@ -370,8 +370,15 @@ const statement_at = (source, start_index) => {
 // behind the play cache.
 // `.first('teams.uid')` projects exactly as `.select` does; a bare `.first()`
 // takes one row of everything and is wholesale.
+//
+// An AGGREGATE (`.max('week as final_week')`, `.min`, `.sum`, `.avg`) returns the
+// aggregated value and no row at all, so it can never expose a renamed column to
+// a consumer -- even when followed by a bare `.first()`, which is why the bare
+// `.first()` carve-out above is not sufficient on its own.
 const has_explicit_projection = (statement) => {
-  const projections = statement.match(/\.(?:select|first|pluck)\(([\s\S]*?)\)/g)
+  const projections = statement.match(
+    /\.(?:select|first|pluck|max|min|sum|avg)\(([\s\S]*?)\)/g
+  )
   if (!projections) return false
   return projections.some(
     (projection) => !projection.includes('*') && !/\((\s*)\)$/.test(projection)
@@ -379,9 +386,10 @@ const has_explicit_projection = (statement) => {
 }
 
 // A statement that WRITES is not a consumer -- its column references are gate-1
-// and 42703 territory, loud either way.
+// and 42703 territory, loud either way. `.decrement`/`.increment` are writes that
+// read nothing.
 const WRITE_METHOD_RE =
-  /\.(insert|update|del|delete|truncate|count|onConflict)\(/
+  /\.(insert|update|del|delete|truncate|count|onConflict|decrement|increment)\(/
 
 // GATE 2 -- a column removed since `base` must not still be read off a row that
 // no longer carries it. Anchored on the affected TABLE; see the header.

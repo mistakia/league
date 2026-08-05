@@ -183,7 +183,7 @@
         "scripts/process-matchups.mjs"
       ],
       "verdict": "not-a-db-read",
-      "reason": "Every flagged read is req.app.locals -- Express's own app object. Confirmed at api/routes/leagues/matchups.mjs:210,337."
+      "reason": "The rename was app -> away_potential_points. Every flagged read is req.app.locals -- Express's own app object -- including the two same-file ones at api/routes/leagues/matchups.mjs:210,337, the second of which sits three lines above the wholesale select and still reads req.app. A repo-wide grep for matchup.app / m.app row access returns zero. Independently confirmed by a second reviewer over 38 of the 40 read sites."
     },
     {
       "table": "nfl_games",
@@ -205,14 +205,11 @@
         "scripts/import-gambet-odds.mjs",
         "scripts/import-nfl-games-nfl.mjs",
         "scripts/import-nfl-games-nflverse-nfldata.mjs",
-        "scripts/import-nflverse-injuries.mjs",
         "scripts/import-pinnacle-odds.mjs",
         "scripts/import-plays-nfl-v1.mjs",
         "scripts/import-prizepicks-odds.mjs",
-        "scripts/populate-opening-days.mjs",
         "scripts/process-nfl-games.mjs",
-        "scripts/process-plays.mjs",
-        "scripts/process-projections-for-league-format.mjs"
+        "scripts/process-plays.mjs"
       ],
       "verdict": "not-a-db-read",
       "reason": "All 11 reads take .clock off a per-play vendor payload (sportradar, charting), a different concept from the dropped nfl_games.clock column."
@@ -237,14 +234,11 @@
         "scripts/import-gambet-odds.mjs",
         "scripts/import-nfl-games-nfl.mjs",
         "scripts/import-nfl-games-nflverse-nfldata.mjs",
-        "scripts/import-nflverse-injuries.mjs",
         "scripts/import-pinnacle-odds.mjs",
         "scripts/import-plays-nfl-v1.mjs",
         "scripts/import-prizepicks-odds.mjs",
-        "scripts/populate-opening-days.mjs",
         "scripts/process-nfl-games.mjs",
-        "scripts/process-plays.mjs",
-        "scripts/process-projections-for-league-format.mjs"
+        "scripts/process-plays.mjs"
       ],
       "verdict": "not-a-db-read",
       "reason": "scripts/import-nfl-games-nflverse-nfldata.mjs:83 reads game.temp off the raw nflverse row while building the temperature_fahrenheit write payload."
@@ -269,14 +263,11 @@
         "scripts/import-gambet-odds.mjs",
         "scripts/import-nfl-games-nfl.mjs",
         "scripts/import-nfl-games-nflverse-nfldata.mjs",
-        "scripts/import-nflverse-injuries.mjs",
         "scripts/import-pinnacle-odds.mjs",
         "scripts/import-plays-nfl-v1.mjs",
         "scripts/import-prizepicks-odds.mjs",
-        "scripts/populate-opening-days.mjs",
         "scripts/process-nfl-games.mjs",
-        "scripts/process-plays.mjs",
-        "scripts/process-projections-for-league-format.mjs"
+        "scripts/process-plays.mjs"
       ],
       "verdict": "not-a-db-read",
       "reason": "Same as nfl_games.temp -- import-nfl-games-nflverse-nfldata.mjs:84 maps the vendor field onto wind_speed_mph on write."
@@ -835,14 +826,13 @@
         "scripts/process-matchups.mjs",
         "scripts/process-projections.mjs",
         "scripts/process-restricted-free-agency-bids.mjs",
-        "scripts/process-waivers-free-agency-active.mjs",
         "scripts/project-lineups.mjs",
         "scripts/release-player.mjs",
         "scripts/reset-player-restricted-free-agency-tags.mjs",
         "scripts/set-draft-pick-number.mjs"
       ],
       "verdict": "not-a-db-read",
-      "reason": "cap SURVIVES on league_formats (db/schema.postgres.sql:4203), so the flagged reads resolve off a league/league_format object via getLeague(), or off team.cap which api/sockets/auction.mjs:1113 assigns from r.availableCap before any read. Per (table, column) judgment is what separates these."
+      "reason": "cap SURVIVES on league_formats (db/schema.postgres.sql:4203) and 72346e579 left it alone deliberately, so the flagged reads resolve off a league/league_format object via getLeague() and api/routes/me.mjs. The rest are same-named COMPUTED JS properties: api/sockets/auction.mjs:1113 assigns team.cap = r.availableCap before any bid validation reads it, and dashboard-team-summary-salary rebuilds its teams prop as { cap: r.availableCap } in map_state_to_props, shadowing the name. Per (table, column) judgment is what separates these. Independently confirmed by a second reviewer over all 24 read sites."
     },
     {
       "table": "teams",
@@ -885,7 +875,6 @@
         "scripts/process-matchups.mjs",
         "scripts/process-projections.mjs",
         "scripts/process-restricted-free-agency-bids.mjs",
-        "scripts/process-waivers-free-agency-active.mjs",
         "scripts/project-lineups.mjs",
         "scripts/release-player.mjs",
         "scripts/reset-player-restricted-free-agency-tags.mjs",
