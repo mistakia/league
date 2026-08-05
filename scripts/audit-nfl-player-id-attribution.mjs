@@ -11,6 +11,10 @@ import {
   load_name_match_scope,
   resolve_unique_candidate
 } from './import-nfl-player-ids.mjs'
+import {
+  last_name_of,
+  is_accepted_name_difference
+} from '#libs-server/nfl-player-id-adjudication.mjs'
 
 const log = debug('audit-nfl-player-id-attribution')
 debug.enable('audit-nfl-player-id-attribution')
@@ -29,15 +33,10 @@ debug.enable('audit-nfl-player-id-attribution')
 // then-adjudicable values sat on the wrong row, concentrated almost entirely in
 // the 2020 cohort — 2564007 is Jordan Love and rode Jeff Okudah's row.
 //
-// ## Adjudicate on LAST NAME
-//
-// NFL.com serves display names and we store legal names, so a full-string
-// comparison reports the same person as a defect: kenny/kenneth gainwell,
-// jj/jonathan mccarthy, theo/theodore johnson, will/william shipley, and
-// robbie chosen (who legally changed his name from robbie anderson). Of 34 raw
-// disagreements only 23 were real. A first-initial check would also fail
-// several of these, so last name alone is the test, and the residue is small
-// enough to read by hand.
+// Name adjudication — surname comparison plus the recorded legal name changes —
+// lives in `libs-server/nfl-player-id-adjudication.mjs`, shared with the ingest
+// so the oracle and the writer cannot drift apart on what counts as the same
+// person.
 //
 // ## Coverage is the active population only
 //
@@ -69,53 +68,6 @@ debug.enable('audit-nfl-player-id-attribution')
 // once, and clearing only the first leaves the correct id homeless: the row it
 // belongs to still holds a wrong value, so it is not free for the importer to
 // fill.
-
-const normalize = (name) =>
-  String(name || '')
-    .toLowerCase()
-    .replace(/[^a-z ]/g, '')
-    .trim()
-
-export const last_name_of = (name) => {
-  const parts = normalize(name).split(/\s+/).filter(Boolean)
-  if (!parts.length) return ''
-
-  // Drop a generational suffix so `Ricky White III` compares as `white`.
-  const suffixes = new Set(['jr', 'sr', 'ii', 'iii', 'iv', 'v'])
-  const trimmed = parts.filter((part) => !suffixes.has(part))
-  const usable = trimmed.length ? trimmed : parts
-
-  return usable[usable.length - 1]
-}
-
-// A LEGAL NAME CHANGE defeats the last-name test, and it is the one shape that
-// cannot be normalized away — the two surnames are genuinely unrelated, so the
-// audit reads a correct value as a defect and would propose destroying it.
-//
-// Adjudications are pinned per pid AND per id, so that a value moving under a
-// pid re-reports rather than inheriting the exception. Keep this list short and
-// evidenced; it is not a place to silence a finding you have not explained.
-const ACCEPTED_NAME_DIFFERENCES = [
-  {
-    pid: 'ROBB-ANDE-017101',
-    nfl_player_id: 2556462,
-    card_name: 'Robbie Chosen',
-    reason:
-      'legal name change from Robbie Anderson in 2022; nfl.com serves the new name, our row carries the old one'
-  }
-]
-
-export const is_accepted_name_difference = ({
-  pid,
-  nfl_player_id,
-  card_name
-}) =>
-  ACCEPTED_NAME_DIFFERENCES.some(
-    (accepted) =>
-      accepted.pid === pid &&
-      accepted.nfl_player_id === Number(nfl_player_id) &&
-      last_name_of(accepted.card_name) === last_name_of(card_name)
-  )
 
 const audit_nfl_player_id_attribution = async ({ output_path = null } = {}) => {
   const listed_players = await fetch_all_listed_players()

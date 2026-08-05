@@ -4,7 +4,8 @@ import { hideBin } from 'yargs/helpers'
 import { JSDOM } from 'jsdom'
 
 import db from '#db'
-import { is_main, report_job, updatePlayer } from '#libs-server'
+import { is_main, report_job, updatePlayer, emit_signal } from '#libs-server'
+import { names_can_be_same_person } from '#libs-server/nfl-player-id-adjudication.mjs'
 import { fixTeam, format_player_name } from '#libs-shared'
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -274,6 +275,11 @@ const import_nfl_player_ids = async ({ dry = false } = {}) => {
     attached: 0,
     ambiguous: 0,
     no_candidate: 0,
+    // A stored id that nfl.com says belongs to somebody else. Steady state is
+    // ZERO -- 118 such values were released on 2026-08-05 -- so any occurrence
+    // is a regression worth a signal rather than a log line. Adjudication is
+    // shared with the audit so the two cannot drift.
+    contradicted: 0,
     // Team agreement is the safety oracle on an attach, and it is deliberately
     // reported rather than enforced: `current_nfl_team` goes stale in the
     // offseason, so a disagreement is a reason to look rather than proof of a
@@ -287,9 +293,17 @@ const import_nfl_player_ids = async ({ dry = false } = {}) => {
     const existing = pid_by_nfl_player_id.get(listed_player.nfl_player_id)
     if (existing) {
       counts.already_present++
-      if (existing.formatted_name !== listed_player.formatted_name) {
+      if (
+        !names_can_be_same_person({
+          pid: existing.pid,
+          nfl_player_id: listed_player.nfl_player_id,
+          our_name: existing.formatted_name,
+          card_name: listed_player.name
+        })
+      ) {
+        counts.contradicted++
         log(
-          `CONFLICT ${listed_player.nfl_player_id}: nfl.com says ${listed_player.formatted_name}, ${existing.pid} says ${existing.formatted_name}`
+          `CONTRADICTED ${listed_player.nfl_player_id}: nfl.com says ${listed_player.name}, ${existing.pid} says ${existing.formatted_name}`
         )
       }
       continue
@@ -348,8 +362,21 @@ const import_nfl_player_ids = async ({ dry = false } = {}) => {
 
 export default import_nfl_player_ids
 
+// This script runs unattended from server/crontab-main/league-imports.cron, so
+// it names the host-cron shape rather than a scheduled-command entity — the
+// league host runs no schedule-processor, and naming an entity that does not
+// exist addresses every signal to nothing.
+const SIGNAL_SOURCE = 'cron:import-nfl-player-ids@league'
+
+// The listing held 1,036 players on 2026-08-05. A floor well beneath that
+// catches a truncated or partially-parsed crawl, which would otherwise look
+// like an ordinary quiet run: the attach count is legitimately near zero in
+// steady state, so it cannot serve as the oracle.
+const MINIMUM_PLAUSIBLE_LISTING_SIZE = 800
+
 const main = async () => {
   let error
+  let counts
   try {
     const argv = yargs(hideBin(process.argv)).option('dry', {
       type: 'boolean',
@@ -357,16 +384,51 @@ const main = async () => {
       describe: 'resolve and report without writing'
     }).argv
 
-    await import_nfl_player_ids({ dry: argv.dry })
+    counts = await import_nfl_player_ids({ dry: argv.dry })
   } catch (err) {
     error = err
     log(error)
   }
 
+  // Output oracle distinct from the exit code. Two failures are invisible to a
+  // throw: a crawl that returns far too few players, and a stored id nfl.com
+  // says belongs to somebody else. The second is the defect this whole task
+  // repaired — 118 released on 2026-08-05 — so steady state is exactly zero and
+  // any recurrence means something is writing the column wrongly again.
+  let shortfall = null
+  if (!error && counts) {
+    if (counts.listed < MINIMUM_PLAUSIBLE_LISTING_SIZE) {
+      shortfall = `nfl.com listing returned ${counts.listed} players, below the ${MINIMUM_PLAUSIBLE_LISTING_SIZE} floor`
+    } else if (counts.contradicted > 0) {
+      shortfall = `${counts.contradicted} stored nfl_player_id value(s) name a different person; run scripts/audit-nfl-player-id-attribution.mjs`
+    }
+  }
+
   await report_job({
     job_type: job_types.NFL_PLAYER_IDS,
-    error
+    error: error || (shortfall ? new Error(shortfall) : null)
   })
+
+  if (error || shortfall) {
+    await emit_signal({
+      source: SIGNAL_SOURCE,
+      kind: 'pipeline_failure',
+      severity: error ? 'high' : 'medium',
+      title: error
+        ? `import-nfl-player-ids threw: ${error.message}`
+        : `import-nfl-player-ids: ${shortfall}`,
+      payload: { error_message: error?.message, shortfall, ...counts },
+      dedup_key: `pipeline_failure:${SIGNAL_SOURCE}`
+    })
+  } else {
+    await emit_signal({
+      source: SIGNAL_SOURCE,
+      kind: 'pipeline_success',
+      severity: 'low',
+      title: `import-nfl-player-ids attached ${counts.attached} of ${counts.listed} listed players`,
+      dedup_key: `pipeline_success:${SIGNAL_SOURCE}`
+    })
+  }
 
   process.exit(error ? 1 : 0)
 }

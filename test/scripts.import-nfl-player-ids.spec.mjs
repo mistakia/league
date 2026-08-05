@@ -7,8 +7,9 @@ import {
 } from '../scripts/import-nfl-player-ids.mjs'
 import {
   last_name_of,
-  is_accepted_name_difference
-} from '../scripts/audit-nfl-player-id-attribution.mjs'
+  is_accepted_name_difference,
+  names_can_be_same_person
+} from '#libs-server/nfl-player-id-adjudication.mjs'
 
 const expect = chai.expect
 
@@ -258,5 +259,43 @@ describe('scripts - audit nfl player id attribution', function () {
         })
       ).to.equal(false)
     })
+  })
+})
+
+describe('libs-server - nfl player id adjudication', function () {
+  // This predicate decides whether the scheduled ingest raises a signal, so a
+  // false positive is a recurring alert on correct data and a false negative
+  // means the defect this task repaired can return unnoticed.
+  it('accepts a display name against a legal name', () => {
+    expect(
+      names_can_be_same_person({
+        pid: 'KENN-GAIN-005953',
+        nfl_player_id: 2566397,
+        our_name: 'kenneth gainwell',
+        card_name: 'Kenny Gainwell'
+      })
+    ).to.equal(true)
+  })
+
+  it('accepts the recorded legal name change', () => {
+    expect(
+      names_can_be_same_person({
+        pid: 'ROBB-ANDE-017101',
+        nfl_player_id: 2556462,
+        our_name: 'robbie anderson',
+        card_name: 'Robbie Chosen'
+      })
+    ).to.equal(true)
+  })
+
+  it('REJECTS two different people', () => {
+    expect(
+      names_can_be_same_person({
+        pid: 'JEFF-OKUD-007629',
+        nfl_player_id: 2564007,
+        our_name: 'jeff okudah',
+        card_name: 'Jordan Love'
+      })
+    ).to.equal(false)
   })
 })
