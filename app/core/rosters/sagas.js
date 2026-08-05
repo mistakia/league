@@ -144,10 +144,14 @@ export function* calculatePlayerLineupContribution({ player_map }) {
   const baselines = (yield select(get_players_state)).get('baselines')
   const currentRoster = yield select(get_current_team_roster_record)
 
+  // Key names match what libs-server/get-players.mjs emits for the same
+  // `lineups` slot, which the SET_PROJECTED_CONTRIBUTION reducer writes to.
+  // Both producers land on ['items', pid, 'lineups'], so a divergent shape here
+  // reads as zeros in every consumer that happens to see the other producer.
   const playerData = {
     starts: 0,
-    sp: 0,
-    bp: 0,
+    starter_plus_points: 0,
+    bench_plus_points: 0,
     weeks: {}
   }
 
@@ -172,9 +176,10 @@ export function* calculatePlayerLineupContribution({ player_map }) {
 
   for (const week in result) {
     const weekData = {
-      start: 0,
-      sp: 0,
-      bp: 0
+      week,
+      is_starter: false,
+      starter_plus_points: 0,
+      bench_plus_points: 0
     }
 
     const projectedPoints = player_map.getIn(['points', week, 'total'])
@@ -194,7 +199,7 @@ export function* calculatePlayerLineupContribution({ player_map }) {
 
     if (isStarter) {
       playerData.starts += 1
-      weekData.start = 1
+      weekData.is_starter = true
       // starter+ is difference between current lineup and lineup without player
       const current_projected_total = currentRoster.getIn(
         ['lineups', week, 'total'],
@@ -203,8 +208,8 @@ export function* calculatePlayerLineupContribution({ player_map }) {
       const diff = isActive
         ? current_projected_total - result[week].total
         : result[week].total - current_projected_total
-      playerData.sp += diff
-      weekData.sp = diff
+      playerData.starter_plus_points += diff
+      weekData.starter_plus_points = diff
     } else {
       // bench+ is difference between player output and best available. The
       // baseline row carries the points directly; resolving its pid back to a
@@ -217,8 +222,8 @@ export function* calculatePlayerLineupContribution({ player_map }) {
       )
       const diff = projectedPoints - baseline_points
       if (diff > 0) {
-        playerData.bp += diff
-        weekData.bp = diff
+        playerData.bench_plus_points += diff
+        weekData.bench_plus_points = diff
       }
     }
     playerData.weeks[week] = weekData

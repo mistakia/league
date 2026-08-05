@@ -20,11 +20,11 @@ export default class TradePlayer extends React.Component {
         </div>
         <div className='trade__player-metric metric'>
           <label>Pts+</label>
-          {player_map.getIn(['lineups', 'sp'], 0).toFixed(1)}
+          {player_map.getIn(['lineups', 'starter_plus_points'], 0).toFixed(1)}
         </div>
         <div className='trade__player-metric metric'>
           <label>Be+</label>
-          {player_map.getIn(['lineups', 'bp'], 0).toFixed(1)}
+          {player_map.getIn(['lineups', 'bench_plus_points'], 0).toFixed(1)}
         </div>
         <div className='trade__player-metric metric'>
           <label>Adj Val</label>

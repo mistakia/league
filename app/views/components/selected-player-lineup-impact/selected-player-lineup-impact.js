@@ -20,12 +20,16 @@ export default class SelectedPlayerLineupImpact extends React.Component {
       if (week >= current_season.week) {
         spData.push(
           parseFloat(
-            player_map.getIn(['lineups', 'weeks', week, 'sp'], 0).toFixed(1)
+            player_map
+              .getIn(['lineups', 'weeks', week, 'starter_plus_points'], 0)
+              .toFixed(1)
           )
         )
         bpData.push(
           parseFloat(
-            player_map.getIn(['lineups', 'weeks', week, 'bp'], 0).toFixed(1)
+            player_map
+              .getIn(['lineups', 'weeks', week, 'bench_plus_points'], 0)
+              .toFixed(1)
           )
         )
       }

@@ -98,8 +98,8 @@ class PlayerRoster extends Player {
     const week = Math.max(current_season.week, 1)
     const weekPoints = player_map.getIn(['points', `${week}`, 'total'], 0)
     const projected_starts = player_map.getIn(['lineups', 'starts'], 0)
-    const startPoints = player_map.getIn(['lineups', 'sp'], 0)
-    const benchPoints = player_map.getIn(['lineups', 'bp'], 0)
+    const startPoints = player_map.getIn(['lineups', 'starter_plus_points'], 0)
+    const benchPoints = player_map.getIn(['lineups', 'bench_plus_points'], 0)
 
     // Seasonlog data for results display
     // Note: seasonlog_points is used because 'points' is overwritten by projection points object
