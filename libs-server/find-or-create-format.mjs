@@ -56,23 +56,39 @@ export const LEAGUE_COLUMNS = [
   'min_bid'
 ]
 
+// `id` is optional and is used ONLY on insert. The named catalog wants its slug
+// as the identity (`ppr`, `sfb16_mfl`); everything else gets a uuid.
+//
+// It cannot be applied on conflict, and must not be: the DO UPDATE branch
+// deliberately returns the row's EXISTING id, because that id is referenced by
+// seasons and by league_formats and re-pointing it would break those rows. So a
+// format already seeded under a uuid keeps the uuid -- adopting a slug for one
+// of those is a data migration, not something this function should do silently.
+//
+// Before this argument existed the named-format loops discarded their catalog
+// key entirely, so every named format minted a uuid. The slugs in production
+// came from the 2026-05-28 format-id migration, which is why the gap was
+// invisible until SFB16 became the first named format added since.
 const upsert_and_return_id = async (
   knex,
   table_name,
   insert_columns,
   conflict_columns,
-  values
+  values,
+  id = null
 ) => {
   const placeholders = insert_columns.map(() => '?').join(', ')
   const conflict_list = conflict_columns.join(', ')
+  const id_expression = id ? '?' : 'gen_random_uuid()::text'
   const sql = `
     INSERT INTO ${table_name} (id, ${insert_columns.join(', ')})
-    VALUES (gen_random_uuid()::text, ${placeholders})
+    VALUES (${id_expression}, ${placeholders})
     ON CONFLICT (${conflict_list})
     DO UPDATE SET id = ${table_name}.id
     RETURNING id
   `
-  const result = await knex.raw(sql, values)
+  const bindings = id ? [id, ...values] : values
+  const result = await knex.raw(sql, bindings)
   return result.rows[0].id
 }
 
@@ -82,7 +98,11 @@ const upsert_and_return_id = async (
 // index that used to be the dedup oracle can no longer be built. See
 // db/adhoc/2026-08-04-kicking-dst-scoring-config.sql for why a digest nothing
 // references is not the content-derived identity the guideline forbids.
-export const find_or_create_scoring_format = async (knex = db, config) => {
+export const find_or_create_scoring_format = async (
+  knex = db,
+  config,
+  id = null
+) => {
   // resolve_scoring_config fills an absent key from the registry default rather
   // than with null. Every kicking and DST column is NOT NULL and no caller
   // supplies them yet -- the external-league mapper structurally cannot -- so
@@ -102,11 +122,16 @@ export const find_or_create_scoring_format = async (knex = db, config) => {
     'league_scoring_formats',
     SCORING_COLUMNS,
     ['config_digest'],
-    values
+    values,
+    id
   )
 }
 
-export const find_or_create_league_format = async (knex = db, config) => {
+export const find_or_create_league_format = async (
+  knex = db,
+  config,
+  id = null
+) => {
   if (!config.scoring_format_id) {
     throw new Error('scoring_format_id is required')
   }
@@ -129,6 +154,7 @@ export const find_or_create_league_format = async (knex = db, config) => {
     'league_formats',
     insert_columns,
     conflict_columns,
-    values
+    values,
+    id
   )
 }

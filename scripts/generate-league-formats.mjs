@@ -75,6 +75,15 @@ const generate_league_formats = async () => {
     fumbles_lost: [-1, -2],
     punt_return_touchdowns: [6],
     kickoff_return_touchdowns: [6],
+    // The third member of the return-touchdown set. It was added as a scoring
+    // column after this list was written and never added here, which left it
+    // undefined in every generated combination -- and because it is NOT NULL
+    // with no schema default and no registry default, resolve_scoring_config
+    // mapped it to null and the seeder aborted on its first insert. All 65
+    // production rows carry 6, matching its two siblings, so this value makes
+    // the generated configs match existing rows and dedup onto them rather than
+    // minting duplicates.
+    fumble_return_touchdowns: [6],
     targets: [0],
     rushing_first_downs: [0],
     receiving_first_downs: [0],
@@ -136,6 +145,7 @@ const generate_league_formats = async () => {
     fumbles_lost: c.fumbles_lost,
     punt_return_touchdowns: c.punt_return_touchdowns,
     kickoff_return_touchdowns: c.kickoff_return_touchdowns,
+    fumble_return_touchdowns: c.fumble_return_touchdowns,
     targets: c.targets,
     rushing_first_downs: c.rushing_first_downs,
     receiving_first_downs: c.receiving_first_downs,
@@ -212,10 +222,16 @@ const generate_league_formats = async () => {
 
   log('Processing named format definitions...')
 
-  for (const [, format_def] of Object.entries(named_scoring_formats)) {
+  // The catalog KEY is the row's identity for a named format. Discarding it
+  // here (this loop destructured `[, format_def]`) meant every named format
+  // minted a uuid instead; the slugs in production came from the 2026-05-28
+  // format-id migration, so nothing surfaced the gap until SFB16 became the
+  // first named format added since.
+  for (const [key, format_def] of Object.entries(named_scoring_formats)) {
     const scoring_format_id = await find_or_create_scoring_format(
       db,
-      format_def.config
+      format_def.config,
+      key
     )
     await db('league_scoring_formats')
       .where({ id: scoring_format_id })
@@ -233,13 +249,18 @@ const generate_league_formats = async () => {
     }
     const scoring_format_id = await find_or_create_scoring_format(
       db,
-      scoring_format_config
+      scoring_format_config,
+      format_def.scoring_format
     )
-    await find_or_create_league_format(db, {
-      ...format_def.config,
-      scoring_format_id,
-      pricing_model: format_def.pricing_model || 'auction'
-    })
+    await find_or_create_league_format(
+      db,
+      {
+        ...format_def.config,
+        scoring_format_id,
+        pricing_model: format_def.pricing_model || 'auction'
+      },
+      key
+    )
   }
 
   log(

@@ -37,6 +37,29 @@ import {
 // writer did on insert. Without it every named format reports a mismatch on all
 // 21 kicking and DST columns, which no named format declares: the source would
 // compare null against the registry default the row actually holds.
+// Stable JSON for comparing a jsonb column against its source config.
+//
+// jsonb normalizes object KEY order on store (it orders by key length then
+// bytewise), so a rule stored as {type, stat, threshold, points} reads back as
+// {stat, type, points, threshold}. A plain JSON.stringify comparison therefore
+// reports a mismatch on every bonus rule even when the values are identical.
+//
+// Array ORDER is deliberately preserved rather than sorted: jsonb keeps it, it
+// is what canonicalize_bonuses exists to make deterministic, and sorting here
+// would hide a genuine ordering drift.
+const stable_json = (value) => {
+  if (Array.isArray(value)) {
+    return `[${value.map(stable_json).join(',')}]`
+  }
+  if (value && typeof value === 'object') {
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stable_json(value[key])}`)
+      .join(',')}}`
+  }
+  return JSON.stringify(value)
+}
+
 const compare_config = (db_row, source_config, columns, default_resolver) => {
   const mismatches = []
   for (const col of columns) {
@@ -55,12 +78,14 @@ const compare_config = (db_row, source_config, columns, default_resolver) => {
     // canonicalized too or an equal rule set in a different authored order
     // reports as drift.
     if (typeof db_val === 'object' && db_val !== null) {
-      const db_json = JSON.stringify(db_val)
-      const src_json = JSON.stringify(
+      const db_json = stable_json(db_val)
+      const src_json = stable_json(
         col === 'bonuses' ? canonicalize_bonuses(src_val) : src_val
       )
       if (db_json !== src_json) {
-        mismatches.push({ column: col, db: db_json, source: src_json })
+        // A string, matching the scalar branch below -- the caller joins these
+        // into one message, and an object renders as [object Object] there.
+        mismatches.push(`${col}: db=${db_json} source=${src_json}`)
       }
       continue
     }
