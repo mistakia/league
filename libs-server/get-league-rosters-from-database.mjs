@@ -76,7 +76,10 @@ export default async function ({
       const lineupStarters = teamStarters.filter((l) => l.week === lineup.week)
       const starter_pids = lineupStarters.map((l) => l.pid)
       r.lineups[lineup.week] = {
-        total: lineup.total,
+        // `league_team_lineups.total` was renamed to `optimal_total` in
+        // 72346e579. The API key stays `total` -- `app/core/rosters/sagas.js`
+        // reads `result[week].total` -- so only the source column moves.
+        total: lineup.optimal_total,
         baseline_total: lineup.baseline_total,
         starter_pids
       }

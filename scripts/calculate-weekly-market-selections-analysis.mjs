@@ -136,7 +136,7 @@ const format_prop_row = ({
   const current_season_opponent_player_gamelogs = all_player_gamelogs.filter(
     (p) => {
       if (p.opponent_nfl_team !== opponent) return false
-      if (p.pos !== player_row.primary_position) return false
+      if (p.player_position !== player_row.primary_position) return false
       if (p.year !== year) return false
       if (seas_type === 'REG' && p.seas_type === 'POST') return false
       if (seas_type === p.seas_type && p.week >= week) return false

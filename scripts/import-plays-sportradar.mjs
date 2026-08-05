@@ -1003,7 +1003,7 @@ const track_collisions = ({
         play_info: {
           esbid: game.esbid,
           play_id: db_play.play_id,
-          qtr: db_play.qtr,
+          quarter: db_play.quarter,
           game_clock: db_play.game_clock_start,
           play_type: mapped_play.play_type,
           description: sportradar_play.description?.substring(0, 80),

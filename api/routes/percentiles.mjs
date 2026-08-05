@@ -84,7 +84,30 @@ router.get('/:percentile_key', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { percentile_key } = req.params
-    const percentiles = await db('percentiles').where({ percentile_key })
+    // Project explicitly and alias back to the API's key names. This route used
+    // to `SELECT *` and send the row verbatim, so 72346e579's rename of every
+    // percentile column (`p25` -> `percentile_25`, `min`/`max` ->
+    // `minimum_value`/`maximum_value`) silently changed the response shape:
+    // `app/core/percentiles/reducer.js` spreads the row straight into redux and
+    // `percentile-metric` reads `.p25`/`.p75`/`.min`/`.max`, so every read
+    // became `undefined` and the color arithmetic collapsed to `NaN || 0`.
+    // An explicit projection is what keeps the payload independent of physical
+    // column names, so the next rename cannot reach the SPA at all.
+    const percentiles = await db('percentiles')
+      .where({ percentile_key })
+      .select(
+        'percentile_key',
+        'field',
+        'percentile_25 as p25',
+        'percentile_50 as p50',
+        'percentile_75 as p75',
+        'percentile_90 as p90',
+        'percentile_95 as p95',
+        'percentile_98 as p98',
+        'percentile_99 as p99',
+        'minimum_value as min',
+        'maximum_value as max'
+      )
     res.send(percentiles)
   } catch (error) {
     logger(error)
