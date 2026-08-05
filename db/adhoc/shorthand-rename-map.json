@@ -1952,5 +1952,19 @@
       "confidence": "high",
       "rationale": "api/routes/leagues/waivers/index.mjs:735 PUT /order sets po: index across a team's own claims; new claims default to po:9999 at :629; app/core/selectors.js:3889 uses `a.po - b.po` as the tiebreaker after bid. It orders a manager's own claims, not league-wide priority."
     }
-  ]
+  ],
+  "applied": {
+    "date": "2026-08-05",
+    "commit": "72346e579",
+    "ddl": [
+      "db/adhoc/2026-08-04-conform-shorthand-plays.sql (47 statements)",
+      "db/adhoc/2026-08-04-conform-shorthand-tail.sql (157 statements)",
+      "db/adhoc/2026-08-04-drop-dead-shorthand-columns.sql (9 statements)"
+    ],
+    "result": "Audit shorthand 234 -> 25, total 304 -> 95. Ratchet confirms 209 baselined violations retired.",
+    "records_now_dead": "All 200 `rename` records and all 9 `drop` records in this file are APPLIED to league_production. They are history, not work. Do not re-apply them.",
+    "records_still_live": "23 `superseded` (22 footballoutsiders.* plus league_formats.cap), owned by the tasks that remove those tables/columns; and pff_team_gamelogs.wins/.ties, ruled DROP on 2026-08-04 and owned by db/adhoc/2026-08-04-drop-pff-team-gamelog-outcome-flags.sql. The 6 `keep` records are already encoded as exemptions in audit-schema-conformance.mjs.",
+    "retirement": "This file is a migration instrument and should be DELETED once the superseded and blocked records are cleared by their owning tasks. It was NOT deleted when the rename class closed, because doing so would have destroyed the disposition record for those 25 still-open columns.",
+    "four_renames_beyond_this_map": "league_team_careerlogs, league_team_seasonlogs, league_user_careerlogs and pff_team_seasonlogs each also had `losses` renamed alongside their `wins`/`ties`. `losses` is six characters so the audit never flagged it and it is absent from the records below; renaming only its two siblings would have split an obvious trio across two naming conventions."
+  }
 }
