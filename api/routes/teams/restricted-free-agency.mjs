@@ -2,12 +2,19 @@ import express from 'express'
 import dayjs from 'dayjs'
 
 import { Roster } from '#libs-shared'
-import { current_season, player_tag_types, roster_slot_types } from '#constants'
+import {
+  current_season,
+  player_tag_types,
+  roster_slot_types,
+  bid_change_types,
+  bid_change_sources
+} from '#constants'
 import {
   getRoster,
   getLeague,
   verifyUserTeam,
-  verify_reserve_status
+  verify_reserve_status,
+  record_restricted_free_agency_bid_change
 } from '#libs-server'
 import { select_restricted_free_agency_bid_with_nomination } from '#libs-server/restricted-free-agency-bids-query.mjs'
 import { require_auth } from '#api/routes/leagues/middleware.mjs'
@@ -479,15 +486,43 @@ router.post('/?', async (req, res) => {
           pid: remove
         })
 
-        await db('restricted_free_agency_bids')
+        // This is the cancellation a manager reads as "my bid was reset": they
+        // tagged a different player and the old tag went away as a side effect
+        // of that request, not as a withdrawal they made. It is recorded with
+        // the CREATE source precisely so the trail distinguishes it from a
+        // deliberate cancel.
+        //
+        // The rows are selected before the update rather than after, because
+        // the predicate matches on `cancelled` being irrelevant and the update
+        // would otherwise give no way to name which bids it touched.
+        const removed_bid_rows = await db('restricted_free_agency_bids')
+          .select('uid')
           .where({
             pid: remove,
             tid,
             year: current_season.year
           })
-          .update({
-            cancelled: Math.round(Date.now() / 1000)
+
+        if (removed_bid_rows.length) {
+          const removed_bid_ids = removed_bid_rows.map((row) => row.uid)
+          await db.transaction(async (trx) => {
+            await trx('restricted_free_agency_bids')
+              .whereIn('uid', removed_bid_ids)
+              .update({
+                cancelled: Math.round(Date.now() / 1000)
+              })
+
+            for (const removed_bid_id of removed_bid_ids) {
+              await record_restricted_free_agency_bid_change({
+                db: trx,
+                bid_id: removed_bid_id,
+                change_type: bid_change_types.CANCELLED,
+                change_source: bid_change_sources.API_BID_CREATE,
+                changed_by_user_id: req.auth.userId
+              })
+            }
           })
+        }
       }
     }
 
@@ -519,19 +554,35 @@ router.post('/?', async (req, res) => {
       nomination_id
     }
 
-    const query = await db('restricted_free_agency_bids')
-      .insert(data)
-      .returning('uid')
-    const restricted_free_agency_bid_id = query[0].uid
-    data.uid = restricted_free_agency_bid_id
+    // The bid, its conditional releases and its changelog entry commit
+    // together. The `created` row snapshots the releases, so recording it
+    // outside this boundary would let it describe an offer with no releases
+    // that a moment later has them -- an audit trail that is wrong at the one
+    // instant it is written.
+    let restricted_free_agency_bid_id
+    await db.transaction(async (trx) => {
+      const query = await trx('restricted_free_agency_bids')
+        .insert(data)
+        .returning('uid')
+      restricted_free_agency_bid_id = query[0].uid
 
-    if (release.length) {
-      const releaseInserts = release.map((pid) => ({
-        restricted_free_agency_bid_id,
-        pid
-      }))
-      await db('restricted_free_agency_releases').insert(releaseInserts)
-    }
+      if (release.length) {
+        const releaseInserts = release.map((pid) => ({
+          restricted_free_agency_bid_id,
+          pid
+        }))
+        await trx('restricted_free_agency_releases').insert(releaseInserts)
+      }
+
+      await record_restricted_free_agency_bid_change({
+        db: trx,
+        bid_id: restricted_free_agency_bid_id,
+        change_type: bid_change_types.CREATED,
+        change_source: bid_change_sources.API_BID_CREATE,
+        changed_by_user_id: req.auth.userId
+      })
+    })
+    data.uid = restricted_free_agency_bid_id
 
     data.release = release
     data.remove = remove
@@ -696,9 +747,19 @@ router.delete('/?', async (req, res) => {
 
     // cancel bid
     const cancelled = Math.round(Date.now() / 1000)
-    await db('restricted_free_agency_bids')
-      .update('cancelled', cancelled)
-      .where('uid', restrictedFreeAgencyBid.uid)
+    await db.transaction(async (trx) => {
+      await trx('restricted_free_agency_bids')
+        .update('cancelled', cancelled)
+        .where('uid', restrictedFreeAgencyBid.uid)
+
+      await record_restricted_free_agency_bid_change({
+        db: trx,
+        bid_id: restrictedFreeAgencyBid.uid,
+        change_type: bid_change_types.CANCELLED,
+        change_source: bid_change_sources.API_BID_CANCEL,
+        changed_by_user_id: req.auth.userId
+      })
+    })
 
     // TODO cancel any pending competing bids
 
@@ -967,29 +1028,47 @@ router.put('/?', async (req, res) => {
         })
     }
 
-    // insert into restrictedFreeAgencyBids
-    await db('restricted_free_agency_bids')
-      .update({
-        userid: req.auth.userId,
-        bid_amount: bid
+    // This is the write that made a bid's history unrecoverable: it overwrites
+    // `bid_amount` and `userid` over the only copy of them, and the conditional
+    // releases are rewritten by delete-and-insert just below. One `updated` row
+    // records the whole request, because the amount and the releases were one
+    // decision by one manager at one instant.
+    //
+    // The changelog entry is recorded LAST inside the transaction, after the
+    // releases have settled, so its snapshot is of the offer as it ended up
+    // rather than of a half-applied intermediate state.
+    await db.transaction(async (trx) => {
+      await trx('restricted_free_agency_bids')
+        .update({
+          userid: req.auth.userId,
+          bid_amount: bid
+        })
+        .where('uid', restrictedFreeAgencyBid.uid)
+
+      if (release.length) {
+        const releaseInserts = release.map((pid) => ({
+          restricted_free_agency_bid_id: restrictedFreeAgencyBid.uid,
+          pid
+        }))
+        await trx('restricted_free_agency_releases')
+          .insert(releaseInserts)
+          .onConflict(['restricted_free_agency_bid_id', 'pid'])
+          .merge()
+      }
+
+      await trx('restricted_free_agency_releases')
+        .del()
+        .where('restricted_free_agency_bid_id', restrictedFreeAgencyBid.uid)
+        .whereNotIn('pid', release)
+
+      await record_restricted_free_agency_bid_change({
+        db: trx,
+        bid_id: restrictedFreeAgencyBid.uid,
+        change_type: bid_change_types.UPDATED,
+        change_source: bid_change_sources.API_BID_UPDATE,
+        changed_by_user_id: req.auth.userId
       })
-      .where('uid', restrictedFreeAgencyBid.uid)
-
-    if (release.length) {
-      const releaseInserts = release.map((pid) => ({
-        restricted_free_agency_bid_id: restrictedFreeAgencyBid.uid,
-        pid
-      }))
-      await db('restricted_free_agency_releases')
-        .insert(releaseInserts)
-        .onConflict(['restricted_free_agency_bid_id', 'pid'])
-        .merge()
-    }
-
-    await db('restricted_free_agency_releases')
-      .del()
-      .where('restricted_free_agency_bid_id', restrictedFreeAgencyBid.uid)
-      .whereNotIn('pid', release)
+    })
 
     res.send({
       ...restrictedFreeAgencyBid,

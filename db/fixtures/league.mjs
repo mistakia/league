@@ -25,6 +25,12 @@ export default async function (knex, league_params = {}) {
   // and made a later nominate return 400 -- on CI only, because it depends on
   // which spec claimed the player first.
   await knex('restricted_free_agency_nominations').del()
+  // The bid audit trail outlives the bids it describes by design -- nothing in
+  // production ever deletes from it. That makes it exactly the kind of table
+  // this reset must name: a leftover changelog row from an earlier spec file
+  // carries a bid id the next file's sequence will hand out again, so an
+  // assertion on "this bid's history" would read another spec's rows.
+  await knex('bid_changelog').del()
   await knex('poaches').del()
   await knex('poach_releases').del()
   await knex('draft').del()

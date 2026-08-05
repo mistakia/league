@@ -1,5 +1,10 @@
 import knex from '#db'
-import { current_season } from '#constants'
+import {
+  current_season,
+  bid_change_types,
+  bid_change_sources
+} from '#constants'
+import { record_restricted_free_agency_bid_change } from '#libs-server/record-bid-change.mjs'
 
 // Seed a restricted free agency bid together with the nomination it belongs to.
 //
@@ -101,7 +106,39 @@ export const insert_restricted_free_agency_bid = async ({
     })
     .returning('uid')
 
-  return rows[0].uid
+  const bid_id = rows[0].uid
+
+  // Seed the audit trail too, so no fixture can produce a bid that the writers
+  // could not have produced. Every live write path records a change; a bid with
+  // an empty changelog is a shape production cannot reach, and a fixture that
+  // creates one lets a spec pass over code that never recorded anything -- the
+  // same defect as the `announced`-on-a-competing-bid fixture this file already
+  // exists to prevent.
+  //
+  // The change type follows the state being seeded rather than always being
+  // `created`, because a fixture that seeds a settled or cancelled bid is
+  // seeding the END of a history. Claiming a five-season-old processed bid was
+  // just created would put a row in the trail that is right about when and
+  // wrong about what.
+  let change_type = bid_change_types.CREATED
+  if (processed) {
+    change_type = bid_change_types.SETTLED
+  } else if (cancelled) {
+    change_type = bid_change_types.CANCELLED
+  }
+
+  await record_restricted_free_agency_bid_change({
+    db: knex,
+    bid_id,
+    change_type,
+    change_source:
+      change_type === bid_change_types.SETTLED
+        ? bid_change_sources.SETTLEMENT_SCRIPT
+        : bid_change_sources.API_BID_CREATE,
+    changed_by_user_id: change_type === bid_change_types.SETTLED ? null : userid
+  })
+
+  return bid_id
 }
 
 export default insert_restricted_free_agency_bid

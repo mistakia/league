@@ -6,7 +6,9 @@ import db from '#db'
 import {
   current_season,
   league_default_rfa_window_hours,
-  league_default_rfa_processing_lead_hours
+  league_default_rfa_processing_lead_hours,
+  bid_change_types,
+  bid_change_sources
 } from '#constants'
 import {
   get_restricted_free_agency_window_config,
@@ -22,7 +24,8 @@ import {
   is_main,
   resetWaiverOrder,
   report_job,
-  throw_if_shortfall
+  throw_if_shortfall,
+  record_restricted_free_agency_bid_change
 } from '#libs-server'
 import { resolve_restricted_free_agency_bid_error_outcome } from '#libs-server/restricted-free-agency-bid-error.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -102,9 +105,19 @@ async function settle_losing_bids({
       original_team_id
     })
 
-    await db('restricted_free_agency_bids')
-      .update({ is_successful: 0, outcome, processed: timestamp })
-      .where('uid', losing_bid.uid)
+    await db.transaction(async (trx) => {
+      await trx('restricted_free_agency_bids')
+        .update({ is_successful: 0, outcome, processed: timestamp })
+        .where('uid', losing_bid.uid)
+
+      await record_restricted_free_agency_bid_change({
+        db: trx,
+        bid_id: losing_bid.uid,
+        change_type: bid_change_types.SETTLED,
+        change_source: bid_change_sources.SETTLEMENT_SCRIPT,
+        changed_by_user_id: null
+      })
+    })
   }
 }
 
@@ -396,16 +409,34 @@ const run = async ({ dry_run = false } = {}) => {
       // this never has to match on the message text -- the habit that made the
       // retired `reason` column a record of exception wording rather than of
       // auction results.
+      //
+      // The changelog entry is conditional on the UPDATE having applied. The
+      // `whereNull('processed')` guard above exists so a throw raised after the
+      // success commit cannot rewrite the record, and in that case this
+      // statement legitimately touches nothing -- recording a settlement anyway
+      // would put a failure in the trail that the table never held.
       if (!dry_run && error) {
-        await db('restricted_free_agency_bids')
-          .update({
-            is_successful: false,
-            outcome: resolve_restricted_free_agency_bid_error_outcome(error),
-            outcome_detail: error.message,
-            processed: timestamp
-          })
-          .where('uid', winning_bid.uid)
-          .whereNull('processed')
+        await db.transaction(async (trx) => {
+          const updated_count = await trx('restricted_free_agency_bids')
+            .update({
+              is_successful: false,
+              outcome: resolve_restricted_free_agency_bid_error_outcome(error),
+              outcome_detail: error.message,
+              processed: timestamp
+            })
+            .where('uid', winning_bid.uid)
+            .whereNull('processed')
+
+          if (updated_count) {
+            await record_restricted_free_agency_bid_change({
+              db: trx,
+              bid_id: winning_bid.uid,
+              change_type: bid_change_types.SETTLED,
+              change_source: bid_change_sources.SETTLEMENT_SCRIPT,
+              changed_by_user_id: null
+            })
+          }
+        })
       }
 
       // Get next bids to process for this league

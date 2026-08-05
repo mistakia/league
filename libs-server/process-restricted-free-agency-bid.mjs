@@ -4,10 +4,13 @@ import {
   roster_slot_types,
   player_tag_types,
   transaction_types,
-  restricted_free_agency_bid_outcomes
+  restricted_free_agency_bid_outcomes,
+  bid_change_types,
+  bid_change_sources
 } from '#constants'
 import db from '#db'
 import { restricted_free_agency_bid_error } from './restricted-free-agency-bid-error.mjs'
+import { record_restricted_free_agency_bid_change } from './record-bid-change.mjs'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
 import processRelease from './process-release.mjs'
@@ -179,6 +182,22 @@ export default async function ({
         player_id: pid,
         season_year: current_season.year
       })
+
+    // Inside the same transaction for the same reason the two writes above are:
+    // a settlement that committed without its trail row, or a trail row for a
+    // settlement that rolled back, are both states the audit exists to make
+    // impossible.
+    await record_restricted_free_agency_bid_change({
+      db: trx,
+      bid_id: uid,
+      change_type: bid_change_types.SETTLED,
+      change_source: bid_change_sources.SETTLEMENT_SCRIPT,
+      // No actor: settlement is automatic and no human chose this outcome.
+      // Attributing it to the bid's own manager would be the same category
+      // error as storing a presentation string in an outcome column -- the
+      // manager who submitted the bid is already on the row as `bid_user_id`.
+      changed_by_user_id: null
+    })
   })
 
   const pids = [pid]
