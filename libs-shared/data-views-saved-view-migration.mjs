@@ -133,6 +133,52 @@ export const BOOLEAN_PREFIX_PARAM_RENAMES = {
   zero_blitz: 'is_zero_blitz'
 }
 
+// Play-filter param keys renamed alongside their columns by the shorthand
+// conformance sweep (72346e579, db/adhoc/2026-08-04-conform-shorthand-plays.sql
+// and -tail.sql). 18 of the 204 renamed columns were also registry keys, and the
+// registry key IS the persisted key, so every saved view carrying one silently
+// lost its filter -- the same failure mode as the two maps above. Unlike those,
+// these rules ship AFTER the DDL rather than with it: the sweep landed without
+// them, and a production check on 2026-08-05 measured 49 orphaned occurrences
+// across 45 saved views (qtr 25, dot 7, route 7, dwn 5, wp 5).
+//
+// All 18 are covered rather than only the 5 with production hits. A client
+// running a stale bundle can save a view carrying any of them at any time, so a
+// key with zero occurrences today is a latent instance of the same bug, and a
+// one-shot SQL migration could not close that window at all.
+//
+// Applied AFTER PLAY_FILTER_PARAM_RENAMES, which matters for two keys: a view
+// saved before 2025-07-24 persists route_ngs / pru_ngs, which that map rewrites
+// to route / pru, which this map then rewrites to charted_route /
+// ngs_pass_rushers. The single migrate_params pass resolves those chains only in
+// this order.
+//
+// `dot` is deliberately absent. The depth-of-target param's COLUMN moved to
+// depth_of_target while its key stayed `dot`, because param resolution is
+// `column_name || param_key` and saved views persist the key -- so `dot` is
+// still a live registry key (nfl-plays-column-params.mjs) and rewriting it would
+// create the orphan rather than fix one.
+export const SHORTHAND_PARAM_RENAMES = {
+  avsk: 'avoided_sacks',
+  boxdb: 'defensive_backs_in_box',
+  cov: 'coverage_on_target',
+  cp: 'completion_probability',
+  cpoe: 'completion_percentage_over_expected',
+  db: 'defensive_back_count',
+  dwn: 'down_number',
+  ep: 'expected_points',
+  mbt: 'missed_or_broken_tackle',
+  oopd: 'out_of_pocket_details',
+  pru: 'ngs_pass_rushers',
+  qtr: 'quarter',
+  route: 'charted_route',
+  surf: 'playing_surface',
+  temp: 'temperature_fahrenheit',
+  wind: 'wind_speed_mph',
+  wp: 'win_probability',
+  wpa: 'win_probability_added'
+}
+
 // scoring_format_hash -> scoring_format_id, stranded by the format-id migration
 // (44cf7fd9 code-side, db/adhoc/2026-05-28-format-id-migration.sql). Unlike the
 // renames above this needs a VALUE mapping, not just a key rename: the persisted
@@ -160,6 +206,24 @@ const SCORING_FORMAT_HASH_TO_ID = {
     'b7855f1f-9f5e-47c4-ba3a-3e906272a60c'
 }
 
+// Merge order is load-bearing: a legacy key may chain through two maps in the
+// single migrate_params pass below, and only this order resolves the chains
+// (qb_pressure_ngs -> qb_pressure_tracking -> is_qb_pressure_tracking;
+// route_ngs -> route -> charted_route; pru_ngs -> pru -> ngs_pass_rushers).
+const PARAM_KEY_RENAMES = {
+  ...PLAY_FILTER_PARAM_RENAMES,
+  ...BOOLEAN_PREFIX_PARAM_RENAMES,
+  ...SHORTHAND_PARAM_RENAMES
+}
+
+// Every legacy param key this module rewrites at read time, exported so
+// db/adhoc/check-saved-view-param-coverage.mjs can recognise them EXACTLY. That
+// checker otherwise infers handling by grepping this file for tokens, and its
+// tokenizer requires three characters or more -- so a two-character legacy key
+// (wp, cp, ep, db) is structurally unmatchable and reports as an orphan even
+// with a correct rule in place. Measured: `wp` did exactly that on 2026-08-05.
+export const MIGRATED_PARAM_KEYS = new Set(Object.keys(PARAM_KEY_RENAMES))
+
 const migrate_params = (params) => {
   let next = params
   let changed = false
@@ -184,10 +248,7 @@ const migrate_params = (params) => {
     }
   }
 
-  for (const [legacy_key, current_key] of Object.entries({
-    ...PLAY_FILTER_PARAM_RENAMES,
-    ...BOOLEAN_PREFIX_PARAM_RENAMES
-  })) {
+  for (const [legacy_key, current_key] of Object.entries(PARAM_KEY_RENAMES)) {
     if (!Object.prototype.hasOwnProperty.call(next, legacy_key)) continue
     const { [legacy_key]: value, ...rest } = next
     // A view that somehow carries both keys keeps the current one; the legacy

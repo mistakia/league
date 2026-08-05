@@ -78,10 +78,11 @@ const walk_directory = async (directory) => {
 }
 
 const build_recognised_key_set = async () => {
-  const [common, plays, team] = await Promise.all([
+  const [common, plays, team, migration] = await Promise.all([
     import('#libs-shared/common-column-params.mjs'),
     import('#libs-shared/nfl-plays-column-params.mjs'),
-    import('#libs-shared/nfl-plays-team-column-params.mjs')
+    import('#libs-shared/nfl-plays-team-column-params.mjs'),
+    import('#libs-shared/data-views-saved-view-migration.mjs')
   ])
 
   const declared = new Set([
@@ -98,7 +99,10 @@ const build_recognised_key_set = async () => {
     files.push(...(await walk_directory(path.join(repo_root, directory))))
   }
 
-  const consumed = new Set()
+  // Migrated keys are recognised EXACTLY rather than through the presence-grep
+  // below, which requires three characters or more and so can never match a
+  // two-character legacy key (wp, cp, ep, db) no matter how correct its rule is.
+  const consumed = new Set(migration.MIGRATED_PARAM_KEYS)
   for (const file of files) {
     const text = await fs.readFile(file, 'utf8')
     for (const token of text.match(/[a-z][a-z0-9_]{2,}/g) || []) {

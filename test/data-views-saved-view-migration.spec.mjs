@@ -5,6 +5,7 @@ import * as chai from 'chai'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import {
   BOOLEAN_PREFIX_PARAM_RENAMES,
+  SHORTHAND_PARAM_RENAMES,
   migrate_column_entry,
   migrate_table_state
 } from '#libs-shared/data-views-saved-view-migration.mjs'
@@ -77,13 +78,15 @@ describe('data-views saved-view migrator', () => {
         }
       })
       expect(result.changed).to.equal(true)
+      // route and pru are NOT terminal: the 2026-08-05 shorthand sweep moved
+      // both again, so each resolves through two rules in this single pass.
       expect(result.params).to.deep.equal({
-        route: ['GO'],
+        charted_route: ['GO'],
         cov_type: ['COVER_1'],
         man_zone: ['MAN_COVERAGE'],
         time_to_throw: [0, 3],
         air_yards: [5, 20],
-        pru: [1, 4],
+        ngs_pass_rushers: [1, 4],
         box_defenders: [6, 8]
       })
     })
@@ -115,7 +118,9 @@ describe('data-views saved-view migrator', () => {
         params: { route_ngs: ['GO'], route: ['SLANT'] }
       })
       expect(result.changed).to.equal(true)
-      expect(result.params).to.deep.equal({ route: ['SLANT'] })
+      // route_ngs is dropped because route is already present; the surviving
+      // route is then carried to charted_route by the shorthand map.
+      expect(result.params).to.deep.equal({ charted_route: ['SLANT'] })
     })
 
     // box_defenders is ambiguous across that commit (box_ngs became
@@ -202,6 +207,89 @@ describe('data-views saved-view migrator', () => {
         params: { motion: true, is_motion: false }
       })
       expect(result.params).to.deep.equal({ is_motion: false })
+    })
+  })
+
+  describe('shorthand param renames (2026-08-05 conformance sweep)', () => {
+    // Same failure mode as the boolean-prefix block above, and the same gate
+    // structure: assertion one proves each rule lands on a key the registry
+    // still carries, assertion two proves no legacy key survived the rename,
+    // and the count is what catches a rule DELETED from the map (the first two
+    // iterate the map under test, so an absent entry is simply not iterated).
+    it('migrates every legacy key to a key the registry still carries', () => {
+      for (const [legacy_key, current_key] of Object.entries(
+        SHORTHAND_PARAM_RENAMES
+      )) {
+        const result = migrate_column_entry({
+          column_id: 'player_pass_attempts_from_plays',
+          params: { [legacy_key]: [1] }
+        })
+        expect(result.changed, legacy_key).to.equal(true)
+        expect(result.params, legacy_key).to.deep.equal({ [current_key]: [1] })
+        expect(
+          Object.prototype.hasOwnProperty.call(
+            nfl_plays_column_params,
+            current_key
+          ),
+          `${current_key} is not a registry key`
+        ).to.equal(true)
+      }
+    })
+
+    it('leaves no renamed key still present in the registry', () => {
+      const stranded = Object.keys(SHORTHAND_PARAM_RENAMES).filter((key) =>
+        Object.prototype.hasOwnProperty.call(nfl_plays_column_params, key)
+      )
+      expect(stranded).to.deep.equal([])
+    })
+
+    // 18 of the 204 renamed columns were also registry keys. If a future rename
+    // adds rules here, raise this number deliberately rather than deleting the
+    // assertion.
+    it('carries a rule for each of the 18 registry keys that moved', () => {
+      expect(Object.keys(SHORTHAND_PARAM_RENAMES)).to.have.lengthOf(18)
+    })
+
+    // The two keys whose rewrite is a CHAIN: an _ngs key renamed in 8a4b6e4a
+    // lands on a shorthand key that the 2026-08-05 sweep then moved again. The
+    // single migrate_params pass resolves this only because the shorthand map is
+    // merged after PLAY_FILTER_PARAM_RENAMES.
+    it('chains route_ngs through to charted_route', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_targets_from_plays',
+        params: { route_ngs: ['GO'] }
+      })
+      expect(result.params).to.deep.equal({ charted_route: ['GO'] })
+    })
+
+    it('chains pru_ngs through to ngs_pass_rushers', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { pru_ngs: [4] }
+      })
+      expect(result.params).to.deep.equal({ ngs_pass_rushers: [4] })
+    })
+
+    // `dot` is the depth-of-target param whose COLUMN moved to depth_of_target
+    // while its key stayed. It must NOT be rewritten -- a rule for it would
+    // create the orphan rather than fix one.
+    it('leaves the dot param alone', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_targets_from_plays',
+        params: { dot: [10] }
+      })
+      expect(result.params).to.deep.equal({ dot: [10] })
+      expect(
+        Object.prototype.hasOwnProperty.call(nfl_plays_column_params, 'dot')
+      ).to.equal(true)
+    })
+
+    it('keeps the current key when a view carries both', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { qtr: [1], quarter: [4] }
+      })
+      expect(result.params).to.deep.equal({ quarter: [4] })
     })
   })
 
