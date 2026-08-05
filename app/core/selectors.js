@@ -1177,7 +1177,9 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
     reserve: {
       reserve_short_term_eligible: false,
       reserve_long_term_eligible: false,
-      covid: false
+      covid: false,
+      // a reserve move that starts on the practice squad activates the player
+      is_practice_squad_activation: false
     }
   }
 
@@ -1319,29 +1321,23 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
       ) {
         const reserve = get_reserve_eligibility_from_player_map({ player_map })
 
-        // For practice squad players, only allow reserve if they have active poaching claim
-        const isPracticeSquad =
-          playerSlot === roster_slot_types.PS ||
-          playerSlot === roster_slot_types.PSD
-        let practiceSquadReserveEligible = true
-        if (isPracticeSquad) {
-          const leaguePoaches = get_poaches_for_current_league(state)
-          practiceSquadReserveEligible = leaguePoaches.has(playerId)
-        }
+        // An unprotected practice squad player may go straight to reserve -- the
+        // move is an activation and the server records it as one. Protected
+        // players are already excluded by `status.protected` above.
+        status.reserve.is_practice_squad_activation =
+          practice_squad_unprotected_slots.includes(playerSlot)
 
         if (
           reserve.reserve_short_term_eligible &&
           playerSlot !== roster_slot_types.RESERVE_SHORT_TERM &&
-          playerSlot !== roster_slot_types.RESERVE_LONG_TERM &&
-          practiceSquadReserveEligible
+          playerSlot !== roster_slot_types.RESERVE_LONG_TERM
         ) {
           status.reserve.reserve_short_term_eligible = true
         }
 
         if (
           reserve.reserve_short_term_eligible &&
-          playerSlot !== roster_slot_types.RESERVE_LONG_TERM &&
-          practiceSquadReserveEligible
+          playerSlot !== roster_slot_types.RESERVE_LONG_TERM
         ) {
           status.reserve.reserve_long_term_eligible = true
         }
@@ -1349,8 +1345,7 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
         if (
           reserve.cov &&
           playerSlot !== roster_slot_types.COV &&
-          current_season.isRegularSeason &&
-          practiceSquadReserveEligible
+          current_season.isRegularSeason
         ) {
           status.reserve.cov = true
         }

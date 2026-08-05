@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import { Roster } from '#libs-shared'
 import {
   current_season,
+  reserve_slots,
   roster_slot_types,
   transaction_types
 } from '#constants'
@@ -42,6 +43,15 @@ export default async function ({
   // make sure player is not on practice squad
   if (roster.practice.find((p) => p.pid === deactivate_pid)) {
     throw new Error('player is already on practice squad')
+  }
+
+  // A reserve player can not be returned to the practice squad. The
+  // previously-activated check below catches most of them, but a player signed
+  // straight to the active roster and then placed on reserve carries no
+  // ROSTER_ACTIVATE row -- and the 48-hour cutoff is gated on `isActive`, which
+  // is false for a reserve player, so nothing else here stops the move.
+  if (reserve_slots.includes(roster.get(deactivate_pid).slot)) {
+    throw new Error('reserve players can not be placed on the practice squad')
   }
 
   const player_rows = await db('player').where('pid', deactivate_pid).limit(1)

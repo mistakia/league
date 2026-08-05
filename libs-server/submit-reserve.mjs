@@ -6,6 +6,7 @@ import {
 } from '#libs-shared'
 import {
   current_season,
+  practice_squad_unprotected_slots,
   roster_slot_types,
   transaction_types,
   transaction_type_display_names
@@ -165,24 +166,15 @@ export default async function ({
     rosterPlayer.slot === roster_slot_types.PSP ||
     rosterPlayer.slot === roster_slot_types.PSDP
   ) {
-    throw new Error('protected players are not reserve eligible')
+    throw new Error('protected practice squad players can not be activated')
   }
 
-  // check if practice squad player has active poaching claims
-  if (
-    rosterPlayer.slot === roster_slot_types.PS ||
-    rosterPlayer.slot === roster_slot_types.PSD
-  ) {
-    const activePoaches = await db('poaches')
-      .where({ pid: reserve_pid })
-      .whereNull('processed')
-
-    if (activePoaches.length === 0) {
-      throw new Error(
-        'practice squad players can only be placed on reserve if they have an active poaching claim'
-      )
-    }
-  }
+  // An unprotected practice squad player moves straight to reserve without ever
+  // occupying a bench slot -- that is the point of this path, since the end
+  // state consumes no active roster slot and no cap. The move IS an activation
+  // and is recorded as one below.
+  const is_practice_squad_activation =
+    practice_squad_unprotected_slots.includes(rosterPlayer.slot)
 
   // make sure player is reserve eligible
   if (slot === roster_slot_types.COV) {
@@ -365,11 +357,48 @@ export default async function ({
     pid: reserve_pid
   })
 
+  const timestamp = Math.round(Date.now() / 1000)
+
+  // read before either insert -- the activation row would otherwise become the
+  // last transaction and feed its own salary back into the reserve row
   const { player_salary } = await getLastTransaction({
     pid: reserve_pid,
     lid: league_id,
     tid
   })
+
+  // The activation is a ledger row only -- the player never occupies a bench
+  // slot, so nothing is broadcast for it. Insertion order carries the ordering
+  // of the two rows, which share a timestamp.
+  if (is_practice_squad_activation) {
+    const activate_transaction = {
+      userid: user_id,
+      tid,
+      lid: league_id,
+      pid: reserve_pid,
+      type: transaction_types.ROSTER_ACTIVATE,
+      player_salary,
+      week: current_season.week,
+      year: current_season.year,
+      timestamp
+    }
+    await db('transactions').insert(activate_transaction)
+
+    // the player is no longer on a practice squad, so a pending poach can not
+    // succeed -- process-poach.mjs would reject it at processing time
+    await db('poaches')
+      .update({
+        is_successful: 0,
+        processed: timestamp,
+        reason: 'player is not on a practice squad' // TODO use constant
+      })
+      .where({
+        lid: league_id,
+        pid: reserve_pid
+      })
+      .whereNull('processed')
+  }
+
   const transaction = {
     userid: user_id,
     tid,
@@ -379,7 +408,7 @@ export default async function ({
     player_salary,
     week: current_season.week,
     year: current_season.year,
-    timestamp: Math.round(Date.now() / 1000)
+    timestamp
   }
   await db('transactions').insert(transaction)
 
@@ -395,7 +424,10 @@ export default async function ({
     year: current_season.year
   })
   const team = teams[0]
-  let message = `${team.name} (${team.abbreviation}) has placed ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) on ${transaction_type_display_names[type]}.`
+  const player_name = `${player_row.first_name} ${player_row.last_name} (${player_row.primary_position})`
+  let message = is_practice_squad_activation
+    ? `${team.name} (${team.abbreviation}) has activated ${player_name} and placed him on ${transaction_type_display_names[type]}.`
+    : `${team.name} (${team.abbreviation}) has placed ${player_name} on ${transaction_type_display_names[type]}.`
 
   if (activate_player_row) {
     message += ` ${activate_player_row.first_name} ${activate_player_row.last_name} (${activate_player_row.primary_position}) has been activated`

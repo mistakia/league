@@ -23,6 +23,11 @@ chai.use(chai_http)
 
 // user1 is the league fixture's commissioner (db/fixtures/league.mjs sets
 // commishid to user 1) and owns team 1; user2 owns team 2.
+// K and DST each have a single roster slot, so trading one to a team that
+// already holds one fails position validation on accept. Without an ORDER BY
+// the pick also depends on physical row order, which shifts whenever another
+// spec file consumes a different number of players from the shared pool -- that
+// combination made this helper fail intermittently on an unrelated change.
 const get_roster_player = async ({ tid }) => {
   const rows = await knex('rosters_players')
     .where({
@@ -31,7 +36,8 @@ const get_roster_player = async ({ tid }) => {
       year: current_season.year,
       week: current_season.week
     })
-    .whereNot('player_position', 'K')
+    .whereNotIn('player_position', ['K', 'DST'])
+    .orderBy('pid', 'asc')
     .limit(1)
   return rows[0]
 }

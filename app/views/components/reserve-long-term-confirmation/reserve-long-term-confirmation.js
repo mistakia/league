@@ -8,13 +8,16 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { roster_slot_types } from '@constants'
+import { practice_squad_unprotected_slots, roster_slot_types } from '@constants'
 
 export default function ReserveLongTermConfirmation({
   player_map,
   reserve,
   onClose
 }) {
+  const is_practice_squad_activation =
+    practice_squad_unprotected_slots.includes(player_map.get('slot'))
+
   const handle_submit = () => {
     const reserve_pid = player_map.get('pid')
     reserve({ reserve_pid, slot: roster_slot_types.RESERVE_LONG_TERM })
@@ -23,11 +26,22 @@ export default function ReserveLongTermConfirmation({
 
   return (
     <Dialog open onClose={onClose}>
-      <DialogTitle>Designate Reserve/IR (Long Term)</DialogTitle>
+      <DialogTitle>
+        {is_practice_squad_activation
+          ? 'Activate & Designate Reserve/IR (Long Term)'
+          : 'Designate Reserve/IR (Long Term)'}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText>
           {`${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on Reserves/IR (Long Term). You will not be able to activate him until the offseason.`}
         </DialogContentText>
+        {is_practice_squad_activation && (
+          <DialogContentText>
+            This activates him off the practice squad. He will no longer be
+            practice squad eligible and can not be returned to the practice
+            squad. No active roster space is required.
+          </DialogContentText>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} text>

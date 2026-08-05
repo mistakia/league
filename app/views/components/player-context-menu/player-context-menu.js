@@ -131,9 +131,14 @@ export default function PlayerContextMenu({
   }
 
   const handleReserveCOV = () => {
+    const practice_squad_notice = status.reserve.is_practice_squad_activation
+      ? ' This activates him off the practice squad. He will no longer be practice squad eligible and can not be returned to the practice squad. No active roster space is required.'
+      : ''
     showConfirmation({
-      title: 'Roster Reserve',
-      description: `${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
+      title: status.reserve.is_practice_squad_activation
+        ? 'Activate & Roster Reserve'
+        : 'Roster Reserve',
+      description: `${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.${practice_squad_notice}`,
       on_confirm_func: () =>
         reserve({
           reserve_pid: player_map.get('pid'),
@@ -344,13 +349,19 @@ export default function PlayerContextMenu({
       })
     }
 
+    // a reserve move from the practice squad activates the player, so the label
+    // has to say so -- the consequence is not reversible
+    const reserve_label_prefix = status.reserve.is_practice_squad_activation
+      ? 'Activate & Move to'
+      : 'Move to'
+
     add({
       key: 'reserve_short_term',
       onClick: handle_reserve_short_term,
       disabled:
         !status.reserve.reserve_short_term_eligible ||
         (status.locked && status.starter),
-      label: 'Move to Short Term Reserve'
+      label: `${reserve_label_prefix} Short Term Reserve`
     })
 
     if (status.reserve.reserve_long_term_eligible) {
@@ -358,7 +369,7 @@ export default function PlayerContextMenu({
         key: 'reserve_long_term',
         onClick: handle_reserve_long_term,
         disabled: status.locked && status.starter,
-        label: 'Move to Long Term Reserve'
+        label: `${reserve_label_prefix} Long Term Reserve`
       })
     }
 
@@ -366,7 +377,7 @@ export default function PlayerContextMenu({
       key: 'cov',
       onClick: handleReserveCOV,
       disabled: !status.reserve.cov || (status.locked && status.starter),
-      label: 'Move to Reserve/COV'
+      label: `${reserve_label_prefix} Reserve/COV`
     })
 
     add({

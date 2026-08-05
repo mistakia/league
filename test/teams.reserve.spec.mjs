@@ -470,7 +470,42 @@ describe('API /teams - reserve', function () {
           leagueId: 1
         })
 
-      await error(request, 'protected players are not reserve eligible')
+      await error(
+        request,
+        'protected practice squad players can not be activated'
+      )
+    })
+
+    it('player is protected - drafted practice squad', async () => {
+      const player = await select_player_with_tracking()
+      await addPlayer({
+        leagueId: 1,
+        player,
+        teamId: 1,
+        userId: 1,
+        slot: roster_slot_types.PSDP
+      })
+      await knex('player')
+        .update({
+          roster_status: player_nfl_status.INJURED_RESERVE
+        })
+        .where({
+          pid: player.pid
+        })
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          slot: roster_slot_types.RESERVE_SHORT_TERM,
+          leagueId: 1
+        })
+
+      await error(
+        request,
+        'protected practice squad players can not be activated'
+      )
     })
 
     it('player not rostered on previous week roster', async () => {
@@ -511,8 +546,12 @@ describe('API /teams - reserve', function () {
       await error(request, 'not eligible, not rostered long enough')
     })
 
-    it('practice squad player without active poaching claim', async () => {
-      const player = await select_player_with_tracking()
+    it('practice squad player not reserve eligible', async () => {
+      MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
+      const player = await select_player_with_tracking({
+        game_designation: null,
+        roster_status: player_nfl_status.ACTIVE
+      })
       await addPlayer({
         leagueId: 1,
         player,
@@ -520,13 +559,6 @@ describe('API /teams - reserve', function () {
         userId: 1,
         slot: roster_slot_types.PS
       })
-      await knex('player')
-        .update({
-          roster_status: player_nfl_status.INJURED_RESERVE
-        })
-        .where({
-          pid: player.pid
-        })
 
       const request = chai_request
         .execute(server)
@@ -538,43 +570,7 @@ describe('API /teams - reserve', function () {
           leagueId: 1
         })
 
-      await error(
-        request,
-        'practice squad players can only be placed on reserve if they have an active poaching claim'
-      )
-    })
-
-    it('practice squad drafted player without active poaching claim', async () => {
-      const player = await select_player_with_tracking()
-      await addPlayer({
-        leagueId: 1,
-        player,
-        teamId: 1,
-        userId: 1,
-        slot: roster_slot_types.PSD
-      })
-      await knex('player')
-        .update({
-          roster_status: player_nfl_status.INJURED_RESERVE
-        })
-        .where({
-          pid: player.pid
-        })
-
-      const request = chai_request
-        .execute(server)
-        .post('/api/teams/1/reserve')
-        .set('Authorization', `Bearer ${user1}`)
-        .send({
-          reserve_pid: player.pid,
-          slot: roster_slot_types.RESERVE_SHORT_TERM,
-          leagueId: 1
-        })
-
-      await error(
-        request,
-        'practice squad players can only be placed on reserve if they have an active poaching claim'
-      )
+      await error(request, 'player not eligible for Reserve')
     })
   })
 
@@ -1050,6 +1046,27 @@ describe('API /teams - reserve', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
+
+      // the move is an activation, so it writes both rows
+      const transactions = await knex('transactions')
+        .where({ lid: leagueId, pid: player.pid })
+        .whereIn('type', [
+          transaction_types.ROSTER_ACTIVATE,
+          transaction_types.RESERVE_IR
+        ])
+        .orderBy('uid', 'asc')
+      expect(transactions.map((t) => t.type)).to.deep.equal([
+        transaction_types.ROSTER_ACTIVATE,
+        transaction_types.RESERVE_IR
+      ])
+
+      // the player is no longer on a practice squad, so the poach can not succeed
+      const poaches = await knex('poaches').where({
+        lid: leagueId,
+        pid: player.pid
+      })
+      expect(poaches[0].is_successful).to.equal(false)
+      expect(poaches[0].processed).to.not.equal(null)
     })
 
     it('practice squad drafted player with active poaching claim can be reserved', async () => {
@@ -1105,6 +1122,177 @@ describe('API /teams - reserve', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
+    })
+  })
+
+  describe('practice squad activation to reserve', function () {
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+    })
+
+    // Asserts the whole contract of the combined move: the reserve slot is
+    // reached directly, both ledger rows are written in order, and no bench slot
+    // was ever occupied.
+    const assert_practice_squad_activation = async ({
+      practice_squad_slot,
+      reserve_slot,
+      reserve_transaction_type,
+      mock_date,
+      roster_status = player_nfl_status.INJURED_RESERVE,
+      acquisition_transaction = transaction_types.DRAFT
+    }) => {
+      MockDate.set(mock_date)
+      const player = await select_player_with_tracking()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: practice_squad_slot,
+        transaction: acquisition_transaction,
+        value
+      })
+
+      await knex('player')
+        .update({
+          roster_status
+        })
+        .where({
+          pid: player.pid
+        })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: reserve_slot
+        })
+
+      // name the rejection rather than reporting a bare status mismatch
+      expect(res.status, res.body && res.body.error).to.equal(200)
+      res.should.be.json
+      res.body.tid.should.equal(teamId)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(reserve_slot)
+      res.body.transaction.type.should.equal(reserve_transaction_type)
+      res.body.transaction.player_salary.should.equal(value)
+
+      const rosterRows = await knex('rosters_players')
+        .where({
+          year: current_season.year,
+          week: current_season.week,
+          pid: player.pid
+        })
+        .limit(1)
+      expect(rosterRows[0].slot).to.equal(reserve_slot)
+
+      const transactions = await knex('transactions')
+        .where({ lid: leagueId, pid: player.pid })
+        .whereIn('type', [
+          transaction_types.ROSTER_ACTIVATE,
+          reserve_transaction_type
+        ])
+        .orderBy('uid', 'asc')
+      expect(transactions.map((t) => t.type)).to.deep.equal([
+        transaction_types.ROSTER_ACTIVATE,
+        reserve_transaction_type
+      ])
+      expect(transactions[0].player_salary).to.equal(value)
+
+      // the player never occupied an active roster slot
+      const active_rows = await knex('rosters_players')
+        .where({
+          year: current_season.year,
+          pid: player.pid
+        })
+        .whereIn('slot', active_roster_slots)
+      expect(active_rows.length).to.equal(0)
+
+      return player
+    }
+
+    it('signed practice squad player to short term reserve', async () => {
+      await assert_practice_squad_activation({
+        practice_squad_slot: roster_slot_types.PS,
+        reserve_slot: roster_slot_types.RESERVE_SHORT_TERM,
+        reserve_transaction_type: transaction_types.RESERVE_IR,
+        mock_date: regular_season_start
+          .clone()
+          .subtract('1', 'week')
+          .toISOString()
+      })
+    })
+
+    it('drafted practice squad player to short term reserve', async () => {
+      await assert_practice_squad_activation({
+        practice_squad_slot: roster_slot_types.PSD,
+        reserve_slot: roster_slot_types.RESERVE_SHORT_TERM,
+        reserve_transaction_type: transaction_types.RESERVE_IR,
+        mock_date: regular_season_start
+          .clone()
+          .subtract('1', 'week')
+          .toISOString()
+      })
+    })
+
+    it('signed practice squad player to long term reserve', async () => {
+      await assert_practice_squad_activation({
+        practice_squad_slot: roster_slot_types.PS,
+        reserve_slot: roster_slot_types.RESERVE_LONG_TERM,
+        reserve_transaction_type: transaction_types.RESERVE_LONG_TERM,
+        mock_date: regular_season_start
+          .clone()
+          .subtract('1', 'week')
+          .toISOString()
+      })
+    })
+
+    it('drafted practice squad player to reserve/cov', async () => {
+      await assert_practice_squad_activation({
+        practice_squad_slot: roster_slot_types.PSD,
+        reserve_slot: roster_slot_types.COV,
+        reserve_transaction_type: transaction_types.RESERVE_COV,
+        // COV is refused in the offseason and needs its own roster status. In
+        // season the rostered-a-week rule applies, which only a trade bypasses.
+        mock_date: regular_season_start.clone().add('1', 'week').toISOString(),
+        roster_status: player_nfl_status.INJURED_RESERVE_COVID,
+        acquisition_transaction: transaction_types.TRADE
+      })
+    })
+
+    it('activated player can not be returned to the practice squad', async () => {
+      const player = await assert_practice_squad_activation({
+        practice_squad_slot: roster_slot_types.PS,
+        reserve_slot: roster_slot_types.RESERVE_SHORT_TERM,
+        reserve_transaction_type: transaction_types.RESERVE_IR,
+        mock_date: regular_season_start
+          .clone()
+          .subtract('1', 'week')
+          .toISOString()
+      })
+
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/deactivate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          deactivate_pid: player.pid,
+          leagueId: 1
+        })
+
+      await error(
+        request,
+        'reserve players can not be placed on the practice squad'
+      )
     })
   })
 

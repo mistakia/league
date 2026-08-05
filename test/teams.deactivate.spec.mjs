@@ -201,13 +201,8 @@ describe('API /teams - deactivate', function () {
       // TODO
     })
 
-    it('short term reserve player', async () => {
-      // TODO
-    })
-
-    it('covid player', async () => {
-      // TODO
-    })
+    // reserve players are covered in the errors block -- they can not be
+    // returned to the practice squad
   })
 
   describe('errors', function () {
@@ -297,6 +292,36 @@ describe('API /teams - deactivate', function () {
 
       await error(request, 'player is already on practice squad')
     })
+
+    for (const [label, slot] of [
+      ['short term reserve', roster_slot_types.RESERVE_SHORT_TERM],
+      ['long term reserve', roster_slot_types.RESERVE_LONG_TERM],
+      ['reserve/cov', roster_slot_types.COV]
+    ]) {
+      it(`player on ${label} can not be deactivated`, async () => {
+        const player = await selectPlayer({ exclude_rostered_players: true })
+        await addPlayer({
+          leagueId: 1,
+          player,
+          teamId: 1,
+          userId: 1,
+          slot
+        })
+        const request = chai_request
+          .execute(server)
+          .post('/api/teams/1/deactivate')
+          .set('Authorization', `Bearer ${user1}`)
+          .send({
+            deactivate_pid: player.pid,
+            leagueId: 1
+          })
+
+        await error(
+          request,
+          'reserve players can not be placed on the practice squad'
+        )
+      })
+    }
 
     it('exceed roster limits', async () => {
       // TODO

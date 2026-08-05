@@ -19,8 +19,8 @@ const router = express.Router({ mergeParams: true })
  *
  *       **Reserve Eligibility Rules:**
  *       - Player must be on the team and meet standard reserve requirements
- *       - Protected practice squad players (PSP, PSDP) cannot be placed on reserve
- *       - Unprotected practice squad players (PS, PSD) can ONLY be placed on reserve if they have an active poaching claim
+ *       - Protected practice squad players (PSP, PSDP) cannot be activated and so cannot be placed on reserve
+ *       - Unprotected practice squad players (PS, PSD) can be placed on reserve directly. The move activates the player — a ROSTER_ACTIVATE transaction is recorded alongside the reserve transaction — and requires no active roster space. The player is no longer practice squad eligible afterward, and any pending poaching claim on him is marked unsuccessful.
  *       - Player must have been rostered for at least one week (unless acquired via trade)
  *       - Player must meet NFL injury status requirements for the reserve type
  *     security:
@@ -114,11 +114,7 @@ const router = express.Router({ mergeParams: true })
  *               protectedPlayer:
  *                 summary: Protected practice squad player
  *                 value:
- *                   error: "protected players are not reserve eligible"
- *               practiceSquadNoPoach:
- *                 summary: Practice squad player without active poach
- *                 value:
- *                   error: "practice squad players can only be placed on reserve if they have an active poaching claim"
+ *                   error: "protected practice squad players can not be activated"
  *               notEligible:
  *                 summary: Player not reserve eligible
  *                 value:
