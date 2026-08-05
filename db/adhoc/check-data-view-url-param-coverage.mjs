@@ -47,14 +47,39 @@
 //   ... --json      machine-readable report
 //   ... --verbose   list every accepted key with its URL count
 //
-// NEGATIVE CONTROL, required before trusting a green: delete the `splits` entry
-// from `LEGACY_URL_PARAM_ALIASES`, re-run, confirm `splits` is reported over its
-// ~309 URLs, and put it back. A gate that cannot fail is not a gate, and the
-// sibling gate had gone un-controlled from the day it was written until the day
-// it was found blind.
+// THIS IS NOT A CI GATE, and cannot become one: it reads the production `urls`
+// table, so wiring it into CI would make master's health depend on database
+// reachability. It is a per-cluster hand-run check, like `check-renamed-column-
+// consumers.mjs --gate 2`. Run it when a cluster touches a top-level
+// `table_state` key, and again after the frontend deploy that ships the alias.
+//
+// ACCEPTANCE TEST — this gate must be watched to FAIL before any green from it
+// is worth anything, and the falsification is named rather than described:
+//
+//   1. Delete the `splits: 'row_axes'` entry from LEGACY_URL_PARAM_ALIASES in
+//      app/core/data-views/parse-table-state-from-url.mjs.
+//   2. NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 \
+//        node db/adhoc/check-data-view-url-param-coverage.mjs
+//   3. REQUIRED result: `UNACCEPTED  splits` over 423 url(s), exit 1.
+//   4. Restore the entry; re-run; exit 0.
+//
+// Run both directions on 2026-08-05 at `ccc0a3d81`, with a sampled hash
+// confirmed to resolve to a real row. Re-run it after any change to this file --
+// a gate nobody has watched fail is not evidence, and the sibling saved-view
+// gate went un-controlled from the day it was written until the day it was found
+// structurally unable to report the keys its own incident was about.
+//
+// THERE IS NO SUPPRESSION MECHANISM HERE, deliberately. Every accepted key comes
+// from an imported declaration, so the only way to quiet a finding is to declare
+// the key -- which is the fix. Do not add a name filter or a stoplist: that is
+// the third-recorded failure mode in this program of a gate reporting success
+// while structurally unable to detect what it measures. If a key ever genuinely
+// needs suppressing, do it per key with a recorded reason in a checked-in file.
 //
 // Exit 0 = every query-string key is accepted by some reader; 1 = unaccepted
-// keys found; 2 = tooling error.
+// keys found; 2 = tooling error. Sets `process.exitCode` rather than calling
+// `process.exit`, which truncates stdout at the 64KB pipe buffer and so silently
+// emits unparseable `--json` output.
 
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
