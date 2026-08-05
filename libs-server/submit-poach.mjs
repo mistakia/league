@@ -42,7 +42,7 @@ export default async function ({
     .where({
       lid: leagueId,
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       pid
     })
     .where(function () {
@@ -153,7 +153,7 @@ export default async function ({
   const player_team = await db('teams')
     .where({
       uid: playerTid,
-      year: current_season.year,
+      season_year: current_season.year,
       lid: leagueId
     })
     .first()

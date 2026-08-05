@@ -48,7 +48,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 1,
           userid: 1
@@ -59,7 +59,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           lid: 1,
           type: transaction_types.POACHED,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 1,
           userid: 2
@@ -340,7 +340,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         lid: 1,
         type: transaction_types.ROSTER_ADD,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: poach_timestamp + 12 * 60 * 60, // 12 hours later
         week: current_season.week - 1,
         userid: 1
@@ -518,7 +518,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         type: transaction_types.PRACTICE_ADD,
         player_salary: 0,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: originalTimestamp
       })
 
@@ -532,7 +532,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         type: transaction_types.POACHED,
         player_salary: 0,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: poachTimestamp
       })
 
@@ -546,7 +546,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         type: transaction_types.ROSTER_RELEASE,
         player_salary: 0,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: releaseTimestamp
       })
 
@@ -560,7 +560,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         type: transaction_types.ROSTER_ADD,
         player_salary: 0,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: readdTimestamp
       })
 

@@ -34,7 +34,7 @@ const normalize = (value) => {
  * Point-in-time read:
  *   SELECT DISTINCT ON (pid, week) pid, week, pts_added, market_salary, removed
  *   FROM league_format_player_projection_values_history
- *   WHERE league_format_id = ? AND year = ? AND observed_at <= ?
+ *   WHERE league_format_id = ? AND season_year = ? AND observed_at <= ?
  *   ORDER BY pid, week, observed_at DESC;
  * ...then discard rows where `removed` is true.
  *
@@ -58,7 +58,7 @@ export default async function record_league_format_projection_value_history({
   const previous_rows = await db(HISTORY_TABLE)
     .distinctOn('pid', 'week')
     .select('pid', 'week', 'pts_added', 'market_salary', 'is_removed')
-    .where({ league_format_id, year })
+    .where({ league_format_id, season_year: year })
     .orderBy([
       { column: 'pid' },
       { column: 'week' },
@@ -92,7 +92,7 @@ export default async function record_league_format_projection_value_history({
     inserts.push({
       pid: value_row.pid,
       league_format_id,
-      year,
+      season_year: year,
       week,
       pts_added,
       market_salary,
@@ -108,7 +108,7 @@ export default async function record_league_format_projection_value_history({
     inserts.push({
       pid: previous.pid,
       league_format_id,
-      year,
+      season_year: year,
       week: previous.week,
       pts_added: null,
       market_salary: null,
@@ -130,7 +130,7 @@ export default async function record_league_format_projection_value_history({
           .onConflict([
             'pid',
             'league_format_id',
-            'year',
+            'season_year',
             'week',
             'observed_at'
           ])

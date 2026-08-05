@@ -68,7 +68,7 @@ const calculate_points_added = async ({
   // Fetch pos_rnk from player_seasonlogs in a separate query
   const pos_rnk_query = db('scoring_format_player_seasonlogs')
     .select('pid', 'points_pos_rnk')
-    .where('year', year)
+    .where('season_year', year)
     .where('scoring_format_id', league.scoring_format_id)
 
   const pos_rnk_rows = await pos_rnk_query

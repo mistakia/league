@@ -215,7 +215,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: current_season.year
+        season_year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -294,7 +294,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: current_season.year
+        season_year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -394,7 +394,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: current_season.year
+        season_year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -508,7 +508,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: current_season.year
+        season_year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -653,7 +653,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: current_season.year
+        season_year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -737,7 +737,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: transaction_types.ROSTER_ACTIVATE,
         player_salary: 1,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)
       })
 
@@ -772,7 +772,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: current_season.year
+        season_year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)

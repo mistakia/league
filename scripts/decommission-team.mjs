@@ -22,7 +22,9 @@ const decommission_team = async ({ year = current_season.year, team_id }) => {
   log(`decommissioning team ${team_id} for year ${year}`)
 
   // get leagueId from teamId
-  const team = await db('teams').where({ uid: team_id, year }).first()
+  const team = await db('teams')
+    .where({ uid: team_id, season_year: year })
+    .first()
 
   if (!team) {
     throw new Error('team not found')
@@ -46,13 +48,15 @@ const decommission_team = async ({ year = current_season.year, team_id }) => {
   }
 
   // nullify all picks owned by team
-  await db('draft').where({ tid: team_id, year }).del()
+  await db('draft').where({ tid: team_id, season_year: year }).del()
 
   // remove team from teams table
-  await db('teams').where({ uid: team_id, year }).del()
+  await db('teams').where({ uid: team_id, season_year: year }).del()
 
   // remove team roster from rosters table
-  await db('rosters').where({ tid: team_id, year, lid: leagueId }).del()
+  await db('rosters')
+    .where({ tid: team_id, season_year: year, lid: leagueId })
+    .del()
 }
 const main = async () => {
   let error

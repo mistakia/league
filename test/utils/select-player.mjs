@@ -30,7 +30,7 @@ export default async function ({
     const rostered_players = await db('rosters_players').where({
       lid,
       week: current_season.week,
-      year: current_season.year
+      season_year: current_season.year
     })
     const rostered_pids = rostered_players.map((p) => p.pid)
     exclude_pids = [...exclude_pids, ...rostered_pids]

@@ -115,12 +115,12 @@ const load_indexes = async ({
   idx.rosters = new Map()
   if (player_ids.length && years.length) {
     const rp_rows = await db('rosters_players')
-      .select('tid', 'pid', 'year', 'week', 'slot')
+      .select('tid', 'pid', 'season_year', 'week', 'slot')
       .where('lid', lid)
       .whereIn('pid', player_ids)
-      .whereIn('year', years)
+      .whereIn('season_year', years)
     for (const r of rp_rows) {
-      const k = `${r.tid}__${r.pid}__${r.year}`
+      const k = `${r.tid}__${r.pid}__${r.season_year}`
       if (!idx.rosters.has(k)) idx.rosters.set(k, [])
       idx.rosters.get(k).push({ week: r.week, slot: r.slot })
     }
@@ -195,16 +195,16 @@ const load_indexes = async ({
   idx.projections = new Map()
   if (player_ids.length && format_ids.length && years.length) {
     const proj_rows = await db('league_format_player_projection_values')
-      .select('pid', 'league_format_id', 'year', 'pts_added')
+      .select('pid', 'league_format_id', 'season_year', 'pts_added')
       .whereIn('pid', player_ids)
       .whereIn('league_format_id', format_ids)
-      .whereIn('year', years)
+      .whereIn('season_year', years)
       .where('week', '0')
     for (const r of proj_rows) {
       if (r.pts_added == null) continue
       const v = Number(r.pts_added)
       if (v <= -900) continue
-      const k = `${r.pid}__${r.league_format_id}__${r.year}`
+      const k = `${r.pid}__${r.league_format_id}__${r.season_year}`
       idx.projections.set(k, v)
     }
   }

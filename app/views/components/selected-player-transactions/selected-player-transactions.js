@@ -120,7 +120,9 @@ export default function SelectedPlayerTransactions({
                 </TableRow>
                 {extension_salaries.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell variant='head'>{item.year} Salary</TableCell>
+                    <TableCell variant='head'>
+                      {item.season_year} Salary
+                    </TableCell>
                     <TableCell colSpan={2}>${item.extended_salary}</TableCell>
                   </TableRow>
                 ))}
@@ -140,7 +142,9 @@ export default function SelectedPlayerTransactions({
                 </TableRow>
                 <TableRow>
                   <TableCell variant='head'>Draft Year</TableCell>
-                  <TableCell colSpan={2}>{draft_transaction.year}</TableCell>
+                  <TableCell colSpan={2}>
+                    {draft_transaction.season_year}
+                  </TableCell>
                 </TableRow>
                 {draft_transaction.pick && (
                   <TableRow>

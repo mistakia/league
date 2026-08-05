@@ -65,7 +65,7 @@ const router = express.Router({ mergeParams: true })
  *                     type: integer
  *                     description: Week number
  *                     example: 4
- *                   year:
+ *                   season_year:
  *                     type: integer
  *                     description: Year
  *                     example: 2024
@@ -109,7 +109,7 @@ router.get('/reserve', async (req, res) => {
         roster_slot_types.RESERVE_SHORT_TERM,
         roster_slot_types.RESERVE_LONG_TERM
       ])
-      .where({ tid, year, week })
+      .where({ tid, season_year: year, week })
 
     let data = []
     for (const { pid } of reserve_roster_rows) {

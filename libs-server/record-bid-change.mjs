@@ -94,7 +94,7 @@ export default async function record_bid_change({
     team_id: bid.tid,
     player_id: bid.pid,
     // `waivers` carries no season column; the restricted free agency table does.
-    season_year: bid.year ?? null,
+    season_year: bid.season_year ?? null,
     change_type,
     change_source,
     changed_by_user_id,

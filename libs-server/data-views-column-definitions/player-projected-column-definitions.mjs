@@ -271,6 +271,10 @@ const apply_projected_join = ({
 const make_league_player_projection_source = () => ({
   grain: 'player',
   table: 'league_player_projection_values',
+  // Conformed to season_year. param-utils/select-string default year_column to
+  // 'year' when a source omits key_columns, which would emit a correlated
+  // predicate on a column that no longer exists.
+  key_columns: { year: 'season_year' },
   attach_owns_join: true,
   year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => {
@@ -289,6 +293,7 @@ const make_league_player_projection_source = () => ({
       join_type,
       join_table_clause: `league_player_projection_values as ${table_alias}`,
       join_year: true,
+      join_year_column: 'season_year',
       join_week: true,
       // This table's week is character varying(3); week_reference is smallint,
       // and Postgres will not compare them.
@@ -358,6 +363,8 @@ const make_league_format_player_projection_source = ({
 } = {}) => ({
   grain: 'player',
   table: 'league_format_player_projection_values',
+  // Conformed to season_year -- see the note on the league_player source above.
+  key_columns: { year: 'season_year' },
   attach_owns_join: true,
   year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => {
@@ -376,6 +383,7 @@ const make_league_format_player_projection_source = ({
       join_type,
       join_table_clause: `league_format_player_projection_values as ${table_alias}`,
       join_year: true,
+      join_year_column: 'season_year',
       join_week: !period_week,
       // This table's week is character varying(10); week_reference is smallint,
       // and Postgres will not compare them.

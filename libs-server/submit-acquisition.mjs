@@ -60,7 +60,7 @@ export default async function ({
   await verify_assets_not_trade_protected({ league, pids })
 
   const teams = await db('teams')
-    .where({ uid: teamId, lid: leagueId, year: current_season.year })
+    .where({ uid: teamId, lid: leagueId, season_year: current_season.year })
     .limit(1)
   const team = teams[0]
 
@@ -73,7 +73,7 @@ export default async function ({
     .where({
       lid: leagueId,
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       pid
     })
     .limit(1)
@@ -92,7 +92,7 @@ export default async function ({
     // verify rookie draft is complete
     const picks = await db('draft')
       .where({
-        year: current_season.year,
+        season_year: current_season.year,
         lid: leagueId
       })
       .orderBy('pick', 'asc')
@@ -102,7 +102,7 @@ export default async function ({
     const season = await db('seasons')
       .where({
         lid: leagueId,
-        year: current_season.year
+        season_year: current_season.year
       })
       .first()
 
@@ -218,7 +218,7 @@ export default async function ({
     extensions: 0,
     tid: teamId,
     lid: leagueId,
-    year: current_season.year,
+    season_year: current_season.year,
     week: current_season.week
   })
 
@@ -231,7 +231,7 @@ export default async function ({
     type,
     player_salary: bid,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     waiverid: waiverId,
     timestamp: Math.round(Date.now() / 1000)
   }

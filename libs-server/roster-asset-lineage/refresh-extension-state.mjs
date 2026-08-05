@@ -42,7 +42,7 @@ const refresh_extension_state = async ({
   const query = trx || db
 
   const transactions = await query('transactions')
-    .select('uid', 'tid', 'pid', 'type', 'year', 'timestamp')
+    .select('uid', 'tid', 'pid', 'type', 'season_year', 'timestamp')
     .where('lid', lid)
     .orderBy('timestamp', 'asc')
 
@@ -124,10 +124,10 @@ const refresh_extension_state = async ({
     if (tran.type === transaction_types.EXTENSION) {
       state.extension_count += 1
     } else if (tran.type === transaction_types.FRANCHISE_TAG) {
-      if (!state.franchise_tag_history_years.includes(tran.year))
-        state.franchise_tag_history_years.push(tran.year)
+      if (!state.franchise_tag_history_years.includes(tran.season_year))
+        state.franchise_tag_history_years.push(tran.season_year)
     } else if (tran.type === transaction_types.ROOKIE_TAG) {
-      state.rookie_tag_used_year = tran.year
+      state.rookie_tag_used_year = tran.season_year
     }
   }
   while (ri < reset_events.length) {

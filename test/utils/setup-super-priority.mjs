@@ -32,7 +32,7 @@ export default async function setupSuperPriority({
       type: transaction_types.ROSTER_RELEASE,
       player_salary: 0,
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp: previousReleaseTimestamp
     })
   }
@@ -42,7 +42,7 @@ export default async function setupSuperPriority({
   const originalRosters = await db('rosters')
     .where({
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       tid: original_team_id
     })
     .limit(1)
@@ -57,7 +57,7 @@ export default async function setupSuperPriority({
     type: transaction_types.PRACTICE_ADD,
     player_salary: 0,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp: originalAddTimestamp
   })
 
@@ -70,7 +70,7 @@ export default async function setupSuperPriority({
     tag: player_tag_types.REGULAR,
     tid: original_team_id,
     lid: league_id,
-    year: current_season.year,
+    season_year: current_season.year,
     week: current_season.week
   })
 
@@ -83,7 +83,7 @@ export default async function setupSuperPriority({
     type: transaction_types.POACHED,
     player_salary: 0,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp: poachTimestamp
   })
 
@@ -100,7 +100,7 @@ export default async function setupSuperPriority({
   const poachingRosters = await db('rosters')
     .where({
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       tid: poaching_team_id
     })
     .limit(1)
@@ -115,7 +115,7 @@ export default async function setupSuperPriority({
     tag: player_tag_types.REGULAR,
     tid: poaching_team_id,
     lid: league_id,
-    year: current_season.year,
+    season_year: current_season.year,
     week: current_season.week
   })
 
@@ -133,7 +133,7 @@ export default async function setupSuperPriority({
       type: transaction_types.ROSTER_RELEASE,
       player_salary: 0,
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp: releaseTimestamp
     })
 

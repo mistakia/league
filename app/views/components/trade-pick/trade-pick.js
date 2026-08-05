@@ -10,7 +10,7 @@ import './trade-pick.styl'
 export default class TradePick extends React.Component {
   render = () => {
     const { pick, teams, draft_value } = this.props
-    let text = `${pick.year} - ${ordinalSuffixOf(pick.round)}`
+    let text = `${pick.season_year} - ${ordinalSuffixOf(pick.round)}`
     if (pick.pick) {
       text = `${text} #${pick.pick}`
     }

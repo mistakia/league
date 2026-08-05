@@ -10,14 +10,14 @@ export default async function get_team_managers({ db, lid, year }) {
   const rows = await db('users_teams')
     .join('teams', function () {
       this.on('users_teams.tid', '=', 'teams.uid').andOn(
-        'users_teams.year',
+        'users_teams.season_year',
         '=',
-        'teams.year'
+        'teams.season_year'
       )
     })
     .join('users', 'users_teams.userid', 'users.id')
     .where('teams.lid', lid)
-    .where('teams.year', year)
+    .where('teams.season_year', year)
     .select('users_teams.tid', 'users.username')
 
   const managers = {}

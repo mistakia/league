@@ -16,7 +16,7 @@ router.get('/?', async (req, res) => {
 
     const league_team_seasonlogs = await db('league_team_seasonlogs').where({
       lid: leagueId,
-      year
+      season_year: year
     })
     res.send(league_team_seasonlogs)
   } catch (error) {

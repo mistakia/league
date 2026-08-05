@@ -96,8 +96,8 @@ async function analyze_all_players({ year, lid, validate }) {
     .join('player', 'super_priority.pid', 'player.pid')
     .join('teams as original', 'super_priority.original_tid', 'original.uid')
     .join('teams as poaching', 'super_priority.poaching_tid', 'poaching.uid')
-    .where('original.year', year)
-    .where('poaching.year', year)
+    .where('original.season_year', year)
+    .where('poaching.season_year', year)
     .select(
       'super_priority.*',
       'player.first_name',

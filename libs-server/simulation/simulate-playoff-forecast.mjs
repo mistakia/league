@@ -46,7 +46,7 @@ export async function simulate_wildcard_forecast({
 
   // Get playoff teams
   const team_stats = await db('league_team_seasonlogs')
-    .where({ lid: league_id, year })
+    .where({ lid: league_id, season_year: year })
     .whereBetween('regular_season_finish', [1, playoff_team_count])
 
   if (team_stats.length !== playoff_team_count) {
@@ -74,7 +74,10 @@ export async function simulate_wildcard_forecast({
   const all_playoff_tids = [...bye_tids, ...wildcard_tids]
 
   // Get all teams for result
-  const all_teams = await db('teams').where({ lid: league_id, year })
+  const all_teams = await db('teams').where({
+    lid: league_id,
+    season_year: year
+  })
 
   // Initialize results
   const result = {}
@@ -298,7 +301,7 @@ export async function simulate_championship_forecast({
 
   // Get championship teams from playoffs table
   const playoffs = await db('playoffs')
-    .where({ lid: league_id, year })
+    .where({ lid: league_id, season_year: year })
     .whereIn('uid', [2, 3]) // Championship round entries
 
   const championship_tids = [...new Set(playoffs.map((p) => p.tid))]
@@ -318,17 +321,22 @@ export async function simulate_championship_forecast({
   }
 
   // Get all teams for result
-  const all_teams = await db('teams').where({ lid: league_id, year })
+  const all_teams = await db('teams').where({
+    lid: league_id,
+    season_year: year
+  })
   const all_playoff_tids = [
     ...new Set(
-      (await db('playoffs').where({ lid: league_id, year })).map((p) => p.tid)
+      (await db('playoffs').where({ lid: league_id, season_year: year })).map(
+        (p) => p.tid
+      )
     )
   ]
 
   // Load team stats to identify which seeds received a bye
   const team_stats_list = await db('league_team_seasonlogs').where({
     lid: league_id,
-    year
+    season_year: year
   })
 
   const team_stats_by_tid = {}

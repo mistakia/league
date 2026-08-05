@@ -479,8 +479,8 @@ describe('tag board', function () {
   describe('franchise screen', function () {
     it('excludes a player tagged by this team in each of the two prior years', function () {
       const franchise_tag_history = [
-        { tid: 1, pid: 'CMC', year: 2025 },
-        { tid: 1, pid: 'CMC', year: 2024 }
+        { tid: 1, pid: 'CMC', season_year: 2025 },
+        { tid: 1, pid: 'CMC', season_year: 2024 }
       ]
       passes_consecutive_year_check({
         tid: 1,
@@ -513,7 +513,7 @@ describe('tag board', function () {
         tid: 1,
         pid: 'CMC',
         year: 2026,
-        franchise_tag_history: [{ tid: 1, pid: 'CMC', year: 2025 }]
+        franchise_tag_history: [{ tid: 1, pid: 'CMC', season_year: 2025 }]
       }).should.equal(true)
     })
 
@@ -525,8 +525,8 @@ describe('tag board', function () {
         pid: 'SAQ',
         year: 2026,
         franchise_tag_history: [
-          { tid: 2, pid: 'SAQ', year: 2025 },
-          { tid: 1, pid: 'SAQ', year: 2024 }
+          { tid: 2, pid: 'SAQ', season_year: 2025 },
+          { tid: 1, pid: 'SAQ', season_year: 2024 }
         ]
       }).should.equal(true)
     })
@@ -643,17 +643,21 @@ describe('tag board', function () {
     it('resolves eligibility to the most recent completed draft class', function () {
       const season_rows = [
         {
-          year: 2024,
+          season_year: 2024,
           rookie_draft_completed_at: null,
           draft_start: 1721707200
         },
         {
-          year: 2025,
+          season_year: 2025,
           rookie_draft_completed_at: 1755187200,
           draft_start: 1752552000
         },
         // 2026's draft has not run yet.
-        { year: 2026, rookie_draft_completed_at: null, draft_start: 1787371200 }
+        {
+          season_year: 2026,
+          rookie_draft_completed_at: null,
+          draft_start: 1787371200
+        }
       ]
       resolve_rookie_class_year({ season_rows, now_unix }).should.equal(2025)
     })
@@ -661,11 +665,15 @@ describe('tag board', function () {
     it('falls back to draft_start when no completion timestamp is recorded', function () {
       const season_rows = [
         {
-          year: 2023,
+          season_year: 2023,
           rookie_draft_completed_at: null,
           draft_start: 1687147200
         },
-        { year: 2024, rookie_draft_completed_at: null, draft_start: 1721707200 }
+        {
+          season_year: 2024,
+          rookie_draft_completed_at: null,
+          draft_start: 1721707200
+        }
       ]
       resolve_rookie_class_year({ season_rows, now_unix }).should.equal(2024)
     })

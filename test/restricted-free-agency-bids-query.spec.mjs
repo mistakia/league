@@ -41,7 +41,7 @@ describe('build_active_restricted_free_agency_bids_query', function () {
 
   it('scopes to the bidding team and the season', () => {
     expect(sql).to.include('"tid" = 12')
-    expect(sql).to.include('"year" = 2026')
+    expect(sql).to.include('"season_year" = 2026')
   })
 
   it('does not constrain ownership -- the call site decides', () => {

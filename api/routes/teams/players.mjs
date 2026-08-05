@@ -68,7 +68,7 @@ router.get('/?', async (req, res) => {
         const rows = await db('users_teams').where({
           userid: userId,
           tid: teamId,
-          year: current_season.year
+          season_year: current_season.year
         })
 
         if (!rows.length) {
@@ -108,7 +108,7 @@ router.get('/?', async (req, res) => {
       const rows = await db('users_teams').where({
         userid: userId,
         tid: teamId,
-        year: current_season.year
+        season_year: current_season.year
       })
 
       if (!rows.length) {

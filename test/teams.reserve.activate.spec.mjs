@@ -100,12 +100,12 @@ describe('API /teams - reserve', function () {
       res.body.transaction.pid.should.equal(player1.pid)
       res.body.transaction.type.should.equal(transaction_types.RESERVE_IR)
       res.body.transaction.player_salary.should.equal(value)
-      res.body.transaction.year.should.equal(current_season.year)
+      res.body.transaction.season_year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows1 = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week,
           pid: player1.pid
         })
@@ -116,7 +116,7 @@ describe('API /teams - reserve', function () {
 
       const rosterRows2 = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week,
           pid: player2.pid
         })

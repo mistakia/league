@@ -20,7 +20,7 @@ export default async function ({
   let rosters = await db('rosters')
     .where({
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       tid: teamId
     })
     .limit(1)
@@ -29,13 +29,13 @@ export default async function ({
       tid: teamId,
       lid: leagueId,
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       last_updated: Math.round(Date.now() / 1000)
     })
     rosters = await db('rosters')
       .where({
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         tid: teamId
       })
       .limit(1)
@@ -50,7 +50,7 @@ export default async function ({
     type: transaction,
     player_salary: value,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp: Math.round(Date.now() / 1000),
     waiverid
   })
@@ -63,7 +63,7 @@ export default async function ({
     tag,
     tid: teamId,
     lid: leagueId,
-    year: current_season.year,
+    season_year: current_season.year,
     week: current_season.week
   })
 }

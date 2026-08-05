@@ -1108,7 +1108,7 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
           'player_seasonlogs.pid'
         )
           .andOn(
-            'scoring_format_player_seasonlogs.year',
+            'scoring_format_player_seasonlogs.season_year',
             '=',
             'player_seasonlogs.season_year'
           )
@@ -1125,7 +1125,7 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
           'player_seasonlogs.pid'
         )
           .andOn(
-            'league_format_player_seasonlogs.year',
+            'league_format_player_seasonlogs.season_year',
             '=',
             'player_seasonlogs.season_year'
           )

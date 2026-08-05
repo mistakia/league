@@ -139,7 +139,7 @@ export default class TransactionMapper {
 
       const base = {
         lid: context.league_id,
-        year: context.year || current_season.year,
+        season_year: context.year || current_season.year,
         week: context.week || this.extract_week(external_transaction),
         timestamp: this.extract_timestamp(external_transaction)
       }

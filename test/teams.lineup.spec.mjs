@@ -71,14 +71,14 @@ describe('API /teams - lineups', function () {
       res.body[0].slot.should.equal(roster_slot_types.RB)
       res.body[0].pid.should.equal(player.pid)
       res.body[0].week.should.equal(current_season.week)
-      res.body[0].year.should.equal(current_season.year)
+      res.body[0].season_year.should.equal(current_season.year)
       res.body[0].tid.should.equal(teamId)
 
       const rosterRows = await knex('rosters_players').where({
         pid: player.pid,
         tid: teamId,
         week: current_season.week,
-        year: current_season.year
+        season_year: current_season.year
       })
 
       expect(rosterRows[0].slot).to.equal(roster_slot_types.RB)
@@ -87,7 +87,7 @@ describe('API /teams - lineups', function () {
       expect(rosterRows[0].tid).to.equal(teamId)
       expect(rosterRows[0].lid).to.equal(leagueId)
       expect(rosterRows[0].week).to.equal(current_season.week)
-      expect(rosterRows[0].year).to.equal(current_season.year)
+      expect(rosterRows[0].season_year).to.equal(current_season.year)
     })
 
     it('future week', function () {
@@ -331,7 +331,7 @@ describe('API /teams - lineups', function () {
 
       await knex('seasons')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           lid: 1
         })
         .update({

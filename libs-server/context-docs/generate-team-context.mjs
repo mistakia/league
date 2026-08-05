@@ -55,7 +55,9 @@ export default async function generate_team_context({
 }) {
   const league = await load_configured_league({ db, lid, year })
 
-  const team = await db('teams').where({ uid: tid, lid, year }).first()
+  const team = await db('teams')
+    .where({ uid: tid, lid, season_year: year })
+    .first()
   if (!team) {
     throw new ContextDocError(`team ${tid} not found in league ${lid}`, {
       status: 404,
@@ -65,14 +67,14 @@ export default async function generate_team_context({
 
   const managers = await get_team_managers({ db, lid, year })
   const seasonlog = await db('league_team_seasonlogs')
-    .where({ lid, tid, year })
+    .where({ lid, tid, season_year: year })
     .first()
   const roster = await load_team_roster({ tid, year, lid, league })
 
   // Resolve player display attributes for the roster and recent transactions.
   const roster_pids = roster.all.map((player) => player.pid)
   const recent_transactions = await db('transactions')
-    .where({ lid, tid, year })
+    .where({ lid, tid, season_year: year })
     .orderBy('timestamp', 'desc')
     .orderBy('uid', 'desc')
     .limit(10)
@@ -82,19 +84,19 @@ export default async function generate_team_context({
   })
 
   const draft_picks = await db('draft')
-    .where({ tid, lid, year })
+    .where({ tid, lid, season_year: year })
     .modify(where_outstanding_draft_pick)
     .orderBy('round')
     .orderBy('pick')
 
   const matchups = await db('matchups')
-    .where({ lid, year })
+    .where({ lid, season_year: year })
     .where(function () {
       this.where('home_team_id', tid).orWhere('away_team_id', tid)
     })
     .orderBy('week')
   const other_teams = await db('teams')
-    .where({ lid, year })
+    .where({ lid, season_year: year })
     .whereNot('uid', tid)
   const team_name_by_tid = new Map([
     [team.uid, team.name],

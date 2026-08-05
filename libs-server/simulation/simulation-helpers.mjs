@@ -24,7 +24,9 @@ export async function load_simulation_context({ league_id, year }) {
     throw new Error(`League not found: ${league_id}`)
   }
 
-  const season = await db('seasons').where({ lid: league_id, year }).first()
+  const season = await db('seasons')
+    .where({ lid: league_id, season_year: year })
+    .first()
   if (!season) {
     throw new Error(`Season not found for league ${league_id}, year ${year}`)
   }
@@ -216,7 +218,7 @@ export async function load_league_matchups({ league_id, week, year }) {
   log(`Loading matchups for league ${league_id}, week ${week}`)
 
   const rows = await db('matchups')
-    .where({ lid: league_id, week, year })
+    .where({ lid: league_id, week, season_year: year })
     .select('uid as matchup_id', 'home_team_id', 'away_team_id')
 
   log(`Loaded ${rows.length} matchups`)

@@ -5,7 +5,7 @@ export default async function (knex) {
   await knex('matchups').del()
   const teams = await knex('teams').where({
     lid: 1,
-    year: current_season.year
+    season_year: current_season.year
   })
   const schedule = generate_fantasy_league_schedule(teams)
   for (const [index, value] of schedule.entries()) {
@@ -15,7 +15,7 @@ export default async function (knex) {
         away_team_id: matchup.away.uid,
         lid: 1,
         week: index + 1,
-        year: current_season.year
+        season_year: current_season.year
       })
     }
   }

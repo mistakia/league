@@ -33,7 +33,7 @@ const insert_poach_history = async ({
       lid,
       type: transaction_types.PRACTICE_ADD,
       player_salary: 0,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp: poach_timestamp - 24 * 60 * 60,
       week: 0,
       userid: original_tid
@@ -44,7 +44,7 @@ const insert_poach_history = async ({
       lid,
       type: transaction_types.POACHED,
       player_salary: 0,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp: poach_timestamp,
       week: 0,
       userid: poaching_tid
@@ -55,7 +55,7 @@ const insert_poach_history = async ({
       lid,
       type: transaction_types.ROSTER_RELEASE,
       player_salary: 0,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp: release_timestamp,
       week: 0,
       userid: poaching_tid
@@ -75,7 +75,7 @@ const insert_extension = async ({
     lid,
     type: transaction_types.EXTENSION,
     player_salary: 0,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp,
     week: 0,
     userid: poaching_tid
@@ -89,7 +89,12 @@ const place_player_at_week_one = async ({
   slot
 }) => {
   const rosters = await knex('rosters')
-    .where({ tid: poaching_tid, lid, year: current_season.year, week: 1 })
+    .where({
+      tid: poaching_tid,
+      lid,
+      season_year: current_season.year,
+      week: 1
+    })
     .limit(1)
   await knex('rosters_players').insert({
     roster_id: rosters[0].uid,
@@ -99,7 +104,7 @@ const place_player_at_week_one = async ({
     tag: player_tag_types.REGULAR,
     tid: poaching_tid,
     lid,
-    year: current_season.year,
+    season_year: current_season.year,
     week: 1
   })
 }
@@ -219,7 +224,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         lid: 1,
         type: transaction_types.PRACTICE_ADD,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: poach_timestamp - 24 * 60 * 60,
         week: 0,
         userid: 1
@@ -230,7 +235,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         lid: 1,
         type: transaction_types.POACHED,
         player_salary: 0,
-        year: null,
+        season_year: null,
         timestamp: poach_timestamp,
         week: 0,
         userid: 2
@@ -241,7 +246,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         lid: 1,
         type: transaction_types.ROSTER_RELEASE,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: release_timestamp,
         week: 0,
         userid: 2
@@ -274,11 +279,11 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
       tid: 2,
       lid: 1,
       week: 1,
-      year: prior_year,
+      season_year: prior_year,
       last_updated: now
     })
     const prior_rosters = await knex('rosters')
-      .where({ tid: 2, lid: 1, week: 1, year: prior_year })
+      .where({ tid: 2, lid: 1, week: 1, season_year: prior_year })
       .limit(1)
 
     await knex('transactions').insert([
@@ -288,7 +293,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         lid: 1,
         type: transaction_types.PRACTICE_ADD,
         player_salary: 0,
-        year: prior_year,
+        season_year: prior_year,
         timestamp: poach_timestamp - 24 * 60 * 60,
         week: 0,
         userid: 1
@@ -299,7 +304,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         lid: 1,
         type: transaction_types.POACHED,
         player_salary: 0,
-        year: prior_year,
+        season_year: prior_year,
         timestamp: poach_timestamp,
         week: 0,
         userid: 2
@@ -310,7 +315,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         lid: 1,
         type: transaction_types.EXTENSION,
         player_salary: 0,
-        year: prior_year,
+        season_year: prior_year,
         timestamp: extension_timestamp,
         week: 0,
         userid: 2
@@ -321,7 +326,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         lid: 1,
         type: transaction_types.ROSTER_RELEASE,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: release_timestamp,
         week: 0,
         userid: 2
@@ -336,7 +341,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
       tag: player_tag_types.REGULAR,
       tid: 2,
       lid: 1,
-      year: prior_year,
+      season_year: prior_year,
       week: 1
     })
 

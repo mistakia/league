@@ -95,7 +95,7 @@ const restricted_free_agency_tag_is_visible_sql = ({
     value: viewer_user_id,
     param_name: 'viewer_user_id'
   })
-  const is_own_team = `rosters_players.tid IN (SELECT users_teams.tid FROM users_teams WHERE users_teams.userid = ${viewer} AND users_teams.year = ${year})`
+  const is_own_team = `rosters_players.tid IN (SELECT users_teams.tid FROM users_teams WHERE users_teams.userid = ${viewer} AND users_teams.season_year = ${year})`
 
   return `(${is_own_team} OR ${announced})`
 }
@@ -152,7 +152,7 @@ const player_league_roster_join = async ({
 
   query.leftJoin('rosters_players', function () {
     this.on('rosters_players.pid', '=', data_view_options.pid_reference)
-    this.andOn('rosters_players.year', '=', year)
+    this.andOn('rosters_players.season_year', '=', year)
     this.andOn('rosters_players.week', '=', week)
     this.andOn('rosters_players.lid', '=', lid)
   })
@@ -168,7 +168,7 @@ const player_league_fantasy_team_sql = ({ params = {} }) => {
     year_param === undefined || year_param === null
       ? current_season.year
       : sql_integer_param({ value: year_param, param_name: 'year' })
-  return `(SELECT name FROM teams WHERE uid = rosters_players.tid AND year = ${year})`
+  return `(SELECT name FROM teams WHERE uid = rosters_players.tid AND season_year = ${year})`
 }
 
 export default {

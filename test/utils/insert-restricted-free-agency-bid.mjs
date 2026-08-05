@@ -97,7 +97,7 @@ export const insert_restricted_free_agency_bid = async ({
       tid,
       lid,
       nomination_id,
-      year,
+      season_year: year,
       submitted: Math.round(Date.now() / 1000),
       processed,
       cancelled,

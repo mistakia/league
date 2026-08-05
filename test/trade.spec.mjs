@@ -51,7 +51,7 @@ const select_tradeable_pair = async () => {
       .where({
         'rosters_players.lid': 1,
         'rosters_players.tid': tid,
-        'rosters_players.year': current_season.year,
+        'rosters_players.season_year': current_season.year,
         'rosters_players.week': current_season.week
       })
       .whereRaw('player.primary_position = rosters_players.player_position')
@@ -142,7 +142,7 @@ describe('API /trades', function () {
       proposeRes.body.propose_tid.should.be.equal(1)
       proposeRes.body.accept_tid.should.be.equal(2)
       proposeRes.body.userid.should.be.equal(1)
-      proposeRes.body.year.should.be.equal(current_season.year)
+      proposeRes.body.season_year.should.be.equal(current_season.year)
       should.exist(proposeRes.body.offered)
       should.not.exist(proposeRes.body.cancelled)
       should.not.exist(proposeRes.body.accepted)
@@ -174,7 +174,7 @@ describe('API /trades', function () {
       acceptRes.body.propose_tid.should.be.equal(1)
       acceptRes.body.accept_tid.should.be.equal(2)
       acceptRes.body.userid.should.be.equal(1)
-      acceptRes.body.year.should.be.equal(current_season.year)
+      acceptRes.body.season_year.should.be.equal(current_season.year)
       should.exist(acceptRes.body.offered)
       should.not.exist(acceptRes.body.cancelled)
       should.exist(acceptRes.body.accepted)
@@ -269,7 +269,7 @@ describe('API /trades', function () {
         .where({
           pid: proposingTeamPlayers[0],
           tid: 2,
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week
         })
         .first()
@@ -278,7 +278,7 @@ describe('API /trades', function () {
         .where({
           pid: acceptingTeamPlayers[0],
           tid: 1,
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week
         })
         .first()
@@ -324,7 +324,7 @@ describe('API /trades', function () {
         type: transaction_types.ROSTER_ACTIVATE,
         player_salary: 0,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)
       })
 
@@ -377,7 +377,7 @@ describe('API /trades', function () {
       proposeRes.body.propose_tid.should.be.equal(1)
       proposeRes.body.accept_tid.should.be.equal(2)
       proposeRes.body.userid.should.be.equal(1)
-      proposeRes.body.year.should.be.equal(current_season.year)
+      proposeRes.body.season_year.should.be.equal(current_season.year)
       should.exist(proposeRes.body.offered)
       should.not.exist(proposeRes.body.cancelled)
       should.not.exist(proposeRes.body.accepted)
@@ -409,7 +409,7 @@ describe('API /trades', function () {
       acceptRes.body.propose_tid.should.be.equal(1)
       acceptRes.body.accept_tid.should.be.equal(2)
       acceptRes.body.userid.should.be.equal(1)
-      acceptRes.body.year.should.be.equal(current_season.year)
+      acceptRes.body.season_year.should.be.equal(current_season.year)
       should.exist(acceptRes.body.offered)
       should.not.exist(acceptRes.body.cancelled)
       should.exist(acceptRes.body.accepted)
@@ -453,7 +453,7 @@ describe('API /trades', function () {
         transaction_types.ROSTER_DEACTIVATE
       )
       res.body.transaction.player_salary.should.equal(value)
-      res.body.transaction.year.should.equal(current_season.year)
+      res.body.transaction.season_year.should.equal(current_season.year)
       // The server stamps the transaction while handling the request and the
       // assertion reads the clock after the response, so an exact equality
       // fails whenever a second boundary falls between the two. Reproduced
@@ -473,7 +473,7 @@ describe('API /trades', function () {
 
       const rosterRows = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week,
           pid: player2.pid
         })
@@ -575,7 +575,7 @@ describe('API /trades', function () {
       // Verify players moved to correct teams with correct slots
       const rosterRows = await knex('rosters_players')
         .whereIn('pid', [player1.pid, player2.pid])
-        .where({ year: current_season.year, week: current_season.week })
+        .where({ season_year: current_season.year, week: current_season.week })
 
       rosterRows.length.should.equal(2)
 
@@ -662,7 +662,7 @@ describe('API /trades', function () {
         .where({
           pid: player1.pid,
           tid: 2,
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week
         })
         .first()
@@ -674,7 +674,7 @@ describe('API /trades', function () {
         .where({
           pid: player2.pid,
           tid: 1,
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week
         })
         .first()

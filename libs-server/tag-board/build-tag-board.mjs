@@ -190,7 +190,8 @@ export const passes_consecutive_year_check = ({
 }) => {
   const tagged_in = (target_year) =>
     franchise_tag_history.some(
-      (row) => row.tid === tid && row.pid === pid && row.year === target_year
+      (row) =>
+        row.tid === tid && row.pid === pid && row.season_year === target_year
     )
 
   return !(tagged_in(year - 1) && tagged_in(year - 2))
@@ -211,7 +212,7 @@ export const resolve_rookie_class_year = ({ season_rows, now_unix }) => {
   })
 
   if (!completed.length) return null
-  return Math.max(...completed.map((row) => row.year))
+  return Math.max(...completed.map((row) => row.season_year))
 }
 
 const median = (values) => {

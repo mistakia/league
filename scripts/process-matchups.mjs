@@ -17,8 +17,8 @@ debug.enable('process-matchups,calculate-standings')
 
 const run = async ({ lid = 1, year = current_season.year }) => {
   const league = await getLeague({ lid, year })
-  const matchups = await db('matchups').where({ lid, year })
-  const teams = await db('teams').where({ lid, year })
+  const matchups = await db('matchups').where({ lid, season_year: year })
+  const teams = await db('teams').where({ lid, season_year: year })
 
   const finalWeek =
     year === current_season.year
@@ -104,7 +104,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
     const owns_own_first_round_pick = await db('draft')
       .where({
         lid,
-        year: year + 1,
+        season_year: year + 1,
         round: 1,
         original_team_id: team.tid,
         tid: team.tid,
@@ -148,7 +148,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
     league_team_seasonlogs.push({
       tid,
       lid,
-      year,
+      season_year: year,
       division: tm.division,
       ...remainingStats
     })
@@ -157,7 +157,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
   if (league_team_seasonlogs.length) {
     await db('league_team_seasonlogs')
       .insert(league_team_seasonlogs)
-      .onConflict(['tid', 'year'])
+      .onConflict(['tid', 'season_year'])
       .merge()
     log(`saved team stats for ${league_team_seasonlogs.length} teams`)
   }

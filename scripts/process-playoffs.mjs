@@ -22,10 +22,10 @@ const process_playoffs = async ({ lid, year }) => {
   }
 
   const league = await getLeague({ lid })
-  const playoffs = await db('playoffs').where({ lid, year })
+  const playoffs = await db('playoffs').where({ lid, season_year: year })
   const league_team_seasonlogs = await db('league_team_seasonlogs').where({
     lid,
-    year
+    season_year: year
   })
 
   const is_wildcard_round =
@@ -46,14 +46,14 @@ const process_playoffs = async ({ lid, year }) => {
         uid: 1, // wildcard round uid
         tid,
         lid,
-        year,
+        season_year: year,
         week: 15 // wildcard round week
       })
     }
 
     await db('playoffs')
       .insert(playoff_inserts)
-      .onConflict(['tid', 'uid', 'year'])
+      .onConflict(['tid', 'uid', 'season_year'])
       .merge()
     log(
       `inserted ${playoff_inserts.length} wildcard round matchups for lid ${lid}`
@@ -80,8 +80,11 @@ const process_playoffs = async ({ lid, year }) => {
     .whereIn('nfl_games.week', weeks)
 
   for (const item of playoffs) {
-    const { tid, week, year } = item
-    if (item.year === current_season.year && item.week >= current_season.week) {
+    const { tid, week, season_year: year } = item
+    if (
+      item.season_year === current_season.year &&
+      item.week >= current_season.week
+    ) {
       continue
     }
     const rosterRow = await getRoster({ tid, week, year })
@@ -104,7 +107,7 @@ const process_playoffs = async ({ lid, year }) => {
 
   await db('playoffs')
     .insert(playoffs)
-    .onConflict(['tid', 'uid', 'year'])
+    .onConflict(['tid', 'uid', 'season_year'])
     .merge()
   log(`updated ${playoffs.length} playoff results`)
 
@@ -120,7 +123,7 @@ const process_playoffs = async ({ lid, year }) => {
     // lowest scoring wildcard team is 6th place
     team_stat_inserts.push({
       lid,
-      year,
+      season_year: year,
       tid: playoff_teams[3],
       post_season_finish: 6,
       overall_finish: 6
@@ -129,7 +132,7 @@ const process_playoffs = async ({ lid, year }) => {
     // second lowest scoring wildcard team is 5th place
     team_stat_inserts.push({
       lid,
-      year,
+      season_year: year,
       tid: playoff_teams[2],
       post_season_finish: 5,
       overall_finish: 5
@@ -161,7 +164,7 @@ const process_playoffs = async ({ lid, year }) => {
       const tid = sorted_championship_round_teams[i]
       team_stat_inserts.push({
         lid,
-        year,
+        season_year: year,
         tid,
         post_season_finish: i + 1,
         overall_finish: i + 1
@@ -178,7 +181,7 @@ const process_playoffs = async ({ lid, year }) => {
     non_playoff_teams.forEach((team) => {
       team_stat_inserts.push({
         lid,
-        year,
+        season_year: year,
         tid: team.tid,
         post_season_finish: null,
         overall_finish: next_finish_position++
@@ -187,7 +190,7 @@ const process_playoffs = async ({ lid, year }) => {
 
     await db('league_team_seasonlogs')
       .insert(team_stat_inserts)
-      .onConflict(['tid', 'year'])
+      .onConflict(['tid', 'season_year'])
       .merge()
     log(
       `updated ${team_stat_inserts.length} team stats for lid ${lid} year ${year}`
@@ -207,7 +210,7 @@ const process_playoffs = async ({ lid, year }) => {
     // regular season 1st and 2nd place finish + two highest points from the wildcard round
     const league_team_seasonlogs = await db('league_team_seasonlogs').where({
       lid,
-      year
+      season_year: year
     })
     const regular_season_finishes = [1, 2]
     const regular_season_teams = league_team_seasonlogs
@@ -227,7 +230,7 @@ const process_playoffs = async ({ lid, year }) => {
         uid: 2, // championship round uid
         tid,
         lid,
-        year,
+        season_year: year,
         week: 16 // championship round week
       })
 
@@ -235,14 +238,14 @@ const process_playoffs = async ({ lid, year }) => {
         uid: 3, // championship round uid
         tid,
         lid,
-        year,
+        season_year: year,
         week: 17 // championship round week
       })
     }
 
     await db('playoffs')
       .insert(championship_inserts)
-      .onConflict(['tid', 'uid', 'year'])
+      .onConflict(['tid', 'uid', 'season_year'])
       .merge()
     log(
       `inserted ${championship_inserts.length} championship round matchups for lid ${lid}`

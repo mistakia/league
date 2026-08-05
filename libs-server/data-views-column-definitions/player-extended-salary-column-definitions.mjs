@@ -67,7 +67,7 @@ export const player_extended_salary_table_alias = ({ params = {} } = {}) => {
 // for the same predicate and the full reasoning.
 const get_extensions_processed = async ({ lid, year }) => {
   const extension_row = await db('transactions')
-    .where({ lid, year, type: transaction_types.EXTENSION })
+    .where({ lid, season_year: year, type: transaction_types.EXTENSION })
     .first()
 
   return Boolean(extension_row)
@@ -137,13 +137,17 @@ export const player_extended_salary_join = async ({
         .andOnNull('s.period_end')
     })
     .where('rp.lid', lid)
-    .where('rp.year', year)
+    .where('rp.season_year', year)
     .where('rp.week', 0)
 
   // Only the projected branch reads the franchise tag prices off `seasons`.
   if (!extensions_processed) {
     subquery.leftJoin('seasons as ssn', function () {
-      this.on('ssn.lid', '=', 'rp.lid').andOn('ssn.year', '=', 'rp.year')
+      this.on('ssn.lid', '=', 'rp.lid').andOn(
+        'ssn.season_year',
+        '=',
+        'rp.season_year'
+      )
     })
   }
 

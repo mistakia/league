@@ -52,7 +52,7 @@ export async function simulate_season_forecast({
   })
 
   // Load teams and current standings
-  const teams = await db('teams').where({ lid: league_id, year })
+  const teams = await db('teams').where({ lid: league_id, season_year: year })
 
   // If week override is provided, compute standings from completed matchups
   // Otherwise use the seasonlogs table
@@ -61,7 +61,7 @@ export async function simulate_season_forecast({
   if (week) {
     // Compute standings from matchups through week-1
     const completed_matchups = await db('matchups')
-      .where({ lid: league_id, year })
+      .where({ lid: league_id, season_year: year })
       .where('week', '<', current_week)
       .whereNotNull('home_points')
       .whereNotNull('away_points')
@@ -100,7 +100,7 @@ export async function simulate_season_forecast({
   } else {
     // Use end-of-season stats
     const team_stats = await db('league_team_seasonlogs')
-      .where({ lid: league_id, year })
+      .where({ lid: league_id, season_year: year })
       .whereIn(
         'tid',
         teams.map((t) => t.uid)
@@ -118,7 +118,7 @@ export async function simulate_season_forecast({
 
   // Load remaining regular season matchups
   const remaining_matchups = await db('matchups')
-    .where({ lid: league_id, year })
+    .where({ lid: league_id, season_year: year })
     .where('week', '>=', current_week)
     .where('week', '<=', regular_season_final_week)
 
@@ -357,7 +357,10 @@ async function build_post_season_forecast({
   playoff_format
 }) {
   // Load playoff data
-  const playoffs = await db('playoffs').where({ lid: league_id, year })
+  const playoffs = await db('playoffs').where({
+    lid: league_id,
+    season_year: year
+  })
 
   const result = {}
   for (const team of teams) {

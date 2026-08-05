@@ -27,7 +27,7 @@ export default async function (league_id) {
       'waivers.type as waiver_type'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
-    .where('teams.year', current_season.year)
+    .where('teams.season_year', current_season.year)
     .whereNull('processed')
     .whereNull('cancelled')
     .where('type', waiver_types.POACH)

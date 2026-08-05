@@ -30,7 +30,7 @@ export const build_roster_players_query = ({
       this.on('rosters_players.pid', '=', 'transactions.pid')
         .andOnVal('transactions.tid', '=', tid)
         .andOn(
-          db.raw('(transactions.year, transactions.week) <= (?, ?)', [
+          db.raw('(transactions.season_year, transactions.week) <= (?, ?)', [
             year,
             week
           ])
@@ -59,7 +59,7 @@ export default async function ({
   week = current_season.fantasy_season_week,
   year = current_season.year
 }) {
-  const rows = await db('rosters').where({ tid, year, week })
+  const rows = await db('rosters').where({ tid, season_year: year, week })
   const roster_row = rows[0]
 
   if (!roster_row) {
@@ -70,7 +70,7 @@ export default async function ({
     db,
     roster_id: roster_row.uid,
     tid,
-    year: roster_row.year,
+    year: roster_row.season_year,
     week: roster_row.week
   })
 

@@ -284,7 +284,7 @@ export class RosterSync {
       lid: internal_league_id,
       tid: internal_team_id,
       week,
-      year
+      season_year: year
     })
   }
 
@@ -314,11 +314,11 @@ export class RosterSync {
         slot: roster_slot_types.BENCH, // Default to bench
         player_position: 'BENCH',
         week,
-        year,
+        season_year: year,
         extensions: 0,
         tag: player_tag_types.REGULAR
       })
-      .onConflict(['lid', 'tid', 'pid', 'week', 'year'])
+      .onConflict(['lid', 'tid', 'pid', 'week', 'season_year'])
       .ignore()
   }
 
@@ -352,7 +352,7 @@ export class RosterSync {
           lid: internal_league_id,
           tid: internal_team_id,
           week,
-          year
+          season_year: year
         })
         .whereIn('pid', players_to_remove)
         .del()

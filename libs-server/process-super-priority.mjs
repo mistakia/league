@@ -105,7 +105,7 @@ export default async function process_super_priority({
   // Add player to original team roster for current and future weeks
   const current_week_roster = await db('rosters')
     .where('week', '>=', current_season.week)
-    .where('year', current_season.year)
+    .where('season_year', current_season.year)
     .where('tid', original_tid)
     .first()
 
@@ -123,7 +123,7 @@ export default async function process_super_priority({
     tid: original_tid,
     lid,
     week: current_week_roster.week,
-    year: current_week_roster.year
+    season_year: current_week_roster.season_year
   })
 
   // Create transaction
@@ -154,7 +154,7 @@ export default async function process_super_priority({
     type: transaction_type,
     player_salary,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp
   }
 
@@ -172,7 +172,7 @@ export default async function process_super_priority({
 
   // Get team info for notifications
   const team_rows = await db('teams')
-    .where({ uid: original_tid, lid, year: current_season.year })
+    .where({ uid: original_tid, lid, season_year: current_season.year })
     .limit(1)
 
   if (team_rows.length) {

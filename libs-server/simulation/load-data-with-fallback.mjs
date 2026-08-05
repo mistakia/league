@@ -148,7 +148,9 @@ export async function load_bench_players_with_fallback({
           ])
         )
         .andOn(
-          db.raw('scoring_format_player_projection_points.year = ?', [year])
+          db.raw('scoring_format_player_projection_points.season_year = ?', [
+            year
+          ])
         )
         .andOn(
           db.raw(
@@ -161,7 +163,7 @@ export async function load_bench_players_with_fallback({
       'rosters_players.lid': league_id,
       'rosters_players.tid': team_id,
       'rosters_players.week': roster_week,
-      'rosters_players.year': year
+      'rosters_players.season_year': year
     })
     .whereIn('rosters_players.slot', slots_to_include)
     .select(
@@ -187,7 +189,7 @@ export async function load_bench_players_with_fallback({
         .whereIn('pid', missing_projection_pids)
         .where({
           week: String(fallback_week),
-          year,
+          season_year: year,
           scoring_format_id
         })
         .select('pid', 'projected_points_total as projection')
@@ -275,14 +277,16 @@ export async function load_bench_player_ids({
           ])
         )
         .andOn(
-          db.raw('scoring_format_player_projection_points.year = ?', [year])
+          db.raw('scoring_format_player_projection_points.season_year = ?', [
+            year
+          ])
         )
     })
     .where({
       'rosters_players.lid': league_id,
       'rosters_players.tid': team_id,
       'rosters_players.week': effective_roster_week,
-      'rosters_players.year': year
+      'rosters_players.season_year': year
     })
     .whereNotIn('rosters_players.pid', starter_pids)
     .whereIn('rosters_players.slot', slots_to_include)

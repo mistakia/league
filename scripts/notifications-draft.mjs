@@ -30,7 +30,9 @@ const run = async () => {
     .leftJoin('seasons', function () {
       this.on('leagues.uid', '=', 'seasons.lid')
       this.on(
-        db.raw(`seasons.year = ${current_season.year} or seasons.year is null`)
+        db.raw(
+          `seasons.season_year = ${current_season.year} or seasons.season_year is null`
+        )
       )
     })
     .whereNotNull('draft_start')
@@ -50,8 +52,8 @@ const run = async () => {
     // pick in a stalled one), so we track the frontier directly.
     const frontier = await db('draft')
       .join('teams', 'draft.tid', 'teams.uid')
-      .where('draft.year', current_season.year)
-      .where('teams.year', current_season.year)
+      .where('draft.season_year', current_season.year)
+      .where('teams.season_year', current_season.year)
       .where('draft.lid', league.uid)
       .modify(where_outstanding_draft_pick, 'draft')
       .orderBy('draft.pick')
@@ -68,7 +70,7 @@ const run = async () => {
       const previous = await db('draft')
         .where({
           lid: league.uid,
-          year: current_season.year,
+          season_year: current_season.year,
           pick: frontier.pick - 1
         })
         .first()

@@ -429,7 +429,7 @@ router.post('/?', async (req, res) => {
         if (type === waiver_types.FREE_AGENCY_PRACTICE) {
           const picks = await db('draft')
             .where({
-              year: current_season.year,
+              season_year: current_season.year,
               lid: leagueId
             })
             .orderBy('pick', 'asc')
@@ -439,7 +439,7 @@ router.post('/?', async (req, res) => {
           const season = await db('seasons')
             .where({
               lid: leagueId,
-              year: current_season.year
+              season_year: current_season.year
             })
             .first()
 
@@ -558,7 +558,7 @@ router.post('/?', async (req, res) => {
         .where({
           lid: leagueId,
           week: current_season.week,
-          year: current_season.year,
+          season_year: current_season.year,
           pid
         })
         .where(function () {

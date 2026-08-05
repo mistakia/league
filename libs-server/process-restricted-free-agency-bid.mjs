@@ -117,7 +117,7 @@ export default async function ({
       extensions: 0,
       tid,
       lid,
-      year: current_season.year,
+      season_year: current_season.year,
       week: current_season.week
     })
 
@@ -142,7 +142,7 @@ export default async function ({
     type: transaction_types.RESTRICTED_FREE_AGENCY_TAG,
     player_salary: bid_amount,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
   }
   // The tag transaction and the bid's success marking must commit together.

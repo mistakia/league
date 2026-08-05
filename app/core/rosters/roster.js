@@ -4,7 +4,7 @@ export const Roster = new Record({
   tid: null,
   lid: null,
   week: null,
-  year: null,
+  season_year: null,
   last_updated: null,
   players: new List(),
   lineups: new Map()
@@ -15,7 +15,7 @@ export function createRoster(roster) {
     return
   }
 
-  const { tid, lid, week, year, last_updated, players, lineups } = roster
+  const { tid, lid, week, season_year, last_updated, players, lineups } = roster
 
   return new Roster({
     players: new List(players),
@@ -23,7 +23,7 @@ export function createRoster(roster) {
     tid,
     lid,
     week,
-    year,
+    season_year,
     last_updated
   })
 }

@@ -43,14 +43,14 @@ export default async function ({
 
   if (teamId) {
     const query = db('rosters_players')
-      .where({ tid: teamId, year: current_season.year })
+      .where({ tid: teamId, season_year: current_season.year })
       .groupBy(
         'rosters_players.pid',
         'rosters_players.roster_id',
         'rosters_players.tid',
         'rosters_players.lid',
         'rosters_players.week',
-        'rosters_players.year',
+        'rosters_players.season_year',
         'rosters_players.slot',
         'rosters_players.player_position',
         'rosters_players.tag',
@@ -65,14 +65,14 @@ export default async function ({
     playerSlots.forEach((s) => league_roster_player_ids.push(s.pid))
   } else if (leagueId) {
     const query = db('rosters_players')
-      .where({ lid: leagueId, year: current_season.year })
+      .where({ lid: leagueId, season_year: current_season.year })
       .groupBy(
         'rosters_players.pid',
         'rosters_players.roster_id',
         'rosters_players.tid',
         'rosters_players.lid',
         'rosters_players.week',
-        'rosters_players.year',
+        'rosters_players.season_year',
         'rosters_players.slot',
         'rosters_players.player_position',
         'rosters_players.tag',
@@ -292,7 +292,7 @@ export default async function ({
     query
       .leftJoin('league_format_player_seasonlogs', function () {
         this.on('league_format_player_seasonlogs.pid', 'player.pid')
-        this.andOn('league_format_player_seasonlogs.year', year)
+        this.andOn('league_format_player_seasonlogs.season_year', year)
         this.andOn(
           db.raw(
             `league_format_player_seasonlogs.league_format_id = '${league_format_id}'`
@@ -316,7 +316,7 @@ export default async function ({
     query
       .leftJoin('scoring_format_player_seasonlogs', function () {
         this.on('scoring_format_player_seasonlogs.pid', 'player.pid')
-        this.andOn('scoring_format_player_seasonlogs.year', year)
+        this.andOn('scoring_format_player_seasonlogs.season_year', year)
         this.andOn(
           db.raw(
             `scoring_format_player_seasonlogs.scoring_format_id = '${scoring_format_id}'`
@@ -368,7 +368,7 @@ export default async function ({
       .select('pid', 'week', 'projected_points_total as total')
       .where({
         scoring_format_id,
-        year: current_season.year
+        season_year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
 
@@ -385,7 +385,7 @@ export default async function ({
     )
       .where({
         league_format_id,
-        year: current_season.year
+        season_year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
 
@@ -407,7 +407,7 @@ export default async function ({
     const leagueValuesProj = await db('league_player_projection_values')
       .where({
         lid: leagueId,
-        year: current_season.year
+        season_year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
 
@@ -484,7 +484,10 @@ export default async function ({
     // rendered its 2025 aggregate (starts=1) over a correct 2026 row (starts=16)
     // for exactly this reason.
     const params = leagueId ? { lid: leagueId } : { tid: teamId }
-    const contribution_params = { ...params, year: current_season.year }
+    const contribution_params = {
+      ...params,
+      season_year: current_season.year
+    }
     const contributions = await db('league_team_lineup_contributions').where(
       contribution_params
     )

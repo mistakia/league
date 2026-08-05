@@ -38,7 +38,7 @@ if (!process.env.DEBUG) {
  *   `draft.expired_at` is timestamptz and is written as a Date.
  */
 export default async function close_rookie_draft({ lid, year, completed_at }) {
-  const season = await db('seasons').where({ lid, year }).first()
+  const season = await db('seasons').where({ lid, season_year: year }).first()
 
   const existing = season?.rookie_draft_completed_at
   const timestamp = existing ? Number(existing) : completed_at
@@ -54,12 +54,12 @@ export default async function close_rookie_draft({ lid, year, completed_at }) {
   await db.transaction(async (trx) => {
     if (!existing) {
       await trx('seasons')
-        .where({ lid, year })
+        .where({ lid, season_year: year })
         .update({ rookie_draft_completed_at: timestamp })
     }
 
     expired_count = await trx('draft')
-      .where({ lid, year })
+      .where({ lid, season_year: year })
       .whereNull('pid')
       .whereNull('expired_at')
       .update({ expired_at: new Date(timestamp * 1000) })

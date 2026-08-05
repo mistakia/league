@@ -423,7 +423,7 @@ const options = {
               description: 'Fantasy team ID',
               example: 13
             },
-            year: {
+            season_year: {
               type: 'integer',
               description: 'Season year',
               example: 2024
@@ -773,7 +773,7 @@ const options = {
               description: 'Week number (or "0" for season total)',
               example: '1'
             },
-            year: {
+            season_year: {
               type: 'integer',
               description: 'Season year',
               example: 2024
@@ -1662,7 +1662,7 @@ const options = {
         NFLTeamSeasonLog: {
           type: 'object',
           properties: {
-            year: {
+            season_year: {
               type: 'integer',
               description: 'Season year',
               example: 2024
@@ -1695,7 +1695,7 @@ const options = {
               example: 3
             }
           },
-          required: ['year', 'tm', 'stat_key', 'stat_value']
+          required: ['season_year', 'tm', 'stat_key', 'stat_value']
         },
         Transaction: {
           allOf: [
@@ -2190,7 +2190,7 @@ const options = {
               items: {
                 type: 'object',
                 properties: {
-                  year: {
+                  season_year: {
                     type: 'integer',
                     description: 'Draft year',
                     example: 2025
@@ -2215,7 +2215,7 @@ const options = {
               items: {
                 type: 'object',
                 properties: {
-                  year: {
+                  season_year: {
                     type: 'integer',
                     description: 'Draft year',
                     example: 2025
@@ -2355,7 +2355,7 @@ const options = {
               description: 'League ID',
               example: 2
             },
-            year: {
+            season_year: {
               type: 'integer',
               description: 'Draft year',
               example: 2025
@@ -2443,7 +2443,7 @@ const options = {
                   description: 'Current week',
                   example: 1
                 },
-                year: {
+                season_year: {
                   type: 'integer',
                   description: 'Current year',
                   example: 2024

@@ -29,9 +29,9 @@ const run = async ({ year = current_season.year, dry_run = false } = {}) => {
     .select('seasons.*')
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')
     .where('leagues.is_hosted', 1)
-    .where('year', year)
+    .where('season_year', year)
 
-  for (const { lid, year } of seasons) {
+  for (const { lid, season_year: year } of seasons) {
     log(`Calculating franchise tags for lid ${lid} in ${year}`)
     const rosters = await db('rosters_players')
       .select(
@@ -39,7 +39,7 @@ const run = async ({ year = current_season.year, dry_run = false } = {}) => {
         'transactions.type',
         'transactions.player_salary',
         'transactions.timestamp',
-        'transactions.year'
+        'transactions.season_year'
       )
       .leftJoin('transactions', function () {
         this.on(
@@ -52,7 +52,7 @@ const run = async ({ year = current_season.year, dry_run = false } = {}) => {
       })
       .where('rosters_players.lid', lid)
       .where('rosters_players.week', 0)
-      .where('rosters_players.year', year - 1)
+      .where('rosters_players.season_year', year - 1)
 
     if (!rosters.length) {
       log(`Missing roster, skipping lid ${lid}`)
@@ -87,7 +87,7 @@ const run = async ({ year = current_season.year, dry_run = false } = {}) => {
     }
 
     log(`Updating lid ${lid} for ${year} with:`, update)
-    await db('seasons').update(update).where({ lid, year })
+    await db('seasons').update(update).where({ lid, season_year: year })
   }
 }
 

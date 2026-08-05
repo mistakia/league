@@ -175,7 +175,7 @@ const router = express.Router({ mergeParams: true })
  *                       - uid: 1542
  *                         tid: 14
  *                         lid: 2
- *                         year: 2025
+ *                         season_year: 2025
  *                         round: 1
  *                         pick: 4
  *                         pick_str: "1.04"
@@ -207,7 +207,7 @@ router.get('/?', async (req, res) => {
 
     const query = db('trades')
       .where('lid', leagueId)
-      .where('year', current_season.year)
+      .where('season_year', current_season.year)
 
     if (teamId) {
       query.where(function () {
@@ -248,7 +248,7 @@ router.get('/?', async (req, res) => {
         'draft.pick',
         'draft.pick_str',
         'draft.round',
-        'draft.year',
+        'draft.season_year',
         'draft.lid',
         'draft.original_team_id'
       )
@@ -579,7 +579,7 @@ router.post(
       const psPlayers = await db('rosters_players')
         .join('poaches', 'rosters_players.pid', 'poaches.pid')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week
         })
         .where(function () {
@@ -716,7 +716,7 @@ router.post(
         .leftJoin('rosters_players', function () {
           this.on('player.pid', '=', 'rosters_players.pid')
             .andOn(
-              'rosters_players.year',
+              'rosters_players.season_year',
               '=',
               db.raw('?', [current_season.year])
             )
@@ -811,7 +811,7 @@ router.post(
             propose_tid,
             accept_tid,
             userid: req.auth.userId,
-            year: current_season.year,
+            season_year: current_season.year,
             lid: leagueId,
             offered: Math.round(Date.now() / 1000)
           })

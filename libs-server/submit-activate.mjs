@@ -70,7 +70,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     type: transaction_types.ROSTER_ACTIVATE,
     player_salary: player_row.player_salary,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp
   }
   await db('transactions').insert(transaction)
@@ -99,7 +99,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
 
   const teams = await db('teams').where({
     uid: tid,
-    year: current_season.year
+    season_year: current_season.year
   })
   const team = teams[0]
 

@@ -2,7 +2,7 @@ import db from '#db'
 
 export default async function get_draft_data_with_history({ lid, year }) {
   // Get draft picks for the specified league and year
-  const picks = await db('draft').where({ lid, year })
+  const picks = await db('draft').where({ lid, season_year: year })
 
   // Build trade history for each pick
   const trade_history_by_pick = {}
@@ -50,7 +50,7 @@ export default async function get_draft_data_with_history({ lid, year }) {
             propose_tid: trade.propose_tid,
             accept_tid: trade.accept_tid,
             accepted: trade.accepted,
-            year: trade.year,
+            season_year: trade.season_year,
             pick_recipient_tid: trade.pick_recipient_tid,
             players: trade_players.filter((p) => p.tradeid === trade.uid),
             picks: trade_picks_all.filter((p) => p.tradeid === trade.uid)
@@ -74,8 +74,8 @@ export default async function get_draft_data_with_history({ lid, year }) {
     const historical_picks = await db('draft')
       .where({ lid, pick: position })
       .whereNotNull('pid') // Only picks that were actually made
-      .where('year', '<', year) // Previous years only
-      .orderBy('year', 'desc')
+      .where('season_year', '<', year) // Previous years only
+      .orderBy('season_year', 'desc')
 
     if (historical_picks.length > 0) {
       historical_by_position[position] = historical_picks

@@ -23,13 +23,13 @@ const export_league_playoffs = async () => {
       'uid',
       'tid',
       'lid',
-      'year',
+      'season_year',
       'week',
       'points',
       'points_manual',
       'projection'
     )
-    .orderBy('year', 'asc')
+    .orderBy('season_year', 'asc')
     .orderBy('uid', 'asc')
     .orderBy('tid', 'asc')
 

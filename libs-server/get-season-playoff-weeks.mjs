@@ -17,7 +17,7 @@ const get_season_playoff_weeks = async ({
   lid,
   year = current_season.year
 }) => {
-  const season = await db('seasons').where({ lid, year }).first()
+  const season = await db('seasons').where({ lid, season_year: year }).first()
 
   if (!season) {
     return {

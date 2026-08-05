@@ -46,9 +46,9 @@ const initialize_cli = () =>
 // for the watermark it replaces -- completeness costs 20ms per poll.
 const fingerprint_sql = `
 SELECT md5(concat_ws('|',
-  (SELECT md5(string_agg(concat_ws(':', uid, tid, pid, type, player_salary, year, timestamp), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', uid, tid, pid, type, player_salary, season_year, timestamp), ',' ORDER BY uid))
      FROM transactions WHERE lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', uid, propose_tid, accept_tid, year, offered, accepted, cancelled, rejected, vetoed), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', uid, propose_tid, accept_tid, season_year, offered, accepted, cancelled, rejected, vetoed), ',' ORDER BY uid))
      FROM trades WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', tt.tradeid, tt.transactionid), ',' ORDER BY tt.tradeid, tt.transactionid))
      FROM trades_transactions tt JOIN trades t ON t.uid = tt.tradeid WHERE t.lid = ?),
@@ -56,11 +56,11 @@ SELECT md5(concat_ws('|',
      FROM trades_players tp JOIN trades t ON t.uid = tp.tradeid WHERE t.lid = ?),
   (SELECT md5(string_agg(concat_ws(':', tk.tradeid, tk.tid, tk.pickid), ',' ORDER BY tk.tradeid, tk.tid, tk.pickid))
      FROM trades_picks tk JOIN trades t ON t.uid = tk.tradeid WHERE t.lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', uid, pid, round, is_compensatory, pick, tid, original_team_id, year, selection_timestamp), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', uid, pid, round, is_compensatory, pick, tid, original_team_id, season_year, selection_timestamp), ',' ORDER BY uid))
      FROM draft WHERE lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', uid, pid, bid_amount, tid, year, is_successful, processed, cancelled, nomination_id, outcome), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', uid, pid, bid_amount, tid, season_year, is_successful, processed, cancelled, nomination_id, outcome), ',' ORDER BY uid))
      FROM restricted_free_agency_bids WHERE lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', year, draft_start, rookie_draft_completed_at, ext_date), ',' ORDER BY year))
+  (SELECT md5(string_agg(concat_ws(':', season_year, draft_start, rookie_draft_completed_at, ext_date), ',' ORDER BY season_year))
      FROM seasons WHERE lid = ?)
 )) AS input_hash`
 

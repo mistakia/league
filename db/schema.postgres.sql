@@ -68,6 +68,7 @@ DROP INDEX IF EXISTS public.user_data_view_tags_user_source_idx;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_id_idx;
 DROP INDEX IF EXISTS public.user_data_view_favorites_user_id_idx;
 DROP INDEX IF EXISTS public.trades_slots_trade_uid_idx;
+DROP INDEX IF EXISTS public.scoring_format_player_projection_points_pid_id_week_season_year;
 DROP INDEX IF EXISTS public.roster_asset_transformation_trade_uid_idx;
 DROP INDEX IF EXISTS public.roster_asset_transformation_target_idx;
 DROP INDEX IF EXISTS public.roster_asset_transformation_source_idx;
@@ -160,9 +161,10 @@ DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_counts_idx;
 DROP INDEX IF EXISTS public.nfl_games_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_games_nflverse_game_id;
 DROP INDEX IF EXISTS public.nfl_game_coaches_team;
-DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_tid_year_idx;
-DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_pid_year_idx;
+DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_tid_season_year_idx;
+DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_pid_season_year_idx;
 DROP INDEX IF EXISTS public.league_scoring_formats_config_digest_unique;
+DROP INDEX IF EXISTS public.league_format_player_projection_values_pid_id_week_season_year;
 DROP INDEX IF EXISTS public.idx_weekly_market_selections_analysis_cache_composite;
 DROP INDEX IF EXISTS public.idx_waivers_super_priority;
 DROP INDEX IF EXISTS public.idx_waivers_lid;
@@ -188,17 +190,16 @@ DROP INDEX IF EXISTS public.idx_selection_combination_odds_index_combination;
 DROP INDEX IF EXISTS public.idx_selection_combination_odds_history_lookup;
 DROP INDEX IF EXISTS public.idx_selection_combination_odds_history_esbid;
 DROP INDEX IF EXISTS public.idx_selection_combination_definitions_active;
-DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_id;
-DROP INDEX IF EXISTS public.idx_scoring_format_player_projection_points_pid_id_week_year;
+DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_season_year_id;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_projection_points_pid;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_id;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_id;
-DROP INDEX IF EXISTS public.idx_rosters_tid_week_year;
+DROP INDEX IF EXISTS public.idx_rosters_tid_week_season_year;
 DROP INDEX IF EXISTS public.idx_rosters_tid;
-DROP INDEX IF EXISTS public.idx_rosters_players_year_week_lid_pid;
+DROP INDEX IF EXISTS public.idx_rosters_players_season_year_week_lid_pid;
 DROP INDEX IF EXISTS public.idx_rosters_players_rid;
 DROP INDEX IF EXISTS public.idx_ros_projections_pid;
-DROP INDEX IF EXISTS public.idx_rfa_bids_lid_year_active;
+DROP INDEX IF EXISTS public.idx_rfa_bids_lid_season_year_active;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_releases_bid_id;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_nominations_league_season;
 DROP INDEX IF EXISTS public.idx_restricted_free_agency_nominations_identity;
@@ -337,8 +338,7 @@ DROP INDEX IF EXISTS public.idx_league_notifications_type;
 DROP INDEX IF EXISTS public.idx_league_notifications_sent_timestamp;
 DROP INDEX IF EXISTS public.idx_league_notifications_lid_season_year;
 DROP INDEX IF EXISTS public.idx_league_notifications_event_timestamp;
-DROP INDEX IF EXISTS public.idx_league_format_player_seasonlogs_pid_year_id;
-DROP INDEX IF EXISTS public.idx_league_format_player_projection_values_pid_id_week_year;
+DROP INDEX IF EXISTS public.idx_league_format_player_seasonlogs_pid_season_year_id;
 DROP INDEX IF EXISTS public.idx_league_format_player_projection_values_pid;
 DROP INDEX IF EXISTS public.idx_league_format_player_gamelogs_pid_esbid_id;
 DROP INDEX IF EXISTS public.idx_league_format_player_careerlogs_pid_id;
@@ -386,7 +386,7 @@ DROP INDEX IF EXISTS public.idx_dfs_contests_draft_group;
 DROP INDEX IF EXISTS public.idx_bid_changelog_league_player_season;
 DROP INDEX IF EXISTS public.idx_bid_changelog_bid_identity;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
-DROP INDEX IF EXISTS public.idx_25141_userid_tid_year;
+DROP INDEX IF EXISTS public.idx_25141_userid_tid_season_year;
 DROP INDEX IF EXISTS public.idx_25138_sourceid;
 DROP INDEX IF EXISTS public.idx_25127_email;
 DROP INDEX IF EXISTS public.idx_25114_pid;
@@ -396,7 +396,7 @@ DROP INDEX IF EXISTS public.idx_25096_pid;
 DROP INDEX IF EXISTS public.idx_25093_pick;
 DROP INDEX IF EXISTS public.idx_25089_uid;
 DROP INDEX IF EXISTS public.idx_25085_pid;
-DROP INDEX IF EXISTS public.idx_25075_team_year;
+DROP INDEX IF EXISTS public.idx_25075_team_season_year;
 DROP INDEX IF EXISTS public.idx_25029_team;
 DROP INDEX IF EXISTS public.idx_25012_season;
 DROP INDEX IF EXISTS public.idx_24999_player_team;
@@ -2154,7 +2154,7 @@ CREATE TABLE public.draft (
     tid integer NOT NULL,
     original_team_id integer NOT NULL,
     lid integer NOT NULL,
-    year smallint,
+    season_year smallint,
     selection_timestamp integer,
     expired_at timestamp with time zone,
     CONSTRAINT draft_not_both_selected_and_expired CHECK (((pid IS NULL) OR (expired_at IS NULL)))
@@ -4029,7 +4029,7 @@ CREATE TABLE public.keeptradecut_valuations (
 CREATE TABLE public.league_baselines (
     lid integer NOT NULL,
     week character varying(3) NOT NULL,
-    year smallint,
+    season_year smallint,
     pid character varying(25),
     type character varying(10) NOT NULL,
     player_position character varying(4) NOT NULL,
@@ -4062,7 +4062,7 @@ CREATE TABLE public.league_cutlist (
 
 CREATE TABLE public.league_divisions (
     lid integer NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     division_name character varying(50) NOT NULL,
     division_id smallint NOT NULL
 );
@@ -4132,7 +4132,7 @@ CREATE TABLE public.league_format_player_gamelogs (
 CREATE TABLE public.league_format_player_projection_values (
     pid character varying(25) NOT NULL,
     week character varying(10) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     pts_added numeric(7,2),
     market_salary numeric(6,2),
     league_format_id text NOT NULL
@@ -4147,7 +4147,7 @@ CREATE TABLE public.league_format_player_projection_values_history (
     pid character varying(25) NOT NULL,
     league_format_id text NOT NULL,
     week character varying(10) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     pts_added numeric(7,2),
     market_salary numeric(6,2),
     is_removed boolean DEFAULT false NOT NULL,
@@ -4161,7 +4161,7 @@ CREATE TABLE public.league_format_player_projection_values_history (
 
 CREATE TABLE public.league_format_player_seasonlogs (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     startable_games smallint,
     points_added_earned numeric(4,1),
     points_added_earned_per_game numeric(3,1),
@@ -4335,7 +4335,7 @@ ALTER SEQUENCE public.league_notifications_uid_seq OWNED BY public.league_notifi
 CREATE TABLE public.league_player_projection_values (
     pid character varying(25),
     week character varying(3) NOT NULL,
-    year smallint,
+    season_year smallint,
     lid integer NOT NULL,
     salary_adj_pts_added numeric(5,2),
     market_salary_adj numeric(6,2)
@@ -4375,7 +4375,7 @@ CREATE TABLE public.league_player_season_projection_values (
 
 CREATE TABLE public.league_player_seasonlogs (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     lid integer NOT NULL,
     start_tid integer,
     start_acquisition_type smallint,
@@ -4514,7 +4514,7 @@ CREATE TABLE public.league_team_forecast (
     tid integer NOT NULL,
     lid integer NOT NULL,
     week character varying(3) NOT NULL,
-    year smallint,
+    season_year smallint,
     day integer NOT NULL,
     playoff_odds numeric(5,4) NOT NULL,
     division_odds numeric(5,4) NOT NULL,
@@ -4539,7 +4539,7 @@ CREATE TABLE public.league_team_forecast (
 CREATE TABLE public.league_team_lineup_contribution_weeks (
     pid character varying(25),
     week smallint NOT NULL,
-    year smallint,
+    season_year smallint,
     tid integer NOT NULL,
     lid integer NOT NULL,
     is_starter boolean NOT NULL,
@@ -4554,7 +4554,7 @@ CREATE TABLE public.league_team_lineup_contribution_weeks (
 
 CREATE TABLE public.league_team_lineup_contributions (
     pid character varying(25),
-    year smallint,
+    season_year smallint,
     tid integer NOT NULL,
     lid integer NOT NULL,
     starts smallint NOT NULL,
@@ -4570,7 +4570,7 @@ CREATE TABLE public.league_team_lineup_contributions (
 CREATE TABLE public.league_team_lineup_starters (
     pid character varying(25),
     week smallint NOT NULL,
-    year smallint,
+    season_year smallint,
     tid integer NOT NULL,
     lid integer NOT NULL
 );
@@ -4582,7 +4582,7 @@ CREATE TABLE public.league_team_lineup_starters (
 
 CREATE TABLE public.league_team_lineups (
     week smallint NOT NULL,
-    year smallint,
+    season_year smallint,
     tid integer NOT NULL,
     lid integer NOT NULL,
     optimal_total numeric(5,2),
@@ -4598,7 +4598,7 @@ CREATE TABLE public.league_team_player_seasonlogs (
     lid integer NOT NULL,
     tid integer NOT NULL,
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     weeks_rostered smallint DEFAULT 0 NOT NULL,
     weeks_started smallint DEFAULT 0 NOT NULL,
     pts_added_earned_rostered numeric(5,1),
@@ -4630,7 +4630,7 @@ CREATE TABLE public.league_team_seasonlogs (
     lid integer NOT NULL,
     tid integer NOT NULL,
     division smallint,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     regular_season_wins smallint DEFAULT '0'::smallint,
     regular_season_losses smallint DEFAULT '0'::smallint,
     regular_season_ties smallint DEFAULT '0'::smallint,
@@ -4787,7 +4787,7 @@ CREATE TABLE public.matchups (
     away_team_id integer NOT NULL,
     home_team_id integer NOT NULL,
     lid integer NOT NULL,
-    year smallint,
+    season_year smallint,
     week smallint NOT NULL,
     away_points numeric(5,2) DEFAULT 0.00 NOT NULL,
     home_points numeric(5,2) DEFAULT 0.00 NOT NULL,
@@ -24596,7 +24596,7 @@ CREATE TABLE public.playoffs (
     uid integer NOT NULL,
     tid integer NOT NULL,
     lid integer NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     week smallint NOT NULL,
     points numeric(7,2),
     points_manual numeric(7,2),
@@ -25957,7 +25957,7 @@ CREATE TABLE public.restricted_free_agency_bids (
     userid integer NOT NULL,
     bid_amount integer,
     tid integer NOT NULL,
-    year smallint,
+    season_year smallint,
     lid integer NOT NULL,
     is_successful boolean,
     submitted integer NOT NULL,
@@ -26315,7 +26315,7 @@ CREATE TABLE public.rosters (
     tid integer NOT NULL,
     lid integer NOT NULL,
     week smallint NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     last_updated integer
 );
 
@@ -26334,7 +26334,7 @@ CREATE TABLE public.rosters_players (
     tid bigint NOT NULL,
     lid bigint NOT NULL,
     week smallint NOT NULL,
-    year bigint NOT NULL,
+    season_year bigint NOT NULL,
     CONSTRAINT rosters_players_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -26398,7 +26398,7 @@ CREATE TABLE public.scoring_format_player_gamelogs (
 CREATE TABLE public.scoring_format_player_projection_points (
     pid character varying(25) NOT NULL,
     week character varying(3) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     projected_points_total numeric(5,2),
     scoring_format_id text NOT NULL
 );
@@ -26410,7 +26410,7 @@ CREATE TABLE public.scoring_format_player_projection_points (
 
 CREATE TABLE public.scoring_format_player_seasonlogs (
     pid character varying(25) NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     points numeric(4,1),
     points_per_game numeric(3,1),
     games_played smallint,
@@ -26428,7 +26428,7 @@ CREATE TABLE public.scoring_format_player_seasonlogs (
 
 CREATE TABLE public.seasons (
     lid integer NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     season_started_at bigint,
     franchise_tag_salary_qb integer,
     franchise_tag_salary_rb integer,
@@ -26688,7 +26688,7 @@ ALTER SEQUENCE public.super_priority_uid_seq OWNED BY public.super_priority.uid;
 
 CREATE TABLE public.teams (
     uid integer NOT NULL,
-    year smallint NOT NULL,
+    season_year smallint NOT NULL,
     lid integer NOT NULL,
     division smallint,
     name character varying(50) NOT NULL,
@@ -26745,7 +26745,7 @@ CREATE TABLE public.trades (
     accept_tid integer NOT NULL,
     lid integer NOT NULL,
     userid integer NOT NULL,
-    year smallint,
+    season_year smallint,
     offered integer NOT NULL,
     accepted integer,
     cancelled integer,
@@ -26831,7 +26831,7 @@ CREATE TABLE public.transactions (
     type smallint NOT NULL,
     player_salary integer NOT NULL,
     week smallint NOT NULL,
-    year smallint,
+    season_year smallint,
     "timestamp" integer NOT NULL,
     waiverid integer
 );
@@ -26976,7 +26976,7 @@ CREATE TABLE public.users_sources (
 CREATE TABLE public.users_teams (
     userid integer NOT NULL,
     tid integer NOT NULL,
-    year smallint NOT NULL
+    season_year smallint NOT NULL
 );
 
 
@@ -28681,7 +28681,7 @@ ALTER TABLE ONLY public.keeptradecut_valuations
 --
 
 ALTER TABLE ONLY public.league_divisions
-    ADD CONSTRAINT league_divisions_pkey PRIMARY KEY (lid, year, division_id);
+    ADD CONSTRAINT league_divisions_pkey PRIMARY KEY (lid, season_year, division_id);
 
 
 --
@@ -28753,7 +28753,7 @@ ALTER TABLE ONLY public.league_team_careerlogs
 --
 
 ALTER TABLE ONLY public.league_team_player_seasonlogs
-    ADD CONSTRAINT league_team_player_seasonlogs_pkey PRIMARY KEY (lid, tid, pid, year, league_format_id);
+    ADD CONSTRAINT league_team_player_seasonlogs_pkey PRIMARY KEY (lid, tid, pid, season_year, league_format_id);
 
 
 --
@@ -28761,7 +28761,7 @@ ALTER TABLE ONLY public.league_team_player_seasonlogs
 --
 
 ALTER TABLE ONLY public.league_team_seasonlogs
-    ADD CONSTRAINT league_team_seasonlogs_pkey PRIMARY KEY (lid, tid, year);
+    ADD CONSTRAINT league_team_seasonlogs_pkey PRIMARY KEY (lid, tid, season_year);
 
 
 --
@@ -29457,7 +29457,7 @@ ALTER TABLE ONLY public.player_variance
 --
 
 ALTER TABLE ONLY public.playoffs
-    ADD CONSTRAINT playoffs_pkey PRIMARY KEY (uid, tid, year, week);
+    ADD CONSTRAINT playoffs_pkey PRIMARY KEY (uid, tid, season_year, week);
 
 
 --
@@ -29529,7 +29529,7 @@ ALTER TABLE ONLY public.rosters_players
 --
 
 ALTER TABLE ONLY public.seasons
-    ADD CONSTRAINT seasons_pkey PRIMARY KEY (lid, year);
+    ADD CONSTRAINT seasons_pkey PRIMARY KEY (lid, season_year);
 
 
 --
@@ -29577,7 +29577,7 @@ ALTER TABLE ONLY public.super_priority
 --
 
 ALTER TABLE ONLY public.teams
-    ADD CONSTRAINT teams_pkey PRIMARY KEY (uid, year);
+    ADD CONSTRAINT teams_pkey PRIMARY KEY (uid, season_year);
 
 
 --
@@ -29641,7 +29641,7 @@ ALTER TABLE ONLY public.user_plays_views
 --
 
 ALTER TABLE ONLY public.users_teams
-    ADD CONSTRAINT users_teams_pkey PRIMARY KEY (userid, tid, year);
+    ADD CONSTRAINT users_teams_pkey PRIMARY KEY (userid, tid, season_year);
 
 
 --
@@ -29965,7 +29965,7 @@ CREATE INDEX historical_injury_index_2025_season_year_week_idx ON public.histori
 -- Name: idx_24608_pick; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24608_pick ON public.draft USING btree (round, pick, lid, year);
+CREATE UNIQUE INDEX idx_24608_pick ON public.draft USING btree (round, pick, lid, season_year);
 
 
 --
@@ -30000,14 +30000,14 @@ CREATE UNIQUE INDEX idx_24662_league_stat ON public.league_nfl_team_seasonlogs U
 -- Name: idx_24665_player_value; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24665_player_value ON public.league_player_projection_values USING btree (pid, lid, week, year);
+CREATE UNIQUE INDEX idx_24665_player_value ON public.league_player_projection_values USING btree (pid, lid, week, season_year);
 
 
 --
 -- Name: idx_24668_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24668_pid ON public.league_player_seasonlogs USING btree (pid, year, lid);
+CREATE UNIQUE INDEX idx_24668_pid ON public.league_player_seasonlogs USING btree (pid, season_year, lid);
 
 
 --
@@ -30021,35 +30021,35 @@ CREATE UNIQUE INDEX idx_24674_league_team ON public.league_team_daily_values USI
 -- Name: idx_24677_team_forecast_day; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24677_team_forecast_day ON public.league_team_forecast USING btree (tid, year, week, day);
+CREATE UNIQUE INDEX idx_24677_team_forecast_day ON public.league_team_forecast USING btree (tid, season_year, week, day);
 
 
 --
 -- Name: idx_24680_contribution; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24680_contribution ON public.league_team_lineup_contribution_weeks USING btree (lid, pid, year, week);
+CREATE UNIQUE INDEX idx_24680_contribution ON public.league_team_lineup_contribution_weeks USING btree (lid, pid, season_year, week);
 
 
 --
 -- Name: idx_24683_contribution; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24683_contribution ON public.league_team_lineup_contributions USING btree (lid, pid, year);
+CREATE UNIQUE INDEX idx_24683_contribution ON public.league_team_lineup_contributions USING btree (lid, pid, season_year);
 
 
 --
 -- Name: idx_24686_starter; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24686_starter ON public.league_team_lineup_starters USING btree (lid, pid, year, week);
+CREATE UNIQUE INDEX idx_24686_starter ON public.league_team_lineup_starters USING btree (lid, pid, season_year, week);
 
 
 --
 -- Name: idx_24689_lineup; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24689_lineup ON public.league_team_lineups USING btree (tid, year, week);
+CREATE UNIQUE INDEX idx_24689_lineup ON public.league_team_lineups USING btree (tid, season_year, week);
 
 
 --
@@ -30063,7 +30063,7 @@ CREATE UNIQUE INDEX idx_24693_uid ON public.leagues USING btree (uid);
 -- Name: idx_24699_aid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24699_aid ON public.matchups USING btree (away_team_id, home_team_id, year, week);
+CREATE UNIQUE INDEX idx_24699_aid ON public.matchups USING btree (away_team_id, home_team_id, season_year, week);
 
 
 --
@@ -30231,7 +30231,7 @@ CREATE UNIQUE INDEX idx_24855_pid ON public.player_seasonlogs USING btree (pid, 
 -- Name: idx_24910_tid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24910_tid ON public.playoffs USING btree (tid, uid, year);
+CREATE UNIQUE INDEX idx_24910_tid ON public.playoffs USING btree (tid, uid, season_year);
 
 
 --
@@ -30308,28 +30308,28 @@ CREATE UNIQUE INDEX idx_24999_pid ON public.rosters_players USING btree (roster_
 -- Name: idx_24999_player_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24999_player_team ON public.rosters_players USING btree (pid, week, year, tid);
+CREATE UNIQUE INDEX idx_24999_player_team ON public.rosters_players USING btree (pid, week, season_year, tid);
 
 
 --
 -- Name: idx_25012_season; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25012_season ON public.seasons USING btree (lid, year);
+CREATE UNIQUE INDEX idx_25012_season ON public.seasons USING btree (lid, season_year);
 
 
 --
 -- Name: idx_25029_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25029_team ON public.league_team_seasonlogs USING btree (tid, year);
+CREATE UNIQUE INDEX idx_25029_team ON public.league_team_seasonlogs USING btree (tid, season_year);
 
 
 --
--- Name: idx_25075_team_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_25075_team_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25075_team_year ON public.teams USING btree (uid, year);
+CREATE UNIQUE INDEX idx_25075_team_season_year ON public.teams USING btree (uid, season_year);
 
 
 --
@@ -30396,10 +30396,10 @@ CREATE UNIQUE INDEX idx_25138_sourceid ON public.users_sources USING btree (user
 
 
 --
--- Name: idx_25141_userid_tid_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_25141_userid_tid_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25141_userid_tid_year ON public.users_teams USING btree (userid, tid, year);
+CREATE UNIQUE INDEX idx_25141_userid_tid_season_year ON public.users_teams USING btree (userid, tid, season_year);
 
 
 --
@@ -30732,17 +30732,10 @@ CREATE INDEX idx_league_format_player_projection_values_pid ON public.league_for
 
 
 --
--- Name: idx_league_format_player_projection_values_pid_id_week_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_league_format_player_seasonlogs_pid_season_year_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_league_format_player_projection_values_pid_id_week_year ON public.league_format_player_projection_values USING btree (pid, league_format_id, week, year);
-
-
---
--- Name: idx_league_format_player_seasonlogs_pid_year_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_league_format_player_seasonlogs_pid_year_id ON public.league_format_player_seasonlogs USING btree (pid, year, league_format_id);
+CREATE UNIQUE INDEX idx_league_format_player_seasonlogs_pid_season_year_id ON public.league_format_player_seasonlogs USING btree (pid, season_year, league_format_id);
 
 
 --
@@ -30805,14 +30798,14 @@ CREATE INDEX idx_leagues_commishid ON public.leagues USING btree (commishid);
 -- Name: idx_lf_player_projection_values_history_as_of; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_lf_player_projection_values_history_as_of ON public.league_format_player_projection_values_history USING btree (league_format_id, year, observed_at);
+CREATE INDEX idx_lf_player_projection_values_history_as_of ON public.league_format_player_projection_values_history USING btree (league_format_id, season_year, observed_at);
 
 
 --
 -- Name: idx_lf_player_projection_values_history_natural_key; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_lf_player_projection_values_history_natural_key ON public.league_format_player_projection_values_history USING btree (pid, league_format_id, year, week, observed_at);
+CREATE UNIQUE INDEX idx_lf_player_projection_values_history_natural_key ON public.league_format_player_projection_values_history USING btree (pid, league_format_id, season_year, week, observed_at);
 
 
 --
@@ -31712,10 +31705,10 @@ CREATE INDEX idx_restricted_free_agency_releases_bid_id ON public.restricted_fre
 
 
 --
--- Name: idx_rfa_bids_lid_year_active; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_rfa_bids_lid_season_year_active; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_rfa_bids_lid_year_active ON public.restricted_free_agency_bids USING btree (lid, year) WHERE (cancelled IS NULL);
+CREATE INDEX idx_rfa_bids_lid_season_year_active ON public.restricted_free_agency_bids USING btree (lid, season_year) WHERE (cancelled IS NULL);
 
 
 --
@@ -31733,10 +31726,10 @@ CREATE INDEX idx_rosters_players_rid ON public.rosters_players USING btree (rost
 
 
 --
--- Name: idx_rosters_players_year_week_lid_pid; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_rosters_players_season_year_week_lid_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_rosters_players_year_week_lid_pid ON public.rosters_players USING btree (year, week, lid, pid);
+CREATE INDEX idx_rosters_players_season_year_week_lid_pid ON public.rosters_players USING btree (season_year, week, lid, pid);
 
 
 --
@@ -31747,10 +31740,10 @@ CREATE INDEX idx_rosters_tid ON public.rosters USING btree (tid);
 
 
 --
--- Name: idx_rosters_tid_week_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_rosters_tid_week_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_rosters_tid_week_year ON public.rosters USING btree (tid, week, year);
+CREATE INDEX idx_rosters_tid_week_season_year ON public.rosters USING btree (tid, week, season_year);
 
 
 --
@@ -31775,17 +31768,10 @@ CREATE INDEX idx_scoring_format_player_projection_points_pid ON public.scoring_f
 
 
 --
--- Name: idx_scoring_format_player_projection_points_pid_id_week_year; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_scoring_format_player_seasonlogs_pid_season_year_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_scoring_format_player_projection_points_pid_id_week_year ON public.scoring_format_player_projection_points USING btree (pid, scoring_format_id, week, year);
-
-
---
--- Name: idx_scoring_format_player_seasonlogs_pid_year_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_id ON public.scoring_format_player_seasonlogs USING btree (pid, year, scoring_format_id);
+CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_season_year_id ON public.scoring_format_player_seasonlogs USING btree (pid, season_year, scoring_format_id);
 
 
 --
@@ -31964,6 +31950,13 @@ CREATE INDEX idx_weekly_market_selections_analysis_cache_composite ON public.wee
 
 
 --
+-- Name: league_format_player_projection_values_pid_id_week_season_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX league_format_player_projection_values_pid_id_week_season_year ON public.league_format_player_projection_values USING btree (pid, league_format_id, week, season_year);
+
+
+--
 -- Name: league_scoring_formats_config_digest_unique; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31971,17 +31964,17 @@ CREATE UNIQUE INDEX league_scoring_formats_config_digest_unique ON public.league
 
 
 --
--- Name: league_team_player_seasonlogs_lid_pid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: league_team_player_seasonlogs_lid_pid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX league_team_player_seasonlogs_lid_pid_year_idx ON public.league_team_player_seasonlogs USING btree (lid, pid, year);
+CREATE INDEX league_team_player_seasonlogs_lid_pid_season_year_idx ON public.league_team_player_seasonlogs USING btree (lid, pid, season_year);
 
 
 --
--- Name: league_team_player_seasonlogs_lid_tid_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: league_team_player_seasonlogs_lid_tid_season_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX league_team_player_seasonlogs_lid_tid_year_idx ON public.league_team_player_seasonlogs USING btree (lid, tid, year);
+CREATE INDEX league_team_player_seasonlogs_lid_tid_season_year_idx ON public.league_team_player_seasonlogs USING btree (lid, tid, season_year);
 
 
 --
@@ -44483,7 +44476,7 @@ CREATE INDEX projections_index_y2026_pid_idx ON public.projections_index_y2026 U
 -- Name: restricted_free_agency_bids_one_live_per_team_player; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX restricted_free_agency_bids_one_live_per_team_player ON public.restricted_free_agency_bids USING btree (lid, year, tid, pid) WHERE ((cancelled IS NULL) AND (processed IS NULL));
+CREATE UNIQUE INDEX restricted_free_agency_bids_one_live_per_team_player ON public.restricted_free_agency_bids USING btree (lid, season_year, tid, pid) WHERE ((cancelled IS NULL) AND (processed IS NULL));
 
 
 --
@@ -44547,6 +44540,13 @@ CREATE INDEX roster_asset_transformation_target_idx ON public.roster_asset_trans
 --
 
 CREATE INDEX roster_asset_transformation_trade_uid_idx ON public.roster_asset_transformation USING btree (trade_uid) WHERE (trade_uid IS NOT NULL);
+
+
+--
+-- Name: scoring_format_player_projection_points_pid_id_week_season_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX scoring_format_player_projection_points_pid_id_week_season_year ON public.scoring_format_player_projection_points USING btree (pid, scoring_format_id, week, season_year);
 
 
 --

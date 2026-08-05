@@ -316,7 +316,7 @@ describe('bid changelog', function () {
     const period_start = regular_season_start.subtract('3', 'month').unix()
     await knex('seasons')
       .update({
-        year: current_season.year,
+        season_year: current_season.year,
         restricted_free_agency_period_start: period_start,
         restricted_free_agency_period_end: regular_season_start
           .subtract('1', 'month')

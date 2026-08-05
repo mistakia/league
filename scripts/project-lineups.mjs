@@ -23,13 +23,16 @@ const project_lineups = async (lid) => {
   const league = await getLeague({ lid })
   const teams = await db('teams').where({
     lid,
-    year: current_season.year
+    season_year: current_season.year
   })
   const team_lineup_inserts = []
   const team_lineup_starter_inserts = []
   const team_lineup_contribution_inserts = []
   const team_lineup_contribution_week_inserts = []
-  const baselines = await db('league_baselines').where({ lid, year })
+  const baselines = await db('league_baselines').where({
+    lid,
+    season_year: year
+  })
 
   // Replacement-level points per week/position, from the 'starter' baseline --
   // used to score optimizeLineup's phantom slot when a roster cannot fill a
@@ -80,7 +83,7 @@ const project_lineups = async (lid) => {
         week: week_number,
         tid,
         lid,
-        year,
+        season_year: year,
         optimal_total: lineup.total,
         baseline_total: baseline_lineups[week].baseline_total
       })
@@ -89,7 +92,7 @@ const project_lineups = async (lid) => {
           pid,
           week: week_number,
           lid,
-          year,
+          season_year: year,
           tid
         })
       }
@@ -172,7 +175,7 @@ const project_lineups = async (lid) => {
         tid,
         lid,
         pid,
-        year,
+        season_year: year,
         starts,
         starter_plus_points: sp,
         bench_plus_points: bp
@@ -184,7 +187,7 @@ const project_lineups = async (lid) => {
           tid,
           lid,
           pid,
-          year,
+          season_year: year,
           is_starter,
           starter_plus_points: sp,
           bench_plus_points: bp
@@ -196,25 +199,29 @@ const project_lineups = async (lid) => {
   if (team_lineup_inserts.length) {
     await db('league_team_lineups')
       .insert(team_lineup_inserts)
-      .onConflict(['tid', 'year', 'week'])
+      .onConflict(['tid', 'season_year', 'week'])
       .merge()
     log(`saved ${team_lineup_inserts.length} team lineups`)
   }
 
   if (team_lineup_starter_inserts.length) {
-    await db('league_team_lineup_starters').del().where({ lid, year })
+    await db('league_team_lineup_starters')
+      .del()
+      .where({ lid, season_year: year })
     await db('league_team_lineup_starters')
       .insert(team_lineup_starter_inserts)
-      .onConflict(['lid', 'pid', 'year', 'week'])
+      .onConflict(['lid', 'pid', 'season_year', 'week'])
       .merge()
     log(`saved ${team_lineup_starter_inserts.length} team lineup starters`)
   }
 
   if (team_lineup_contribution_inserts.length) {
-    await db('league_team_lineup_contributions').del().where({ lid, year })
+    await db('league_team_lineup_contributions')
+      .del()
+      .where({ lid, season_year: year })
     await db('league_team_lineup_contributions')
       .insert(team_lineup_contribution_inserts)
-      .onConflict(['lid', 'pid', 'year'])
+      .onConflict(['lid', 'pid', 'season_year'])
       .merge()
     log(
       `saved ${team_lineup_contribution_inserts.length} team lineup contributions`
@@ -222,10 +229,12 @@ const project_lineups = async (lid) => {
   }
 
   if (team_lineup_contribution_week_inserts.length) {
-    await db('league_team_lineup_contribution_weeks').del().where({ lid, year })
+    await db('league_team_lineup_contribution_weeks')
+      .del()
+      .where({ lid, season_year: year })
     await db('league_team_lineup_contribution_weeks')
       .insert(team_lineup_contribution_week_inserts)
-      .onConflict(['lid', 'pid', 'year', 'week'])
+      .onConflict(['lid', 'pid', 'season_year', 'week'])
       .merge()
     log(
       `saved ${team_lineup_contribution_week_inserts.length} team lineup contribution weeks`

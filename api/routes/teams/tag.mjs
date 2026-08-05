@@ -207,7 +207,7 @@ router.post('/?', async (req, res) => {
     await db('restricted_free_agency_bids')
       .update('cancelled', timestamp)
       .where({
-        year: current_season.year,
+        season_year: current_season.year,
         pid,
         tid
       })

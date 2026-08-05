@@ -23,7 +23,9 @@ export const build_active_restricted_free_agency_bids_query = ({
 }) =>
   db('restricted_free_agency_bids')
     .where('tid', tid)
-    .where('year', year)
+    // Qualified because callers join `restricted_free_agency_nominations`, which
+    // carries its own `season_year` -- unqualified, the predicate is ambiguous.
+    .where('restricted_free_agency_bids.season_year', year)
     .whereNull('cancelled')
     .whereNull('processed')
 

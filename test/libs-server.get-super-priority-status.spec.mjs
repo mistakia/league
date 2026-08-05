@@ -55,7 +55,7 @@ describe('LIB - get_super_priority_status', function () {
         lid: 1,
         type: transaction_types.POACHED,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60, // 1 week ago
         week: current_season.week - 1,
         userid: 2
@@ -86,7 +86,7 @@ describe('LIB - get_super_priority_status', function () {
         lid: 1,
         type: transaction_types.PRACTICE_ADD,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: poach_timestamp - 24 * 60 * 60, // 1 day before poach
         week: current_season.week - 1,
         userid: 1
@@ -99,7 +99,7 @@ describe('LIB - get_super_priority_status', function () {
         lid: 1,
         type: transaction_types.POACHED,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: poach_timestamp,
         week: current_season.week - 1,
         userid: 2
@@ -125,7 +125,7 @@ describe('LIB - get_super_priority_status', function () {
         .insert({
           tid: 1, // Original team
           week: current_season.week - 2,
-          year: current_season.year,
+          season_year: current_season.year,
           lid: 1
         })
         .returning('uid')
@@ -139,7 +139,7 @@ describe('LIB - get_super_priority_status', function () {
         slot: roster_slot_types.PSD, // PS drafted slot
         player_position: player.primary_position,
         week: current_season.week - 2,
-        year: current_season.year
+        season_year: current_season.year
       })
 
       const status = await get_super_priority_status({
@@ -168,7 +168,7 @@ describe('LIB - get_super_priority_status', function () {
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 1,
           userid: 1
@@ -179,7 +179,7 @@ describe('LIB - get_super_priority_status', function () {
           lid: 1,
           type: transaction_types.POACHED,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 1,
           userid: 2
@@ -195,7 +195,7 @@ describe('LIB - get_super_priority_status', function () {
         lid: 1,
         type: transaction_types.TRADE,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: poach_timestamp + 24 * 60 * 60, // 1 day after poach
         week: current_season.week,
         userid: 2
@@ -223,7 +223,7 @@ describe('LIB - get_super_priority_status', function () {
         lid: 1,
         type: transaction_types.EXTENSION,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: poach_timestamp + 24 * 60 * 60,
         week: current_season.week,
         userid: 2
@@ -233,7 +233,7 @@ describe('LIB - get_super_priority_status', function () {
         .insert({
           tid: 2,
           week: 1,
-          year: current_season.year,
+          season_year: current_season.year,
           lid: 1
         })
         .returning('uid')
@@ -245,7 +245,7 @@ describe('LIB - get_super_priority_status', function () {
         slot: roster_slot_types.BENCH,
         player_position: player.primary_position,
         week: 1,
-        year: current_season.year
+        season_year: current_season.year
       })
 
       const status = await get_super_priority_status({
@@ -266,7 +266,7 @@ describe('LIB - get_super_priority_status', function () {
         lid: 1,
         type: transaction_types.RESTRICTED_FREE_AGENCY_TAG,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: poach_timestamp + 24 * 60 * 60,
         week: current_season.week,
         userid: 2
@@ -301,7 +301,7 @@ describe('LIB - get_super_priority_status', function () {
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 5,
           userid: 1
@@ -312,7 +312,7 @@ describe('LIB - get_super_priority_status', function () {
           lid: 1,
           type: transaction_types.POACHED,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 5,
           userid: 2
@@ -329,7 +329,7 @@ describe('LIB - get_super_priority_status', function () {
           .insert({
             tid: 2, // Poaching team
             week: weekNum,
-            year: current_season.year,
+            season_year: current_season.year,
             lid: 1
           })
           .returning('uid')
@@ -347,7 +347,7 @@ describe('LIB - get_super_priority_status', function () {
           slot: roster_slot_types.PS,
           player_position: player.primary_position,
           week: current_season.week - 4 + i,
-          year: current_season.year
+          season_year: current_season.year
         })
       }
       await knex('rosters_players').insert(rosterEntries)
@@ -368,7 +368,7 @@ describe('LIB - get_super_priority_status', function () {
         .insert({
           tid: 2, // Poaching team
           week: current_season.week - 1,
-          year: current_season.year,
+          season_year: current_season.year,
           lid: 1
         })
         .returning('uid')
@@ -382,7 +382,7 @@ describe('LIB - get_super_priority_status', function () {
         slot: roster_slot_types.QB, // Starting slot
         player_position: player.primary_position,
         week: current_season.week - 1,
-        year: current_season.year
+        season_year: current_season.year
       })
 
       const status = await get_super_priority_status({
@@ -417,7 +417,7 @@ describe('LIB - get_super_priority_status', function () {
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 1,
           userid: 1
@@ -428,7 +428,7 @@ describe('LIB - get_super_priority_status', function () {
           lid: 1,
           type: transaction_types.POACHED,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 1,
           userid: 2
@@ -440,7 +440,7 @@ describe('LIB - get_super_priority_status', function () {
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 1,
           userid: 3
@@ -451,7 +451,7 @@ describe('LIB - get_super_priority_status', function () {
           lid: 1,
           type: transaction_types.POACHED,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 1,
           userid: 2
@@ -500,7 +500,7 @@ describe('LIB - get_super_priority_status', function () {
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 1,
           userid: 1
@@ -511,7 +511,7 @@ describe('LIB - get_super_priority_status', function () {
           lid: 1,
           type: transaction_types.POACHED,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 1,
           userid: 2

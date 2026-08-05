@@ -32,7 +32,7 @@ const BATCH_SIZE = 1000
 const resolve_league_format_id = async ({ lid, year }) => {
   const seasons_row = await db('seasons')
     .select('league_format_id')
-    .where({ lid, year })
+    .where({ lid, season_year: year })
     .first()
   if (seasons_row?.league_format_id) return seasons_row.league_format_id
   // Fall back to the most-recent seasons row for this league.
@@ -40,7 +40,7 @@ const resolve_league_format_id = async ({ lid, year }) => {
     .select('league_format_id')
     .where('lid', lid)
     .whereNotNull('league_format_id')
-    .orderBy('year', 'desc')
+    .orderBy('season_year', 'desc')
     .first()
   return latest?.league_format_id || null
 }

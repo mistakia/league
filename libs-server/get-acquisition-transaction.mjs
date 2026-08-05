@@ -14,10 +14,10 @@ export default async function ({ lid, pid, tid, year, week }) {
   if (year) {
     query.where(function () {
       this.where(function () {
-        this.where('year', year)
+        this.where('season_year', year)
         this.where('week', '<=', week || 0)
       }).orWhere(function () {
-        this.where('year', '<', year)
+        this.where('season_year', '<', year)
       })
     })
   }

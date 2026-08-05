@@ -98,7 +98,7 @@ const router = express.Router({
  *           type: integer
  *           description: League ID
  *           example: 2
- *         year:
+ *         season_year:
  *           type: integer
  *           description: Draft year
  *           example: 2025
@@ -168,7 +168,7 @@ const router = express.Router({
  *               type: integer
  *               description: Current week
  *               example: 1
- *             year:
+ *             season_year:
  *               type: integer
  *               description: Current year
  *               example: 2024
@@ -265,7 +265,7 @@ const router = express.Router({
  *                 value:
  *                   teams:
  *                     - uid: 13
- *                       year: 2024
+ *                       season_year: 2024
  *                       lid: 2
  *                       name: Dynasty Warriors
  *                       abbreviation: DW
@@ -293,7 +293,7 @@ const router = express.Router({
  *                         - uid: 1542
  *                           tid: 13
  *                           lid: 2
- *                           year: 2025
+ *                           season_year: 2025
  *                           round: 1
  *                           pick: 3
  *                           original_team_id: null
@@ -333,7 +333,7 @@ router.get('/?', async (req, res) => {
 
     const teams = await db('teams').where({
       lid: leagueId,
-      year
+      season_year: year
     })
     const picks = await db('draft')
       .where({ lid: leagueId })
@@ -342,7 +342,7 @@ router.get('/?', async (req, res) => {
     const sub_query = db('league_team_forecast')
       .select(db.raw('max(timestamp) AS maxtime, tid AS teamid'))
       .groupBy('teamid')
-      .where('year', year)
+      .where('season_year', year)
       .as('sub_query')
     const forecasts = await db
       .select(
@@ -453,7 +453,7 @@ router.get('/?', async (req, res) => {
  *                 value:
  *                   team:
  *                     uid: 13
- *                     year: 2024
+ *                     season_year: 2024
  *                     name: Team5
  *                     abbreviation: TM5
  *                     waiver_order: 5
@@ -466,7 +466,7 @@ router.get('/?', async (req, res) => {
  *                     tid: 13
  *                     lid: 2
  *                     week: 1
- *                     year: 2024
+ *                     season_year: 2024
  *       400:
  *         description: Bad request
  *         content:
@@ -517,7 +517,7 @@ router.post('/?', async (req, res) => {
     // make sure league has space for another team
     const teams = await db('teams').where({
       lid: leagueId,
-      year: current_season.year
+      season_year: current_season.year
     })
     if (teams.length >= league.num_teams) {
       return res.status(400).send({ error: 'league is full' })
@@ -525,7 +525,7 @@ router.post('/?', async (req, res) => {
 
     const count = teams.length + 1
     const team = {
-      year: current_season.year,
+      season_year: current_season.year,
       name: `Team${count}`,
       abbreviation: `TM${count}`,
       waiver_order: count,
@@ -542,11 +542,12 @@ router.post('/?', async (req, res) => {
       tid: team.uid,
       lid: league.uid,
       week: current_season.week,
-      year: current_season.year
+      season_year: current_season.year
     }
 
     const rosterRows = await db('rosters').insert(roster).returning('uid')
     roster.uid = rosterRows[0].uid
+
     res.send({ roster, team })
   } catch (error) {
     handle_error(error, logger, res)
@@ -684,14 +685,14 @@ router.delete('/?', async (req, res) => {
       .select('teams.*')
       .join('users_teams', function () {
         this.on('teams.uid', '=', 'users_teams.tid')
-        this.andOn('teams.year', '=', 'users_teams.year')
+        this.andOn('teams.season_year', '=', 'users_teams.season_year')
       })
       .where({
         lid: leagueId,
         tid: teamId,
         userid: req.auth.userId
       })
-      .where('teams.year', current_season.year)
+      .where('teams.season_year', current_season.year)
     if (teamRows.length) {
       return res.status(400).send({ error: 'can not remove user team' })
     }
@@ -705,7 +706,7 @@ router.delete('/?', async (req, res) => {
 
     const teams = await db('teams')
       .where({
-        year: current_season.year,
+        season_year: current_season.year,
         uid: teamId,
         lid: leagueId
       })

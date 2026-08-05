@@ -58,7 +58,7 @@ const generate_scoring_format_player_seasonlogs = async ({
     // process / create inserts
     inserts.push({
       pid,
-      year,
+      season_year: year,
       scoring_format_id,
       pos,
       points,
@@ -116,7 +116,7 @@ const generate_scoring_format_player_seasonlogs = async ({
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
     const deleted_count = await db('scoring_format_player_seasonlogs')
-      .where({ scoring_format_id, year })
+      .where({ scoring_format_id, season_year: year })
       .whereNotIn('pid', pids)
       .del()
     log(`Deleted ${deleted_count} excess player seasonlogs`)
@@ -124,7 +124,7 @@ const generate_scoring_format_player_seasonlogs = async ({
     log(`updated ${inserts.length} player regular seasons`)
     await db('scoring_format_player_seasonlogs')
       .insert(inserts)
-      .onConflict(['pid', 'year', 'scoring_format_id'])
+      .onConflict(['pid', 'season_year', 'scoring_format_id'])
       .merge()
   }
 }

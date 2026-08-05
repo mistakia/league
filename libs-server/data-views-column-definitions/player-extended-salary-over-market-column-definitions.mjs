@@ -48,7 +48,7 @@ const get_scope = ({ params = {} } = {}) => ({
 // (pid, league_format_id, week, year) index and cannot fan out a row.
 const market_salary_sql = ({ params, data_view_options }) => {
   const { year, league_format_id } = get_scope({ params })
-  return `(SELECT market_salary FROM league_format_player_projection_values WHERE pid = ${data_view_options.pid_reference} AND league_format_id = '${league_format_id}' AND year = ${year} AND week = '0')`
+  return `(SELECT market_salary FROM league_format_player_projection_values WHERE pid = ${data_view_options.pid_reference} AND league_format_id = '${league_format_id}' AND season_year = ${year} AND week = '0')`
 }
 
 // Read through a correlated subquery for the same reason: `rosters_players` is
@@ -56,7 +56,7 @@ const market_salary_sql = ({ params, data_view_options }) => {
 // a dangling reference in any view that carries no roster column.
 const roster_tag_sql = ({ params, data_view_options }) => {
   const { year, lid } = get_scope({ params })
-  return `(SELECT tag FROM rosters_players WHERE pid = ${data_view_options.pid_reference} AND lid = ${lid} AND year = ${year} AND week = 0)`
+  return `(SELECT tag FROM rosters_players WHERE pid = ${data_view_options.pid_reference} AND lid = ${lid} AND season_year = ${year} AND week = 0)`
 }
 
 // REGULAR and RESTRICTED_FREE_AGENCY tags get a number. FRANCHISE and ROOKIE

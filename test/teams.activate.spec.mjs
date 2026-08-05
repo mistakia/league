@@ -80,12 +80,12 @@ describe('API /teams - activate', function () {
       res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_ACTIVATE)
       res.body.transaction.player_salary.should.equal(value)
-      res.body.transaction.year.should.equal(current_season.year)
+      res.body.transaction.season_year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week,
           pid: player.pid
         })
@@ -173,7 +173,7 @@ describe('API /teams - activate', function () {
       // Verify activated player is now on bench
       const activateRosterRows = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week,
           pid: activate_player.pid
         })
@@ -183,7 +183,7 @@ describe('API /teams - activate', function () {
       // Verify deactivated player is now on practice squad
       const deactivateRosterRows = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week,
           pid: deactivate_player.pid
         })
@@ -194,7 +194,7 @@ describe('API /teams - activate', function () {
       const transactions = await knex('transactions')
         .where({
           lid: leagueId,
-          year: current_season.year
+          season_year: current_season.year
         })
         .whereIn('pid', [activate_player.pid, deactivate_player.pid])
         .orderBy('timestamp', 'desc')
@@ -416,7 +416,7 @@ describe('API /teams - activate', function () {
         type: transaction_types.PRACTICE_ADD,
         player_salary: 2,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 10
       })
 
@@ -472,7 +472,7 @@ describe('API /teams - activate', function () {
       const rosters = await knex('rosters')
         .where({
           week: current_season.week,
-          year: current_season.year,
+          season_year: current_season.year,
           tid: teamId
         })
         .limit(1)
@@ -487,7 +487,7 @@ describe('API /teams - activate', function () {
         type: transaction_types.ROSTER_ADD,
         player_salary: 1,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 60 * 60 * 49 // 49 hours ago
       })
 
@@ -499,7 +499,7 @@ describe('API /teams - activate', function () {
         tag: player_tag_types.REGULAR,
         tid: teamId,
         lid: leagueId,
-        year: current_season.year,
+        season_year: current_season.year,
         week: current_season.week
       })
 

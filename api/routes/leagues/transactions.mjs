@@ -51,7 +51,7 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: NFL week when transaction occurred
  *           example: 8
- *         year:
+ *         season_year:
  *           type: integer
  *           description: Season year
  *           example: 2024
@@ -202,7 +202,7 @@ const router = express.Router({ mergeParams: true })
  *                     userid: 5
  *                     player_salary: 15
  *                     week: 8
- *                     year: 2024
+ *                     season_year: 2024
  *                     timestamp: 1698765432
  *                     pick: 15
  *                     pick_str: "2.03"
@@ -214,7 +214,7 @@ const router = express.Router({ mergeParams: true })
  *                     userid: 7
  *                     player_salary: 8
  *                     week: 8
- *                     year: 2024
+ *                     season_year: 2024
  *                     timestamp: 1698765400
  *                     pick: null
  *                     pick_str: null
@@ -336,7 +336,7 @@ router.get('/?', async (req, res) => {
  *                     userid: 5
  *                     player_salary: 0
  *                     week: 8
- *                     year: 2024
+ *                     season_year: 2024
  *                     timestamp: 1698765000
  *                     pick: null
  *                     pick_str: null
@@ -348,7 +348,7 @@ router.get('/?', async (req, res) => {
  *                     userid: 7
  *                     player_salary: 3
  *                     week: 8
- *                     year: 2024
+ *                     season_year: 2024
  *                     timestamp: 1698764800
  *                     pick: null
  *                     pick_str: null
@@ -450,7 +450,7 @@ router.get('/release', async (req, res) => {
  *                       userid: 5
  *                       player_salary: 12
  *                       week: 5
- *                       year: 2024
+ *                       season_year: 2024
  *                       timestamp: 1698600000
  *                       pick: null
  *                       pick_str: null
@@ -463,7 +463,7 @@ router.get('/release', async (req, res) => {
  *                       userid: 5
  *                       player_salary: 12
  *                       week: 5
- *                       year: 2024
+ *                       season_year: 2024
  *                       timestamp: 1698600000
  *                       pick: null
  *                       pick_str: null

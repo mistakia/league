@@ -170,7 +170,7 @@ const handle_tied_waivers = async (waiver) => {
 const update_team_budget = async (team_id, bid) => {
   await db('teams').decrement('faab_balance', bid).where({
     uid: team_id,
-    year: current_season.year
+    season_year: current_season.year
   })
 }
 

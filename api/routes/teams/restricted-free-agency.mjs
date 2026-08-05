@@ -69,7 +69,7 @@ const router = express.Router({ mergeParams: true })
  *                     type: integer
  *                     description: Submission timestamp
  *                     example: 1640995200
- *                   year:
+ *                   season_year:
  *                     type: integer
  *                     description: Year
  *                     example: 2024
@@ -120,7 +120,7 @@ router.get('/?', async (req, res) => {
       )
       .where({
         'restricted_free_agency_bids.tid': teamId,
-        'restricted_free_agency_bids.year': current_season.year
+        'restricted_free_agency_bids.season_year': current_season.year
       })
       .whereNull('restricted_free_agency_bids.processed')
       .whereNull('restricted_free_agency_bids.cancelled')
@@ -231,7 +231,7 @@ router.get('/?', async (req, res) => {
  *                   type: integer
  *                   description: Submission timestamp
  *                   example: 1640995200
- *                 year:
+ *                 season_year:
  *                   type: integer
  *                   description: Year
  *                   example: 2024
@@ -400,7 +400,7 @@ router.post('/?', async (req, res) => {
         .where({
           pid,
           week: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           league_format_id: league.league_format_id
         })
         .first()
@@ -425,7 +425,7 @@ router.post('/?', async (req, res) => {
           pid,
           tid: playerTid,
           lid: leagueId,
-          year: current_season.year
+          season_year: current_season.year
         })
         .whereNull('processed')
         .whereNull('cancelled')
@@ -500,7 +500,7 @@ router.post('/?', async (req, res) => {
           .where({
             pid: remove,
             tid,
-            year: current_season.year
+            season_year: current_season.year
           })
 
         if (removed_bid_rows.length) {
@@ -547,7 +547,7 @@ router.post('/?', async (req, res) => {
         pid,
         tid,
         lid: leagueId,
-        year: current_season.year
+        season_year: current_season.year
       })
       .whereNull('cancelled')
       .whereNull('processed')
@@ -582,7 +582,7 @@ router.post('/?', async (req, res) => {
       lid: leagueId,
       pid,
       submitted: Math.round(Date.now() / 1000),
-      year: current_season.year,
+      season_year: current_season.year,
       bid_amount: bid,
       nomination_id
     }
@@ -768,7 +768,7 @@ router.delete('/?', async (req, res) => {
       .where({
         'restricted_free_agency_bids.pid': pid,
         'restricted_free_agency_bids.tid': tid,
-        'restricted_free_agency_bids.year': current_season.year
+        'restricted_free_agency_bids.season_year': current_season.year
       })
       .whereNull('restricted_free_agency_bids.cancelled')
       .orderByRaw(
@@ -977,7 +977,7 @@ router.put('/?', async (req, res) => {
       .where({
         'restricted_free_agency_bids.pid': pid,
         'restricted_free_agency_bids.tid': tid,
-        'restricted_free_agency_bids.year': current_season.year
+        'restricted_free_agency_bids.season_year': current_season.year
       })
       .whereNull('restricted_free_agency_bids.cancelled')
       .orderByRaw(
@@ -1058,7 +1058,7 @@ router.put('/?', async (req, res) => {
         .where({
           pid,
           week: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           league_format_id: league.league_format_id
         })
         .first()
@@ -1244,7 +1244,7 @@ router.post('/nominate/?', async (req, res) => {
         .where({
           'restricted_free_agency_bids.pid': pid,
           'restricted_free_agency_bids.tid': tid,
-          'restricted_free_agency_bids.year': current_season.year,
+          'restricted_free_agency_bids.season_year': current_season.year,
           'restricted_free_agency_nominations.original_team_id': tid
         })
         .whereNull('restricted_free_agency_bids.cancelled')
@@ -1393,7 +1393,7 @@ router.delete('/nominate/?', async (req, res) => {
         .where({
           'restricted_free_agency_bids.pid': pid,
           'restricted_free_agency_bids.tid': tid,
-          'restricted_free_agency_bids.year': current_season.year,
+          'restricted_free_agency_bids.season_year': current_season.year,
           'restricted_free_agency_nominations.original_team_id': tid
         })
         .whereNull('restricted_free_agency_bids.cancelled')

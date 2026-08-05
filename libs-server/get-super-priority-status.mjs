@@ -229,7 +229,7 @@ async function calculate_super_priority_from_source({
   // Roster snapshots are scoped to the poach year — for prior-season poaches
   // evaluated in a later season, the relevant context is the season the
   // poach occurred in, not current_season.
-  const poach_year = poach_transaction.year
+  const poach_year = poach_transaction.season_year
   if (poach_year == null) {
     return {
       eligible: false,
@@ -262,7 +262,7 @@ async function calculate_super_priority_from_source({
           'rosters_players.tid': poaching_tid,
           'rosters_players.lid': lid
         })
-        .where('rosters.year', poach_year)
+        .where('rosters.season_year', poach_year)
         .where('rosters.week', 1)
         .whereIn('rosters_players.slot', active_roster_slots)
         .first()
@@ -286,7 +286,7 @@ async function calculate_super_priority_from_source({
       'rosters_players.tid': poaching_tid,
       'rosters_players.lid': lid
     })
-    .where('rosters.year', poach_year)
+    .where('rosters.season_year', poach_year)
     .where('rosters.week', '>=', 1)
 
   if (poach_year === current_season.year) {
@@ -311,7 +311,7 @@ async function calculate_super_priority_from_source({
       'rosters_players.tid': poaching_tid,
       'rosters_players.lid': lid
     })
-    .where('rosters.year', poach_year)
+    .where('rosters.season_year', poach_year)
     .where('rosters.week', '>=', 1)
     .whereIn('rosters_players.slot', starting_lineup_slots)
 

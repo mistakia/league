@@ -58,7 +58,7 @@ router.get('/?', async (req, res) => {
 
     const teams = await db('users_teams').where({
       userid: req.auth.userId,
-      year: current_season.year
+      season_year: current_season.year
     })
     const teamIds = teams.map((r) => r.tid)
 
@@ -100,7 +100,7 @@ router.get('/?', async (req, res) => {
  *                 type: integer
  *                 description: Week number
  *                 example: 4
- *               year:
+ *               season_year:
  *                 type: integer
  *                 description: Year
  *                 example: 2024
@@ -160,7 +160,7 @@ router.get('/?', async (req, res) => {
  *                     type: integer
  *                     description: Week number
  *                     example: 4
- *                   year:
+ *                   season_year:
  *                     type: integer
  *                     description: Year
  *                     example: 2024
@@ -261,7 +261,7 @@ router.put('/?', async (req, res) => {
           const transaction_before_auction = await db('transactions')
             .where({
               tid,
-              year,
+              season_year: year,
               week: 0,
               pid: item.pid
             })
@@ -304,13 +304,13 @@ router.put('/?', async (req, res) => {
     for (const { slot, pid } of players) {
       const updateid = await db('rosters_players')
         .update({ slot })
-        .where({ week, year, tid, pid })
+        .where({ week, season_year: year, tid, pid })
 
       data.push({
         slot,
         pid,
         week,
-        year,
+        season_year: year,
         tid
       })
 

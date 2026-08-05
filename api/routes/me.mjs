@@ -138,7 +138,7 @@ const router = express.Router()
  *                       name: 'Dynasty Warriors'
  *                       abbreviation: 'DW'
  *                       lid: 2
- *                       year: 2024
+ *                       season_year: 2024
  *                   leagues:
  *                     - uid: 2
  *                       name: 'TEFLON LEAGUE'
@@ -183,11 +183,11 @@ router.get('/?', async (req, res) => {
       .select('teams.*')
       .where({
         'users_teams.userid': req.auth.userId,
-        'users_teams.year': current_season.year
+        'users_teams.season_year': current_season.year
       })
       .join('users_teams', function () {
         this.on('users_teams.tid', '=', 'teams.uid')
-        this.andOn('users_teams.year', '=', 'teams.year')
+        this.andOn('users_teams.season_year', '=', 'teams.season_year')
       })
 
     const leagueIds = teams.map((t) => t.lid)
@@ -197,7 +197,7 @@ router.get('/?', async (req, res) => {
         this.on('leagues.uid', '=', 'seasons.lid')
         this.on(
           db.raw(
-            `seasons.year = ${current_season.year} or seasons.year is null`
+            `seasons.season_year = ${current_season.year} or seasons.season_year is null`
           )
         )
       })
@@ -218,14 +218,14 @@ router.get('/?', async (req, res) => {
     // Fetch divisions for all leagues
     const divisions = await db('league_divisions')
       .whereIn('lid', leagueIds)
-      .andWhere('year', current_season.year)
+      .andWhere('season_year', current_season.year)
 
     const seasonsByLeagueId = groupBy(seasons, 'lid')
     const divisionsByLeagueId = groupBy(divisions, 'lid')
 
     for (const lid in seasonsByLeagueId) {
       const league = leagues.find((l) => l.uid === Number(lid))
-      league.years = seasonsByLeagueId[lid].map((s) => s.year)
+      league.years = seasonsByLeagueId[lid].map((s) => s.season_year)
 
       // Add divisions to the league
       const leagueDivisions = divisionsByLeagueId[lid] || []

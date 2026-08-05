@@ -14,14 +14,17 @@ const set_draft_pick_number = async ({ lid }) => {
   log(`setting draft picks for ${current_season.year}`)
 
   const league = await getLeague({ lid })
-  const teams = await db('teams').where({ lid, year: current_season.year })
+  const teams = await db('teams').where({
+    lid,
+    season_year: current_season.year
+  })
   const draftOrder = teams
     .sort((a, b) => a.draft_order - b.draft_order)
     .map((t) => t.uid)
 
   const picks = await db('draft').where({
     lid,
-    year: current_season.year,
+    season_year: current_season.year,
     is_compensatory: 0
   })
 
@@ -45,7 +48,7 @@ const set_draft_pick_number = async ({ lid }) => {
     .where({
       is_compensatory: 0,
       lid,
-      year: current_season.year
+      season_year: current_season.year
     })
     .orderBy('pick', 'asc')
 
@@ -60,7 +63,7 @@ const set_draft_pick_number = async ({ lid }) => {
   const query_params = {
     is_compensatory: 1,
     lid,
-    year: current_season.year
+    season_year: current_season.year
   }
   await db('draft').update({ pick: null }).where(query_params)
   const compensatory_picks = await db('draft').where(query_params)

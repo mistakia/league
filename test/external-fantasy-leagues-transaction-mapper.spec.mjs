@@ -138,7 +138,7 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
         row.should.have.property('pid')
         row.should.have.property('tid')
         row.should.have.property('lid', 'lid-fixture')
-        row.should.have.property('year', 2025)
+        row.should.have.property('season_year', 2025)
         row.should.have.property('timestamp').that.is.a('number')
         row.should.have.property('type')
       }

@@ -17,7 +17,7 @@ debug.enable('calculate-player-extension-count')
 const run = async ({ lid }) => {
   const rosters = await db('rosters')
     .select('*')
-    .where({ lid, year: current_season.year })
+    .where({ lid, season_year: current_season.year })
     .orderBy('week', 'desc')
 
   const rows = await db('rosters_players').whereIn(

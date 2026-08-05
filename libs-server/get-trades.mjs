@@ -7,7 +7,7 @@ export default async function ({ lid, year = null }) {
     .whereNotNull('accepted')
 
   if (year) {
-    trade_query.where({ year })
+    trade_query.where({ season_year: year })
   }
 
   const trades = await trade_query

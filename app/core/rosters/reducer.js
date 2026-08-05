@@ -20,7 +20,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
     case roster_actions.GET_ROSTERS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((r) =>
-          state.setIn([r.tid, r.year, r.week], createRoster(r))
+          state.setIn([r.tid, r.season_year, r.week], createRoster(r))
         )
       })
 
@@ -33,7 +33,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         userid,
         player_salary,
         type,
-        year,
+        season_year,
         timestamp,
         lid
       } = payload
@@ -49,7 +49,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
             userid,
             value: player_salary,
             type,
-            year,
+            season_year,
             timestamp,
             tid,
             lid
@@ -111,7 +111,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
                   lid: t.lid,
                   type: t.type,
                   value: t.player_salary,
-                  year: t.year,
+                  season_year: t.season_year,
                   timestamp: t.timestamp
                 })
             )
@@ -230,7 +230,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
 
     case roster_actions.POST_ROSTERS_FULFILLED: {
       const { rid, slot, pos, pid } = payload.data
-      const { userid, tid, lid, type, value, year, timestamp } =
+      const { userid, tid, lid, type, value, season_year, timestamp } =
         payload.data.transaction
       return state.updateIn(
         [
@@ -251,7 +251,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
             lid,
             type,
             value,
-            year,
+            season_year,
             timestamp
           })
       )

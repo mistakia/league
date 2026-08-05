@@ -82,7 +82,7 @@ describe('API /leagues/rosters - add', function () {
       expect(rosterRow.players[0].lid).to.equal(leagueId)
       expect(rosterRow.players[0].type).to.equal(transaction_types.ROSTER_ADD)
       expect(rosterRow.players[0].player_salary).to.equal(value)
-      expect(rosterRow.players[0].year).to.equal(current_season.year)
+      expect(rosterRow.players[0].season_year).to.equal(current_season.year)
     })
   })
 

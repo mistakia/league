@@ -139,7 +139,7 @@ const router = express.Router({ mergeParams: true })
  *                         type: integer
  *                         description: Week number
  *                         example: 4
- *                       year:
+ *                       season_year:
  *                         type: integer
  *                         description: Year
  *                         example: 2024

@@ -425,7 +425,7 @@ const main = async () => {
 
         // Also reset slow mode flag in database if needed
         const update_result = await db('seasons')
-          .where({ lid, year })
+          .where({ lid, season_year: year })
           .update({ is_free_agency_auction_slow_mode: false })
 
         if (update_result) {

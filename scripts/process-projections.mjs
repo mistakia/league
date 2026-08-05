@@ -112,7 +112,7 @@ const run_season_forecast = async (lid) => {
         tid: Number(tid),
         lid,
         week: current_season.week,
-        year,
+        season_year: year,
         day: dayjs().dayOfYear(),
         playoff_odds: forecast.playoff_odds,
         division_odds: forecast.division_odds,
@@ -125,7 +125,7 @@ const run_season_forecast = async (lid) => {
     if (forecastInserts.length) {
       await db('league_team_forecast')
         .insert(forecastInserts)
-        .onConflict(['tid', 'year', 'week', 'day'])
+        .onConflict(['tid', 'season_year', 'week', 'day'])
         .merge()
       log(`Saved ${forecastInserts.length} team forecasts`)
     }
@@ -331,7 +331,7 @@ const process_league_format = async ({
 
       const params = {
         pid: player_row.pid,
-        year: current_season.year,
+        season_year: current_season.year,
         league_format_id,
         week,
         pts_added,
@@ -357,7 +357,7 @@ const process_league_format = async ({
     // the reinsert below only ever restores current_season.year.
     await db('league_format_player_projection_values')
       .del()
-      .where({ league_format_id, year: current_season.year })
+      .where({ league_format_id, season_year: current_season.year })
     await batch_insert({
       items: valueInserts,
       save: (items) =>
@@ -372,7 +372,7 @@ const process_league = async ({ year, lid }) => {
   let week = first_projection_week_to_recompute({ year })
 
   const league = await getLeague({ lid })
-  const teams = await db('teams').where({ lid, year })
+  const teams = await db('teams').where({ lid, season_year: year })
   // min_bid here prices unused roster space, not the board -- unrelated to the
   // discretionary cap calculatePrices derives.
   const { min_bid } = league
@@ -532,7 +532,7 @@ const process_league = async ({ year, lid }) => {
 
       valueInserts.push({
         pid: player_row.pid,
-        year: current_season.year,
+        season_year: current_season.year,
         lid,
         week,
         salary_adj_pts_added
@@ -549,7 +549,7 @@ const process_league = async ({ year, lid }) => {
         baselineInserts.push({
           lid,
           week,
-          year: current_season.year,
+          season_year: current_season.year,
           player_position: position,
           // Null for the season 'starter' baseline, which is an expectation over
           // drawn seasons rather than a player. `points` carries it there.
@@ -581,7 +581,7 @@ const process_league = async ({ year, lid }) => {
       save: (items) =>
         db('league_player_projection_values')
           .insert(items)
-          .onConflict(['pid', 'lid', 'week', 'year'])
+          .onConflict(['pid', 'lid', 'week', 'season_year'])
           .merge(),
       batch_size: 100
     })
@@ -807,7 +807,7 @@ const check_lineup_starter_identity_oracle = async () => {
       from rosters r
       join rosters_players rp on rp.roster_id = r.uid
       join player p on p.pid = rp.pid
-      where r.year = ? and p.primary_position <> 'DST'
+      where r.season_year = ? and p.primary_position <> 'DST'
       group by r.lid, r.tid
       having count(distinct rp.pid) >= 2
     ),
@@ -815,7 +815,7 @@ const check_lineup_starter_identity_oracle = async () => {
       select s.lid, s.tid, s.week
       from league_team_lineup_starters s
       join player p on p.pid = s.pid
-      where s.year = ? and p.primary_position <> 'DST'
+      where s.season_year = ? and p.primary_position <> 'DST'
       group by s.lid, s.tid, s.week
     )
     select l.lid, l.tid, count(*)::int as weeks
@@ -824,7 +824,7 @@ const check_lineup_starter_identity_oracle = async () => {
     join rostered_teams rt on rt.lid = l.lid and rt.tid = l.tid
     left join player_starters ps
       on ps.lid = l.lid and ps.tid = l.tid and ps.week = l.week
-    where l.year = ?
+    where l.season_year = ?
       and lg.is_hosted = true
       and lg.archived_at is null
       and l.optimal_total > 0

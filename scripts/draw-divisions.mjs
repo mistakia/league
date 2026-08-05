@@ -23,7 +23,10 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
   }
 
   log(`Drawing divisions for leagueId: ${lid}`)
-  const teams = await db('teams').where({ lid, year: current_season.year })
+  const teams = await db('teams').where({
+    lid,
+    season_year: current_season.year
+  })
   if (!teams.length) {
     log(`No teams found for leagueId: ${lid}`)
     return
@@ -42,7 +45,7 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
     if (!dry_run) {
       await db('teams')
         .update({ division: 1 })
-        .where({ lid, year: current_season.year })
+        .where({ lid, season_year: current_season.year })
     }
     return
   }
@@ -52,7 +55,7 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
   // get team sesaonlogs for last three years
   const cutoff = current_season.year - 2
   const league_team_seasonlogs = await db('league_team_seasonlogs')
-    .where('year', '>=', cutoff)
+    .where('season_year', '>=', cutoff)
     .whereIn('tid', tids)
 
   let maxPf = 0
@@ -119,7 +122,7 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
       for (const team of division) {
         await db('teams')
           .update({ division: div })
-          .where({ uid: team.tid, year: current_season.year })
+          .where({ uid: team.tid, season_year: current_season.year })
       }
     }
 

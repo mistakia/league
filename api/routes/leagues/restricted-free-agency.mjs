@@ -138,10 +138,10 @@ router.get('/?', async (req, res) => {
         .select('users_teams.tid')
         .join('teams', function () {
           this.on('users_teams.tid', '=', 'teams.uid')
-          this.andOn('users_teams.year', '=', 'teams.year')
+          this.andOn('users_teams.season_year', '=', 'teams.season_year')
         })
         .where('users_teams.userid', req.auth.userId)
-        .where('users_teams.year', year)
+        .where('users_teams.season_year', year)
         .where('teams.lid', leagueId)
       for (const user_team of user_teams) {
         user_team_ids.add(user_team.tid)

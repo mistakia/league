@@ -18,7 +18,7 @@ const read_as_of = async ({ league_format_id, observed_at }) =>
   knex(HISTORY_TABLE)
     .distinctOn('pid', 'week')
     .select('pid', 'week', 'pts_added', 'market_salary', 'is_removed')
-    .where({ league_format_id, year: YEAR })
+    .where({ league_format_id, season_year: YEAR })
     .where('observed_at', '<=', observed_at)
     .orderBy([
       { column: 'pid' },
@@ -41,7 +41,9 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
   })
 
   beforeEach(async function () {
-    await knex(HISTORY_TABLE).where({ league_format_id, year: YEAR }).del()
+    await knex(HISTORY_TABLE)
+      .where({ league_format_id, season_year: YEAR })
+      .del()
   })
 
   it('records an observation for every grain on first run', async () => {
@@ -72,7 +74,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
 
     const rows = await knex(HISTORY_TABLE).where({
       league_format_id,
-      year: YEAR
+      season_year: YEAR
     })
     expect(rows.length).to.equal(2)
   })
@@ -101,7 +103,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
     expect(result.changed).to.equal(0)
     const rows = await knex(HISTORY_TABLE).where({
       league_format_id,
-      year: YEAR
+      season_year: YEAR
     })
     expect(rows.length).to.equal(1)
   })
@@ -174,7 +176,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
     expect(result.changed).to.equal(1)
     const rows = await knex(HISTORY_TABLE).where({
       league_format_id,
-      year: YEAR
+      season_year: YEAR
     })
     expect(rows.length).to.equal(3)
   })
@@ -294,7 +296,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
     expect(result.tombstoned).to.equal(0)
     const rows = await knex(HISTORY_TABLE).where({
       league_format_id,
-      year: YEAR
+      season_year: YEAR
     })
     expect(rows.length).to.equal(2)
   })

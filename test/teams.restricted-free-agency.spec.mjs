@@ -87,7 +87,7 @@ describe('API /teams - restricted free agency', function () {
       res.body.pid.should.equal(player.pid)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid_amount.should.equal(bid)
-      res.body.year.should.equal(current_season.year)
+      res.body.season_year.should.equal(current_season.year)
       res.body.original_team_id.should.equal(teamId)
       res.body.uid.should.be.a('number')
       res.body.uid.should.be.above(0)
@@ -103,7 +103,7 @@ describe('API /teams - restricted free agency', function () {
       query1[0].pid.should.equal(player.pid)
       query1[0].userid.should.equal(userId)
       query1[0].bid_amount.should.equal(bid)
-      query1[0].year.should.equal(current_season.year)
+      query1[0].season_year.should.equal(current_season.year)
       query1[0].tid.should.equal(teamId)
 
       query1[0].lid.should.equal(leagueId)
@@ -176,7 +176,7 @@ describe('API /teams - restricted free agency', function () {
       res2.body.tid.should.equal(1)
       res2.body.userid.should.equal(userId)
       res2.body.pid.should.equal(player.pid)
-      res2.body.year.should.equal(current_season.year)
+      res2.body.season_year.should.equal(current_season.year)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid_amount.should.equal(bid)
       res2.body.original_team_id.should.equal(playerTid)
@@ -259,7 +259,7 @@ describe('API /teams - restricted free agency', function () {
 
       res2.body.tid.should.equal(teamId)
       res2.body.userid.should.equal(userId)
-      res2.body.year.should.equal(current_season.year)
+      res2.body.season_year.should.equal(current_season.year)
       res2.body.pid.should.equal(tagPlayer.pid)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid_amount.should.equal(bid)
@@ -293,7 +293,7 @@ describe('API /teams - restricted free agency', function () {
 
       // Set league restricted_free_agency_period_end to a past date
       await knex('seasons')
-        .where({ lid: leagueId, year: current_season.year })
+        .where({ lid: leagueId, season_year: current_season.year })
         .update({
           restricted_free_agency_period_end:
             Math.floor(Date.now() / 1000) - 86400
@@ -315,7 +315,7 @@ describe('API /teams - restricted free agency', function () {
 
       // Reset the league restricted_free_agency_period_end
       await knex('seasons')
-        .where({ lid: leagueId, year: current_season.year })
+        .where({ lid: leagueId, season_year: current_season.year })
         .update({ restricted_free_agency_period_end: null })
     })
 
@@ -355,7 +355,7 @@ describe('API /teams - restricted free agency', function () {
           pid: player.pid,
           tid: original_team_id,
           lid: league_id,
-          year: current_season.year
+          season_year: current_season.year
         })
         .update({ processed: Math.round(Date.now() / 1000) })
 
@@ -1212,7 +1212,7 @@ describe('API /teams - restricted free agency', function () {
 
       // Set RFA period end to yesterday
       await knex('seasons')
-        .where({ lid: leagueId, year: current_season.year })
+        .where({ lid: leagueId, season_year: current_season.year })
         .update({
           restricted_free_agency_period_end:
             Math.floor(Date.now() / 1000) - 86400

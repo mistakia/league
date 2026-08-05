@@ -24,7 +24,7 @@ const regular_season_date = () =>
 const seed_slice = async ({ lid = 1, tid = 1, week }) => {
   const year = current_season.year
   const rows = await knex('rosters')
-    .insert({ tid, lid, week, year })
+    .insert({ tid, lid, week, season_year: year })
     .returning('uid')
   const rid = rows[0].uid
 
@@ -37,7 +37,7 @@ const seed_slice = async ({ lid = 1, tid = 1, week }) => {
       tid,
       lid,
       week,
-      year
+      season_year: year
     },
     {
       roster_id: rid,
@@ -47,7 +47,7 @@ const seed_slice = async ({ lid = 1, tid = 1, week }) => {
       tid,
       lid,
       week,
-      year
+      season_year: year
     },
     {
       roster_id: rid,
@@ -57,7 +57,7 @@ const seed_slice = async ({ lid = 1, tid = 1, week }) => {
       tid,
       lid,
       week,
-      year
+      season_year: year
     }
   ])
 }
@@ -73,7 +73,7 @@ const announcements = async () =>
 const slots_by_pid = async ({ week }) => {
   const rows = await knex('rosters_players')
     .select('pid', 'slot')
-    .where({ lid: 1, year: current_season.year, week })
+    .where({ lid: 1, season_year: current_season.year, week })
   return rows.reduce((acc, { pid, slot }) => ({ ...acc, [pid]: slot }), {})
 }
 

@@ -22,7 +22,7 @@ export default async function ({ league, pids }) {
   if (isRestrictedFreeAgency) {
     const restrictedFreeAgencyBids = await db('restricted_free_agency_bids')
       .whereIn('pid', pids)
-      .where('year', current_season.year)
+      .where('season_year', current_season.year)
       .whereNull('processed')
       .whereNull('cancelled')
 

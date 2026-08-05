@@ -79,7 +79,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: current_season.year
+        season_year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -175,7 +175,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: current_season.year
+        season_year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)

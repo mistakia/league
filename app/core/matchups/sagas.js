@@ -59,7 +59,9 @@ export function* select_matchup() {
 
   if (is_post_season_week) {
     const playoffs = state.get('playoffs')
-    const filtered = playoffs.filter((m) => m.week === week && m.year === year)
+    const filtered = playoffs.filter(
+      (m) => m.week === week && m.season_year === year
+    )
     const matchup = teamId
       ? filtered.find((m) => m.tids.includes(teamId))
       : filtered.first()
@@ -74,7 +76,8 @@ export function* select_matchup() {
     const matchups = state.get('matchups_by_id').toList()
     const matchup = teamId
       ? matchups.find(
-          (m) => m.tids.includes(teamId) && m.week === week && m.year === year
+          (m) =>
+            m.tids.includes(teamId) && m.week === week && m.season_year === year
         )
       : matchups.first()
     console.log(`matchup: ${matchup}`)

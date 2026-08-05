@@ -52,7 +52,7 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: League ID
  *           example: 2
- *         year:
+ *         season_year:
  *           type: integer
  *           description: Season year
  *           example: 2024
@@ -223,7 +223,7 @@ const router = express.Router({ mergeParams: true })
  *                           extensions: 0
  *                           tid: 13
  *                           lid: 2
- *                           year: 2024
+ *                           season_year: 2024
  *                           week: 8
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
@@ -329,7 +329,7 @@ router.get('/?', async (req, res) => {
  *                   extensions: 0
  *                   tid: 13
  *                   lid: 2
- *                   year: 2024
+ *                   season_year: 2024
  *                   week: 8
  *                   transaction:
  *                     uid: 12345
@@ -340,7 +340,7 @@ router.get('/?', async (req, res) => {
  *                     userid: 5
  *                     player_salary: 15
  *                     week: 8
- *                     year: 2024
+ *                     season_year: 2024
  *                     timestamp: 1698765432
  *       400:
  *         description: Bad request
@@ -457,7 +457,7 @@ router.post('/?', async (req, res) => {
       type: transaction_types.ROSTER_ADD,
       player_salary: val,
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
     await db('transactions').insert(transaction)
@@ -471,11 +471,12 @@ router.post('/?', async (req, res) => {
       extensions: 0,
       tid: teamId,
       lid: leagueId,
-      year: current_season.year,
+      season_year: current_season.year,
       week: current_season.week
     }
     await db('rosters_players').insert(rosterInsert)
 
+    // response keeps `year` on the wire — clients read this field by that name
     res.send({
       ...rosterInsert,
       transaction
@@ -848,7 +849,7 @@ router.delete('/?', async (req, res) => {
       tid: teamId,
       lid: leagueId,
       week: current_season.week,
-      year: current_season.year
+      season_year: current_season.year
     })
     const roster = rosters[0]
     if (!roster) {

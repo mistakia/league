@@ -22,7 +22,7 @@ router.get('/?', async (req, res) => {
       db('teams')
         .where({ lid: leagueId })
         .distinctOn('uid')
-        .orderBy(['uid', { column: 'year', order: 'desc' }])
+        .orderBy(['uid', { column: 'season_year', order: 'desc' }])
     ])
 
     // Separate user_careerlogs and usernames

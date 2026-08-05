@@ -201,7 +201,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   const teams_index = {}
   const trades = await get_trades({ lid })
   const transactions = await db('transactions')
-    .select('uid', 'tid', 'pid', 'type', 'timestamp', 'year')
+    .select('uid', 'tid', 'pid', 'type', 'timestamp', 'season_year')
     .where('lid', lid)
     .orderBy('timestamp', 'asc')
 
@@ -272,14 +272,14 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
       emit_day({ date: last_date, timestamp: dayjs(last_date).valueOf() })
     }
 
-    if (!current_year || current_year !== transaction.year) {
-      current_year = transaction.year
+    if (!current_year || current_year !== transaction.season_year) {
+      current_year = transaction.season_year
 
       log(`updating teams index for year ${current_year}`)
 
       const teams = await db('teams')
         .select('uid')
-        .where({ lid, year: current_year })
+        .where({ lid, season_year: current_year })
 
       // add any new teams to team index
       for (const team of teams) {

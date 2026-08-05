@@ -11,7 +11,7 @@ export default async function (lid) {
   const league = await getLeague({ lid })
   const picks = await db('draft')
     .where({
-      year: current_season.year,
+      season_year: current_season.year,
       lid
     })
     .orderBy('pick', 'asc')
@@ -22,7 +22,7 @@ export default async function (lid) {
   const season = await db('seasons')
     .where({
       lid,
-      year: current_season.year
+      season_year: current_season.year
     })
     .first()
 
@@ -69,7 +69,7 @@ export default async function (lid) {
       'waivers.type as waiver_type'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
-    .where('teams.year', current_season.year)
+    .where('teams.season_year', current_season.year)
     .whereNull('processed')
     .whereNull('cancelled')
     .where('waivers.lid', lid)
@@ -118,7 +118,7 @@ export default async function (lid) {
       'waivers.super_priority'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
-    .where('teams.year', current_season.year)
+    .where('teams.season_year', current_season.year)
     .whereNull('processed')
     .whereNull('cancelled')
     .where('waivers.lid', lid)

@@ -77,12 +77,17 @@ export default async function generate_league_context({
 }) {
   const league = await load_configured_league({ db, lid, year })
 
-  const teams = await db('teams').where({ lid, year }).orderBy('uid')
-  const seasonlogs = await db('league_team_seasonlogs').where({ lid, year })
+  const teams = await db('teams')
+    .where({ lid, season_year: year })
+    .orderBy('uid')
+  const seasonlogs = await db('league_team_seasonlogs').where({
+    lid,
+    season_year: year
+  })
   const managers = await get_team_managers({ db, lid, year })
 
   const recent_transactions = await db('transactions')
-    .where({ lid, year })
+    .where({ lid, season_year: year })
     .orderBy('timestamp', 'desc')
     .orderBy('uid', 'desc')
     .limit(10)

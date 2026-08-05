@@ -12,13 +12,13 @@ const apply_eligibility_filters = ({ query, team_uids, lid }) => {
     .where({
       tag: player_tag_types.RESTRICTED_FREE_AGENCY,
       week: 0,
-      year: current_season.year
+      season_year: current_season.year
     })
     .whereIn('tid', team_uids)
     .whereNotExists(function () {
       this.select('*')
         .from('restricted_free_agency_bids')
-        .where('restricted_free_agency_bids.year', current_season.year)
+        .where('restricted_free_agency_bids.season_year', current_season.year)
         .where('restricted_free_agency_bids.lid', lid)
         .whereNull('restricted_free_agency_bids.cancelled')
         .whereRaw('restricted_free_agency_bids.tid = rosters_players.tid')
@@ -38,7 +38,7 @@ const run = async () => {
 
   const teams = await db('teams')
     .where({
-      year: current_season.year,
+      season_year: current_season.year,
       lid
     })
     .orderBy('uid')

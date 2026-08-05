@@ -29,7 +29,7 @@ describe('API /leagues - format-id cascade', function () {
   it('scoring format change updates seasons.scoring_format_id and runs cascade', async () => {
     const lid = 1
     const before_season = await knex('seasons')
-      .where({ lid, year: current_season.year })
+      .where({ lid, season_year: current_season.year })
       .first()
 
     const res = await chai_request
@@ -42,7 +42,7 @@ describe('API /leagues - format-id cascade', function () {
     res.body.value.should.equal(1.25)
 
     const after_season = await knex('seasons')
-      .where({ lid, year: current_season.year })
+      .where({ lid, season_year: current_season.year })
       .first()
     expect(after_season.scoring_format_id).to.not.equal(
       before_season.scoring_format_id
@@ -57,7 +57,7 @@ describe('API /leagues - format-id cascade', function () {
     )
       .where({
         scoring_format_id: after_season.scoring_format_id,
-        year: current_season.year
+        season_year: current_season.year
       })
       .count('* as n')
       .first()
@@ -72,7 +72,7 @@ describe('API /leagues - format-id cascade', function () {
       .send({ field: 'receptions', value: 1.25 })
     res_same.should.have.status(200)
     const same_season = await knex('seasons')
-      .where({ lid, year: current_season.year })
+      .where({ lid, season_year: current_season.year })
       .first()
     expect(same_season.scoring_format_id).to.equal(
       after_season.scoring_format_id
@@ -86,7 +86,7 @@ describe('API /leagues - format-id cascade', function () {
       .send({ field: 'receptions', value: 0.75 })
     res_diff.should.have.status(200)
     const diff_season = await knex('seasons')
-      .where({ lid, year: current_season.year })
+      .where({ lid, season_year: current_season.year })
       .first()
     expect(diff_season.scoring_format_id).to.not.equal(
       after_season.scoring_format_id
@@ -96,7 +96,7 @@ describe('API /leagues - format-id cascade', function () {
   it('league format change updates seasons.league_format_id and runs cascade', async () => {
     const lid = 1
     const before_season = await knex('seasons')
-      .where({ lid, year: current_season.year })
+      .where({ lid, season_year: current_season.year })
       .first()
 
     const res = await chai_request
@@ -109,7 +109,7 @@ describe('API /leagues - format-id cascade', function () {
     res.body.value.should.equal(250)
 
     const after_season = await knex('seasons')
-      .where({ lid, year: current_season.year })
+      .where({ lid, season_year: current_season.year })
       .first()
     expect(after_season.league_format_id).to.not.equal(
       before_season.league_format_id
@@ -118,7 +118,7 @@ describe('API /leagues - format-id cascade', function () {
     const projection_rows = await knex('league_format_player_projection_values')
       .where({
         league_format_id: after_season.league_format_id,
-        year: current_season.year
+        season_year: current_season.year
       })
       .count('* as n')
       .first()

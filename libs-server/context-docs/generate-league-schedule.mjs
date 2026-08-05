@@ -66,10 +66,10 @@ export default async function generate_league_schedule({
 }) {
   const league = await load_configured_league({ db, lid, year })
 
-  const teams = await db('teams').where({ lid, year })
+  const teams = await db('teams').where({ lid, season_year: year })
   const team_name_by_tid = new Map(teams.map((team) => [team.uid, team.name]))
   const matchups = await db('matchups')
-    .where({ lid, year })
+    .where({ lid, season_year: year })
     .orderBy('week')
     .orderBy('uid')
 

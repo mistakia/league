@@ -53,7 +53,7 @@ async function sort_bids_by_waiver_order(bids) {
 
   const teams = await db('teams').select('uid', 'waiver_order').where({
     lid: bids[0].lid,
-    year: current_season.year
+    season_year: current_season.year
   })
 
   const team_waiver_order = {}
@@ -92,7 +92,7 @@ async function settle_losing_bids({
     .where({
       pid: winning_bid.pid,
       lid,
-      year: current_season.year
+      season_year: current_season.year
     })
     .whereNull('cancelled')
     .whereNull('processed')
@@ -166,18 +166,18 @@ const run = async ({ dry_run = false } = {}) => {
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')
     .join('restricted_free_agency_bids', function () {
       this.on('restricted_free_agency_bids.lid', 'seasons.lid').on(
-        'restricted_free_agency_bids.year',
-        'seasons.year'
+        'restricted_free_agency_bids.season_year',
+        'seasons.season_year'
       )
     })
     .where({
-      'seasons.year': current_season.year
+      'seasons.season_year': current_season.year
     })
     .whereNotNull('restricted_free_agency_period_start')
     .whereNotNull('restricted_free_agency_first_window_at')
     .where('restricted_free_agency_period_start', '<=', timestamp)
     .where('restricted_free_agency_period_end', '>=', timestamp)
-    .groupBy('seasons.lid', 'seasons.year', 'leagues.name')
+    .groupBy('seasons.lid', 'seasons.season_year', 'leagues.name')
     .whereNull('restricted_free_agency_bids.processed')
     .whereNull('restricted_free_agency_bids.cancelled')
     // The announcement lives on the player's nomination, never on a competing
@@ -193,7 +193,7 @@ const run = async ({ dry_run = false } = {}) => {
           'restricted_free_agency_nominations.player_id = restricted_free_agency_bids.pid'
         )
         .whereRaw(
-          'restricted_free_agency_nominations.season_year = restricted_free_agency_bids.year'
+          'restricted_free_agency_nominations.season_year = restricted_free_agency_bids.season_year'
         )
         .whereNotNull('restricted_free_agency_nominations.announced_at')
     })
@@ -461,11 +461,11 @@ const run = async ({ dry_run = false } = {}) => {
     const stuck_bids = await db('restricted_free_agency_bids as rfab')
       .join('seasons', function () {
         this.on('seasons.lid', 'rfab.lid').on(
-          'seasons.year',
+          'seasons.season_year',
           db.raw('?', [current_season.year])
         )
       })
-      .where('rfab.year', current_season.year)
+      .where('rfab.season_year', current_season.year)
       .whereNull('rfab.processed')
       .whereNull('rfab.cancelled')
       .whereNotNull('seasons.restricted_free_agency_period_start')
@@ -488,7 +488,7 @@ const run = async ({ dry_run = false } = {}) => {
             from restricted_free_agency_nominations as nomination
             where nomination.player_id = rfab.pid
               and nomination.league_id = rfab.lid
-              and nomination.season_year = rfab.year
+              and nomination.season_year = rfab.season_year
               and nomination.announced_at is not null
           ) >= (COALESCE(seasons.restricted_free_agency_window_hours, ?) - COALESCE(seasons.restricted_free_agency_processing_lead_hours, ?)) * 3600 + 3600`,
           [

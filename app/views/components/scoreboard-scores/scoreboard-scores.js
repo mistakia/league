@@ -24,12 +24,12 @@ export default function ScoreboardScores({
         <ScoreboardScoreTeam
           tid={matchup.away_team_id}
           week={matchup.week}
-          year={matchup.year}
+          year={matchup.season_year}
         />
         <ScoreboardScoreTeam
           tid={matchup.home_team_id}
           week={matchup.week}
-          year={matchup.year}
+          year={matchup.season_year}
         />
       </div>
     )

@@ -31,32 +31,34 @@ describe('get-league-rosters-from-database lineup starters', function () {
     await knex.seed.run()
     await league(knex)
 
-    await knex('rosters').del().where({ lid, year })
+    await knex('rosters').del().where({ lid, season_year: year })
     await knex('rosters').insert(
       [1, 2, 10].map((week) => ({
         uid: 9000 + week,
         tid,
         lid,
         week,
-        year
+        season_year: year
       }))
     )
 
-    await knex('league_team_lineups').del().where({ lid, year })
+    await knex('league_team_lineups').del().where({ lid, season_year: year })
     await knex('league_team_lineups').insert(
       [1, 2, 10].map((week) => ({
         lid,
         tid,
-        year,
+        season_year: year,
         week,
         optimal_total: 100 + week,
         baseline_total: 100 + week
       }))
     )
 
-    await knex('league_team_lineup_starters').del().where({ lid, year })
+    await knex('league_team_lineup_starters')
+      .del()
+      .where({ lid, season_year: year })
     await knex('league_team_lineup_starters').insert(
-      [1, 2, 10].map((week) => ({ lid, tid, year, week, pid }))
+      [1, 2, 10].map((week) => ({ lid, tid, season_year: year, week, pid }))
     )
   })
 

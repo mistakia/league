@@ -36,14 +36,14 @@ const run = async () => {
   // Candidate league-years: anything still carrying an outstanding pick. A
   // year with none is already fully resolved and needs no window arithmetic.
   const candidates = await db('draft')
-    .select('lid', 'year')
+    .select('lid', 'season_year')
     .modify(where_outstanding_draft_pick)
-    .whereNotNull('year')
-    .groupBy('lid', 'year')
+    .whereNotNull('season_year')
+    .groupBy('lid', 'season_year')
 
   const closed = []
 
-  for (const { lid, year } of candidates) {
+  for (const { lid, season_year: year } of candidates) {
     // A draft whose year is still ahead of us has not opened, let alone
     // closed. Guarding here keeps the window projection off future endowments,
     // which carry no pick numbers at all.
@@ -55,16 +55,16 @@ const run = async () => {
       continue
     }
 
-    const season = await db('seasons').where({ lid, year }).first()
+    const season = await db('seasons').where({ lid, season_year: year }).first()
 
     const last_pick = await db('draft')
-      .where({ lid, year })
+      .where({ lid, season_year: year })
       .whereNotNull('pick')
       .orderBy('pick', 'desc')
       .first()
 
     const last_selection = await db('draft')
-      .where({ lid, year })
+      .where({ lid, season_year: year })
       .whereNotNull('selection_timestamp')
       .orderBy('selection_timestamp', 'desc')
       .first()
@@ -103,7 +103,7 @@ const run = async () => {
   const shortfalls = []
   for (const { lid, year, expired_count } of closed) {
     const survivors = await db('draft')
-      .where({ lid, year })
+      .where({ lid, season_year: year })
       .modify(where_outstanding_draft_pick)
       .count('* as count')
       .first()

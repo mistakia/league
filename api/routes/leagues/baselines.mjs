@@ -26,13 +26,13 @@ const router = express.Router({ mergeParams: true })
  *             example:
  *               - lid: 2
  *                 week: "1"
- *                 year: 2024
+ *                 season_year: 2024
  *                 pid: "JAKO-MEYE-017624"
  *                 type: "starter"
  *                 player_position: "WR"
  *               - lid: 2
  *                 week: "1"
- *                 year: 2024
+ *                 season_year: 2024
  *                 pid: "DEON-JACK-006958"
  *                 type: "starter"
  *                 player_position: "RB"

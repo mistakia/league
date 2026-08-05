@@ -15,13 +15,14 @@ export default function Matchup({ matchup, teams, scoreboard }) {
   const away = teams.find((t) => t.uid === matchup.away_team_id) || {}
   const handleClick = () =>
     navigate(
-      `/leagues/${matchup.lid}/matchups/${matchup.year}/${matchup.week}/${matchup.uid}`
+      `/leagues/${matchup.lid}/matchups/${matchup.season_year}/${matchup.week}/${matchup.uid}`
     )
   const formatSpread = (value) =>
     value === 0 ? 'EVEN' : value > 0 ? `+${value}` : value
 
   const is_current_week =
-    matchup.week === current_season.week && matchup.year === current_season.year
+    matchup.week === current_season.week &&
+    matchup.season_year === current_season.year
   const is_final = Boolean(matchup.away_points && matchup.home_points)
   const home_score =
     !is_final && is_current_week ? scoreboard.home.points : matchup.home_points
@@ -55,8 +56,8 @@ export default function Matchup({ matchup, teams, scoreboard }) {
             backgroundColor: `#${away.primary_color}`
           }}
         />
-        <TeamImage tid={matchup.away_team_id} year={matchup.year} />
-        <TeamName tid={matchup.away_team_id} year={matchup.year} />
+        <TeamImage tid={matchup.away_team_id} year={matchup.season_year} />
+        <TeamName tid={matchup.away_team_id} year={matchup.season_year} />
         <div className='matchup__col metric spread'>
           {formatSpread(matchup.home_projection - matchup.away_projection)}
         </div>
@@ -78,8 +79,8 @@ export default function Matchup({ matchup, teams, scoreboard }) {
             backgroundColor: `#${home.primary_color}`
           }}
         />
-        <TeamImage tid={matchup.home_team_id} year={matchup.year} />
-        <TeamName tid={matchup.home_team_id} year={matchup.year} />
+        <TeamImage tid={matchup.home_team_id} year={matchup.season_year} />
+        <TeamName tid={matchup.home_team_id} year={matchup.season_year} />
         <div className='matchup__col metric spread'>
           {formatSpread(matchup.away_projection - matchup.home_projection)}
         </div>

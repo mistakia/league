@@ -84,12 +84,12 @@ describe('API /teams - deactivate', function () {
         transaction_types.ROSTER_DEACTIVATE
       )
       res.body.transaction.player_salary.should.equal(value)
-      res.body.transaction.year.should.equal(current_season.year)
+      res.body.transaction.season_year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week,
           pid: player.pid
         })
@@ -160,12 +160,12 @@ describe('API /teams - deactivate', function () {
         transaction_types.ROSTER_DEACTIVATE
       )
       res.body.transaction.player_salary.should.equal(value)
-      res.body.transaction.year.should.equal(current_season.year)
+      res.body.transaction.season_year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week,
           pid: player.pid
         })
@@ -379,7 +379,7 @@ describe('API /teams - deactivate', function () {
         type: transaction_types.PRACTICE_ADD,
         player_salary: 2,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 10
       })
 

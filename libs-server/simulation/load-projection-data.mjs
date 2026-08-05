@@ -121,7 +121,7 @@ export async function load_player_projections({
   const projections = await db('scoring_format_player_projection_points')
     .whereIn('pid', player_ids)
     .where({
-      year,
+      season_year: year,
       week: String(week),
       scoring_format_id
     })

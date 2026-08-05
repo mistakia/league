@@ -67,7 +67,7 @@ const scoring_format_seasonlogs_conditions = ({ params, row_axes = [] }) => {
   if (!row_axes.includes('year') && params.year) {
     const year = Array.isArray(params.year) ? params.year[0] : params.year
     if (year !== undefined && year !== null) {
-      conditions.push({ column: 'year', value: year })
+      conditions.push({ column: 'season_year', value: year })
     }
   }
 
@@ -77,7 +77,7 @@ const scoring_format_seasonlogs_conditions = ({ params, row_axes = [] }) => {
 const scoring_format_player_seasonlogs_source = {
   table: 'scoring_format_player_seasonlogs',
   grain: 'player_year',
-  key_columns: { pid: 'pid', year: 'year' },
+  key_columns: { pid: 'pid', year: 'season_year' },
   year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => [
     { column: 'scoring_format_id', value: get_scoring_format_id(params) }

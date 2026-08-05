@@ -59,7 +59,7 @@ const seed_trade = async () => {
   const drafted_player = await selectPlayer({ rookie: true })
 
   const season_row = await knex('seasons')
-    .where({ lid: LID, year: current_season.year })
+    .where({ lid: LID, season_year: current_season.year })
     .first()
   const league_format_id = season_row.league_format_id
 
@@ -213,7 +213,7 @@ const seed_trade = async () => {
     accept_tid: ACCEPT_TID,
     lid: LID,
     userid: 1,
-    year: current_season.year,
+    season_year: current_season.year,
     offered: Math.round(traded_at.getTime() / 1000) - 3600,
     accepted: Math.round(traded_at.getTime() / 1000)
   })

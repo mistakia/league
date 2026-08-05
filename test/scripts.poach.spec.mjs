@@ -119,7 +119,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(draft[0].round).to.equal(4)
       expect(draft[0].tid).to.equal(1)
       expect(draft[0].original_team_id).to.equal(1)
-      expect(draft[0].year).to.equal(current_season.year + 1)
+      expect(draft[0].season_year).to.equal(current_season.year + 1)
     })
 
     it('process single claim, of multiple', async () => {
@@ -479,7 +479,7 @@ describe('SCRIPTS /waivers - poach', function () {
         type: transaction_types.ROSTER_ACTIVATE,
         player_salary: 1,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)
       })
 

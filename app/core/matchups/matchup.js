@@ -6,7 +6,7 @@ export const Matchup = new Record({
   home_team_id: null,
   away_team_id: null,
   type: null,
-  year: null,
+  season_year: null,
   week: null,
   lid: null,
 
@@ -27,7 +27,7 @@ export function create_matchup({
   home_team_id,
   away_team_id,
   type,
-  year,
+  season_year,
   week,
   lid,
 
@@ -47,7 +47,7 @@ export function create_matchup({
     home_team_id,
     away_team_id,
     type,
-    year,
+    season_year,
     week,
     lid,
     away_points,

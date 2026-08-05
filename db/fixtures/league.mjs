@@ -83,7 +83,7 @@ export default async function (knex, league_params = {}) {
   for (let i = 1; i <= 12; i++) {
     team_rows.push({
       uid: i,
-      year: current_season.year,
+      season_year: current_season.year,
       lid: 1,
       waiver_order: i,
       draft_order: i,
@@ -99,7 +99,7 @@ export default async function (knex, league_params = {}) {
         tid: i,
         lid: 1,
         week,
-        year: current_season.year,
+        season_year: current_season.year,
         last_updated
       })
     }
@@ -107,7 +107,7 @@ export default async function (knex, league_params = {}) {
     users_teams_rows.push({
       userid: i,
       tid: i,
-      year: current_season.year
+      season_year: current_season.year
     })
   }
 

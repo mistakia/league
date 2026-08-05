@@ -25,7 +25,7 @@ export default class TradeSelectPick extends React.Component {
     return (
       <div className={class_names.join(' ')}>
         <div className='pick__content'>
-          <span className='pick__year'>{pick.year}</span>
+          <span className='pick__year'>{pick.season_year}</span>
           <span className='pick__round'>
             {ordinalSuffixOf(pick.round)} Round
           </span>

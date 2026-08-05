@@ -63,7 +63,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
       'rosters_players.tid': super_priority_status.original_tid,
       'rosters_players.lid': lid
     })
-    .where('rosters.year', current_season.year)
+    .where('rosters.season_year', current_season.year)
     .whereIn('rosters_players.slot', [
       roster_slot_types.PS,
       roster_slot_types.PSP
@@ -262,7 +262,7 @@ export default async function ({
       type: transaction_types.ROSTER_ACTIVATE,
       player_salary,
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp
     }
     const [inserted_transaction] = await db('transactions')
@@ -303,7 +303,7 @@ export default async function ({
     type: transaction_types.ROSTER_RELEASE,
     player_salary: 0,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp
   }
   const [inserted_transaction] = await db('transactions')
@@ -314,7 +314,7 @@ export default async function ({
   // remove release player from rosters
   const teamRosters = await db('rosters')
     .where('week', '>=', current_season.week)
-    .where('year', current_season.year)
+    .where('season_year', current_season.year)
     .where('tid', tid)
   const rosterIds = teamRosters.map((r) => r.uid)
   await db('rosters_players')
@@ -349,7 +349,7 @@ export default async function ({
     const teams = await db('teams').where({
       uid: tid,
       lid,
-      year: current_season.year
+      season_year: current_season.year
     })
     const team = teams[0]
 

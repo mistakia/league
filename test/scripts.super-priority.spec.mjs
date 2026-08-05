@@ -52,7 +52,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 1,
           userid: 1
@@ -63,7 +63,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           lid: 1,
           type: transaction_types.POACHED,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 1,
           userid: 2
@@ -93,7 +93,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         lid: 1,
         type: transaction_types.ROSTER_RELEASE,
         player_salary: 0,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 25 * 60 * 60, // 25 hours ago
         week: current_season.week,
         userid: 2
@@ -161,7 +161,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           tid: 1,
           lid: 1,
           week: current_season.week,
-          year: current_season.year
+          season_year: current_season.year
         })
         .first()
 
@@ -261,7 +261,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
 
       // Set up league for free agency period to allow active roster waiver processing
       await knex('seasons')
-        .where({ lid: 1, year: current_season.year })
+        .where({ lid: 1, season_year: current_season.year })
         .update({
           free_agency_live_auction_start:
             free_agency_auction_regular_season_start.unix(),
@@ -366,7 +366,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           tid: 4,
           lid: 1,
           week: current_season.week,
-          year: current_season.year
+          season_year: current_season.year
         })
         .first()
 
@@ -476,7 +476,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         type: transaction_types.TRADE,
         player_salary: 0,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: now - 3600 // Trade happened after the poach
       })
 
@@ -538,7 +538,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 1,
           userid: 1
@@ -549,7 +549,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           lid: 1,
           type: transaction_types.POACHED,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 1,
           userid: 2
@@ -609,7 +609,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           tid: 1,
           lid: 1,
           week: current_season.week,
-          year: current_season.year
+          season_year: current_season.year
         })
         .first()
 
@@ -669,7 +669,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           tid: 1,
           lid: 1,
           week: current_season.week,
-          year: current_season.year
+          season_year: current_season.year
         })
         .first()
 
@@ -698,7 +698,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 1,
           userid: 1
@@ -709,7 +709,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           lid: 1,
           type: transaction_types.POACHED,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 1,
           userid: 2
@@ -721,7 +721,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           lid: 1,
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
           week: current_season.week - 1,
           userid: 3
@@ -732,7 +732,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           lid: 1,
           type: transaction_types.POACHED,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp,
           week: current_season.week - 1,
           userid: 4
@@ -743,7 +743,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           lid: 1,
           type: transaction_types.TRADE,
           player_salary: 0,
-          year: current_season.year,
+          season_year: current_season.year,
           timestamp: poach_timestamp + 12 * 60 * 60, // 12 hours after poach
           week: current_season.week - 1,
           userid: 4

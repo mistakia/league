@@ -167,10 +167,10 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
     // Create current pick data
     const current_pick_item = (
       <DraftPickItem
-        key={`${pick.year}-${pick.uid}`}
+        key={`${pick.season_year}-${pick.uid}`}
         player={selected_player}
         pick={pick}
-        year={pick.year}
+        year={pick.season_year}
       />
     )
 

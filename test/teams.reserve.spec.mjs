@@ -108,12 +108,12 @@ describe('API /teams - reserve', function () {
       res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(transaction_types.RESERVE_IR)
       res.body.transaction.player_salary.should.equal(value)
-      res.body.transaction.year.should.equal(current_season.year)
+      res.body.transaction.season_year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week,
           pid: player.pid
         })
@@ -413,7 +413,7 @@ describe('API /teams - reserve', function () {
           lid: leagueId,
           tid: teamId,
           week: current_season.week,
-          year: current_season.year
+          season_year: current_season.year
         })
         .whereIn('slot', active_roster_slots)
         .orderBy('pid')
@@ -621,7 +621,7 @@ describe('API /teams - reserve', function () {
           tid: teamId,
           lid: leagueId,
           week: prior_week,
-          year: current_season.year
+          season_year: current_season.year
         })
         .returning('uid')
 
@@ -637,7 +637,7 @@ describe('API /teams - reserve', function () {
         tid: teamId,
         lid: leagueId,
         week: prior_week,
-        year: current_season.year
+        season_year: current_season.year
       })
 
       // Add player to roster (will be added to current week 5 roster)
@@ -1188,7 +1188,7 @@ describe('API /teams - reserve', function () {
 
       const rosterRows = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           week: current_season.week,
           pid: player.pid
         })
@@ -1211,7 +1211,7 @@ describe('API /teams - reserve', function () {
       // the player never occupied an active roster slot
       const active_rows = await knex('rosters_players')
         .where({
-          year: current_season.year,
+          season_year: current_season.year,
           pid: player.pid
         })
         .whereIn('slot', active_roster_slots)

@@ -127,7 +127,7 @@ const pick_key = (tid, pickid) => `pk__${tid}__${pickid}`
 const resolve_endowment_date = async ({ lid, year }) => {
   const prior = await db('seasons')
     .select('draft_start')
-    .where({ lid, year: year - 1 })
+    .where({ lid, season_year: year - 1 })
     .first()
   if (prior?.draft_start) return new Date(Number(prior.draft_start) * 1000)
   return new Date(`${year}-01-01T00:00:00Z`)
@@ -693,10 +693,10 @@ const build_event_stream = async ({ lid }) => {
     .select(
       'restricted_free_agency_bids.tid',
       'restricted_free_agency_bids.pid',
-      'restricted_free_agency_bids.year'
+      'restricted_free_agency_bids.season_year'
     )
   const cross_team_rfa_key_set = new Set(
-    cross_team_rfa_wins.map((r) => `${r.tid}__${r.pid}__${r.year}`)
+    cross_team_rfa_wins.map((r) => `${r.tid}__${r.pid}__${r.season_year}`)
   )
   // Pair each suppressed transactions row (RESTRICTED_FREE_AGENCY_TAG) with
   // its bid event so the rfa_cross_team_win emitter can carry the
@@ -707,7 +707,15 @@ const build_event_stream = async ({ lid }) => {
 
   // 2. Player transactions (excluding those that resolve via a trade).
   const transactions = await db('transactions')
-    .select('uid', 'tid', 'pid', 'type', 'timestamp', 'year', 'player_salary')
+    .select(
+      'uid',
+      'tid',
+      'pid',
+      'type',
+      'timestamp',
+      'season_year',
+      'player_salary'
+    )
     .where('lid', lid)
     .whereNotNull('pid')
     .orderBy('timestamp', 'asc')
@@ -728,7 +736,7 @@ const build_event_stream = async ({ lid }) => {
         tid: tran.tid,
         player_id: tran.pid,
         occurred_at: ts,
-        year: tran.year,
+        year: tran.season_year,
         transaction_id: tran.uid
       })
       continue
@@ -741,7 +749,7 @@ const build_event_stream = async ({ lid }) => {
         tid: tran.tid,
         player_id: tran.pid,
         occurred_at: ts,
-        year: tran.year,
+        year: tran.season_year,
         value: tran.player_salary,
         transaction_id: tran.uid
       })
@@ -749,7 +757,9 @@ const build_event_stream = async ({ lid }) => {
     }
     if (
       tran.type === transaction_types.RESTRICTED_FREE_AGENCY_TAG &&
-      cross_team_rfa_key_set.has(`${tran.tid}__${tran.pid}__${tran.year}`)
+      cross_team_rfa_key_set.has(
+        `${tran.tid}__${tran.pid}__${tran.season_year}`
+      )
     ) {
       // Cross-team RFA win: the rfa_cross_team_win event from
       // restricted_free_agency_bids handles open/close. Skip the transactions
@@ -757,7 +767,7 @@ const build_event_stream = async ({ lid }) => {
       // but remember its uid so the bid emitter can link the RFA_WIN edge
       // back to this transaction.
       cross_team_rfa_transaction_id_by_key.set(
-        `${tran.tid}__${tran.pid}__${tran.year}`,
+        `${tran.tid}__${tran.pid}__${tran.season_year}`,
         tran.uid
       )
       events.push({
@@ -788,7 +798,7 @@ const build_event_stream = async ({ lid }) => {
         player_id: tran.pid,
         transaction_type: tran.type,
         occurred_at: ts,
-        year: tran.year,
+        year: tran.season_year,
         value: tran.player_salary,
         transaction_id: tran.uid
       })
@@ -803,7 +813,7 @@ const build_event_stream = async ({ lid }) => {
         player_id: tran.pid,
         transaction_type: tran.type,
         occurred_at: ts,
-        year: tran.year,
+        year: tran.season_year,
         value: tran.player_salary,
         transaction_id: tran.uid
       })
@@ -830,7 +840,7 @@ const build_event_stream = async ({ lid }) => {
       'restricted_free_agency_bids.tid',
       'restricted_free_agency_nominations.original_team_id',
       'restricted_free_agency_bids.processed',
-      'restricted_free_agency_bids.year',
+      'restricted_free_agency_bids.season_year',
       'restricted_free_agency_bids.bid_amount'
     )
     .where({ 'restricted_free_agency_bids.lid': lid, is_successful: true })
@@ -846,9 +856,9 @@ const build_event_stream = async ({ lid }) => {
       to_tid: r.tid,
       bid: r.bid_amount,
       occurred_at: new Date(r.processed * 1000),
-      year: r.year,
+      year: r.season_year,
       transaction_id: cross_team_rfa_transaction_id_by_key.get(
-        `${r.tid}__${r.pid}__${r.year}`
+        `${r.tid}__${r.pid}__${r.season_year}`
       )
     })
   }
@@ -857,7 +867,7 @@ const build_event_stream = async ({ lid }) => {
   const trades = await db('trades')
     .where({ lid })
     .whereNotNull('accepted')
-    .select('uid', 'propose_tid', 'accept_tid', 'year', 'accepted')
+    .select('uid', 'propose_tid', 'accept_tid', 'season_year', 'accepted')
     .orderBy('accepted', 'asc')
   const trade_ids = trades.map((t) => t.uid)
   const trade_players = trade_ids.length
@@ -871,7 +881,14 @@ const build_event_stream = async ({ lid }) => {
   const picks_meta = pickids.length
     ? await db('draft')
         .whereIn('uid', pickids)
-        .select('uid', 'round', 'year', 'original_team_id', 'pick', 'tid')
+        .select(
+          'uid',
+          'round',
+          'season_year',
+          'original_team_id',
+          'pick',
+          'tid'
+        )
     : []
   const pick_meta_by_id = new Map(picks_meta.map((p) => [p.uid, p]))
   // Compute per-pick chronological from/to per trade by walking forward from
@@ -1008,7 +1025,7 @@ const build_event_stream = async ({ lid }) => {
       legs.push({
         asset_type: ASSET_TYPE.PICK,
         pickid: tpi.pickid,
-        pick_year: meta.year,
+        pick_year: meta.season_year,
         pick_round: meta.round,
         pick_original_owner_tid: meta.original_team_id,
         pick_draft_overall_position: meta.pick,
@@ -1021,7 +1038,7 @@ const build_event_stream = async ({ lid }) => {
       sort_priority: 3,
       kind: 'trade',
       occurred_at: new Date(trade.accepted * 1000),
-      year: trade.year,
+      year: trade.season_year,
       trade_uid: trade.uid,
       propose_tid: trade.propose_tid,
       accept_tid: trade.accept_tid,
@@ -1039,11 +1056,13 @@ const build_event_stream = async ({ lid }) => {
       'original_team_id',
       'round',
       'pick',
-      'year',
+      'season_year',
       'selection_timestamp'
     )
   // Default endowment timestamp by year (prior-year draft_start).
-  const years_for_picks = Array.from(new Set(all_picks.map((p) => p.year)))
+  const years_for_picks = Array.from(
+    new Set(all_picks.map((p) => p.season_year))
+  )
   const endowment_by_year = new Map()
   for (const y of years_for_picks) {
     endowment_by_year.set(y, await resolve_endowment_date({ lid, year: y }))
@@ -1060,7 +1079,7 @@ const build_event_stream = async ({ lid }) => {
     }
   }
   for (const pick of all_picks) {
-    let endow_date = endowment_by_year.get(pick.year)
+    let endow_date = endowment_by_year.get(pick.season_year)
     const earliest_trade = earliest_trade_by_pickid.get(pick.uid)
     if (earliest_trade && earliest_trade * 1000 < endow_date.getTime()) {
       endow_date = new Date(earliest_trade * 1000 - 60_000)
@@ -1080,7 +1099,7 @@ const build_event_stream = async ({ lid }) => {
       tid:
         endowment_holder_tid_by_pickid.get(pick.uid) ?? pick.original_team_id,
       pickid: pick.uid,
-      pick_year: pick.year,
+      pick_year: pick.season_year,
       pick_round: pick.round,
       pick_original_owner_tid: pick.original_team_id,
       pick_draft_overall_position: pick.pick,
@@ -1117,12 +1136,12 @@ const build_event_stream = async ({ lid }) => {
   // silently masking a league-year that never got closed.
   const seasons_rows = await db('seasons')
     .where({ lid })
-    .select('year', 'rookie_draft_completed_at')
+    .select('season_year', 'rookie_draft_completed_at')
   const rookie_draft_completed_by_year = new Map()
   for (const s of seasons_rows) {
     if (s.rookie_draft_completed_at) {
       rookie_draft_completed_by_year.set(
-        s.year,
+        s.season_year,
         Number(s.rookie_draft_completed_at)
       )
     }

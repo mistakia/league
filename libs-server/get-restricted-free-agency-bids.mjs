@@ -7,14 +7,14 @@ export default async function ({ userId, leagueId }) {
     .select('teams.*')
     .join('users_teams', function () {
       this.on('teams.uid', '=', 'users_teams.tid').andOn(
-        'teams.year',
+        'teams.season_year',
         '=',
-        'users_teams.year'
+        'users_teams.season_year'
       )
     })
     .where('users_teams.userid', userId)
     .where('teams.lid', leagueId)
-    .where('teams.year', current_season.year)
+    .where('teams.season_year', current_season.year)
 
   if (query1.length) {
     const tid = query1[0].uid

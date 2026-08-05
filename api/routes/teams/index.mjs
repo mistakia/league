@@ -136,7 +136,7 @@ router.put('/:teamId', async (req, res) => {
 
     await db('teams')
       .update({ [field]: value })
-      .where({ uid: teamId, year: current_season.year })
+      .where({ uid: teamId, season_year: current_season.year })
     res.send({ value })
   } catch (error) {
     logger(error)

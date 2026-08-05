@@ -214,7 +214,7 @@ router.post('/register', async (req, res) => {
 
       const teams = await db('teams').where({
         lid: league_id,
-        year: current_season.year
+        season_year: current_season.year
       })
       if (team_id) {
         if (!teams.find((t) => t.uid === team_id)) {
@@ -250,7 +250,7 @@ router.post('/register', async (req, res) => {
       await db('users_teams').insert({
         userid: user_id,
         tid: team_id,
-        year: current_season.year
+        season_year: current_season.year
       })
     }
 

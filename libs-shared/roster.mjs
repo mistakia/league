@@ -26,7 +26,7 @@ export default class Roster {
     this.uid = roster.uid
     this.tid = roster.tid
     this.week = roster.week
-    this.year = roster.year
+    this.season_year = roster.season_year
     this.lid = roster.lid
     this._league = league
     this._players = new Map()
@@ -124,7 +124,7 @@ export default class Roster {
   // used for inserting into rosters_players table
   get rosters_players() {
     const arr = []
-    const { tid, lid, year, week } = this
+    const { tid, lid, season_year, week } = this
     for (const {
       slot,
       pid,
@@ -142,7 +142,7 @@ export default class Roster {
         extensions,
         tid,
         lid,
-        year,
+        season_year,
         week
       })
     }

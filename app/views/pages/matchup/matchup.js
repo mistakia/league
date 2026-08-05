@@ -97,7 +97,7 @@ export default function MatchupPage({
     )
     if (matchup.uid) {
       navigate(
-        `/leagues/${matchup.lid}/matchups/${matchup.year}/${matchup.week}/${matchup.uid}`
+        `/leagues/${matchup.lid}/matchups/${matchup.season_year}/${matchup.week}/${matchup.uid}`
       )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,7 +127,7 @@ export default function MatchupPage({
                 <ScoreboardTeam
                   tid={matchup.away_team_id}
                   week={matchup.week}
-                  year={matchup.year}
+                  year={matchup.season_year}
                   type='away'
                   showBench={show_bench}
                 />
@@ -136,7 +136,7 @@ export default function MatchupPage({
               <ScoreboardTeam
                 tid={selected_tid}
                 week={matchup.week}
-                year={matchup.year}
+                year={matchup.season_year}
                 type='home'
                 showBench={show_bench}
               />

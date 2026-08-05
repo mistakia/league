@@ -20,7 +20,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     .where('rosters_players.pid', pid)
     .where({
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       lid
     })
 
@@ -107,7 +107,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   const poachedTeamRosters = await db('rosters')
     .where('week', '>=', current_season.week)
     .where('tid', rosterSlot.tid)
-    .where('year', current_season.year)
+    .where('season_year', current_season.year)
   const poachedTeamRosterIds = poachedTeamRosters.map((r) => r.uid)
   await db('rosters_players')
     .whereIn('roster_id', poachedTeamRosterIds)
@@ -122,7 +122,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     type: transaction_types.POACHED,
     player_salary: playerPoachValue,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
   }
   await db('transactions').insert(transaction)
@@ -137,7 +137,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     tid,
     lid,
     week: current_season.week,
-    year: current_season.year
+    season_year: current_season.year
   })
 
   // award conditional pick to poached team

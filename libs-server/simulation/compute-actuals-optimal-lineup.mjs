@@ -42,7 +42,7 @@ export async function compute_actuals_optimal_lineup({
   const { scoring_format_id } = league_format_record
 
   const roster_rows = await db('rosters_players')
-    .where({ lid, tid, week, year })
+    .where({ lid, tid, week, season_year: year })
     .whereIn('slot', active_roster_slots)
     .select('pid', 'player_position')
 

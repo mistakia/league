@@ -48,8 +48,12 @@ describe('SCRIPTS process-projections-for-league-format', function () {
       seeded_pids = seeded_pids.concat(rows.map((row) => row.pid))
     }
 
-    await knex(VALUES_TABLE).where({ league_format_id, year: YEAR }).del()
-    await knex(POINTS_TABLE).where({ scoring_format_id, year: YEAR }).del()
+    await knex(VALUES_TABLE)
+      .where({ league_format_id, season_year: YEAR })
+      .del()
+    await knex(POINTS_TABLE)
+      .where({ scoring_format_id, season_year: YEAR })
+      .del()
 
     const projection_rows = []
     const point_rows = []
@@ -72,7 +76,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
           pid,
           scoring_format_id,
           week,
-          year: YEAR,
+          season_year: YEAR,
           projected_points_total: total
         })
       }
@@ -97,7 +101,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     // passes at the broken revision and proves nothing.
     const rows = await knex(VALUES_TABLE)
       .select('pts_added')
-      .where({ league_format_id, year: YEAR })
+      .where({ league_format_id, season_year: YEAR })
       .whereRaw("week ~ '^[0-9]+$'")
 
     expect(rows.length).to.be.greaterThan(0)
@@ -114,7 +118,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
   it('spreads values across the board rather than collapsing to one number', async () => {
     const rows = await knex(VALUES_TABLE)
       .select('pts_added')
-      .where({ league_format_id, year: YEAR, week: '0' })
+      .where({ league_format_id, season_year: YEAR, week: '0' })
       .whereNot({ pts_added: default_points_added })
 
     const distinct = new Set(rows.map((row) => Number(row.pts_added)))
@@ -128,12 +132,12 @@ describe('SCRIPTS process-projections-for-league-format', function () {
   it('refuses to write, and preserves stored values, when points exist but no value is usable', async () => {
     const before_rows = await knex(VALUES_TABLE)
       .select('pid', 'week', 'pts_added')
-      .where({ league_format_id, year: YEAR })
+      .where({ league_format_id, season_year: YEAR })
       .orderBy(['pid', 'week'])
     expect(before_rows.length).to.be.greaterThan(0)
 
     await knex(POINTS_TABLE)
-      .where({ scoring_format_id, year: YEAR })
+      .where({ scoring_format_id, season_year: YEAR })
       .update({ projected_points_total: null })
 
     let caught
@@ -153,7 +157,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     // that the prior year survives intact.
     const after_rows = await knex(VALUES_TABLE)
       .select('pid', 'week', 'pts_added')
-      .where({ league_format_id, year: YEAR })
+      .where({ league_format_id, season_year: YEAR })
       .orderBy(['pid', 'week'])
     expect(after_rows).to.deep.equal(before_rows)
   })
@@ -164,7 +168,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
   it('does not refuse a year that has no scoring-format points at all', async () => {
     const empty_year = YEAR - 1
     await knex(POINTS_TABLE)
-      .where({ scoring_format_id, year: empty_year })
+      .where({ scoring_format_id, season_year: empty_year })
       .del()
     await knex('projections_index')
       .where({

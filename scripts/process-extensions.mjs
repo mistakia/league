@@ -89,19 +89,22 @@ const createTransaction = async ({ roster_player, tid, league }) => {
     type: getTransactionType(tag),
     player_salary: extensionValue,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp: league.ext_date
   }
 }
 
 const run = async ({ lid }) => {
   const league = await getLeague({ lid })
-  const teams = await db('teams').where({ lid, year: current_season.year })
+  const teams = await db('teams').where({
+    lid,
+    season_year: current_season.year
+  })
   await db('transactions')
     .where({
       userid: 0,
       lid,
-      year: current_season.year
+      season_year: current_season.year
     })
     .whereIn('type', [
       transaction_types.FRANCHISE_TAG,
@@ -149,7 +152,10 @@ const process_extensions_for_due_leagues = async () => {
 
   const eligible = await db('seasons')
     .join('leagues', 'leagues.uid', 'seasons.lid')
-    .where({ 'seasons.year': current_season.year, 'leagues.is_hosted': true })
+    .where({
+      'seasons.season_year': current_season.year,
+      'leagues.is_hosted': true
+    })
     .whereNotNull('seasons.ext_date')
     .select('seasons.lid', 'seasons.ext_date')
 

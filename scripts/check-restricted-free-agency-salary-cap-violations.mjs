@@ -28,12 +28,12 @@ const get_leagues_with_restricted_free_agency_transactions = async () => {
   return await db('seasons')
     .select('seasons.*', 'leagues.name as league_name')
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')
-    .where('seasons.year', CURRENT_YEAR)
+    .where('seasons.season_year', CURRENT_YEAR)
     .whereExists(function () {
       this.select('*')
         .from('transactions')
         .where('transactions.lid', db.raw('seasons.lid'))
-        .where('transactions.year', CURRENT_YEAR)
+        .where('transactions.season_year', CURRENT_YEAR)
         .where('transactions.type', RESTRICTED_FREE_AGENCY_TAG_TYPE)
     })
     .distinct()
@@ -46,7 +46,7 @@ const get_teams_with_restricted_free_agency_transactions = async ({ lid }) => {
   return await db('transactions')
     .select('tid')
     .where('lid', lid)
-    .where('year', CURRENT_YEAR)
+    .where('season_year', CURRENT_YEAR)
     .where('type', RESTRICTED_FREE_AGENCY_TAG_TYPE)
     .groupBy('tid')
 }
@@ -58,7 +58,7 @@ const get_team_display_name = async ({ tid }) => {
   const team = await db('teams')
     .select('name', 'abbreviation')
     .where('uid', tid)
-    .where('year', CURRENT_YEAR)
+    .where('season_year', CURRENT_YEAR)
     .first()
 
   return team ? `${team.name} (${team.abbreviation})` : `Team ${tid}`
@@ -78,7 +78,7 @@ const get_restricted_free_agency_transactions = async ({ tid, lid }) => {
     )
     .where('transactions.tid', tid)
     .where('transactions.lid', lid)
-    .where('transactions.year', CURRENT_YEAR)
+    .where('transactions.season_year', CURRENT_YEAR)
     .where('transactions.type', RESTRICTED_FREE_AGENCY_TAG_TYPE)
     .orderBy('transactions.timestamp', 'desc')
 }

@@ -19,8 +19,11 @@ const calculate_playoff_matchup_projection = async ({
   dry = false
 } = {}) => {
   log(`Calculating playoff matchup projections for lid ${lid} in ${year}`)
-  const lineups = await db('league_team_lineups').where({ year, lid })
-  const playoffs = await db('playoffs').where({ year, lid })
+  const lineups = await db('league_team_lineups').where({
+    season_year: year,
+    lid
+  })
+  const playoffs = await db('playoffs').where({ season_year: year, lid })
 
   log(`Found ${lineups.length} lineups and ${playoffs.length} playoffs`)
 
@@ -53,7 +56,7 @@ const calculate_playoff_matchup_projection = async ({
     log(`Updating ${playoff_updates.length} playoffs in lid ${lid} for ${year}`)
     await db('playoffs')
       .insert(playoff_updates)
-      .onConflict(['uid', 'tid', 'year', 'week'])
+      .onConflict(['uid', 'tid', 'season_year', 'week'])
       .merge()
   }
 }

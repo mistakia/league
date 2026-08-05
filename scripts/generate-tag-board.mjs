@@ -19,9 +19,10 @@ const DYNASTY_ASSET_TYPE_PLAYER = 1
 
 const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
   const season_rows = await db('seasons')
+    .select('*')
     .where({ lid })
-    .where('year', '<=', year)
-  const season = season_rows.find((row) => row.year === year)
+    .where('season_year', '<=', year)
+  const season = season_rows.find((row) => row.season_year === year)
   if (!season) {
     throw new Error(`no seasons row for lid ${lid} year ${year}`)
   }
@@ -35,12 +36,12 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
 
   const teams = await db('teams')
     .select('uid', 'name', 'salary_cap', 'faab_balance', 'draft_order')
-    .where({ lid, year })
+    .where({ lid, season_year: year })
     .orderBy('uid')
 
   const roster_rows = await db('rosters_players')
     .select('tid', 'pid', 'slot', 'player_position', 'tag', 'extensions')
-    .where({ lid, year, week: 0 })
+    .where({ lid, season_year: year, week: 0 })
 
   const pids = [...new Set(roster_rows.map((row) => row.pid))]
 
@@ -74,14 +75,14 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
   // extension has been written. Reading the deadline off the clock makes the
   // board understate every contract for the length of that window.
   const extension_row = await db('transactions')
-    .where({ lid, year, type: transaction_types.EXTENSION })
+    .where({ lid, season_year: year, type: transaction_types.EXTENSION })
     .first()
   const extensions_processed = Boolean(extension_row)
 
   const franchise_tag_history = await db('transactions')
-    .select('tid', 'pid', 'year')
+    .select('tid', 'pid', 'season_year')
     .where({ lid, type: transaction_types.FRANCHISE_TAG })
-    .whereIn('year', [year - 1, year - 2])
+    .whereIn('season_year', [year - 1, year - 2])
 
   const dynasty_date_row = await db('composite_market_value_daily')
     .max('date as date')
@@ -117,7 +118,11 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
   //                   are multi-year decisions this column cannot price.
   const projection_rows = await db('league_format_player_projection_values')
     .select('pid', 'pts_added', 'market_salary')
-    .where({ league_format_id: season.league_format_id, year, week: '0' })
+    .where({
+      league_format_id: season.league_format_id,
+      season_year: year,
+      week: '0'
+    })
     .whereIn('pid', pids)
   const projected_points_added = new Map(
     projection_rows.map((row) => [row.pid, Number(row.pts_added)])
@@ -175,7 +180,7 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
       )
       .where({
         'restricted_free_agency_bids.lid': lid,
-        'restricted_free_agency_bids.year': year,
+        'restricted_free_agency_bids.season_year': year,
         'restricted_free_agency_bids.tid': viewer_tid
       })
       .whereNull('restricted_free_agency_bids.cancelled')

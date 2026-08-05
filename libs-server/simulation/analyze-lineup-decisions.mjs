@@ -98,7 +98,9 @@ export async function analyze_lineup_decisions({
   log(`Base win probability: ${(base_win_probability * 100).toFixed(1)}%`)
 
   // Get scoring format hash for projection lookup
-  const season = await db('seasons').where({ lid: league_id, year }).first()
+  const season = await db('seasons')
+    .where({ lid: league_id, season_year: year })
+    .first()
   const scoring_format_id = season?.scoring_format_id
 
   // Load bench players for potential swaps (only those with valid projections)
@@ -152,7 +154,7 @@ export async function analyze_lineup_decisions({
       lid: league_id,
       tid: team_id,
       week: roster_week,
-      year
+      season_year: year
     })
     .whereIn('pid', my_roster.player_ids)
     .whereIn('slot', starting_lineup_slots)

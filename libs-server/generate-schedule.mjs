@@ -3,8 +3,11 @@ import generate_fantasy_league_schedule from './generate-fantasy-league-schedule
 import db from '#db'
 
 export default async function ({ lid, random_seed }) {
-  await db('matchups').del().where({ lid, year: current_season.year })
-  const teams = await db('teams').where({ lid, year: current_season.year })
+  await db('matchups').del().where({ lid, season_year: current_season.year })
+  const teams = await db('teams').where({
+    lid,
+    season_year: current_season.year
+  })
   const schedule = generate_fantasy_league_schedule(teams, random_seed)
   const inserts = []
   for (const [index, value] of schedule.entries()) {
@@ -14,7 +17,7 @@ export default async function ({ lid, random_seed }) {
         away_team_id: matchup.away.uid,
         lid,
         week: index + 1,
-        year: current_season.year
+        season_year: current_season.year
       })
     }
   }

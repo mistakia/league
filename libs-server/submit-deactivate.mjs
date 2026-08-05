@@ -160,7 +160,7 @@ export default async function ({
     type: transaction_types.ROSTER_DEACTIVATE,
     player_salary: lastTransaction.player_salary,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp
   }
   await db('transactions').insert(transaction)
@@ -176,7 +176,7 @@ export default async function ({
 
   const teams = await db('teams').where({
     uid: tid,
-    year: current_season.year
+    season_year: current_season.year
   })
   const team = teams[0]
 

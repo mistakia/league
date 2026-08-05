@@ -166,7 +166,7 @@ export async function load_all_teams_starters({
 
   // Get all team IDs for the league
   const teams = await db('teams')
-    .where({ lid: league_id, year })
+    .where({ lid: league_id, season_year: year })
     .select('uid as team_id')
 
   const team_ids = teams.map((t) => t.team_id)
@@ -221,7 +221,7 @@ async function load_actual_starters({ league_id, team_id, week, year }) {
       lid: league_id,
       tid: team_id,
       week,
-      year
+      season_year: year
     })
     .whereIn('slot', starting_lineup_slots)
     .select('pid')
@@ -262,7 +262,7 @@ async function calculate_optimal_starters({
       lid: league_id,
       tid: team_id,
       week: roster_week,
-      year
+      season_year: year
     })
     .whereIn('slot', active_roster_slots)
     .select('pid')

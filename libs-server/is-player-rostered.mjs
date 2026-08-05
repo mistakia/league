@@ -6,7 +6,7 @@ export default async function ({ pid, leagueId }) {
     pid,
     lid: leagueId,
     week: current_season.week,
-    year: current_season.year
+    season_year: current_season.year
   })
 
   return Boolean(rosterRows.length)

@@ -46,7 +46,7 @@ const build_rows_for_slice = async ({
   with_optimal
 }) => {
   const seasonlog_rows = await db('league_player_seasonlogs')
-    .where({ lid, year })
+    .where({ lid, season_year: year })
     .select(
       'pid',
       'start_tid',
@@ -140,7 +140,7 @@ const build_rows_for_slice = async ({
       lid,
       tid,
       pid,
-      year,
+      season_year: year,
       league_format_id,
       weeks_rostered: m.weeks_rostered,
       weeks_started: m.weeks_started,
@@ -167,14 +167,14 @@ export const generate_league_team_player_seasonlogs = async ({
   const year_hash_pairs = await db('seasons')
     .where({ lid })
     .modify((q) => {
-      if (year) q.where({ year })
+      if (year) q.where({ season_year: year })
     })
-    .distinct('year', 'league_format_id')
-    .orderBy('year', 'asc')
+    .distinct('season_year', 'league_format_id')
+    .orderBy('season_year', 'asc')
 
   const slice_failures = []
 
-  for (const { year: y, league_format_id } of year_hash_pairs) {
+  for (const { season_year: y, league_format_id } of year_hash_pairs) {
     log(`processing lid=${lid} year=${y} hash=${league_format_id}`)
 
     const league_format_record = await db('league_formats')
@@ -197,7 +197,7 @@ export const generate_league_team_player_seasonlogs = async ({
     // represented by at least one row. `seasons` carries one league_format_id
     // per (lid, y), so the cross-hash tid count equals the per-hash floor.
     const floor_row = await db('rosters_players')
-      .where({ lid, year: y })
+      .where({ lid, season_year: y })
       .countDistinct({ floor: 'tid' })
       .first()
     const floor = Number(floor_row?.floor || 0)
@@ -208,7 +208,7 @@ export const generate_league_team_player_seasonlogs = async ({
     }
 
     await db('league_team_player_seasonlogs')
-      .where({ lid, year: y, league_format_id })
+      .where({ lid, season_year: y, league_format_id })
       .del()
 
     if (rows.length > 0) {
@@ -218,7 +218,13 @@ export const generate_league_team_player_seasonlogs = async ({
         save: async (batch) =>
           db('league_team_player_seasonlogs')
             .insert(batch)
-            .onConflict(['lid', 'tid', 'pid', 'year', 'league_format_id'])
+            .onConflict([
+              'lid',
+              'tid',
+              'pid',
+              'season_year',
+              'league_format_id'
+            ])
             .merge()
       })
     }

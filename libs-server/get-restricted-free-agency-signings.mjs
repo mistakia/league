@@ -25,7 +25,7 @@ export default async function ({ lid, year = null }) {
 
   if (year) {
     restricted_free_agency_bids_query.where({
-      'restricted_free_agency_bids.year': year
+      'restricted_free_agency_bids.season_year': year
     })
   }
 

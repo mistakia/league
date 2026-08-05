@@ -54,14 +54,14 @@ const generate_league_player_seasonlogs = async ({
     const rosters_start = await db('rosters_players')
       .where('lid', lid)
       .where('pid', pid)
-      .where('year', year)
+      .where('season_year', year)
       .where('week', 0)
     const start_tid = rosters_start.length ? rosters_start[0].tid : null
 
     let salary = null
     if (start_tid) {
       const salary_query = await db('transactions')
-        .where({ lid, pid, year, week: 0, tid: start_tid })
+        .where({ lid, pid, season_year: year, week: 0, tid: start_tid })
         .orderBy('timestamp', 'desc')
         .limit(1)
 
@@ -72,7 +72,7 @@ const generate_league_player_seasonlogs = async ({
     const rosters_end = await db('rosters_players')
       .where('lid', lid)
       .where('pid', pid)
-      .where('year', year)
+      .where('season_year', year)
       .where('week', season_dates.finalWeek)
     const end_tid = rosters_end.length ? rosters_end[0].tid : null
 
@@ -110,7 +110,7 @@ const generate_league_player_seasonlogs = async ({
     // process / create inserts
     inserts.push({
       pid,
-      year,
+      season_year: year,
       lid,
       salary,
       start_tid,
@@ -124,7 +124,7 @@ const generate_league_player_seasonlogs = async ({
   if (inserts.length) {
     const pids = inserts.map((p) => p.pid)
     const deleted_count = await db('league_player_seasonlogs')
-      .where({ lid, year })
+      .where({ lid, season_year: year })
       .whereNotIn('pid', pids)
       .del()
     log(`Deleted ${deleted_count} excess player seasonlogs`)
@@ -132,7 +132,7 @@ const generate_league_player_seasonlogs = async ({
     log(`updated ${inserts.length} player regular seasons`)
     await db('league_player_seasonlogs')
       .insert(inserts)
-      .onConflict(['pid', 'year', 'lid'])
+      .onConflict(['pid', 'season_year', 'lid'])
       .merge()
   }
 }

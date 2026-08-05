@@ -54,7 +54,7 @@ const PROTECTED_SLOTS = {
 const get_protected_pids = async ({ lid }) => {
   const rows = await db('rosters_players')
     .distinct('pid')
-    .where({ lid, year: current_season.year })
+    .where({ lid, season_year: current_season.year })
     .whereIn('slot', Object.keys(PROTECTED_SLOTS).map(Number))
 
   return rows.map(({ pid }) => pid)
@@ -73,7 +73,7 @@ const reset_league = async ({ lid, dry_run = false }) => {
   )) {
     const query = db('rosters_players').where({
       lid,
-      year: current_season.year,
+      season_year: current_season.year,
       slot: Number(protected_slot)
     })
 
@@ -193,7 +193,10 @@ const reset_protected_designations_for_due_leagues = async ({
   // indefinitely, matching is-before-extension-deadline.mjs, so it is never due.
   const eligible = await db('seasons')
     .join('leagues', 'leagues.uid', 'seasons.lid')
-    .where({ 'seasons.year': current_season.year, 'leagues.is_hosted': true })
+    .where({
+      'seasons.season_year': current_season.year,
+      'leagues.is_hosted': true
+    })
     .whereNotNull('seasons.ext_date')
     .select('seasons.lid', 'seasons.ext_date')
 
@@ -255,7 +258,7 @@ const reset_protected_designations_for_due_leagues = async ({
   const shortfalls = [...announce_failures]
   for (const { lid, ext_date } of due_leagues) {
     const row = await db('rosters_players')
-      .where({ lid, year: current_season.year })
+      .where({ lid, season_year: current_season.year })
       .whereIn('slot', Object.keys(PROTECTED_SLOTS).map(Number))
       .count()
       .first()

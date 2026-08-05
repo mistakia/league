@@ -77,13 +77,13 @@ describe('API /teams - add', function () {
       res.body[0].transaction.pid.should.equal(player.pid)
       res.body[0].transaction.type.should.equal(transaction_types.ROSTER_ADD)
       res.body[0].transaction.player_salary.should.equal(0)
-      res.body[0].transaction.year.should.equal(current_season.year)
+      res.body[0].transaction.season_year.should.equal(current_season.year)
 
       const rosters = await knex('rosters_players').where({
         pid: player.pid,
         tid: teamId,
         week: current_season.week,
-        year: current_season.year
+        season_year: current_season.year
       })
 
       expect(rosters.length).to.equal(1)
@@ -93,7 +93,7 @@ describe('API /teams - add', function () {
       expect(rosters[0].tid).to.equal(teamId)
       expect(rosters[0].lid).to.equal(leagueId)
       expect(rosters[0].week).to.equal(current_season.week)
-      expect(rosters[0].year).to.equal(current_season.year)
+      expect(rosters[0].season_year).to.equal(current_season.year)
 
       await checkLastTransaction({
         leagueId,
@@ -145,13 +145,13 @@ describe('API /teams - add', function () {
       res.body[0].transaction.pid.should.equal(player.pid)
       res.body[0].transaction.type.should.equal(transaction_types.PRACTICE_ADD)
       res.body[0].transaction.player_salary.should.equal(0)
-      res.body[0].transaction.year.should.equal(current_season.year)
+      res.body[0].transaction.season_year.should.equal(current_season.year)
 
       const rosters = await knex('rosters_players').where({
         pid: player.pid,
         tid: teamId,
         week: current_season.week,
-        year: current_season.year
+        season_year: current_season.year
       })
 
       expect(rosters.length).to.equal(1)
@@ -161,7 +161,7 @@ describe('API /teams - add', function () {
       expect(rosters[0].tid).to.equal(teamId)
       expect(rosters[0].lid).to.equal(leagueId)
       expect(rosters[0].week).to.equal(current_season.week)
-      expect(rosters[0].year).to.equal(current_season.year)
+      expect(rosters[0].season_year).to.equal(current_season.year)
 
       await checkLastTransaction({
         leagueId,
@@ -391,7 +391,7 @@ describe('API /teams - add', function () {
         .where({
           tid: teamId,
           week: current_season.week,
-          year: current_season.year,
+          season_year: current_season.year,
           player_position: 'RB'
         })
         .whereIn('slot', [
@@ -470,7 +470,7 @@ describe('API /teams - add', function () {
         .where({
           tid: teamId,
           week: current_season.week,
-          year: current_season.year,
+          season_year: current_season.year,
           pid: player2.pid
         })
         .del()

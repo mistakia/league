@@ -37,7 +37,9 @@ const generate_league_season_teams = async ({
   league_settings_year,
   overwrite = false
 }) => {
-  const teams_exist = await db('teams').where({ lid, year }).first()
+  const teams_exist = await db('teams')
+    .where({ lid, season_year: year })
+    .first()
   if (teams_exist && !overwrite) {
     log(`teams already exist for ${lid} ${year}`)
     return
@@ -47,10 +49,13 @@ const generate_league_season_teams = async ({
   // Use explicit league_settings_year if provided, otherwise fall back to previous_year
   const settings_year = league_settings_year ?? previous_year
   const league = await getLeague({ lid, year: settings_year })
-  const teams = await db('teams').where({ lid, year: previous_year })
+  const teams = await db('teams').where({
+    lid,
+    season_year: previous_year
+  })
   const league_team_seasonlogs = await db('league_team_seasonlogs').where({
     lid,
-    year: previous_year
+    season_year: previous_year
   })
 
   // draft order is determined by draft order index for teams that didnt make the post season
@@ -80,7 +85,7 @@ const generate_league_season_teams = async ({
     team_inserts.push({
       ...team,
 
-      year,
+      season_year: year,
 
       // reset team stats
       waiver_order: i + 1,
@@ -92,7 +97,7 @@ const generate_league_season_teams = async ({
     // Get user associations for this team from previous year
     const previous_users_teams = await db('users_teams').where({
       tid: team_id,
-      year: previous_year
+      season_year: previous_year
     })
 
     // Create new users_teams entries for the new year
@@ -100,20 +105,23 @@ const generate_league_season_teams = async ({
       users_teams_inserts.push({
         userid: user_team.userid,
         tid: team_id,
-        year
+        season_year: year
       })
     }
   }
 
   if (team_inserts.length) {
-    await db('teams').insert(team_inserts).onConflict(['year', 'uid']).merge()
+    await db('teams')
+      .insert(team_inserts)
+      .onConflict(['season_year', 'uid'])
+      .merge()
     log(`generated ${team_inserts.length} teams for lid ${lid} year ${year}`)
   }
 
   if (users_teams_inserts.length) {
     await db('users_teams')
       .insert(users_teams_inserts)
-      .onConflict(['userid', 'tid', 'year'])
+      .onConflict(['userid', 'tid', 'season_year'])
       .merge()
     log(
       `generated ${users_teams_inserts.length} users_teams associations for lid ${lid} year ${year}`

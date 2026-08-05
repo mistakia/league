@@ -85,9 +85,9 @@ export async function require_league_access(league, userId, leagueId, db, res) {
   const user_team = await db('teams')
     .join('users_teams', function () {
       this.on('teams.uid', '=', 'users_teams.tid').andOn(
-        'teams.year',
+        'teams.season_year',
         '=',
-        'users_teams.year'
+        'users_teams.season_year'
       )
     })
     .where('teams.lid', leagueId)

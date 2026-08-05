@@ -76,7 +76,7 @@ export const process_scoring_format_year = async ({
       })
       points_inserts.push({
         pid,
-        year,
+        season_year: year,
         scoring_format_id,
         week,
         projected_points_total: total
@@ -93,7 +93,7 @@ export const process_scoring_format_year = async ({
       })
       points_inserts.push({
         pid,
-        year,
+        season_year: year,
         scoring_format_id,
         week: 'ros',
         projected_points_total: total
@@ -104,7 +104,7 @@ export const process_scoring_format_year = async ({
   if (points_inserts.length) {
     await db('scoring_format_player_projection_points')
       .del()
-      .where({ scoring_format_id, year })
+      .where({ scoring_format_id, season_year: year })
     await batch_insert({
       items: points_inserts,
       save: (items) =>

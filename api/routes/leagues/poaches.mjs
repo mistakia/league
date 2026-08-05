@@ -51,10 +51,10 @@ router.post('/?', async (req, res) => {
     const userTeams = await db('users_teams')
       .join('teams', function () {
         this.on('users_teams.tid', '=', 'teams.uid')
-        this.andOn('users_teams.year', '=', 'teams.year')
+        this.andOn('users_teams.season_year', '=', 'teams.season_year')
       })
       .where('userid', req.auth.userId)
-      .where('teams.year', current_season.year)
+      .where('teams.season_year', current_season.year)
     const team = userTeams.find((p) => p.tid === teamId)
     if (!team) {
       return res.status(400).send({ error: 'invalid teamId' })

@@ -88,7 +88,7 @@ const process_league_format_year = async ({
 
       const params = {
         pid: player_row.pid,
-        year,
+        season_year: year,
         league_format_id,
         week,
         pts_added,
@@ -153,7 +153,7 @@ const process_league_format_year = async ({
 
     await db('league_format_player_projection_values')
       .del()
-      .where({ league_format_id, year })
+      .where({ league_format_id, season_year: year })
     await batch_insert({
       items: value_inserts,
       save: (items) =>
@@ -211,7 +211,7 @@ const process_projections_for_league_format = async ({
     )
       .select('pid', 'week', 'projected_points_total as total')
       .where({
-        year: process_year,
+        season_year: process_year,
         scoring_format_id: league_format.scoring_format_id
       })
       .whereIn('pid', projection_pids)

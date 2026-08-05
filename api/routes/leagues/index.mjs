@@ -265,7 +265,7 @@ router.put('/:leagueId', async (req, res) => {
     } else if (season_fields.includes(field)) {
       await db('seasons')
         .update({ [field]: value })
-        .where({ lid, year: current_season.year })
+        .where({ lid, season_year: current_season.year })
     } else if (league_scoring_format_fields.includes(field)) {
       // Find-or-create inline. The DB unique index on the full scoring config
       // tuple is the dedup oracle; identity (id) is opaque. The DO UPDATE
@@ -277,7 +277,7 @@ router.put('/:leagueId', async (req, res) => {
       )
       await db('seasons')
         .update({ scoring_format_id })
-        .where({ lid, year: current_season.year })
+        .where({ lid, season_year: current_season.year })
 
       try {
         await process_projections_for_scoring_format({
@@ -304,7 +304,7 @@ router.put('/:leagueId', async (req, res) => {
       )
       await db('seasons')
         .update({ league_format_id })
-        .where({ lid, year: current_season.year })
+        .where({ lid, season_year: current_season.year })
 
       try {
         await process_projections_for_league_format({
@@ -395,7 +395,7 @@ router.get('/:leagueId/?', async (req, res) => {
     if (!league) return
 
     const seasons = await db('seasons').where('lid', leagueId)
-    league.years = seasons.map((s) => s.year)
+    league.years = seasons.map((s) => s.season_year)
     res.send(league)
   } catch (err) {
     handle_error(err, logger, res)

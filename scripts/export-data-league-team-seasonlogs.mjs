@@ -19,7 +19,7 @@ const data_path = path.join(__dirname, '../data')
 
 const export_league_league_team_seasonlogs = async () => {
   const data = await db('league_team_seasonlogs')
-    .orderBy('year', 'asc')
+    .orderBy('season_year', 'asc')
     .orderBy('lid', 'asc')
     .orderBy('tid', 'asc')
 

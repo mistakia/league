@@ -4,7 +4,7 @@ import { create_default_league } from '#libs-shared'
 
 async function get_league_divisions({ lid, year }) {
   const divisions = await db('league_divisions')
-    .where({ lid, year })
+    .where({ lid, season_year: year })
     .select('division_id', 'division_name')
 
   return divisions.reduce((acc, div) => {
@@ -31,7 +31,9 @@ export default async function ({ lid, year = current_season.year } = {}) {
   const league = await db('leagues')
     .leftJoin('seasons', function () {
       this.on('leagues.uid', '=', 'seasons.lid')
-      this.on(db.raw(`seasons.year = ${year} or seasons.year is null`))
+      this.on(
+        db.raw(`seasons.season_year = ${year} or seasons.season_year is null`)
+      )
     })
     .leftJoin('league_formats', 'seasons.league_format_id', 'league_formats.id')
     .leftJoin(

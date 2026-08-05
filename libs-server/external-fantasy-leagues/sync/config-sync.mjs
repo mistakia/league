@@ -78,7 +78,7 @@ export class ConfigSync {
       await db('seasons')
         .where({
           lid: sync_context.internal_league_id,
-          year: sync_context.year
+          season_year: sync_context.year
         })
         .update({
           league_format_id,

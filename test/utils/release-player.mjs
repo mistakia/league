@@ -6,7 +6,7 @@ export default async function ({ leagueId, player, teamId, userId }) {
     .where({
       tid: teamId,
       week: current_season.week,
-      year: current_season.year
+      season_year: current_season.year
     })
     .limit(1)
 
@@ -27,7 +27,7 @@ export default async function ({ leagueId, player, teamId, userId }) {
     type: transaction_types.ROSTER_RELEASE,
     player_salary: 0,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
   })
 }

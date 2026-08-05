@@ -70,7 +70,7 @@ const seed_full_league = async () => {
     seasonlogs.push({
       lid: 1,
       tid: i,
-      year,
+      season_year: year,
       division: (i % 4) + 1,
       regular_season_wins: 12 - i,
       regular_season_losses: i - 1,
@@ -93,7 +93,7 @@ const seed_full_league = async () => {
   const rfa_player = players[0]
   const ps_player = players[1]
   const roster0 = await knex('rosters')
-    .where({ tid: 1, lid: 1, week: 0, year })
+    .where({ tid: 1, lid: 1, week: 0, season_year: year })
     .first()
 
   // The roster player's salary basis (`value`) comes from its transaction row;
@@ -106,7 +106,7 @@ const seed_full_league = async () => {
       type: transaction_types.RESTRICTED_FREE_AGENCY_TAG,
       player_salary: 50,
       week: 0,
-      year,
+      season_year: year,
       timestamp: Math.round(Date.now() / 1000) - 100,
       userid: 1
     },
@@ -117,7 +117,7 @@ const seed_full_league = async () => {
       type: transaction_types.PRACTICE_ADD,
       player_salary: 5,
       week: 0,
-      year,
+      season_year: year,
       timestamp: Math.round(Date.now() / 1000) - 200,
       userid: 1
     }
@@ -133,7 +133,7 @@ const seed_full_league = async () => {
       tid: 1,
       lid: 1,
       week: 0,
-      year
+      season_year: year
     },
     {
       roster_id: roster0.uid,
@@ -145,7 +145,7 @@ const seed_full_league = async () => {
       tid: 1,
       lid: 1,
       week: 0,
-      year
+      season_year: year
     }
   ])
   await insert_restricted_free_agency_bid({
@@ -163,7 +163,7 @@ const seed_full_league = async () => {
       away_team_id: 2,
       home_team_id: 1,
       lid: 1,
-      year,
+      season_year: year,
       week: 1,
       home_points: 100.5,
       away_points: 90.25
@@ -172,7 +172,7 @@ const seed_full_league = async () => {
       away_team_id: 4,
       home_team_id: 3,
       lid: 1,
-      year,
+      season_year: year,
       week: 1,
       home_points: 0,
       away_points: 0,
@@ -188,13 +188,13 @@ const seed_full_league = async () => {
     tid: 1,
     original_team_id: 1,
     lid: 1,
-    year
+    season_year: year
   })
 
   // Populate the enumerated calendar event fields.
   const t = current_season.regular_season_start
   await knex('seasons')
-    .where({ lid: 1, year })
+    .where({ lid: 1, season_year: year })
     .update({
       season_started_at: t.subtract(20, 'weeks').unix(),
       free_agency_period_start: t.subtract(6, 'weeks').unix(),
@@ -442,7 +442,7 @@ describe('context documents', function () {
     it('team: extension window open → post-extension salary basis and prices', async function () {
       const year = current_season.year
       await knex('seasons')
-        .where({ lid: 1, year })
+        .where({ lid: 1, season_year: year })
         .update({ ext_date: current_season.now.add(1, 'week').unix() })
 
       // A regular contract with one extension already used: the recorded $20
@@ -453,7 +453,7 @@ describe('context documents', function () {
         .offset(2)
         .first()
       const roster0 = await knex('rosters')
-        .where({ tid: 1, lid: 1, week: 0, year })
+        .where({ tid: 1, lid: 1, week: 0, season_year: year })
         .first()
       await knex('transactions').insert({
         pid: player.pid,
@@ -462,7 +462,7 @@ describe('context documents', function () {
         type: transaction_types.AUCTION_PROCESSED,
         player_salary: 20,
         week: 0,
-        year,
+        season_year: year,
         timestamp: Math.round(Date.now() / 1000) - 300,
         userid: 1
       })
@@ -476,7 +476,7 @@ describe('context documents', function () {
         tid: 1,
         lid: 1,
         week: 0,
-        year
+        season_year: year
       })
 
       const doc = await generate_team_context({

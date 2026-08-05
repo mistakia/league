@@ -255,12 +255,12 @@ const verify_matchup_scores = async ({ league_ids, year, week, seas_type }) => {
   for (const lid of league_ids) {
     const [scored_row, team_row] = await Promise.all([
       db('matchups')
-        .where({ lid, year, week })
+        .where({ lid, season_year: year, week })
         .whereNotNull('home_points')
         .whereNotNull('away_points')
         .count({ n: '*' })
         .first(),
-      db('teams').where({ lid, year }).count({ n: '*' }).first()
+      db('teams').where({ lid, season_year: year }).count({ n: '*' }).first()
     ])
 
     const scored = Number(scored_row?.n ?? 0)

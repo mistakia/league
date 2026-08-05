@@ -40,7 +40,14 @@ export async function load_team_roster({ tid, year, lid, league }) {
     roster_row = await getRoster({ tid, week: 0, year })
   } catch (err) {
     if (/No roster found/.test(err.message)) {
-      roster_row = { uid: null, tid, week: 0, year, lid, players: [] }
+      roster_row = {
+        uid: null,
+        tid,
+        week: 0,
+        season_year: year,
+        lid,
+        players: []
+      }
     } else {
       throw err
     }
@@ -88,7 +95,9 @@ export function build_roster_rows({ team, roster, players }) {
  * the two never sees two different roster states.
  */
 export default async function load_league_rosters({ db, lid, year, league }) {
-  const teams = await db('teams').where({ lid, year }).orderBy('uid')
+  const teams = await db('teams')
+    .where({ lid, season_year: year })
+    .orderBy('uid')
 
   const rosters = await Promise.all(
     teams.map(async (team) => ({

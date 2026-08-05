@@ -32,7 +32,7 @@ export default async function (leagueId) {
     )
     .join('teams', 'waivers.tid', 'teams.uid')
     .join('player', 'waivers.pid', 'player.pid')
-    .where('teams.year', current_season.year)
+    .where('teams.season_year', current_season.year)
     .where('waivers.lid', leagueId)
     .whereNull('processed')
     .whereNull('cancelled')

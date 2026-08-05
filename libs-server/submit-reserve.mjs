@@ -320,7 +320,7 @@ export default async function ({
       type: transaction_types.ROSTER_ACTIVATE,
       player_salary,
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
     await db('transactions').insert(transaction)
@@ -379,7 +379,7 @@ export default async function ({
       type: transaction_types.ROSTER_ACTIVATE,
       player_salary,
       week: current_season.week,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp
     }
     await db('transactions').insert(activate_transaction)
@@ -407,7 +407,7 @@ export default async function ({
     type,
     player_salary,
     week: current_season.week,
-    year: current_season.year,
+    season_year: current_season.year,
     timestamp
   }
   await db('transactions').insert(transaction)
@@ -421,7 +421,7 @@ export default async function ({
 
   const teams = await db('teams').where({
     uid: tid,
-    year: current_season.year
+    season_year: current_season.year
   })
   const team = teams[0]
   const player_name = `${player_row.first_name} ${player_row.last_name} (${player_row.primary_position})`

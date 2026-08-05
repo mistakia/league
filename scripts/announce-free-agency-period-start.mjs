@@ -67,7 +67,7 @@ const get_eligible_leagues_for_free_agency_period_notifications = async ({
     .select('seasons.*', 'leagues.name as name', 'leagues.uid as lid')
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')
     .where({
-      'seasons.year': current_season.year
+      'seasons.season_year': current_season.year
     })
     .whereNotNull('free_agency_live_auction_start')
 

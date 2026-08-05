@@ -81,7 +81,7 @@ const measure_format = async ({ scoring_format_id, projections_by_year }) => {
     if (!rows) continue
 
     const realized_rows = await db('scoring_format_player_seasonlogs')
-      .where({ year, scoring_format_id })
+      .where({ season_year: year, scoring_format_id })
       .select('pid', 'points')
     const realized_by_pid = Object.fromEntries(
       realized_rows.map((row) => [row.pid, Number(row.points)])

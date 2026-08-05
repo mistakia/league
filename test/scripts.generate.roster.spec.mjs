@@ -47,14 +47,14 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       const forward_rows = await knex('rosters_players').where({
         lid: 1,
-        year: current_season.year,
+        season_year: current_season.year,
         week: 1
       })
       expect(forward_rows.length).to.equal(0)
 
       const week_zero_rows = await knex('rosters_players').where({
         lid: 1,
-        year: current_season.year,
+        season_year: current_season.year,
         week: 0
       })
       expect(week_zero_rows.length).to.be.greaterThan(0)
@@ -138,7 +138,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       expect(roster3Players).to.eql(roster4Players)
       expect(roster1Players).to.eql(roster3Players)
       expect(roster4.week).to.equal(current_season.week + 1)
-      expect(roster4.year).to.equal(current_season.year)
+      expect(roster4.season_year).to.equal(current_season.year)
     })
 
     it('generate rosters for next year', async () => {
@@ -186,7 +186,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
           type
         })
       )
-      expect(roster1.year).to.equal(current_season.year - 1)
+      expect(roster1.season_year).to.equal(current_season.year - 1)
       expect(roster1Players).to.eql(roster2Players)
 
       try {
@@ -228,7 +228,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       expect(roster3Players).to.eql(roster4Players)
       expect(roster1Players).to.eql(roster3Players)
       expect(roster4.week).to.equal(0)
-      expect(roster4.year).to.equal(current_season.year)
+      expect(roster4.season_year).to.equal(current_season.year)
     })
 
     it('scrubs non-REGULAR tags during year-rollover', async () => {
@@ -240,13 +240,18 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       const team_id = 1
 
       const team_players = await knex('rosters_players')
-        .where({ lid: 1, year: seed_year, week: 0, tid: team_id })
+        .where({ lid: 1, season_year: seed_year, week: 0, tid: team_id })
         .limit(2)
       expect(team_players.length).to.equal(2)
       const [franchise_player, rookie_player] = team_players
 
       const final_week_roster = await knex('rosters')
-        .where({ lid: 1, year: seed_year, week: final_week, tid: team_id })
+        .where({
+          lid: 1,
+          season_year: seed_year,
+          week: final_week,
+          tid: team_id
+        })
         .first()
 
       // Plant a FRANCHISE and a ROOKIE tag on year=Y0 final-week as carry-forward fodder.
@@ -260,7 +265,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
           extensions: 0,
           tid: team_id,
           lid: 1,
-          year: seed_year,
+          season_year: seed_year,
           week: final_week
         },
         {
@@ -272,7 +277,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
           extensions: 0,
           tid: team_id,
           lid: 1,
-          year: seed_year,
+          season_year: seed_year,
           week: final_week
         }
       ])
@@ -282,7 +287,12 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       // Insert path: year=Y1 week=0 should mint these players with tag=REGULAR.
       const new_year_rows = await knex('rosters_players')
-        .where({ lid: 1, year: current_season.year, week: 0, tid: team_id })
+        .where({
+          lid: 1,
+          season_year: current_season.year,
+          week: 0,
+          tid: team_id
+        })
         .whereIn('pid', [franchise_player.pid, rookie_player.pid])
       expect(new_year_rows.length).to.equal(2)
       for (const row of new_year_rows) {
@@ -291,14 +301,24 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       // Update path: re-pollute the new-year rows and rerun; rollover should reset them.
       await knex('rosters_players')
-        .where({ lid: 1, year: current_season.year, week: 0, tid: team_id })
+        .where({
+          lid: 1,
+          season_year: current_season.year,
+          week: 0,
+          tid: team_id
+        })
         .whereIn('pid', [franchise_player.pid, rookie_player.pid])
         .update({ tag: player_tag_types.FRANCHISE })
 
       await run()
 
       const repolluted_rows = await knex('rosters_players')
-        .where({ lid: 1, year: current_season.year, week: 0, tid: team_id })
+        .where({
+          lid: 1,
+          season_year: current_season.year,
+          week: 0,
+          tid: team_id
+        })
         .whereIn('pid', [franchise_player.pid, rookie_player.pid])
       for (const row of repolluted_rows) {
         expect(row.tag).to.equal(player_tag_types.REGULAR)

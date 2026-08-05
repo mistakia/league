@@ -840,7 +840,7 @@ export const get_regular_season_weeks = createSelector(
   (state) => state.getIn(['app', 'year'], current_season.year),
   (matchups, year) =>
     matchups
-      .filter((m) => m.year === year)
+      .filter((m) => m.season_year === year)
       .map((m) => m.week)
       .sort((a, b) => a - b)
 )
@@ -850,7 +850,7 @@ export const get_post_season_weeks = createSelector(
   (state) => state.getIn(['app', 'year'], current_season.year),
   (playoffs, year) =>
     playoffs
-      .filter((m) => m.year === year)
+      .filter((m) => m.season_year === year)
       .map((m) => m.week)
       .sort((a, b) => a - b)
 )
@@ -876,7 +876,7 @@ export function get_filtered_matchups(state) {
   const year = state.getIn(['app', 'year'], current_season.year)
   const filtered = items.filter((m) => {
     // Always apply year filter first
-    if (m.year !== year) return false
+    if (m.season_year !== year) return false
 
     // Apply team filter if teams are selected
     if (teams.size > 0) {
@@ -905,7 +905,7 @@ export function get_selected_matchup(state) {
   if (is_league_post_season_week({ year, week })) {
     const items = matchups.get('playoffs')
     return (
-      items.find((m) => m.uid === matchupId && m.year === year) ||
+      items.find((m) => m.uid === matchupId && m.season_year === year) ||
       create_matchup()
     )
   } else {
@@ -916,7 +916,7 @@ export function get_selected_matchup(state) {
 export function get_selected_matchup_teams(state) {
   const matchup = get_selected_matchup(state)
   const teams = matchup.tids.map((tid) =>
-    get_team_by_id_for_year(state, { tid, year: matchup.year })
+    get_team_by_id_for_year(state, { tid, year: matchup.season_year })
   )
   if (matchup.week === current_season.finalWeek) {
     const prevWeek = current_season.finalWeek - 1
@@ -935,7 +935,7 @@ export function get_matchups_for_selected_week(state) {
   const matchups = state.getIn(['matchups', 'matchups_by_id']).toList()
   const week = state.getIn(['scoreboard', 'week'])
   const year = state.getIn(['app', 'year'], current_season.year)
-  return matchups.filter((m) => m.week === week && m.year === year)
+  return matchups.filter((m) => m.week === week && m.season_year === year)
 }
 
 export function get_matchup_by_team_id(state, { tid, year, week }) {
@@ -943,7 +943,7 @@ export function get_matchup_by_team_id(state, { tid, year, week }) {
 
   // first check if week is in playoffs
   const playoff_matchup = playoffs.find(
-    (m) => m.year === year && m.week === week
+    (m) => m.season_year === year && m.week === week
   )
   if (playoff_matchup) {
     if (!tid) {
@@ -952,7 +952,7 @@ export function get_matchup_by_team_id(state, { tid, year, week }) {
 
     return (
       playoffs.find(
-        (m) => m.year === year && m.week === week && m.tids.includes(tid)
+        (m) => m.season_year === year && m.week === week && m.tids.includes(tid)
       ) || playoff_matchup
     )
   }
@@ -961,7 +961,7 @@ export function get_matchup_by_team_id(state, { tid, year, week }) {
   return (
     matchups.find(
       (m) =>
-        m.year === year &&
+        m.season_year === year &&
         m.week === week &&
         (m.home_team_id === tid || m.away_team_id === tid)
     ) || create_matchup()
@@ -2285,8 +2285,9 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
   // For past matchups (before current week), use stored values
   // For current/future weeks, calculate live projections dynamically
   const is_past_matchup =
-    matchup.year < current_season.year ||
-    (matchup.year === current_season.year && matchup.week < current_season.week)
+    matchup.season_year < current_season.year ||
+    (matchup.season_year === current_season.year &&
+      matchup.week < current_season.week)
 
   const team_index = matchup.tids.indexOf(tid)
   if (

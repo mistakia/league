@@ -22,14 +22,14 @@ export default async function validate_franchise_tag({
       pid,
       type: transaction_types.FRANCHISE_TAG
     })
-    .whereIn('year', [year - 1, year - 2])
-    .orderBy('year', 'desc')
+    .whereIn('season_year', [year - 1, year - 2])
+    .orderBy('season_year', 'desc')
 
   // Invalid if there are 2 franchise tags in the past two consecutive years
   if (
     previous_years_tags.length === 2 &&
-    previous_years_tags[0].year === year - 1 &&
-    previous_years_tags[1].year === year - 2
+    previous_years_tags[0].season_year === year - 1 &&
+    previous_years_tags[1].season_year === year - 2
   ) {
     return false
   }

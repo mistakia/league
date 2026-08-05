@@ -27,7 +27,7 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: League ID
  *           example: 2
- *         year:
+ *         season_year:
  *           type: integer
  *           description: Season year
  *           example: 2024
@@ -60,7 +60,7 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: League ID
  *           example: 2
- *         year:
+ *         season_year:
  *           type: integer
  *           description: Season year
  *           example: 2024
@@ -179,14 +179,14 @@ const router = express.Router({ mergeParams: true })
  *                   matchups:
  *                     - uid: 1234
  *                       lid: 2
- *                       year: 2024
+ *                       season_year: 2024
  *                       week: 1
  *                       home_team_id: 13
  *                       away_team_id: 14
  *                       week_type: "REG"
  *                     - uid: 1235
  *                       lid: 2
- *                       year: 2024
+ *                       season_year: 2024
  *                       week: 1
  *                       home_team_id: 15
  *                       away_team_id: 16
@@ -301,14 +301,14 @@ router.post('/?', async (req, res) => {
  *                   matchups:
  *                     - uid: 1234
  *                       lid: 2
- *                       year: 2024
+ *                       season_year: 2024
  *                       week: 1
  *                       home_team_id: 13
  *                       away_team_id: 14
  *                       week_type: "REG"
  *                     - uid: 1235
  *                       lid: 2
- *                       year: 2024
+ *                       season_year: 2024
  *                       week: 2
  *                       home_team_id: 15
  *                       away_team_id: 16
@@ -316,7 +316,7 @@ router.post('/?', async (req, res) => {
  *                   playoffs:
  *                     - uid: 5678
  *                       lid: 2
- *                       year: 2024
+ *                       season_year: 2024
  *                       week: 15
  *                       round: 1
  *                       seed1: 13
@@ -324,7 +324,7 @@ router.post('/?', async (req, res) => {
  *                       winner: null
  *                     - uid: 5679
  *                       lid: 2
- *                       year: 2024
+ *                       season_year: 2024
  *                       week: 15
  *                       round: 1
  *                       seed1: 14
@@ -340,10 +340,13 @@ router.get('/?', async (req, res) => {
     const { year = current_season.year } = req.query
 
     const matchups = await db('matchups')
-      .where({ lid: leagueId, year })
+      .where({ lid: leagueId, season_year: year })
       .orderBy('week', 'asc')
 
-    const playoffs = await db('playoffs').where({ lid: leagueId, year })
+    const playoffs = await db('playoffs').where({
+      lid: leagueId,
+      season_year: year
+    })
 
     res.send({ matchups, playoffs })
   } catch (err) {

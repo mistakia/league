@@ -31,7 +31,7 @@ const check_orphan_slice = async ({
   slice_failures
 }) => {
   const max_week_row = await db('rosters_players')
-    .where({ lid: league.uid, year: current_season.year })
+    .where({ lid: league.uid, season_year: current_season.year })
     .max({ max_week: 'week' })
     .first()
   const max_week = max_week_row?.max_week
@@ -111,7 +111,7 @@ const run = async () => {
     // get latest rosters for league
     const rosters = await db('rosters').where({
       lid: league.uid,
-      year: previousYear,
+      season_year: previousYear,
       week: previousWeek
     })
 
@@ -137,7 +137,7 @@ const run = async () => {
         tid,
         lid,
         week: nextWeek,
-        year: current_season.year
+        season_year: current_season.year
       }
       const rosterRows = await db('rosters').where(rosterData)
       let rid = rosterRows.length ? rosterRows[0].uid : null
@@ -176,7 +176,7 @@ const run = async () => {
         extensions: p.extensions, // Use previous week's value for new roster entries
         tid,
         lid,
-        year: current_season.year,
+        season_year: current_season.year,
         week: nextWeek
       }))
 
@@ -222,7 +222,7 @@ const run = async () => {
       const written_row = await db('rosters_players')
         .where({
           lid: league.uid,
-          year: current_season.year,
+          season_year: current_season.year,
           week: nextWeek
         })
         .countDistinct({ written: 'tid' })
@@ -247,16 +247,18 @@ const run = async () => {
     const key_of = ({ tid, pid }) => `${tid}:${pid}`
     const source_keys = new Set(
       (
-        await db('rosters_players')
-          .select('tid', 'pid')
-          .where({ lid: league.uid, year: previousYear, week: previousWeek })
+        await db('rosters_players').select('tid', 'pid').where({
+          lid: league.uid,
+          season_year: previousYear,
+          week: previousWeek
+        })
       ).map(key_of)
     )
     const generated_keys = new Set(
       (
         await db('rosters_players').select('tid', 'pid').where({
           lid: league.uid,
-          year: current_season.year,
+          season_year: current_season.year,
           week: nextWeek
         })
       ).map(key_of)

@@ -38,7 +38,7 @@ describe('API /leagues/teams - delete', function () {
     it('remove team', async () => {
       const leagueId = 1
       const team = {
-        year: current_season.year,
+        season_year: current_season.year,
         name: 'Team1',
         abbreviation: 'TM1',
         lid: leagueId
@@ -50,7 +50,7 @@ describe('API /leagues/teams - delete', function () {
         tid: team.uid,
         lid: leagueId,
         week: current_season.week,
-        year: current_season.year
+        season_year: current_season.year
       }
 
       await knex('rosters').insert(roster)
@@ -73,7 +73,7 @@ describe('API /leagues/teams - delete', function () {
 
       const teams = await knex('teams').where({
         lid: leagueId,
-        year: current_season.year
+        season_year: current_season.year
       })
       const rosters = await knex('rosters').where({ lid: leagueId })
       expect(teams.length).to.equal(0)
@@ -146,7 +146,7 @@ describe('API /leagues/teams - delete', function () {
       const rows = await knex('teams')
         .insert({
           lid: 1,
-          year: current_season.year,
+          season_year: current_season.year,
           name: 'Team1',
           abbreviation: 'TM1',
           salary_cap: 200,
@@ -159,7 +159,7 @@ describe('API /leagues/teams - delete', function () {
       await knex('users_teams').insert({
         userid: 1,
         tid,
-        year: current_season.year
+        season_year: current_season.year
       })
 
       const request = chai_request

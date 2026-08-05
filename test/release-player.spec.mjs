@@ -244,7 +244,7 @@ describe('CLI release-player script', function () {
         .where({
           'rosters.tid': 1,
           'rosters.lid': 1,
-          'rosters.year': current_season.year,
+          'rosters.season_year': current_season.year,
           'rosters.week': current_season.week
         })
         .del()

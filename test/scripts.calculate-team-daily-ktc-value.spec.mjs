@@ -34,7 +34,7 @@ const insert_transaction = async ({ uid, tid, pid, type, date }) =>
     type,
     player_salary: 0,
     week: 1,
-    year,
+    season_year: year,
     timestamp: local_noon(date)
   })
 
@@ -73,7 +73,7 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
     for (const uid of [1, 2, 3]) {
       await knex('teams').insert({
         uid,
-        year,
+        season_year: year,
         lid,
         name: `team ${uid}`,
         abbreviation: `T${uid}`,
@@ -129,7 +129,7 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
         accept_tid: 2,
         lid,
         userid: 1,
-        year,
+        season_year: year,
         offered: local_noon(day_two),
         accepted: local_noon(day_two)
       })

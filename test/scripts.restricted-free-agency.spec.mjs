@@ -63,7 +63,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // 24-hour nomination windows, bids processed 3 hours before the next one
       await knex('seasons')
         .update({
-          year: current_season.year,
+          season_year: current_season.year,
           restricted_free_agency_period_start: tran_date,
           restricted_free_agency_period_end: regular_season_start
             .subtract('1', 'month')
@@ -382,7 +382,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // 24-hour nomination windows, bids processed 3 hours before the next one
       await knex('seasons')
         .update({
-          year: current_season.year,
+          season_year: current_season.year,
           restricted_free_agency_period_start: tran_date,
           restricted_free_agency_period_end: regular_season_start
             .subtract('1', 'month')
@@ -686,7 +686,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // Verify waiver order was reset for the winning team (team_id2)
       const final_waiver_orders = await knex('teams')
         .select('uid', 'waiver_order')
-        .where({ lid: leagueId, year: current_season.year })
+        .where({ lid: leagueId, season_year: current_season.year })
         .orderBy('waiver_order', 'asc')
 
       // The winning team (team_id2) should have the highest (worst) waiver order number

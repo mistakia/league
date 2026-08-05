@@ -20,7 +20,7 @@ export default async function ({
     const players = await db('rosters_players').where({
       lid: leagueId,
       week: current_season.week,
-      year: current_season.year
+      season_year: current_season.year
     })
     const existing_pids = players.map((p) => p.pid)
     const player = await selectPlayer({
@@ -46,7 +46,7 @@ export default async function ({
     const players = await db('rosters_players').where({
       lid: leagueId,
       week: current_season.week,
-      year: current_season.year
+      season_year: current_season.year
     })
     const existing_pids = players.map((p) => p.pid)
     const player = await selectPlayer({
@@ -73,7 +73,7 @@ export default async function ({
     const players = await db('rosters_players').where({
       lid: leagueId,
       week: current_season.week,
-      year: current_season.year
+      season_year: current_season.year
     })
     const existing_pids = players.map((p) => p.pid)
     const player = await selectPlayer({

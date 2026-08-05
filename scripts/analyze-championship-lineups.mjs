@@ -132,7 +132,7 @@ const create_player_name_cache = () => {
  */
 const load_scoring_format = async ({ league_id, year }) => {
   const season = await db('seasons')
-    .where({ lid: league_id, year })
+    .where({ lid: league_id, season_year: year })
     .first('scoring_format_id')
   return season?.scoring_format_id
 }

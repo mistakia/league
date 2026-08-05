@@ -33,7 +33,7 @@ const get_roster_player = async ({ tid }) => {
     .where({
       lid: 1,
       tid,
-      year: current_season.year,
+      season_year: current_season.year,
       week: current_season.week
     })
     .whereNotIn('player_position', ['K', 'DST'])
@@ -161,7 +161,7 @@ describe('API /trades - veto', function () {
     await draft_picks(knex)
 
     const pick_rows = await knex('draft')
-      .where({ lid: 1, tid: 1, year: current_season.year + 1 })
+      .where({ lid: 1, tid: 1, season_year: current_season.year + 1 })
       .whereNull('pid')
       .limit(1)
     const pick = pick_rows[0]

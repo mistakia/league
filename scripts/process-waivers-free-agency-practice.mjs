@@ -215,7 +215,7 @@ const handle_regular_practice_claim = async (waiver, lid, timestamp) => {
     const transactions = await db('transactions').where({
       lid,
       type: transaction_types.DRAFT,
-      year: current_season.year,
+      season_year: current_season.year,
       pid: waiver.pid
     })
 

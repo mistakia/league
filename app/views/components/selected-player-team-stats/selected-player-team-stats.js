@@ -10,10 +10,11 @@ export default class SelectedPlayerTeamStats extends React.Component {
     const { team, stats } = this.props
 
     const teamStats = stats.teamStats.filter((t) => fixTeam(t.tname) === team)
-    const sorted = teamStats.sort((a, b) => b.year - a.year)
+    const sorted = teamStats.sort((a, b) => b.season_year - a.season_year)
     const items = []
     for (const [index, seasonlog] of sorted.entries()) {
-      const percentiles = stats.teamStatsPercentiles[seasonlog.year] || {}
+      const percentiles =
+        stats.teamStatsPercentiles[seasonlog.season_year] || {}
 
       const passing_stat_keys = [
         'pa',
@@ -51,7 +52,7 @@ export default class SelectedPlayerTeamStats extends React.Component {
 
       items.push(
         <div key={index} className='player__selected-row'>
-          <div className='table__cell text'>{seasonlog.year}</div>
+          <div className='table__cell text'>{seasonlog.season_year}</div>
           <PercentileMetric
             value={seasonlog.drv}
             percentile={percentiles.drv}

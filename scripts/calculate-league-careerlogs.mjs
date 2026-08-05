@@ -33,7 +33,7 @@ const calculate_league_careerlogs = async ({ lid }) => {
     // Get all users associated with this team
     const users_teams = await db('users_teams').where({
       tid: league_team_seasonlog.tid,
-      year: league_team_seasonlog.year
+      season_year: league_team_seasonlog.season_year
     })
     for (const user_team of users_teams) {
       if (!user_seasonlogs[user_team.userid]) {
@@ -117,7 +117,7 @@ const calculate_league_careerlogs = async ({ lid }) => {
         league_team_seasonlog.weekly_high_scores || 0
 
       if (
-        league_team_seasonlog.year === current_season.year &&
+        league_team_seasonlog.season_year === current_season.year &&
         current_season.week < current_season.finalWeek
       ) {
         continue
@@ -141,11 +141,11 @@ const calculate_league_careerlogs = async ({ lid }) => {
       )
       careerlog.first_season_year = Math.min(
         careerlog.first_season_year,
-        league_team_seasonlog.year
+        league_team_seasonlog.season_year
       )
       careerlog.last_season_year = Math.max(
         careerlog.last_season_year,
-        league_team_seasonlog.year
+        league_team_seasonlog.season_year
       )
 
       careerlog.post_seasons +=
@@ -185,7 +185,7 @@ const calculate_league_careerlogs = async ({ lid }) => {
         .where({
           tid: league_team_seasonlog.tid,
           lid: league_team_seasonlog.lid,
-          year: league_team_seasonlog.year
+          season_year: league_team_seasonlog.season_year
         })
         .orderBy('uid')
 

@@ -28,8 +28,9 @@ export default function ScoreboardTeam({
   )
   const is_final = useMemo(
     () =>
-      matchup.week < current_season.week || matchup.year < current_season.year,
-    [matchup.week, matchup.year]
+      matchup.week < current_season.week ||
+      matchup.season_year < current_season.year,
+    [matchup.week, matchup.season_year]
   )
 
   const generateRows = useCallback(
@@ -98,8 +99,8 @@ export default function ScoreboardTeam({
             backgroundColor: `#${team.accent_color || 'd0d0d0'}`
           }}
         />
-        <TeamImage tid={team.uid} year={matchup.year} />
-        <TeamName tid={team.uid} year={matchup.year} />
+        <TeamImage tid={team.uid} year={matchup.season_year} />
+        <TeamName tid={team.uid} year={matchup.season_year} />
       </div>
       <div className='scoreboard__team-meta'>
         <div className='scoreboard__team-score'>

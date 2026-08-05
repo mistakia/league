@@ -12,7 +12,7 @@ import { Team } from '@core/teams'
 import './trade-select-items.styl'
 
 function get_pick_label({ pick, teams }) {
-  let label_string = `${pick.year} Draft Pick ${pick.round}`
+  let label_string = `${pick.season_year} Draft Pick ${pick.round}`
 
   if (pick.pick) {
     label_string += ` #${pick.pick}`

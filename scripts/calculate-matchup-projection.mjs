@@ -20,8 +20,11 @@ const calculate_matchup_projection = async ({
   dry = false
 } = {}) => {
   log(`Calculating matchup projections for lid ${lid} in ${year}`)
-  const lineups = await db('league_team_lineups').where({ year, lid })
-  const matchups = await db('matchups').where({ year, lid })
+  const lineups = await db('league_team_lineups').where({
+    season_year: year,
+    lid
+  })
+  const matchups = await db('matchups').where({ season_year: year, lid })
 
   log(`Found ${lineups.length} lineups and ${matchups.length} matchups`)
 

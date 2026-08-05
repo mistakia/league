@@ -22,7 +22,7 @@ const generate_seasons = async () => {
     // get the latest season for this league
     const season = await db('seasons')
       .where({ lid })
-      .orderBy('year', 'desc')
+      .orderBy('season_year', 'desc')
       .first()
 
     if (!season) {
@@ -31,7 +31,7 @@ const generate_seasons = async () => {
     }
 
     // if the latest season is not the current season, create a new season
-    if (season.year !== current_season.year) {
+    if (season.season_year !== current_season.year) {
       const new_season = {
         ...season,
 
@@ -51,7 +51,7 @@ const generate_seasons = async () => {
       await db('seasons').insert({
         ...new_season,
         lid,
-        year: current_season.year
+        season_year: current_season.year
       })
       log(`Created new season for league ${lid} (${current_season.year})`)
     }
@@ -74,7 +74,7 @@ const generate_seasons = async () => {
   }
 
   const present_lids = await db('seasons')
-    .where({ year: current_season.year })
+    .where({ season_year: current_season.year })
     .whereIn('lid', expected_lids)
     .pluck('lid')
 

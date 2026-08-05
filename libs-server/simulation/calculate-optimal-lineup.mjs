@@ -43,7 +43,7 @@ export async function load_full_team_roster({
       lid: league_id,
       tid: team_id,
       week,
-      year
+      season_year: year
     })
     .whereIn('slot', active_roster_slots)
     .select('pid')
@@ -58,7 +58,7 @@ export async function load_full_team_roster({
         lid: league_id,
         tid: team_id,
         week: fallback_week,
-        year
+        season_year: year
       })
       .whereIn('slot', active_roster_slots)
       .select('pid')

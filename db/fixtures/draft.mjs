@@ -31,7 +31,7 @@ export default async function (knex) {
     const roster = await getRoster({
       tid,
       week: current_season.week,
-      year: current_season.year
+      season_year: current_season.year
     })
     teams.push({ roster, r: new Roster({ roster, league }) })
   }
@@ -74,7 +74,7 @@ export default async function (knex) {
       roster_id: roster.uid,
       tid: roster.tid,
       lid: league.uid,
-      year: current_season.year,
+      season_year: current_season.year,
       week: current_season.week
     })
 
@@ -90,7 +90,7 @@ export default async function (knex) {
         type,
         player_salary: value,
         week: current_season.week,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp
       })
     }

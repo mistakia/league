@@ -42,7 +42,7 @@ describe('draft pick expiry', function () {
       const completed_at = regular_season_start.subtract('1', 'week').unix()
 
       const before_count = await knex('draft')
-        .where({ lid, year })
+        .where({ lid, season_year: year })
         .modify(where_outstanding_draft_pick)
         .count('* as count')
         .first()
@@ -59,14 +59,16 @@ describe('draft pick expiry', function () {
       expect(expired_count).to.equal(Number(before_count.count))
 
       const after_count = await knex('draft')
-        .where({ lid, year })
+        .where({ lid, season_year: year })
         .modify(where_outstanding_draft_pick)
         .count('* as count')
         .first()
 
       expect(Number(after_count.count)).to.equal(0)
 
-      const season = await knex('seasons').where({ lid, year }).first()
+      const season = await knex('seasons')
+        .where({ lid, season_year: year })
+        .first()
       expect(Number(season.rookie_draft_completed_at)).to.equal(completed_at)
     })
 

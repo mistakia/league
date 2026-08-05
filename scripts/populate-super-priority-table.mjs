@@ -24,7 +24,7 @@ const run = async ({
   const query = db('transactions')
     .where({
       type: transaction_types.POACHED,
-      year
+      season_year: year
     })
     .orderBy('timestamp', 'desc')
 

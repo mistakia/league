@@ -609,7 +609,7 @@ export default class Auction {
     // Check if player is already rostered
     const roster_rows = await db('rosters_players')
       .where('lid', this._lid)
-      .where('year', current_season.year)
+      .where('season_year', current_season.year)
       .where('pid', pid)
     if (roster_rows.length) {
       this.reply(userid, 'invalid nomination')
@@ -732,12 +732,15 @@ export default class Auction {
       type: transaction_types.AUCTION_BID,
       player_salary: value,
       week: 0,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
 
     const insert_query = await db('transactions').insert(bid).returning('uid')
-    const bid_with_uid = { ...bid, uid: insert_query[0].uid }
+    const bid_with_uid = {
+      ...bid,
+      uid: insert_query[0].uid
+    }
 
     this.broadcast({
       type: 'AUCTION_BID',
@@ -758,12 +761,15 @@ export default class Auction {
       player_salary: value,
       lid: this._lid,
       week: 0,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
 
     const insert_query = await db('transactions').insert(bid).returning('uid')
-    const bid_with_uid = { ...bid, uid: insert_query[0].uid }
+    const bid_with_uid = {
+      ...bid,
+      uid: insert_query[0].uid
+    }
 
     this.broadcast({
       type: 'AUCTION_BID',
@@ -783,7 +789,7 @@ export default class Auction {
         extensions: 0,
         tid,
         lid: this._lid,
-        year: current_season.year,
+        season_year: current_season.year,
         week: 0
       })
     } catch (err) {
@@ -803,7 +809,7 @@ export default class Auction {
 
     try {
       await db('teams')
-        .where({ uid: tid, year: current_season.year })
+        .where({ uid: tid, season_year: current_season.year })
         .update('salary_cap', new_cap)
     } catch (err) {
       this.logger(err)
@@ -821,7 +827,7 @@ export default class Auction {
       type: transaction_types.AUCTION_PROCESSED,
       player_salary: bid.player_salary,
       week: 0,
-      year: bid.year,
+      season_year: bid.season_year,
       timestamp: Math.round(Date.now() / 1000)
     }
 
@@ -1078,7 +1084,7 @@ export default class Auction {
   async _load_teams() {
     const teams = await db('teams').where({
       lid: this._lid,
-      year: current_season.year
+      season_year: current_season.year
     })
     this._teams = teams.sort((a, b) => a.draft_order - b.draft_order)
     this._tids = this._teams.map((t) => t.uid)
@@ -1087,7 +1093,7 @@ export default class Auction {
   async _load_transactions() {
     this._transactions = await db('transactions')
       .whereIn('tid', this._tids)
-      .where('year', current_season.year)
+      .where('season_year', current_season.year)
       .whereIn('type', [
         transaction_types.AUCTION_BID,
         transaction_types.AUCTION_PROCESSED

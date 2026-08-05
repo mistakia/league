@@ -54,7 +54,7 @@ export default async function ({ lid, commishid, ...params } = {}) {
 
   await db('seasons').insert({
     lid: leagueId,
-    year: current_season.year,
+    season_year: current_season.year,
 
     league_format_id,
     scoring_format_id,

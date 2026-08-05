@@ -156,7 +156,7 @@ const get_roster_players = async ({ lid, tid }) => {
     .where({
       'rosters_players.tid': tid,
       'rosters_players.lid': lid,
-      'rosters_players.year': current_season.year,
+      'rosters_players.season_year': current_season.year,
       'rosters_players.week': current_season.week
     })
 }
@@ -223,7 +223,7 @@ const validate_league = async (lid) => {
 
 const validate_team = async ({ tid, lid }) => {
   const teams = await db('teams')
-    .where({ uid: tid, lid, year: current_season.year })
+    .where({ uid: tid, lid, season_year: current_season.year })
     .limit(1)
   if (!teams.length) {
     throw new Error(`Team not found with ID: ${tid} in league ${lid}`)
@@ -237,7 +237,7 @@ const validate_player_on_roster = async ({ pid, tid, lid }) => {
       'rosters_players.pid': pid,
       'rosters_players.tid': tid,
       'rosters_players.lid': lid,
-      'rosters_players.year': current_season.year,
+      'rosters_players.season_year': current_season.year,
       'rosters_players.week': current_season.week
     })
     .limit(1)

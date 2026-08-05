@@ -57,13 +57,13 @@ describe('build_roster_players_query', () => {
       sql.indexOf(' where ')
     )
     expect(on_clause).to.include(
-      '(transactions.year, transactions.week) <= (2025, 4)'
+      '(transactions.season_year, transactions.week) <= (2025, 4)'
     )
   })
 
   it('keeps the as-of bound out of the WHERE clause', () => {
     const where_clause = sql.slice(sql.indexOf(' where '))
-    expect(where_clause).to.not.include('transactions.year')
+    expect(where_clause).to.not.include('transactions.season_year')
   })
 
   it('orders so the newest transaction per player wins the uniqBy', () => {

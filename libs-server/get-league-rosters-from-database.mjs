@@ -10,7 +10,7 @@ export default async function ({
 }) {
   const rosters = await db('rosters')
     .select('*')
-    .where({ lid, year })
+    .where({ lid, season_year: year })
     .orderBy('week', 'desc')
 
   const is_current_year = year === current_season.year
@@ -26,11 +26,11 @@ export default async function ({
   }
 
   const lineups = await db('league_team_lineups')
-    .where({ lid, year: current_season.year })
+    .where({ lid, season_year: current_season.year })
     .where('week', '>=', min_week)
   const lineupStarters = await db('league_team_lineup_starters')
     .where({
-      year,
+      season_year: year,
       lid
     })
     .where('week', '>=', min_week)
@@ -50,7 +50,7 @@ export default async function ({
       'transactions.type',
       'transactions.player_salary',
       'transactions.timestamp',
-      'transactions.year'
+      'transactions.season_year'
     )
     .join('rosters', 'rosters_players.roster_id', '=', 'rosters.uid')
     .leftJoin('transactions', function () {
@@ -95,14 +95,14 @@ export default async function ({
       .select('teams.*')
       .join('users_teams', function () {
         this.on('teams.uid', '=', 'users_teams.tid').andOn(
-          'teams.year',
+          'teams.season_year',
           '=',
-          'users_teams.year'
+          'users_teams.season_year'
         )
       })
       .where('users_teams.userid', userId)
       .where('teams.lid', lid)
-      .where('teams.year', current_season.year)
+      .where('teams.season_year', current_season.year)
 
     if (query1.length) {
       const tid = query1[0].uid

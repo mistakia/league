@@ -74,7 +74,7 @@ describe('API /teams - restricted free agency write path', function () {
       )
 
       const live_bids = await knex('restricted_free_agency_bids')
-        .where({ pid: player.pid, tid: 1, year: current_season.year })
+        .where({ pid: player.pid, tid: 1, season_year: current_season.year })
         .whereNull('cancelled')
         .whereNull('processed')
 
@@ -132,7 +132,7 @@ describe('API /teams - restricted free agency write path', function () {
       res.should.have.status(200)
 
       const live = await knex('restricted_free_agency_bids')
-        .where({ pid: player.pid, tid: 1, year: current_season.year })
+        .where({ pid: player.pid, tid: 1, season_year: current_season.year })
         .whereNull('cancelled')
         .whereNull('processed')
         .first()

@@ -299,7 +299,7 @@ export async function load_actual_playoff_points({
   year
 }) {
   const playoff_entries = await db('playoffs')
-    .where({ lid: league_id, year })
+    .where({ lid: league_id, season_year: year })
     .whereIn('week', weeks)
     .whereIn('tid', team_ids)
     .whereNotNull('points')

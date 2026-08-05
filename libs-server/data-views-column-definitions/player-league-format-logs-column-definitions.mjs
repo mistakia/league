@@ -55,7 +55,7 @@ const league_format_seasonlogs_year_default = (params) => {
 const league_format_player_seasonlogs_source = {
   table: 'league_format_player_seasonlogs',
   grain: 'player_year',
-  key_columns: { pid: 'pid', year: 'year' },
+  key_columns: { pid: 'pid', year: 'season_year' },
   year_default: league_format_seasonlogs_year_default,
   extra_predicates: (params) => [
     { column: 'league_format_id', value: get_league_format_id(params) }
@@ -71,7 +71,7 @@ const league_format_seasonlogs_conditions = ({ params, row_axes = [] }) => {
   if (!row_axes.includes('year') && params.year) {
     const year = Array.isArray(params.year) ? params.year[0] : params.year
     if (year !== undefined && year !== null) {
-      conditions.push({ column: 'year', value: year })
+      conditions.push({ column: 'season_year', value: year })
     }
   }
 

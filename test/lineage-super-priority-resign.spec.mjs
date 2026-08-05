@@ -60,7 +60,7 @@ describe('LINEAGE - super priority resign', function () {
       lid: LID,
       type,
       player_salary: ORIGINAL_SALARY,
-      year: current_season.year,
+      season_year: current_season.year,
       timestamp: origin_timestamp + index,
       week: current_season.week,
       userid: 1
@@ -74,7 +74,7 @@ describe('LINEAGE - super priority resign', function () {
         lid: LID,
         type: transaction_types.POACHED,
         player_salary: 10,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: poach_timestamp,
         week: current_season.week,
         userid: 2
@@ -85,7 +85,7 @@ describe('LINEAGE - super priority resign', function () {
         lid: LID,
         type: transaction_types.ROSTER_RELEASE,
         player_salary: 10,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: release_timestamp,
         week: current_season.week,
         userid: 2
@@ -98,7 +98,7 @@ describe('LINEAGE - super priority resign', function () {
         // process-super-priority.mjs resolves this from the last
         // PRACTICE_ADD / DRAFT / ROSTER_DEACTIVATE on the original team.
         player_salary: ORIGINAL_SALARY,
-        year: current_season.year,
+        season_year: current_season.year,
         timestamp: exercise_timestamp,
         week: current_season.week,
         userid: 1

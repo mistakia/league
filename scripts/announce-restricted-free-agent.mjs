@@ -56,7 +56,7 @@ const get_active_leagues = async () => {
   const active_leagues = await db('seasons')
     .select('seasons.*', 'leagues.name as name')
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')
-    .where({ 'seasons.year': current_season.year })
+    .where({ 'seasons.season_year': current_season.year })
     .whereNotNull('restricted_free_agency_period_start')
     .whereNotNull('restricted_free_agency_first_window_at')
     .where('restricted_free_agency_period_start', '<=', current_timestamp)
@@ -140,7 +140,7 @@ const announce_restricted_free_agent = async ({
   }
 
   const teams = await db('teams')
-    .where({ lid, year: current_season.year })
+    .where({ lid, season_year: current_season.year })
     .orderBy('draft_order', 'desc')
 
   let nominating_team
