@@ -55,6 +55,17 @@ const repo_root = path.join(__dirname, '..', '..')
 // Server-side directories whose files are read to decide whether a param key is
 // consumed anywhere. Kept narrow on purpose: a key mentioned only in, say, an
 // importer has nothing to do with data-view params.
+// Both persisted-view tables, because both resolve their params through
+// apply_play_by_play_column_params_to_query and so share the silent-skip defect.
+// user_plays_views (api/routes/plays.mjs -> libs-server/plays-view/
+// get-plays-view-results.mjs) is the one that is easy to forget: it holds 0 rows
+// today, and it has NO migration layer at all -- app/core/plays-view/
+// browser-storage.mjs sanitizes params but never rewrites them, so there is no
+// libs-shared/data-views-saved-view-migration.mjs equivalent to add a rule to.
+// Scanning it while it is empty costs one query and means the gate is already
+// correct on the day it stops being empty.
+const SAVED_VIEW_TABLES = ['user_data_views', 'user_plays_views']
+
 const PARAM_CONSUMER_DIRECTORIES = [
   'libs-server/data-views',
   'libs-server/data-views-column-definitions'
@@ -152,7 +163,11 @@ const main = async () => {
   const db = (await import('#db')).default
 
   try {
-    const rows = await db('user_data_views').select('view_id', 'table_state')
+    const rows = []
+    for (const source_table of SAVED_VIEW_TABLES) {
+      const table_rows = await db(source_table).select('view_id', 'table_state')
+      for (const row of table_rows) rows.push({ ...row, source_table })
+    }
 
     if (argv.columnIds) {
       const column_ids = new Set()
@@ -188,12 +203,20 @@ const main = async () => {
         total_params++
         if (declared.has(key) || consumed.has(key)) continue
         if (!orphans.has(key)) {
-          orphans.set(key, { count: 0, views: new Set(), columns: new Set() })
+          orphans.set(key, {
+            count: 0,
+            views: new Set(),
+            columns: new Set(),
+            tables: new Set()
+          })
         }
         const entry = orphans.get(key)
         entry.count++
-        entry.views.add(row.view_id)
+        // view_id is unique per table, not across them -- qualify it so two
+        // views sharing an id in the two tables are not counted as one.
+        entry.views.add(`${row.source_table}:${row.view_id}`)
         entry.columns.add(column_id)
+        entry.tables.add(row.source_table)
       }
     }
 
@@ -202,6 +225,7 @@ const main = async () => {
         param_key: key,
         occurrences: entry.count,
         saved_views: entry.views.size,
+        tables: [...entry.tables].sort(),
         columns: [...entry.columns].sort()
       }))
       .sort((a, b) => b.occurrences - a.occurrences)
@@ -215,13 +239,18 @@ const main = async () => {
         )
       )
     } else {
+      const per_table = SAVED_VIEW_TABLES.map(
+        (table) =>
+          `${table} ${rows.filter((row) => row.source_table === table).length}`
+      ).join(', ')
       console.log(
-        `\nScanned ${total_params} persisted param key(s) across ${rows.length} saved view(s).`
+        `\nScanned ${total_params} persisted param key(s) across ${rows.length} saved view(s) (${per_table}).`
       )
       for (const finding of findings) {
         console.log(
           `\n  ORPHANED  ${finding.param_key}  ` +
-            `(${finding.occurrences} occurrence(s) across ${finding.saved_views} saved view(s))`
+            `(${finding.occurrences} occurrence(s) across ${finding.saved_views} saved view(s) ` +
+            `in ${finding.tables.join(', ')})`
         )
         for (const column of finding.columns) console.log(`    on ${column}`)
       }
@@ -231,7 +260,10 @@ const main = async () => {
             'Each is a filter a user set that the query silently ignores. Add a rename\n' +
             'rule to libs-shared/data-views-saved-view-migration.mjs for every key that\n' +
             'has a current equivalent; a key whose feature is genuinely gone can be\n' +
-            'dropped there instead, but decide it explicitly rather than leaving it.'
+            'dropped there instead, but decide it explicitly rather than leaving it.\n' +
+            'An orphan reported in user_plays_views needs a different remedy: that\n' +
+            'table has no read-time migration layer, so one has to be built before a\n' +
+            'rule has anywhere to live.'
         )
       } else {
         console.log('\nGATE OK: every persisted param key is recognised.')
