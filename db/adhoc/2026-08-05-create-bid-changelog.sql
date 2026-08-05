@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-05 against league_production
 --
 -- Give every mutation of a bid a row of its own, so a bid's history stops being
 -- unrecoverable.

@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-05 against league_production
 --
 -- Record the operator cancellation of league 1 bid uid 600 as its own event in
 -- bid_changelog, at the instant it actually happened.

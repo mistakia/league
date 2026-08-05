@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-05 against league_production
 --
 -- Backfill bid_changelog from the league host's daily pg_dump snapshots, so the
 -- trail does not start empty on the day the table was created.
