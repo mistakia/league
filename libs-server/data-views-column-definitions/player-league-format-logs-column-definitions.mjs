@@ -227,6 +227,34 @@ export default {
     create_field_from_league_format_player_careerlogs(
       'points_added_net_per_game'
     ),
+  player_best_season_points_added_net_per_game_from_careerlogs:
+    create_field_from_league_format_player_careerlogs(
+      'best_season_points_added_net_per_game'
+    ),
+  player_points_added_net_first_three_seasons_from_careerlogs:
+    create_field_from_league_format_player_careerlogs(
+      'points_added_net_first_three_seasons'
+    ),
+  player_points_added_net_first_four_seasons_from_careerlogs:
+    create_field_from_league_format_player_careerlogs(
+      'points_added_net_first_four_seasons'
+    ),
+  player_points_added_net_first_five_seasons_from_careerlogs:
+    create_field_from_league_format_player_careerlogs(
+      'points_added_net_first_five_seasons'
+    ),
+  player_points_added_net_first_season_from_careerlogs:
+    create_field_from_league_format_player_careerlogs(
+      'points_added_net_first_season'
+    ),
+  player_points_added_net_second_season_from_careerlogs:
+    create_field_from_league_format_player_careerlogs(
+      'points_added_net_second_season'
+    ),
+  player_points_added_net_third_season_from_careerlogs:
+    create_field_from_league_format_player_careerlogs(
+      'points_added_net_third_season'
+    ),
   player_draft_rank_from_careerlogs:
     create_field_from_league_format_player_careerlogs('draft_rank')
 }

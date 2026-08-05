@@ -102,6 +102,20 @@ export default {
     'The points added by the player in their career based on league format (cumulative, positive + negative weeks)',
   player_points_added_net_per_game_from_careerlogs:
     'The points added per game by the player in their career based on league format (cumulative, positive + negative weeks)',
+  player_best_season_points_added_net_per_game_from_careerlogs:
+    "The best season's net points added per game by the player in their career based on league format (cumulative, positive + negative weeks)",
+  player_points_added_net_first_three_seasons_from_careerlogs:
+    "The net points added in the first three seasons of the player's career based on league format (cumulative, positive + negative weeks)",
+  player_points_added_net_first_four_seasons_from_careerlogs:
+    "The net points added in the first four seasons of the player's career based on league format (cumulative, positive + negative weeks)",
+  player_points_added_net_first_five_seasons_from_careerlogs:
+    "The net points added in the first five seasons of the player's career based on league format (cumulative, positive + negative weeks)",
+  player_points_added_net_first_season_from_careerlogs:
+    "The net points added in the first season (rookie year) of the player's career based on league format (cumulative, positive + negative weeks)",
+  player_points_added_net_second_season_from_careerlogs:
+    "The net points added in the second season of the player's career based on league format (cumulative, positive + negative weeks)",
+  player_points_added_net_third_season_from_careerlogs:
+    "The net points added in the third season of the player's career based on league format (cumulative, positive + negative weeks)",
   player_draft_rank_from_careerlogs:
     'The draft class rank of the player based on their draft position',
 

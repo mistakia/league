@@ -1,0 +1,16 @@
+{
+  "name": "careerlog net first-N-season and best-season columns",
+  "description": "league_format_player_careerlogs carries a net counterpart for every first-N-season and best-season aggregate, and until these fields were registered nothing could read them. This fixture pins the emitted SQL for four of the seven net columns alongside an earned sibling. league_format_player_careerlogs is one row per (pid, league_format_id) and pins no period sentinel, so every column of one format legitimately shares a single join -- the fixture pins that shared alias, which is the correct shape here rather than the collision shape league_format_player_projection_values had. It fails at any revision where the net fields are unregistered. The league_format_id param is explicit so nothing here is clock-derived.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      "player_points_added_net_first_season_from_careerlogs",
+      "player_points_added_net_first_three_seasons_from_careerlogs",
+      "player_best_season_points_added_net_per_game_from_careerlogs",
+      "player_points_added_earned_first_season_from_careerlogs"
+    ],
+    "where": []
+  },
+  "tags": ["careerlogs", "points-added", "league-format"],
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"t8da47e69a2555b893c6fda004c7987f7\".\"points_added_net_first_season\" AS \"points_added_net_first_season_from_careerlogs_0\", \"t8da47e69a2555b893c6fda004c7987f7\".\"points_added_net_first_three_seasons\" AS \"points_added_net_first_three_seasons_from_careerlogs_0\", \"t8da47e69a2555b893c6fda004c7987f7\".\"best_season_points_added_net_per_game\" AS \"best_season_points_added_net_per_game_from_careerlogs_0\", \"t8da47e69a2555b893c6fda004c7987f7\".\"points_added_earned_first_season\" AS \"points_added_earned_first_season_from_careerlogs_0\", \"player\".\"primary_position\" from \"player\" left join \"league_format_player_careerlogs\" as \"t8da47e69a2555b893c6fda004c7987f7\" on \"t8da47e69a2555b893c6fda004c7987f7\".\"pid\" = \"player\".\"pid\" and \"t8da47e69a2555b893c6fda004c7987f7\".\"league_format_id\" = 'genesis_10_team' group by player.first_name, player.last_name, \"t8da47e69a2555b893c6fda004c7987f7\".\"points_added_net_first_season\", \"t8da47e69a2555b893c6fda004c7987f7\".\"points_added_net_first_three_seasons\", \"t8da47e69a2555b893c6fda004c7987f7\".\"best_season_points_added_net_per_game\", \"t8da47e69a2555b893c6fda004c7987f7\".\"points_added_earned_first_season\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}

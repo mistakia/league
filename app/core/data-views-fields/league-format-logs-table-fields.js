@@ -222,6 +222,48 @@ export default {
       header_label: 'Pts+ Net/G',
       player_value_path: 'points_added_net_per_game_from_careerlogs'
     }),
+  player_best_season_points_added_net_per_game_from_careerlogs:
+    from_league_format_careerlogs({
+      column_title: 'Best Season Points Added Net Per Game (Career)',
+      header_label: 'Best Pts+ Net/G',
+      player_value_path: 'best_season_points_added_net_per_game_from_careerlogs'
+    }),
+  player_points_added_net_first_three_seasons_from_careerlogs:
+    from_league_format_careerlogs({
+      column_title: 'Points Added Net First 3 Seasons (Career)',
+      header_label: 'Pts+ Net 1st 3',
+      player_value_path: 'points_added_net_first_three_seasons_from_careerlogs'
+    }),
+  player_points_added_net_first_four_seasons_from_careerlogs:
+    from_league_format_careerlogs({
+      column_title: 'Points Added Net First 4 Seasons (Career)',
+      header_label: 'Pts+ Net 1st 4',
+      player_value_path: 'points_added_net_first_four_seasons_from_careerlogs'
+    }),
+  player_points_added_net_first_five_seasons_from_careerlogs:
+    from_league_format_careerlogs({
+      column_title: 'Points Added Net First 5 Seasons (Career)',
+      header_label: 'Pts+ Net 1st 5',
+      player_value_path: 'points_added_net_first_five_seasons_from_careerlogs'
+    }),
+  player_points_added_net_first_season_from_careerlogs:
+    from_league_format_careerlogs({
+      column_title: 'Points Added Net First Season (Career)',
+      header_label: 'Pts+ Net Rookie',
+      player_value_path: 'points_added_net_first_season_from_careerlogs'
+    }),
+  player_points_added_net_second_season_from_careerlogs:
+    from_league_format_careerlogs({
+      column_title: 'Points Added Net Second Season (Career)',
+      header_label: 'Pts+ Net 2nd Year',
+      player_value_path: 'points_added_net_second_season_from_careerlogs'
+    }),
+  player_points_added_net_third_season_from_careerlogs:
+    from_league_format_careerlogs({
+      column_title: 'Points Added Net Third Season (Career)',
+      header_label: 'Pts+ Net 3rd Year',
+      player_value_path: 'points_added_net_third_season_from_careerlogs'
+    }),
   player_draft_rank_from_careerlogs: from_league_format_careerlogs({
     column_title: 'Draft Class Rank',
     header_label: 'Draft Rnk',
