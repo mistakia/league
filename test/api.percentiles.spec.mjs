@@ -25,8 +25,14 @@ const expect = chai.expect
 //
 // The spec has to EXECUTE the round trip rather than inspect the query builder:
 // at the pre-fix revision the handler was well-formed JavaScript naming columns
-// that exist, and only the returned KEYS tell the two revisions apart. Confirmed
-// red at 782b78907~1 on all four assertions below.
+// that exist, and only the returned KEYS tell the two revisions apart.
+//
+// Verified in a worktree at 782b78907~1 with its own database: THREE of the four
+// tests below fail there and all four pass at HEAD. The fourth -- unknown key
+// returns an empty array -- passes at both revisions deliberately, because it
+// pins the route's shape rather than the rename. Do not "fix" that by making it
+// rename-sensitive; a test that cannot distinguish the revisions is not the same
+// thing as a test that is not supposed to.
 //
 // Scope is deliberately the key contract and nothing else. These keys are a
 // client contract, not an implementation detail -- the SPA reads them by name
