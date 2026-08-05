@@ -5,17 +5,16 @@
 // Gates the swagger response schemas in `api/` against two oracles that nothing
 // else in this repo checks:
 //
-//   GATE 1  swagger internal consistency — every `required` name, every `$ref`
-//           and every response `example` key must resolve against the schema's
-//           own resolved `properties`. No database, no adjudication, and no way
-//           for it to produce a false positive: it compares the spec to itself.
+//   GATE 1  swagger internal consistency — every `required` name and every
+//           `$ref` must resolve against the schema's own resolved `properties`.
+//           No database, no base ref, and no way for it to produce a false
+//           positive: it compares the spec to itself.
 //
 //   GATE 2  table-backed response drift — for a route handler that is a provable
 //           wholesale single-table read (`db('t').where(...)` echoed straight to
 //           `res.send`), the response key set is EXACTLY that table's column set,
 //           so every documented property must be a column in
-//           `db/schema.gres.sql`. Legitimate exceptions are adjudicated in
-//           `api-response-shape-adjudications.json`, never filtered by name.
+//           `db/schema.postgres.sql`.
 //
 // Both gates exist because `api/swagger` declares response schemas across 53
 // route files and nothing validated a response against them, which is what made
@@ -47,20 +46,21 @@
 // Usage:
 //
 //   node db/adhoc/check-api-response-shapes.mjs            # both gates
-//   node db/adhoc/check-api-response-shapes.mjs --gate 1
-//   node db/adhoc/check-api-response-shapes.mjs --coverage # denominator only
-//   node db/adhoc/check-api-response-shapes.mjs --json
+//   node db/adhoc/check-api-response-shapes.mjs --gate 1   # the CI-eligible half
 //
 // Exit 1 on any finding. Uses console.log deliberately, never `debug` — the
 // ESM import graph clobbers the namespace set before a module-scope
 // `debug.enable` runs, and an oracle whose verdict depends on winning that
 // negotiation has no audit trail.
 //
-// NEGATIVE CONTROL. Never accept a green from this you have not shown can go
-// red. `--self-test` mutates the spec in memory in three ways this gate is
-// supposed to catch and asserts each one is reported; run it whenever you touch
-// this file, and delete an adjudication and confirm its property reappears
-// whenever you add one.
+// NEGATIVE CONTROL, RUN EVERY TIME. Never accept a green from this you have not
+// shown can go red, so the control is not behind a flag you could forget. Each
+// run mutates the spec in memory in three ways this gate is supposed to catch
+// and asserts each one is reported; a control that fails fails the run. Its
+// gate-2 case needs a covered route to mutate, so it is also what detects the
+// handler analysis going blind — there is deliberately no coverage-floor
+// constant, because the control already fails in exactly that case and a
+// hand-maintained threshold would fire on ordinary refactors instead.
 
 import fs from 'fs'
 import path from 'path'
@@ -91,33 +91,7 @@ const spa_service_file = path.join(
   'api',
   'service.js'
 )
-const adjudications_file = path.join(
-  repo_root,
-  'db',
-  'adhoc',
-  'api-response-shape-adjudications.json'
-)
-
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete']
-
-// COVERAGE FLOOR — the single most important line in this file.
-//
-// Gate 2's reach depends on a static analysis of route handlers. If that
-// analysis breaks — a refactor changes how handlers are written, the parser
-// changes, a bug drops a case — `covered` silently falls toward zero, gate 2
-// reports nothing, and the run prints GATE OK. That is precisely the failure
-// this program has recorded three times: a gate reporting success while
-// structurally unable to detect the thing it measures.
-//
-// So a DROP in coverage is itself a failure. Raise this when a change genuinely
-// extends reach; never lower it to make a run pass. Lowering it is the same act
-// as `--rebaseline` on the conformance ratchet, and it is wrong for the same
-// reason.
-const GATE_2_MINIMUM_COVERED_ROUTES = 5
-
-// Same reasoning for gate 1: it walks the spec, so an import or resolution
-// change could quietly leave it walking nothing.
-const GATE_1_MINIMUM_SCHEMAS_CHECKED = 90
 
 // Chain members that leave the row's COLUMN SET exactly as the table declares
 // it. Filtering, ordering and pagination qualify; nothing else does.
@@ -158,10 +132,11 @@ const SHAPE_PRESERVING_METHODS = new Set([
 // schema.postgres.sql
 // ---------------------------------------------------------------------------
 
-// Parses CREATE TABLE bodies out of the exported schema. Views are collected
-// separately and are NOT usable as a gate-2 anchor: a view's output columns come
-// from its SELECT list, so a name-only parse of the dump cannot state them
-// reliably, and a gate that guessed would report confident nonsense.
+// Parses CREATE TABLE bodies out of the exported schema. Views are deliberately
+// not parsed: a view's output columns come from its SELECT list, which a
+// name-only parse of the dump cannot state, and no route reads one anyway. A
+// route that later did would fall through to the `unknown_table` finding, which
+// is loud and roughly right.
 const parse_schema_tables = (sql) => {
   const tables = new Map()
   const table_re =
@@ -186,15 +161,6 @@ const parse_schema_tables = (sql) => {
   }
   return tables
 }
-
-const parse_schema_views = (sql) =>
-  new Set(
-    [
-      ...sql.matchAll(
-        /CREATE (?:OR REPLACE )?(?:MATERIALIZED )?VIEW (?:public\.)?"?([a-z0-9_]+)"?/gi
-      )
-    ].map((m) => m[1])
-  )
 
 // ---------------------------------------------------------------------------
 // swagger schema resolution
@@ -662,25 +628,13 @@ const build_tier_resolver = () => {
 }
 
 // ---------------------------------------------------------------------------
-// adjudications
-// ---------------------------------------------------------------------------
-
-const load_adjudications = () => {
-  if (!fs.existsSync(adjudications_file)) return {}
-  const parsed = JSON.parse(fs.readFileSync(adjudications_file, 'utf8'))
-  return parsed.adjudications || {}
-}
-
-// ---------------------------------------------------------------------------
 // gates
 // ---------------------------------------------------------------------------
 
 const run_gate_1 = () => {
   const findings = []
-  let schemas_checked = 0
 
   for (const { node, trail } of walk_all_schema_nodes(specs, 'spec')) {
-    schemas_checked++
     const properties = resolve_properties(node)
     const required = resolve_required(node)
     if (!required.length) continue
@@ -726,10 +680,10 @@ const run_gate_1 = () => {
     }
   }
 
-  return { findings, schemas_checked }
+  return findings
 }
 
-const run_gate_2 = ({ tables, views, adjudications, tier_of }) => {
+const run_gate_2 = ({ tables, tier_of }) => {
   const findings = []
   const covered = []
   const uncovered = []
@@ -798,16 +752,6 @@ const run_gate_2 = ({ tables, views, adjudications, tier_of }) => {
 
       const table = handler.table
 
-      if (views.has(table) && !tables.has(table)) {
-        uncovered.push({
-          file: relative,
-          path: op.path,
-          method: op.method,
-          reason: `reads view '${table}'; a view's output columns are not stated by the schema dump`
-        })
-        continue
-      }
-
       const columns = tables.get(table)
       if (!columns) {
         findings.push({
@@ -841,13 +785,9 @@ const run_gate_2 = ({ tables, views, adjudications, tier_of }) => {
       const column_set = new Set(columns)
       const tier = tier_of(op.path)
 
-      const documented_but_absent = []
-      for (const name of properties) {
-        if (column_set.has(name)) continue
-        const key = `${schema_name}.${name}`
-        if (adjudications[key]) continue
-        documented_but_absent.push(name)
-      }
+      const documented_but_absent = [...properties].filter(
+        (name) => !column_set.has(name)
+      )
 
       const present_but_undocumented = columns.filter((c) => !properties.has(c))
 
@@ -898,20 +838,26 @@ const run_gate_2 = ({ tables, views, adjudications, tier_of }) => {
 // negative control
 // ---------------------------------------------------------------------------
 
-// Three deliberate mutations of the live spec, each one an instance of what a
-// gate here is supposed to catch. A green this file has not been shown able to
-// turn red is not evidence.
-const run_self_test = (context) => {
+// Three deliberate mutations, each one an instance of what a gate here is
+// supposed to catch. A green this file has not been shown able to turn red is
+// not evidence.
+//
+// Only the controls for the gates being RUN are exercised. That matters for
+// `--gate 1` in CI: the gate-2 control depends on the working tree's schema
+// file, so a sibling mid-migration could turn it red on a finding that has
+// nothing to do with the pushing session — the cross-session red-master hazard.
+// Gate 1 reads only the spec, so its controls are safe anywhere.
+const run_self_test = ({ tables, tier_of, covered_tables, gates }) => {
   const cases = []
 
   // 1. gate 1: a required name that is not a property.
-  {
+  if (gates.includes(1)) {
     const target = Object.values(specs.components.schemas).find(
       (s) => s && s.properties && Object.keys(s.properties).length
     )
     const restore = target.required
     target.required = [...(restore || []), '__negative_control_absent__']
-    const reported = run_gate_1().findings.some(
+    const reported = run_gate_1().some(
       (f) => f.property === '__negative_control_absent__'
     )
     target.required = restore
@@ -923,7 +869,7 @@ const run_self_test = (context) => {
   }
 
   // 2. gate 1: an unresolvable $ref.
-  {
+  if (gates.includes(1)) {
     const target = Object.values(specs.components.schemas).find(
       (s) => s && s.properties && Object.keys(s.properties).length
     )
@@ -932,20 +878,20 @@ const run_self_test = (context) => {
     target.properties[key] = {
       $ref: '#/components/schemas/__NegativeControlMissing__'
     }
-    const reported = run_gate_1().findings.some(
-      (f) => f.kind === 'unresolvable_ref'
-    )
+    const reported = run_gate_1().some((f) => f.kind === 'unresolvable_ref')
     target.properties[key] = restore
     cases.push(['gate 1 reports an unresolvable $ref', reported])
   }
 
   // 3. gate 2: a documented property renamed off its column. Mutates the parsed
   //    column set rather than the spec, which is the same drift seen from the
-  //    other side and needs no file edit.
-  {
-    const mutated = new Map(context.tables)
+  //    other side and needs no file edit. This is also the case that fails when
+  //    the handler analysis has gone blind: with no covered route there is no
+  //    victim to mutate, and it reports STAYED GREEN.
+  if (gates.includes(2)) {
+    const mutated = new Map(tables)
     let victim = null
-    for (const entry of context.covered_tables) {
+    for (const entry of covered_tables) {
       const columns = mutated.get(entry.table)
       if (!columns) continue
       const renameable = columns.find((c) => entry.documented_names.has(c))
@@ -963,7 +909,7 @@ const run_self_test = (context) => {
         false
       ])
     } else {
-      const { findings } = run_gate_2({ ...context, tables: mutated })
+      const { findings } = run_gate_2({ tables: mutated, tier_of })
       const reported = findings.some(
         (f) =>
           f.kind === 'documented_property_not_a_column' &&
@@ -991,19 +937,14 @@ const run_self_test = (context) => {
 // main
 // ---------------------------------------------------------------------------
 
+// `--gate 1` exists because gate 1 is the CI-eligible half: it reads only the
+// spec, so it cannot go red on a sibling's in-flight migration the way gate 2
+// can. That is the documented plan, not a speculative knob.
 const parse_argv = () => {
   const argv = process.argv.slice(2)
-  const options = {
-    gates: [1, 2],
-    json: false,
-    coverage_only: false,
-    self_test: false
-  }
+  const options = { gates: [1, 2] }
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--gate') options.gates = [Number(argv[++i])]
-    else if (argv[i] === '--json') options.json = true
-    else if (argv[i] === '--coverage') options.coverage_only = true
-    else if (argv[i] === '--self-test') options.self_test = true
   }
   return options
 }
@@ -1013,8 +954,6 @@ const main = () => {
 
   const sql = fs.readFileSync(schema_file, 'utf8')
   const tables = parse_schema_tables(sql)
-  const views = parse_schema_views(sql)
-  const adjudications = load_adjudications()
   const tier_of = build_tier_resolver()
 
   // Whole-surface denominator, measured rather than assumed.
@@ -1034,19 +973,12 @@ const main = () => {
 
   const findings = []
   let gate_2_result = { findings: [], covered: [], uncovered: [] }
-  let gate_1_schemas_checked = null
 
-  if (options.gates.includes(2) || options.coverage_only) {
-    gate_2_result = run_gate_2({ tables, views, adjudications, tier_of })
-  }
-  if (options.gates.includes(1) && !options.coverage_only) {
-    const gate_1_result = run_gate_1()
-    gate_1_schemas_checked = gate_1_result.schemas_checked
-    findings.push(...gate_1_result.findings)
-  }
-  if (options.gates.includes(2) && !options.coverage_only) {
-    findings.push(...gate_2_result.findings)
-  }
+  // Gate 2 always runs: its result feeds the coverage report and the negative
+  // control even when only gate 1's findings are wanted.
+  gate_2_result = run_gate_2({ tables, tier_of })
+  if (options.gates.includes(1)) findings.push(...run_gate_1())
+  if (options.gates.includes(2)) findings.push(...gate_2_result.findings)
 
   const route_files = walk_files(routes_dir)
   const documenting_files = route_files.filter((f) =>
@@ -1141,89 +1073,31 @@ const main = () => {
     `WARNINGS (${warnings.length}) — emitted on the wire, absent from the docs`
   )
 
-  if (options.json) {
-    console.log('')
-    console.log(
-      JSON.stringify(
-        {
-          coverage: {
-            route_files: route_files.length,
-            documenting_files: documenting_files.length,
-            operations: all_operations.length,
-            with_200_json_schema: with_schema.length,
-            with_properties: with_properties.length,
-            gate_2_covered: gate_2_result.covered.length,
-            gate_2_uncovered: gate_2_result.uncovered.length
-          },
-          covered: gate_2_result.covered,
-          uncovered: gate_2_result.uncovered,
-          findings
-        },
-        null,
-        2
-      )
+  // The negative control runs on EVERY invocation rather than behind a flag.
+  // It is the only active guard that this gate can still see anything — its
+  // gate-2 case needs a covered route to mutate, so if the handler analysis
+  // ever stops finding any, the control reports STAYED GREEN and the run fails
+  // instead of printing GATE OK over a gate that has gone blind. A guard you
+  // have to remember to ask for is not a guard.
+  const covered_tables = gate_2_result.covered.map((entry) => {
+    const operations = operations_declared_by(path.join(repo_root, entry.file))
+    const op = operations.find(
+      (o) => o.method === entry.method && o.path === entry.path
     )
-  }
-
-  let self_test_ok = true
-  if (options.self_test) {
-    const covered_tables = gate_2_result.covered.map((entry) => {
-      const operations = operations_declared_by(
-        path.join(repo_root, entry.file)
-      )
-      const op = operations.find(
-        (o) => o.method === entry.method && o.path === entry.path
-      )
-      return {
-        table: entry.table,
-        documented_names:
-          resolve_properties(success_schema(op.operation).schema) || new Set()
-      }
-    })
-    self_test_ok = run_self_test({
-      tables,
-      views,
-      adjudications,
-      tier_of,
-      covered_tables
-    })
-  }
+    return {
+      table: entry.table,
+      documented_names:
+        resolve_properties(success_schema(op.operation).schema) || new Set()
+    }
+  })
+  const self_test_ok = run_self_test({
+    tables,
+    tier_of,
+    covered_tables,
+    gates: options.gates
+  })
 
   console.log('')
-  if (options.coverage_only) {
-    console.log('COVERAGE REPORT ONLY — no gate was run')
-    process.exit(0)
-  }
-
-  // Coverage floors, checked before findings. A gate that has stopped looking
-  // reports no findings, and that must never read as a pass.
-  const floor_failures = []
-  if (
-    options.gates.includes(2) &&
-    gate_2_result.covered.length < GATE_2_MINIMUM_COVERED_ROUTES
-  ) {
-    floor_failures.push(
-      `gate 2 covered ${gate_2_result.covered.length} routes, below the floor of ${GATE_2_MINIMUM_COVERED_ROUTES}. The handler analysis has lost reach — fix it rather than lowering the floor.`
-    )
-  }
-  if (
-    gate_1_schemas_checked !== null &&
-    gate_1_schemas_checked < GATE_1_MINIMUM_SCHEMAS_CHECKED
-  ) {
-    floor_failures.push(
-      `gate 1 checked ${gate_1_schemas_checked} schemas, below the floor of ${GATE_1_MINIMUM_SCHEMAS_CHECKED}. The spec walk has lost reach — fix it rather than lowering the floor.`
-    )
-  }
-  if (floor_failures.length) {
-    console.log('COVERAGE FLOOR BREACHED')
-    for (const message of floor_failures) console.log(`  ${message}`)
-    console.log('')
-    console.log(
-      'GATE FAIL: coverage floor breached; findings below are not trustworthy'
-    )
-    process.exit(1)
-  }
-
   if (!self_test_ok) {
     console.log(
       'GATE FAIL: the negative control did not go red. This gate cannot be trusted until it does.'
