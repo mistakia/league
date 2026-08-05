@@ -24,8 +24,6 @@
 -- Source of truth for the mapping:
 --   db/adhoc/shorthand-rename-map.json
 
-BEGIN;
-
 -- nfl_play_stats (1)
 ALTER TABLE public.nfl_play_stats RENAME COLUMN yards TO stat_yards;
 
@@ -84,5 +82,3 @@ ALTER TABLE public.nfl_plays_receiver RENAME COLUMN route TO route_run;
 -- player_gamelogs (2)
 ALTER TABLE public.player_gamelogs RENAME COLUMN jnum TO jersey_number;
 ALTER TABLE public.player_gamelogs RENAME COLUMN pos TO player_position;
-
-COMMIT;

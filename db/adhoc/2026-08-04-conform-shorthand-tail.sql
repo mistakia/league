@@ -3,7 +3,14 @@
 -- Shorthand conformance: the remaining tables
 --
 -- Retires 153 of the 234 shorthand violations reported by
--- db/adhoc/audit-schema-conformance.mjs at ruler league 74b1366cd.
+-- db/adhoc/audit-schema-conformance.mjs at ruler league 74b1366cd, in 157
+-- statements. The extra four are `losses` on league_team_careerlogs,
+-- league_team_seasonlogs, league_user_careerlogs and pff_team_seasonlogs:
+-- NOT audit violations (six characters clears the bare-name threshold), but
+-- renaming their `wins`/`ties` siblings without them would leave each of those
+-- four tables naming one member of an obvious trio differently from the other
+-- two. Verified as genuine counts, so the coherent end state is to rename all
+-- three per table rather than to ship the split.
 --
 -- Expands abbreviated column names to full words. Every (table, column) here
 -- was verified present in information_schema, and every proposed name verified
@@ -15,9 +22,11 @@
 -- EXCLUDED: pff_team_gamelogs.wins and .ties. The map originally renamed them
 -- to win_count/tie_count; verification against production showed they are
 -- mutually exclusive per-game outcome FLAGS (only value 1; exactly one of
--- wins/losses/ties set per row), not counts. They are now
--- blocked_operator_ruling in the map and must be settled together with the
--- unflagged `losses` sibling.
+-- wins/losses/ties set per row), not counts. Ruled 2026-08-04: DROP, together
+-- with the unflagged `losses` sibling, in
+-- db/adhoc/2026-08-04-drop-pff-team-gamelog-outcome-flags.sql. That file is
+-- owned separately and applies behind this one. Note the same three columns on
+-- pff_team_seasonlogs ARE real counts (0-18) and are renamed here.
 --
 -- ORDERING: apply only AFTER the boolean-prefix sweep
 -- (db/adhoc/2026-08-04-conform-boolean-prefix-*.sql) has landed its DDL and
@@ -25,8 +34,6 @@
 --
 -- Source of truth for the mapping:
 --   db/adhoc/shorthand-rename-map.json
-
-BEGIN;
 
 -- config (1)
 ALTER TABLE public.config RENAME COLUMN value TO config_value;
@@ -66,7 +73,8 @@ ALTER TABLE public.league_formats RENAME COLUMN swrte TO starter_slots_wr_te_fle
 -- league_nfl_team_seasonlogs (1)
 ALTER TABLE public.league_nfl_team_seasonlogs RENAME COLUMN rank TO points_rank;
 
--- league_team_careerlogs (2)
+-- league_team_careerlogs (3)
+ALTER TABLE public.league_team_careerlogs RENAME COLUMN losses TO regular_season_losses;
 ALTER TABLE public.league_team_careerlogs RENAME COLUMN ties TO regular_season_ties;
 ALTER TABLE public.league_team_careerlogs RENAME COLUMN wins TO regular_season_wins;
 
@@ -81,11 +89,13 @@ ALTER TABLE public.league_team_lineup_contributions RENAME COLUMN sp TO starter_
 -- league_team_lineups (1)
 ALTER TABLE public.league_team_lineups RENAME COLUMN total TO optimal_total;
 
--- league_team_seasonlogs (2)
+-- league_team_seasonlogs (3)
+ALTER TABLE public.league_team_seasonlogs RENAME COLUMN losses TO regular_season_losses;
 ALTER TABLE public.league_team_seasonlogs RENAME COLUMN ties TO regular_season_ties;
 ALTER TABLE public.league_team_seasonlogs RENAME COLUMN wins TO regular_season_wins;
 
--- league_user_careerlogs (2)
+-- league_user_careerlogs (3)
+ALTER TABLE public.league_user_careerlogs RENAME COLUMN losses TO regular_season_losses;
 ALTER TABLE public.league_user_careerlogs RENAME COLUMN ties TO regular_season_ties;
 ALTER TABLE public.league_user_careerlogs RENAME COLUMN wins TO regular_season_wins;
 
@@ -138,7 +148,8 @@ ALTER TABLE public.pff_player_seasonlogs RENAME COLUMN pass TO pass_grade;
 ALTER TABLE public.pff_player_seasonlogs RENAME COLUMN run TO run_grade;
 ALTER TABLE public.pff_player_seasonlogs RENAME COLUMN speed TO speed_rating;
 
--- pff_team_seasonlogs (2)
+-- pff_team_seasonlogs (3)
+ALTER TABLE public.pff_team_seasonlogs RENAME COLUMN losses TO loss_count;
 ALTER TABLE public.pff_team_seasonlogs RENAME COLUMN ties TO tie_count;
 ALTER TABLE public.pff_team_seasonlogs RENAME COLUMN wins TO win_count;
 
@@ -272,5 +283,3 @@ ALTER TABLE public.transactions RENAME COLUMN value TO player_salary;
 -- waivers (2)
 ALTER TABLE public.waivers RENAME COLUMN bid TO bid_amount;
 ALTER TABLE public.waivers RENAME COLUMN po TO priority_order;
-
-COMMIT;

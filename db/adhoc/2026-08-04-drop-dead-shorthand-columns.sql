@@ -51,8 +51,6 @@
 -- Source of truth for the dispositions:
 --   db/adhoc/shorthand-rename-map.json
 
-BEGIN;
-
 -- users (4)
 ALTER TABLE public.users DROP COLUMN qbb;
 ALTER TABLE public.users DROP COLUMN rbb;
@@ -67,5 +65,3 @@ ALTER TABLE public.seasons DROP COLUMN ext4;
 
 -- nfl_plays_current_week (1)
 ALTER TABLE public.nfl_plays_current_week DROP COLUMN box;
-
-COMMIT;
