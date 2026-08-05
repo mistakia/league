@@ -335,7 +335,7 @@ const router = express.Router()
  *             schema:
  *               $ref: '#/components/schemas/Error'
  *       401:
- *         $ref: '#/components/responses/Unauthorized'
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       403:
  *         description: Not league commissioner
  *         content:
