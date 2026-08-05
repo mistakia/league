@@ -33,6 +33,25 @@ const v1_to_v2 = (snapshot) => {
   return { ...snapshot, table_state: next_table_state, version: 2 }
 }
 
+// `splits` is handled in THREE places, and none of them is redundant -- they
+// cover disjoint populations, so deleting any one of them silently drops a real
+// cohort's row axes. This has already been proposed once on the mistaken reading
+// that the rule below is dead:
+//
+//   - This step is the only reach to a snapshot stored at version 2.
+//     STORAGE_SCHEMA_VERSION was 2 in production between e1cf78e71 and
+//     cabf950de, so those snapshots exist in real browsers, and they skip
+//     v0_to_v1 and v1_to_v2 entirely.
+//   - `migrate_saved_view_table_state` (v1_to_v2 above) carries its own `splits`
+//     rule, which is what catches a snapshot entering at version 0 or 1 -- and
+//     it also serves the SAVED VIEW read path, which has no version field.
+//   - `LEGACY_URL_PARAM_ALIASES` (app/core/data-views/parse-table-state-from-url.mjs)
+//     covers short URLs, which have no version field either and cannot be
+//     rewritten. That is the surface this whole chain missed for six weeks.
+//
+// A versioned step is frozen history in any case: it states what a snapshot at
+// that version needs, and that does not change because a later reader also
+// handles the key.
 const v2_to_v3 = (snapshot) => {
   const { splits, ...rest } = snapshot.table_state
   const next_table_state =
