@@ -679,7 +679,14 @@ const generate_snap_based_gamelogs = async ({
       player_gamelog_inserts.push({
         esbid: snap_player.esbid,
         pid: snap_player.pid,
-        pos: snap_player.primary_position,
+        // `player_position`, not `pos`. This branch builds its insert object
+        // directly instead of going through format_player_gamelog, which is
+        // where the `pos` -> `player_position` mapping lives -- so the shorthand
+        // conform that renamed the column swept the helper and missed this one
+        // call site. The key also reaches the merge list, so every run raised
+        // 42703 on both halves of the upsert while main() caught the throw and
+        // exited 0.
+        player_position: snap_player.primary_position,
         nfl_team: team,
         opponent_nfl_team: opponent,
         season_year: year,
