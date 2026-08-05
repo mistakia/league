@@ -155,6 +155,39 @@ export const two_point_conversion_attribution = create_play_stats_attribution({
   alias_prefix: 'two_point_conversion'
 })
 
+// Field goals (70) and extra points (72). These stat ids are deliberately NOT
+// in libs-shared/scoring-stat-roles.mjs and are declared here instead: that
+// registry's scope is one stat row, one increment, and on the GAMELOGS path 70
+// increments five fields while 72 increments both `xpa` and `extra_points_made`.
+// On the SCORING path the shapes differ again -- an extra point is flat (only
+// extra_points_made is a scoring column; xpa is an attempt count nothing scores)
+// while a field goal is not, because its value depends on the kick distance.
+//
+// Measured against production, 2025 REG: nfl_plays.kicker_pid is populated on
+// 0 of the 931 valid stat_id 70 rows and 2 of the 1,210 stat_id 72 rows, so a
+// kicker_pid-sourced role would join correctly and return nothing -- the same
+// trap the two-point role sprang. The stat rows themselves do carry an external
+// id (929 and 1,201 respectively), which is why the attribution shape below is
+// the right one. Both roles therefore also need the EXISTS gate widening.
+export const FIELD_GOAL_STAT_IDS = [70]
+export const EXTRA_POINT_STAT_IDS = [72]
+
+// The field-goal scoring expression reads the kick distance off this alias's
+// `stat_yards` column, which is why the alias prefix is part of the module's
+// contract rather than an internal detail. Every one of the 931 valid stat_id
+// 70 rows carries a distance, spanning 19 to 68.
+export const FIELD_GOAL_STATS_ALIAS = 'field_goal_stats'
+
+export const field_goal_attribution = create_play_stats_attribution({
+  stat_ids: FIELD_GOAL_STAT_IDS,
+  alias_prefix: 'field_goal'
+})
+
+export const extra_point_attribution = create_play_stats_attribution({
+  stat_ids: EXTRA_POINT_STAT_IDS,
+  alias_prefix: 'extra_point'
+})
+
 export const fumble_lost_attribution = create_play_stats_attribution({
   stat_ids: FUMBLE_LOST_STAT_IDS,
   alias_prefix: 'fumble_lost',

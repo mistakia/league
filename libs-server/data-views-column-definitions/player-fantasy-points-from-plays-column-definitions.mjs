@@ -16,9 +16,14 @@ import {
   punt_return_touchdown_attribution,
   kickoff_return_touchdown_attribution,
   two_point_conversion_attribution,
+  field_goal_attribution,
+  extra_point_attribution,
   PUNT_RETURN_TOUCHDOWN_STAT_IDS,
   KICKOFF_RETURN_TOUCHDOWN_STAT_IDS,
-  TWO_POINT_CONVERSION_STAT_IDS
+  TWO_POINT_CONVERSION_STAT_IDS,
+  FIELD_GOAL_STAT_IDS,
+  EXTRA_POINT_STAT_IDS,
+  FIELD_GOAL_STATS_ALIAS
 } from '#libs-server/data-views/nfl-play-stats-attribution.mjs'
 
 const FP_OUTPUT_PERIODS = [
@@ -183,35 +188,12 @@ const fantasy_points_from_plays_with = async ({
     scoring_format,
     requires_position_data
   )
-  const fuml_scoring = await generate_fumble_scoring_sql(scoring_format)
-  const fumble_return_touchdown_scoring =
-    await generate_fumble_return_touchdown_scoring_sql(scoring_format)
-  // Mirrors the role-union path: a format that scores one of the stat-sourced
-  // fumble roles at zero emits no subquery for it, so its SQL is unchanged.
-  const scores_fumbles_lost =
-    Number(await generate_fumble_scoring_inner(scoring_format)) !== 0
-  const scores_fumble_return_touchdowns =
-    Number(
-      await generate_fumble_return_touchdown_scoring_inner(scoring_format)
-    ) !== 0
-  const punt_return_touchdown_scoring =
-    await generate_punt_return_touchdown_scoring_sql(scoring_format)
-  const kickoff_return_touchdown_scoring =
-    await generate_kickoff_return_touchdown_scoring_sql(scoring_format)
-  const scores_punt_return_touchdowns =
-    Number(
-      await generate_punt_return_touchdown_scoring_inner(scoring_format)
-    ) !== 0
-  const scores_kickoff_return_touchdowns =
-    Number(
-      await generate_kickoff_return_touchdown_scoring_inner(scoring_format)
-    ) !== 0
-  const two_point_conversion_scoring_sql =
-    await generate_two_point_conversion_scoring_sql(scoring_format)
-  const scores_two_point_conversions =
-    Number(
-      await generate_two_point_conversion_scoring_inner(scoring_format)
-    ) !== 0
+  // Mirrors the role-union path: a format that scores a stat-sourced role at
+  // zero emits no subquery for it, so its SQL is unchanged.
+  const stat_sourced_roles = await resolve_stat_sourced_roles(scoring_format)
+  const scores_fumbles_lost = stat_sourced_roles.some(
+    ({ name }) => name === 'fumble_lost'
+  )
 
   // Apply parameter-based filters to each union query using proper query builder
   const filtered_params = { ...params, seas_type }
@@ -232,13 +214,9 @@ const fantasy_points_from_plays_with = async ({
   //
   // The EXISTS is emitted only when a role is actually scored, so a format
   // scoring these at zero gets byte-identical SQL to before.
-  const stat_sourced_gate_stat_ids = [
-    ...(scores_punt_return_touchdowns ? PUNT_RETURN_TOUCHDOWN_STAT_IDS : []),
-    ...(scores_kickoff_return_touchdowns
-      ? KICKOFF_RETURN_TOUCHDOWN_STAT_IDS
-      : []),
-    ...(scores_two_point_conversions ? TWO_POINT_CONVERSION_STAT_IDS : [])
-  ]
+  const stat_sourced_gate_stat_ids = stat_sourced_roles.flatMap(
+    ({ gate_stat_ids }) => gate_stat_ids || []
+  )
 
   // Create shared CTE with basic filtering
   const filtered_plays_cte = db('nfl_plays')
@@ -294,14 +272,9 @@ const fantasy_points_from_plays_with = async ({
     select_columns.push('nfl_plays.player_fuml_pid')
   }
 
-  // Every stat-sourced subquery (fumble, return touchdown, two point
-  // conversion) joins nfl_play_stats on (esbid, play_id), so the CTE has to
-  // carry both.
-  if (
-    scores_fumbles_lost ||
-    scores_fumble_return_touchdowns ||
-    stat_sourced_gate_stat_ids.length
-  ) {
+  // Every stat-sourced subquery joins nfl_play_stats on (esbid, play_id), so
+  // the CTE has to carry both whenever any such role is scored.
+  if (stat_sourced_roles.length) {
     if (!select_columns.includes('nfl_plays.esbid')) {
       select_columns.push('nfl_plays.esbid')
     }
@@ -433,30 +406,21 @@ const fantasy_points_from_plays_with = async ({
       .groupBy([db.raw(pid_expr), ...play_stats_columns])
   }
 
-  const fuml_subquery = build_play_stats_subquery({
-    attribution: fumble_lost_attribution,
-    scoring: fuml_scoring
-  })
-
-  const fumble_return_touchdown_subquery = build_play_stats_subquery({
-    attribution: fumble_return_touchdown_attribution,
-    scoring: fumble_return_touchdown_scoring
-  })
-
-  const punt_return_touchdown_subquery = build_play_stats_subquery({
-    attribution: punt_return_touchdown_attribution,
-    scoring: punt_return_touchdown_scoring
-  })
-
-  const kickoff_return_touchdown_subquery = build_play_stats_subquery({
-    attribution: kickoff_return_touchdown_attribution,
-    scoring: kickoff_return_touchdown_scoring
-  })
-
-  const two_point_conversion_subquery = build_play_stats_subquery({
-    attribution: two_point_conversion_attribution,
-    scoring: two_point_conversion_scoring_sql
-  })
+  // One UNION arm per scored stat-sourced role, in STAT_SOURCED_ROLES order.
+  // The legacy path wraps each expression in its own ROUND(SUM(...)) because it
+  // aggregates inside the arm; the role-union path does not, which is why the
+  // two consume different members of the same scoring object.
+  const stat_sourced_arms = await Promise.all(
+    stat_sourced_roles.map(
+      async ({ attribution, scoring, subquery_alias }) => ({
+        subquery_alias,
+        subquery: build_play_stats_subquery({
+          attribution,
+          scoring: await scoring.sql(scoring_format)
+        })
+      })
+    )
+  )
 
   // Combine with UNION ALL
   // Use subquery_output_columns_list if we have career parameters, otherwise use output_columns_list
@@ -482,41 +446,9 @@ const fantasy_points_from_plays_with = async ({
           this.select('*').from(trg_subquery.as('trg_stats'))
         })
         .modify((builder) => {
-          if (scores_fumbles_lost) {
+          for (const { subquery, subquery_alias } of stat_sourced_arms) {
             builder.unionAll(function () {
-              this.select('*').from(fuml_subquery.as('fuml_stats'))
-            })
-          }
-          if (scores_fumble_return_touchdowns) {
-            builder.unionAll(function () {
-              this.select('*').from(
-                fumble_return_touchdown_subquery.as(
-                  'fumble_return_touchdown_stats'
-                )
-              )
-            })
-          }
-          if (scores_punt_return_touchdowns) {
-            builder.unionAll(function () {
-              this.select('*').from(
-                punt_return_touchdown_subquery.as('punt_return_touchdown_stats')
-              )
-            })
-          }
-          if (scores_kickoff_return_touchdowns) {
-            builder.unionAll(function () {
-              this.select('*').from(
-                kickoff_return_touchdown_subquery.as(
-                  'kickoff_return_touchdown_stats'
-                )
-              )
-            })
-          }
-          if (scores_two_point_conversions) {
-            builder.unionAll(function () {
-              this.select('*').from(
-                two_point_conversion_subquery.as('two_point_conversion_stats')
-              )
+              this.select('*').from(subquery.as(subquery_alias))
             })
           }
         })
@@ -711,21 +643,6 @@ const generate_receiving_scoring_sql = async (
 // gamelogs path -- see nfl-play-stats-attribution.mjs. The join restricts the
 // role to the charged plays, so the expression is the flat per-fumble value
 // rather than a conditional.
-const generate_fumble_scoring_inner = async (scoring_format) => {
-  if (!scoring_format) {
-    scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
-    if (!scoring_format) {
-      return '-1'
-    }
-  }
-
-  const fuml = scoring_format.fumbles_lost || 0
-  return String(fuml)
-}
-
-const generate_fumble_scoring_sql = async (scoring_format) =>
-  `ROUND(SUM(${await generate_fumble_scoring_inner(scoring_format)}), 2)`
-
 // Per-row value for a FLAT stat-sourced role -- one stat row, one scoring
 // value. The role's join already restricts to plays carrying the relevant stat
 // row, so the expression is the flat per-event value rather than a conditional.
@@ -754,10 +671,95 @@ const create_flat_role_scoring = ({ column, fallback }) => {
   return {
     inner,
     sql: async (scoring_format) =>
-      `ROUND(SUM(${await inner(scoring_format)}), 2)`
+      `ROUND(SUM(${await inner(scoring_format)}), 2)`,
+    // Uniform shape both from-plays paths iterate. `scores` is what drives the
+    // zero-scoring skip; for a flat role it is just the constant being nonzero.
+    resolve: async (scoring_format) => {
+      const expression = await inner(scoring_format)
+      return { expression, scores: Number(expression) !== 0 }
+    }
   }
 }
 
+// Field goals are the one stat-sourced role whose value is not a constant, so
+// it cannot use the flat factory: the value depends on the kick distance, which
+// lives on the joined stat row rather than on the format.
+//
+// Two things here are load-bearing and neither is visible in calculate-points.mjs,
+// which after the Phase 3 registry rewrite is a plain dot product of band COUNTS
+// against band values (it contains no field-goal literal at all). Both come from
+// calculate-stats-from-play-stats.mjs case 70, which is what builds those counts.
+//
+// The band cuts are < 20 / < 30 / < 40 / < 50 / else, one band per made kick.
+//
+// The per-yard term is GREATEST(yards, 30), NOT the raw distance -- case 70
+// accumulates `Math.max(playStat.yards, 30)` into field_goal_yards, so a 19-yard
+// kick contributes 30. Using the raw distance under-scores every field goal
+// shorter than 30 yards, and the two paths then disagree silently.
+const FIELD_GOAL_BANDS = [
+  { column: 'field_goals_made_0_19_yards', below: 20 },
+  { column: 'field_goals_made_20_29_yards', below: 30 },
+  { column: 'field_goals_made_30_39_yards', below: 40 },
+  { column: 'field_goals_made_40_49_yards', below: 50 }
+]
+const FIELD_GOAL_50_PLUS_COLUMN = 'field_goals_made_50_plus_yards'
+const FIELD_GOAL_YARDS_FLOOR = 30
+
+const create_field_goal_role_scoring = () => {
+  const resolve = async (scoring_format) => {
+    if (!scoring_format) {
+      scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
+    }
+
+    const read = (column) => Number(scoring_format?.[column] || 0)
+    const bands = FIELD_GOAL_BANDS.map(({ column, below }) => ({
+      below,
+      value: read(column)
+    }))
+    const fifty_plus = read(FIELD_GOAL_50_PLUS_COLUMN)
+    const per_yard = read('field_goal_yards')
+
+    const scores =
+      per_yard !== 0 ||
+      fifty_plus !== 0 ||
+      bands.some(({ value }) => value !== 0)
+    if (!scores) {
+      return { expression: '0', scores: false }
+    }
+
+    const yards = `"${FIELD_GOAL_STATS_ALIAS}"."yards"`
+    const band_expression =
+      `CASE ` +
+      bands
+        .map(({ below, value }) => `WHEN ${yards} < ${below} THEN ${value}`)
+        .join(' ') +
+      ` ELSE ${fifty_plus} END`
+
+    // Production scores every band at 0 and the rate at 0.1, so the band CASE
+    // collapses to a constant 0 there and the per-yard term carries the score.
+    // A banded league is the inverse. Both terms are always emitted when the
+    // role scores at all, which keeps the expression one shape.
+    const per_yard_expression = `${per_yard} * GREATEST(${yards}, ${FIELD_GOAL_YARDS_FLOOR})`
+
+    return {
+      expression: `(${band_expression}) + (${per_yard_expression})`,
+      scores: true
+    }
+  }
+
+  return {
+    resolve,
+    sql: async (scoring_format) => {
+      const { expression } = await resolve(scoring_format)
+      return `ROUND(SUM(${expression}), 2)`
+    }
+  }
+}
+
+const fumble_lost_role_scoring = create_flat_role_scoring({
+  column: 'fumbles_lost',
+  fallback: '-1'
+})
 const fumble_return_touchdown_role_scoring = create_flat_role_scoring({
   column: 'fumble_return_touchdowns',
   fallback: '6'
@@ -774,23 +776,97 @@ const two_point_conversion_role_scoring = create_flat_role_scoring({
   column: 'two_point_conversions',
   fallback: '2'
 })
+// An extra point IS flat on the scoring path, even though case 72 increments two
+// fields on the gamelogs path: only `extra_points_made` is a scoring column, and
+// `xpa` is an attempt count nothing scores (it is also shared with the missed
+// kick, case 73). That asymmetry is why the stat-role registry excludes 72 while
+// this factory accepts it.
+const extra_point_role_scoring = create_flat_role_scoring({
+  column: 'extra_points_made',
+  fallback: '1'
+})
+const field_goal_role_scoring = create_field_goal_role_scoring()
 
-const generate_fumble_return_touchdown_scoring_inner =
-  fumble_return_touchdown_role_scoring.inner
-const generate_fumble_return_touchdown_scoring_sql =
-  fumble_return_touchdown_role_scoring.sql
-const generate_punt_return_touchdown_scoring_inner =
-  punt_return_touchdown_role_scoring.inner
-const generate_punt_return_touchdown_scoring_sql =
-  punt_return_touchdown_role_scoring.sql
-const generate_kickoff_return_touchdown_scoring_inner =
-  kickoff_return_touchdown_role_scoring.inner
-const generate_kickoff_return_touchdown_scoring_sql =
-  kickoff_return_touchdown_role_scoring.sql
-const generate_two_point_conversion_scoring_inner =
-  two_point_conversion_role_scoring.inner
-const generate_two_point_conversion_scoring_sql =
-  two_point_conversion_role_scoring.sql
+// Every stat-sourced role in one table. Both from-plays paths iterate this
+// rather than repeating a near-identical block per role -- the legacy `with`
+// path to build its subqueries and its EXISTS gate, the role-union path to build
+// its roles. `gate_stat_ids` is null for the two fumble roles, whose plays are
+// already reachable through nfl_plays.player_fuml_pid and so need no widening.
+// `subquery_alias` is the legacy `with` path's UNION-arm alias and is emitted
+// verbatim, so the five pre-existing values are pinned rather than derived --
+// deriving them would rename fuml_stats and change SQL for every format.
+//
+// The two kicking roles take a `_role_stats` suffix deliberately. Deriving
+// theirs would produce `field_goal_stats`, which is already the alias of the
+// nfl_play_stats JOIN inside that same subquery (the field-goal scoring
+// expression reads its `yards`). Postgres resolves the two by nesting, but an
+// alias collision in this exact path is what 67278d518 had to repair, so they
+// are kept distinct.
+const STAT_SOURCED_ROLES = [
+  {
+    name: 'fumble_lost',
+    attribution: fumble_lost_attribution,
+    scoring: fumble_lost_role_scoring,
+    gate_stat_ids: null,
+    subquery_alias: 'fuml_stats'
+  },
+  {
+    name: 'fumble_return_touchdown',
+    attribution: fumble_return_touchdown_attribution,
+    scoring: fumble_return_touchdown_role_scoring,
+    gate_stat_ids: null,
+    subquery_alias: 'fumble_return_touchdown_stats'
+  },
+  {
+    name: 'punt_return_touchdown',
+    attribution: punt_return_touchdown_attribution,
+    scoring: punt_return_touchdown_role_scoring,
+    gate_stat_ids: PUNT_RETURN_TOUCHDOWN_STAT_IDS,
+    subquery_alias: 'punt_return_touchdown_stats'
+  },
+  {
+    name: 'kickoff_return_touchdown',
+    attribution: kickoff_return_touchdown_attribution,
+    scoring: kickoff_return_touchdown_role_scoring,
+    gate_stat_ids: KICKOFF_RETURN_TOUCHDOWN_STAT_IDS,
+    subquery_alias: 'kickoff_return_touchdown_stats'
+  },
+  {
+    name: 'two_point_conversion',
+    attribution: two_point_conversion_attribution,
+    scoring: two_point_conversion_role_scoring,
+    gate_stat_ids: TWO_POINT_CONVERSION_STAT_IDS,
+    subquery_alias: 'two_point_conversion_stats'
+  },
+  {
+    name: 'field_goal',
+    attribution: field_goal_attribution,
+    scoring: field_goal_role_scoring,
+    gate_stat_ids: FIELD_GOAL_STAT_IDS,
+    subquery_alias: 'field_goal_role_stats'
+  },
+  {
+    name: 'extra_point',
+    attribution: extra_point_attribution,
+    scoring: extra_point_role_scoring,
+    gate_stat_ids: EXTRA_POINT_STAT_IDS,
+    subquery_alias: 'extra_point_role_stats'
+  }
+]
+
+// Resolve every stat-sourced role against a format, keeping only the ones it
+// actually scores. Omitting a zero-scored role is not just an optimization: its
+// joins are pure cost for a term that is always zero, and leaving it out keeps
+// the emitted SQL byte-identical for the formats that carry 0.
+const resolve_stat_sourced_roles = async (scoring_format) => {
+  const resolved = await Promise.all(
+    STAT_SOURCED_ROLES.map(async (role) => ({
+      ...role,
+      ...(await role.scoring.resolve(scoring_format))
+    }))
+  )
+  return resolved.filter(({ scores }) => scores)
+}
 
 const should_use_main_where = ({ params }) => {
   // Equal-endpoint offsets ([k,k]) are a single-year shift, not a range: the
@@ -809,7 +885,7 @@ const should_use_main_where = ({ params }) => {
 // path does not yet support. All three production scoring_format_ides
 // in baseline.json have uniform `receptions` values, so this is parity-safe.
 // SFB formats (sfb15_sleeper/sfb15_mfl) would diverge -- track as a follow-up.
-const fp_role_attributions = async ({ params }) => {
+const fantasy_points_role_attributions = async ({ params }) => {
   const scoring_format = await get_scoring_format(params.scoring_format_id)
   const rushing_inner = await generate_rushing_scoring_inner(scoring_format)
   const passing_inner = await generate_passing_scoring_inner(scoring_format)
@@ -817,59 +893,18 @@ const fp_role_attributions = async ({ params }) => {
     scoring_format,
     false
   )
-  const fumble_inner = await generate_fumble_scoring_inner(scoring_format)
-  const fumble_return_touchdown_inner =
-    await generate_fumble_return_touchdown_scoring_inner(scoring_format)
-  const punt_return_touchdown_inner =
-    await generate_punt_return_touchdown_scoring_inner(scoring_format)
-  const kickoff_return_touchdown_inner =
-    await generate_kickoff_return_touchdown_scoring_inner(scoring_format)
-  const two_point_conversion_inner =
-    await generate_two_point_conversion_scoring_inner(scoring_format)
-  const roles = [
+  const stat_sourced_roles = await resolve_stat_sourced_roles(scoring_format)
+
+  return [
     { pid_column: 'ball_carrier_pid', measure_expr: rushing_inner },
     { pid_column: 'passer_pid', measure_expr: passing_inner },
-    { pid_column: 'target_pid', measure_expr: receiving_inner }
+    { pid_column: 'target_pid', measure_expr: receiving_inner },
+    ...stat_sourced_roles.map(({ attribution, expression }) => ({
+      pid_expr: attribution.pid_expr,
+      apply_joins: attribution.apply_joins,
+      measure_expr: expression
+    }))
   ]
-  // Skip a stat-sourced role entirely when the format scores it at zero -- the
-  // joins are pure cost for a term that is always zero, and omitting them keeps
-  // the emitted SQL unchanged for the formats that carry 0.
-  if (Number(fumble_inner) !== 0) {
-    roles.push({
-      pid_expr: fumble_lost_attribution.pid_expr,
-      apply_joins: fumble_lost_attribution.apply_joins,
-      measure_expr: fumble_inner
-    })
-  }
-  if (Number(fumble_return_touchdown_inner) !== 0) {
-    roles.push({
-      pid_expr: fumble_return_touchdown_attribution.pid_expr,
-      apply_joins: fumble_return_touchdown_attribution.apply_joins,
-      measure_expr: fumble_return_touchdown_inner
-    })
-  }
-  if (Number(punt_return_touchdown_inner) !== 0) {
-    roles.push({
-      pid_expr: punt_return_touchdown_attribution.pid_expr,
-      apply_joins: punt_return_touchdown_attribution.apply_joins,
-      measure_expr: punt_return_touchdown_inner
-    })
-  }
-  if (Number(kickoff_return_touchdown_inner) !== 0) {
-    roles.push({
-      pid_expr: kickoff_return_touchdown_attribution.pid_expr,
-      apply_joins: kickoff_return_touchdown_attribution.apply_joins,
-      measure_expr: kickoff_return_touchdown_inner
-    })
-  }
-  if (Number(two_point_conversion_inner) !== 0) {
-    roles.push({
-      pid_expr: two_point_conversion_attribution.pid_expr,
-      apply_joins: two_point_conversion_attribution.apply_joins,
-      measure_expr: two_point_conversion_inner
-    })
-  }
-  return roles
 }
 
 // Apply the same param-driven filters that the legacy `with` builder
@@ -924,7 +959,7 @@ export default {
     with: fantasy_points_from_plays_with,
     source: plays_source,
     measure_source: 'plays_role_union',
-    role_attributions: fp_role_attributions,
+    role_attributions: fantasy_points_role_attributions,
     apply_filters: fp_apply_filters,
     supports_output: {
       periods: FP_OUTPUT_PERIODS,
