@@ -91,6 +91,8 @@ yarn test:local     # starts the DB and runs the full suite against it
 yarn test:db:down   # stop and remove the container
 ```
 
+**`yarn test` and `yarn test:db:up` do not point at the same database, so starting the container and then running `yarn test` HANGS INDEFINITELY rather than failing.** `yarn test` blanks `LEAGUE_DB_HOST`/`LEAGUE_DB_PORT`, and `db/index.mjs` only overrides on a truthy value, so the connection falls back to `config-test.json` — **127.0.0.1:5432**. The container publishes on **5433**. On a machine already running something on 5432 the pool neither connects nor errors: mocha sits at ~0% CPU emitting nothing, because `--reporter min` prints only at the end. On 2026-08-05 that read as a slow suite for 53 minutes before the CPU time (2.4s elapsed against 53 min wall) gave it away; `yarn test:local`, which sets port 5433 explicitly, then ran the same suite in 2 minutes. **Use `yarn test:local` — never `yarn test:db:up && yarn test`.** Check `ps -o etime,time` on the mocha pid before assuming a long run is progressing; this presents identically to the malformed-schema hang documented under "Building a candidate schema by hand" below.
+
 **A bare `yarn test` with no database fails with `role "league_test" does not exist`.** That is a missing test DB, NOT a broken or unrunnable suite — start it with `yarn test:db:up` rather than concluding the tests cannot run here. `test/global.mjs` drops all tables and reloads `db/schema.postgres.sql` on every run, so schema edits are exercised by simply running the suite.
 
 To run one spec against an already-running DB:
