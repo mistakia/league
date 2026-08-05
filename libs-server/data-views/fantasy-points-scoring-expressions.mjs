@@ -191,9 +191,19 @@ const PLAYS_SOURCED_ROLES = [
         // Applied only when the caller supplies position data AND some position
         // value differs from the base -- otherwise the plain rate form is
         // emitted, which is what every uniform-reception format gets.
+        //
+        // `position_column` is the legacy `with` path's reference: that builder
+        // projects the position into its filtered_plays CTE as `trg_pos` and the
+        // subqueries read it from there. The role-union path joins `player`
+        // directly in its inner sub and so passes its own reference -- see
+        // receiving_position_attribution below.
         position_override: {
           predicate: 'is_completion = true',
           position_column: 'trg_pos',
+          // The positions the join restricts to. A player outside this set
+          // reads NULL and the CASE falls through to the base value, so the
+          // list is part of the scoring semantics rather than an optimization.
+          join_positions: ['RB', 'WR', 'TE', 'FB'],
           columns: [
             ['RB', 'running_back_reception'],
             ['WR', 'wide_receiver_reception'],
@@ -213,7 +223,12 @@ const PLAYS_SOURCED_ROLES = [
 
 const scoring_value = (scoring_format, column) => scoring_format[column] || 0
 
-const render_position_override = (term, scoring_format, base_value) => {
+const render_position_override = (
+  term,
+  scoring_format,
+  base_value,
+  position_column_override
+) => {
   const { predicate, position_column, columns } = term.position_override
   const cases = columns
     .map(
@@ -221,7 +236,8 @@ const render_position_override = (term, scoring_format, base_value) => {
         `WHEN '${position}' THEN ${scoring_value(scoring_format, column)}`
     )
     .join(' ')
-  return `CASE WHEN ${predicate} THEN CASE ${position_column} ${cases} ELSE ${base_value} END ELSE 0 END`
+  const column_reference = position_column_override || position_column
+  return `CASE WHEN ${predicate} THEN CASE ${column_reference} ${cases} ELSE ${base_value} END ELSE 0 END`
 }
 
 const uses_position_override = (term, scoring_format, has_position_data) => {
@@ -234,11 +250,21 @@ const uses_position_override = (term, scoring_format, has_position_data) => {
   )
 }
 
-const render_term = (term, scoring_format, has_position_data) => {
+const render_term = (
+  term,
+  scoring_format,
+  has_position_data,
+  position_column_override
+) => {
   const value = scoring_value(scoring_format, term.column)
 
   if (uses_position_override(term, scoring_format, has_position_data)) {
-    return render_position_override(term, scoring_format, value)
+    return render_position_override(
+      term,
+      scoring_format,
+      value,
+      position_column_override
+    )
   }
 
   switch (term.kind) {
@@ -263,7 +289,8 @@ const term_is_emitted = (term, scoring_format, has_position_data) =>
 const generate_role_scoring_inner = async (
   role,
   scoring_format,
-  has_position_data = false
+  has_position_data = false,
+  position_column_override = null
 ) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
@@ -274,7 +301,14 @@ const generate_role_scoring_inner = async (
 
   return role.terms
     .filter((term) => term_is_emitted(term, scoring_format, has_position_data))
-    .map((term) => render_term(term, scoring_format, has_position_data))
+    .map((term) =>
+      render_term(
+        term,
+        scoring_format,
+        has_position_data,
+        position_column_override
+      )
+    )
     .join(' + ')
 }
 
@@ -299,12 +333,14 @@ export const generate_rushing_scoring_sql = async (scoring_format) =>
 
 export const generate_receiving_scoring_inner = async (
   scoring_format,
-  has_position_data = false
+  has_position_data = false,
+  position_column_override = null
 ) =>
   generate_role_scoring_inner(
     role_by_name.receiving,
     scoring_format,
-    has_position_data
+    has_position_data,
+    position_column_override
   )
 
 export const generate_receiving_scoring_sql = async (
@@ -312,6 +348,62 @@ export const generate_receiving_scoring_sql = async (
   has_position_data = false
 ) =>
   `ROUND(SUM(${await generate_receiving_scoring_inner(scoring_format, has_position_data)}), 2)`
+
+// Does this format need position data to score receptions correctly?
+//
+// Derived from the receiving role's own `position_override` declaration rather
+// than restating the three column names, so a fourth positional reception
+// column would be honored by adding it to the table and nothing else. Both
+// from-plays builders gate on this, which is what keeps them from disagreeing
+// about whether the positional CASE applies.
+//
+// Confirmed equivalent to the hand-written predicate it replaced across all 65
+// production formats -- that one required the positional value to be TRUTHY as
+// well as different, so the two disagree only for a format overriding a nonzero
+// base with an explicit 0, which none carries.
+export const needs_position_data = (scoring_format) => {
+  if (!scoring_format) {
+    return false
+  }
+  return PLAYS_SOURCED_ROLES.some((role) =>
+    role.terms.some((term) =>
+      uses_position_override(term, scoring_format, true)
+    )
+  )
+}
+
+// The `player` join and position reference the role-union path needs to score
+// receptions positionally, in the shape build_period_cte's role_attributions
+// already accept -- the same `apply_joins` hook the stat-sourced roles use.
+//
+// This is what makes position-aware receiving reachable on that path. A comment
+// in the column definitions asserted for a long time that it was not, because
+// the builder had no leftJoin support; `apply_joins` was added for the
+// nfl_play_stats-sourced roles and applies unconditionally to any role
+// supplying one, so the capability had been there and unused.
+//
+// The join mirrors the legacy `with` builder's exactly, restriction included: a
+// player outside join_positions reads NULL and the CASE falls through to the
+// base value, so widening it here would silently change scoring on one path
+// only.
+export const receiving_position_attribution = (() => {
+  const { position_override } = role_by_name.receiving.terms.find(
+    (term) => term.position_override
+  )
+  const alias = 'p_trg'
+  return {
+    position_column: `${alias}.primary_position`,
+    apply_joins: ({ query, plays_table }) => {
+      query.leftJoin(`player as ${alias}`, function () {
+        this.on(`${plays_table}.target_pid`, `${alias}.pid`)
+        this.andOnIn(
+          `${alias}.primary_position`,
+          position_override.join_positions
+        )
+      })
+    }
+  }
+})()
 
 // Per-row fumble-lost penalty. Like the fumble return touchdown below, this
 // role is sourced from nfl_play_stats (stat_id 106) rather than from

@@ -15,6 +15,8 @@ import {
   generate_rushing_scoring_sql,
   generate_receiving_scoring_inner,
   generate_receiving_scoring_sql,
+  needs_position_data,
+  receiving_position_attribution,
   resolve_stat_sourced_roles
 } from '#libs-server/data-views/fantasy-points-scoring-expressions.mjs'
 
@@ -66,24 +68,6 @@ const generate_fantasy_points_table_alias = ({ params = {} } = {}) => {
     .join('')
 
   return get_table_hash(`fantasy_points_from_plays_${key}`)
-}
-
-// Check if position data is needed based on scoring format
-const needs_position_data = (scoring_format) => {
-  if (!scoring_format) {
-    return false // Default scoring doesn't need position data
-  }
-
-  // Check if any position-specific reception scoring differs from base reception scoring
-  const base_rec = scoring_format.receptions || 0
-  return (
-    (scoring_format.running_back_reception &&
-      scoring_format.running_back_reception !== base_rec) ||
-    (scoring_format.wide_receiver_reception &&
-      scoring_format.wide_receiver_reception !== base_rec) ||
-    (scoring_format.tight_end_reception &&
-      scoring_format.tight_end_reception !== base_rec)
-  )
 }
 
 const fantasy_points_from_plays_with = async ({
@@ -494,27 +478,37 @@ const should_use_main_where = ({ params }) => {
 
 // Build the role-union role_attributions for fantasy points. Each role
 // emits the per-play scoring expression (no SUM/ROUND wrapper -- the
-// aggregator's SUM wraps it). Position-aware receiving
-// (running_back_reception/wide_receiver_reception/tight_end_reception)
-// is intentionally NOT enabled here: it requires a leftJoin on `player`
-// inside the role_union inner sub, which the build_period_cte role_union
-// path does not yet support. All three production scoring_format_ides
-// in baseline.json have uniform `receptions` values, so this is parity-safe.
-// SFB formats (sfb15_sleeper/sfb15_mfl) would diverge -- track as a follow-up.
+// aggregator's SUM wraps it).
+//
+// Position-aware receiving is gated on the same `needs_position_data` predicate
+// as the legacy `with` builder, so the two paths agree on whether the positional
+// CASE applies. Five production formats need it -- sfb15_mfl and sfb15_sleeper
+// among them -- and this path scored all five as if every reception were worth
+// the base value until the join was wired.
 const fantasy_points_role_attributions = async ({ params }) => {
   const scoring_format = await get_scoring_format(params.scoring_format_id)
+  const requires_position_data = needs_position_data(scoring_format)
   const rushing_inner = await generate_rushing_scoring_inner(scoring_format)
   const passing_inner = await generate_passing_scoring_inner(scoring_format)
   const receiving_inner = await generate_receiving_scoring_inner(
     scoring_format,
-    false
+    requires_position_data,
+    receiving_position_attribution.position_column
   )
   const stat_sourced_roles = await resolve_stat_sourced_roles(scoring_format)
 
   return [
     { pid_column: 'ball_carrier_pid', measure_expr: rushing_inner },
     { pid_column: 'passer_pid', measure_expr: passing_inner },
-    { pid_column: 'target_pid', measure_expr: receiving_inner },
+    {
+      pid_column: 'target_pid',
+      measure_expr: receiving_inner,
+      // Emitted only when the format needs it, so a uniform-reception format
+      // pays for no join and its SQL is unchanged.
+      ...(requires_position_data
+        ? { apply_joins: receiving_position_attribution.apply_joins }
+        : {})
+    },
     ...stat_sourced_roles.map(({ attribution, expression }) => ({
       pid_expr: attribution.pid_expr,
       apply_joins: attribution.apply_joins,
