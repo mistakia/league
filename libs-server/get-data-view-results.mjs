@@ -422,7 +422,7 @@ const resolve_nfl_week_params = (params) => {
   if (!params.nfl_week_id.length) return
 
   // Decompose BEFORE offset expansion to get base year/week/seas_type
-  // These base values are used by data-view-join-function.mjs which applies
+  // These base values are used by the source-attach rules, which apply
   // year_offset independently via SQL arithmetic -- using post-offset years
   // would double-apply the offset
   const base_decomposed = decompose_nfl_weeks({
