@@ -2,22 +2,18 @@
 
 import * as chai from 'chai'
 
-import {
-  derive_measure,
-  derive_periods_from_rate_types
-} from '#libs-server/data-views/measure-contract.mjs'
+import { derive_measure } from '#libs-server/data-views/measure-contract.mjs'
 
 const expect = chai.expect
 
-const TEAM_RATE_TYPES = [
-  'per_game',
-  'per_team_half',
-  'per_team_quarter',
-  'per_team_play',
-  'per_team_pass_play',
-  'per_team_rush_play',
-  'per_team_drive',
-  'per_team_series'
+const TEAM_PERIODS = [
+  'team_half',
+  'team_quarter',
+  'team_play',
+  'team_pass_play',
+  'team_rush_play',
+  'team_drive',
+  'team_series'
 ]
 
 describe('data-views measure-contract', () => {
@@ -26,7 +22,7 @@ describe('data-views measure-contract', () => {
       const result = derive_measure({
         stat_name: 'rush_yds_from_plays',
         measure: { kind: 'additive', expr: 'rush_yds' },
-        supported_rate_types: TEAM_RATE_TYPES
+        supports_periods: TEAM_PERIODS
       })
       expect(result.with_select).to.equal('SUM(rush_yds)')
       expect(result.aggregate).to.equal('sum')
@@ -42,7 +38,7 @@ describe('data-views measure-contract', () => {
           expr: 'CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END',
           decimals: 2
         },
-        supported_rate_types: TEAM_RATE_TYPES
+        supports_periods: TEAM_PERIODS
       })
       expect(result.with_select).to.equal(
         'ROUND(SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2)'
@@ -60,7 +56,7 @@ describe('data-views measure-contract', () => {
           kind: 'distinct_count',
           expr: "CONCAT(esbid, '_', series_seq)"
         },
-        supported_rate_types: TEAM_RATE_TYPES
+        supports_periods: TEAM_PERIODS
       })
       expect(result.with_select).to.equal(
         "COUNT(DISTINCT CONCAT(esbid, '_', series_seq))"
@@ -76,7 +72,7 @@ describe('data-views measure-contract', () => {
           kind: 'distinct_count',
           expr: "CONCAT(esbid, '_', drive_seq)"
         },
-        supported_rate_types: TEAM_RATE_TYPES
+        supports_periods: TEAM_PERIODS
       })
       expect(result.decimals).to.equal(2)
       // season render is bare regardless of decimals
@@ -91,18 +87,18 @@ describe('data-views measure-contract', () => {
           expr: "CONCAT(esbid, '_', drive_seq)",
           decimals: 0
         },
-        supported_rate_types: TEAM_RATE_TYPES
+        supports_periods: TEAM_PERIODS
       })
       expect(result.decimals).to.equal(0)
     })
   })
 
   describe('supports_output derivation', () => {
-    it('prepends game/season to the canonical period list and echoes supported_rate_types', () => {
+    it('prepends game/season to the declared period list and echoes supports_periods', () => {
       const result = derive_measure({
         stat_name: 'rush_yds_from_plays',
         measure: { kind: 'additive', expr: 'rush_yds' },
-        supported_rate_types: TEAM_RATE_TYPES
+        supports_periods: TEAM_PERIODS
       })
       expect(result.supports_output.aggregations).to.deep.equal([
         'rate',
@@ -113,15 +109,7 @@ describe('data-views measure-contract', () => {
         'season'
       ])
       expect(result.supports_output.periods).to.include('team_play')
-      expect(result.supported_rate_types).to.deep.equal(TEAM_RATE_TYPES)
-    })
-  })
-
-  describe('derive_periods_from_rate_types', () => {
-    it('strips the per_ prefix', () => {
-      expect(
-        derive_periods_from_rate_types(['per_game', 'per_team_play'])
-      ).to.deep.equal(['game', 'team_play'])
+      expect(result.supports_periods).to.deep.equal(TEAM_PERIODS)
     })
   })
 
@@ -131,7 +119,7 @@ describe('data-views measure-contract', () => {
         derive_measure({
           stat_name: 'bad_col',
           measure: { kind: 'average', expr: 'x' },
-          supported_rate_types: TEAM_RATE_TYPES
+          supports_periods: TEAM_PERIODS
         })
       ).to.throw(/unknown measure kind/)
     })
@@ -141,7 +129,7 @@ describe('data-views measure-contract', () => {
         derive_measure({
           stat_name: 'bad_col',
           measure: { kind: 'additive' },
-          supported_rate_types: TEAM_RATE_TYPES
+          supports_periods: TEAM_PERIODS
         })
       ).to.throw(/non-empty string expr/)
     })
@@ -151,7 +139,7 @@ describe('data-views measure-contract', () => {
         derive_measure({
           stat_name: 'bad_col',
           measure: null,
-          supported_rate_types: TEAM_RATE_TYPES
+          supports_periods: TEAM_PERIODS
         })
       ).to.throw(/requires a measure object/)
     })

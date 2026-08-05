@@ -11,9 +11,9 @@ const expect = chai.expect
 const per_game = { period: 'game', aggregation: 'rate', threshold: null }
 
 // create_team_share_stat columns are a separate factory (no supports_output, no
-// supported_rate_types property) -- non-rate by construction. Exempt them
+// supports_periods property) -- non-rate by construction. Exempt them
 // explicitly so the sweep neither false-positives nor silently skips them.
-const is_share_stat = (def) => !('supported_rate_types' in def)
+const is_share_stat = (def) => !('supports_periods' in def)
 
 const build_per_game_sql = async (column_id, is_team) => {
   const request = {
@@ -44,7 +44,7 @@ describe('data-views rate-capability sweep', () => {
       it(`${column_id}`, async () => {
         // closed measure-kind aggregate set
         expect(['sum', 'count_distinct'], column_id).to.include(def.aggregate)
-        expect(def.supported_rate_types.length, column_id).to.be.greaterThan(0)
+        expect(def.supports_periods.length, column_id).to.be.greaterThan(0)
         const is_team =
           column_id.startsWith('team_') && !column_id.startsWith('player_team_')
         const sql = await build_per_game_sql(column_id, is_team)
@@ -58,7 +58,7 @@ describe('data-views rate-capability sweep', () => {
   describe('carve-out columns advertise no rate types', () => {
     for (const [column_id, def] of carve_outs) {
       it(`${column_id}`, () => {
-        expect(def.supported_rate_types, column_id).to.deep.equal([])
+        expect(def.supports_periods, column_id).to.deep.equal([])
         expect(def.supports_output, column_id).to.be.not.ok
       })
     }
@@ -66,7 +66,7 @@ describe('data-views rate-capability sweep', () => {
 
   it('time_to_throw is a carve-out (no rate types)', () => {
     const def = player_stats.player_time_to_throw_from_plays
-    expect(def.supported_rate_types).to.deep.equal([])
+    expect(def.supports_periods).to.deep.equal([])
     expect(def.supports_output).to.be.not.ok
   })
 })

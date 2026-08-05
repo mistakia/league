@@ -591,28 +591,6 @@ export default {
       'scoring_format_id',
       ...Object.keys(nfl_plays_column_params)
     ],
-    supported_rate_types: [
-      'per_game',
-      'per_team_half',
-      'per_team_quarter',
-      'per_team_play',
-      'per_team_pass_play',
-      'per_team_rush_play',
-      'per_team_drive',
-      'per_team_series',
-
-      'per_player_rush_attempt',
-      'per_player_pass_attempt',
-      'per_player_target',
-      'per_player_catchable_target',
-      'per_player_catchable_deep_target',
-      'per_player_reception',
-
-      'per_player_play',
-      'per_player_route',
-      'per_player_pass_play',
-      'per_player_rush_play'
-    ],
     use_having: true,
     get_cache_info: get_cache_info_for_fields_from_plays
   }

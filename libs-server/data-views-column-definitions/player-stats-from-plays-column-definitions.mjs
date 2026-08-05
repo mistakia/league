@@ -69,27 +69,26 @@ const player_stat_from_plays = ({
   is_percentage = false,
   measure = null,
   measure_expr = null,
-  supported_rate_types = [
-    'per_game',
-    'per_team_half',
-    'per_team_quarter',
-    'per_team_play',
-    'per_team_pass_play',
-    'per_team_rush_play',
-    'per_team_drive',
-    'per_team_series',
+  supports_periods = [
+    'team_half',
+    'team_quarter',
+    'team_play',
+    'team_pass_play',
+    'team_rush_play',
+    'team_drive',
+    'team_series',
 
-    'per_player_rush_attempt',
-    'per_player_pass_attempt',
-    'per_player_target',
-    'per_player_catchable_target',
-    'per_player_catchable_deep_target',
-    'per_player_reception',
+    'player_rush_attempt',
+    'player_pass_attempt',
+    'player_target',
+    'player_catchable_target',
+    'player_catchable_deep_target',
+    'player_reception',
 
-    'per_player_play',
-    'per_player_route',
-    'per_player_pass_play',
-    'per_player_rush_play'
+    'player_play',
+    'player_route',
+    'player_pass_play',
+    'player_rush_play'
   ]
 }) => {
   // Measure-first contract: a rate-capable single-aggregate column declares an
@@ -97,18 +96,19 @@ const player_stat_from_plays = ({
   // season render, numerator measure_expr, period aggregate, supports_output,
   // and decimals rounding from it. Non-rate columns (averages, compound ratios,
   // numerator/denominator ratios) declare no measure, keep their raw
-  // with_select_string, and pass supported_rate_types: [].
+  // with_select_string, and pass supports_periods: [].
   const derived = measure
-    ? derive_measure({ stat_name, measure, supported_rate_types })
+    ? derive_measure({ stat_name, measure, supports_periods })
     : null
 
-  // Fail-fast invariant (scoped to this factory): a column advertising any rate
-  // type MUST declare a measure; a column left on a raw with_select_string MUST
-  // pass supported_rate_types: []. Throws at module load, making the
-  // silent-rate-drop class (e.g. time_to_throw) structurally impossible.
-  if (!derived && supported_rate_types && supported_rate_types.length > 0) {
+  // Fail-fast invariant (scoped to this factory): a column advertising any
+  // denominator period MUST declare a measure; a column left on a raw
+  // with_select_string MUST pass supports_periods: []. Throws at module load,
+  // making the silent-rate-drop class (e.g. time_to_throw) structurally
+  // impossible.
+  if (!derived && supports_periods && supports_periods.length > 0) {
     throw new Error(
-      `player_stat_from_plays: '${stat_name}' advertises rate types but declares no measure -- declare measure: { kind, expr } or set supported_rate_types: []`
+      `player_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { kind, expr } or set supports_periods: []`
     )
   }
 
@@ -218,7 +218,7 @@ const player_stat_from_plays = ({
     with: add_player_stats_play_by_play_with_statement,
     source: plays_source,
     use_having: true,
-    supported_rate_types,
+    supports_periods,
     ...(final_supports_output
       ? { supports_output: final_supports_output, measure_source: 'plays' }
       : {}),
@@ -474,7 +474,7 @@ export default {
     denominator_select: `SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_completion_percentage_over_expected_from_plays: player_stat_from_plays(
     {
@@ -487,7 +487,7 @@ export default {
       numerator_select: `SUM(completion_percentage_over_expected)`,
       denominator_select: `SUM(CASE WHEN completion_percentage_over_expected IS NOT NULL THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
-      supported_rate_types: []
+      supports_periods: []
     }
   ),
   player_expected_completion_percentage_from_plays: player_stat_from_plays({
@@ -503,7 +503,7 @@ export default {
     denominator_select: `SUM(CASE WHEN completion_probability IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_pass_touchdown_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -513,7 +513,7 @@ export default {
     denominator_select: `SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_pass_interception_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -523,7 +523,7 @@ export default {
     denominator_select: `SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_pass_interception_worthy_percentage_from_plays: player_stat_from_plays(
     {
@@ -534,7 +534,7 @@ export default {
       denominator_select: `SUM(CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
       is_percentage: true,
-      supported_rate_types: []
+      supports_periods: []
     }
   ),
   player_pass_yards_after_catch_from_plays: player_stat_from_plays({
@@ -550,7 +550,7 @@ export default {
       numerator_select: `SUM(yards_after_catch)`,
       denominator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
-      supported_rate_types: []
+      supports_periods: []
     }),
   player_pass_yards_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -559,7 +559,7 @@ export default {
     numerator_select: `SUM(pass_yds)`,
     denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_pass_depth_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -568,7 +568,7 @@ export default {
     numerator_select: `SUM(depth_of_target)`,
     denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_pass_air_yards_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -582,7 +582,7 @@ export default {
     numerator_select: `SUM(depth_of_target)`,
     denominator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
 
   // completed air yards / total air yards (a unitless ratio, not a percentage)
@@ -593,7 +593,7 @@ export default {
     numerator_select: `SUM(CASE WHEN is_completion = true THEN depth_of_target ELSE 0 END)`,
     denominator_select: `SUM(depth_of_target)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_sacked_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -619,7 +619,7 @@ export default {
     denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_quarterback_hits_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -629,7 +629,7 @@ export default {
     denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_quarterback_pressures_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -639,7 +639,7 @@ export default {
     denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_quarterback_hurries_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['passer_pid'],
@@ -649,7 +649,7 @@ export default {
     denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
 
   // net yards per passing attempt: (pass yards - sack yards)/(passing attempts + sacks).
@@ -661,7 +661,7 @@ export default {
     numerator_select: `SUM(pass_yds) - SUM(CASE WHEN is_sack = true THEN yds_gained ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
 
   player_rush_yards_from_plays: player_stat_from_plays({
@@ -684,7 +684,7 @@ export default {
     numerator_select: `SUM(rush_yds)`,
     denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_rush_attempts_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
@@ -702,7 +702,7 @@ export default {
       numerator_select: `AVG(CASE WHEN ball_carrier_pid IS NOT NULL THEN box_defenders ELSE NULL END)`,
       denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
-      supported_rate_types: []
+      supports_periods: []
     }),
   player_rush_first_downs_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
@@ -733,7 +733,7 @@ export default {
       numerator_select: `SUM(yards_after_any_contact)`,
       denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
-      supported_rate_types: []
+      supports_periods: []
     }),
   player_rush_first_down_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
@@ -743,7 +743,7 @@ export default {
     denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_weighted_opportunity_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid', 'target_pid'],
@@ -843,7 +843,7 @@ export default {
     denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_positive_rush_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
@@ -853,7 +853,7 @@ export default {
     denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_successful_rush_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
@@ -863,7 +863,7 @@ export default {
     denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_broken_tackles_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid', 'target_pid'],
@@ -877,7 +877,7 @@ export default {
     numerator_select: `SUM(missed_or_broken_tackle)`,
     denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_receptions_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -953,7 +953,7 @@ export default {
     denominator_select: `SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_air_yards_per_target_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -962,7 +962,7 @@ export default {
     numerator_select: `SUM(depth_of_target)`,
     denominator_select: `SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_air_yards_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -985,7 +985,7 @@ export default {
     denominator_select: `SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
 
   player_air_yards_share_from_plays: create_team_share_stat({
@@ -1059,7 +1059,7 @@ export default {
     numerator_select: `SUM(CASE WHEN is_completion = true THEN recv_yds ELSE 0 END)`,
     denominator_select: `SUM(depth_of_target)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_receiving_yards_per_reception_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -1068,7 +1068,7 @@ export default {
     numerator_select: `SUM(CASE WHEN is_completion = true THEN recv_yds ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_receiving_yards_per_target_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
@@ -1077,7 +1077,7 @@ export default {
     numerator_select: `SUM(CASE WHEN is_completion = true THEN recv_yds ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
   player_receiving_yards_after_catch_per_reception_from_plays:
     player_stat_from_plays({
@@ -1087,7 +1087,7 @@ export default {
       numerator_select: `SUM(CASE WHEN is_completion = true THEN yards_after_catch ELSE 0 END)`,
       denominator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
-      supported_rate_types: []
+      supports_periods: []
     }),
 
   player_yards_created_from_plays: player_stat_from_plays({
@@ -1111,7 +1111,7 @@ export default {
     denominator_select: `SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,
-    supported_rate_types: []
+    supports_periods: []
   }),
 
   player_successful_rushing_and_receiving_play_percentage_from_plays:
@@ -1125,7 +1125,7 @@ export default {
       denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
       is_percentage: true,
-      supported_rate_types: []
+      supports_periods: []
     }),
 
   player_total_expected_points_added_from_plays: player_stat_from_plays({
@@ -1172,6 +1172,6 @@ export default {
     numerator_select: `SUM(CASE WHEN time_to_throw IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN time_to_throw ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN time_to_throw IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
-    supported_rate_types: []
+    supports_periods: []
   })
 }

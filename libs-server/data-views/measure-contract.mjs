@@ -5,7 +5,7 @@
 // downstream artifact from that single source of truth: the season-total
 // render (`with_select`), the numerator measure expression (`measure_expr`),
 // the period-CTE aggregate selector (`aggregate`), the advertised
-// `supports_output` periods, the echoed `supported_rate_types`, and the
+// `supports_output` periods, the echoed `supports_periods`, and the
 // rate/season rounding (`decimals`). This replaces the fragile prior heuristic
 // that inferred the measure by parsing the season-render string (and silently
 // dropped rate types for `ROUND(SUM(...))`, `AVG(...)`, and
@@ -35,7 +35,7 @@ const VALID_KINDS = new Set(['additive', 'distinct_count'])
 // emitting wrong SQL at query time. The broader invariant -- a column passing
 // through a measure-first factory that advertises rate types MUST declare a
 // measure; a column left on a raw with_select_string MUST pass
-// `supported_rate_types: []` -- is enforced inside the two factories, not here,
+// `supports_periods: []` -- is enforced inside the two factories, not here,
 // because the role_attributions / explicit-supports_output factories
 // (defensive, fantasy-points) never call derive_measure and would be wrongly
 // rejected by a global sweep.
@@ -57,20 +57,14 @@ const assert_measure_rate_capability = ({ stat_name, measure }) => {
   }
 }
 
-// Translate the legacy `per_<period>` rate-type tokens into the canonical
-// period names consumed by the output-aggregator registry.
-export const derive_periods_from_rate_types = (rate_types) =>
-  rate_types.map((t) => t.replace(/^per_/, ''))
-
 // Convert an explicit measure declaration into the full set of column-def
-// artifacts. `supported_rate_types` is supplied by the calling factory (the
-// two factories advertise different default rate-type sets) and echoed back so
-// the factory can spread the whole return uniformly onto the column-def.
-export const derive_measure = ({
-  stat_name,
-  measure,
-  supported_rate_types
-}) => {
+// artifacts. `supports_periods` is supplied by the calling factory (the two
+// factories advertise different default period sets) in the canonical
+// output-aggregator vocabulary -- bare period names such as `game` and
+// `team_play`, never the retired `per_`-prefixed rate-type tokens -- and is
+// echoed back so the factory can spread the whole return uniformly onto the
+// column-def.
+export const derive_measure = ({ stat_name, measure, supports_periods }) => {
   assert_measure_rate_capability({ stat_name, measure })
 
   const { kind, expr } = measure
@@ -101,11 +95,7 @@ export const derive_measure = ({
   const measure_expr = () => expr
 
   const supports_output = {
-    periods: [
-      'game',
-      'season',
-      ...derive_periods_from_rate_types(supported_rate_types)
-    ],
+    periods: ['game', 'season', ...supports_periods],
     aggregations: ['rate', 'count']
   }
 
@@ -114,7 +104,7 @@ export const derive_measure = ({
     measure_expr,
     aggregate,
     supports_output,
-    supported_rate_types,
+    supports_periods,
     decimals
   }
 }

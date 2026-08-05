@@ -82,20 +82,6 @@ const defensive_player_stat_from_plays = ({
   main_where: () => null,
   source: defensive_plays_source,
   pid_columns,
-  supported_rate_types: [
-    'per_game',
-    'per_team_half',
-    'per_team_quarter',
-    'per_team_play',
-    'per_team_pass_play',
-    'per_team_rush_play',
-    'per_team_drive',
-    'per_team_series',
-
-    'per_player_play',
-    'per_player_pass_play',
-    'per_player_rush_play'
-  ],
   use_having: true,
   with: add_defensive_play_by_play_with_statement,
   get_cache_info: get_cache_info_for_fields_from_plays,

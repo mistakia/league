@@ -8,7 +8,7 @@ import { compare_queries } from './utils/index.mjs'
 
 // Parity audit: legacy `rate_type` params and native `output` params should
 // produce byte-identical SQL after request-time normalization. Seeded across
-// the 6 column families that declare `supported_rate_types`: stats-from-plays,
+// the 6 column families that declare `supports_periods`: stats-from-plays,
 // fantasy-points, games-played, routes, snaps, team.
 
 const assert_output_parity = async ({

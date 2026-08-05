@@ -121,15 +121,14 @@ const team_stat_from_plays = ({
   force_player_active = false,
   measure = null,
   measure_expr = null,
-  supported_rate_types = [
-    'per_game',
-    'per_team_half',
-    'per_team_quarter',
-    'per_team_play',
-    'per_team_pass_play',
-    'per_team_rush_play',
-    'per_team_drive',
-    'per_team_series'
+  supports_periods = [
+    'team_half',
+    'team_quarter',
+    'team_play',
+    'team_pass_play',
+    'team_rush_play',
+    'team_drive',
+    'team_series'
   ]
 }) => {
   // Player-identity variant always limits to the player's active games.
@@ -144,22 +143,17 @@ const team_stat_from_plays = ({
   // season render, numerator measure_expr, period aggregate (sum or
   // count_distinct), supports_output, and decimals rounding from it. is_rate
   // numerator/denominator columns and AVG carve-outs declare no measure and
-  // pass supported_rate_types: [].
+  // pass supports_periods: [].
   const derived = measure
-    ? derive_measure({ stat_name, measure, supported_rate_types })
+    ? derive_measure({ stat_name, measure, supports_periods })
     : null
 
   // Fail-fast invariant (scoped to this factory): a non-rate column advertising
-  // any rate type MUST declare a measure; an is_rate or raw-select column MUST
-  // pass supported_rate_types: []. Throws at module load.
-  if (
-    !is_rate &&
-    !derived &&
-    supported_rate_types &&
-    supported_rate_types.length > 0
-  ) {
+  // any denominator period MUST declare a measure; an is_rate or raw-select
+  // column MUST pass supports_periods: []. Throws at module load.
+  if (!is_rate && !derived && supports_periods && supports_periods.length > 0) {
     throw new Error(
-      `team_stat_from_plays: '${stat_name}' advertises rate types but declares no measure -- declare measure: { kind, expr } or set supported_rate_types: []`
+      `team_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { kind, expr } or set supports_periods: []`
     )
   }
 
@@ -311,7 +305,7 @@ const team_stat_from_plays = ({
       return `${table_name}${table_suffix}.week`
     },
     use_having: true,
-    supported_rate_types,
+    supports_periods,
     is_rate,
     ...(final_supports_output
       ? { supports_output: final_supports_output, measure_source: 'plays' }
@@ -357,14 +351,14 @@ const stat_specs = {
     numerator_select: `SUM(pass_oe)`,
     denominator_select: `SUM(CASE WHEN pass_oe IS NOT NULL THEN 1 ELSE 0 END)`,
     stat_name: 'team_pass_rate_over_expected_from_plays',
-    supported_rate_types: []
+    supports_periods: []
   },
   team_completion_percentage_over_expected_from_plays: {
     select_string: `AVG(completion_percentage_over_expected)`,
     numerator_select: `SUM(completion_percentage_over_expected)`,
     denominator_select: `SUM(CASE WHEN completion_percentage_over_expected IS NOT NULL THEN 1 ELSE 0 END)`,
     stat_name: 'team_completion_percentage_over_expected_from_plays',
-    supported_rate_types: []
+    supports_periods: []
   },
   team_pass_attempts_from_plays: {
     measure: {
@@ -428,7 +422,7 @@ const stat_specs = {
     ],
     stat_name: 'team_success_rate_from_plays',
     is_rate: true,
-    supported_rate_types: []
+    supports_periods: []
   },
   team_expected_points_success_rate_from_plays: {
     rate_with_selects: [
@@ -437,7 +431,7 @@ const stat_specs = {
     ],
     stat_name: 'team_expected_points_success_rate_from_plays',
     is_rate: true,
-    supported_rate_types: []
+    supports_periods: []
   },
   team_explosive_play_rate_from_plays: {
     rate_with_selects: [
@@ -446,7 +440,7 @@ const stat_specs = {
     ],
     stat_name: 'team_explosive_play_rate_from_plays',
     is_rate: true,
-    supported_rate_types: []
+    supports_periods: []
   },
   team_play_count_from_plays: {
     measure: { kind: 'additive', expr: `1` },
@@ -492,7 +486,7 @@ const stat_specs = {
     ],
     stat_name: 'team_series_conversion_rate_from_plays',
     is_rate: true,
-    supported_rate_types: []
+    supports_periods: []
   }
 }
 
