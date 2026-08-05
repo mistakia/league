@@ -75,12 +75,12 @@ const calculateStatsFromPlayStats = (playStats) => {
         stats.rushing_yards += playStat.yards
 
         // Track rushing yards excluding QB kneels
-        if (!playStat.qb_kneel) {
+        if (!playStat.is_qb_kneel) {
           stats.rushing_yards_excluding_kneels += playStat.yards
         }
 
         // Track rushing first downs using play-level first_down flag
-        if (playStat.first_down) {
+        if (playStat.is_first_down) {
           stats.rushing_first_downs += 1
         }
 
@@ -99,12 +99,12 @@ const calculateStatsFromPlayStats = (playStats) => {
         stats.rushing_yards += playStat.yards
 
         // Track rushing yards excluding QB kneels
-        if (!playStat.qb_kneel) {
+        if (!playStat.is_qb_kneel) {
           stats.rushing_yards_excluding_kneels += playStat.yards
         }
 
         // Track rushing first downs using play-level first_down flag
-        if (playStat.first_down) {
+        if (playStat.is_first_down) {
           stats.rushing_first_downs += 1
         }
 
@@ -123,7 +123,7 @@ const calculateStatsFromPlayStats = (playStats) => {
         stats.rushing_yards += playStat.yards
 
         // Track rushing yards excluding QB kneels
-        if (!playStat.qb_kneel) {
+        if (!playStat.is_qb_kneel) {
           stats.rushing_yards_excluding_kneels += playStat.yards
         }
 
@@ -135,7 +135,7 @@ const calculateStatsFromPlayStats = (playStats) => {
         stats.rushing_yards += playStat.yards
 
         // Track rushing yards excluding QB kneels
-        if (!playStat.qb_kneel) {
+        if (!playStat.is_qb_kneel) {
           stats.rushing_yards_excluding_kneels += playStat.yards
         }
 
@@ -185,7 +185,7 @@ const calculateStatsFromPlayStats = (playStats) => {
           stats.recv_yards_15_plus_count += 1
         }
         // Track receiving first downs using play-level first_down flag
-        if (playStat.first_down) {
+        if (playStat.is_first_down) {
           stats.receiving_first_downs += 1
         }
         break
@@ -203,7 +203,7 @@ const calculateStatsFromPlayStats = (playStats) => {
           stats.recv_yards_15_plus_count += 1
         }
         // Track receiving first downs using play-level first_down flag
-        if (playStat.first_down) {
+        if (playStat.is_first_down) {
           stats.receiving_first_downs += 1
         }
         break

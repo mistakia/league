@@ -213,18 +213,18 @@ These stats are recorded at the team level and do not have associated player IDs
 
 **Critical**: Stat IDs 3 (1st Down Rushing) and 4 (1st Down Passing) are **team-level statistics** with no player association. They record that a first down occurred but do NOT indicate which player earned the first down.
 
-To track player-level first downs for fantasy scoring, use the `first_down` flag at the play level combined with the receiving/rushing stat:
+To track player-level first downs for fantasy scoring, use the `is_first_down` flag at the play level combined with the receiving/rushing stat:
 
 ```javascript
 // Player-level first down tracking
 case 10: // Rushing Yards
-  if (playStat.first_down) {
+  if (playStat.is_first_down) {
     stats.rush_first_down += 1
   }
   break
 
 case 21: // Receiving Yards
-  if (playStat.first_down) {
+  if (playStat.is_first_down) {
     stats.rec_first_down += 1
   }
   break
@@ -232,7 +232,7 @@ case 21: // Receiving Yards
 
 ### QB Kneels
 
-QB kneels are recorded as rushing attempts (stat ID 10) with negative yards. To exclude kneels from rushing yard calculations, check the `qb_kneel` flag on the play.
+QB kneels are recorded as rushing attempts (stat ID 10) with negative yards. To exclude kneels from rushing yard calculations, check the `is_qb_kneel` flag on the play.
 
 ### Lateral Plays
 

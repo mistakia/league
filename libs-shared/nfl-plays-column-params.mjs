@@ -212,7 +212,7 @@ export const nfl_games_params = {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.GAME]
   },
-  ot: {
+  is_overtime: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.GAME]
   },
@@ -375,13 +375,13 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
 
-  motion: {
+  is_motion: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  motion_before_snap: {
+  is_motion_before_snap: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  motion_during_snap: {
+  is_motion_during_snap: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
@@ -655,11 +655,11 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
-  drive_inside20: {
+  is_drive_inside_20: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
-  drive_score: {
+  is_drive_score: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
@@ -748,7 +748,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SERIES]
   },
-  series_suc: {
+  is_series_successful: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.SERIES]
   },
@@ -770,12 +770,12 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.SERIES]
   },
 
-  goal_to_go: {
+  is_goal_to_go: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
 
-  score: {
+  is_scoring_play: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
@@ -868,72 +868,72 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
 
-  fum: {
+  is_fumble: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  fumbles_lost: {
+  is_fumble_lost: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  interceptions: {
+  is_interception: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  sk: {
+  is_sack: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  successful_play: {
+  is_successful_play: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  comp: {
+  is_completion: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  incomp: {
+  is_incompletion: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  trick_play: {
+  is_trick_play: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  touchback: {
+  is_touchback: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  safety: {
+  is_safety: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  penalty: {
+  is_penalty: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  oob: {
+  is_out_of_bounds: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  tfl: {
+  is_tackle_for_loss: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  rush: {
+  is_rushing_play: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TYPE]
   },
-  pass: {
+  is_passing_play: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TYPE]
   },
-  solo_tk: {
+  is_solo_tackle: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  assist_tk: {
+  is_assist_tackle: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
-  special: {
+  is_special_teams_play: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
@@ -954,19 +954,19 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PENALTY]
   },
 
-  td: {
+  is_touchdown: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  ret_td: {
+  is_return_touchdown: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  pass_td: {
+  is_passing_touchdown: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  rush_td: {
+  is_rushing_touchdown: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
@@ -1072,7 +1072,7 @@ export default {
       }
     ]
   },
-  endzone_target: {
+  is_endzone_target: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
@@ -1103,93 +1103,93 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
 
-  no_huddle: {
+  is_no_huddle: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
-  play_action: {
+  is_play_action: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  qb_dropback: {
+  is_qb_dropback: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  qb_kneel: {
+  is_qb_kneel: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  qb_spike: {
+  is_qb_spike: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  qb_rush: {
+  is_qb_rush: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
-  qb_sneak: {
+  is_qb_sneak: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
-  qb_scramble: {
+  is_qb_scramble: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
 
-  qb_pressure: {
+  is_qb_pressure: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
-  qb_pressure_tracking: {
+  is_qb_pressure_tracking: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
-  qb_hit: {
+  is_qb_hit: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
-  qb_hurry: {
+  is_qb_hurry: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
 
-  int_worthy: {
+  is_interception_worthy: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  catchable_ball: {
+  is_catchable_ball: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  throw_away: {
+  is_throw_away: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  shovel_pass: {
+  is_shovel_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  sideline_pass: {
+  is_sideline_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  highlight_pass: {
+  is_highlight_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
 
-  dropped_pass: {
+  is_dropped_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  contested_ball: {
+  is_contested_ball: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  created_reception: {
+  is_created_reception: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
-  pass_breakup: {
+  is_pass_breakup: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
@@ -1237,81 +1237,81 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
 
-  trick_look: {
+  is_trick_look: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
   },
 
-  first_down: {
+  is_first_down: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  first_down_rush: {
+  is_first_down_rush: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
-  first_down_pass: {
+  is_first_down_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  first_down_penalty: {
+  is_first_down_penalty: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PENALTY]
   },
 
-  third_down_converted: {
+  is_third_down_converted: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  third_down_failed: {
+  is_third_down_failed: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  fourth_down_converted: {
+  is_fourth_down_converted: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  fourth_down_failed: {
+  is_fourth_down_failed: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
 
-  hindered_pass: {
+  is_hindered_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  zero_blitz: {
+  is_zero_blitz: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
-  stunt: {
+  is_stunt: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
-  out_of_pocket_pass: {
+  is_out_of_pocket_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  phyb: {
+  is_physical_ball: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  batted_pass: {
+  is_batted_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  screen_pass: {
+  is_screen_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  pain_free_play: {
+  is_pain_free_play: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  run_play_option: {
+  is_run_play_option: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TYPE]
   },
-  qb_fault_sack: {
+  is_qb_fault_sack: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
@@ -1455,7 +1455,7 @@ export default {
       }
     ]
   },
-  ep_succ: {
+  is_epa_successful: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
@@ -1836,23 +1836,23 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
 
-  ep_att: {
+  is_extra_point_attempt: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
-  two_att: {
+  is_two_point_conversion_attempt: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
-  fg_att: {
+  is_field_goal_attempt: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
-  kickoff_att: {
+  is_kickoff_attempt: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
-  punt_att: {
+  is_punt_attempt: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
@@ -1877,7 +1877,7 @@ export default {
   // tp_result: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
-  punt_blocked: {
+  is_punt_blocked: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
@@ -1918,7 +1918,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
-  timeouts: {
+  is_timeout: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },

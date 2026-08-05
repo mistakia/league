@@ -38,7 +38,7 @@ const backfill_penalty_type = async ({
       'pen_team',
       'offense_nfl_team'
     )
-    .where('penalty', true)
+    .where('is_penalty', true)
     .whereNotNull('pen_team')
 
   if (!force) {

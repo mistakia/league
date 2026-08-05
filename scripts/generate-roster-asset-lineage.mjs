@@ -169,7 +169,7 @@ const generate_roster_asset_lineage = async ({
       is_rookie_tag: draft.is_rookie_tag === true,
       protected_for_year: draft.protected_for_year ?? null,
       super_priority_until: draft.super_priority_until ?? null,
-      audit_corrected: false,
+      is_audit_corrected: false,
       correction_note: null,
       __draft_id: draft.draft_id
     }
@@ -224,7 +224,7 @@ const generate_roster_asset_lineage = async ({
         : null,
       source_share: t.source_share,
       target_share: t.target_share,
-      audit_corrected: false
+      is_audit_corrected: false
     }))
     transformation_row_count = transformation_rows.length
     if (transformation_rows.length) {
@@ -239,7 +239,7 @@ const generate_roster_asset_lineage = async ({
     )
 
     // Apply audit-corrections seed: flag holdings keyed by (lid, tid, player_id,
-    // period_start_ts) with audit_corrected=true and a correction_note. Each
+    // period_start_ts) with is_audit_corrected=true and a correction_note. Each
     // entry is expected to match exactly one holding; mismatches surface as
     // log warnings rather than errors so a rebuild on a different league does
     // not fail on unrelated seed entries.
@@ -254,7 +254,7 @@ const generate_roster_asset_lineage = async ({
           period_start
         })
         .update({
-          audit_corrected: true,
+          is_audit_corrected: true,
           correction_note: entry.correction_note
         })
       if (updated === 0) {
@@ -288,7 +288,7 @@ const main = async () => {
     if (argv.all) {
       const leagues = await db('leagues')
         .select('uid')
-        .where({ hosted: true })
+        .where({ is_hosted: true })
         .whereNull('archived_at')
       for (const league of leagues) {
         await generate_roster_asset_lineage({

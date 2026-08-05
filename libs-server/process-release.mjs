@@ -197,7 +197,7 @@ export default async function ({
   // verify player was not poached this offseason
   if (!current_season.isRegularSeason) {
     const poaches = await db('poaches')
-      .where({ pid: release_pid, lid, tid, succ: 1 })
+      .where({ pid: release_pid, lid, tid, is_successful: 1 })
       .orderBy('processed', 'desc')
 
     if (poaches.length) {
@@ -273,7 +273,7 @@ export default async function ({
     // clear any pending poaching claims for player
     await db('poaches')
       .update({
-        succ: 0,
+        is_successful: 0,
         processed: timestamp,
         reason: 'player is not on a practice squad' // TODO use constant
       })

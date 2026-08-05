@@ -60,7 +60,7 @@ const run = async () => {
     await db('poaches')
       .update('processed', timestamp)
       .update('reason', error ? error.message : null) // TODO - add error codes
-      .update('succ', error ? 0 : 1)
+      .update('is_successful', error ? 0 : 1)
       .where({
         pid: claim.pid,
         tid: claim.tid,

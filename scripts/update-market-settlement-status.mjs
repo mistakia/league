@@ -139,7 +139,7 @@ export const update_market_settlement_status = async ({
         pmi.source_id,
         pmi.source_market_id,
         pmi.time_type,
-        pmi.market_settled,
+        pmi.is_market_settled,
         pmi.esbid,
         pmi.season_year,
         pmi.market_type,
@@ -161,7 +161,7 @@ export const update_market_settlement_status = async ({
         pmi.source_id,
         pmi.source_market_id,
         pmi.time_type,
-        pmi.market_settled,
+        pmi.is_market_settled,
         pmi.esbid,
         pmi.season_year,
         pmi.market_type
@@ -173,7 +173,7 @@ export const update_market_settlement_status = async ({
       time_type::text,
       total_selections,
       settled_selections,
-      market_settled,
+      is_market_settled,
       esbid,
       season_year,
       ${needs_game_join ? 'week, seas_type::text,' : ''}
@@ -181,7 +181,7 @@ export const update_market_settlement_status = async ({
     FROM market_settlement_check
     WHERE total_selections = settled_selections  -- All selections are settled
       AND total_selections > 0                   -- Has selections
-      AND market_settled = false                 -- Not already marked as settled
+      AND is_market_settled = false               -- Not already marked as settled
     ORDER BY source_id, source_market_id, time_type
   `
 
@@ -237,7 +237,7 @@ export const update_market_settlement_status = async ({
             time_type: market.time_type
           })
           .update({
-            market_settled: true
+            is_market_settled: true
           })
 
         if (update_count > 0) {

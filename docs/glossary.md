@@ -205,120 +205,120 @@
 | column                  | name                    | description                                                                       | coverage | since      |
 | ----------------------- | ----------------------- | --------------------------------------------------------------------------------- | -------- | ---------- |
 | desc                    | Description             | Text description of the play                                                      | 100.00%  | 2001/01/06 |
-| motion                  | Motion                  | Indicator if any player was in motion on the play                                 | 92.07%   | 2022/09/08 |
+| is_motion               | Motion                  | Indicator if any player was in motion on the play                                 | 92.07%   | 2022/09/08 |
 | timestamp               | Timestamp               | Timestamp of the play                                                             | 99.11%   | 2001/01/06 |
 | pos_team                | Possession Team         | Team in possession of the ball                                                    | 99.99%   | 2001/01/06 |
 | pos_team_id             | Possession Team ID      | ID of the team in possession                                                      | 99.38%   | 2002/08/03 |
 | off                     | Offense                 | Abbreviation for the offensive team                                               | 99.99%   | 2001/01/06 |
 | def                     | Defense                 | Abbreviation for the defensive team                                               | 99.99%   | 2001/01/06 |
-| trick_play              | Trick Play              | Indicator if the play was a trick play                                            | 83.19%   | 2021/09/10 |
+| is_trick_play           | Trick Play              | Indicator if the play was a trick play                                            | 83.19%   | 2021/09/10 |
 | mbt                     | Missed or Broken Tackle | Indicator if the tackle was missed or broken                                      | 23.42%   | 2021/09/10 |
-| oob                     | Out of Bounds           | Indicator if the play ended out of bounds                                         | 55.59%   | 2001/09/09 |
+| is_out_of_bounds        | Out of Bounds           | Indicator if the play ended out of bounds                                         | 55.59%   | 2001/09/09 |
 | pen_team                | Penalty Team            | Team that was penalized                                                           | 58.10%   | 2002/09/05 |
 | pen_yds                 | Penalty Yards           | Yards gained by the team after the penalty                                        | 55.55%   | 2001/09/09 |
-| penalty                 | Penalty                 | Indicator if the play was a penalty                                               | 99.11%   | 2001/01/06 |
-| ret_td                  | Return Touchdown        | Indicator if the return was a touchdown                                           | 20.11%   | 2001/01/06 |
+| is_penalty              | Penalty                 | Indicator if the play was a penalty                                               | 99.11%   | 2001/01/06 |
+| is_return_touchdown     | Return Touchdown        | Indicator if the return was a touchdown                                           | 20.11%   | 2001/01/06 |
 | ret_tm                  | Return Team             | Team that was returned to                                                         | -        | -          |
-| stunt                   | Stunt                   | stunt, when any two pass rushers cross, trading pass rush lanes on a passing down | 23.42%   | 2021/09/10 |
-| tfl                     | Tackle For Loss         | Indicator if the tackle was for loss                                              | 55.59%   | 2001/09/09 |
+| is_stunt                | Stunt                   | stunt, when any two pass rushers cross, trading pass rush lanes on a passing down | 23.42%   | 2021/09/10 |
+| is_tackle_for_loss      | Tackle For Loss         | Indicator if the tackle was for loss                                              | 55.59%   | 2001/09/09 |
 | to                      | Timeout                 | Indicator if the play was a timeout                                               | 55.59%   | 2001/09/09 |
 | to_team                 | Timeout Team            | Team that was timed out                                                           | 58.06%   | 2002/09/05 |
 | yards_after_any_contact | Yards After Contact     | Yards gained by the ball carrier after initial contact of any kind                | 23.42%   | 2021/09/10 |
 
 ### Passing
 
-| column               | name                            | description                                                                                                                                                                                                                                                                                            | coverage | since      |
-| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ---------- |
-| air_yards            | Air Yards                       | Air yards (distance from line of scrimmage to target)                                                                                                                                                                                                                                                  | 96.96%   | 2016/08/11 |
-| time_to_throw        | Time to Throw                   | Time taken to throw the ball (in seconds)                                                                                                                                                                                                                                                              | 96.96%   | 2016/08/11 |
-| route                | Route                           | Route run by the receiver                                                                                                                                                                                                                                                                              | 95.94%   | 2016/08/27 |
-| oopd                 | Out of Pocket Details           | Details about the quarterback being out of the pocket                                                                                                                                                                                                                                                  | 23.42%   | 2021/09/10 |
-| avsk                 | Avoided Sacks                   | Number of sacks avoided by the quarterback                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
-| batted_pass          | Batted Pass                     | Indicator if the pass was batted down by a defender                                                                                                                                                                                                                                                    | 23.42%   | 2021/09/10 |
-| catchable_ball       | Catchable Ball                  | Indicator if the pass was a catchable ball                                                                                                                                                                                                                                                             | 83.19%   | 2021/09/10 |
-| contested_ball       | Contested Ball                  | Indicator if the pass was contested                                                                                                                                                                                                                                                                    | 83.19%   | 2021/09/10 |
-| phyb                 | Physical Ball                   | Indicator if the pass was a physical ball                                                                                                                                                                                                                                                              | 23.42%   | 2021/09/10 |
-| created_reception    | Created Reception               | Indicator if the reception was exceptional                                                                                                                                                                                                                                                             | 83.19%   | 2021/09/10 |
-| dot                  | Depth of Target                 | Distance the ball traveled to the receiver                                                                                                                                                                                                                                                             | 91.75%   | 2001/01/06 |
-| dropped_pass         | Dropped Pass                    | Indicator if the pass was dropped by the receiver                                                                                                                                                                                                                                                      | 83.19%   | 2021/09/10 |
-| highlight_pass       | Highlight Pass                  | Indicator if the pass was a highlight pass                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
-| hindered_pass        | Hindered Throw Motion           | Indicator if the throwing motion was hindered                                                                                                                                                                                                                                                          | 23.42%   | 2021/09/10 |
-| int_worthy           | Interception Worthy             | A bad pass that is interceptable as determined by a video scout. An interception worthy throw is not always an INT. Perhaps the defender muffs the opportunity. Also, not every INT is a interception worthy throw. Ex: a catchable ball bouncing off a receivers chest, into the hands of a defender. | 83.19%   | 2021/09/10 |
-| play_action          | Play Action Pass                | Indicator if the pass was a play action pass                                                                                                                                                                                                                                                           | 83.19%   | 2021/09/10 |
-| out_of_pocket_pass   | Out of Pocket Pass              | Indicator if the pass was out of pocket                                                                                                                                                                                                                                                                | 83.19%   | 2021/09/10 |
-| pass                 | Pass Play                       | Indicator if the play was a pass attempt (includes sacks)                                                                                                                                                                                                                                              | 55.59%   | 2001/09/09 |
-| pass_td              | Pass Touchdown                  | Indicator if the pass was a touchdown                                                                                                                                                                                                                                                                  | 96.27%   | 2001/01/06 |
-| pass_yds             | Pass Yards                      | Pass yards attributed to the quarterback                                                                                                                                                                                                                                                               | 99.99%   | 2001/01/06 |
-| qb_hit               | Quarterback Hit                 | Indicator if the quarterback was hit by the pass                                                                                                                                                                                                                                                       | 23.42%   | 2021/09/10 |
-| qb_hurry             | Quarterback Hurry               | Indicator if the quarterback was hurried by the pass                                                                                                                                                                                                                                                   | -        | -          |
-| qb_pressure          | Quarterback Pressure            | Indicator if the quarterback was pressed by the pass                                                                                                                                                                                                                                                   | 23.42%   | 2021/09/10 |
-| qb_pressure_tracking | Quarterback Pressure (Tracking) | Indicator if the quarterback was under pressure (tracking data)                                                                                                                                                                                                                                        | 96.96%   | 2016/08/11 |
-| qb_dropback          | Quarterback Dropback            | Indicator if the quarterback dropped back on the play                                                                                                                                                                                                                                                  | 55.59%   | 2001/09/09 |
-| qb_kneel             | Quarterback Kneel               | Indicator if the quarterback kneeled on the play                                                                                                                                                                                                                                                       | 55.59%   | 2001/09/09 |
-| qb_rush              | Quarterback Run                 | Indicator if the quarterback ran on the play                                                                                                                                                                                                                                                           | 23.42%   | 2021/09/10 |
-| qb_scramble          | Quarterback Scramble            | Indicator if the quarterback scramble on the play                                                                                                                                                                                                                                                      | 23.42%   | 2021/09/10 |
-| qb_spike             | Quarterback Spike               | Indicator if the quarterback spiked on the play                                                                                                                                                                                                                                                        | 55.59%   | 2001/09/09 |
-| qb_fault_sack        | Quarterback Sack                | Indicator if the quarterback sacked on the play                                                                                                                                                                                                                                                        | 83.19%   | 2021/09/10 |
-| throw_away           | Quarterback Throwaway           | Indicator if the quarterback threw away on the play                                                                                                                                                                                                                                                    | 83.19%   | 2021/09/10 |
-| recv_yds             | Receiver Yards                  | Receiver yards attributed to the receiver                                                                                                                                                                                                                                                              | 99.99%   | 2001/01/06 |
-| screen_pass          | Screen Pass                     | Indicator if the pass was a screen pass                                                                                                                                                                                                                                                                | 83.19%   | 2021/09/10 |
-| shovel_pass          | Shovel Pass                     | Indicator if the pass was a shovel pass                                                                                                                                                                                                                                                                | 23.42%   | 2021/09/10 |
-| sideline_pass        | Sideline Pass                   | Indicator if the pass was a sideline pass                                                                                                                                                                                                                                                              | 23.42%   | 2021/09/10 |
-| qb_sneak             | Quarterback Sneak               | Indicator if the quarterback sneaked on the play                                                                                                                                                                                                                                                       | 83.19%   | 2021/09/10 |
-| true_air_yards       | True Air Yards                  | Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline                                                                                                                                                                                                 | 23.42%   | 2021/09/10 |
-| time_to_pass         | Time to Pass                    | Time elapsed from the snap to the throw                                                                                                                                                                                                                                                                | 23.42%   | 2021/09/10 |
-| time_to_pressure     | Time to Pressure                | Time elapsed from the snap to the pressure                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
-| ttscrm               | Time to Scramble                | Time elapsed from the snap to the scramble                                                                                                                                                                                                                                                             | -        | -          |
-| ttsk                 | Time to Sack                    | Time elapsed from the snap to the sack                                                                                                                                                                                                                                                                 | -        | -          |
-| yards_after_catch    | Yards After Catch               | Yards gained by the receiver after the catch                                                                                                                                                                                                                                                           | 99.98%   | 2006/08/06 |
+| column                  | name                            | description                                                                                                                                                                                                                                                                                            | coverage | since      |
+| ----------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ---------- |
+| air_yards               | Air Yards                       | Air yards (distance from line of scrimmage to target)                                                                                                                                                                                                                                                  | 96.96%   | 2016/08/11 |
+| time_to_throw           | Time to Throw                   | Time taken to throw the ball (in seconds)                                                                                                                                                                                                                                                              | 96.96%   | 2016/08/11 |
+| route                   | Route                           | Route run by the receiver                                                                                                                                                                                                                                                                              | 95.94%   | 2016/08/27 |
+| oopd                    | Out of Pocket Details           | Details about the quarterback being out of the pocket                                                                                                                                                                                                                                                  | 23.42%   | 2021/09/10 |
+| avsk                    | Avoided Sacks                   | Number of sacks avoided by the quarterback                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
+| is_batted_pass          | Batted Pass                     | Indicator if the pass was batted down by a defender                                                                                                                                                                                                                                                    | 23.42%   | 2021/09/10 |
+| is_catchable_ball       | Catchable Ball                  | Indicator if the pass was a catchable ball                                                                                                                                                                                                                                                             | 83.19%   | 2021/09/10 |
+| is_contested_ball       | Contested Ball                  | Indicator if the pass was contested                                                                                                                                                                                                                                                                    | 83.19%   | 2021/09/10 |
+| is_physical_ball        | Physical Ball                   | Indicator if the pass was a physical ball                                                                                                                                                                                                                                                              | 23.42%   | 2021/09/10 |
+| is_created_reception    | Created Reception               | Indicator if the reception was exceptional                                                                                                                                                                                                                                                             | 83.19%   | 2021/09/10 |
+| dot                     | Depth of Target                 | Distance the ball traveled to the receiver                                                                                                                                                                                                                                                             | 91.75%   | 2001/01/06 |
+| is_dropped_pass         | Dropped Pass                    | Indicator if the pass was dropped by the receiver                                                                                                                                                                                                                                                      | 83.19%   | 2021/09/10 |
+| is_highlight_pass       | Highlight Pass                  | Indicator if the pass was a highlight pass                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
+| is_hindered_pass        | Hindered Throw Motion           | Indicator if the throwing motion was hindered                                                                                                                                                                                                                                                          | 23.42%   | 2021/09/10 |
+| is_interception_worthy  | Interception Worthy             | A bad pass that is interceptable as determined by a video scout. An interception worthy throw is not always an INT. Perhaps the defender muffs the opportunity. Also, not every INT is a interception worthy throw. Ex: a catchable ball bouncing off a receivers chest, into the hands of a defender. | 83.19%   | 2021/09/10 |
+| is_play_action          | Play Action Pass                | Indicator if the pass was a play action pass                                                                                                                                                                                                                                                           | 83.19%   | 2021/09/10 |
+| is_out_of_pocket_pass   | Out of Pocket Pass              | Indicator if the pass was out of pocket                                                                                                                                                                                                                                                                | 83.19%   | 2021/09/10 |
+| is_passing_play         | Pass Play                       | Indicator if the play was a pass attempt (includes sacks)                                                                                                                                                                                                                                              | 55.59%   | 2001/09/09 |
+| is_passing_touchdown    | Pass Touchdown                  | Indicator if the pass was a touchdown                                                                                                                                                                                                                                                                  | 96.27%   | 2001/01/06 |
+| pass_yds                | Pass Yards                      | Pass yards attributed to the quarterback                                                                                                                                                                                                                                                               | 99.99%   | 2001/01/06 |
+| is_qb_hit               | Quarterback Hit                 | Indicator if the quarterback was hit by the pass                                                                                                                                                                                                                                                       | 23.42%   | 2021/09/10 |
+| is_qb_hurry             | Quarterback Hurry               | Indicator if the quarterback was hurried by the pass                                                                                                                                                                                                                                                   | -        | -          |
+| is_qb_pressure          | Quarterback Pressure            | Indicator if the quarterback was pressed by the pass                                                                                                                                                                                                                                                   | 23.42%   | 2021/09/10 |
+| is_qb_pressure_tracking | Quarterback Pressure (Tracking) | Indicator if the quarterback was under pressure (tracking data)                                                                                                                                                                                                                                        | 96.96%   | 2016/08/11 |
+| is_qb_dropback          | Quarterback Dropback            | Indicator if the quarterback dropped back on the play                                                                                                                                                                                                                                                  | 55.59%   | 2001/09/09 |
+| is_qb_kneel             | Quarterback Kneel               | Indicator if the quarterback kneeled on the play                                                                                                                                                                                                                                                       | 55.59%   | 2001/09/09 |
+| is_qb_rush              | Quarterback Run                 | Indicator if the quarterback ran on the play                                                                                                                                                                                                                                                           | 23.42%   | 2021/09/10 |
+| is_qb_scramble          | Quarterback Scramble            | Indicator if the quarterback scramble on the play                                                                                                                                                                                                                                                      | 23.42%   | 2021/09/10 |
+| is_qb_spike             | Quarterback Spike               | Indicator if the quarterback spiked on the play                                                                                                                                                                                                                                                        | 55.59%   | 2001/09/09 |
+| is_qb_fault_sack        | Quarterback Sack                | Indicator if the quarterback sacked on the play                                                                                                                                                                                                                                                        | 83.19%   | 2021/09/10 |
+| is_throw_away           | Quarterback Throwaway           | Indicator if the quarterback threw away on the play                                                                                                                                                                                                                                                    | 83.19%   | 2021/09/10 |
+| recv_yds                | Receiver Yards                  | Receiver yards attributed to the receiver                                                                                                                                                                                                                                                              | 99.99%   | 2001/01/06 |
+| is_screen_pass          | Screen Pass                     | Indicator if the pass was a screen pass                                                                                                                                                                                                                                                                | 83.19%   | 2021/09/10 |
+| is_shovel_pass          | Shovel Pass                     | Indicator if the pass was a shovel pass                                                                                                                                                                                                                                                                | 23.42%   | 2021/09/10 |
+| is_sideline_pass        | Sideline Pass                   | Indicator if the pass was a sideline pass                                                                                                                                                                                                                                                              | 23.42%   | 2021/09/10 |
+| is_qb_sneak             | Quarterback Sneak               | Indicator if the quarterback sneaked on the play                                                                                                                                                                                                                                                       | 83.19%   | 2021/09/10 |
+| true_air_yards          | True Air Yards                  | Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline                                                                                                                                                                                                 | 23.42%   | 2021/09/10 |
+| time_to_pass            | Time to Pass                    | Time elapsed from the snap to the throw                                                                                                                                                                                                                                                                | 23.42%   | 2021/09/10 |
+| time_to_pressure        | Time to Pressure                | Time elapsed from the snap to the pressure                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
+| ttscrm                  | Time to Scramble                | Time elapsed from the snap to the scramble                                                                                                                                                                                                                                                             | -        | -          |
+| ttsk                    | Time to Sack                    | Time elapsed from the snap to the sack                                                                                                                                                                                                                                                                 | -        | -          |
+| yards_after_catch       | Yards After Catch               | Yards gained by the receiver after the catch                                                                                                                                                                                                                                                           | 99.98%   | 2006/08/06 |
 
 ### Rushing
 
-| column       | name           | description                                           | coverage | since      |
-| ------------ | -------------- | ----------------------------------------------------- | -------- | ---------- |
-| rush         | Rush Attempt   | Indicator if the play was a rush attempt              | 55.59%   | 2001/09/09 |
-| rush_td      | Rush Touchdown | Indicator if the rush was a touchdown                 | 91.07%   | 2001/01/06 |
-| rush_yds     | Rush Yards     | Rush yards attributed to the rusher                   | 99.99%   | 2001/01/06 |
-| run_gap      | Run Gap        | Indicator for line gap of run: end, guard, or tackle  | 55.58%   | 2001/09/09 |
-| run_location | Run Location   | Indicator for location of run: left, middle, or right | 55.59%   | 2001/09/09 |
+| column               | name           | description                                           | coverage | since      |
+| -------------------- | -------------- | ----------------------------------------------------- | -------- | ---------- |
+| is_rushing_play      | Rush Attempt   | Indicator if the play was a rush attempt              | 55.59%   | 2001/09/09 |
+| is_rushing_touchdown | Rush Touchdown | Indicator if the rush was a touchdown                 | 91.07%   | 2001/01/06 |
+| rush_yds             | Rush Yards     | Rush yards attributed to the rusher                   | 99.99%   | 2001/01/06 |
+| run_gap              | Run Gap        | Indicator for line gap of run: end, guard, or tackle  | 55.58%   | 2001/09/09 |
+| run_location         | Run Location   | Indicator for location of run: left, middle, or right | 55.59%   | 2001/09/09 |
 
 ### Series
 
-| column        | name            | description                                                   | coverage | since      |
-| ------------- | --------------- | ------------------------------------------------------------- | -------- | ---------- |
-| series_seq    | Series Sequence | Sequence number of the series within the game                 | 55.59%   | 2001/09/09 |
-| series_suc    | Series Success  | Indicator if the series resulted in a touchdown or first down | 55.59%   | 2001/09/09 |
-| series_result | Series Result   | Outcome of the series (e.g., touchdown, field goal)           | 55.59%   | 2001/09/09 |
+| column               | name            | description                                                   | coverage | since      |
+| -------------------- | --------------- | ------------------------------------------------------------- | -------- | ---------- |
+| series_seq           | Series Sequence | Sequence number of the series within the game                 | 55.59%   | 2001/09/09 |
+| is_series_successful | Series Success  | Indicator if the series resulted in a touchdown or first down | 55.59%   | 2001/09/09 |
+| series_result        | Series Result   | Outcome of the series (e.g., touchdown, field goal)           | 55.59%   | 2001/09/09 |
 
 ### Play Types, Events & Outcomes
 
-| column             | name               | description                                                   | coverage | since      |
-| ------------------ | ------------------ | ------------------------------------------------------------- | -------- | ---------- |
-| play_type          | Play Type          | Type of play (e.g., RUSH, PASS)                               | 99.99%   | 2001/01/06 |
-| play_type_nfl      | Play Type NFL      | NFL-defined type of play                                      | 99.11%   | 2001/01/06 |
-| play_type_ngs      | Play Type NGS      | Next Gen Stats defined type of play                           | 99.38%   | 2002/08/03 |
-| next_play_type     | Next Play Type     | Type of the next play                                         | 98.29%   | 2001/01/06 |
-| yds_gained         | Yards Gained       | Yardage gained or lost by the possessing team during the play | 99.99%   | 2001/01/06 |
-| fum                | Fumble Occurred    | Indicator if a fumble occurred during the play                | 55.59%   | 2001/09/09 |
-| fuml               | Fumble Lost        | Indicator if the fumble was lost to the opposing team         | 71.59%   | 2001/01/06 |
-| int                | Interception       | Indicator if an interception occurred during the play         | 84.26%   | 2001/01/06 |
-| sk                 | Sack               | Indicator if a sack occurred during the play                  | 97.94%   | 2001/01/06 |
-| successful_play    | Successful Play    | Indicator if the play was successful                          | 23.42%   | 2021/09/10 |
-| comp               | Completion         | Indicator if the pass was completed                           | 99.99%   | 2001/01/06 |
-| incomp             | Incompletion       | Indicator if the pass was incomplete                          | 55.59%   | 2001/09/09 |
-| safety             | Safety             | Indicator if a safety occurred                                | 55.59%   | 2001/09/09 |
-| punt_blocked       | Punt Blocked       | Binary indicator for if the punt was blocked.                 | 55.59%   | 2001/09/09 |
-| score              | Score Occurred     | Indicator if a score occurred during the play                 | 100.00%  | 2001/01/06 |
-| score_type         | Score Type         | Type of score (e.g., field goal, touchdown)                   | 99.10%   | 2001/01/06 |
-| score_team         | Scoring Team       | Team that scored                                              | 99.10%   | 2001/01/06 |
-| solo_tk            | Solo Tackle        | Indicator if the tackle was solo                              | 55.59%   | 2001/09/09 |
-| assist_tk          | Assist Tackle      | Indicator if the tackle was an assist                         | 55.59%   | 2001/09/09 |
-| first_down         | First Down         | Indicator if the play was a first down                        | 100.00%  | 2001/01/06 |
-| first_down_rush    | First Down Rush    | Indicator if the play was a first down rush                   | 55.59%   | 2001/09/09 |
-| first_down_pass    | First Down Pass    | Indicator if the play was a first down pass                   | 55.59%   | 2001/09/09 |
-| first_down_penalty | First Down Penalty | Indicator if the play was a first down penalty                | 55.59%   | 2001/09/09 |
-| td                 | Touchdown          | Indicator if the play was a touchdown                         | 99.18%   | 2001/01/06 |
-| td_tm              | Touchdown Team     | Team that scored the touchdown                                | -        | -          |
+| column                | name               | description                                                   | coverage | since      |
+| --------------------- | ------------------ | ------------------------------------------------------------- | -------- | ---------- |
+| play_type             | Play Type          | Type of play (e.g., RUSH, PASS)                               | 99.99%   | 2001/01/06 |
+| play_type_nfl         | Play Type NFL      | NFL-defined type of play                                      | 99.11%   | 2001/01/06 |
+| play_type_ngs         | Play Type NGS      | Next Gen Stats defined type of play                           | 99.38%   | 2002/08/03 |
+| next_play_type        | Next Play Type     | Type of the next play                                         | 98.29%   | 2001/01/06 |
+| yds_gained            | Yards Gained       | Yardage gained or lost by the possessing team during the play | 99.99%   | 2001/01/06 |
+| is_fumble             | Fumble Occurred    | Indicator if a fumble occurred during the play                | 55.59%   | 2001/09/09 |
+| fuml                  | Fumble Lost        | Indicator if the fumble was lost to the opposing team         | 71.59%   | 2001/01/06 |
+| int                   | Interception       | Indicator if an interception occurred during the play         | 84.26%   | 2001/01/06 |
+| is_sack               | Sack               | Indicator if a sack occurred during the play                  | 97.94%   | 2001/01/06 |
+| is_successful_play    | Successful Play    | Indicator if the play was successful                          | 23.42%   | 2021/09/10 |
+| is_completion         | Completion         | Indicator if the pass was completed                           | 99.99%   | 2001/01/06 |
+| is_incompletion       | Incompletion       | Indicator if the pass was incomplete                          | 55.59%   | 2001/09/09 |
+| is_safety             | Safety             | Indicator if a safety occurred                                | 55.59%   | 2001/09/09 |
+| is_punt_blocked       | Punt Blocked       | Binary indicator for if the punt was blocked.                 | 55.59%   | 2001/09/09 |
+| is_scoring_play       | Score Occurred     | Indicator if a score occurred during the play                 | 100.00%  | 2001/01/06 |
+| score_type            | Score Type         | Type of score (e.g., field goal, touchdown)                   | 99.10%   | 2001/01/06 |
+| score_team            | Scoring Team       | Team that scored                                              | 99.10%   | 2001/01/06 |
+| is_solo_tackle        | Solo Tackle        | Indicator if the tackle was solo                              | 55.59%   | 2001/09/09 |
+| is_assist_tackle      | Assist Tackle      | Indicator if the tackle was an assist                         | 55.59%   | 2001/09/09 |
+| is_first_down         | First Down         | Indicator if the play was a first down                        | 100.00%  | 2001/01/06 |
+| is_first_down_rush    | First Down Rush    | Indicator if the play was a first down rush                   | 55.59%   | 2001/09/09 |
+| is_first_down_pass    | First Down Pass    | Indicator if the play was a first down pass                   | 55.59%   | 2001/09/09 |
+| is_first_down_penalty | First Down Penalty | Indicator if the play was a first down penalty                | 55.59%   | 2001/09/09 |
+| is_touchdown          | Touchdown          | Indicator if the play was a touchdown                         | 99.18%   | 2001/01/06 |
+| td_tm                 | Touchdown Team     | Team that scored the touchdown                                | -        | -          |
 
 ### Game
 
@@ -330,41 +330,41 @@
 
 ### Situation
 
-| column                | name                          | description                                                                  | coverage | since      |
-| --------------------- | ----------------------------- | ---------------------------------------------------------------------------- | -------- | ---------- |
-| dwn                   | Down                          | Current down in the play                                                     | 100.00%  | 2001/01/06 |
-| qtr                   | Quarter                       | Current quarter of the game                                                  | 100.00%  | 2001/01/06 |
-| ydl_num               | Yard Line Number              | Numeric distance in yards from the closest endzone                           | 99.92%   | 2001/01/06 |
-| ydl_side              | Yard Line Side                | Side of the field for the yard line (e.g., home or away)                     | 99.92%   | 2001/01/06 |
-| ydl_start             | Yard Line Start               | Starting yard line for the play                                              | 99.11%   | 2001/01/06 |
-| ydl_end               | Yard Line End                 | Ending yard line after the play                                              | 99.10%   | 2001/01/06 |
-| ydl_100               | Yard Line 100                 | Numeric distance in yards from the opponent's endzone for the posteam        | 99.07%   | 2001/01/06 |
-| starting_hash         | Starting Hash                 | Starting hash location LEFT, RIGHT, or MIDDLE (in-between)                   | 83.19%   | 2021/09/10 |
-| yards_to_go           | Yards to Go                   | Yards remaining to achieve a first down                                      | 100.00%  | 2001/01/06 |
-| yfog                  | Yards from Own Goal           | Yards from the team's own goal line                                          | -        | -          |
-| goal_to_go            | Goal to Go                    | Indicator if the team is in a goal-to-go situation                           | 99.11%   | 2001/01/06 |
-| game_clock_start      | Game Clock Start              | Game time at the start of the play                                           | 68.54%   | 2001/01/06 |
-| game_clock_end        | Game Clock End                | Game time at the end of the play                                             | 47.92%   | 2001/09/09 |
-| sec_rem_qtr           | Seconds Remaining Quarter     | Seconds remaining in the quarter                                             | 55.59%   | 2001/09/09 |
-| sec_rem_half          | Seconds Remaining Half        | Seconds remaining in the half                                                | 55.59%   | 2001/09/09 |
-| sec_rem_gm            | Seconds Remaining Game        | Seconds remaining in the game                                                | 55.59%   | 2001/09/09 |
-| play_clock            | Play Clock                    | Time on the play clock when the ball was snapped                             | 69.01%   | 2001/01/06 |
-| home_to_rem           | Home Timeouts Remaining       | Numeric timeouts remaining in the half for the home team.                    | 55.59%   | 2001/09/09 |
-| away_to_rem           | Away Timeouts Remaining       | Numeric timeouts remaining in the half for the away team.                    | 55.59%   | 2001/09/09 |
-| pos_to_rem            | Possession Timeouts Remaining | Number of timeouts remaining for the possession team.                        | 55.59%   | 2001/09/09 |
-| def_to_rem            | Defense Timeouts Remaining    | Number of timeouts remaining for the team on defense.                        | 55.59%   | 2001/09/09 |
-| home_score            | Home Score                    | Score for the home team at the end of the play.                              | 96.47%   | 2001/09/09 |
-| away_score            | Away Score                    | Score for the away team at the end of the play.                              | 96.47%   | 2001/09/09 |
-| pos_score             | Possession Team Score         | Score the posteam at the start of the play.                                  | 55.59%   | 2001/09/09 |
-| def_score             | Defense Team Score            | Score the defteam at the start of the play.                                  | 55.59%   | 2001/09/09 |
-| score_diff            | Score Difference              | Score differential between the posteam and defteam at the start of the play. | 55.59%   | 2001/09/09 |
-| pos_score_post        | Possession Team Score Post    | Score for the posteam at the end of the play.                                | 55.59%   | 2001/09/09 |
-| def_score_post        | Defense Team Score Post       | Score for the defteam at the end of the play.                                | 55.59%   | 2001/09/09 |
-| score_diff_post       | Score Difference Post         | Score differential between the posteam and defteam at the end of the play.   | 55.59%   | 2001/09/09 |
-| third_down_converted  | Third Down Converted          | Indicator if the play was a third down conversion                            | 55.59%   | 2001/09/09 |
-| third_down_failed     | Third Down Failed             | Indicator if the play was a third down failed conversion                     | 55.59%   | 2001/09/09 |
-| fourth_down_converted | Fourth Down Converted         | Indicator if the play was a fourth down conversion                           | 55.59%   | 2001/09/09 |
-| fourth_down_failed    | Fourth Down Failed            | Indicator if the play was a fourth down failed conversion                    | 55.59%   | 2001/09/09 |
+| column                   | name                          | description                                                                  | coverage | since      |
+| ------------------------ | ----------------------------- | ---------------------------------------------------------------------------- | -------- | ---------- |
+| dwn                      | Down                          | Current down in the play                                                     | 100.00%  | 2001/01/06 |
+| qtr                      | Quarter                       | Current quarter of the game                                                  | 100.00%  | 2001/01/06 |
+| ydl_num                  | Yard Line Number              | Numeric distance in yards from the closest endzone                           | 99.92%   | 2001/01/06 |
+| ydl_side                 | Yard Line Side                | Side of the field for the yard line (e.g., home or away)                     | 99.92%   | 2001/01/06 |
+| ydl_start                | Yard Line Start               | Starting yard line for the play                                              | 99.11%   | 2001/01/06 |
+| ydl_end                  | Yard Line End                 | Ending yard line after the play                                              | 99.10%   | 2001/01/06 |
+| ydl_100                  | Yard Line 100                 | Numeric distance in yards from the opponent's endzone for the posteam        | 99.07%   | 2001/01/06 |
+| starting_hash            | Starting Hash                 | Starting hash location LEFT, RIGHT, or MIDDLE (in-between)                   | 83.19%   | 2021/09/10 |
+| yards_to_go              | Yards to Go                   | Yards remaining to achieve a first down                                      | 100.00%  | 2001/01/06 |
+| yfog                     | Yards from Own Goal           | Yards from the team's own goal line                                          | -        | -          |
+| is_goal_to_go            | Goal to Go                    | Indicator if the team is in a goal-to-go situation                           | 99.11%   | 2001/01/06 |
+| game_clock_start         | Game Clock Start              | Game time at the start of the play                                           | 68.54%   | 2001/01/06 |
+| game_clock_end           | Game Clock End                | Game time at the end of the play                                             | 47.92%   | 2001/09/09 |
+| sec_rem_qtr              | Seconds Remaining Quarter     | Seconds remaining in the quarter                                             | 55.59%   | 2001/09/09 |
+| sec_rem_half             | Seconds Remaining Half        | Seconds remaining in the half                                                | 55.59%   | 2001/09/09 |
+| sec_rem_gm               | Seconds Remaining Game        | Seconds remaining in the game                                                | 55.59%   | 2001/09/09 |
+| play_clock               | Play Clock                    | Time on the play clock when the ball was snapped                             | 69.01%   | 2001/01/06 |
+| home_to_rem              | Home Timeouts Remaining       | Numeric timeouts remaining in the half for the home team.                    | 55.59%   | 2001/09/09 |
+| away_to_rem              | Away Timeouts Remaining       | Numeric timeouts remaining in the half for the away team.                    | 55.59%   | 2001/09/09 |
+| pos_to_rem               | Possession Timeouts Remaining | Number of timeouts remaining for the possession team.                        | 55.59%   | 2001/09/09 |
+| def_to_rem               | Defense Timeouts Remaining    | Number of timeouts remaining for the team on defense.                        | 55.59%   | 2001/09/09 |
+| home_score               | Home Score                    | Score for the home team at the end of the play.                              | 96.47%   | 2001/09/09 |
+| away_score               | Away Score                    | Score for the away team at the end of the play.                              | 96.47%   | 2001/09/09 |
+| pos_score                | Possession Team Score         | Score the posteam at the start of the play.                                  | 55.59%   | 2001/09/09 |
+| def_score                | Defense Team Score            | Score the defteam at the start of the play.                                  | 55.59%   | 2001/09/09 |
+| score_diff               | Score Difference              | Score differential between the posteam and defteam at the start of the play. | 55.59%   | 2001/09/09 |
+| pos_score_post           | Possession Team Score Post    | Score for the posteam at the end of the play.                                | 55.59%   | 2001/09/09 |
+| def_score_post           | Defense Team Score Post       | Score for the defteam at the end of the play.                                | 55.59%   | 2001/09/09 |
+| score_diff_post          | Score Difference Post         | Score differential between the posteam and defteam at the end of the play.   | 55.59%   | 2001/09/09 |
+| is_third_down_converted  | Third Down Converted          | Indicator if the play was a third down conversion                            | 55.59%   | 2001/09/09 |
+| is_third_down_failed     | Third Down Failed             | Indicator if the play was a third down failed conversion                     | 55.59%   | 2001/09/09 |
+| is_fourth_down_converted | Fourth Down Converted         | Indicator if the play was a fourth down conversion                           | 55.59%   | 2001/09/09 |
+| is_fourth_down_failed    | Fourth Down Failed            | Indicator if the play was a fourth down failed conversion                    | 55.59%   | 2001/09/09 |
 
 ### Personnel, Formation & Coverage
 
@@ -386,12 +386,12 @@
 | blitzers              | Blitzers              | Number of linebackers and defensive backs blitzing                                       | 83.19%   | 2021/09/10 |
 | db_blitzers           | DB Blitzers           | Number of defensive backs blitzing                                                       | -        | -          |
 | back                  | Number in Backfield   | Number of players in the backfield                                                       | -        | -          |
-| no_huddle             | No Huddle             | Indicator if the huddle was not used                                                     | 83.19%   | 2021/09/10 |
+| is_no_huddle          | No Huddle             | Indicator if the huddle was not used                                                     | 83.19%   | 2021/09/10 |
 | xlm                   | Extra Men on Line     | Number of players lined up on either side of the Offensive Tackles - usually a Tight End | -        | -          |
-| zero_blitz            | Zero Blitz            | At least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage     | 23.42%   | 2021/09/10 |
+| is_zero_blitz         | Zero Blitz            | At least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage     | 23.42%   | 2021/09/10 |
 | qb_position           | QB Position           | Position of the quarterback (UNDER_CENTER, SHOTGUN, or PISTOL)                           | 83.19%   | 2021/09/10 |
 | n_offense_backfield   | Offensive Backfield   | Number of offensive players in the backfield                                             | 92.07%   | 2022/09/08 |
-| run_play_option       | Run Play Option       | Indicator if the play was a run option                                                   | 92.07%   | 2022/09/08 |
+| is_run_play_option    | Run Play Option       | Indicator if the play was a run option                                                   | 92.07%   | 2022/09/08 |
 | read_thrown           | Read Thrown           | Indicator if the quarterback made a read and threw the ball                              | 83.19%   | 2021/09/10 |
 
 ### Drive
@@ -404,8 +404,8 @@
 | drive_result           | Drive Result             | Outcome of the drive (e.g., touchdown, field goal)                  | 55.59%   | 2001/09/09 |
 | drive_top              | Drive Time of Possession | Time of possession during the drive                                 | 55.59%   | 2001/09/09 |
 | drive_fds              | Drive First Downs        | Number of first downs during the drive                              | 55.59%   | 2001/09/09 |
-| drive_inside20         | Drive Inside 20          | Indicator if the offense reached inside the opponent's 20 yard line | 55.59%   | 2001/09/09 |
-| drive_score            | Drive Score              | Indicator if the drive ended with a score                           | 55.59%   | 2001/09/09 |
+| is_drive_inside_20     | Drive Inside 20          | Indicator if the offense reached inside the opponent's 20 yard line | 55.59%   | 2001/09/09 |
+| is_drive_score         | Drive Score              | Indicator if the drive ended with a score                           | 55.59%   | 2001/09/09 |
 | drive_start_qtr        | Drive Start Quarter      | Quarter in which the drive started                                  | 55.59%   | 2001/09/09 |
 | drive_end_qtr          | Drive End Quarter        | Quarter in which the drive ended                                    | 55.59%   | 2001/09/09 |
 | drive_yds_penalized    | Drive Yards Penalized    | Yards penalized during the drive                                    | 55.59%   | 2001/09/09 |
@@ -424,7 +424,7 @@
 | ----------------------- | ---------------------------- | -------------------------------------------------------------------------------------------- | -------- | ---------- |
 | ep                      | Expected Points              | Expected points with respect to the possession team for the given play                       | 55.59%   | 2001/09/09 |
 | epa                     | Expected Points Added        | Expected points added by the posteam for the given play                                      | 55.59%   | 2001/09/09 |
-| ep_succ                 | EPA Success                  | Indicator whether EPA > 0 in the given play                                                  | 55.59%   | 2001/09/09 |
+| is_epa_successful       | EPA Success                  | Indicator whether EPA > 0 in the given play                                                  | 55.59%   | 2001/09/09 |
 | total_home_epa          | Total Home EPA               | Cumulative total EPA for the home team in the game so far                                    | 55.59%   | 2001/09/09 |
 | total_away_epa          | Total Away EPA               | Cumulative total EPA for the away team in the game so far                                    | 55.59%   | 2001/09/09 |
 | total_home_rush_epa     | Total Home Rush EPA          | Cumulative total rushing EPA for the home team in the game so far                            | 55.59%   | 2001/09/09 |
@@ -516,21 +516,21 @@
 
 ### Special Teams
 
-| column            | name                         | description                                                                  | coverage | since      |
-| ----------------- | ---------------------------- | ---------------------------------------------------------------------------- | -------- | ---------- |
-| special           | Special Teams Play           | Indicator if a special teams play occurred                                   | 96.47%   | 2001/09/09 |
-| special_play_type | Special Play Type            | -                                                                            | 15.72%   | 2001/01/06 |
-| ret_yds           | Return Yards                 | Yards gained by the team after the return                                    | 84.19%   | 2001/01/06 |
-| touchback         | Touchback                    | Indicator if a touchback occurred                                            | 55.59%   | 2001/09/09 |
-| ep_att            | Extra Point Attempt          | Binary indicator for extra point attempt.                                    | 55.59%   | 2001/09/09 |
-| two_att           | Two Point Conversion Attempt | Binary indicator for two point conversion attempt.                           | 55.59%   | 2001/09/09 |
-| fg_att            | Field Goal Attempt           | Binary indicator for field goal attempt.                                     | 55.59%   | 2001/09/09 |
-| kickoff_att       | Kickoff Attempt              | Binary indicator for kickoff.                                                | 55.59%   | 2001/09/09 |
-| punt_att          | Punt Attempt                 | Binary indicator for punts.                                                  | 55.59%   | 2001/09/09 |
-| fg_result         | Field Goal Result            | String indicator for result of field goal attempt: made, missed, or blocked. | 54.85%   | 2001/09/09 |
-| kick_distance     | Kick Distance                | Numeric distance in yards for kickoffs, field goals, and punts.              | 55.57%   | 2001/09/09 |
-| ep_result         | Extra Point Result           | String indicator for the result of the extra point attempt.                  | 55.15%   | 2001/09/09 |
-| tp_result         | Two Point Conversion Result  | String indicator for result of two point conversion attempt.                 | 18.70%   | 2001/09/09 |
+| column                          | name                         | description                                                                  | coverage | since      |
+| ------------------------------- | ---------------------------- | ---------------------------------------------------------------------------- | -------- | ---------- |
+| is_special_teams_play           | Special Teams Play           | Indicator if a special teams play occurred                                   | 96.47%   | 2001/09/09 |
+| special_play_type               | Special Play Type            | -                                                                            | 15.72%   | 2001/01/06 |
+| ret_yds                         | Return Yards                 | Yards gained by the team after the return                                    | 84.19%   | 2001/01/06 |
+| is_touchback                    | Touchback                    | Indicator if a touchback occurred                                            | 55.59%   | 2001/09/09 |
+| is_extra_point_attempt          | Extra Point Attempt          | Binary indicator for extra point attempt.                                    | 55.59%   | 2001/09/09 |
+| is_two_point_conversion_attempt | Two Point Conversion Attempt | Binary indicator for two point conversion attempt.                           | 55.59%   | 2001/09/09 |
+| is_field_goal_attempt           | Field Goal Attempt           | Binary indicator for field goal attempt.                                     | 55.59%   | 2001/09/09 |
+| is_kickoff_attempt              | Kickoff Attempt              | Binary indicator for kickoff.                                                | 55.59%   | 2001/09/09 |
+| is_punt_attempt                 | Punt Attempt                 | Binary indicator for punts.                                                  | 55.59%   | 2001/09/09 |
+| fg_result                       | Field Goal Result            | String indicator for result of field goal attempt: made, missed, or blocked. | 54.85%   | 2001/09/09 |
+| kick_distance                   | Kick Distance                | Numeric distance in yards for kickoffs, field goals, and punts.              | 55.57%   | 2001/09/09 |
+| ep_result                       | Extra Point Result           | String indicator for the result of the extra point attempt.                  | 55.15%   | 2001/09/09 |
+| tp_result                       | Two Point Conversion Result  | String indicator for result of two point conversion attempt.                 | 18.70%   | 2001/09/09 |
 
 ## Player
 

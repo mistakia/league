@@ -68,18 +68,23 @@ export const enrich_yardage_stats = (plays, play_stats) => {
     if (stats_data.ret_yds != null) enrichment_data.ret_yds = stats_data.ret_yds
 
     // Completion and outcome fields
-    if (stats_data.comp != null) enrichment_data.comp = stats_data.comp
-    if (stats_data.td != null) enrichment_data.td = stats_data.td
-    if (stats_data.rush_td != null) enrichment_data.rush_td = stats_data.rush_td
-    if (stats_data.pass_td != null) enrichment_data.pass_td = stats_data.pass_td
-    if (stats_data.ret_td != null) enrichment_data.ret_td = stats_data.ret_td
-    if (stats_data.interceptions != null)
-      enrichment_data.interceptions = stats_data.interceptions
-    if (stats_data.sk != null) enrichment_data.sk = stats_data.sk
-    if (stats_data.fumbles_lost != null)
-      enrichment_data.fumbles_lost = stats_data.fumbles_lost
-    if (stats_data.first_down != null)
-      enrichment_data.first_down = stats_data.first_down
+    if (stats_data.is_completion != null)
+      enrichment_data.is_completion = stats_data.is_completion
+    if (stats_data.is_touchdown != null)
+      enrichment_data.is_touchdown = stats_data.is_touchdown
+    if (stats_data.is_rushing_touchdown != null)
+      enrichment_data.is_rushing_touchdown = stats_data.is_rushing_touchdown
+    if (stats_data.is_passing_touchdown != null)
+      enrichment_data.is_passing_touchdown = stats_data.is_passing_touchdown
+    if (stats_data.is_return_touchdown != null)
+      enrichment_data.is_return_touchdown = stats_data.is_return_touchdown
+    if (stats_data.is_interception != null)
+      enrichment_data.is_interception = stats_data.is_interception
+    if (stats_data.is_sack != null) enrichment_data.is_sack = stats_data.is_sack
+    if (stats_data.is_fumble_lost != null)
+      enrichment_data.is_fumble_lost = stats_data.is_fumble_lost
+    if (stats_data.is_first_down != null)
+      enrichment_data.is_first_down = stats_data.is_first_down
 
     // Air yards and yards after catch
     if (stats_data.dot != null) enrichment_data.dot = stats_data.dot

@@ -266,8 +266,8 @@ const map_basic_play_data = ({
     mapped.play_type = map_play_type(play.play_type)
   }
 
-  set_boolean_if_defined(mapped, play, 'kneel_down', 'qb_kneel')
-  set_boolean_if_defined(mapped, play, 'spike', 'qb_spike')
+  set_boolean_if_defined(mapped, play, 'kneel_down', 'is_qb_kneel')
+  set_boolean_if_defined(mapped, play, 'spike', 'is_qb_spike')
 
   return mapped
 }
@@ -355,22 +355,22 @@ const map_formation_data = ({ sportradar_play: play }) => {
 
   // play_action: FTN charting is authoritative (manual expert charting)
   // set_boolean_if_defined(mapped, play, 'play_action', 'play_action')
-  set_boolean_if_defined(mapped, play, 'screen_pass', 'screen_pass')
-  set_boolean_if_defined(mapped, play, 'run_pass_option', 'run_play_option')
-  set_boolean_if_defined(mapped, play, 'fake_punt', 'fake_punt')
-  set_boolean_if_defined(mapped, play, 'fake_field_goal', 'fake_field_goal')
+  set_boolean_if_defined(mapped, play, 'screen_pass', 'is_screen_pass')
+  set_boolean_if_defined(mapped, play, 'run_pass_option', 'is_run_play_option')
+  set_boolean_if_defined(mapped, play, 'fake_punt', 'is_fake_punt')
+  set_boolean_if_defined(mapped, play, 'fake_field_goal', 'is_fake_field_goal')
 
   if (play.huddle === 'No Huddle') {
-    mapped.no_huddle = true
+    mapped.is_no_huddle = true
   } else if (play.huddle === 'Huddle') {
-    mapped.no_huddle = false
+    mapped.is_no_huddle = false
   }
 
   // box_defenders: NGS tracking data is authoritative
   // set_if_defined(mapped, play, 'men_in_box', 'box_defenders')
   // pass_rushers: NGS tracking data is authoritative
   // set_if_defined(mapped, play, 'players_rushed', 'pass_rushers')
-  set_if_defined(mapped, play, 'blitz')
+  set_if_defined(mapped, play, 'blitz', 'is_blitz')
   set_if_defined(mapped, play, 'left_tightends')
   set_if_defined(mapped, play, 'right_tightends')
 
@@ -428,7 +428,7 @@ const map_statistics = async ({
       rush_stats: get_stat('rush'),
       resolve_player,
       pos_team: mapped_play.possession_nfl_team,
-      is_sack: mapped_play.sk
+      is_sack: mapped_play.is_sack
     }),
     map_field_goal_stats({
       field_goal_stats: get_stat('field_goal'),
@@ -506,7 +506,7 @@ const map_sportradar_play_to_nfl_play = async ({
 
   // Calculate goal_to_go after all field position data is available
   if (mapped.ydl_100 !== null && mapped.yards_to_go !== null) {
-    mapped.goal_to_go = mapped.ydl_100 + mapped.yards_to_go >= 100
+    mapped.is_goal_to_go = mapped.ydl_100 + mapped.yards_to_go >= 100
   }
 
   const broken_tackles_rush = mapped.broken_tackles_rush || 0
@@ -518,7 +518,7 @@ const map_sportradar_play_to_nfl_play = async ({
   const fumble_stats =
     play.statistics?.filter((s) => s.stat_type === 'fumble') || []
   if (fumble_stats.length > 0) {
-    mapped.fumbles_lost = fumble_stats.some((f) => f.fumble === 1)
+    mapped.is_fumble_lost = fumble_stats.some((f) => f.fumble === 1)
   }
 
   // Override play_type to NOPL for nullified plays
@@ -526,7 +526,7 @@ const map_sportradar_play_to_nfl_play = async ({
   const has_no_play_detail = (play.details || []).some(
     (d) => d.category === 'no_play'
   )
-  if (play.nullified || has_no_play_detail || mapped.deleted) {
+  if (play.nullified || has_no_play_detail || mapped.is_deleted) {
     mapped.play_type = 'NOPL'
   }
 

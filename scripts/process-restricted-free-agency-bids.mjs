@@ -103,7 +103,7 @@ async function settle_losing_bids({
     })
 
     await db('restricted_free_agency_bids')
-      .update({ succ: 0, outcome, processed: timestamp })
+      .update({ is_successful: 0, outcome, processed: timestamp })
       .where('uid', losing_bid.uid)
   }
 }
@@ -399,7 +399,7 @@ const run = async ({ dry_run = false } = {}) => {
       if (!dry_run && error) {
         await db('restricted_free_agency_bids')
           .update({
-            succ: false,
+            is_successful: false,
             outcome: resolve_restricted_free_agency_bid_error_outcome(error),
             outcome_detail: error.message,
             processed: timestamp

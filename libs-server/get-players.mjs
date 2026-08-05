@@ -224,21 +224,21 @@ export default async function ({
     query.select('nfl_games.day as game_day')
     query.groupBy('game_day')
 
-    // Calculate prior_week_inactive: true if no gamelog OR gamelog.active is false
-    // Calculate prior_week_ruled_out: true if gamelog.ruled_out_in_game is true
+    // Calculate prior_week_inactive: true if no gamelog OR gamelog.is_active is false
+    // Calculate prior_week_ruled_out: true if gamelog.is_ruled_out_in_game is true
     if (prior_week_params) {
       query.select(
         db.raw(
-          'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.active = false THEN true ELSE false END as prior_week_inactive'
+          'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.is_active = false THEN true ELSE false END as prior_week_inactive'
         ),
         db.raw(
-          'CASE WHEN prior_week_gamelog.ruled_out_in_game = true THEN true ELSE false END as prior_week_ruled_out'
+          'CASE WHEN prior_week_gamelog.is_ruled_out_in_game = true THEN true ELSE false END as prior_week_ruled_out'
         )
       )
       query.groupBy(
         'prior_week_gamelog.pid',
-        'prior_week_gamelog.active',
-        'prior_week_gamelog.ruled_out_in_game'
+        'prior_week_gamelog.is_active',
+        'prior_week_gamelog.is_ruled_out_in_game'
       )
     }
   }
@@ -500,8 +500,8 @@ export default async function ({
         (w) => w.pid === player_contribution.pid
       )
       const weeks = {}
-      for (const { week, start, sp, bp } of player_contribution_weeks) {
-        weeks[week] = { week, start, sp, bp }
+      for (const { week, is_starter, sp, bp } of player_contribution_weeks) {
+        weeks[week] = { week, is_starter, sp, bp }
       }
 
       players_by_pid[pid].lineups = {

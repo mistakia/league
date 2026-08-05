@@ -56,9 +56,9 @@ SELECT md5(concat_ws('|',
      FROM trades_players tp JOIN trades t ON t.uid = tp.tradeid WHERE t.lid = ?),
   (SELECT md5(string_agg(concat_ws(':', tk.tradeid, tk.tid, tk.pickid), ',' ORDER BY tk.tradeid, tk.tid, tk.pickid))
      FROM trades_picks tk JOIN trades t ON t.uid = tk.tradeid WHERE t.lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', uid, pid, round, comp, pick, tid, otid, year, selection_timestamp), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', uid, pid, round, is_compensatory, pick, tid, otid, year, selection_timestamp), ',' ORDER BY uid))
      FROM draft WHERE lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', uid, pid, bid, tid, year, succ, processed, cancelled, nomination_id, outcome), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', uid, pid, bid, tid, year, is_successful, processed, cancelled, nomination_id, outcome), ',' ORDER BY uid))
      FROM restricted_free_agency_bids WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', year, draft_start, rookie_draft_completed_at, ext_date), ',' ORDER BY year))
      FROM seasons WHERE lid = ?)
@@ -72,7 +72,7 @@ const compute_input_hash = async ({ lid }) => {
 const refresh_roster_asset_lineage = async ({ lid = null, force = false }) => {
   const league_query = db('leagues')
     .select('uid')
-    .where({ hosted: true })
+    .where({ is_hosted: true })
     .whereNull('archived_at')
   if (lid) league_query.where('uid', lid)
   const leagues = await league_query

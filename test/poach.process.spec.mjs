@@ -56,7 +56,7 @@ describe('API /poaches - process', function () {
         tid: 2,
         player_tid: teamId,
         lid: leagueId,
-        succ: null,
+        is_successful: null,
         submitted: Math.round(Date.now() / 1000),
         reason: null,
         processed: null
@@ -75,7 +75,7 @@ describe('API /poaches - process', function () {
 
       // Check poaches table
       const updatedPoach = await knex('poaches').where('uid', poach.uid).first()
-      expect(updatedPoach.succ).to.equal(true)
+      expect(updatedPoach.is_successful).to.equal(true)
       expect(updatedPoach.processed).to.not.equal(null)
 
       // Check rosters

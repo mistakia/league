@@ -307,7 +307,7 @@ const options = {
               description: 'Fantasy league name',
               example: 'TEFLON LEAGUE'
             },
-            hosted: {
+            is_hosted: {
               type: 'boolean',
               description: 'Whether fantasy league is hosted on platform',
               example: false
@@ -1415,7 +1415,7 @@ const options = {
                   description: 'Player ID who fumbled',
                   example: 'PATR-MAHO-005785'
                 },
-                fumbles_lost: {
+                is_fumble_lost: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether a fumble occurred',
@@ -1445,13 +1445,13 @@ const options = {
                   description: 'Receiving yards on the play',
                   example: 12
                 },
-                first_down: {
+                is_first_down: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether play resulted in first down',
                   example: true
                 },
-                successful_play: {
+                is_successful_play: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether play was considered successful',
@@ -1475,19 +1475,19 @@ const options = {
                   description: 'Intercepted by player ID',
                   example: 'MARC-PETE-002708'
                 },
-                comp: {
+                is_completion: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether pass was completed',
                   example: true
                 },
-                td: {
+                is_touchdown: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether play resulted in touchdown',
                   example: false
                 },
-                sk: {
+                is_sack: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether quarterback was sacked',
@@ -1505,43 +1505,43 @@ const options = {
                   description: 'Distance to touchdown',
                   example: 75
                 },
-                qb_pressure: {
+                is_qb_pressure: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether quarterback was pressured',
                   example: false
                 },
-                qb_hit: {
+                is_qb_hit: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether quarterback was hit',
                   example: false
                 },
-                qb_hurry: {
+                is_qb_hurry: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether quarterback was hurried',
                   example: false
                 },
-                highlight_pass: {
+                is_highlight_pass: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether pass was highlight-worthy',
                   example: false
                 },
-                int_worthy: {
+                is_interception_worthy: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether pass was interception-worthy',
                   example: false
                 },
-                dropped_pass: {
+                is_dropped_pass: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether pass was dropped',
                   example: false
                 },
-                contested_ball: {
+                is_contested_ball: {
                   type: 'boolean',
                   nullable: true,
                   description: 'Whether ball was contested',
@@ -1626,7 +1626,7 @@ const options = {
               description: 'Whether play resulted in interception',
               example: false
             },
-            valid: {
+            is_valid: {
               type: 'boolean',
               description: 'Whether statistic is valid',
               example: true
@@ -1650,7 +1650,7 @@ const options = {
             'stat_type',
             'touchdown',
             'interception',
-            'valid'
+            'is_valid'
           ]
         },
         NFLTeamSeasonLog: {
@@ -2822,7 +2822,7 @@ const options = {
                 83, 84, 85, 86, 87
               ]
             },
-            succ: {
+            is_successful: {
               type: 'boolean',
               description: 'Whether the job execution was successful',
               example: true
@@ -2836,11 +2836,11 @@ const options = {
               type: 'string',
               nullable: true,
               description:
-                'Failure reason or error message (only present when succ is false)',
+                'Failure reason or error message (only present when is_successful is false)',
               example: 'Database connection timeout'
             }
           },
-          required: ['id', 'type', 'succ', 'timestamp']
+          required: ['id', 'type', 'is_successful', 'timestamp']
         },
         SystemHealthError: {
           type: 'object',

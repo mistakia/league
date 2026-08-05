@@ -451,7 +451,7 @@ describe('API /trades', function () {
       expect(poaches.length).to.equal(1)
 
       expect(poaches[0].processed).to.exist
-      expect(poaches[0].succ).to.equal(false)
+      expect(poaches[0].is_successful).to.equal(false)
       expect(poaches[0].reason).to.equal('Player traded')
 
       const rosterRows = await knex('rosters_players')

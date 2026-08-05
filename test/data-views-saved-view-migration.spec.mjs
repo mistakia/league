@@ -2,7 +2,9 @@
 
 import * as chai from 'chai'
 
+import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import {
+  BOOLEAN_PREFIX_PARAM_RENAMES,
   migrate_column_entry,
   migrate_table_state
 } from '#libs-shared/data-views-saved-view-migration.mjs'
@@ -88,13 +90,15 @@ describe('data-views saved-view migrator', () => {
 
     // qb_pressure and qb_pressure_tracking both exist in the registry today and
     // are different params. The legacy qb_pressure_ngs is the tracking one.
-    it('maps qb_pressure_ngs to qb_pressure_tracking, not qb_pressure', () => {
+    // Both were then boolean-prefixed, so this is the one key that migrates
+    // through two rules in a single pass.
+    it('chains qb_pressure_ngs through to is_qb_pressure_tracking', () => {
       const result = migrate_column_entry({
         column_id: 'player_pass_attempts_from_plays',
         params: { qb_pressure_ngs: true }
       })
       expect(result.changed).to.equal(true)
-      expect(result.params).to.deep.equal({ qb_pressure_tracking: true })
+      expect(result.params).to.deep.equal({ is_qb_pressure_tracking: true })
     })
 
     it('preserves a false value rather than dropping the filter', () => {
@@ -102,7 +106,7 @@ describe('data-views saved-view migrator', () => {
         column_id: 'player_pass_attempts_from_plays',
         params: { qb_pressure_ngs: false }
       })
-      expect(result.params).to.deep.equal({ qb_pressure_tracking: false })
+      expect(result.params).to.deep.equal({ is_qb_pressure_tracking: false })
     })
 
     it('keeps the current key when both are present', () => {
@@ -124,6 +128,80 @@ describe('data-views saved-view migrator', () => {
       })
       expect(result.changed).to.equal(false)
       expect(result.params).to.deep.equal({ box_defenders: [6, 8] })
+    })
+  })
+
+  describe('boolean-prefix param renames (2026-08-04 conformance sweep)', () => {
+    // The registry key IS the persisted key, and
+    // apply_play_by_play_column_params_to_query skips an unrecognised one
+    // silently -- so a missing rule is a dropped filter with no error and no
+    // other failing test. The second assertion below is the real gate: it fails
+    // when a registry key that MOVED still has no rule. The first cannot catch a
+    // rule deleted from the map -- it iterates the map under test, so an absent
+    // entry is simply not iterated. Proven by mutation: deleting a rule leaves
+    // this file fully green.
+    it('migrates every legacy key to a key the registry still carries', () => {
+      for (const [legacy_key, current_key] of Object.entries(
+        BOOLEAN_PREFIX_PARAM_RENAMES
+      )) {
+        const result = migrate_column_entry({
+          column_id: 'player_pass_attempts_from_plays',
+          params: { [legacy_key]: true }
+        })
+        expect(result.changed, legacy_key).to.equal(true)
+        expect(result.params, legacy_key).to.deep.equal({
+          [current_key]: true
+        })
+        expect(
+          Object.prototype.hasOwnProperty.call(
+            nfl_plays_column_params,
+            current_key
+          ),
+          `${current_key} is not a registry key`
+        ).to.equal(true)
+      }
+    })
+
+    it('leaves no renamed key still present in the registry', () => {
+      const stranded = Object.keys(BOOLEAN_PREFIX_PARAM_RENAMES).filter((key) =>
+        Object.prototype.hasOwnProperty.call(nfl_plays_column_params, key)
+      )
+      expect(stranded).to.deep.equal([])
+    })
+
+    // Both assertions above iterate the map under test, so neither can see a
+    // rule DELETED from it. This count is what catches that: 81 registry keys
+    // moved in the 2026-08-04 boolean-prefix rename and each needs exactly one
+    // rule. If a future rename adds rules here, raise this number deliberately
+    // rather than deleting the assertion.
+    it('carries a rule for each of the 81 registry keys that moved', () => {
+      expect(Object.keys(BOOLEAN_PREFIX_PARAM_RENAMES)).to.have.lengthOf(81)
+    })
+
+    // nfl_games.ot is the one renamed column outside nfl_plays; it is a
+    // GAME-group param resolved against the joined nfl_games table.
+    it('migrates the nfl_games overtime param', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { ot: true }
+      })
+      expect(result.params).to.deep.equal({ is_overtime: true })
+    })
+
+    it('preserves a non-boolean value vocabulary unchanged', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { motion: [true, false] }
+      })
+      expect(result.params).to.deep.equal({ is_motion: [true, false] })
+    })
+
+    it('keeps the current key when a view carries both', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { motion: true, is_motion: false }
+      })
+      expect(result.params).to.deep.equal({ is_motion: false })
     })
   })
 

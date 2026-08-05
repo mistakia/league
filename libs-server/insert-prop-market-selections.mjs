@@ -68,7 +68,7 @@ const process_market_selection = ({
       time_type: 'OPEN'
     })
 
-    if (!market.live) {
+    if (!market.is_live) {
       selection_index_inserts.push({
         ...selection,
         observed_at,
@@ -131,7 +131,7 @@ const process_market_selection = ({
     }
   }
 
-  if (!market.live) {
+  if (!market.is_live) {
     selection_index_inserts.push({
       ...selection,
       observed_at,
@@ -215,7 +215,7 @@ export default async function ({
   // Only run cleanup when we have selections to compare against - empty arrays
   // would incorrectly mark all existing selections for deletion
   if (
-    !market.live &&
+    !market.is_live &&
     existing_market &&
     existing_market.source_market_id &&
     selections.length > 0

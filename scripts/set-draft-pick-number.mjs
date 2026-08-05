@@ -22,7 +22,7 @@ const set_draft_pick_number = async ({ lid }) => {
   const picks = await db('draft').where({
     lid,
     year: current_season.year,
-    comp: 0
+    is_compensatory: 0
   })
 
   const team_ids = teams.map((t) => t.uid)
@@ -43,7 +43,7 @@ const set_draft_pick_number = async ({ lid }) => {
   // reset pick numbers as there could be gaps due to decommissioned teams
   const sorted_draft_picks = await db('draft')
     .where({
-      comp: 0,
+      is_compensatory: 0,
       lid,
       year: current_season.year
     })
@@ -58,7 +58,7 @@ const set_draft_pick_number = async ({ lid }) => {
   }
 
   const query_params = {
-    comp: 1,
+    is_compensatory: 1,
     lid,
     year: current_season.year
   }

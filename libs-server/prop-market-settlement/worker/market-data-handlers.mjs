@@ -192,10 +192,10 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
         // TODO: Use td_pid field once it's available in nfl_plays table
         let is_scorer = false
 
-        if (first_td_play.rush === true) {
+        if (first_td_play.is_rushing_play === true) {
           // Rushing TD - ball_carrier_pid is the scorer
           is_scorer = first_td_play.ball_carrier_pid === market.selection_pid
-        } else if (first_td_play.pass === true) {
+        } else if (first_td_play.is_passing_play === true) {
           // Passing TD - target_pid is the scorer (receiver)
           is_scorer = first_td_play.target_pid === market.selection_pid
         } else {

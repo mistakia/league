@@ -101,7 +101,7 @@ const get_effective_posteam = (play) => {
   // nflfastR keys this off own_kickoff_recovery | fumble_lost. We have no
   // own_kickoff_recovery equivalent on nfl_plays, so a lost fumble on the
   // kickoff is the only signal available.
-  if (play.play_type === 'KOFF' && play.fumbles_lost) {
+  if (play.play_type === 'KOFF' && play.is_fumble_lost) {
     return play.defense_nfl_team // Kicking team is listed as def on kickoffs
   }
 
@@ -117,7 +117,9 @@ const get_effective_posteam = (play) => {
  * suppressing every drive boundary that follows a touchdown.
  */
 const is_defensive_td = (play) =>
-  Boolean(play.td && play.td_tm && play.offense_nfl_team !== play.td_tm)
+  Boolean(
+    play.is_touchdown && play.td_tm && play.offense_nfl_team !== play.td_tm
+  )
 
 /**
  * Checks if play is a PAT following a defensive touchdown.
@@ -163,26 +165,26 @@ const is_pat_after_defensive_td = (
  * Checks if play is a kickoff that was recovered by the kicking team
  */
 const is_kickoff_recovery = (play) => {
-  return play.play_type === 'KOFF' && Boolean(play.fumbles_lost)
+  return play.play_type === 'KOFF' && Boolean(play.is_fumble_lost)
 }
 
 /**
  * Checks if play is a kickoff following a safety
  */
 const is_kickoff_after_safety = (play, prev_play, prev_play_2) => {
-  if (play.play_type !== 'KOFF' && !play.kickoff_att) {
+  if (play.play_type !== 'KOFF' && !play.is_kickoff_attempt) {
     return false
   }
 
   // Safety on previous play
-  if (prev_play && prev_play.safety) {
+  if (prev_play && prev_play.is_safety) {
     return true
   }
 
   // Safety 2 plays ago with timeout/no-play in between
   if (
     prev_play_2 &&
-    prev_play_2.safety &&
+    prev_play_2.is_safety &&
     prev_play &&
     (!prev_play.play_type || prev_play.play_type === 'NOPL')
   ) {
@@ -203,9 +205,9 @@ const is_fumble_recovery_same_team = (play, prev_play, prev_play_2) => {
     prev_play &&
     current_posteam &&
     current_posteam === get_effective_posteam(prev_play) &&
-    prev_play.fumbles_lost &&
+    prev_play.is_fumble_lost &&
     ['PUNT', 'PASS', 'RUSH'].includes(prev_play.play_type) &&
-    !prev_play.td // Not if it was a TD
+    !prev_play.is_touchdown // Not if it was a TD
   ) {
     return true
   }
@@ -217,9 +219,9 @@ const is_fumble_recovery_same_team = (play, prev_play, prev_play_2) => {
     !get_effective_posteam(prev_play) &&
     current_posteam &&
     current_posteam === prev_posteam_2 &&
-    prev_play_2.fumbles_lost &&
+    prev_play_2.is_fumble_lost &&
     ['PUNT', 'PASS', 'RUSH'].includes(prev_play_2.play_type) &&
-    !prev_play_2.td
+    !prev_play_2.is_touchdown
   ) {
     return true
   }

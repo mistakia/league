@@ -193,7 +193,7 @@ const reset_protected_designations_for_due_leagues = async ({
   // indefinitely, matching is-before-extension-deadline.mjs, so it is never due.
   const eligible = await db('seasons')
     .join('leagues', 'leagues.uid', 'seasons.lid')
-    .where({ 'seasons.year': current_season.year, 'leagues.hosted': true })
+    .where({ 'seasons.year': current_season.year, 'leagues.is_hosted': true })
     .whereNotNull('seasons.ext_date')
     .select('seasons.lid', 'seasons.ext_date')
 

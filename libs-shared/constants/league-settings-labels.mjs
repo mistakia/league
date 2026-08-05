@@ -15,7 +15,7 @@
  * It additionally labels scoring fields that carry no UI control today
  * (`targets`, `rushing_first_downs`, `receiving_first_downs`,
  * `punt_return_touchdowns`, `kickoff_return_touchdowns`,
- * `fumble_return_touchdowns`, `exclude_quarterback_kneels`) so no raw field
+ * `fumble_return_touchdowns`, `is_excluding_quarterback_kneels`) so no raw field
  * key is ever surfaced.
  */
 
@@ -49,7 +49,7 @@ export const scoring_field_labels = {
     punt_return_touchdowns: 'Punt Return Tds',
     kickoff_return_touchdowns: 'Kick Return Tds',
     fumble_return_touchdowns: 'Fumble Return Tds',
-    exclude_quarterback_kneels: 'Exclude QB Kneels'
+    is_excluding_quarterback_kneels: 'Exclude QB Kneels'
   },
   kicking: {
     field_goal_yards: 'FG Yards',

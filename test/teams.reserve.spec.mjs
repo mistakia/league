@@ -678,7 +678,7 @@ describe('API /teams - reserve', function () {
         opponent_nfl_team: 'OPP',
         pos: player.primary_position,
         season_year: current_season.year,
-        active: false
+        is_active: false
       })
 
       // Add current week game schedule
@@ -773,7 +773,7 @@ describe('API /teams - reserve', function () {
         opponent_nfl_team: 'OPP',
         pos: player.primary_position,
         season_year: current_season.year,
-        active: false
+        is_active: false
       })
 
       // Add current week game schedule for Sunday game with unique esbid
@@ -864,7 +864,7 @@ describe('API /teams - reserve', function () {
         opponent_nfl_team: 'OPP',
         pos: player.primary_position,
         season_year: current_season.year,
-        active: false
+        is_active: false
       })
 
       // Add current week game schedule for Sunday game with unique esbid
@@ -953,7 +953,7 @@ describe('API /teams - reserve', function () {
         opponent_nfl_team: 'OPP',
         pos: player.primary_position,
         season_year: current_season.year,
-        active: false
+        is_active: false
       })
 
       // Add current week game schedule for Thursday game with unique esbid

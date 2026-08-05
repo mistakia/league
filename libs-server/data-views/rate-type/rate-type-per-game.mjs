@@ -99,7 +99,7 @@ const add_player_per_game_cte = ({
     .select(
       db.raw(`array_agg(distinct ${player_gamelogs_table}.nfl_team) as teams`)
     )
-    .where(`${player_gamelogs_table}.active`, true)
+    .where(`${player_gamelogs_table}.is_active`, true)
 
   // nfl_games join is required whenever the view has scoped weeks (the common
   // case after view-scope unification) or career filters / row_axes are active.

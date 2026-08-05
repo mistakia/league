@@ -13,9 +13,9 @@ WITH reg_games AS (
   WHERE season_type = 'REG' AND season_year BETWEEN :start_year AND :end_year
 ),
 gl AS (
-  SELECT pg.pid, pg.esbid, pg.season_year AS year, pg.nfl_team, pg.active,
+  SELECT pg.pid, pg.esbid, pg.season_year AS year, pg.nfl_team, pg.is_active,
          pg.snaps_off, pg.snaps_def, pg.snaps_st,
-         pg.ruled_out_in_game,
+         pg.is_ruled_out_in_game,
          (COALESCE(pg.passing_attempts,0)+COALESCE(pg.rushing_attempts,0)+COALESCE(pg.targets,0)
           +COALESCE(pg.receptions,0)+COALESCE(pg.field_goals_made,0)+COALESCE(pg.extra_points_made,0)
           +COALESCE(pg.defensive_sacks,0)+COALESCE(pg.defensive_interceptions,0)+COALESCE(pg.defensive_three_and_outs,0)) AS any_stat_count
@@ -24,8 +24,8 @@ gl AS (
 ),
 practice_signal AS (
   SELECT pid, season_year, week,
-         BOOL_OR(inj IS NOT NULL AND inj <> '') AS practice_listed_injury,
-         BOOL_OR(UPPER(game_designation) IN ('OUT','DOUBTFUL','QUESTIONABLE')) AS practice_questionable_or_worse,
+         BOOL_OR(inj IS NOT NULL AND inj <> '') AS has_practice_listed_injury,
+         BOOL_OR(UPPER(game_designation) IN ('OUT','DOUBTFUL','QUESTIONABLE')) AS is_practice_questionable_or_worse,
          MAX(UPPER(game_designation)) AS practice_designation
   FROM practice
   WHERE season_type = 'REG'
@@ -43,12 +43,12 @@ changelog_signal AS (
   -- it, and this comment avoids the literal so that guard stays meaningful.
   SELECT gl_inner.pid, gl_inner.esbid,
          BOOL_OR(pc.column_name = 'injury_status'
-                 AND UPPER(pc.new_value) IN ('OUT','DOUBTFUL','IR','PUP','SUS','COV')) AS changelog_unavailable,
-         BOOL_OR(pc.column_name = 'injury_status') AS changelog_injury_event,
+                 AND UPPER(pc.new_value) IN ('OUT','DOUBTFUL','IR','PUP','SUS','COV')) AS is_changelog_unavailable,
+         BOOL_OR(pc.column_name = 'injury_status') AS has_changelog_injury_event,
          BOOL_OR(pc.column_name = 'nfl_status'
                  AND pc.new_value IN ('INJURED_RESERVE','PHYSICALLY_UNABLE_TO_PERFORM',
                                 'SUSPENDED','NON_FOOTBALL_RELATED_INJURED_RESERVE',
-                                'DID_NOT_REPORT')) AS changelog_nfl_reserve_event
+                                'DID_NOT_REPORT')) AS has_changelog_nfl_reserve_event
   FROM player_gamelogs gl_inner
   JOIN nfl_games gm ON gm.esbid = gl_inner.esbid
   JOIN player_changelog pc
@@ -84,50 +84,50 @@ SELECT
     WHEN gl.snaps_off IS NULL AND gl.snaps_def IS NULL AND gl.snaps_st IS NULL
       THEN (gl.any_stat_count > 0)
     ELSE COALESCE(gl.snaps_off,0) + COALESCE(gl.snaps_def,0) + COALESCE(gl.snaps_st,0) > 0
-  END AS played,
+  END AS is_played,
   CASE WHEN gl.pid IS NULL THEN NULL
        ELSE COALESCE(gl.snaps_off,0) + COALESCE(gl.snaps_def,0) + COALESCE(gl.snaps_st,0)
   END AS snap_count,
   gl.snaps_off, gl.snaps_def, gl.snaps_st,
-  gl.active AS gamelog_active,
-  gl.ruled_out_in_game,
-  COALESCE(ps.practice_listed_injury, false) AS practice_listed_injury,
-  COALESCE(ps.practice_questionable_or_worse, false) AS practice_questionable_or_worse,
+  gl.is_active AS is_gamelog_active,
+  gl.is_ruled_out_in_game,
+  COALESCE(ps.has_practice_listed_injury, false) AS has_practice_listed_injury,
+  COALESCE(ps.is_practice_questionable_or_worse, false) AS is_practice_questionable_or_worse,
   ps.practice_designation,
-  COALESCE(cs.changelog_injury_event, false) AS changelog_injury_event,
-  COALESCE(cs.changelog_unavailable, false) AS changelog_unavailable,
-  COALESCE(cs.changelog_nfl_reserve_event, false) AS changelog_nfl_reserve_event,
+  COALESCE(cs.has_changelog_injury_event, false) AS has_changelog_injury_event,
+  COALESCE(cs.is_changelog_unavailable, false) AS is_changelog_unavailable,
+  COALESCE(cs.has_changelog_nfl_reserve_event, false) AS has_changelog_nfl_reserve_event,
   CASE
     WHEN gl.pid IS NULL                                                  THEN 'no-gamelog-row'
-    WHEN gl.active = false                                               THEN 'inactive'
-    WHEN cs.changelog_nfl_reserve_event                                  THEN 'reserve-list'
-    WHEN gl.ruled_out_in_game                                            THEN 'in-game-injury'
-    WHEN ps.practice_questionable_or_worse                               THEN 'practice-report-out'
-    WHEN cs.changelog_unavailable                                        THEN 'changelog-out'
+    WHEN gl.is_active = false                                            THEN 'inactive'
+    WHEN cs.has_changelog_nfl_reserve_event                              THEN 'reserve-list'
+    WHEN gl.is_ruled_out_in_game                                         THEN 'in-game-injury'
+    WHEN ps.is_practice_questionable_or_worse                            THEN 'practice-report-out'
+    WHEN cs.is_changelog_unavailable                                     THEN 'changelog-out'
     WHEN (COALESCE(gl.snaps_off,0) + COALESCE(gl.snaps_def,0) + COALESCE(gl.snaps_st,0)) = 0
          AND gl.pid IS NOT NULL                                          THEN 'zero-snap'
     ELSE NULL
   END AS missed_reason,
-  ( (CASE WHEN cs.changelog_injury_event   THEN 1 ELSE 0 END)
-  + (CASE WHEN ps.practice_listed_injury    THEN 1 ELSE 0 END)
-  + (CASE WHEN gl.active = false            THEN 1 ELSE 0 END)
-  + (CASE WHEN gl.ruled_out_in_game         THEN 1 ELSE 0 END)
+  ( (CASE WHEN cs.has_changelog_injury_event THEN 1 ELSE 0 END)
+  + (CASE WHEN ps.has_practice_listed_injury THEN 1 ELSE 0 END)
+  + (CASE WHEN gl.is_active = false          THEN 1 ELSE 0 END)
+  + (CASE WHEN gl.is_ruled_out_in_game       THEN 1 ELSE 0 END)
   ) AS source_concurrence,
   CASE
     WHEN s.spine_year < 2009 THEN 'low'
-    WHEN s.spine_year < 2021 AND ( (CASE WHEN cs.changelog_injury_event THEN 1 ELSE 0 END)
-                                 + (CASE WHEN ps.practice_listed_injury THEN 1 ELSE 0 END)
-                                 + (CASE WHEN gl.active = false         THEN 1 ELSE 0 END)
-                                 + (CASE WHEN gl.ruled_out_in_game      THEN 1 ELSE 0 END) ) >= 1 THEN 'medium'
+    WHEN s.spine_year < 2021 AND ( (CASE WHEN cs.has_changelog_injury_event THEN 1 ELSE 0 END)
+                                 + (CASE WHEN ps.has_practice_listed_injury THEN 1 ELSE 0 END)
+                                 + (CASE WHEN gl.is_active = false          THEN 1 ELSE 0 END)
+                                 + (CASE WHEN gl.is_ruled_out_in_game       THEN 1 ELSE 0 END) ) >= 1 THEN 'medium'
     WHEN s.spine_year < 2021 THEN 'low'
-    WHEN ( (CASE WHEN cs.changelog_injury_event THEN 1 ELSE 0 END)
-         + (CASE WHEN ps.practice_listed_injury THEN 1 ELSE 0 END)
-         + (CASE WHEN gl.active = false         THEN 1 ELSE 0 END)
-         + (CASE WHEN gl.ruled_out_in_game      THEN 1 ELSE 0 END) ) >= 2 THEN 'high'
-    WHEN ( (CASE WHEN cs.changelog_injury_event THEN 1 ELSE 0 END)
-         + (CASE WHEN ps.practice_listed_injury THEN 1 ELSE 0 END)
-         + (CASE WHEN gl.active = false         THEN 1 ELSE 0 END)
-         + (CASE WHEN gl.ruled_out_in_game      THEN 1 ELSE 0 END) ) = 1 THEN 'medium'
+    WHEN ( (CASE WHEN cs.has_changelog_injury_event THEN 1 ELSE 0 END)
+         + (CASE WHEN ps.has_practice_listed_injury THEN 1 ELSE 0 END)
+         + (CASE WHEN gl.is_active = false          THEN 1 ELSE 0 END)
+         + (CASE WHEN gl.is_ruled_out_in_game       THEN 1 ELSE 0 END) ) >= 2 THEN 'high'
+    WHEN ( (CASE WHEN cs.has_changelog_injury_event THEN 1 ELSE 0 END)
+         + (CASE WHEN ps.has_practice_listed_injury THEN 1 ELSE 0 END)
+         + (CASE WHEN gl.is_active = false          THEN 1 ELSE 0 END)
+         + (CASE WHEN gl.is_ruled_out_in_game       THEN 1 ELSE 0 END) ) = 1 THEN 'medium'
     ELSE 'low'
   END AS confidence
 FROM schedule_spine s

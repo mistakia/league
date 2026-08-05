@@ -10,17 +10,17 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   'desc_nflfastr', // nflfastr play description (complete, unlike NGS truncated desc)
 
   // Play Characteristics
-  // Note: 'incomp' is shared with Sportradar - both pipelines report physical outcome
-  'fg_att',
-  'oob',
+  // Note: 'is_incompletion' is shared with Sportradar - both pipelines report physical outcome
+  'is_field_goal_attempt',
+  'is_out_of_bounds',
   'drive_yds_penalized',
-  'punt_att',
-  'qb_scramble', // nflfastR is authoritative - parses "scrambles" from play description; Sportradar over-reports (marks designed runs/sacks as scrambles)
+  'is_punt_attempt',
+  'is_qb_scramble', // nflfastR is authoritative - parses "scrambles" from play description; Sportradar over-reports (marks designed runs/sacks as scrambles)
 
   // Core EPA Metrics
   'ep', // Expected Points pre-play
   'epa', // Expected Points Added
-  'ep_succ', // Expected Points success indicator
+  'is_epa_successful', // Expected Points success indicator
 
   // EPA Home/Away Team Totals
   'total_home_epa',
@@ -109,7 +109,7 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
 
   // Series Data
   'series_seq', // Series sequence number
-  'series_suc', // Series success indicator
+  'is_series_successful', // Series success indicator
   'series_result' // How series ended (FIELD_GOAL, TOUCHDOWN, TURNOVER, etc.)
 ])
 

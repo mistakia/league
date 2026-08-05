@@ -91,7 +91,7 @@ const calculatePoints = ({
     // have been explicitly calculated rather than merely initialized to 0.
     else if (
       stat === 'rushing_yards' &&
-      league.exclude_quarterback_kneels &&
+      league.is_excluding_quarterback_kneels &&
       stats.rushing_yards_excluding_kneels !== undefined &&
       stats.rushing_yards_excluding_kneels !== null &&
       (stats.rushing_yards_excluding_kneels !== 0 || stats.rushing_yards === 0)

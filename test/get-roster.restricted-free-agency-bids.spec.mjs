@@ -22,7 +22,7 @@ const { regular_season_start } = current_season
 
 // Regression gate for the bid a roster is priced from.
 //
-// `scripts/process-restricted-free-agency-bids.mjs` settles a losing bid with `succ: 0`
+// `scripts/process-restricted-free-agency-bids.mjs` settles a losing bid with `is_successful: 0`
 // and a `processed` timestamp and deliberately leaves `cancelled` null -- cancellation
 // means the team withdrew, settlement means the auction resolved, and the table records
 // both. `get-roster.mjs` filtered on `cancelled` alone, so a settled bid kept being
@@ -43,7 +43,7 @@ const insert_bid = async ({
   bid,
   processed = null,
   cancelled = null,
-  succ = null,
+  is_successful = null,
   player_tid = team_id,
   tid = team_id
 }) =>
@@ -56,7 +56,7 @@ const insert_bid = async ({
     original_team_id: player_tid,
     processed,
     cancelled,
-    succ
+    is_successful
   })
 
 const get_roster_player = async (pid) => {
@@ -108,14 +108,14 @@ describe('LIBS-SERVER getRoster - restricted free agency bids', function () {
   })
 
   it('does NOT attach a settled bid left uncancelled by the processing run', async () => {
-    // The regression. `succ: false` with `processed` set and `cancelled` null is
+    // The regression. `is_successful: false` with `processed` set and `cancelled` null is
     // exactly the row shape `process-restricted-free-agency-bids.mjs` writes for a
     // losing bid, and it is the shape production carries after every run.
     const player = await add_restricted_free_agent()
     await insert_bid({
       pid: player.pid,
       bid: 0,
-      succ: false,
+      is_successful: false,
       processed: Math.round(Date.now() / 1000)
     })
 
@@ -130,7 +130,7 @@ describe('LIBS-SERVER getRoster - restricted free agency bids', function () {
     await insert_bid({
       pid: player.pid,
       bid: 14,
-      succ: true,
+      is_successful: true,
       processed: Math.round(Date.now() / 1000)
     })
 

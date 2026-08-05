@@ -8,7 +8,7 @@
  * 1. Load games for the specified week/year
  * 2. For each game, find players with active=true in their gamelog
  * 3. Check if player was ruled OUT in players_status table after game time
- * 4. Update ruled_out_in_game flag for matching players
+ * 4. Update is_ruled_out_in_game flag for matching players
  *
  * Detection Logic:
  * - Player must have active=true (suited up for the game)
@@ -139,9 +139,9 @@ const load_games = async ({ year, week, seas_type }) => {
  */
 const load_active_gamelogs = async (esbids) => {
   const gamelogs = await db('player_gamelogs')
-    .select('esbid', 'pid', 'active', 'ruled_out_in_game', 'snaps_off')
+    .select('esbid', 'pid', 'is_active', 'is_ruled_out_in_game', 'snaps_off')
     .whereIn('esbid', esbids)
-    .where('active', true)
+    .where('is_active', true)
 
   log(`Loaded ${gamelogs.length} active player gamelogs`)
 
@@ -250,7 +250,7 @@ const process_game = async (game, gamelogs) => {
         .split('T')[0]
 
       // Only update if not already set
-      if (!gamelog.ruled_out_in_game) {
+      if (!gamelog.is_ruled_out_in_game) {
         updates.push({
           esbid: gamelog.esbid,
           pid: gamelog.pid,
@@ -304,7 +304,7 @@ const apply_updates = async (updates, dry_run) => {
       for (const update of batch) {
         await trx('player_gamelogs')
           .where({ esbid: update.esbid, pid: update.pid })
-          .update({ ruled_out_in_game: true })
+          .update({ is_ruled_out_in_game: true })
       }
     })
 

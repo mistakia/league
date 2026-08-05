@@ -125,7 +125,7 @@ const import_ownership = async ({
 } = {}) => {
   let query = db('dfs_contests').where({
     source_id: 'FANDUEL',
-    ownership_imported: false
+    is_ownership_imported: false
   })
 
   if (fixture_list_id) {
@@ -330,7 +330,7 @@ const import_ownership = async ({
           source_id: 'FANDUEL'
         })
         .update({
-          ownership_imported: true,
+          is_ownership_imported: true,
           ownership_imported_at: new Date(),
           ownership_entry_sample_size: ownership_result.total_entries_sampled
         })

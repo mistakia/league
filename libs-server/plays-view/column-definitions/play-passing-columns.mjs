@@ -56,13 +56,13 @@ export default {
     use_having: true
   },
   play_comp: {
-    column_name: 'comp',
+    column_name: 'is_completion',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.comp as play_comp'],
-    main_where: () => 'nfl_plays.comp',
+    main_select: () => ['nfl_plays.is_completion as play_comp'],
+    main_where: () => 'nfl_plays.is_completion',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.comp = true THEN 1 ELSE 0 END) as play_comp'
+        'SUM(CASE WHEN nfl_plays.is_completion = true THEN 1 ELSE 0 END) as play_comp'
       ),
     use_having: true
   },
@@ -84,67 +84,69 @@ export default {
     use_having: true
   },
   play_highlight_pass: {
-    column_name: 'highlight_pass',
+    column_name: 'is_highlight_pass',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.highlight_pass as play_highlight_pass'],
-    main_where: () => 'nfl_plays.highlight_pass',
+    main_select: () => ['nfl_plays.is_highlight_pass as play_highlight_pass'],
+    main_where: () => 'nfl_plays.is_highlight_pass',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.highlight_pass = true THEN 1 ELSE 0 END) as play_highlight_pass'
+        'SUM(CASE WHEN nfl_plays.is_highlight_pass = true THEN 1 ELSE 0 END) as play_highlight_pass'
       ),
     use_having: true
   },
   play_int_worthy: {
-    column_name: 'int_worthy',
+    column_name: 'is_interception_worthy',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.int_worthy as play_int_worthy'],
-    main_where: () => 'nfl_plays.int_worthy',
+    main_select: () => ['nfl_plays.is_interception_worthy as play_int_worthy'],
+    main_where: () => 'nfl_plays.is_interception_worthy',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.int_worthy = true THEN 1 ELSE 0 END) as play_int_worthy'
+        'SUM(CASE WHEN nfl_plays.is_interception_worthy = true THEN 1 ELSE 0 END) as play_int_worthy'
       ),
     use_having: true
   },
   play_dropped_pass: {
-    column_name: 'dropped_pass',
+    column_name: 'is_dropped_pass',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.dropped_pass as play_dropped_pass'],
-    main_where: () => 'nfl_plays.dropped_pass',
+    main_select: () => ['nfl_plays.is_dropped_pass as play_dropped_pass'],
+    main_where: () => 'nfl_plays.is_dropped_pass',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.dropped_pass = true THEN 1 ELSE 0 END) as play_dropped_pass'
+        'SUM(CASE WHEN nfl_plays.is_dropped_pass = true THEN 1 ELSE 0 END) as play_dropped_pass'
       ),
     use_having: true
   },
   play_qb_pressure: {
-    column_name: 'qb_pressure',
+    column_name: 'is_qb_pressure',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.qb_pressure as play_qb_pressure'],
-    main_where: () => 'nfl_plays.qb_pressure',
+    main_select: () => ['nfl_plays.is_qb_pressure as play_qb_pressure'],
+    main_where: () => 'nfl_plays.is_qb_pressure',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.qb_pressure = true THEN 1 ELSE 0 END) as play_qb_pressure'
+        'SUM(CASE WHEN nfl_plays.is_qb_pressure = true THEN 1 ELSE 0 END) as play_qb_pressure'
       ),
     use_having: true
   },
   play_qb_hit: {
-    column_name: 'qb_hit',
+    column_name: 'is_qb_hit',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.qb_hit as play_qb_hit'],
-    main_where: () => 'nfl_plays.qb_hit',
+    main_select: () => ['nfl_plays.is_qb_hit as play_qb_hit'],
+    main_where: () => 'nfl_plays.is_qb_hit',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.qb_hit = true THEN 1 ELSE 0 END) as play_qb_hit'
+        'SUM(CASE WHEN nfl_plays.is_qb_hit = true THEN 1 ELSE 0 END) as play_qb_hit'
       ),
     use_having: true
   },
   play_sk: {
-    column_name: 'sk',
+    column_name: 'is_sack',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.sk as play_sk'],
-    main_where: () => 'nfl_plays.sk',
+    main_select: () => ['nfl_plays.is_sack as play_sk'],
+    main_where: () => 'nfl_plays.is_sack',
     aggregate_select: () =>
-      db.raw('SUM(CASE WHEN nfl_plays.sk = true THEN 1 ELSE 0 END) as play_sk'),
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.is_sack = true THEN 1 ELSE 0 END) as play_sk'
+      ),
     use_having: true
   }
 }

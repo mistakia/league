@@ -57,7 +57,7 @@ export default async function record_league_format_projection_value_history({
 
   const previous_rows = await db(HISTORY_TABLE)
     .distinctOn('pid', 'week')
-    .select('pid', 'week', 'pts_added', 'market_salary', 'removed')
+    .select('pid', 'week', 'pts_added', 'market_salary', 'is_removed')
     .where({ league_format_id, year })
     .orderBy([
       { column: 'pid' },
@@ -83,7 +83,7 @@ export default async function record_league_format_projection_value_history({
 
     const unchanged =
       previous &&
-      !previous.removed &&
+      !previous.is_removed &&
       normalize(previous.pts_added) === pts_added &&
       normalize(previous.market_salary) === market_salary
 
@@ -96,7 +96,7 @@ export default async function record_league_format_projection_value_history({
       week,
       pts_added,
       market_salary,
-      removed: false,
+      is_removed: false,
       observed_at
     })
   }
@@ -104,7 +104,7 @@ export default async function record_league_format_projection_value_history({
   const changed = inserts.length
 
   for (const [key, previous] of previous_by_key) {
-    if (seen_keys.has(key) || previous.removed) continue
+    if (seen_keys.has(key) || previous.is_removed) continue
     inserts.push({
       pid: previous.pid,
       league_format_id,
@@ -112,7 +112,7 @@ export default async function record_league_format_projection_value_history({
       week: previous.week,
       pts_added: null,
       market_salary: null,
-      removed: true,
+      is_removed: true,
       observed_at
     })
   }

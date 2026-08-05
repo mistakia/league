@@ -242,7 +242,7 @@ export default {
   },
   player_combine_attendance: {
     table_name: 'player',
-    column_name: 'combine_attendance',
+    column_name: 'has_combine_attendance',
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },

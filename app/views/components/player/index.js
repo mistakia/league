@@ -41,7 +41,7 @@ const map_state_to_props = createSelector(
   (contextMenu, league) => ({
     selected: contextMenu.getIn(['data', 'pid']),
     league,
-    is_hosted: Boolean(league.hosted)
+    is_hosted: Boolean(league.is_hosted)
   })
 )
 

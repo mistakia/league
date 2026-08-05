@@ -42,7 +42,7 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: Waiver type (constants.waiver_types)
  *           example: 1
- *         succ:
+ *         is_successful:
  *           type: integer
  *           description: Success status (1=successful, 0=failed)
  *           example: 1
@@ -173,7 +173,7 @@ const router = express.Router({ mergeParams: true })
  *                     pid: "4017"
  *                     drop: "2041"
  *                     type: 1
- *                     succ: 1
+ *                     is_successful: 1
  *                     reason: null
  *                     processed: 1698765432
  *                     submitted: 1698700000
@@ -188,7 +188,7 @@ const router = express.Router({ mergeParams: true })
  *                     pid: "4017"
  *                     drop: "1889"
  *                     type: 1
- *                     succ: 0
+ *                     is_successful: 0
  *                     reason: "player is not a free agent"
  *                     processed: 1698765432
  *                     submitted: 1698700000
@@ -206,7 +206,7 @@ const router = express.Router({ mergeParams: true })
  *                     pid: "4017"
  *                     drop: null
  *                     type: 1
- *                     succ: 1
+ *                     is_successful: 1
  *                     reason: null
  *                     processed: 1698765432
  *                     submitted: 1698700000
@@ -221,7 +221,7 @@ const router = express.Router({ mergeParams: true })
  *                     pid: "3892"
  *                     drop: "2041"
  *                     type: 1
- *                     succ: 0
+ *                     is_successful: 0
  *                     reason: "insufficient funds"
  *                     processed: 1698765432
  *                     submitted: 1698700000
@@ -299,21 +299,21 @@ router.get('/?', async (req, res) => {
       }
 
       query.where(function () {
-        this.where('succ', 1)
+        this.where('is_successful', 1)
           .orWhere({
-            succ: 0,
+            is_successful: 0,
             tid
           })
           .orWhere({
-            succ: 0,
+            is_successful: 0,
             reason: 'player is not a free agent' // TODO use code
           })
       })
     } else {
       // show successful bids or only failed bids due to player no longer being a free agent
       query.where(function () {
-        this.where('succ', 1).orWhere({
-          succ: 0,
+        this.where('is_successful', 1).orWhere({
+          is_successful: 0,
           reason: 'player is not a free agent' // TODO use code
         })
       })

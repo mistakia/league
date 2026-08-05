@@ -134,7 +134,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         'restricted_free_agency_bids'
       )
       expect(restricted_free_agency_bids.length).to.equal(1)
-      expect(restricted_free_agency_bids[0].succ).to.equal(true)
+      expect(restricted_free_agency_bids[0].is_successful).to.equal(true)
       expect(restricted_free_agency_bids[0].processed).to.not.equal(null)
       expect(restricted_free_agency_bids[0].outcome).to.equal(
         restricted_free_agency_bid_outcomes.WON
@@ -204,7 +204,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       const bid_after = await knex('restricted_free_agency_bids')
         .where('uid', bid_row.uid)
         .first()
-      expect(bid_after.succ).to.equal(true)
+      expect(bid_after.is_successful).to.equal(true)
       expect(bid_after.processed).to.equal(processed)
       expect(bid_after.outcome).to.equal(
         restricted_free_agency_bid_outcomes.WON
@@ -313,7 +313,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         'restricted_free_agency_bids'
       )
       expect(restricted_free_agency_bids.length).to.equal(1)
-      expect(restricted_free_agency_bids[0].succ).to.equal(true)
+      expect(restricted_free_agency_bids[0].is_successful).to.equal(true)
       expect(restricted_free_agency_bids[0].processed).to.not.equal(null)
       expect(restricted_free_agency_bids[0].outcome).to.equal(
         restricted_free_agency_bid_outcomes.WON
@@ -436,7 +436,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         'restricted_free_agency_bids'
       )
       expect(restricted_free_agency_bids.length).to.equal(1)
-      expect(restricted_free_agency_bids[0].succ).to.equal(null)
+      expect(restricted_free_agency_bids[0].is_successful).to.equal(null)
       expect(restricted_free_agency_bids[0].processed).to.equal(null)
       expect(restricted_free_agency_bids[0].outcome).to.equal(null)
     })
@@ -484,7 +484,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         'restricted_free_agency_bids'
       )
       expect(restricted_free_agency_bids.length).to.equal(1)
-      expect(restricted_free_agency_bids[0].succ).to.equal(null)
+      expect(restricted_free_agency_bids[0].is_successful).to.equal(null)
       expect(restricted_free_agency_bids[0].processed).to.equal(null)
       expect(restricted_free_agency_bids[0].outcome).to.equal(null)
     })
@@ -547,7 +547,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       expect(restricted_free_agency_bids.length).to.equal(2)
 
       for (const bid_row of restricted_free_agency_bids) {
-        expect(bid_row.succ).to.equal(null)
+        expect(bid_row.is_successful).to.equal(null)
         expect(bid_row.processed).to.equal(null)
         expect(bid_row.outcome).to.equal(null)
       }
@@ -649,17 +649,17 @@ describe('SCRIPTS - restricted free agency bids', function () {
 
       // Team 1 (original team) bid should be unsuccessful
       expect(restricted_free_agency_bids[0].tid).to.equal(team_id1)
-      expect(restricted_free_agency_bids[0].succ).to.equal(false)
+      expect(restricted_free_agency_bids[0].is_successful).to.equal(false)
       expect(restricted_free_agency_bids[0].processed).to.not.equal(null)
 
       // Team 2 bid should be successful
       expect(restricted_free_agency_bids[1].tid).to.equal(team_id2)
-      expect(restricted_free_agency_bids[1].succ).to.equal(true)
+      expect(restricted_free_agency_bids[1].is_successful).to.equal(true)
       expect(restricted_free_agency_bids[1].processed).to.not.equal(null)
 
       // Team 3 bid should be unsuccessful
       expect(restricted_free_agency_bids[2].tid).to.equal(team_id3)
-      expect(restricted_free_agency_bids[2].succ).to.equal(false)
+      expect(restricted_free_agency_bids[2].is_successful).to.equal(false)
       expect(restricted_free_agency_bids[2].processed).to.not.equal(null)
 
       // The losses are told apart, which the retired `reason` column could not

@@ -441,11 +441,11 @@ router.get('/?', async (req, res) => {
  *                     $ref: '#/components/schemas/MarketTypeEnum'
  *                   source_id:
  *                     $ref: '#/components/schemas/BookmakerEnum'
- *                   open:
+ *                   is_open:
  *                     type: boolean
  *                     description: Whether market was open at this time
  *                     example: true
- *                   live:
+ *                   is_live:
  *                     type: boolean
  *                     nullable: true
  *                     description: Whether market was live at this time
@@ -466,8 +466,8 @@ router.get('/?', async (req, res) => {
  *                     timestamp: "2024-01-15T14:30:00Z"
  *                     market_type: "GAME_PASSING_YARDS"
  *                     source_id: "DRAFTKINGS"
- *                     open: true
- *                     live: false
+ *                     is_open: true
+ *                     is_live: false
  *                     settled: false
  *                     odds_data: {}
  *       400:
@@ -625,8 +625,8 @@ router.get('/:source_market_id/history', async (req, res) => {
  *                     source_id: "DRAFTKINGS"
  *                     source_market_name: "Patrick Mahomes - Passing Yards"
  *                     esbid: "2025012601"
- *                     open: true
- *                     live: false
+ *                     is_open: true
+ *                     is_live: false
  *                     settled: false
  *                     selection_pid: "PATR-MAHO-005785"
  *                     selections:
@@ -647,8 +647,8 @@ router.get('/:source_market_id/history', async (req, res) => {
  *                     source_id: "FANDUEL"
  *                     source_market_name: "Christian McCaffrey - Rushing Yards"
  *                     esbid: "2025012601"
- *                     open: true
- *                     live: false
+ *                     is_open: true
+ *                     is_live: false
  *                     settled: false
  *                     selection_pid: "CHRI-MCCA-005372"
  *                     selections:
@@ -885,8 +885,8 @@ router.get('/players/:pid', async (req, res) => {
  *                     source_id: "DRAFTKINGS"
  *                     source_market_name: "Patrick Mahomes - Passing Yards"
  *                     esbid: "2025012601"
- *                     open: true
- *                     live: false
+ *                     is_open: true
+ *                     is_live: false
  *                     settled: false
  *                     selection_pid: "PATR-MAHO-005785"
  *                     selections:
@@ -899,8 +899,8 @@ router.get('/players/:pid', async (req, res) => {
  *                     source_id: "DRAFTKINGS"
  *                     source_market_name: "Total Points"
  *                     esbid: "2025012601"
- *                     open: true
- *                     live: false
+ *                     is_open: true
+ *                     is_live: false
  *                     settled: false
  *                     selection_pid: null
  *                     selections:
@@ -1069,8 +1069,8 @@ router.get('/games/:esbid', async (req, res) => {
  *                   source_market_name: "Patrick Mahomes - Passing Yards"
  *                   source_market_id: "dk_123456789"
  *                   esbid: "2025012601"
- *                   open: true
- *                   live: false
+ *                   is_open: true
+ *                   is_live: false
  *                   settled: false
  *                   selection_pid: "PATR-MAHO-005785"
  *                   selections:
@@ -1100,8 +1100,8 @@ router.get('/games/:esbid', async (req, res) => {
  *                   source_market_name: "Kansas City Chiefs - Total Points"
  *                   source_market_id: "fd_987654321"
  *                   esbid: "2025012601"
- *                   open: true
- *                   live: false
+ *                   is_open: true
+ *                   is_live: false
  *                   settled: false
  *                   selection_pid: null
  *                   selections:

@@ -73,7 +73,7 @@ const run = async () => {
     days_until_week_one <= FORWARD_SLICE_LEAD_DAYS
 
   // get list of hosted leagues
-  const leagues = await db('leagues').where('hosted', 1)
+  const leagues = await db('leagues').where('is_hosted', 1)
 
   const slice_failures = []
 

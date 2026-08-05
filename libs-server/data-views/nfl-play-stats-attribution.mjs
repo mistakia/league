@@ -68,7 +68,7 @@ const create_play_stats_attribution = ({
         this.on(`${stats_alias}.esbid`, '=', `${plays_table}.esbid`)
           .andOn(`${stats_alias}.play_id`, '=', `${plays_table}.play_id`)
           .andOnIn(`${stats_alias}.stat_id`, stat_ids)
-          .andOn(db.raw(`"${stats_alias}"."valid" = true`))
+          .andOn(db.raw(`"${stats_alias}"."is_valid" = true`))
       })
       .leftJoin(
         `player as ${smart_alias}`,
@@ -102,7 +102,7 @@ export const FUMBLE_RETURN_TOUCHDOWN_STAT_IDS = [56, 58, 60, 62]
 // -- a greater-than-2x over-penalization in every scoring format, and the
 // reason C.J. Stroud was charged for the aborted snap on which his own team
 // recovered (esbid 2025121402, play_id 653) while his gamelog reads
-// fumbles_lost = 0. nfl_plays.fumbles_lost is a closer proxy but still not the
+// fumbles_lost = 0. nfl_plays.is_fumble_lost is a closer proxy but still not the
 // same set (307 REG plays are true there with no stat_id 106 row), so the stat
 // rows are the source of truth here as everywhere else in this module.
 export const FUMBLE_LOST_STAT_IDS = [106]

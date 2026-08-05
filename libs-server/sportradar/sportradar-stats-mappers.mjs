@@ -47,11 +47,11 @@ export const map_passing_stats = async ({
 
   // Pass metrics
   mapped.pass_yds = pass_stats.yards || null
-  mapped.comp = pass_stats.complete === 1
-  mapped.incomp = pass_stats.complete === 0
-  mapped.pass_td = pass_stats.touchdown === 1
-  mapped.interceptions = pass_stats.interception === 1
-  mapped.sk = pass_stats.sack === 1
+  mapped.is_completion = pass_stats.complete === 1
+  mapped.is_incompletion = pass_stats.complete === 0
+  mapped.is_passing_touchdown = pass_stats.touchdown === 1
+  mapped.is_interception = pass_stats.interception === 1
+  mapped.is_sack = pass_stats.sack === 1
 
   // Sack yards (already negative from API)
   if (pass_stats.sack_yards !== undefined && pass_stats.sack_yards !== null) {
@@ -62,16 +62,16 @@ export const map_passing_stats = async ({
   mapped.pocket_time = pass_stats.pocket_time || null
 
   // Flags
-  mapped.first_down_pass = pass_stats.firstdown === 1
+  mapped.is_first_down_pass = pass_stats.firstdown === 1
   // knockdown/hurry are charted sparsely by Sportradar and are co-owned with
   // import-charted-plays-from-csv; preserve null for absent so a re-import
   // can't collapse "not charted" into a spurious false (see map_sportradar_flag).
-  mapped.qb_hit = map_sportradar_flag(pass_stats.knockdown)
-  mapped.qb_hurry = map_sportradar_flag(pass_stats.hurry)
+  mapped.is_qb_hit = map_sportradar_flag(pass_stats.knockdown)
+  mapped.is_qb_hurry = map_sportradar_flag(pass_stats.hurry)
 
   // Goal to go
   if (pass_stats.goaltogo === 1) {
-    mapped.goal_to_go = true
+    mapped.is_goal_to_go = true
   }
 
   return mapped
@@ -107,14 +107,14 @@ export const map_receiving_stats = async ({
   mapped.yards_after_catch = receive_stats.yards_after_catch || null
   mapped.yards_after_any_contact = receive_stats.yards_after_contact || null
   mapped.broken_tackles_rec = receive_stats.broken_tackles || 0
-  mapped.td = receive_stats.touchdown === 1
-  mapped.first_down_pass = receive_stats.firstdown === 1
-  mapped.catchable_ball = map_sportradar_flag(receive_stats.catchable)
-  mapped.dropped_pass = map_sportradar_flag(receive_stats.dropped)
+  mapped.is_touchdown = receive_stats.touchdown === 1
+  mapped.is_first_down_pass = receive_stats.firstdown === 1
+  mapped.is_catchable_ball = map_sportradar_flag(receive_stats.catchable)
+  mapped.is_dropped_pass = map_sportradar_flag(receive_stats.dropped)
 
   // Goal to go
   if (receive_stats.goaltogo === 1) {
-    mapped.goal_to_go = true
+    mapped.is_goal_to_go = true
   }
 
   return mapped
@@ -148,16 +148,16 @@ export const map_rushing_stats = async ({
 
   // Rushing metrics
   mapped.rush_yds = rush_stats.yards || null
-  mapped.rush_td = rush_stats.touchdown === 1
+  mapped.is_rushing_touchdown = rush_stats.touchdown === 1
   mapped.broken_tackles_rush = rush_stats.broken_tackles || 0
-  mapped.qb_kneel = rush_stats.kneel_down === 1
+  mapped.is_qb_kneel = rush_stats.kneel_down === 1
   // Note: qb_scramble intentionally not set here - nflfastR is authoritative
   // (Sportradar over-reports scrambles, marking designed runs and sacks as scrambles)
-  mapped.first_down_rush = rush_stats.firstdown === 1
+  mapped.is_first_down_rush = rush_stats.firstdown === 1
 
   // Goal to go
   if (rush_stats.goaltogo === 1) {
-    mapped.goal_to_go = true
+    mapped.is_goal_to_go = true
   }
 
   // Yards after contact
@@ -185,7 +185,7 @@ export const map_field_goal_stats = async ({
 
   if (!field_goal_stats) return mapped
 
-  mapped.fg_att = field_goal_stats.attempt === 1
+  mapped.is_field_goal_attempt = field_goal_stats.attempt === 1
 
   // Kicker player IDs
   if (field_goal_stats.kicker) {
@@ -203,7 +203,7 @@ export const map_field_goal_stats = async ({
 
   // Field goal metrics
   mapped.kick_distance = field_goal_stats.yards || null
-  mapped.fg_blocked = field_goal_stats.blocked === 1
+  mapped.is_field_goal_blocked = field_goal_stats.blocked === 1
 
   // Map result to enum
   if (field_goal_stats.made === 1) {
@@ -229,7 +229,7 @@ export const map_punt_stats = async ({
 
   if (!punt_stats) return mapped
 
-  mapped.punt_att = punt_stats.attempt === 1
+  mapped.is_punt_attempt = punt_stats.attempt === 1
 
   // Punter player IDs
   if (punt_stats.punter) {
@@ -248,9 +248,9 @@ export const map_punt_stats = async ({
   // Punt metrics
   mapped.punt_yds = punt_stats.yards || null
   mapped.punt_hang_time = punt_stats.hang_time || null
-  mapped.punt_blocked = punt_stats.blocked === 1
-  mapped.punt_inside_20 = punt_stats.inside_20 === 1
-  mapped.punt_touchback = punt_stats.touchback === 1
+  mapped.is_punt_blocked = punt_stats.blocked === 1
+  mapped.is_punt_inside_20 = punt_stats.inside_20 === 1
+  mapped.is_punt_touchback = punt_stats.touchback === 1
 
   return mapped
 }
@@ -267,7 +267,7 @@ export const map_kickoff_stats = async ({
 
   if (!kick_stats) return mapped
 
-  mapped.kickoff_att = kick_stats.attempt === 1
+  mapped.is_kickoff_attempt = kick_stats.attempt === 1
 
   // Kicker player IDs
   if (kick_stats.player) {
@@ -285,8 +285,8 @@ export const map_kickoff_stats = async ({
 
   // Kickoff metrics
   mapped.kickoff_yds = kick_stats.yards || null
-  mapped.kickoff_onside = kick_stats.onside_attempt === 1
-  mapped.kickoff_touchback = kick_stats.touchback === 1
+  mapped.is_kickoff_onside = kick_stats.onside_attempt === 1
+  mapped.is_kickoff_touchback = kick_stats.touchback === 1
 
   return mapped
 }
@@ -319,10 +319,10 @@ export const map_return_stats = async ({
 
   // Return metrics
   mapped.ret_yds = return_stats.yards || null
-  mapped.ret_td = return_stats.touchdown === 1
-  mapped.touchback = return_stats.touchback === 1
-  mapped.punt_fair_catch = return_stats.faircatch === 1
-  mapped.oob = return_stats.out_of_bounds === 1
+  mapped.is_return_touchdown = return_stats.touchdown === 1
+  mapped.is_touchback = return_stats.touchback === 1
+  mapped.is_punt_fair_catch = return_stats.faircatch === 1
+  mapped.is_out_of_bounds = return_stats.out_of_bounds === 1
 
   // For interceptions
   if (return_stats.category === 'interception' && return_stats.returner) {
@@ -352,7 +352,7 @@ export const map_penalty_stats = async ({
 
   if (!penalty_stats || penalty_stats.length === 0) return mapped
 
-  mapped.penalty = Boolean(penalty_stats.length)
+  mapped.is_penalty = Boolean(penalty_stats.length)
 
   // Take first penalty for detailed tracking
   const primary_penalty = penalty_stats[0]
@@ -407,8 +407,8 @@ export const map_play_details = async ({
     })
 
     if (penalty_detail.penalty.result) {
-      mapped.penalty_declined = penalty_detail.penalty.result === 'declined'
-      mapped.penalty_offset = penalty_detail.penalty.result === 'offset'
+      mapped.is_penalty_declined = penalty_detail.penalty.result === 'declined'
+      mapped.is_penalty_offset = penalty_detail.penalty.result === 'offset'
     }
   }
 
@@ -503,7 +503,7 @@ export const map_play_details = async ({
     (s) => s.stat_type === 'defense' && s.tlost === 1 && s.player
   )
   if (tfl_stats.length) {
-    mapped.tfl = true
+    mapped.is_tackle_for_loss = true
     for (let i = 0; i < Math.min(tfl_stats.length, 2); i++) {
       const tackler = await resolve_player({
         sportradar_player_id: tfl_stats[i].player.id,
@@ -520,7 +520,7 @@ export const map_play_details = async ({
   }
 
   if (details.some((d) => d.category === 'safety')) {
-    mapped.safety = true
+    mapped.is_safety = true
   }
 
   return mapped

@@ -53,7 +53,7 @@ export const add_per_player_cte = ({
       cte_query.groupBy('nfl_plays.ball_carrier_pid')
       break
     case 'pass_attempt':
-      count_expression = `SUM(CASE WHEN passer_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`
+      count_expression = `SUM(CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END)`
       cte_query.select('nfl_plays.passer_pid as pid')
       cte_query.groupBy('nfl_plays.passer_pid')
       break
@@ -63,14 +63,14 @@ export const add_per_player_cte = ({
       cte_query.groupBy('nfl_plays.target_pid')
       break
     case 'reception':
-      count_expression = `SUM(CASE WHEN target_pid IS NOT NULL AND comp = true THEN 1 ELSE 0 END)`
+      count_expression = `SUM(CASE WHEN target_pid IS NOT NULL AND is_completion = true THEN 1 ELSE 0 END)`
       cte_query.select('nfl_plays.target_pid as pid')
       cte_query.groupBy('nfl_plays.target_pid')
       break
     case 'touch':
       cte_query.crossJoin(
         db.raw(
-          'LATERAL (VALUES (nfl_plays.ball_carrier_pid), (CASE WHEN nfl_plays.comp = true THEN nfl_plays.target_pid END)) AS t(pid)'
+          'LATERAL (VALUES (nfl_plays.ball_carrier_pid), (CASE WHEN nfl_plays.is_completion = true THEN nfl_plays.target_pid END)) AS t(pid)'
         )
       )
       cte_query.whereRaw('t.pid IS NOT NULL')
@@ -80,7 +80,7 @@ export const add_per_player_cte = ({
     case 'opportunity':
       cte_query.crossJoin(
         db.raw(
-          'LATERAL (VALUES (CASE WHEN nfl_plays.sk IS NULL OR nfl_plays.sk = false THEN nfl_plays.passer_pid END), (nfl_plays.ball_carrier_pid), (nfl_plays.target_pid)) AS t(pid)'
+          'LATERAL (VALUES (CASE WHEN nfl_plays.is_sack IS NULL OR nfl_plays.is_sack = false THEN nfl_plays.passer_pid END), (nfl_plays.ball_carrier_pid), (nfl_plays.target_pid)) AS t(pid)'
         )
       )
       cte_query.whereRaw('t.pid IS NOT NULL')

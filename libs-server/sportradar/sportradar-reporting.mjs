@@ -82,18 +82,18 @@ export const print_dry_mode_comparison = ({ sample_plays_by_type }) => {
     'qb_position',
     'starting_hash',
     'run_gap',
-    'play_action',
-    'screen_pass',
-    'no_huddle',
-    'run_play_option',
+    'is_play_action',
+    'is_screen_pass',
+    'is_no_huddle',
+    'is_run_play_option',
     'box_defenders',
     'pass_rushers',
-    'blitz',
+    'is_blitz',
     'pocket_location',
     'left_tightends',
     'right_tightends',
-    'fake_punt',
-    'fake_field_goal',
+    'is_fake_punt',
+    'is_fake_field_goal',
     'route',
     'pocket_time',
     'yards_after_catch',
@@ -401,7 +401,7 @@ export const should_track_collision = ({
     'week',
     'updated',
     'sequence', // Different methodology
-    'catchable_ball' // Different methodology
+    'is_catchable_ball' // Different methodology
   ]
   if (excluded_fields.includes(field)) {
     return false

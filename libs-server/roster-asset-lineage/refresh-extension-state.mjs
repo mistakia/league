@@ -59,7 +59,7 @@ const refresh_extension_state = async ({
       'restricted_free_agency_nominations.original_team_id',
       'restricted_free_agency_bids.processed'
     )
-    .where({ 'restricted_free_agency_bids.lid': lid, succ: true })
+    .where({ 'restricted_free_agency_bids.lid': lid, is_successful: true })
     .whereNotNull('restricted_free_agency_bids.processed')
 
   // Build a unified reset stream keyed by ts so chronological ordering with

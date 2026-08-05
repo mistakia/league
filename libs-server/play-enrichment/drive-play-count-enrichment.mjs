@@ -29,7 +29,7 @@ const log = debug('drive-play-count-enrichment')
  */
 const should_count_play = (play) => {
   // Exclude deleted plays
-  if (play.deleted) {
+  if (play.is_deleted) {
     return false
   }
 
@@ -62,7 +62,11 @@ const should_count_play = (play) => {
 
   // Exclude no-play events that are pure penalties (no actual play occurred)
   // A play with play_type='NOPL' but with pass/rush/etc is still counted
-  if (play.play_type === 'NOPL' && !play.pass && !play.rush) {
+  if (
+    play.play_type === 'NOPL' &&
+    !play.is_passing_play &&
+    !play.is_rushing_play
+  ) {
     return false
   }
 

@@ -369,21 +369,21 @@ const stat_specs = {
   team_pass_attempts_from_plays: {
     measure: {
       kind: 'additive',
-      expr: `CASE WHEN passer_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END`
+      expr: `CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
     },
     stat_name: 'team_pass_att_from_plays'
   },
   team_pass_completions_from_plays: {
     measure: {
       kind: 'additive',
-      expr: `CASE WHEN comp = true THEN 1 ELSE 0 END`
+      expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
     },
     stat_name: 'team_pass_comp_from_plays'
   },
   team_pass_touchdowns_from_plays: {
     measure: {
       kind: 'additive',
-      expr: `CASE WHEN pass_td = true THEN 1 ELSE 0 END`
+      expr: `CASE WHEN is_passing_touchdown = true THEN 1 ELSE 0 END`
     },
     stat_name: 'team_pass_td_from_plays'
   },
@@ -409,7 +409,7 @@ const stat_specs = {
   team_rush_touchdowns_from_plays: {
     measure: {
       kind: 'additive',
-      expr: `CASE WHEN rush_td = true THEN 1 ELSE 0 END`
+      expr: `CASE WHEN is_rushing_touchdown = true THEN 1 ELSE 0 END`
     },
     stat_name: 'team_rush_td_from_plays'
   },
@@ -423,7 +423,7 @@ const stat_specs = {
   },
   team_success_rate_from_plays: {
     rate_with_selects: [
-      `SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator`,
+      `SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator`,
       `COUNT(*) as team_success_rate_from_plays_denominator`
     ],
     stat_name: 'team_success_rate_from_plays',
@@ -432,7 +432,7 @@ const stat_specs = {
   },
   team_expected_points_success_rate_from_plays: {
     rate_with_selects: [
-      `SUM(CASE WHEN ep_succ = true THEN 1 ELSE 0 END) as team_expected_points_success_rate_from_plays_numerator`,
+      `SUM(CASE WHEN is_epa_successful = true THEN 1 ELSE 0 END) as team_expected_points_success_rate_from_plays_numerator`,
       `COUNT(*) as team_expected_points_success_rate_from_plays_denominator`
     ],
     stat_name: 'team_expected_points_success_rate_from_plays',

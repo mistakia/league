@@ -64,7 +64,7 @@ const format = (item) => {
     ...(seas_type && { season_type: seas_type }),
     ...(week_type && { week_type }),
     ...(score.detail && {
-      ot: (score.detail.phase || '').includes('OVERTIME')
+      is_overtime: (score.detail.phase || '').includes('OVERTIME')
     }),
 
     ...(score.homePointsTotal && { home_score: score.homePointsTotal }),

@@ -12,14 +12,14 @@ export const SPORTRADAR_EXCLUSIVE_FIELDS = new Set([
   'right_tightends', // Number of TEs on right
 
   // Play Characteristics
-  'blitz', // Boolean indicating blitz (different from FTN's blitzers count)
-  'fake_punt', // Fake punt attempt
-  'fake_field_goal', // Fake field goal attempt
+  'is_blitz', // Boolean indicating blitz (different from FTN's blitzers count)
+  'is_fake_punt', // Fake punt attempt
+  'is_fake_field_goal', // Fake field goal attempt
 
   // Passing Metrics
   'pocket_time', // Time in pocket (different from NGS time_to_throw)
-  'qb_hit', // QB hit/knockdown (also set by import-charted-plays-from-csv)
-  'qb_hurry', // QB hurried
+  'is_qb_hit', // QB hit/knockdown (also set by import-charted-plays-from-csv)
+  'is_qb_hurry', // QB hurried
   'incomplete_pass_type', // Type of incompletion
 
   // Advanced Contact Metrics
@@ -29,10 +29,10 @@ export const SPORTRADAR_EXCLUSIVE_FIELDS = new Set([
 
   // Special Teams
   'punt_hang_time', // Punt hang time in seconds
-  'punt_inside_20', // Punt downed inside 20
-  'punt_touchback', // Punt touchback
-  'kickoff_onside', // Onside kick attempt
-  'kickoff_touchback', // Kickoff touchback
+  'is_punt_inside_20', // Punt downed inside 20
+  'is_punt_touchback', // Punt touchback
+  'is_kickoff_onside', // Onside kick attempt
+  'is_kickoff_touchback', // Kickoff touchback
   'fg_result_detail', // Detailed FG miss reason
 
   // Defensive Player Tracking
@@ -47,8 +47,8 @@ export const SPORTRADAR_EXCLUSIVE_FIELDS = new Set([
   // Penalty Details
   // Note: penalty_type is NOT exclusive - nflfastr extracts from play descriptions
   // which is more accurate than Sportradar's API (see sportradar errors on special teams)
-  'penalty_declined', // Penalty was declined
-  'penalty_offset', // Offsetting penalty
+  'is_penalty_declined', // Penalty was declined
+  'is_penalty_offset', // Offsetting penalty
   'penalty_player_sportradar_id',
   'play_direction', // Play direction from pass details
 

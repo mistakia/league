@@ -50,7 +50,7 @@ export default class Scoreboard {
     const esbids = Array.from(uniqBy(plays, 'esbid')).map((p) => p.esbid)
     const playStats = await db('nfl_play_stats_current_week')
       .whereIn('esbid', esbids)
-      .where('valid', 1)
+      .where('is_valid', 1)
 
     for (const play of plays) {
       play.playStats = playStats.filter(

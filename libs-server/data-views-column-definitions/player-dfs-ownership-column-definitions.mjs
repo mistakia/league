@@ -65,7 +65,7 @@ const player_dfs_ownership_source = {
           GROUP BY source_contest_id, source_id
         ) own_stats ON own_stats.source_contest_id = dc.source_contest_id
                     AND own_stats.source_id = dc.source_id
-        WHERE dc.ownership_imported = true
+        WHERE dc.is_ownership_imported = true
           AND dc.source_id IN (${platform_source_id.map(() => '?').join(',')})
           AND (${year_week_pairs.map(() => '(dc.season_year = ? AND dc.week = ?)').join(' OR ')})
       ) rc ON o.source_contest_id = rc.source_contest_id

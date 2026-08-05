@@ -6,13 +6,10 @@
     "columns": [
       {
         "column_id": "player_successful_rushing_and_receiving_play_percentage_from_plays",
-        "params": {
-          "year": [2023],
-          "year_offset": [1, 2]
-        }
+        "params": { "year": [2023], "year_offset": [1, 2] }
       }
     ]
   },
-  "expected_query": "with \"tbeb3fc5258c1d35876b268c1775a7bb5\" as materialized (select COALESCE(ball_carrier_pid, target_pid) as pid, SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) as successful_rushing_and_receiving_play_pct_from_plays_numerator, SUM(CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL THEN 1 ELSE 0 END) as successful_rushing_and_receiving_play_pct_from_plays_denominator from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2024, 2025) group by COALESCE(ball_carrier_pid, target_pid)) select \"player\".\"pid\", player.first_name, player.last_name, (SELECT ROUND(100.0 * SUM(tbeb3fc5258c1d35876b268c1775a7bb5.successful_rushing_and_receiving_play_pct_from_plays_numerator) / NULLIF(SUM(tbeb3fc5258c1d35876b268c1775a7bb5.successful_rushing_and_receiving_play_pct_from_plays_denominator), 0), 2) FROM tbeb3fc5258c1d35876b268c1775a7bb5 WHERE tbeb3fc5258c1d35876b268c1775a7bb5.pid = player.pid) AS \"successful_rushing_and_receiving_play_pct_from_plays_0\", \"player\".\"primary_position\" from \"player\" group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "with \"t61584fced4b7d8d6d14e1c8548862648\" as materialized (select COALESCE(ball_carrier_pid, target_pid) as pid, SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) as successful_rushing_and_receiving_play_pct_from_plays_numerator, SUM(CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL THEN 1 ELSE 0 END) as successful_rushing_and_receiving_play_pct_from_plays_denominator from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2024, 2025) group by COALESCE(ball_carrier_pid, target_pid)) select \"player\".\"pid\", player.first_name, player.last_name, (SELECT ROUND(100.0 * SUM(t61584fced4b7d8d6d14e1c8548862648.successful_rushing_and_receiving_play_pct_from_plays_numerator) / NULLIF(SUM(t61584fced4b7d8d6d14e1c8548862648.successful_rushing_and_receiving_play_pct_from_plays_denominator), 0), 2) FROM t61584fced4b7d8d6d14e1c8548862648 WHERE t61584fced4b7d8d6d14e1c8548862648.pid = player.pid) AS \"successful_rushing_and_receiving_play_pct_from_plays_0\", \"player\".\"primary_position\" from \"player\" group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "tags": ["year_offset", "from_plays", "range", "has_numerator_denominator"]
 }

@@ -125,7 +125,7 @@ describe('API /waivers - poach', function () {
     expect(waiver.bid).to.equal(0)
     expect(waiver.po).to.equal(9999)
     expect(waiver.type).to.equal(waiver_types.POACH)
-    expect(waiver.succ).to.equal(null)
+    expect(waiver.is_successful).to.equal(null)
     expect(waiver.reason).to.equal(null)
     expect(waiver.processed).to.equal(null)
     expect(waiver.cancelled).to.equal(null)

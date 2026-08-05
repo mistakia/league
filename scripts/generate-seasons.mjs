@@ -11,7 +11,7 @@ debug.enable('generate-seasons')
 const generate_seasons = async () => {
   // get all hosted leagues that are not archived
   const leagues = await db('leagues')
-    .where({ hosted: 1 })
+    .where({ is_hosted: 1 })
     .whereNull('archived_at')
 
   log(`Found ${leagues.length} active hosted leagues`)
@@ -62,7 +62,7 @@ const generate_seasons = async () => {
   // seasons are deliberately out of scope (logged-and-skipped above) because
   // this script cannot manufacture a season from nothing.
   const expected_lids = await db('leagues')
-    .where({ 'leagues.hosted': 1 })
+    .where({ 'leagues.is_hosted': 1 })
     .whereNull('leagues.archived_at')
     .whereExists(function () {
       this.select('*').from('seasons').whereRaw('seasons.lid = leagues.uid')

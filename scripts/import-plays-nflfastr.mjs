@@ -335,8 +335,8 @@ const format_drive_data = (play) => ({
   drive_result: play.fixed_drive_result || null,
   drive_top: play.drive_time_of_possession || null,
   drive_fds: format_number(play.drive_first_downs) || null,
-  drive_inside20: format_boolean(play.drive_inside20),
-  drive_score: format_boolean(play.drive_ended_with_score),
+  is_drive_inside_20: format_boolean(play.drive_inside20),
+  is_drive_score: format_boolean(play.drive_ended_with_score),
   drive_start_qtr: format_number(play.drive_quarter_start),
   drive_end_qtr: format_number(play.drive_quarter_end),
   drive_yds_penalized: format_number(play.drive_yards_penalized),
@@ -356,7 +356,7 @@ const format_drive_data = (play) => ({
 
 const format_series_data = (play) => ({
   series_seq: format_number(play.series),
-  series_suc: format_boolean(play.series_success),
+  is_series_successful: format_boolean(play.series_success),
   series_result: format_series_result(play.series_result)
 })
 
@@ -391,17 +391,17 @@ const format_play_events = (play) => {
   const off_team = get_offensive_team(play)
 
   return {
-    fum: format_boolean(play.fumble),
-    incomp: incomp || null,
-    touchback: format_boolean(play.touchback),
-    safety: format_boolean(play.safety),
-    special: format_boolean(play.special),
-    oob: format_boolean(play.out_of_bounds),
-    tfl: format_boolean(play.tackled_for_loss),
-    rush: format_boolean(play.rush_attempt),
-    pass: pass_attempted,
-    solo_tk: format_boolean(play.solo_tackle),
-    assist_tk: format_boolean(play.assist_tackle),
+    is_fumble: format_boolean(play.fumble),
+    is_incompletion: incomp || null,
+    is_touchback: format_boolean(play.touchback),
+    is_safety: format_boolean(play.safety),
+    is_special_teams_play: format_boolean(play.special),
+    is_out_of_bounds: format_boolean(play.out_of_bounds),
+    is_tackle_for_loss: format_boolean(play.tackled_for_loss),
+    is_rushing_play: format_boolean(play.rush_attempt),
+    is_passing_play: pass_attempted,
+    is_solo_tackle: format_boolean(play.solo_tackle),
+    is_assist_tackle: format_boolean(play.assist_tackle),
     pen_team,
     pen_yds: format_number(play.penalty_yards),
     penalty_type: normalize_penalty_type({
@@ -414,18 +414,18 @@ const format_play_events = (play) => {
 }
 
 const format_scoring_yards = (play) => ({
-  pass_td: format_boolean(play.pass_touchdown),
-  rush_td: format_boolean(play.rush_touchdown),
+  is_passing_touchdown: format_boolean(play.pass_touchdown),
+  is_rushing_touchdown: format_boolean(play.rush_touchdown),
   pass_yds: format_number(play.passing_yards),
   recv_yds: format_number(play.receiving_yards),
   rush_yds: format_number(play.rushing_yards)
 })
 
 const format_qb_play_data = (play) => ({
-  qb_dropback: format_boolean(play.qb_dropback),
-  qb_kneel: format_boolean(play.qb_kneel),
-  qb_spike: format_boolean(play.qb_spike),
-  qb_scramble: format_boolean(play.qb_scramble)
+  is_qb_dropback: format_boolean(play.qb_dropback),
+  is_qb_kneel: format_boolean(play.qb_kneel),
+  is_qb_spike: format_boolean(play.qb_spike),
+  is_qb_scramble: format_boolean(play.qb_scramble)
 })
 
 const format_location_data = (play) => ({
@@ -435,17 +435,17 @@ const format_location_data = (play) => ({
 })
 
 const format_down_conversions = (play) => ({
-  first_down:
+  is_first_down:
     format_boolean(play.first_down_rush) ||
     format_boolean(play.first_down_pass) ||
     format_boolean(play.first_down_penalty),
-  first_down_rush: format_boolean(play.first_down_rush),
-  first_down_pass: format_boolean(play.first_down_pass),
-  first_down_penalty: format_boolean(play.first_down_penalty),
-  third_down_converted: format_boolean(play.third_down_converted),
-  third_down_failed: format_boolean(play.third_down_failed),
-  fourth_down_converted: format_boolean(play.fourth_down_converted),
-  fourth_down_failed: format_boolean(play.fourth_down_failed)
+  is_first_down_rush: format_boolean(play.first_down_rush),
+  is_first_down_pass: format_boolean(play.first_down_pass),
+  is_first_down_penalty: format_boolean(play.first_down_penalty),
+  is_third_down_converted: format_boolean(play.third_down_converted),
+  is_third_down_failed: format_boolean(play.third_down_failed),
+  is_fourth_down_converted: format_boolean(play.fourth_down_converted),
+  is_fourth_down_failed: format_boolean(play.fourth_down_failed)
 })
 
 const format_epa_data = (play) => {
@@ -455,7 +455,7 @@ const format_epa_data = (play) => {
   return {
     ep: format_number(is_kickoff && play.ep != null ? -play.ep : play.ep),
     epa: is_kickoff ? negated_epa : epa,
-    ep_succ: is_kickoff
+    is_epa_successful: is_kickoff
       ? negated_epa != null
         ? negated_epa > 0
         : null
@@ -555,16 +555,16 @@ const format_xyac_data = (play) => ({
 })
 
 const format_special_teams = (play) => ({
-  ep_att: format_boolean(play.extra_point_attempt),
-  two_att: format_boolean(play.two_point_attempt),
-  fg_att: format_boolean(play.field_goal_attempt),
-  kickoff_att: format_boolean(play.kickoff_attempt),
-  punt_att: format_boolean(play.punt_attempt),
+  is_extra_point_attempt: format_boolean(play.extra_point_attempt),
+  is_two_point_conversion_attempt: format_boolean(play.two_point_attempt),
+  is_field_goal_attempt: format_boolean(play.field_goal_attempt),
+  is_kickoff_attempt: format_boolean(play.kickoff_attempt),
+  is_punt_attempt: format_boolean(play.punt_attempt),
   fg_result: standardize_kick_result(play.field_goal_result),
   kick_distance: format_number(play.kick_distance),
   ep_result: standardize_kick_result(play.extra_point_result),
   tp_result: standardize_two_point_result(play.two_point_conv_result),
-  punt_blocked: format_boolean(play.punt_blocked)
+  is_punt_blocked: format_boolean(play.punt_blocked)
 })
 
 const format_timeout_data = (play) => {
@@ -582,7 +582,7 @@ const format_timeout_data = (play) => {
         ? play.posteam_timeouts_remaining
         : play.defteam_timeouts_remaining
     ),
-    timeouts: format_boolean(play.timeout),
+    is_timeout: format_boolean(play.timeout),
     timeout_team: play.timeout_team ? fixTeam(play.timeout_team) : null
   }
 }

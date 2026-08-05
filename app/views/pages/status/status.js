@@ -25,7 +25,7 @@ import './status.styl'
 
 const StatusItem = ({ status_item, index }) => {
   const [expanded, set_expanded] = React.useState(false)
-  const is_operational = Boolean(status_item.succ)
+  const is_operational = Boolean(status_item.is_successful)
   const icon = is_operational ? (
     <CheckCircleOutlineIcon style={{ color: green[500] }} />
   ) : (
@@ -77,7 +77,7 @@ export default function StatusPage({ load, status }) {
     const item = (
       <StatusItem key={index} status_item={status_item} index={index} />
     )
-    if (status_item.succ) {
+    if (status_item.is_successful) {
       success_items.push(item)
     } else {
       error_items.push(item)

@@ -46,6 +46,6 @@ describe('LIBS-SERVER /merge-columns-on-conflict', function () {
   // it is canonical and CHECK-constrained now, so merging it is a no-op rather
   // than a respelling.
   it('keeps the gamelog generator holding back active', () => {
-    expect(GAMELOG_COLUMNS_NOT_MERGED).to.have.members(['active'])
+    expect(GAMELOG_COLUMNS_NOT_MERGED).to.have.members(['is_active'])
   })
 })

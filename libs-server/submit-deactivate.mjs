@@ -108,7 +108,7 @@ export default async function ({
         .where({
           pid: deactivate_pid,
           processed: transactionWaiver.processed,
-          succ: 0,
+          is_successful: 0,
           type: 1,
           lid: leagueId,
           reason: 'player is not a free agent'

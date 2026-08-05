@@ -243,7 +243,7 @@ const fantasy_points_from_plays_with = async ({
             .whereRaw('"return_td_gate"."esbid" = "nfl_plays"."esbid"')
             .whereRaw('"return_td_gate"."play_id" = "nfl_plays"."play_id"')
             .whereIn('return_td_gate.stat_id', return_touchdown_stat_ids)
-            .where('return_td_gate.valid', true)
+            .where('return_td_gate.is_valid', true)
         })
       }
     })
@@ -260,13 +260,13 @@ const fantasy_points_from_plays_with = async ({
     'nfl_plays.season_type as seas_type',
     'nfl_plays.season_year as year',
     'nfl_plays.rush_yds',
-    'nfl_plays.rush_td',
+    'nfl_plays.is_rushing_touchdown',
     'nfl_plays.pass_yds',
-    'nfl_plays.pass_td',
+    'nfl_plays.is_passing_touchdown',
     'nfl_plays.recv_yds',
-    'nfl_plays.comp',
-    'nfl_plays.interceptions',
-    'nfl_plays.first_down',
+    'nfl_plays.is_completion',
+    'nfl_plays.is_interception',
+    'nfl_plays.is_first_down',
     'nfl_plays.play_type'
   ]
 
@@ -574,7 +574,7 @@ const generate_passing_scoring_inner = async (scoring_format) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
     if (!scoring_format) {
-      return 'COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE("interceptions"::int, 0) * -1'
+      return 'COALESCE(pass_yds, 0) * 0.04 + COALESCE(is_passing_touchdown::int, 0) * 4 + COALESCE("is_interception"::int, 0) * -1'
     }
   }
 
@@ -582,7 +582,7 @@ const generate_passing_scoring_inner = async (scoring_format) => {
   const ptd = scoring_format.passing_touchdowns || 0
   const ints = scoring_format.passing_interceptions || 0
 
-  return `COALESCE(pass_yds, 0) * ${py} + COALESCE(pass_td::int, 0) * ${ptd} + COALESCE("interceptions"::int, 0) * ${ints}`
+  return `COALESCE(pass_yds, 0) * ${py} + COALESCE(is_passing_touchdown::int, 0) * ${ptd} + COALESCE("is_interception"::int, 0) * ${ints}`
 }
 
 const generate_passing_scoring_sql = async (scoring_format) =>
@@ -592,7 +592,7 @@ const generate_rushing_scoring_inner = async (scoring_format) => {
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
     if (!scoring_format) {
-      return 'COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6'
+      return 'COALESCE(rush_yds, 0) * 0.1 + COALESCE(is_rushing_touchdown::int, 0) * 6'
     }
   }
 
@@ -601,7 +601,7 @@ const generate_rushing_scoring_inner = async (scoring_format) => {
   const rufd = scoring_format.rushing_first_downs || 0
   const ra = scoring_format.rushing_attempts || 0
 
-  let sql = `COALESCE(rush_yds, 0) * ${ry} + COALESCE(rush_td::int, 0) * ${rtd}`
+  let sql = `COALESCE(rush_yds, 0) * ${ry} + COALESCE(is_rushing_touchdown::int, 0) * ${rtd}`
 
   if (ra) {
     sql += ` + ${ra}`
@@ -613,9 +613,9 @@ const generate_rushing_scoring_inner = async (scoring_format) => {
       scoring_format.scoring_format_id ===
         'ed9c2daa0f00d9389f450b577c16fb0864fa22c6e261c0161db5f2da54457286'
     if (is_sleeper_sfb) {
-      sql += ` + (CASE WHEN first_down = true AND play_type = 'RUSH' AND COALESCE(rush_td::int, 0) = 0 THEN ${rufd} ELSE 0 END)`
+      sql += ` + (CASE WHEN is_first_down = true AND play_type = 'RUSH' AND COALESCE(is_rushing_touchdown::int, 0) = 0 THEN ${rufd} ELSE 0 END)`
     } else {
-      sql += ` + (CASE WHEN first_down = true AND play_type = 'RUSH' THEN ${rufd} ELSE 0 END)`
+      sql += ` + (CASE WHEN is_first_down = true AND play_type = 'RUSH' THEN ${rufd} ELSE 0 END)`
     }
   }
 
@@ -632,7 +632,7 @@ const generate_receiving_scoring_inner = async (
   if (!scoring_format) {
     scoring_format = await get_scoring_format(DEFAULT_SCORING_FORMAT_ID)
     if (!scoring_format) {
-      return 'COALESCE(comp::int, 0) * 1 + COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6'
+      return 'COALESCE(is_completion::int, 0) * 1 + COALESCE(recv_yds, 0) * 0.1 + COALESCE(is_passing_touchdown::int, 0) * 6'
     }
   }
 
@@ -645,12 +645,12 @@ const generate_receiving_scoring_inner = async (
   const trg = scoring_format.targets || 0
   const recfd = scoring_format.receiving_first_downs || 0
 
-  let sql = `COALESCE(recv_yds, 0) * ${recy} + COALESCE(pass_td::int, 0) * ${rctd}`
+  let sql = `COALESCE(recv_yds, 0) * ${recy} + COALESCE(is_passing_touchdown::int, 0) * ${rctd}`
 
   if (has_position_data && (rbrec !== rec || wrrec !== rec || terec !== rec)) {
-    sql += ` + CASE WHEN comp = true THEN CASE trg_pos WHEN 'RB' THEN ${rbrec} WHEN 'WR' THEN ${wrrec} WHEN 'TE' THEN ${terec} ELSE ${rec} END ELSE 0 END`
+    sql += ` + CASE WHEN is_completion = true THEN CASE trg_pos WHEN 'RB' THEN ${rbrec} WHEN 'WR' THEN ${wrrec} WHEN 'TE' THEN ${terec} ELSE ${rec} END ELSE 0 END`
   } else {
-    sql += ` + COALESCE(comp::int, 0) * ${rec}`
+    sql += ` + COALESCE(is_completion::int, 0) * ${rec}`
   }
 
   if (trg) {
@@ -663,9 +663,9 @@ const generate_receiving_scoring_inner = async (
       scoring_format.scoring_format_id ===
         'ed9c2daa0f00d9389f450b577c16fb0864fa22c6e261c0161db5f2da54457286'
     if (is_sleeper_sfb) {
-      sql += ` + (CASE WHEN first_down = true AND play_type = 'PASS' AND COALESCE(pass_td::int, 0) = 0 THEN ${recfd} ELSE 0 END)`
+      sql += ` + (CASE WHEN is_first_down = true AND play_type = 'PASS' AND COALESCE(is_passing_touchdown::int, 0) = 0 THEN ${recfd} ELSE 0 END)`
     } else {
-      sql += ` + (CASE WHEN first_down = true AND play_type = 'PASS' THEN ${recfd} ELSE 0 END)`
+      sql += ` + (CASE WHEN is_first_down = true AND play_type = 'PASS' THEN ${recfd} ELSE 0 END)`
     }
   }
 

@@ -51,9 +51,9 @@ export default {
     main_where: () => 'nfl_games.away_nfl_team'
   },
   play_goal_to_go: {
-    column_name: 'goal_to_go',
+    column_name: 'is_goal_to_go',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.goal_to_go as play_goal_to_go'],
-    main_where: () => 'nfl_plays.goal_to_go'
+    main_select: () => ['nfl_plays.is_goal_to_go as play_goal_to_go'],
+    main_where: () => 'nfl_plays.is_goal_to_go'
   }
 }

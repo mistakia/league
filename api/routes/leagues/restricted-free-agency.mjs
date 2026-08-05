@@ -76,7 +76,7 @@ const router = express.Router({ mergeParams: true })
  *                           type: integer
  *                         bid:
  *                           type: integer
- *                         succ:
+ *                         is_successful:
  *                           type: boolean
  *                         outcome:
  *                           type: string
@@ -120,7 +120,7 @@ router.get('/?', async (req, res) => {
         'restricted_free_agency_bids.pid',
         'restricted_free_agency_bids.tid',
         'restricted_free_agency_bids.bid',
-        'restricted_free_agency_bids.succ',
+        'restricted_free_agency_bids.is_successful',
         'restricted_free_agency_bids.outcome',
         'restricted_free_agency_bids.outcome_detail',
         'restricted_free_agency_bids.submitted',

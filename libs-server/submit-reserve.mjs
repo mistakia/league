@@ -116,10 +116,10 @@ export default async function ({
       'practice.su',
       'nfl_games.day as game_day',
       db.raw(
-        'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.active = false THEN true ELSE false END as prior_week_inactive'
+        'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.is_active = false THEN true ELSE false END as prior_week_inactive'
       ),
       db.raw(
-        'CASE WHEN prior_week_gamelog.ruled_out_in_game = true THEN true ELSE false END as prior_week_ruled_out'
+        'CASE WHEN prior_week_gamelog.is_ruled_out_in_game = true THEN true ELSE false END as prior_week_ruled_out'
       )
     )
   } else {

@@ -249,7 +249,7 @@ router.post('/connect', async (req, res) => {
           ...DEFAULT_SYNC_COMPONENTS,
           ...sync_config?.sync_components
         },
-        auto_sync_enabled: sync_config?.auto_sync || false,
+        is_auto_sync_enabled: sync_config?.auto_sync || false,
         created_by: req.auth.userId,
         status: 'active'
       })
@@ -621,7 +621,7 @@ router.get('/status', async (req, res) => {
           external_league_id: job.external_league_id,
           display_name: job.display_name,
           job_type: job.job_type,
-          dry_run: job.dry_run,
+          dry_run: job.is_dry_run,
           queued_at: job.queued_at,
           started_at: job.started_at,
           completed_at: job.completed_at
@@ -860,7 +860,7 @@ router.get('/connections', async (req, res) => {
         'connection_name',
         'status',
         'sync_components',
-        'auto_sync_enabled',
+        'is_auto_sync_enabled',
         'created_at',
         'last_sync',
         'last_validated'
@@ -888,7 +888,7 @@ router.get('/connections', async (req, res) => {
         display_name: conn.connection_name,
         is_active: conn.status === 'active',
         sync_config: {
-          auto_sync: conn.auto_sync_enabled,
+          auto_sync: conn.is_auto_sync_enabled,
           sync_components: parsed_sync_components
         },
         created_at: conn.created_at,

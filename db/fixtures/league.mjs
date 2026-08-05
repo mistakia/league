@@ -45,7 +45,7 @@ export default async function (knex, league_params = {}) {
   const userId = 1
   const leagueId = await createLeague({
     lid: 1,
-    hosted: 1,
+    is_hosted: 1,
     commishid: userId,
     draft_start: Math.round(Date.now() / 1000),
     free_agency_live_auction_start: null,

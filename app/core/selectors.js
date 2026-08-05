@@ -3846,12 +3846,12 @@ export function get_waiver_report_items(state) {
 
   const result = []
   for (const playerId in grouped) {
-    const waiver = grouped[playerId].find((w) => w.succ)
+    const waiver = grouped[playerId].find((w) => w.is_successful)
     const { pid } = grouped[playerId][0]
     result.push({
       pid,
       ...waiver,
-      waivers: grouped[playerId].filter((w) => !w.succ)
+      waivers: grouped[playerId].filter((w) => !w.is_successful)
     })
   }
   return result.sort((a, b) => {

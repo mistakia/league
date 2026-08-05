@@ -5,7 +5,7 @@
  * A bare `.merge()` asserts EVERY column the insert names. That is wrong for two
  * kinds of column, and both have caused silent data loss here:
  *
- *   - A column another script owns. `player_gamelogs.active` belongs to
+ *   - A column another script owns. `player_gamelogs.is_active` belongs to
  *     import-nflverse-weekly-rosters.mjs, which maps game-day roster status onto
  *     it. The gamelog generator hardcodes `active: true` because a player with
  *     counting stats was dressed -- right on INSERT, wrong on UPDATE, where it

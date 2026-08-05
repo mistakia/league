@@ -23,7 +23,7 @@ describe('API /selection-combinations', function () {
       { position: 'QB', market: 'GAME_ALT_PASSING_YARDS' },
       { position: 'WR', market: 'GAME_ALT_RECEIVING_YARDS' }
     ]),
-    active: true
+    is_active: true
   }
 
   const test_player_1 = {

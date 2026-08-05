@@ -31,7 +31,7 @@ export const scoring_formats = {
       targets: 0, // targets (no points in standard)
       rushing_first_downs: 0, // rushing first downs
       receiving_first_downs: 0, // receiving first downs
-      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
+      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description: 'Standard scoring with no PPR and 4-point passing touchdowns'
   },
@@ -61,7 +61,7 @@ export const scoring_formats = {
       targets: 0, // targets (no points in standard)
       rushing_first_downs: 0, // rushing first downs
       receiving_first_downs: 0, // receiving first downs
-      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
+      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Half point per reception scoring with 4-point passing touchdowns'
@@ -92,7 +92,7 @@ export const scoring_formats = {
       targets: 0, // targets (no points in standard)
       rushing_first_downs: 0, // rushing first downs
       receiving_first_downs: 0, // receiving first downs
-      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
+      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Full point per reception scoring with 4-point passing touchdowns'
@@ -123,7 +123,7 @@ export const scoring_formats = {
       targets: 1, // targets (1 point per target in SFB)
       rushing_first_downs: 1, // rushing first downs (1 point in SFB)
       receiving_first_downs: 1, // receiving first downs (1 point in SFB)
-      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
+      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties'
@@ -154,7 +154,7 @@ export const scoring_formats = {
       targets: 0, // targets (no points in SFB Sleeper)
       rushing_first_downs: 1, // rushing first downs (1 point in SFB)
       receiving_first_downs: 1, // receiving first downs (1 point in SFB)
-      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
+      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties'
@@ -185,7 +185,7 @@ export const scoring_formats = {
       targets: 0, // targets (no points in FanDuel)
       rushing_first_downs: 0, // rushing first downs
       receiving_first_downs: 0, // receiving first downs
-      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
+      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
       // TODO: Add support for unsupported FanDuel scoring:
       // - 100+ rushing yard bonus (3 points)
       // - 100+ receiving yard bonus (3 points)
@@ -225,7 +225,7 @@ export const scoring_formats = {
       targets: 0, // targets (no points in DraftKings)
       rushing_first_downs: 0, // rushing first downs
       receiving_first_downs: 0, // receiving first downs
-      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
+      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
       // TODO: Add support for unsupported DraftKings scoring:
       // - 300+ passing yard bonus (3 points)
       // - 100+ rushing yard bonus (3 points)
@@ -261,7 +261,7 @@ export const scoring_formats = {
       targets: 0, // targets (no points in standard)
       rushing_first_downs: 0, // rushing first downs
       receiving_first_downs: 0, // receiving first downs
-      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
+      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Half PPR with lower turnover penalties: -1 INT, -1 fumble lost'
@@ -292,7 +292,7 @@ export const scoring_formats = {
       targets: 0, // targets (no points in standard)
       rushing_first_downs: 0, // rushing first downs
       receiving_first_downs: 0, // receiving first downs
-      exclude_quarterback_kneels: false // exclude QB kneels from rushing yards
+      is_excluding_quarterback_kneels: false // exclude QB kneels from rushing yards
     },
     description:
       'Full PPR with lower turnover penalties: -1 INT, -1 fumble lost'
@@ -323,7 +323,7 @@ export const scoring_formats = {
       targets: 0, // targets (no points in Genesis)
       rushing_first_downs: 0, // rushing first downs
       receiving_first_downs: 0, // receiving first downs
-      exclude_quarterback_kneels: true // exclude QB kneels from rushing yards
+      is_excluding_quarterback_kneels: true // exclude QB kneels from rushing yards
     },
     description:
       'Genesis League scoring with half PPR, 4-point passing TDs, 0.05 passing yards, and -1 turnovers'

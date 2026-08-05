@@ -31,7 +31,7 @@ export const enrich_qb_plays = (plays) => {
     //   "(:22) B.Purdy kneels to SEA 36 for -1 yards."
     //   "(:22) A.Brooks to BUF 35 for -1 yards. QB kneels"
     if (play_type_nfl === 'RUSH' && desc_lower.includes('kneel')) {
-      enriched.qb_kneel = true
+      enriched.is_qb_kneel = true
       qb_kneel_count++
     }
 
@@ -39,7 +39,7 @@ export const enrich_qb_plays = (plays) => {
     // Example:
     //   "(:08) J.Allen spiked the ball to stop the clock."
     if (play_type_nfl === 'PASS' && desc_lower.includes('spike')) {
-      enriched.qb_spike = true
+      enriched.is_qb_spike = true
       qb_spike_count++
     }
 

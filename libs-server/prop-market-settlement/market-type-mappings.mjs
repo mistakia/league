@@ -159,7 +159,7 @@ export const market_type_mappings = {
   // TODO: Use td_pid field once it's available in nfl_plays table
   [player_game_prop_types.GAME_FIRST_TOUCHDOWN_SCORER]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
-    metric_columns: ['td'], // touchdown indicator
+    metric_columns: ['is_touchdown'], // touchdown indicator
     has_metric_value: false, // Just YES/NO
     selection_types: ['YES', 'NO'],
     special_logic: 'first_touchdown_scorer'
@@ -202,7 +202,7 @@ export const market_type_mappings = {
   [player_first_quarter_prop_types.GAME_FIRST_QUARTER_RECEPTIONS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     player_column: 'target_pid', // target
-    metric_columns: ['comp'], // Count receptions by counting completed passes
+    metric_columns: ['is_completion'], // Count receptions by counting completed passes
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 1,
@@ -211,7 +211,7 @@ export const market_type_mappings = {
   [player_first_quarter_prop_types.GAME_FIRST_QUARTER_RUSHING_ATTEMPTS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     player_column: 'ball_carrier_pid', // ball carrier
-    metric_columns: ['rush'], // Count rushing attempts by counting rush plays
+    metric_columns: ['is_rushing_play'], // Count rushing attempts by counting rush plays
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 1,
@@ -220,7 +220,7 @@ export const market_type_mappings = {
   [player_first_quarter_prop_types.GAME_FIRST_QUARTER_PASSING_ATTEMPTS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     player_column: 'passer_pid', // passer
-    metric_columns: ['pass'], // Count passing attempts by counting pass plays
+    metric_columns: ['is_passing_play'], // Count passing attempts by counting pass plays
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 1,
@@ -229,7 +229,7 @@ export const market_type_mappings = {
   [player_first_quarter_prop_types.GAME_FIRST_QUARTER_PASSING_INTERCEPTIONS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     player_column: 'passer_pid', // passer
-    metric_columns: ['interceptions'], // interception indicator
+    metric_columns: ['is_interception'], // interception indicator
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 1,

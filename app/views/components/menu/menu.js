@@ -49,7 +49,7 @@ export default function AppMenu({
   const location = useLocation()
   const isAuction = location.pathname === '/auction'
   const isMobile = window.innerWidth < 800
-  const is_hosted = Boolean(league.hosted)
+  const is_hosted = Boolean(league.is_hosted)
   const drawer_ref = useRef(null)
 
   useEffect(() => {

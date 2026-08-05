@@ -25,10 +25,10 @@
  *
  *   - `rushing_yards_excluding_kneels` is a stat with no column; it is scored
  *     through the `rushing_yards` value when a format sets
- *     `exclude_quarterback_kneels`.
+ *     `is_excluding_quarterback_kneels`.
  *   - the three positional reception columns are columns with no stat; they
  *     override the `receptions` value for one position.
- *   - `exclude_quarterback_kneels` is a boolean switch, not a rate.
+ *   - `is_excluding_quarterback_kneels` is a boolean switch, not a rate.
  *   - `field_goals_made` is a stat that is deliberately never scored. It is
  *     the total the five distance bands partition, so giving it a value would
  *     double-count every field goal.
@@ -304,7 +304,7 @@ export const scoring_registry = [
   },
   {
     // Column with no stat: a switch, not a rate.
-    column: 'exclude_quarterback_kneels',
+    column: 'is_excluding_quarterback_kneels',
     group: 'base',
     section: 'misc',
     label: 'Exclude QB Kneels',

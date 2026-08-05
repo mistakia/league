@@ -27,21 +27,21 @@
 export const SPORTRADAR_PROTECTED_FIELDS = new Set([
   // ---- FTN charting (manual expert charting; authoritative) ----
   // Source: scripts/import-plays-nflfastr-ftn.mjs format_play()
-  'catchable_ball', // is_catchable_ball — the 2026-05-24 damaged field
-  'dropped_pass', // is_drop
-  'run_play_option', // is_rpo
-  'screen_pass', // is_screen_pass
-  'no_huddle', // is_no_huddle
-  'motion', // is_motion
-  'play_action', // is_play_action (Sportradar mapping already disabled)
-  'trick_play', // is_trick_play
-  'out_of_pocket_pass', // is_qb_out_of_pocket
-  'int_worthy', // is_interception_worthy
-  'throw_away', // is_throw_away
-  'contested_ball', // is_contested_ball
-  'created_reception', // is_created_reception
-  'qb_sneak', // is_qb_sneak
-  'qb_fault_sack', // is_qb_fault_sack
+  'is_catchable_ball', // the 2026-05-24 damaged field
+  'is_dropped_pass',
+  'is_run_play_option',
+  'is_screen_pass',
+  'is_no_huddle',
+  'is_motion',
+  'is_play_action', // (Sportradar mapping already disabled)
+  'is_trick_play',
+  'is_out_of_pocket_pass',
+  'is_interception_worthy',
+  'is_throw_away',
+  'is_contested_ball',
+  'is_created_reception',
+  'is_qb_sneak',
+  'is_qb_fault_sack',
   'read_thrown', // read_thrown
   'qb_position', // qb_location — FTN pre-snap formation is authoritative
   'starting_hash', // starting_hash — FTN pre-snap formation is authoritative
@@ -51,20 +51,20 @@ export const SPORTRADAR_PROTECTED_FIELDS = new Set([
 
   // ---- nflfastR official play-by-play (authoritative play outcomes) ----
   // Source: scripts/import-plays-nflfastr.mjs format_play()
-  'comp', // completion — Sportradar live-fills, nflfastR is final
-  'incomp',
-  'pass_td',
-  'rush_td',
-  'td',
-  'interceptions', // interception
-  'sk', // sack
-  'first_down',
-  'first_down_pass',
-  'first_down_rush',
-  'first_down_penalty',
-  'qb_dropback',
-  'qb_kneel',
-  'qb_scramble'
+  'is_completion', // Sportradar live-fills, nflfastR is final
+  'is_incompletion',
+  'is_passing_touchdown',
+  'is_rushing_touchdown',
+  'is_touchdown',
+  'is_interception',
+  'is_sack',
+  'is_first_down',
+  'is_first_down_pass',
+  'is_first_down_rush',
+  'is_first_down_penalty',
+  'is_qb_dropback',
+  'is_qb_kneel',
+  'is_qb_scramble'
 ])
 
 /**

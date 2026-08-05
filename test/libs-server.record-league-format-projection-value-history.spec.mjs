@@ -17,7 +17,7 @@ const YEAR = 2026
 const read_as_of = async ({ league_format_id, observed_at }) =>
   knex(HISTORY_TABLE)
     .distinctOn('pid', 'week')
-    .select('pid', 'week', 'pts_added', 'market_salary', 'removed')
+    .select('pid', 'week', 'pts_added', 'market_salary', 'is_removed')
     .where({ league_format_id, year: YEAR })
     .where('observed_at', '<=', observed_at)
     .orderBy([
@@ -264,7 +264,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
       observed_at: new Date('2026-07-05T00:00:00Z')
     })
     const dropped = as_of.find((row) => row.pid === 'JOSH-ALLE-005788')
-    expect(dropped.removed).to.equal(true)
+    expect(dropped.is_removed).to.equal(true)
     expect(dropped.market_salary).to.equal(null)
   })
 
@@ -331,7 +331,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
       league_format_id,
       observed_at: new Date('2026-07-04T00:00:00Z')
     })
-    expect(as_of[0].removed).to.equal(false)
+    expect(as_of[0].is_removed).to.equal(false)
     expect(Number(as_of[0].market_salary)).to.equal(29)
   })
 

@@ -472,8 +472,8 @@ const format_market = async ({
       pinnacle_matchup_special_category: special_category,
       pinnacle_matchup_special_description: special_description
     }),
-    open: true,
-    live: pinnacle_matchup.isLive,
+    is_open: true,
+    is_live: pinnacle_matchup.isLive,
     selection_count: market_selection_odds.length,
     observed_at,
     selections

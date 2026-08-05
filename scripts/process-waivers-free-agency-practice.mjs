@@ -66,7 +66,7 @@ const process_single_practice_waiver = async (waiver_id, timestamp) => {
     if (!waiver.super_priority) {
       await db('waivers')
         .update({
-          succ: 0,
+          is_successful: 0,
           reason: error.message,
           processed: timestamp
         })
@@ -162,7 +162,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
       // Mark waiver as successful
       await db('waivers')
         .update({
-          succ: 1,
+          is_successful: 1,
           processed: timestamp
         })
         .where('uid', waiver.wid)
@@ -183,7 +183,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
       // Mark waiver as failed with the actual error reason
       await db('waivers')
         .update({
-          succ: 0,
+          is_successful: 0,
           reason: err.message,
           processed: timestamp
         })
@@ -197,7 +197,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
     // Super priority not eligible, mark as failed
     await db('waivers')
       .update({
-        succ: 0,
+        is_successful: 0,
         reason: 'super priority not available',
         processed: timestamp
       })
@@ -254,7 +254,7 @@ const handle_regular_practice_claim = async (waiver, lid, timestamp) => {
   // Update waiver status for regular claims
   await db('waivers')
     .update({
-      succ: 1,
+      is_successful: 1,
       reason: null,
       processed: timestamp
     })
@@ -270,7 +270,7 @@ const cancel_other_pending_waivers = async (
 ) => {
   await db('waivers')
     .update({
-      succ: false,
+      is_successful: false,
       reason,
       processed: timestamp
     })
@@ -316,7 +316,7 @@ const process_league_practice_waivers = async (lid, timestamp) => {
     if (!waiver.super_priority) {
       await db('waivers')
         .update({
-          succ: error ? 0 : 1,
+          is_successful: error ? 0 : 1,
           reason: error ? error.message : null,
           processed: timestamp
         })

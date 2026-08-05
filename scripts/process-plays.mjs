@@ -115,8 +115,8 @@ const build_play_update_object = (enriched_play) => {
     }
   }
 
-  if (enriched_play.successful_play !== undefined) {
-    update.successful_play = enriched_play.successful_play
+  if (enriched_play.is_successful_play !== undefined) {
+    update.is_successful_play = enriched_play.is_successful_play
   }
 
   return update

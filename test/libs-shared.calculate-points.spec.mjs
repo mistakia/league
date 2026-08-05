@@ -256,7 +256,7 @@ describe('LIBS-SHARED calculatePoints', function () {
   })
 
   describe('quarterback kneel exclusion', function () {
-    const kneel_league = ppr_league({ exclude_quarterback_kneels: true })
+    const kneel_league = ppr_league({ is_excluding_quarterback_kneels: true })
 
     const score_rushing_yards = ({ league, stats }) =>
       calculatePoints({ league, stats }).rushing_yards
@@ -274,7 +274,7 @@ describe('LIBS-SHARED calculatePoints', function () {
     it('uses rushing_yards when the flag is not set', () => {
       close_to(
         score_rushing_yards({
-          league: ppr_league({ exclude_quarterback_kneels: false }),
+          league: ppr_league({ is_excluding_quarterback_kneels: false }),
           stats: { rushing_yards: 30, rushing_yards_excluding_kneels: 25 }
         }),
         3

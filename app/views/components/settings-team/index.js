@@ -12,7 +12,7 @@ import SettingsTeam from './settings-team'
 const map_state_to_props = createSelector(
   get_team_by_id_for_current_year,
   get_current_league,
-  (team, league) => ({ team, is_hosted: Boolean(league.hosted) })
+  (team, league) => ({ team, is_hosted: Boolean(league.is_hosted) })
 )
 
 const map_dispatch_to_props = {

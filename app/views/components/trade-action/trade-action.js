@@ -35,7 +35,7 @@ export default class TradeAction extends React.Component {
 
   render = () => {
     const { league, trade, isValid, isProposer } = this.props
-    if (!league.hosted) {
+    if (!league.is_hosted) {
       return null
     } else if (trade.cancelled) {
       return <Button disabled>Cancelled</Button>

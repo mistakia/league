@@ -163,7 +163,7 @@ export default async function ({
     await trx('transactions').insert(addTransaction)
     await trx('restricted_free_agency_bids')
       .update({
-        succ: true,
+        is_successful: true,
         outcome: restricted_free_agency_bid_outcomes.WON,
         outcome_detail: null,
         processed

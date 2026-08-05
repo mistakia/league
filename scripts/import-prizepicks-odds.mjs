@@ -118,8 +118,8 @@ const format_market = async ({
     source_event_id: prizepicks_market.attributes?.game_id || null,
     source_event_name: null,
 
-    open: true,
-    live: false,
+    is_open: true,
+    is_live: false,
     selection_count: 2,
     season_year: current_season.year,
 

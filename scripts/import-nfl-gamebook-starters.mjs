@@ -2,15 +2,15 @@
  * Import NFL Gamebook Starters
  *
  * Parses cached NFL gamebook PDFs (see scripts/archive-nfl-gamebooks.mjs) and
- * writes the 44 declared starters per game to player_gamelogs.started.
+ * writes the 44 declared starters per game to player_gamelogs.is_starter.
  *
  * Resolution path: PDF (team, jersey) -> nflverse weekly_rosters CSV
  * (team, week, jersey_number) -> gsis_id -> player.gsis_player_id -> pid.
  *
- * After upserting the 44 started=true rows for an esbid, sweeps the rest of
- * the dressed roster to started=false (active IS TRUE OR active IS NULL --
+ * After upserting the 44 is_starter=true rows for an esbid, sweeps the rest of
+ * the dressed roster to is_starter=false (is_active IS TRUE OR is_active IS NULL --
  * the IS NULL clause covers 2002-2014 rows from the legacy importer era when
- * `active` was not always populated).
+ * `is_active` was not always populated).
  *
  * Usage:
  *   node scripts/import-nfl-gamebook-starters.mjs --year 2024
@@ -179,7 +179,7 @@ const pdftotext = (pdf_path) =>
 // Lenient, parser-local, and deliberately NOT the canonical normalize_position
 // from #libs-shared/constants/position-constants.mjs: the STARTER_ROW regex
 // matches any 1-5 letter token, so a strict fold would throw on garbage lines.
-// Nothing here reaches the database -- this importer writes only `started` --
+// Nothing here reaches the database -- this importer writes only `is_starter` --
 // so the folded label is a parse aid, not a stored value.
 const fold_gamebook_position_label = (label) => POSITION_ALIAS[label] || label
 
@@ -469,7 +469,7 @@ const process_game = async ({ game, index, dry_run }) => {
   }
 
   // Dedupe by pid (a player resolving twice -- e.g., LT and RT slots both
-  // pointing at the same swing tackle -- still produces one started=true row).
+  // pointing at the same swing tackle -- still produces one is_starter=true row).
   const dedup_by_pid = new Map()
   for (const r of starter_rows) dedup_by_pid.set(r.pid, r)
   const final_rows = Array.from(dedup_by_pid.values())
@@ -478,9 +478,9 @@ const process_game = async ({ game, index, dry_run }) => {
     return { starters_written: final_rows.length, resolved, attempted }
   }
 
-  // UPDATE only -- never INSERT. The gamebook importer adds `started` to
+  // UPDATE only -- never INSERT. The gamebook importer adds `is_starter` to
   // player_gamelogs rows created by the rosters importers (which populate
-  // nfl_team/opponent_nfl_team/pos/active and satisfy
+  // nfl_team/opponent_nfl_team/pos/is_active and satisfy
   // player_gamelogs.opponent_nfl_team NOT NULL). If no matching row exists
   // for (esbid, pid, season_year), the starter is silently dropped -- count
   // these to surface upstream rosters-importer gaps.
@@ -489,21 +489,21 @@ const process_game = async ({ game, index, dry_run }) => {
     // Skip rows mistakenly tagged nfl_team='INA' by upstream rosters
     // importers -- 'INA' is a roster-status code (inactive), not a team. The
     // (esbid, pid) resolves to a row whose `nfl_team` is wrong; setting
-    // started=true there would produce nonsense team-level aggregates.
+    // is_starter=true there would produce nonsense team-level aggregates.
     const n = await db('player_gamelogs')
       .where({ esbid: r.esbid, pid: r.pid, season_year: r.year })
       .whereNot({ nfl_team: 'INA' })
-      .update({ started: r.started })
+      .update({ is_starter: r.started })
     updated_count += n
   }
 
-  // Sweep remainder of the dressed roster to started=false. Same INA guard.
+  // Sweep remainder of the dressed roster to is_starter=false. Same INA guard.
   await db('player_gamelogs')
     .where({ esbid: game.esbid })
-    .whereNull('started')
+    .whereNull('is_starter')
     .whereNot({ nfl_team: 'INA' })
-    .andWhere((q) => q.where('active', true).orWhereNull('active'))
-    .update({ started: false })
+    .andWhere((q) => q.where('is_active', true).orWhereNull('is_active'))
+    .update({ is_starter: false })
 
   return {
     starters_written: updated_count,

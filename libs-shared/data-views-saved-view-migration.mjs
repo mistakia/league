@@ -32,6 +32,107 @@ const PLAY_FILTER_PARAM_RENAMES = {
   time_to_throw_ngs: 'time_to_throw'
 }
 
+// Play-filter param keys renamed alongside their columns by the boolean-prefix
+// conformance sweep (db/adhoc/2026-08-04-conform-boolean-prefix-plays.sql and
+// -tail.sql). 81 of the 249 renamed boolean columns were also registry keys, and
+// the registry key IS the persisted key, so every saved view carrying one would
+// have silently lost its filter -- the same failure mode as the 2025-07-24
+// rename above, which is why these rules ship in the same change as the DDL
+// rather than after it.
+//
+// Applied AFTER PLAY_FILTER_PARAM_RENAMES, which matters for exactly one key:
+// a view saved before 2025-07-24 persists qb_pressure_ngs, which that map
+// rewrites to qb_pressure_tracking, which this map then rewrites to
+// is_qb_pressure_tracking. The single migrate_params pass resolves the chain
+// only in this order.
+//
+// nfl_games.ot is the one entry whose column does not live on nfl_plays; it is
+// a GAME-group param that apply_play_by_play_column_params_to_query resolves
+// against the joined nfl_games table.
+export const BOOLEAN_PREFIX_PARAM_RENAMES = {
+  assist_tk: 'is_assist_tackle',
+  batted_pass: 'is_batted_pass',
+  catchable_ball: 'is_catchable_ball',
+  comp: 'is_completion',
+  contested_ball: 'is_contested_ball',
+  created_reception: 'is_created_reception',
+  drive_inside20: 'is_drive_inside_20',
+  drive_score: 'is_drive_score',
+  dropped_pass: 'is_dropped_pass',
+  endzone_target: 'is_endzone_target',
+  ep_att: 'is_extra_point_attempt',
+  ep_succ: 'is_epa_successful',
+  fg_att: 'is_field_goal_attempt',
+  first_down: 'is_first_down',
+  first_down_pass: 'is_first_down_pass',
+  first_down_penalty: 'is_first_down_penalty',
+  first_down_rush: 'is_first_down_rush',
+  fourth_down_converted: 'is_fourth_down_converted',
+  fourth_down_failed: 'is_fourth_down_failed',
+  fum: 'is_fumble',
+  fumbles_lost: 'is_fumble_lost',
+  goal_to_go: 'is_goal_to_go',
+  highlight_pass: 'is_highlight_pass',
+  hindered_pass: 'is_hindered_pass',
+  incomp: 'is_incompletion',
+  int_worthy: 'is_interception_worthy',
+  interceptions: 'is_interception',
+  kickoff_att: 'is_kickoff_attempt',
+  motion: 'is_motion',
+  motion_before_snap: 'is_motion_before_snap',
+  motion_during_snap: 'is_motion_during_snap',
+  no_huddle: 'is_no_huddle',
+  oob: 'is_out_of_bounds',
+  ot: 'is_overtime',
+  out_of_pocket_pass: 'is_out_of_pocket_pass',
+  pain_free_play: 'is_pain_free_play',
+  pass: 'is_passing_play',
+  pass_breakup: 'is_pass_breakup',
+  pass_td: 'is_passing_touchdown',
+  penalty: 'is_penalty',
+  phyb: 'is_physical_ball',
+  play_action: 'is_play_action',
+  punt_att: 'is_punt_attempt',
+  punt_blocked: 'is_punt_blocked',
+  qb_dropback: 'is_qb_dropback',
+  qb_fault_sack: 'is_qb_fault_sack',
+  qb_hit: 'is_qb_hit',
+  qb_hurry: 'is_qb_hurry',
+  qb_kneel: 'is_qb_kneel',
+  qb_pressure: 'is_qb_pressure',
+  qb_pressure_tracking: 'is_qb_pressure_tracking',
+  qb_rush: 'is_qb_rush',
+  qb_scramble: 'is_qb_scramble',
+  qb_sneak: 'is_qb_sneak',
+  qb_spike: 'is_qb_spike',
+  ret_td: 'is_return_touchdown',
+  run_play_option: 'is_run_play_option',
+  rush: 'is_rushing_play',
+  rush_td: 'is_rushing_touchdown',
+  safety: 'is_safety',
+  score: 'is_scoring_play',
+  screen_pass: 'is_screen_pass',
+  series_suc: 'is_series_successful',
+  shovel_pass: 'is_shovel_pass',
+  sideline_pass: 'is_sideline_pass',
+  sk: 'is_sack',
+  solo_tk: 'is_solo_tackle',
+  special: 'is_special_teams_play',
+  stunt: 'is_stunt',
+  successful_play: 'is_successful_play',
+  td: 'is_touchdown',
+  tfl: 'is_tackle_for_loss',
+  third_down_converted: 'is_third_down_converted',
+  third_down_failed: 'is_third_down_failed',
+  throw_away: 'is_throw_away',
+  timeouts: 'is_timeout',
+  touchback: 'is_touchback',
+  trick_look: 'is_trick_look',
+  trick_play: 'is_trick_play',
+  two_att: 'is_two_point_conversion_attempt',
+  zero_blitz: 'is_zero_blitz'
+}
+
 // scoring_format_hash -> scoring_format_id, stranded by the format-id migration
 // (44cf7fd9 code-side, db/adhoc/2026-05-28-format-id-migration.sql). Unlike the
 // renames above this needs a VALUE mapping, not just a key rename: the persisted
@@ -83,9 +184,10 @@ const migrate_params = (params) => {
     }
   }
 
-  for (const [legacy_key, current_key] of Object.entries(
-    PLAY_FILTER_PARAM_RENAMES
-  )) {
+  for (const [legacy_key, current_key] of Object.entries({
+    ...PLAY_FILTER_PARAM_RENAMES,
+    ...BOOLEAN_PREFIX_PARAM_RENAMES
+  })) {
     if (!Object.prototype.hasOwnProperty.call(next, legacy_key)) continue
     const { [legacy_key]: value, ...rest } = next
     // A view that somehow carries both keys keeps the current one; the legacy

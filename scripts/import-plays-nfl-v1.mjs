@@ -157,18 +157,18 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
     drive_yds: play.driveNetYards,
     ydl_end: normalize_yardline(clean_string(play.endYardLine)),
     ydl_start: clean_string(play.yardLine),
-    first_down: play.firstDown,
-    goal_to_go: play.goalToGo,
+    is_first_down: play.firstDown,
+    is_goal_to_go: play.goalToGo,
     season_year: year,
     season_type: seas_type,
     week,
     next_play_type: clean_string(play.nextPlayType),
     sequence: play.orderSequence,
-    penalty: play.penaltyOnPlay,
+    is_penalty: play.penaltyOnPlay,
     play_clock: play.playClock,
-    deleted: play.playDeleted,
+    is_deleted: play.playDeleted,
     review: clean_string(play.playReviewStatus),
-    score: play.scoringPlay,
+    is_scoring_play: play.scoringPlay,
     score_type: standardize_score_type(play.scoringPlayType),
     special_play_type: clean_string(play.stPlayType),
     play_time_of_day: play.timeOfDay
@@ -416,7 +416,7 @@ const importPlaysForWeek = async ({
         play_stat_inserts.push({
           play_id: playId,
           esbid: game.esbid,
-          valid: 1,
+          is_valid: 1,
           stat_id: playStat.statId,
           gsis_player_id,
           player_name,
@@ -469,8 +469,8 @@ const importPlaysForWeek = async ({
         offense_nfl_team: play.offense_nfl_team,
         defense_nfl_team: play.defense_nfl_team,
         play_type: play.play_type,
-        qb_kneel: play.qb_kneel,
-        qb_spike: play.qb_spike,
+        is_qb_kneel: play.is_qb_kneel,
+        is_qb_spike: play.is_qb_spike,
         ball_carrier_pid: play.ball_carrier_pid,
         passer_pid: play.passer_pid,
         target_pid: play.target_pid
@@ -519,7 +519,7 @@ const importPlaysForWeek = async ({
         if (play_stat_inserts.length) {
           // reset final table playStats
           await db('nfl_play_stats')
-            .update({ valid: 0 })
+            .update({ is_valid: 0 })
             .where({ esbid: game.esbid })
 
           // delete any excess plays

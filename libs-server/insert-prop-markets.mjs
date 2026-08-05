@@ -49,9 +49,9 @@ const SELECTION_INSERT_CONCURRENCY = 4
 
 // Fields that trigger a history insert when changed
 const MARKET_HISTORY_UPDATE_FIELDS = [
-  'open',
+  'is_open',
   'selection_count',
-  'live',
+  'is_live',
   'source_market_name'
 ]
 
@@ -185,8 +185,8 @@ const get_market_history_record = (market, observed_at) => ({
   source_id: market.source_id,
   source_market_id: market.source_market_id,
   source_market_name: market.source_market_name,
-  open: market.open,
-  live: market.live,
+  is_open: market.is_open,
+  is_live: market.is_live,
   selection_count: market.selection_count,
   observed_at
 })
@@ -223,7 +223,7 @@ const process_market = async ({ observed_at, selections, ...market }) => {
       time_type: 'OPEN'
     })
 
-    if (!market.live) {
+    if (!market.is_live) {
       market_index_inserts.push({
         ...market,
         observed_at,
@@ -246,8 +246,8 @@ const process_market = async ({ observed_at, selections, ...market }) => {
     } else {
       // Create a copy for comparison to avoid mutating cached object
       const { observed_at: _, ...market_to_compare } = previous_market_row
-      market_to_compare.open = Boolean(market_to_compare.open)
-      market_to_compare.live = Boolean(market_to_compare.live)
+      market_to_compare.is_open = Boolean(market_to_compare.is_open)
+      market_to_compare.is_live = Boolean(market_to_compare.is_live)
 
       const differences = diff(market_to_compare, market)
 
@@ -285,7 +285,7 @@ const process_market = async ({ observed_at, selections, ...market }) => {
     }
 
     // Update CLOSE index if this is newer than existing and not live
-    if (!market.live && observed_at > existing_market.observed_at) {
+    if (!market.is_live && observed_at > existing_market.observed_at) {
       market_index_inserts.push({
         ...market,
         observed_at,

@@ -37,7 +37,7 @@ export const player_years_teams_cte_sql = ({ year_range }) => {
       (year) => `SELECT pgl.pid, ${year}::int AS year, pgl.nfl_team AS team_code
        FROM player_gamelogs_year_${year} pgl
        INNER JOIN nfl_games g ON g.esbid = pgl.esbid
-       WHERE pgl.active = TRUE AND g.season_type = 'REG' AND g.season_year = ${year}`
+       WHERE pgl.is_active = TRUE AND g.season_type = 'REG' AND g.season_year = ${year}`
     )
     .join(' UNION ALL ')
   return `SELECT pid, year, array_agg(DISTINCT team_code) AS teams
@@ -50,8 +50,9 @@ export const player_years_teams_cte_sql = ({ year_range }) => {
 // RELAXED (absent). This is the single source of the "was the player active
 // this week" signal. A row exists for every (pid, year, week) the player has a
 // gamelog for — active or inactive — so a consumer can distinguish active-but-
-// zero (row present, active true) from did-not-play (no row at all). `active`
-// is carried through as bool_or(pgl.active) to defend against duplicate
+// zero (row present, is_active true) from did-not-play (no row at all).
+// `is_active`
+// is carried through as bool_or(pgl.is_active) to defend against duplicate
 // (pid, year, week) rows (the gamelog PK is (esbid, pid, year), not unique on
 // week). `columns` is an extension point: each entry contributes an inner
 // projection (`inner`, selected from the gamelog source) and an outer aggregate
@@ -73,13 +74,13 @@ export const player_participation_weeks_cte_sql = ({
     .map(
       (
         year
-      ) => `SELECT pgl.pid, ${year}::int AS year, g.week, pgl.active${inner_extra}
+      ) => `SELECT pgl.pid, ${year}::int AS year, g.week, pgl.is_active${inner_extra}
        FROM player_gamelogs_year_${year} pgl
        INNER JOIN nfl_games g ON g.esbid = pgl.esbid
        WHERE g.season_type = 'REG' AND g.season_year = ${year}`
     )
     .join(' UNION ALL ')
-  return `SELECT pid, year, week, bool_or(active) AS active${outer_extra}
+  return `SELECT pid, year, week, bool_or(is_active) AS is_active${outer_extra}
           FROM (${unions}) src
           GROUP BY pid, year, week`
 }
@@ -99,7 +100,7 @@ export const player_years_weeks_teams_cte_sql = ({ year_range }) => {
       ) => `SELECT pgl.pid, ${year}::int AS year, g.week, pgl.nfl_team AS team_code
        FROM player_gamelogs_year_${year} pgl
        INNER JOIN nfl_games g ON g.esbid = pgl.esbid
-       WHERE pgl.active = TRUE AND g.season_type = 'REG' AND g.season_year = ${year}`
+       WHERE pgl.is_active = TRUE AND g.season_type = 'REG' AND g.season_year = ${year}`
     )
     .join(' UNION ALL ')
   return `SELECT pid, year, week, ARRAY[team_code]::text[] AS teams

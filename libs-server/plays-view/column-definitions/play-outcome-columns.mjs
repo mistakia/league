@@ -20,33 +20,35 @@ export default {
     use_having: true
   },
   play_first_down: {
-    column_name: 'first_down',
+    column_name: 'is_first_down',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.first_down as play_first_down'],
-    main_where: () => 'nfl_plays.first_down',
+    main_select: () => ['nfl_plays.is_first_down as play_first_down'],
+    main_where: () => 'nfl_plays.is_first_down',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.first_down = true THEN 1 ELSE 0 END) as play_first_down'
+        'SUM(CASE WHEN nfl_plays.is_first_down = true THEN 1 ELSE 0 END) as play_first_down'
       ),
     use_having: true
   },
   play_td: {
-    column_name: 'td',
+    column_name: 'is_touchdown',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.td as play_td'],
-    main_where: () => 'nfl_plays.td',
+    main_select: () => ['nfl_plays.is_touchdown as play_td'],
+    main_where: () => 'nfl_plays.is_touchdown',
     aggregate_select: () =>
-      db.raw('SUM(CASE WHEN nfl_plays.td = true THEN 1 ELSE 0 END) as play_td'),
+      db.raw(
+        'SUM(CASE WHEN nfl_plays.is_touchdown = true THEN 1 ELSE 0 END) as play_td'
+      ),
     use_having: true
   },
   play_successful: {
-    column_name: 'successful_play',
+    column_name: 'is_successful_play',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.successful_play as play_successful'],
-    main_where: () => 'nfl_plays.successful_play',
+    main_select: () => ['nfl_plays.is_successful_play as play_successful'],
+    main_where: () => 'nfl_plays.is_successful_play',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.successful_play = true THEN 1 ELSE 0 END) as play_successful'
+        'SUM(CASE WHEN nfl_plays.is_successful_play = true THEN 1 ELSE 0 END) as play_successful'
       ),
     use_having: true
   },

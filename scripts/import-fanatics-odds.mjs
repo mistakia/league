@@ -117,8 +117,8 @@ const format_market = async ({
     season_year: nfl_game?.year || current_season.year,
     source_event_id: String(event.id),
     source_event_name: event.name,
-    open: market.state === 'OPEN',
-    live: Boolean(market.live),
+    is_open: market.state === 'OPEN',
+    is_live: Boolean(market.live),
     selection_count: market.selection.length,
     observed_at,
     selections

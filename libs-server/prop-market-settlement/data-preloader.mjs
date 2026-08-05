@@ -56,7 +56,7 @@ const load_player_gamelogs = async (esbids) => {
       'player_gamelogs.pos',
       'player_gamelogs.nfl_team',
       'player_gamelogs.opponent_nfl_team',
-      'player_gamelogs.active',
+      'player_gamelogs.is_active',
       // Passing stats
       'player_gamelogs.passing_attempts',
       'player_gamelogs.passing_completions',
@@ -97,7 +97,7 @@ const load_player_gamelogs = async (esbids) => {
       ).andOn('player_gamelogs.pid', '=', 'player_rushing_gamelogs.pid')
     })
     .whereIn('player_gamelogs.esbid', esbids)
-    .where('player_gamelogs.active', true)
+    .where('player_gamelogs.is_active', true)
 }
 
 /**
@@ -125,11 +125,11 @@ const load_nfl_plays = async (esbids) => {
       'rush_yds',
       'recv_yds',
       // Play outcome flags used by count and first-scorer market logic
-      'comp',
-      'td',
-      'rush',
-      'pass',
-      'interceptions'
+      'is_completion',
+      'is_touchdown',
+      'is_rushing_play',
+      'is_passing_play',
+      'is_interception'
     )
     .whereIn('esbid', esbids)
 }

@@ -2,6 +2,24 @@ import debug from 'debug'
 
 const log = debug('external:league-config-mapper')
 
+const SLEEPER_FIELD_GOAL_BAND_KEYS = [
+  'fgm_0_19',
+  'fgm_20_29',
+  'fgm_30_39',
+  'fgm_40_49',
+  'fgm_50p'
+]
+
+const SLEEPER_POINTS_ALLOWED_KEYS = [
+  'pts_allow_0',
+  'pts_allow_1_6',
+  'pts_allow_7_13',
+  'pts_allow_14_20',
+  'pts_allow_21_27',
+  'pts_allow_28_34',
+  'pts_allow_35p'
+]
+
 /**
  * League configuration mapper
  * Pure transform from external platform league settings (scoring, roster,
@@ -36,7 +54,28 @@ export default class LeagueConfigMapper {
         fum_lost: 'fumbles_lost',
         def_pr_td: 'punt_return_touchdowns',
         def_kr_td: 'kickoff_return_touchdowns',
-        rec_tgt: 'targets'
+        rec_tgt: 'targets',
+
+        // Kicking. Sleeper scores field goals by distance band, so mapping any
+        // of these also zeroes field_goal_yards below -- our scoring is
+        // additive (bands PLUS the per-yard term) and the registry default for
+        // the rate is 0.1, which would otherwise double-score every kick.
+        fgm_0_19: 'field_goals_made_0_19_yards',
+        fgm_20_29: 'field_goals_made_20_29_yards',
+        fgm_30_39: 'field_goals_made_30_39_yards',
+        fgm_40_49: 'field_goals_made_40_49_yards',
+        fgm_50p: 'field_goals_made_50_plus_yards',
+        xpm: 'extra_points_made',
+
+        // DST flat events. `int` is the DST interception; a passing
+        // interception is `pass_int` above.
+        sack: 'defensive_sacks',
+        int: 'defensive_interceptions',
+        ff: 'defensive_forced_fumbles',
+        fum_rec: 'defensive_recovered_fumbles',
+        def_td: 'defensive_touchdowns',
+        safe: 'defensive_safeties',
+        blk_kick: 'defensive_blocked_kicks'
       },
       espn: {
         passing_yards: 'passing_yards',
@@ -288,7 +327,31 @@ export default class LeagueConfigMapper {
       case 'sleeper':
         // Sleeper might have QB kneel exclusion setting
         if (scoring_config.exclude_qb_kneels) {
-          scoring_params.exclude_quarterback_kneels = true
+          scoring_params.is_excluding_quarterback_kneels = true
+        }
+
+        // Field goal scoring here is additive: the five distance bands PLUS a
+        // per-yard rate. Sleeper is purely banded, so a league that scores any
+        // band must score nothing per yard -- left absent, find-or-create fills
+        // field_goal_yards from the registry default of 0.1 and every field
+        // goal is scored twice.
+        if (SLEEPER_FIELD_GOAL_BAND_KEYS.some((key) => key in scoring_config)) {
+          scoring_params.field_goal_yards = 0
+        }
+
+        // Sleeper scores points and yards allowed as a step function over
+        // seven bands (pts_allow_0, pts_allow_1_6, ... pts_allow_35p). Our
+        // schema holds a rate applied per unit BEYOND a threshold, which cannot
+        // represent a step function -- there is no pair of numbers that
+        // reproduces those bands. Zero the rate rather than let the registry
+        // default (-0.4 per point beyond 20) stand: that default is OUR
+        // scoring, not theirs, and inventing it silently is worse than
+        // dropping a component the import cannot carry.
+        if (SLEEPER_POINTS_ALLOWED_KEYS.some((key) => key in scoring_config)) {
+          scoring_params.defensive_points_against = 0
+          log(
+            'sleeper league scores points allowed in bands, which the rate/threshold config cannot represent; points against scoring dropped'
+          )
         }
         break
 
@@ -344,9 +407,22 @@ export default class LeagueConfigMapper {
       fumbles_lost: 0,
       punt_return_touchdowns: 0,
       kickoff_return_touchdowns: 0,
-      fumble_return_touchdowns: 6,
+      // 0, matching every sibling. This was 6, which silently gave every
+      // imported league six points per fumble return touchdown whether or not
+      // the platform scored them -- and no platform map has a source key for
+      // it, so the default was the only value it could ever take. A default
+      // here means "the platform did not tell us", and the honest reading of
+      // that is not-scored.
+      fumble_return_touchdowns: 0,
       targets: 0,
-      exclude_quarterback_kneels: false
+      is_excluding_quarterback_kneels: false
+
+      // The 21 kicking and DST columns are deliberately ABSENT rather than
+      // listed at 0. find-or-create fills an absent key from the registry
+      // default, so an imported league that carries no kicking or DST scoring
+      // gets the standard values instead of a format that scores them at
+      // nothing. Anything the platform DOES specify is mapped above and
+      // overrides the default.
     }
   }
 

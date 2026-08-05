@@ -113,7 +113,7 @@ describe('fixed-drive-enrichment drive boundaries', function () {
         play_id: 2,
         play_type: 'RUSH',
         offense_nfl_team: 'KC',
-        fumbles_lost: true
+        is_fumble_lost: true
       }),
       build_play({ play_id: 3, play_type: 'RUSH', offense_nfl_team: 'KC' })
     ]
@@ -128,8 +128,8 @@ describe('fixed-drive-enrichment drive boundaries', function () {
         play_id: 2,
         play_type: 'RUSH',
         offense_nfl_team: 'KC',
-        fumbles_lost: true,
-        td: true
+        is_fumble_lost: true,
+        is_touchdown: true
       }),
       build_play({ play_id: 3, play_type: 'RUSH', offense_nfl_team: 'KC' })
     ]
@@ -160,7 +160,7 @@ describe('fixed-drive-enrichment drive boundaries', function () {
         play_type: 'KOFF',
         offense_nfl_team: 'NE',
         defense_nfl_team: 'KC',
-        fumbles_lost: true
+        is_fumble_lost: true
       }),
       build_play({ play_id: 3, play_type: 'RUSH', offense_nfl_team: 'KC' })
     ]
@@ -176,7 +176,7 @@ describe('fixed-drive-enrichment drive boundaries', function () {
         play_id: 1,
         play_type: 'PASS',
         offense_nfl_team: 'KC',
-        td: true,
+        is_touchdown: true,
         td_tm: 'KC'
       }),
       build_play({ play_id: 2, play_type: 'CONV', offense_nfl_team: 'NE' })
@@ -193,7 +193,7 @@ describe('fixed-drive-enrichment drive boundaries', function () {
         play_id: 1,
         play_type: 'PASS',
         offense_nfl_team: 'KC',
-        td: true,
+        is_touchdown: true,
         td_tm: 'NE'
       }),
       build_play({ play_id: 2, play_type: 'CONV', offense_nfl_team: 'NE' })
@@ -211,7 +211,7 @@ describe('fixed-drive-enrichment drive boundaries', function () {
         play_id: 1,
         play_type: 'PASS',
         offense_nfl_team: 'KC',
-        td: true,
+        is_touchdown: true,
         td_tm: null
       }),
       build_play({ play_id: 2, play_type: 'CONV', offense_nfl_team: 'NE' })
@@ -410,13 +410,13 @@ describe('import-plays-nfl-v1 live upsert drive_seq protection', function () {
     const build_plays_merge = await load_build_plays_merge()
     const merge = build_plays_merge('nfl_plays', [
       { esbid: 1, play_id: 2, drive_seq: 4 },
-      { esbid: 1, play_id: 3, drive_seq: null, penalty: true }
+      { esbid: 1, play_id: 3, drive_seq: null, is_penalty: true }
     ])
 
     expect(Object.keys(merge).sort()).to.deep.equal([
       'drive_seq',
       'esbid',
-      'penalty',
+      'is_penalty',
       'play_id'
     ])
   })
@@ -594,7 +594,7 @@ describe('calculate-stats-from-plays interception attribution', function () {
   it('does not count an interception on an ordinary completion', () => {
     const players = calculateStatsFromPlays([
       pass_play({
-        comp: true,
+        is_completion: true,
         target_pid: 'TARG-ET-000003',
         recv_yds: 12,
         pass_yds: 12
@@ -630,8 +630,8 @@ describe('prop-market-settlement nfl_plays select coverage', function () {
       }
       if (mapping.special_logic === 'first_touchdown_scorer') {
         // The first-scorer branch reads these directly off the play.
-        required_columns.add('rush')
-        required_columns.add('pass')
+        required_columns.add('is_rushing_play')
+        required_columns.add('is_passing_play')
         required_columns.add('ball_carrier_pid')
         required_columns.add('target_pid')
       }

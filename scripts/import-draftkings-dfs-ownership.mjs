@@ -211,7 +211,7 @@ const import_ownership = async ({
   // load unimported DK contests
   let query = db('dfs_contests').where({
     source_id: 'DRAFTKINGS',
-    ownership_imported: false
+    is_ownership_imported: false
   })
 
   if (contest_id) {
@@ -419,7 +419,7 @@ const import_ownership = async ({
             source_id: 'DRAFTKINGS'
           })
           .update({
-            ownership_imported: true,
+            is_ownership_imported: true,
             ownership_imported_at: new Date()
           })
       }

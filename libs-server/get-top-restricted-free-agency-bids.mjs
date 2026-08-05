@@ -39,7 +39,7 @@ export default async function get_top_restricted_free_agency_bids(leagueId) {
   // Find announced restricted free agents that don't have a successful bid yet
   const settled_pid_rows = await db('restricted_free_agency_bids')
     .select('pid')
-    .where({ lid: leagueId, year: current_season.year, succ: true })
+    .where({ lid: leagueId, year: current_season.year, is_successful: true })
 
   const settled_pids = new Set(settled_pid_rows.map((row) => row.pid))
   const active_rfa_pids = announced_pids.filter((pid) => !settled_pids.has(pid))

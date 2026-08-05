@@ -56,7 +56,7 @@ const map_state_to_props = createSelector(
       player_seasonlogs,
       auction_adjusted_salary,
       is_logged_in: Boolean(app.userId),
-      is_hosted_league: Boolean(league.hosted),
+      is_hosted_league: Boolean(league.is_hosted),
       is_before_live_auction_end
     }
   }

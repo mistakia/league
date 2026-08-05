@@ -88,7 +88,7 @@ register(
   'rate',
   adapt(plugin_per_player, {
     stat_type: 'target',
-    rate_type_params: { catchable_ball: true }
+    rate_type_params: { is_catchable_ball: true }
   })
 )
 register(
@@ -104,7 +104,7 @@ register(
   'rate',
   adapt(plugin_per_player, {
     stat_type: 'target',
-    rate_type_params: { dot: [20, 99], catchable_ball: true }
+    rate_type_params: { dot: [20, 99], is_catchable_ball: true }
   })
 )
 register(

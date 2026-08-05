@@ -299,8 +299,8 @@ export const format_market = async ({
     source_event_id: draftkings_market.eventId,
     source_event_name: clean_string(draftkings_event?.name) || null,
 
-    open: true, // Assume open if present in API
-    live: null,
+    is_open: true, // Assume open if present in API
+    is_live: null,
     selection_count: draftkings_market_selections.length,
 
     observed_at: format_observed_at,

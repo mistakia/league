@@ -40,7 +40,7 @@ const calculateStatsFromPlays = (plays) => {
   }
 
   plays.forEach((play) => {
-    if (play.fumbles_lost) {
+    if (play.is_fumble_lost) {
       addStat(play.player_fuml_pid, 'fumbles_lost', 1)
       playerToTeam[play.player_fuml_pid] = play.offense_nfl_team
     }
@@ -54,25 +54,26 @@ const calculateStatsFromPlays = (plays) => {
         addStat(play.ball_carrier_pid, 'rushing_yards', play.rush_yds)
         if (play.yards_after_any_contact)
           addStat(play.ball_carrier_pid, 'ryaco', play.yards_after_any_contact)
-        if (play.first_down) {
+        if (play.is_first_down) {
           addStat(play.ball_carrier_pid, 'first_down', 1)
           addStat(play.ball_carrier_pid, 'rfd', 1)
         }
-        if (play.successful_play) {
+        if (play.is_successful_play) {
           addStat(play.ball_carrier_pid, 'successful_play', 1)
           addStat(play.ball_carrier_pid, 'rasucc', 1)
         }
         if (play.mbt) addStat(play.ball_carrier_pid, 'mbt', play.mbt)
         if (play.rush_yds > 0) addStat(play.ball_carrier_pid, 'posra', 1)
-        if (play.first_down) addStat(play.ball_carrier_pid, 'rfd', 1)
-        if (play.td) addStat(play.ball_carrier_pid, 'rushing_touchdowns', 1)
+        if (play.is_first_down) addStat(play.ball_carrier_pid, 'rfd', 1)
+        if (play.is_touchdown)
+          addStat(play.ball_carrier_pid, 'rushing_touchdowns', 1)
         break
       }
 
       case 'PASS': {
         // passer
         playerToTeam[play.passer_pid] = play.offense_nfl_team
-        if (play.successful_play) {
+        if (play.is_successful_play) {
           addStat(play.passer_pid, 'psucc', 1)
           addStat(play.passer_pid, 'successful_play', 1)
         }
@@ -80,12 +81,14 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.passer_pid, 'pdot', play.dot)
           addTeamStat(play.offense_nfl_team, 'rdot', play.dot)
         }
-        if (play.qb_pressure) addStat(play.passer_pid, 'qb_pressure', 1)
-        if (play.qb_hit) addStat(play.passer_pid, 'qb_hit', 1)
-        if (play.qb_hurry) addStat(play.passer_pid, 'qb_hurry', 1)
-        if (play.highlight_pass) addStat(play.passer_pid, 'highlight_pass', 1)
-        if (play.int_worthy) addStat(play.passer_pid, 'int_worthy', 1)
-        if (play.dropped_pass) {
+        if (play.is_qb_pressure) addStat(play.passer_pid, 'qb_pressure', 1)
+        if (play.is_qb_hit) addStat(play.passer_pid, 'qb_hit', 1)
+        if (play.is_qb_hurry) addStat(play.passer_pid, 'qb_hurry', 1)
+        if (play.is_highlight_pass)
+          addStat(play.passer_pid, 'highlight_pass', 1)
+        if (play.is_interception_worthy)
+          addStat(play.passer_pid, 'int_worthy', 1)
+        if (play.is_dropped_pass) {
           addStat(play.passer_pid, 'drpp', 1)
           addStat(play.passer_pid, 'drppy', play.dot)
         }
@@ -97,8 +100,9 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.target_pid, 'targets', 1)
           addStat(play.target_pid, 'rdot', play.dot)
           if (play.dot >= 20) addStat(play.target_pid, 'dptrg', 1)
-          if (play.contested_ball) addStat(play.target_pid, 'contested_ball', 1)
-          if (play.dropped_pass) {
+          if (play.is_contested_ball)
+            addStat(play.target_pid, 'contested_ball', 1)
+          if (play.is_dropped_pass) {
             addStat(play.target_pid, 'drops', 1)
             addStat(play.target_pid, 'drprecy', play.dot)
           }
@@ -107,7 +111,7 @@ const calculateStatsFromPlays = (plays) => {
         if (play.interceptor_pid) {
           addStat(play.passer_pid, 'passing_interceptions', 1)
           addStat(play.passer_pid, 'passing_attempts', 1)
-        } else if (play.comp && play.target_pid) {
+        } else if (play.is_completion && play.target_pid) {
           // TODO deprecate - temp fix for missing trg
           // receiver
           addStat(play.target_pid, 'receptions', 1)
@@ -124,18 +128,18 @@ const calculateStatsFromPlays = (plays) => {
           if (play.yards_after_catch)
             addStat(play.passer_pid, 'pyac', play.yards_after_catch)
 
-          if (play.successful_play)
+          if (play.is_successful_play)
             addStat(play.target_pid, 'successful_play', 1)
-          if (play.first_down) {
+          if (play.is_first_down) {
             addStat(play.passer_pid, 'first_down', 1)
             addStat(play.target_pid, 'first_down', 1)
           }
 
-          if (play.td) {
+          if (play.is_touchdown) {
             addStat(play.passer_pid, 'passing_touchdowns', 1)
             addStat(play.target_pid, 'receiving_touchdowns', 1)
           }
-        } else if (play.sk) {
+        } else if (play.is_sack) {
           addStat(play.passer_pid, 'sk', 1)
           addStat(play.passer_pid, 'sky', Math.abs(play.yds_gained))
         } else {

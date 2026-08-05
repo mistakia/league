@@ -142,7 +142,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .where({ tid: 1, pid: player.pid, super_priority: 1 })
         .first()
 
-      expect(super_priority_waiver.succ).to.equal(true)
+      expect(super_priority_waiver.is_successful).to.equal(true)
       expect(super_priority_waiver.processed).to.be.greaterThan(0)
 
       // Check that regular waiver was processed but unsuccessful
@@ -151,7 +151,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(regular_waiver.processed).to.be.greaterThan(0)
-      expect(regular_waiver.succ).to.equal(false)
+      expect(regular_waiver.is_successful).to.equal(false)
       expect(regular_waiver.reason).to.include('already claimed')
 
       // Verify player is on team 1 roster
@@ -209,7 +209,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .where({ tid: 3, pid: player.pid })
         .first()
 
-      expect(waiver.succ).to.equal(true)
+      expect(waiver.is_successful).to.equal(true)
       expect(waiver.processed).to.be.greaterThan(0)
     })
 
@@ -248,7 +248,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .where({ tid: 1, pid: player.pid, super_priority: 1 })
         .first()
 
-      expect(waiver.succ).to.equal(false)
+      expect(waiver.is_successful).to.equal(false)
       expect(waiver.reason).to.include('super priority not available')
     })
 
@@ -333,7 +333,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(super_priority_waiver_after_practice.processed).to.be.null
-      expect(super_priority_waiver_after_practice.succ).to.be.null
+      expect(super_priority_waiver_after_practice.is_successful).to.be.null
 
       // The active roster waiver should still be unprocessed (since we only ran practice squad processing)
       const active_roster_waiver_after_practice = await knex('waivers')
@@ -357,7 +357,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(active_roster_waiver_final.processed).to.be.greaterThan(0)
-      expect(active_roster_waiver_final.succ).to.equal(true)
+      expect(active_roster_waiver_final.is_successful).to.equal(true)
 
       // Verify player is on team 4 active roster (bench slot)
       const roster_entry = await knex('rosters_players')
@@ -388,7 +388,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(super_priority_waiver_final.processed).to.be.greaterThan(0)
-      expect(super_priority_waiver_final.succ).to.equal(false)
+      expect(super_priority_waiver_final.is_successful).to.equal(false)
       expect(super_priority_waiver_final.reason).to.include('already claimed')
 
       // Verify super priority was NOT claimed (since player went to active roster instead)
@@ -442,7 +442,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(super_priority_waiver.processed).to.be.greaterThan(0)
-      expect(super_priority_waiver.succ).to.equal(true)
+      expect(super_priority_waiver.is_successful).to.equal(true)
 
       // Verify super priority transaction was created
       const super_priority_transaction = await knex('transactions')
@@ -508,7 +508,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(super_priority_waiver.processed).to.be.greaterThan(0)
-      expect(super_priority_waiver.succ).to.equal(false)
+      expect(super_priority_waiver.is_successful).to.equal(false)
       expect(super_priority_waiver.reason).to.include(
         'super priority not available'
       )

@@ -291,7 +291,7 @@ export const fetch_markets_for_games = async ({
         qb.whereIn('prop_markets_index.market_type', supported_market_types)
       }
       if (missing_only) {
-        qb.where('prop_markets_index.market_settled', false)
+        qb.where('prop_markets_index.is_market_settled', false)
       }
     })
 

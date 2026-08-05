@@ -22,7 +22,7 @@ const router = express.Router()
  *           description: Job type ID corresponding to job_types constants
  *           example: 1
  *           enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87]
- *         succ:
+ *         is_successful:
  *           type: boolean
  *           description: Whether the job execution was successful
  *           example: true
@@ -33,12 +33,12 @@ const router = express.Router()
  *         reason:
  *           type: string
  *           nullable: true
- *           description: Failure reason or error message (only present when succ is false)
+ *           description: Failure reason or error message (only present when is_successful is false)
  *           example: "Database connection timeout"
  *       required:
  *         - id
  *         - type
- *         - succ
+ *         - is_successful
  *         - timestamp
  *
  *     SystemHealthError:
@@ -115,22 +115,22 @@ const router = express.Router()
  *                 value:
  *                   - id: "1640995200_WAIVERS"
  *                     type: 1
- *                     succ: true
+ *                     is_successful: true
  *                     timestamp: 1640995200
  *                   - id: "1640995300_PROJECTIONS"
  *                     type: 8
- *                     succ: true
+ *                     is_successful: true
  *                     timestamp: 1640995300
  *               mixed_jobs:
  *                 summary: Example with successful and failed jobs
  *                 value:
  *                   - id: "1640995200_WAIVERS"
  *                     type: 1
- *                     succ: true
+ *                     is_successful: true
  *                     timestamp: 1640995200
  *                   - id: "1640995300_DATA_IMPORT"
  *                     type: 5
- *                     succ: false
+ *                     is_successful: false
  *                     timestamp: 1640995300
  *                     reason: "Database connection timeout"
  *       500:
@@ -210,7 +210,7 @@ router.get('/overall', async (req, res) => {
   const { logger } = req.app.locals
   try {
     const jobs = await getJobs()
-    const failed_jobs = jobs.filter((job) => !job.succ)
+    const failed_jobs = jobs.filter((job) => !job.is_successful)
 
     if (failed_jobs.length === 0) {
       return res.send({ status: 'operational' })

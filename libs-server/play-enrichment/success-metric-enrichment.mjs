@@ -36,7 +36,7 @@ export const enrich_play_success = (plays) => {
 
     return {
       ...play,
-      successful_play
+      is_successful_play: successful_play
     }
   })
 

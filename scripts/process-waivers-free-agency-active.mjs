@@ -56,7 +56,7 @@ const process_single_active_waiver = async (waiver_id, timestamp) => {
 
   await db('waivers')
     .update({
-      succ: error ? 0 : 1,
+      is_successful: error ? 0 : 1,
       reason: error ? error.message : null,
       processed: timestamp
     })
@@ -177,7 +177,7 @@ const update_team_budget = async (team_id, bid) => {
 const cancel_other_pending_waivers = async (lid, pid, waiver_id, timestamp) => {
   await db('waivers')
     .update({
-      succ: 0,
+      is_successful: 0,
       reason: 'Player already claimed',
       processed: timestamp
     })
@@ -233,7 +233,7 @@ const process_league_active_waivers = async (lid, timestamp) => {
 
     await db('waivers')
       .update({
-        succ: error ? 0 : 1,
+        is_successful: error ? 0 : 1,
         reason: error ? error.message : null, // TODO - add error codes
         processed: timestamp
       })

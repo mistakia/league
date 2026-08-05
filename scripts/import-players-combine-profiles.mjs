@@ -79,7 +79,29 @@ const import_players_from_combine_profiles_for_year = async ({
       player_row = await find_player_row({
         esb_player_id: profile.person.esbId
       })
+
+      // The esb lookup above was the ONLY matcher here, and find_player_row's id
+      // chain is exclusive with its name branch -- so a player already minted by a
+      // feed that carries no esb id (SIS draft profiles in particular) was invisible
+      // to this importer and got a second row. That is how CLEV-HARR-002939 and
+      // CLEV-HARR-007173 both came to exist for Tre Harris, 2025 WR, with the
+      // GSIS/NFL identifier family on one row and every commercial source on the
+      // other. Fall back to the combine class's own discriminators before minting.
+      // Accept the candidate only when it carries no esb id of its own: a row that
+      // already has a DIFFERENT esb id is a different person with the same name in
+      // the same class, and enriching it would corrupt a real player rather than
+      // merely duplicate one.
+      if (!player_row) {
+        const candidate = await find_player_row({
+          name: `${profile.person.firstName} ${profile.person.lastName}`,
+          nfl_draft_year: year,
+          pos: profile.position
+        })
+        if (candidate && !candidate.esb_player_id) player_row = candidate
+      }
     } catch (err) {
+      // MatchedMultiplePlayers -- two same-name rows in this draft class. Abstain
+      // rather than mint; a duplicate row is mergeable, a wrong enrichment is not.
       log(err)
       continue
     }
@@ -113,7 +135,7 @@ const import_players_from_combine_profiles_for_year = async ({
       sixty_yard_shuttle_seconds: profile.sixtyYardShuttle?.seconds || null,
       sixty_yard_shuttle_designation:
         profile.sixtyYardShuttle?.designation ?? null,
-      combine_attendance: profile.combineAttendance ?? null,
+      has_combine_attendance: profile.combineAttendance ?? null,
       ...ngs_data
     }
 

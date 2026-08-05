@@ -10,8 +10,8 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
       'nfl_plays.possession_nfl_team',
       'nfl_plays.ydl_100',
       'nfl_plays.dot',
-      'nfl_plays.qb_kneel',
-      'nfl_plays.first_down',
+      'nfl_plays.is_qb_kneel',
+      'nfl_plays.is_first_down',
       'nfl_plays.play_type',
       'nfl_plays.ball_carrier_pid',
       'nfl_plays.passer_pid',
@@ -30,7 +30,7 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
     })
     .where('nfl_plays.season_year', year)
     .where('nfl_plays.week', week)
-    .where('nfl_play_stats.valid', true)
+    .where('nfl_play_stats.is_valid', true)
     .where('nfl_plays.season_type', seas_type)
 }
 

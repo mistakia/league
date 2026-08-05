@@ -124,7 +124,7 @@ export const participation_status_select = ({
   week_reference
 }) =>
   `CASE
-     WHEN ${PLAYER_PARTICIPATION_WEEKS_CTE}.active THEN '${PARTICIPATION_STATUS.ACTIVE}'
+     WHEN ${PLAYER_PARTICIPATION_WEEKS_CTE}.is_active THEN '${PARTICIPATION_STATUS.ACTIVE}'
      WHEN ${PLAYER_PARTICIPATION_WEEKS_CTE}.pid IS NULL
           AND ${PLAYER_YEARS_TEAMS_CTE}.teams IS NOT NULL
           AND NOT EXISTS (

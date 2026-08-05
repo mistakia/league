@@ -685,7 +685,7 @@ const build_event_stream = async ({ lid }) => {
       'restricted_free_agency_nominations.nomination_id',
       'restricted_free_agency_bids.nomination_id'
     )
-    .where({ 'restricted_free_agency_bids.lid': lid, succ: true })
+    .where({ 'restricted_free_agency_bids.lid': lid, is_successful: true })
     .whereNotNull('restricted_free_agency_bids.processed')
     .whereRaw(
       'restricted_free_agency_bids.tid != restricted_free_agency_nominations.original_team_id'
@@ -833,7 +833,7 @@ const build_event_stream = async ({ lid }) => {
       'restricted_free_agency_bids.year',
       'restricted_free_agency_bids.bid'
     )
-    .where({ 'restricted_free_agency_bids.lid': lid, succ: true })
+    .where({ 'restricted_free_agency_bids.lid': lid, is_successful: true })
     .whereNotNull('restricted_free_agency_bids.processed')
   for (const r of rfa) {
     if (r.tid === r.original_team_id) continue

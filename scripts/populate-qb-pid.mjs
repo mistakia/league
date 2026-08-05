@@ -50,8 +50,8 @@ const populate_qb_pid = async ({
         np.play_id,
         np.season_year,
         CASE
-          WHEN np.pass = true AND np.passer_pid IS NOT NULL THEN np.passer_pid
-          WHEN (np.qb_scramble = true OR np.qb_kneel = true) AND np.ball_carrier_pid IS NOT NULL THEN np.ball_carrier_pid
+          WHEN np.is_passing_play = true AND np.passer_pid IS NOT NULL THEN np.passer_pid
+          WHEN (np.is_qb_scramble = true OR np.is_qb_kneel = true) AND np.ball_carrier_pid IS NOT NULL THEN np.ball_carrier_pid
           ELSE snap_qb.pid
         END AS qb_pid
       FROM nfl_plays np
@@ -71,8 +71,8 @@ const populate_qb_pid = async ({
             LIMIT 1
           ) THEN 0 ELSE 1 END
         LIMIT 1
-      ) snap_qb ON np.pass IS NOT TRUE
-        AND NOT ((np.qb_scramble = true OR np.qb_kneel = true) AND np.ball_carrier_pid IS NOT NULL)
+      ) snap_qb ON np.is_passing_play IS NOT TRUE
+        AND NOT ((np.is_qb_scramble = true OR np.is_qb_kneel = true) AND np.ball_carrier_pid IS NOT NULL)
       WHERE np.season_year = :year ${esbid_filter}
     ) derived
     WHERE p.esbid = derived.esbid
@@ -90,8 +90,8 @@ const populate_qb_pid = async ({
         np.play_id,
         np.season_year,
         CASE
-          WHEN np.pass = true AND np.passer_pid IS NOT NULL THEN np.passer_pid
-          WHEN (np.qb_scramble = true OR np.qb_kneel = true) AND np.ball_carrier_pid IS NOT NULL THEN np.ball_carrier_pid
+          WHEN np.is_passing_play = true AND np.passer_pid IS NOT NULL THEN np.passer_pid
+          WHEN (np.is_qb_scramble = true OR np.is_qb_kneel = true) AND np.ball_carrier_pid IS NOT NULL THEN np.ball_carrier_pid
           ELSE NULL
         END AS qb_pid
       FROM nfl_plays np
@@ -119,10 +119,10 @@ const populate_qb_pid = async ({
     const snap_count_query = `
       SELECT
         COUNT(*) as total_plays,
-        COUNT(CASE WHEN pass = true AND passer_pid IS NOT NULL THEN 1 END) as pass_plays,
-        COUNT(CASE WHEN (qb_scramble = true OR qb_kneel = true) AND ball_carrier_pid IS NOT NULL THEN 1 END) as scramble_kneel_plays,
-        COUNT(CASE WHEN NOT (pass = true AND passer_pid IS NOT NULL)
-          AND NOT ((qb_scramble = true OR qb_kneel = true) AND ball_carrier_pid IS NOT NULL) THEN 1 END) as other_plays
+        COUNT(CASE WHEN is_passing_play = true AND passer_pid IS NOT NULL THEN 1 END) as pass_plays,
+        COUNT(CASE WHEN (is_qb_scramble = true OR is_qb_kneel = true) AND ball_carrier_pid IS NOT NULL THEN 1 END) as scramble_kneel_plays,
+        COUNT(CASE WHEN NOT (is_passing_play = true AND passer_pid IS NOT NULL)
+          AND NOT ((is_qb_scramble = true OR is_qb_kneel = true) AND ball_carrier_pid IS NOT NULL) THEN 1 END) as other_plays
         ${snap_subquery}
       FROM nfl_plays WHERE season_year = ? ${plays_esbid_filter}
     `

@@ -32,7 +32,7 @@ export default async function (knex) {
       targets: 0,
       rushing_first_downs: 0,
       receiving_first_downs: 0,
-      exclude_quarterback_kneels: false
+      is_excluding_quarterback_kneels: false
     })
     .onConflict('id')
     .ignore()
@@ -65,7 +65,7 @@ export default async function (knex) {
       targets: 1,
       rushing_first_downs: 1,
       receiving_first_downs: 1,
-      exclude_quarterback_kneels: false
+      is_excluding_quarterback_kneels: false
     })
     .onConflict('id')
     .ignore()

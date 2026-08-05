@@ -14,7 +14,7 @@ const map_state_to_props = createSelector(
   (app, player_maps, league) => ({
     player_maps,
     is_logged_in: Boolean(app.userId),
-    is_league_hosted: Boolean(league.hosted)
+    is_league_hosted: Boolean(league.is_hosted)
   })
 )
 

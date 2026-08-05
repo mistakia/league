@@ -1,6 +1,24 @@
 import { Record, List } from 'immutable'
 
 import { current_season } from '@constants'
+import { scoring_column_names } from '@libs-shared/scoring-columns.mjs'
+
+// An Immutable Record silently DROPS any key its declaration does not carry,
+// and createLeague independently drops any key it does not name -- so a scoring
+// column has to be declared in three places or it reaches the SPA as
+// `undefined` with no lint error, no PropTypes warning and no build failure.
+// Deriving all three from the registry is what makes adding a scoring column a
+// one-file change: listing the 21 kicking and DST columns by hand here would
+// have been a fourth enumeration to keep in agreement, and omitting them was
+// the failure this replaces.
+const scoring_column_declarations = Object.fromEntries(
+  scoring_column_names.map((column) => [column, null])
+)
+
+const pick_scoring_columns = (source) =>
+  Object.fromEntries(
+    scoring_column_names.map((column) => [column, source[column]])
+  )
 
 export const League = new Record({
   uid: null,
@@ -43,30 +61,7 @@ export const League = new Record({
   at_large_selection_method: null,
   has_division_winner_berths: null,
 
-  passing_attempts: null,
-  passing_completions: null,
-  passing_yards: null,
-  passing_interceptions: null,
-  passing_touchdowns: null,
-  rushing_attempts: null,
-  rushing_yards: null,
-  rushing_touchdowns: null,
-  running_back_reception: null,
-  wide_receiver_reception: null,
-  tight_end_reception: null,
-  receptions: null,
-  receiving_yards: null,
-  two_point_conversions: null,
-  receiving_touchdowns: null,
-  fumbles_lost: null,
-  punt_return_touchdowns: null,
-  kickoff_return_touchdowns: null,
-  fumble_return_touchdowns: null,
-
-  targets: null,
-  rushing_first_downs: null,
-  receiving_first_downs: null,
-  exclude_quarterback_kneels: null,
+  ...scoring_column_declarations,
 
   tag2: null,
   tag3: null,
@@ -91,7 +86,7 @@ export const League = new Record({
   rookie_draft_completed_at: null,
 
   min_bid: 0,
-  hosted: 0,
+  is_hosted: 0,
 
   fqb: null,
   frb: null,
@@ -139,139 +134,118 @@ export const League = new Record({
   isLoaded: false
 })
 
-export function createLeague({
-  uid,
-  commishid,
-  name,
-  num_teams,
+// Takes the whole payload rather than destructuring in the signature, so the
+// scoring columns can be picked from it by the registry below.
+export function createLeague(league_data = {}) {
+  const {
+    uid,
+    commishid,
+    name,
+    num_teams,
 
-  sqb,
-  srb,
-  swr,
-  ste,
-  srbwr,
-  srbwrte,
-  sqbrbwrte,
-  swrte,
-  sdst,
-  sk,
+    sqb,
+    srb,
+    swr,
+    ste,
+    srbwr,
+    srbwrte,
+    sqbrbwrte,
+    swrte,
+    sdst,
+    sk,
 
-  bench,
-  ps,
-  reserve_short_term_limit,
+    bench,
+    ps,
+    reserve_short_term_limit,
 
-  mqb,
-  mrb,
-  mwr,
-  mte,
-  mdst,
-  mk,
+    mqb,
+    mrb,
+    mwr,
+    mte,
+    mdst,
+    mk,
 
-  faab,
-  cap,
+    faab,
+    cap,
 
-  playoff_team_count,
-  bye_count,
-  bye_candidate_pool,
-  bye_selection_method,
-  at_large_selection_method,
-  has_division_winner_berths,
+    playoff_team_count,
+    bye_count,
+    bye_candidate_pool,
+    bye_selection_method,
+    at_large_selection_method,
+    has_division_winner_berths,
 
-  passing_attempts,
-  passing_completions,
-  passing_yards,
-  passing_interceptions,
-  passing_touchdowns,
-  rushing_attempts,
-  rushing_yards,
-  rushing_touchdowns,
-  running_back_reception,
-  wide_receiver_reception,
-  tight_end_reception,
-  receptions,
-  receiving_yards,
-  two_point_conversions,
-  receiving_touchdowns,
-  fumbles_lost,
-  punt_return_touchdowns,
-  kickoff_return_touchdowns,
-  fumble_return_touchdowns,
+    tag2,
+    tag3,
+    tag4,
 
-  targets,
-  rushing_first_downs,
-  receiving_first_downs,
-  exclude_quarterback_kneels,
+    ext1,
+    ext2,
+    ext3,
+    ext4,
 
-  tag2,
-  tag3,
-  tag4,
+    free_agency_period_start,
+    free_agency_period_end,
+    free_agency_live_auction_start,
+    free_agency_live_auction_end,
+    tddate,
 
-  ext1,
-  ext2,
-  ext3,
-  ext4,
+    draft_start,
+    draft_type,
+    draft_pick_interval,
+    draft_hour_min,
+    draft_hour_max,
+    rookie_draft_completed_at,
 
-  free_agency_period_start,
-  free_agency_period_end,
-  free_agency_live_auction_start,
-  free_agency_live_auction_end,
-  tddate,
+    min_bid,
+    is_hosted,
 
-  draft_start,
-  draft_type,
-  draft_pick_interval,
-  draft_hour_min,
-  draft_hour_max,
-  rookie_draft_completed_at,
+    b_QB,
+    b_RB,
+    b_WR,
+    b_TE,
+    b_K,
+    b_DST,
 
-  min_bid,
-  hosted,
+    fqb,
+    frb,
+    fwr,
+    fte,
 
-  b_QB,
-  b_RB,
-  b_WR,
-  b_TE,
-  b_K,
-  b_DST,
+    restricted_free_agency_period_start,
+    restricted_free_agency_period_end,
+    restricted_free_agency_first_window_at,
+    ext_date,
 
-  fqb,
-  frb,
-  fwr,
-  fte,
+    processed_at,
 
-  restricted_free_agency_period_start,
-  restricted_free_agency_period_end,
-  restricted_free_agency_first_window_at,
-  ext_date,
+    teams,
+    years,
 
-  processed_at,
+    espn_id,
+    sleeper_id,
+    mfl_id,
+    fleaflicker_id,
 
-  teams,
-  years,
+    season_due_amount,
 
-  espn_id,
-  sleeper_id,
-  mfl_id,
-  fleaflicker_id,
+    division_1_name,
+    division_2_name,
+    division_3_name,
+    division_4_name,
 
-  season_due_amount,
+    wildcard_round,
+    championship_round,
 
-  division_1_name,
-  division_2_name,
-  division_3_name,
-  division_4_name,
+    restricted_free_agency_window_hours,
+    restricted_free_agency_processing_lead_hours,
 
-  wildcard_round,
-  championship_round,
+    trade_veto_window_hours,
 
-  restricted_free_agency_window_hours,
-  restricted_free_agency_processing_lead_hours,
+    isLoaded,
+    isLoading
+  } = league_data
 
-  trade_veto_window_hours,
-
-  isLoaded,
-  isLoading
-}) {
   return new League({
     uid,
     commishid,
@@ -310,30 +284,7 @@ export function createLeague({
     at_large_selection_method,
     has_division_winner_berths,
 
-    passing_attempts,
-    passing_completions,
-    passing_yards,
-    passing_interceptions,
-    passing_touchdowns,
-    rushing_attempts,
-    rushing_yards,
-    rushing_touchdowns,
-    running_back_reception,
-    wide_receiver_reception,
-    tight_end_reception,
-    receptions,
-    receiving_yards,
-    two_point_conversions,
-    receiving_touchdowns,
-    fumbles_lost,
-    punt_return_touchdowns,
-    kickoff_return_touchdowns,
-    fumble_return_touchdowns,
-
-    targets,
-    rushing_first_downs,
-    receiving_first_downs,
-    exclude_quarterback_kneels,
+    ...pick_scoring_columns(league_data),
 
     tag2,
     tag3,
@@ -358,7 +309,7 @@ export function createLeague({
     rookie_draft_completed_at,
 
     min_bid,
-    hosted,
+    is_hosted,
 
     b_QB,
     b_RB,

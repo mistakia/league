@@ -55,35 +55,35 @@ export default {
     main_where: () => 'nfl_plays.route'
   },
   play_contested_ball: {
-    column_name: 'contested_ball',
+    column_name: 'is_contested_ball',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.contested_ball as play_contested_ball'],
-    main_where: () => 'nfl_plays.contested_ball',
+    main_select: () => ['nfl_plays.is_contested_ball as play_contested_ball'],
+    main_where: () => 'nfl_plays.is_contested_ball',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.contested_ball = true THEN 1 ELSE 0 END) as play_contested_ball'
+        'SUM(CASE WHEN nfl_plays.is_contested_ball = true THEN 1 ELSE 0 END) as play_contested_ball'
       ),
     use_having: true
   },
   play_catchable_ball: {
-    column_name: 'catchable_ball',
+    column_name: 'is_catchable_ball',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.catchable_ball as play_catchable_ball'],
-    main_where: () => 'nfl_plays.catchable_ball',
+    main_select: () => ['nfl_plays.is_catchable_ball as play_catchable_ball'],
+    main_where: () => 'nfl_plays.is_catchable_ball',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.catchable_ball = true THEN 1 ELSE 0 END) as play_catchable_ball'
+        'SUM(CASE WHEN nfl_plays.is_catchable_ball = true THEN 1 ELSE 0 END) as play_catchable_ball'
       ),
     use_having: true
   },
   play_endzone_target: {
-    column_name: 'endzone_target',
+    column_name: 'is_endzone_target',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.endzone_target as play_endzone_target'],
-    main_where: () => 'nfl_plays.endzone_target',
+    main_select: () => ['nfl_plays.is_endzone_target as play_endzone_target'],
+    main_where: () => 'nfl_plays.is_endzone_target',
     aggregate_select: () =>
       db.raw(
-        'SUM(CASE WHEN nfl_plays.endzone_target = true THEN 1 ELSE 0 END) as play_endzone_target'
+        'SUM(CASE WHEN nfl_plays.is_endzone_target = true THEN 1 ELSE 0 END) as play_endzone_target'
       ),
     use_having: true
   }

@@ -1098,7 +1098,7 @@ export default class Auction {
 
   async _load_league() {
     this._league = await getLeague({ lid: this._lid })
-    this._slow_mode = this._league?.free_agency_auction_slow_mode || false
+    this._slow_mode = this._league?.is_free_agency_auction_slow_mode || false
     if (this._slow_mode) {
       this._paused = false
     }

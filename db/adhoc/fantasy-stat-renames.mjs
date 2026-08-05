@@ -87,7 +87,7 @@ export const FANTASY_STAT_RENAMES = {
   rbrec: 'running_back_reception',
   wrrec: 'wide_receiver_reception',
   terec: 'tight_end_reception',
-  exclude_qb_kneels: 'exclude_quarterback_kneels'
+  exclude_qb_kneels: 'is_excluding_quarterback_kneels'
 }
 
 // The logical tables whose columns carry the fantasy-scoring vocabulary. Partitioned

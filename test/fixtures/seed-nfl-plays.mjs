@@ -23,8 +23,8 @@ const build_play_row = ({ year, seas_type, week, esbid, play_id, off }) => ({
   updated: NOW(),
   offense_nfl_team: off,
   play_type: 'RUSH',
-  qb_kneel: false,
-  first_down: false,
+  is_qb_kneel: false,
+  is_first_down: false,
   qtr: 1,
   dwn: 1,
   yards_to_go: 10
@@ -35,7 +35,7 @@ const build_stat_row = ({ esbid, play_id, club_code }) => ({
   play_id,
   stat_id: play_id,
   player_name: `test-player-${play_id}`,
-  valid: true,
+  is_valid: true,
   yards: 7,
   nfl_team: club_code
 })

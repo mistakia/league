@@ -119,7 +119,7 @@ const project_lineups = async (lid) => {
 
       for (const week in result) {
         const weekData = {
-          start: 0,
+          is_starter: 0,
           sp: 0,
           bp: 0
         }
@@ -138,7 +138,7 @@ const project_lineups = async (lid) => {
           : result[week].starter_pids.includes(pid)
         if (isStarter) {
           playerData.starts += 1
-          weekData.start = 1
+          weekData.is_starter = 1
           const current_projected_total = lineups[week].total
 
           // starter+ is difference between current lineup and lineup without player
@@ -177,14 +177,14 @@ const project_lineups = async (lid) => {
         bp
       })
       for (const week in playerData.weeks) {
-        const { start, sp, bp } = playerData.weeks[week]
+        const { is_starter, sp, bp } = playerData.weeks[week]
         team_lineup_contribution_week_inserts.push({
           week: Number(week),
           tid,
           lid,
           pid,
           year,
-          start,
+          is_starter,
           sp,
           bp
         })

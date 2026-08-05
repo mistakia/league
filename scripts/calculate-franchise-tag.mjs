@@ -21,7 +21,7 @@ const run = async ({ year = current_season.year, dry_run = false } = {}) => {
   const seasons = await db('seasons')
     .select('seasons.*')
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')
-    .where('leagues.hosted', 1)
+    .where('leagues.is_hosted', 1)
     .where('year', year)
 
   for (const { lid, year } of seasons) {

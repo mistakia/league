@@ -44,7 +44,7 @@ const validate = async () => {
   const cl_rates = await db('historical_injury_index')
     .select('season_year')
     .avg({
-      r: db.raw('CASE WHEN changelog_injury_event THEN 1.0 ELSE 0.0 END')
+      r: db.raw('CASE WHEN has_changelog_injury_event THEN 1.0 ELSE 0.0 END')
     })
     .where('season_year', '>=', 2021)
     .groupBy('season_year')
@@ -54,7 +54,7 @@ const validate = async () => {
     log(`  changelog-event rate ${year}: ${(rate * 100).toFixed(1)}%`)
     if (rate <= 0)
       failures.push(
-        `year ${year}: changelog_injury_event rate = 0 (join not firing)`
+        `year ${year}: has_changelog_injury_event rate = 0 (join not firing)`
       )
   }
 
@@ -62,7 +62,7 @@ const validate = async () => {
   const practice_pids = await db('historical_injury_index')
     .select('season_year')
     .countDistinct({ c: 'pid' })
-    .where('practice_listed_injury', true)
+    .where('has_practice_listed_injury', true)
     .groupBy('season_year')
     .orderBy('season_year')
   for (const { season_year: year, c } of practice_pids) {

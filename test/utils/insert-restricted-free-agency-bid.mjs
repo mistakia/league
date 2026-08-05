@@ -71,7 +71,7 @@ export const insert_restricted_free_agency_bid = async ({
   announced_at = null,
   processed = null,
   cancelled = null,
-  succ = null,
+  is_successful = null,
   outcome = null,
   year = current_season.year
 }) => {
@@ -96,7 +96,7 @@ export const insert_restricted_free_agency_bid = async ({
       submitted: Math.round(Date.now() / 1000),
       processed,
       cancelled,
-      succ,
+      is_successful,
       outcome
     })
     .returning('uid')

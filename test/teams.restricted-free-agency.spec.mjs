@@ -107,7 +107,7 @@ describe('API /teams - restricted free agency', function () {
       query1[0].tid.should.equal(teamId)
 
       query1[0].lid.should.equal(leagueId)
-      expect(query1[0].succ).to.equal(null)
+      expect(query1[0].is_successful).to.equal(null)
       expect(query1[0].outcome).to.equal(null)
       expect(query1[0].submitted).to.equal(Math.round(Date.now() / 1000))
       expect(query1[0].processed).to.equal(null)

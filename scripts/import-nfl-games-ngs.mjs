@@ -86,7 +86,7 @@ const format = (item) => {
 
     season_type: seas_type,
     week_type,
-    ot: (score.phase || '').includes('OVERTIME'),
+    is_overtime: (score.phase || '').includes('OVERTIME'),
 
     home_score: (score.homeTeamScore || {}).pointTotal,
     away_score: (score.visitorTeamScore || {}).pointTotal,

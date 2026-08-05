@@ -426,7 +426,7 @@ const main = async () => {
         // Also reset slow mode flag in database if needed
         const update_result = await db('seasons')
           .where({ lid, year })
-          .update({ free_agency_auction_slow_mode: false })
+          .update({ is_free_agency_auction_slow_mode: false })
 
         if (update_result) {
           console.log(`✓ Disabled slow mode in database for league ${lid}`)

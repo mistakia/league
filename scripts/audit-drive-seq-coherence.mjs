@@ -150,15 +150,16 @@ export const classify_drive_seq_coherence = (rows) => {
  * them. One row per drive per quarter -- roughly 200k rows, not 1.5M plays.
  */
 export const find_drive_seq_coherence_violations = async () => {
-  // `deleted is not true` rather than `deleted = false`: the column is nullable
-  // and roughly ten games' worth of rows carry NULL. The enrichment's own
-  // should_count_play tests JS truthiness, so NULL counts as not-deleted there;
-  // `deleted = false` here would silently exclude those rows and undercount.
+  // `is_deleted is not true` rather than `is_deleted = false`: the column is
+  // nullable and roughly ten games' worth of rows carry NULL. The enrichment's
+  // own should_count_play tests JS truthiness, so NULL counts as not-deleted
+  // there; `is_deleted = false` here would silently exclude those rows and
+  // undercount.
   const rows = await db('nfl_plays')
     .distinct('esbid', 'qtr', 'drive_seq')
     .whereNotNull('drive_seq')
     .whereNotNull('qtr')
-    .whereRaw('deleted is not true')
+    .whereRaw('is_deleted is not true')
 
   // Oracle: assert the query actually resolved something. A renamed column or a
   // predicate that stopped matching would otherwise leave every game trivially

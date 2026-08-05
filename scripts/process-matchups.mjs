@@ -56,7 +56,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
     .select('player_gamelogs.*', 'nfl_games.week')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.season_year', year)
-    .where('player_gamelogs.active', true)
+    .where('player_gamelogs.is_active', true)
     .where('nfl_games.season_type', 'REG')
     .whereIn('player_gamelogs.pid', Object.keys(player_pids))
 
@@ -106,7 +106,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
         round: 1,
         otid: team.tid,
         tid: team.tid,
-        comp: false
+        is_compensatory: false
       })
       .first('uid')
     if (!owns_own_first_round_pick) continue

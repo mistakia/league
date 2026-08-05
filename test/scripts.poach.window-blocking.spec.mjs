@@ -254,7 +254,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
       expect(poaches[0].processed).to.not.equal(null)
-      expect(poaches[0].succ).to.equal(true)
+      expect(poaches[0].is_successful).to.equal(true)
     })
 
     it('should allow processing on Wednesday (CRITICAL BUG FIX TEST)', async () => {
@@ -300,7 +300,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
       expect(poaches[0].processed).to.not.equal(null)
-      expect(poaches[0].succ).to.equal(true)
+      expect(poaches[0].is_successful).to.equal(true)
     })
 
     it('should allow processing on Thursday (CRITICAL BUG FIX TEST)', async () => {
@@ -344,7 +344,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
       expect(poaches[0].processed).to.not.equal(null)
-      expect(poaches[0].succ).to.equal(true)
+      expect(poaches[0].is_successful).to.equal(true)
     })
 
     it('should allow processing on Friday (CRITICAL BUG FIX TEST)', async () => {
@@ -385,7 +385,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
       expect(poaches[0].processed).to.not.equal(null)
-      expect(poaches[0].succ).to.equal(true)
+      expect(poaches[0].is_successful).to.equal(true)
     })
 
     it('should allow processing on Saturday before 6pm', async () => {
@@ -426,7 +426,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
       expect(poaches[0].processed).to.not.equal(null)
-      expect(poaches[0].succ).to.equal(true)
+      expect(poaches[0].is_successful).to.equal(true)
     })
   })
 })

@@ -1040,12 +1040,27 @@ DROP TYPE IF EXISTS public.dfs_source_id;
 DROP TYPE IF EXISTS public.coverage_type;
 DROP TYPE IF EXISTS public.adp_source_id;
 DROP EXTENSION IF EXISTS pgcrypto;
+DROP EXTENSION IF EXISTS pg_stat_statements;
 -- *not* dropping schema, since initdb creates it
 --
 -- Name: public; Type: SCHEMA; Schema: -; Owner: -
 --
 
 -- *not* creating schema, since initdb creates it
+
+
+--
+-- Name: pg_stat_statements; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION pg_stat_statements; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION pg_stat_statements IS 'track planning and execution statistics of all SQL statements executed';
 
 
 --
@@ -1592,8 +1607,8 @@ DECLARE
   job_record RECORD;
 BEGIN
   -- Archive jobs older than 30 days that are completed or failed
-  FOR job_record IN 
-    SELECT * FROM external_league_import_jobs 
+  FOR job_record IN
+    SELECT * FROM external_league_import_jobs
     WHERE status IN ('completed', 'failed', 'cancelled')
       AND completed_at < NOW() - INTERVAL '30 days'
   LOOP
@@ -1602,14 +1617,14 @@ BEGIN
       job_id, connection_id, lid, job_type, status,
       queued_at, started_at, completed_at,
       duration_seconds,
-      success, players_mapped, rosters_updated, transactions_imported,
+      is_successful, players_mapped, rosters_updated, transactions_imported,
       error_summary, initiated_by
     ) VALUES (
       job_record.job_id, job_record.connection_id, job_record.lid,
       job_record.job_type, job_record.status,
       job_record.queued_at, job_record.started_at, job_record.completed_at,
-      CASE 
-        WHEN job_record.started_at IS NOT NULL AND job_record.completed_at IS NOT NULL 
+      CASE
+        WHEN job_record.started_at IS NOT NULL AND job_record.completed_at IS NOT NULL
         THEN EXTRACT(EPOCH FROM (job_record.completed_at - job_record.started_at))::INTEGER
         ELSE NULL
       END,
@@ -1617,12 +1632,12 @@ BEGIN
       job_record.players_mapped, job_record.rosters_updated, job_record.transactions_imported,
       job_record.error_message, job_record.initiated_by
     );
-    
+
     -- Delete from main table
     DELETE FROM external_league_import_jobs WHERE job_id = job_record.job_id;
     archived_count := archived_count + 1;
   END LOOP;
-  
+
   RETURN archived_count;
 END;
 $$;
@@ -2072,7 +2087,7 @@ CREATE TABLE public.dfs_contests (
     week smallint,
     start_date timestamp with time zone,
     is_guaranteed boolean,
-    ownership_imported boolean DEFAULT false,
+    is_ownership_imported boolean DEFAULT false,
     ownership_imported_at timestamp with time zone,
     ownership_entry_sample_size integer,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
@@ -2087,7 +2102,7 @@ CREATE TABLE public.draft (
     uid bigint NOT NULL,
     pid character varying(25),
     round smallint NOT NULL,
-    comp boolean DEFAULT false NOT NULL,
+    is_compensatory boolean DEFAULT false NOT NULL,
     pick smallint,
     pick_str character varying(4),
     tid integer NOT NULL,
@@ -2787,7 +2802,7 @@ CREATE TABLE public.external_league_connections (
     status character varying(50) DEFAULT 'active'::character varying NOT NULL,
     last_validated timestamp with time zone,
     last_sync timestamp with time zone,
-    auto_sync_enabled boolean DEFAULT false NOT NULL,
+    is_auto_sync_enabled boolean DEFAULT false NOT NULL,
     sync_components jsonb DEFAULT '{"rosters": true, "transactions": true, "league_config": true}'::jsonb NOT NULL,
     created_by bigint,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
@@ -2854,10 +2869,10 @@ COMMENT ON COLUMN public.external_league_connections.status IS 'Connection statu
 
 
 --
--- Name: COLUMN external_league_connections.auto_sync_enabled; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN external_league_connections.is_auto_sync_enabled; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.external_league_connections.auto_sync_enabled IS 'Whether automatic syncing is enabled';
+COMMENT ON COLUMN public.external_league_connections.is_auto_sync_enabled IS 'Whether automatic syncing is enabled';
 
 
 --
@@ -2881,7 +2896,7 @@ CREATE TABLE public.external_league_import_job_history (
     started_at timestamp with time zone,
     completed_at timestamp with time zone,
     duration_seconds integer,
-    success boolean NOT NULL,
+    is_successful boolean NOT NULL,
     players_mapped integer DEFAULT 0,
     rosters_updated integer DEFAULT 0,
     transactions_imported integer DEFAULT 0,
@@ -2908,7 +2923,7 @@ CREATE TABLE public.external_league_import_jobs (
     lid bigint NOT NULL,
     job_type character varying(50) DEFAULT 'full_sync'::character varying NOT NULL,
     sync_components jsonb DEFAULT '{"rosters": true, "transactions": true, "league_config": true}'::jsonb NOT NULL,
-    dry_run boolean DEFAULT false NOT NULL,
+    is_dry_run boolean DEFAULT false NOT NULL,
     status character varying(50) DEFAULT 'queued'::character varying NOT NULL,
     progress_percentage integer DEFAULT 0 NOT NULL,
     current_step character varying(100),
@@ -3307,19 +3322,19 @@ CREATE TABLE public.historical_injury_index (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3339,19 +3354,19 @@ CREATE TABLE public.historical_injury_index_2009 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3370,19 +3385,19 @@ CREATE TABLE public.historical_injury_index_2010 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3401,19 +3416,19 @@ CREATE TABLE public.historical_injury_index_2011 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3432,19 +3447,19 @@ CREATE TABLE public.historical_injury_index_2012 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3463,19 +3478,19 @@ CREATE TABLE public.historical_injury_index_2013 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3494,19 +3509,19 @@ CREATE TABLE public.historical_injury_index_2014 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3525,19 +3540,19 @@ CREATE TABLE public.historical_injury_index_2015 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3556,19 +3571,19 @@ CREATE TABLE public.historical_injury_index_2016 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3587,19 +3602,19 @@ CREATE TABLE public.historical_injury_index_2017 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3618,19 +3633,19 @@ CREATE TABLE public.historical_injury_index_2018 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3649,19 +3664,19 @@ CREATE TABLE public.historical_injury_index_2019 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3680,19 +3695,19 @@ CREATE TABLE public.historical_injury_index_2020 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3711,19 +3726,19 @@ CREATE TABLE public.historical_injury_index_2021 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3742,19 +3757,19 @@ CREATE TABLE public.historical_injury_index_2022 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3773,19 +3788,19 @@ CREATE TABLE public.historical_injury_index_2023 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3804,19 +3819,19 @@ CREATE TABLE public.historical_injury_index_2024 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3835,19 +3850,19 @@ CREATE TABLE public.historical_injury_index_2025 (
     week smallint NOT NULL,
     esbid integer NOT NULL,
     nfl_team character varying(3),
-    played boolean,
+    is_played boolean,
     snap_count integer,
     snaps_off smallint,
     snaps_def smallint,
     snaps_st smallint,
-    gamelog_active boolean,
-    ruled_out_in_game boolean,
-    practice_listed_injury boolean,
-    practice_questionable_or_worse boolean,
+    is_gamelog_active boolean,
+    is_ruled_out_in_game boolean,
+    has_practice_listed_injury boolean,
+    is_practice_questionable_or_worse boolean,
     practice_designation character varying(16),
-    changelog_injury_event boolean,
-    changelog_unavailable boolean,
-    changelog_nfl_reserve_event boolean,
+    has_changelog_injury_event boolean,
+    is_changelog_unavailable boolean,
+    has_changelog_nfl_reserve_event boolean,
     missed_reason character varying(24),
     source_concurrence smallint,
     confidence character varying(8),
@@ -3880,7 +3895,7 @@ CREATE TABLE public.invite_codes (
 CREATE TABLE public.jobs (
     uid integer NOT NULL,
     type smallint NOT NULL,
-    succ boolean NOT NULL,
+    is_successful boolean NOT NULL,
     reason text,
     "timestamp" integer NOT NULL
 );
@@ -4080,7 +4095,7 @@ CREATE TABLE public.league_format_player_projection_values_history (
     year smallint NOT NULL,
     pts_added numeric(7,2),
     market_salary numeric(6,2),
-    removed boolean DEFAULT false NOT NULL,
+    is_removed boolean DEFAULT false NOT NULL,
     observed_at timestamp with time zone NOT NULL
 );
 
@@ -4342,7 +4357,7 @@ CREATE TABLE public.league_scoring_formats (
     targets numeric(2,1) DEFAULT 0 NOT NULL,
     rushing_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
     receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
-    exclude_quarterback_kneels boolean DEFAULT false NOT NULL,
+    is_excluding_quarterback_kneels boolean DEFAULT false NOT NULL,
     fumble_return_touchdowns smallint NOT NULL,
     id text NOT NULL,
     field_goal_yards numeric(4,3) DEFAULT 0.1 NOT NULL,
@@ -4366,7 +4381,7 @@ CREATE TABLE public.league_scoring_formats (
     defensive_points_against_threshold smallint DEFAULT 20 NOT NULL,
     defensive_yards_against numeric(5,4) DEFAULT '-0.02'::numeric NOT NULL,
     defensive_yards_against_threshold smallint DEFAULT 300 NOT NULL,
-    config_digest text GENERATED ALWAYS AS (md5(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((COALESCE((passing_attempts)::text, ''::text) || '|'::text) || COALESCE((passing_completions)::text, ''::text)) || '|'::text) || COALESCE((passing_yards)::text, ''::text)) || '|'::text) || COALESCE((passing_interceptions)::text, ''::text)) || '|'::text) || COALESCE((passing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_attempts)::text, ''::text)) || '|'::text) || COALESCE((rushing_yards)::text, ''::text)) || '|'::text) || COALESCE((rushing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_first_downs)::text, ''::text)) || '|'::text) || COALESCE((fumbles_lost)::text, ''::text)) || '|'::text) || COALESCE((targets)::text, ''::text)) || '|'::text) || COALESCE((receptions)::text, ''::text)) || '|'::text) || COALESCE((running_back_reception)::text, ''::text)) || '|'::text) || COALESCE((wide_receiver_reception)::text, ''::text)) || '|'::text) || COALESCE((tight_end_reception)::text, ''::text)) || '|'::text) || COALESCE((receiving_yards)::text, ''::text)) || '|'::text) || COALESCE((receiving_first_downs)::text, ''::text)) || '|'::text) || COALESCE((receiving_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((two_point_conversions)::text, ''::text)) || '|'::text) || COALESCE((punt_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((kickoff_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((fumble_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((exclude_quarterback_kneels)::text, ''::text)) || '|'::text) || COALESCE((field_goal_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_0_19_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_20_29_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_30_39_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_40_49_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_50_plus_yards)::text, ''::text)) || '|'::text) || COALESCE((extra_points_made)::text, ''::text)) || '|'::text) || COALESCE((defensive_sacks)::text, ''::text)) || '|'::text) || COALESCE((defensive_interceptions)::text, ''::text)) || '|'::text) || COALESCE((defensive_forced_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_recovered_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_three_and_outs)::text, ''::text)) || '|'::text) || COALESCE((defensive_fourth_down_stops)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_blocked_kicks)::text, ''::text)) || '|'::text) || COALESCE((defensive_safeties)::text, ''::text)) || '|'::text) || COALESCE((defensive_two_point_returns)::text, ''::text)) || '|'::text) || COALESCE((defensive_touchdowns)::text, ''::text)))) STORED
+    config_digest text GENERATED ALWAYS AS (md5(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((COALESCE((passing_attempts)::text, ''::text) || '|'::text) || COALESCE((passing_completions)::text, ''::text)) || '|'::text) || COALESCE((passing_yards)::text, ''::text)) || '|'::text) || COALESCE((passing_interceptions)::text, ''::text)) || '|'::text) || COALESCE((passing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_attempts)::text, ''::text)) || '|'::text) || COALESCE((rushing_yards)::text, ''::text)) || '|'::text) || COALESCE((rushing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_first_downs)::text, ''::text)) || '|'::text) || COALESCE((fumbles_lost)::text, ''::text)) || '|'::text) || COALESCE((targets)::text, ''::text)) || '|'::text) || COALESCE((receptions)::text, ''::text)) || '|'::text) || COALESCE((running_back_reception)::text, ''::text)) || '|'::text) || COALESCE((wide_receiver_reception)::text, ''::text)) || '|'::text) || COALESCE((tight_end_reception)::text, ''::text)) || '|'::text) || COALESCE((receiving_yards)::text, ''::text)) || '|'::text) || COALESCE((receiving_first_downs)::text, ''::text)) || '|'::text) || COALESCE((receiving_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((two_point_conversions)::text, ''::text)) || '|'::text) || COALESCE((punt_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((kickoff_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((fumble_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((is_excluding_quarterback_kneels)::text, ''::text)) || '|'::text) || COALESCE((field_goal_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_0_19_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_20_29_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_30_39_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_40_49_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_50_plus_yards)::text, ''::text)) || '|'::text) || COALESCE((extra_points_made)::text, ''::text)) || '|'::text) || COALESCE((defensive_sacks)::text, ''::text)) || '|'::text) || COALESCE((defensive_interceptions)::text, ''::text)) || '|'::text) || COALESCE((defensive_forced_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_recovered_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_three_and_outs)::text, ''::text)) || '|'::text) || COALESCE((defensive_fourth_down_stops)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_blocked_kicks)::text, ''::text)) || '|'::text) || COALESCE((defensive_safeties)::text, ''::text)) || '|'::text) || COALESCE((defensive_two_point_returns)::text, ''::text)) || '|'::text) || COALESCE((defensive_touchdowns)::text, ''::text)))) STORED
 );
 
 
@@ -4469,7 +4484,7 @@ CREATE TABLE public.league_team_lineup_contribution_weeks (
     year smallint,
     tid integer NOT NULL,
     lid integer NOT NULL,
-    start boolean NOT NULL,
+    is_starter boolean NOT NULL,
     sp numeric(5,2) NOT NULL,
     bp numeric(5,2) NOT NULL
 );
@@ -4668,7 +4683,7 @@ CREATE TABLE public.leagues (
     groupme_token character varying(45),
     groupme_id character varying(26),
     discord_webhook_url character varying(255),
-    hosted boolean DEFAULT false,
+    is_hosted boolean DEFAULT false,
     processed_at integer,
     archived_at bigint,
     espn_id bigint,
@@ -4836,8 +4851,8 @@ CREATE TABLE public.nfl_games (
     away_nfl_team character varying(3) NOT NULL,
     home_nfl_team character varying(3) NOT NULL,
     season_type character varying(10) NOT NULL,
-    ot boolean,
-    div boolean,
+    is_overtime boolean,
+    is_division_game boolean,
     home_team_id character varying(36),
     away_team_id character varying(36),
     home_ngs_team_id character varying(10),
@@ -4954,7 +4969,7 @@ CREATE TABLE public.nfl_play_stats (
     gsis_player_id character varying(36),
     smart_player_id character varying(47),
     nfl_team_id character varying(36),
-    valid boolean
+    is_valid boolean
 );
 
 
@@ -4972,7 +4987,7 @@ CREATE TABLE public.nfl_play_stats_current_week (
     gsis_player_id character varying(36),
     smart_player_id character varying(47),
     nfl_team_id character varying(36),
-    valid boolean
+    is_valid boolean
 );
 
 
@@ -4987,7 +5002,7 @@ CREATE TABLE public.nfl_plays (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -5009,16 +5024,16 @@ CREATE TABLE public.nfl_plays (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -5043,48 +5058,48 @@ CREATE TABLE public.nfl_plays (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -5105,8 +5120,8 @@ CREATE TABLE public.nfl_plays (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -5119,43 +5134,43 @@ CREATE TABLE public.nfl_plays (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -5206,19 +5221,19 @@ CREATE TABLE public.nfl_plays (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -5244,14 +5259,14 @@ CREATE TABLE public.nfl_plays (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -5291,13 +5306,13 @@ CREATE TABLE public.nfl_plays (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -5317,19 +5332,19 @@ CREATE TABLE public.nfl_plays (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -5357,9 +5372,9 @@ CREATE TABLE public.nfl_plays (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -5376,15 +5391,15 @@ CREATE TABLE public.nfl_plays (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -5404,87 +5419,87 @@ PARTITION BY RANGE (season_year);
 
 
 --
--- Name: COLUMN nfl_plays.special; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_special_teams_play; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.special IS 'special teams';
-
-
---
--- Name: COLUMN nfl_plays.first_down; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.first_down IS 'first down';
+COMMENT ON COLUMN public.nfl_plays.is_special_teams_play IS 'special teams';
 
 
 --
--- Name: COLUMN nfl_plays.goal_to_go; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_first_down; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.goal_to_go IS 'Binary indicator for whether or not the posteam is in a goal down situation.';
-
-
---
--- Name: COLUMN nfl_plays.penalty; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.penalty IS 'penalty';
+COMMENT ON COLUMN public.nfl_plays.is_first_down IS 'first down';
 
 
 --
--- Name: COLUMN nfl_plays.score; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_goal_to_go; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.score IS 'Binary indicator for whether or not a score occurred on the play.';
-
-
---
--- Name: COLUMN nfl_plays.qb_pressure; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.qb_pressure IS 'QB pressure';
+COMMENT ON COLUMN public.nfl_plays.is_goal_to_go IS 'Binary indicator for whether or not the posteam is in a goal down situation.';
 
 
 --
--- Name: COLUMN nfl_plays.qb_hit; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_penalty; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qb_hit IS 'QB hit';
-
-
---
--- Name: COLUMN nfl_plays.qb_hurry; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.qb_hurry IS 'QB hurry';
+COMMENT ON COLUMN public.nfl_plays.is_penalty IS 'penalty';
 
 
 --
--- Name: COLUMN nfl_plays.highlight_pass; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_scoring_play; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.highlight_pass IS 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.';
-
-
---
--- Name: COLUMN nfl_plays.int_worthy; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.int_worthy IS 'interception worthy';
+COMMENT ON COLUMN public.nfl_plays.is_scoring_play IS 'Binary indicator for whether or not a score occurred on the play.';
 
 
 --
--- Name: COLUMN nfl_plays.dropped_pass; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_qb_pressure; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.dropped_pass IS 'dropped pass';
+COMMENT ON COLUMN public.nfl_plays.is_qb_pressure IS 'QB pressure';
 
 
 --
--- Name: COLUMN nfl_plays.contested_ball; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_qb_hit; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.contested_ball IS 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.';
+COMMENT ON COLUMN public.nfl_plays.is_qb_hit IS 'QB hit';
+
+
+--
+-- Name: COLUMN nfl_plays.is_qb_hurry; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_qb_hurry IS 'QB hurry';
+
+
+--
+-- Name: COLUMN nfl_plays.is_highlight_pass; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_highlight_pass IS 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_interception_worthy; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_interception_worthy IS 'interception worthy';
+
+
+--
+-- Name: COLUMN nfl_plays.is_dropped_pass; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_dropped_pass IS 'dropped pass';
+
+
+--
+-- Name: COLUMN nfl_plays.is_contested_ball; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_contested_ball IS 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.';
 
 
 --
@@ -5495,52 +5510,52 @@ COMMENT ON COLUMN public.nfl_plays.mbt IS 'missed or broken tackles';
 
 
 --
--- Name: COLUMN nfl_plays.fumbles_lost; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_fumble_lost; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.fumbles_lost IS 'fumble lost';
-
-
---
--- Name: COLUMN nfl_plays.interceptions; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.interceptions IS 'interception';
+COMMENT ON COLUMN public.nfl_plays.is_fumble_lost IS 'fumble lost';
 
 
 --
--- Name: COLUMN nfl_plays.sk; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_interception; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.sk IS 'sack';
-
-
---
--- Name: COLUMN nfl_plays.successful_play; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.successful_play IS 'Play success based on down/distance thresholds (40%/60%/100% criteria). Calculated by process-plays enrichment pipeline using is_successful_play() logic.';
+COMMENT ON COLUMN public.nfl_plays.is_interception IS 'interception';
 
 
 --
--- Name: COLUMN nfl_plays.comp; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_sack; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.comp IS 'completion';
-
-
---
--- Name: COLUMN nfl_plays.td; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.td IS 'touchdown';
+COMMENT ON COLUMN public.nfl_plays.is_sack IS 'sack';
 
 
 --
--- Name: COLUMN nfl_plays.ret_td; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_successful_play; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.ret_td IS 'return touchdown';
+COMMENT ON COLUMN public.nfl_plays.is_successful_play IS 'Play success based on down/distance thresholds (40%/60%/100% criteria). Calculated by process-plays enrichment pipeline using is_successful_play() logic.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_completion; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_completion IS 'completion';
+
+
+--
+-- Name: COLUMN nfl_plays.is_touchdown; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_touchdown IS 'touchdown';
+
+
+--
+-- Name: COLUMN nfl_plays.is_return_touchdown; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_return_touchdown IS 'return touchdown';
 
 
 --
@@ -5551,10 +5566,10 @@ COMMENT ON COLUMN public.nfl_plays.true_air_yards IS 'true air yards, Distance b
 
 
 --
--- Name: COLUMN nfl_plays.created_reception; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_created_reception; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.created_reception IS 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.';
+COMMENT ON COLUMN public.nfl_plays.is_created_reception IS 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.';
 
 
 --
@@ -5565,143 +5580,143 @@ COMMENT ON COLUMN public.nfl_plays.avsk IS 'number of avoided sacks';
 
 
 --
--- Name: COLUMN nfl_plays.no_huddle; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_no_huddle; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.no_huddle IS 'no huddle';
-
-
---
--- Name: COLUMN nfl_plays.play_action; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.play_action IS 'play action pass';
+COMMENT ON COLUMN public.nfl_plays.is_no_huddle IS 'no huddle';
 
 
 --
--- Name: COLUMN nfl_plays.trick_look; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_play_action; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.trick_look IS 'trick look';
-
-
---
--- Name: COLUMN nfl_plays.trick_play; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.trick_play IS 'trick play';
+COMMENT ON COLUMN public.nfl_plays.is_play_action IS 'play action pass';
 
 
 --
--- Name: COLUMN nfl_plays.qb_rush; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_trick_look; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qb_rush IS 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.';
-
-
---
--- Name: COLUMN nfl_plays.qb_sneak; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.qb_sneak IS 'QB sneak';
+COMMENT ON COLUMN public.nfl_plays.is_trick_look IS 'trick look';
 
 
 --
--- Name: COLUMN nfl_plays.qb_scramble; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_trick_play; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qb_scramble IS 'QB scramble';
-
-
---
--- Name: COLUMN nfl_plays.hindered_pass; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.hindered_pass IS 'hindered throwing motion';
+COMMENT ON COLUMN public.nfl_plays.is_trick_play IS 'trick play';
 
 
 --
--- Name: COLUMN nfl_plays.zero_blitz; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_qb_rush; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.zero_blitz IS 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage';
-
-
---
--- Name: COLUMN nfl_plays.stunt; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.stunt IS 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down';
+COMMENT ON COLUMN public.nfl_plays.is_qb_rush IS 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.';
 
 
 --
--- Name: COLUMN nfl_plays.out_of_pocket_pass; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_qb_sneak; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.out_of_pocket_pass IS 'out of pocket pass';
-
-
---
--- Name: COLUMN nfl_plays.phyb; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.phyb IS 'physical ball, Pass target takes significant punishment whether the pass is caught or not. Most Contested Balls will also be a Physical Ball.';
+COMMENT ON COLUMN public.nfl_plays.is_qb_sneak IS 'QB sneak';
 
 
 --
--- Name: COLUMN nfl_plays.catchable_ball; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_qb_scramble; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.catchable_ball IS 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.';
-
-
---
--- Name: COLUMN nfl_plays.throw_away; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.throw_away IS 'QB Throw Away';
+COMMENT ON COLUMN public.nfl_plays.is_qb_scramble IS 'QB scramble';
 
 
 --
--- Name: COLUMN nfl_plays.shovel_pass; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_hindered_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.shovel_pass IS 'Shovel/Touch Pass';
-
-
---
--- Name: COLUMN nfl_plays.sideline_pass; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.sideline_pass IS 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.';
+COMMENT ON COLUMN public.nfl_plays.is_hindered_pass IS 'hindered throwing motion';
 
 
 --
--- Name: COLUMN nfl_plays.batted_pass; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_zero_blitz; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.batted_pass IS 'batted pass';
-
-
---
--- Name: COLUMN nfl_plays.screen_pass; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.screen_pass IS 'screen pass';
+COMMENT ON COLUMN public.nfl_plays.is_zero_blitz IS 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage';
 
 
 --
--- Name: COLUMN nfl_plays.pain_free_play; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_stunt; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.pain_free_play IS 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs';
+COMMENT ON COLUMN public.nfl_plays.is_stunt IS 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down';
 
 
 --
--- Name: COLUMN nfl_plays.qb_fault_sack; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_out_of_pocket_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qb_fault_sack IS 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc';
+COMMENT ON COLUMN public.nfl_plays.is_out_of_pocket_pass IS 'out of pocket pass';
+
+
+--
+-- Name: COLUMN nfl_plays.is_physical_ball; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_physical_ball IS 'physical ball, Pass target takes significant punishment whether the pass is caught or not. Most Contested Balls will also be a Physical Ball.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_catchable_ball; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_catchable_ball IS 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_throw_away; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_throw_away IS 'QB Throw Away';
+
+
+--
+-- Name: COLUMN nfl_plays.is_shovel_pass; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_shovel_pass IS 'Shovel/Touch Pass';
+
+
+--
+-- Name: COLUMN nfl_plays.is_sideline_pass; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_sideline_pass IS 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_batted_pass; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_batted_pass IS 'batted pass';
+
+
+--
+-- Name: COLUMN nfl_plays.is_screen_pass; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_screen_pass IS 'screen pass';
+
+
+--
+-- Name: COLUMN nfl_plays.is_pain_free_play; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_pain_free_play IS 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs';
+
+
+--
+-- Name: COLUMN nfl_plays.is_qb_fault_sack; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_qb_fault_sack IS 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc';
 
 
 --
@@ -5740,17 +5755,17 @@ COMMENT ON COLUMN public.nfl_plays.cov IS 'coverage on target, Uncovered is 0, s
 
 
 --
--- Name: COLUMN nfl_plays.drive_inside20; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_drive_inside_20; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.drive_inside20 IS 'Binary indicator if the offense was able to get inside the opponents 20 yard line.';
+COMMENT ON COLUMN public.nfl_plays.is_drive_inside_20 IS 'Binary indicator if the offense was able to get inside the opponents 20 yard line.';
 
 
 --
--- Name: COLUMN nfl_plays.drive_score; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_drive_score; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.drive_score IS 'Binary indicator the drive ended with a score.';
+COMMENT ON COLUMN public.nfl_plays.is_drive_score IS 'Binary indicator the drive ended with a score.';
 
 
 --
@@ -5768,171 +5783,171 @@ COMMENT ON COLUMN public.nfl_plays.drive_end_qtr IS 'Numeric value indicating in
 
 
 --
--- Name: COLUMN nfl_plays.series_suc; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_series_successful; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.series_suc IS '1: scored touchdown, gained enough yards for first down.';
-
-
---
--- Name: COLUMN nfl_plays.fum; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.fum IS 'fumble occurred';
+COMMENT ON COLUMN public.nfl_plays.is_series_successful IS '1: scored touchdown, gained enough yards for first down.';
 
 
 --
--- Name: COLUMN nfl_plays.incomp; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_fumble; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.incomp IS 'incompletion';
-
-
---
--- Name: COLUMN nfl_plays.touchback; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.touchback IS 'touchback';
+COMMENT ON COLUMN public.nfl_plays.is_fumble IS 'fumble occurred';
 
 
 --
--- Name: COLUMN nfl_plays.safety; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_incompletion; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.safety IS 'safety';
-
-
---
--- Name: COLUMN nfl_plays.oob; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.oob IS '1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.';
+COMMENT ON COLUMN public.nfl_plays.is_incompletion IS 'incompletion';
 
 
 --
--- Name: COLUMN nfl_plays.tfl; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_touchback; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.tfl IS 'Binary indicator for whether or not a tackle for loss on a run play occurred.';
-
-
---
--- Name: COLUMN nfl_plays.rush; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.rush IS 'Binary indicator for if the play was a run.';
+COMMENT ON COLUMN public.nfl_plays.is_touchback IS 'touchback';
 
 
 --
--- Name: COLUMN nfl_plays.pass; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_safety; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.pass IS 'Binary indicator for if the play was a pass attempt (includes sacks).';
-
-
---
--- Name: COLUMN nfl_plays.solo_tk; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.solo_tk IS 'Binary indicator if the play had a solo tackle (could be multiple due to fumbles).';
+COMMENT ON COLUMN public.nfl_plays.is_safety IS 'safety';
 
 
 --
--- Name: COLUMN nfl_plays.assist_tk; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_out_of_bounds; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.assist_tk IS 'Binary indicator for if an assist tackle occurred.';
-
-
---
--- Name: COLUMN nfl_plays.pass_td; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.pass_td IS 'passing touchdown';
+COMMENT ON COLUMN public.nfl_plays.is_out_of_bounds IS '1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.';
 
 
 --
--- Name: COLUMN nfl_plays.rush_td; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_tackle_for_loss; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.rush_td IS 'rushing touchdown';
-
-
---
--- Name: COLUMN nfl_plays.qb_dropback; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.qb_dropback IS 'QB dropped back on the play (pass attempt, sack, or scrambled).';
+COMMENT ON COLUMN public.nfl_plays.is_tackle_for_loss IS 'Binary indicator for whether or not a tackle for loss on a run play occurred.';
 
 
 --
--- Name: COLUMN nfl_plays.qb_kneel; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_rushing_play; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qb_kneel IS 'QB took a knee.';
-
-
---
--- Name: COLUMN nfl_plays.qb_spike; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.qb_spike IS 'QB spiked the ball.';
+COMMENT ON COLUMN public.nfl_plays.is_rushing_play IS 'Binary indicator for if the play was a run.';
 
 
 --
--- Name: COLUMN nfl_plays.first_down_rush; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_passing_play; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.first_down_rush IS 'Binary indicator for if a running play converted the first down.';
-
-
---
--- Name: COLUMN nfl_plays.first_down_pass; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.first_down_pass IS 'Binary indicator for if a passing play converted the first down.';
+COMMENT ON COLUMN public.nfl_plays.is_passing_play IS 'Binary indicator for if the play was a pass attempt (includes sacks).';
 
 
 --
--- Name: COLUMN nfl_plays.first_down_penalty; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_solo_tackle; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.first_down_penalty IS 'Binary indicator for if a penalty converted the first down.';
-
-
---
--- Name: COLUMN nfl_plays.third_down_converted; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.third_down_converted IS 'Binary indicator for if the first down was converted on third down.';
+COMMENT ON COLUMN public.nfl_plays.is_solo_tackle IS 'Binary indicator if the play had a solo tackle (could be multiple due to fumbles).';
 
 
 --
--- Name: COLUMN nfl_plays.third_down_failed; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_assist_tackle; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.third_down_failed IS 'Binary indicator for if the posteam failed to convert first down on third down.';
-
-
---
--- Name: COLUMN nfl_plays.fourth_down_converted; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.fourth_down_converted IS 'Binary indicator for if the first down was converted on fourth down.';
+COMMENT ON COLUMN public.nfl_plays.is_assist_tackle IS 'Binary indicator for if an assist tackle occurred.';
 
 
 --
--- Name: COLUMN nfl_plays.fourth_down_failed; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_passing_touchdown; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.fourth_down_failed IS 'Binary indicator for if the posteam failed to convert first down on fourth down.';
+COMMENT ON COLUMN public.nfl_plays.is_passing_touchdown IS 'passing touchdown';
 
 
 --
--- Name: COLUMN nfl_plays.ep_succ; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_rushing_touchdown; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.ep_succ IS 'Play success based on Expected Points Added (EPA) model from nflfastr dataset. More sophisticated than down/distance thresholds. 100% coverage for nflfastr plays.';
+COMMENT ON COLUMN public.nfl_plays.is_rushing_touchdown IS 'rushing touchdown';
+
+
+--
+-- Name: COLUMN nfl_plays.is_qb_dropback; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_qb_dropback IS 'QB dropped back on the play (pass attempt, sack, or scrambled).';
+
+
+--
+-- Name: COLUMN nfl_plays.is_qb_kneel; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_qb_kneel IS 'QB took a knee.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_qb_spike; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_qb_spike IS 'QB spiked the ball.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_first_down_rush; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_first_down_rush IS 'Binary indicator for if a running play converted the first down.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_first_down_pass; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_first_down_pass IS 'Binary indicator for if a passing play converted the first down.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_first_down_penalty; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_first_down_penalty IS 'Binary indicator for if a penalty converted the first down.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_third_down_converted; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_third_down_converted IS 'Binary indicator for if the first down was converted on third down.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_third_down_failed; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_third_down_failed IS 'Binary indicator for if the posteam failed to convert first down on third down.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_fourth_down_converted; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_fourth_down_converted IS 'Binary indicator for if the first down was converted on fourth down.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_fourth_down_failed; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_fourth_down_failed IS 'Binary indicator for if the posteam failed to convert first down on fourth down.';
+
+
+--
+-- Name: COLUMN nfl_plays.is_epa_successful; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.is_epa_successful IS 'Play success based on Expected Points Added (EPA) model from nflfastr dataset. More sophisticated than down/distance thresholds. 100% coverage for nflfastr plays.';
 
 
 --
@@ -5971,10 +5986,10 @@ COMMENT ON COLUMN public.nfl_plays.route IS 'Pass route type from NGS and Sportr
 
 
 --
--- Name: COLUMN nfl_plays.qb_pressure_tracking; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.is_qb_pressure_tracking; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qb_pressure_tracking IS 'QB pressure (tracking)';
+COMMENT ON COLUMN public.nfl_plays.is_qb_pressure_tracking IS 'QB pressure (tracking)';
 
 
 --
@@ -5995,7 +6010,7 @@ CREATE TABLE public.nfl_plays_current_week (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -6017,16 +6032,16 @@ CREATE TABLE public.nfl_plays_current_week (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type character varying(10),
     score_team character varying(4),
     special_play_type character varying(10),
@@ -6051,48 +6066,48 @@ CREATE TABLE public.nfl_plays_current_week (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -6113,8 +6128,8 @@ CREATE TABLE public.nfl_plays_current_week (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -6127,44 +6142,44 @@ CREATE TABLE public.nfl_plays_current_week (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result character varying(100),
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
     run_gap character varying(10),
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -6215,21 +6230,21 @@ CREATE TABLE public.nfl_plays_current_week (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     fg_result character varying(10),
     kick_distance integer,
     ep_result character varying(10),
     tp_result character varying(10),
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -6255,14 +6270,14 @@ CREATE TABLE public.nfl_plays_current_week (
     route character varying(100),
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -6294,15 +6309,15 @@ CREATE TABLE public.nfl_plays_current_week (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     off_personnel_qb_count smallint,
@@ -6357,20 +6372,20 @@ CREATE TABLE public.nfl_plays_passer (
     passing_zone_los_distance character varying(50),
     is_tipped boolean,
     target_receiver_location character varying(50),
-    pass_dropped boolean,
+    is_pass_dropped boolean,
     time_in_tackle_box numeric(10,3),
     target_separation_at_outcome numeric(10,4),
     completion_probability numeric(10,4),
     min_separation_from_pass_rusher numeric(10,4),
-    hurry boolean,
+    is_hurry boolean,
     time_to_hurry numeric(10,3),
     drop_back_distance numeric(10,2),
     drop_back_type character varying(50),
     intended_air_yards numeric(10,4),
     intended_air_distance numeric(10,4),
-    pressure boolean,
-    pressure_at_pass_forward boolean,
-    spike boolean
+    is_pressure boolean,
+    is_pressure_at_pass_forward boolean,
+    is_spike boolean
 );
 
 
@@ -6397,7 +6412,7 @@ CREATE TABLE public.nfl_plays_player (
     is_target boolean,
     jersey_number integer,
     last_name character varying(50),
-    pass_defended boolean,
+    is_pass_defended boolean,
     player_name character varying(100),
     player_position character varying(10),
     position_group character varying(10),
@@ -6413,12 +6428,12 @@ CREATE TABLE public.nfl_plays_player (
     x_ball_at_snap numeric(10,2),
     y_at_end_of_play numeric(10,2),
     y_ball_at_snap numeric(10,2),
-    lined_up_in_the_box boolean,
-    was_blitzing boolean,
-    caused_pressure boolean,
-    pressure_caused_turnover boolean,
+    is_lined_up_in_the_box boolean,
+    is_blitzing boolean,
+    has_caused_pressure boolean,
+    has_pressure_caused_turnover boolean,
     separation_to_qb numeric(10,4),
-    was_running_route boolean,
+    is_running_route boolean,
     defender_location_type character varying(20),
     left_or_right_of_center character varying(10),
     ngs_position character varying(20),
@@ -6444,10 +6459,10 @@ CREATE TABLE public.nfl_plays_receiver (
     receiver_location_type character varying(50),
     cushion numeric(10,2),
     route character varying(50),
-    isolated boolean,
+    is_isolated boolean,
     separation_at_pass_forward numeric(10,4),
     separation_at_pass_arrived numeric(10,4),
-    pass_dropped boolean,
+    is_pass_dropped boolean,
     air_yards numeric(10,4),
     air_distance numeric(10,4),
     expected_yards_after_catch numeric(10,4),
@@ -6457,9 +6472,9 @@ CREATE TABLE public.nfl_plays_receiver (
     y_at_pass_outcome numeric(10,2),
     x_at_pass_forward numeric(10,2),
     y_at_pass_forward numeric(10,2),
-    completion boolean,
-    interception boolean,
-    touchdown boolean,
+    is_completion boolean,
+    is_interception boolean,
+    is_touchdown boolean,
     distance_from_sideline numeric(10,4),
     distance_from_endzone numeric(10,2),
     cushion_charted numeric(10,2),
@@ -6489,7 +6504,7 @@ CREATE TABLE public.nfl_plays_rusher (
     speed_at_los numeric(10,4),
     success_probability numeric(10,4),
     time_to_los numeric(10,3),
-    touchdown boolean,
+    is_touchdown boolean,
     touchdown_probability numeric(10,4),
     x_at_los numeric(10,2),
     x_at_past_tackle_box numeric(10,2),
@@ -6513,7 +6528,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -6535,16 +6550,16 @@ CREATE TABLE public.nfl_plays_year_2000 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -6569,48 +6584,48 @@ CREATE TABLE public.nfl_plays_year_2000 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -6631,8 +6646,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -6645,43 +6660,43 @@ CREATE TABLE public.nfl_plays_year_2000 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -6732,19 +6747,19 @@ CREATE TABLE public.nfl_plays_year_2000 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -6770,14 +6785,14 @@ CREATE TABLE public.nfl_plays_year_2000 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -6817,13 +6832,13 @@ CREATE TABLE public.nfl_plays_year_2000 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -6843,19 +6858,19 @@ CREATE TABLE public.nfl_plays_year_2000 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -6883,9 +6898,9 @@ CREATE TABLE public.nfl_plays_year_2000 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -6902,15 +6917,15 @@ CREATE TABLE public.nfl_plays_year_2000 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -6947,7 +6962,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -6969,16 +6984,16 @@ CREATE TABLE public.nfl_plays_year_2001 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -7003,48 +7018,48 @@ CREATE TABLE public.nfl_plays_year_2001 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -7065,8 +7080,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -7079,43 +7094,43 @@ CREATE TABLE public.nfl_plays_year_2001 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -7166,19 +7181,19 @@ CREATE TABLE public.nfl_plays_year_2001 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -7204,14 +7219,14 @@ CREATE TABLE public.nfl_plays_year_2001 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -7251,13 +7266,13 @@ CREATE TABLE public.nfl_plays_year_2001 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -7277,19 +7292,19 @@ CREATE TABLE public.nfl_plays_year_2001 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -7317,9 +7332,9 @@ CREATE TABLE public.nfl_plays_year_2001 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -7336,15 +7351,15 @@ CREATE TABLE public.nfl_plays_year_2001 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -7381,7 +7396,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -7403,16 +7418,16 @@ CREATE TABLE public.nfl_plays_year_2002 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -7437,48 +7452,48 @@ CREATE TABLE public.nfl_plays_year_2002 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -7499,8 +7514,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -7513,43 +7528,43 @@ CREATE TABLE public.nfl_plays_year_2002 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -7600,19 +7615,19 @@ CREATE TABLE public.nfl_plays_year_2002 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -7638,14 +7653,14 @@ CREATE TABLE public.nfl_plays_year_2002 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -7685,13 +7700,13 @@ CREATE TABLE public.nfl_plays_year_2002 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -7711,19 +7726,19 @@ CREATE TABLE public.nfl_plays_year_2002 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -7751,9 +7766,9 @@ CREATE TABLE public.nfl_plays_year_2002 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -7770,15 +7785,15 @@ CREATE TABLE public.nfl_plays_year_2002 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -7815,7 +7830,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -7837,16 +7852,16 @@ CREATE TABLE public.nfl_plays_year_2003 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -7871,48 +7886,48 @@ CREATE TABLE public.nfl_plays_year_2003 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -7933,8 +7948,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -7947,43 +7962,43 @@ CREATE TABLE public.nfl_plays_year_2003 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -8034,19 +8049,19 @@ CREATE TABLE public.nfl_plays_year_2003 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -8072,14 +8087,14 @@ CREATE TABLE public.nfl_plays_year_2003 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -8119,13 +8134,13 @@ CREATE TABLE public.nfl_plays_year_2003 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -8145,19 +8160,19 @@ CREATE TABLE public.nfl_plays_year_2003 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -8185,9 +8200,9 @@ CREATE TABLE public.nfl_plays_year_2003 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -8204,15 +8219,15 @@ CREATE TABLE public.nfl_plays_year_2003 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -8249,7 +8264,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -8271,16 +8286,16 @@ CREATE TABLE public.nfl_plays_year_2004 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -8305,48 +8320,48 @@ CREATE TABLE public.nfl_plays_year_2004 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -8367,8 +8382,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -8381,43 +8396,43 @@ CREATE TABLE public.nfl_plays_year_2004 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -8468,19 +8483,19 @@ CREATE TABLE public.nfl_plays_year_2004 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -8506,14 +8521,14 @@ CREATE TABLE public.nfl_plays_year_2004 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -8553,13 +8568,13 @@ CREATE TABLE public.nfl_plays_year_2004 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -8579,19 +8594,19 @@ CREATE TABLE public.nfl_plays_year_2004 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -8619,9 +8634,9 @@ CREATE TABLE public.nfl_plays_year_2004 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -8638,15 +8653,15 @@ CREATE TABLE public.nfl_plays_year_2004 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -8683,7 +8698,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -8705,16 +8720,16 @@ CREATE TABLE public.nfl_plays_year_2005 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -8739,48 +8754,48 @@ CREATE TABLE public.nfl_plays_year_2005 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -8801,8 +8816,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -8815,43 +8830,43 @@ CREATE TABLE public.nfl_plays_year_2005 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -8902,19 +8917,19 @@ CREATE TABLE public.nfl_plays_year_2005 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -8940,14 +8955,14 @@ CREATE TABLE public.nfl_plays_year_2005 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -8987,13 +9002,13 @@ CREATE TABLE public.nfl_plays_year_2005 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -9013,19 +9028,19 @@ CREATE TABLE public.nfl_plays_year_2005 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -9053,9 +9068,9 @@ CREATE TABLE public.nfl_plays_year_2005 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -9072,15 +9087,15 @@ CREATE TABLE public.nfl_plays_year_2005 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -9117,7 +9132,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -9139,16 +9154,16 @@ CREATE TABLE public.nfl_plays_year_2006 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -9173,48 +9188,48 @@ CREATE TABLE public.nfl_plays_year_2006 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -9235,8 +9250,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -9249,43 +9264,43 @@ CREATE TABLE public.nfl_plays_year_2006 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -9336,19 +9351,19 @@ CREATE TABLE public.nfl_plays_year_2006 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -9374,14 +9389,14 @@ CREATE TABLE public.nfl_plays_year_2006 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -9421,13 +9436,13 @@ CREATE TABLE public.nfl_plays_year_2006 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -9447,19 +9462,19 @@ CREATE TABLE public.nfl_plays_year_2006 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -9487,9 +9502,9 @@ CREATE TABLE public.nfl_plays_year_2006 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -9506,15 +9521,15 @@ CREATE TABLE public.nfl_plays_year_2006 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -9551,7 +9566,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -9573,16 +9588,16 @@ CREATE TABLE public.nfl_plays_year_2007 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -9607,48 +9622,48 @@ CREATE TABLE public.nfl_plays_year_2007 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -9669,8 +9684,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -9683,43 +9698,43 @@ CREATE TABLE public.nfl_plays_year_2007 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -9770,19 +9785,19 @@ CREATE TABLE public.nfl_plays_year_2007 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -9808,14 +9823,14 @@ CREATE TABLE public.nfl_plays_year_2007 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -9855,13 +9870,13 @@ CREATE TABLE public.nfl_plays_year_2007 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -9881,19 +9896,19 @@ CREATE TABLE public.nfl_plays_year_2007 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -9921,9 +9936,9 @@ CREATE TABLE public.nfl_plays_year_2007 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -9940,15 +9955,15 @@ CREATE TABLE public.nfl_plays_year_2007 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -9985,7 +10000,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -10007,16 +10022,16 @@ CREATE TABLE public.nfl_plays_year_2008 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -10041,48 +10056,48 @@ CREATE TABLE public.nfl_plays_year_2008 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -10103,8 +10118,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -10117,43 +10132,43 @@ CREATE TABLE public.nfl_plays_year_2008 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -10204,19 +10219,19 @@ CREATE TABLE public.nfl_plays_year_2008 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -10242,14 +10257,14 @@ CREATE TABLE public.nfl_plays_year_2008 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -10289,13 +10304,13 @@ CREATE TABLE public.nfl_plays_year_2008 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -10315,19 +10330,19 @@ CREATE TABLE public.nfl_plays_year_2008 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -10355,9 +10370,9 @@ CREATE TABLE public.nfl_plays_year_2008 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -10374,15 +10389,15 @@ CREATE TABLE public.nfl_plays_year_2008 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -10419,7 +10434,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -10441,16 +10456,16 @@ CREATE TABLE public.nfl_plays_year_2009 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -10475,48 +10490,48 @@ CREATE TABLE public.nfl_plays_year_2009 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -10537,8 +10552,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -10551,43 +10566,43 @@ CREATE TABLE public.nfl_plays_year_2009 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -10638,19 +10653,19 @@ CREATE TABLE public.nfl_plays_year_2009 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -10676,14 +10691,14 @@ CREATE TABLE public.nfl_plays_year_2009 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -10723,13 +10738,13 @@ CREATE TABLE public.nfl_plays_year_2009 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -10749,19 +10764,19 @@ CREATE TABLE public.nfl_plays_year_2009 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -10789,9 +10804,9 @@ CREATE TABLE public.nfl_plays_year_2009 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -10808,15 +10823,15 @@ CREATE TABLE public.nfl_plays_year_2009 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -10853,7 +10868,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -10875,16 +10890,16 @@ CREATE TABLE public.nfl_plays_year_2010 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -10909,48 +10924,48 @@ CREATE TABLE public.nfl_plays_year_2010 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -10971,8 +10986,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -10985,43 +11000,43 @@ CREATE TABLE public.nfl_plays_year_2010 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -11072,19 +11087,19 @@ CREATE TABLE public.nfl_plays_year_2010 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -11110,14 +11125,14 @@ CREATE TABLE public.nfl_plays_year_2010 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -11157,13 +11172,13 @@ CREATE TABLE public.nfl_plays_year_2010 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -11183,19 +11198,19 @@ CREATE TABLE public.nfl_plays_year_2010 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -11223,9 +11238,9 @@ CREATE TABLE public.nfl_plays_year_2010 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -11242,15 +11257,15 @@ CREATE TABLE public.nfl_plays_year_2010 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -11287,7 +11302,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -11309,16 +11324,16 @@ CREATE TABLE public.nfl_plays_year_2011 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -11343,48 +11358,48 @@ CREATE TABLE public.nfl_plays_year_2011 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -11405,8 +11420,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -11419,43 +11434,43 @@ CREATE TABLE public.nfl_plays_year_2011 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -11506,19 +11521,19 @@ CREATE TABLE public.nfl_plays_year_2011 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -11544,14 +11559,14 @@ CREATE TABLE public.nfl_plays_year_2011 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -11591,13 +11606,13 @@ CREATE TABLE public.nfl_plays_year_2011 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -11617,19 +11632,19 @@ CREATE TABLE public.nfl_plays_year_2011 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -11657,9 +11672,9 @@ CREATE TABLE public.nfl_plays_year_2011 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -11676,15 +11691,15 @@ CREATE TABLE public.nfl_plays_year_2011 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -11721,7 +11736,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -11743,16 +11758,16 @@ CREATE TABLE public.nfl_plays_year_2012 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -11777,48 +11792,48 @@ CREATE TABLE public.nfl_plays_year_2012 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -11839,8 +11854,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -11853,43 +11868,43 @@ CREATE TABLE public.nfl_plays_year_2012 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -11940,19 +11955,19 @@ CREATE TABLE public.nfl_plays_year_2012 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -11978,14 +11993,14 @@ CREATE TABLE public.nfl_plays_year_2012 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -12025,13 +12040,13 @@ CREATE TABLE public.nfl_plays_year_2012 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -12051,19 +12066,19 @@ CREATE TABLE public.nfl_plays_year_2012 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -12091,9 +12106,9 @@ CREATE TABLE public.nfl_plays_year_2012 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -12110,15 +12125,15 @@ CREATE TABLE public.nfl_plays_year_2012 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -12155,7 +12170,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -12177,16 +12192,16 @@ CREATE TABLE public.nfl_plays_year_2013 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -12211,48 +12226,48 @@ CREATE TABLE public.nfl_plays_year_2013 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -12273,8 +12288,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -12287,43 +12302,43 @@ CREATE TABLE public.nfl_plays_year_2013 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -12374,19 +12389,19 @@ CREATE TABLE public.nfl_plays_year_2013 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -12412,14 +12427,14 @@ CREATE TABLE public.nfl_plays_year_2013 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -12459,13 +12474,13 @@ CREATE TABLE public.nfl_plays_year_2013 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -12485,19 +12500,19 @@ CREATE TABLE public.nfl_plays_year_2013 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -12525,9 +12540,9 @@ CREATE TABLE public.nfl_plays_year_2013 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -12544,15 +12559,15 @@ CREATE TABLE public.nfl_plays_year_2013 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -12589,7 +12604,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -12611,16 +12626,16 @@ CREATE TABLE public.nfl_plays_year_2014 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -12645,48 +12660,48 @@ CREATE TABLE public.nfl_plays_year_2014 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -12707,8 +12722,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -12721,43 +12736,43 @@ CREATE TABLE public.nfl_plays_year_2014 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -12808,19 +12823,19 @@ CREATE TABLE public.nfl_plays_year_2014 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -12846,14 +12861,14 @@ CREATE TABLE public.nfl_plays_year_2014 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -12893,13 +12908,13 @@ CREATE TABLE public.nfl_plays_year_2014 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -12919,19 +12934,19 @@ CREATE TABLE public.nfl_plays_year_2014 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -12959,9 +12974,9 @@ CREATE TABLE public.nfl_plays_year_2014 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -12978,15 +12993,15 @@ CREATE TABLE public.nfl_plays_year_2014 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -13023,7 +13038,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -13045,16 +13060,16 @@ CREATE TABLE public.nfl_plays_year_2015 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -13079,48 +13094,48 @@ CREATE TABLE public.nfl_plays_year_2015 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -13141,8 +13156,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -13155,43 +13170,43 @@ CREATE TABLE public.nfl_plays_year_2015 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -13242,19 +13257,19 @@ CREATE TABLE public.nfl_plays_year_2015 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -13280,14 +13295,14 @@ CREATE TABLE public.nfl_plays_year_2015 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -13327,13 +13342,13 @@ CREATE TABLE public.nfl_plays_year_2015 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -13353,19 +13368,19 @@ CREATE TABLE public.nfl_plays_year_2015 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -13393,9 +13408,9 @@ CREATE TABLE public.nfl_plays_year_2015 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -13412,15 +13427,15 @@ CREATE TABLE public.nfl_plays_year_2015 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -13457,7 +13472,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -13479,16 +13494,16 @@ CREATE TABLE public.nfl_plays_year_2016 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -13513,48 +13528,48 @@ CREATE TABLE public.nfl_plays_year_2016 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -13575,8 +13590,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -13589,43 +13604,43 @@ CREATE TABLE public.nfl_plays_year_2016 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -13676,19 +13691,19 @@ CREATE TABLE public.nfl_plays_year_2016 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -13714,14 +13729,14 @@ CREATE TABLE public.nfl_plays_year_2016 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -13761,13 +13776,13 @@ CREATE TABLE public.nfl_plays_year_2016 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -13787,19 +13802,19 @@ CREATE TABLE public.nfl_plays_year_2016 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -13827,9 +13842,9 @@ CREATE TABLE public.nfl_plays_year_2016 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -13846,15 +13861,15 @@ CREATE TABLE public.nfl_plays_year_2016 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -13891,7 +13906,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -13913,16 +13928,16 @@ CREATE TABLE public.nfl_plays_year_2017 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -13947,48 +13962,48 @@ CREATE TABLE public.nfl_plays_year_2017 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -14009,8 +14024,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -14023,43 +14038,43 @@ CREATE TABLE public.nfl_plays_year_2017 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -14110,19 +14125,19 @@ CREATE TABLE public.nfl_plays_year_2017 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -14148,14 +14163,14 @@ CREATE TABLE public.nfl_plays_year_2017 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -14195,13 +14210,13 @@ CREATE TABLE public.nfl_plays_year_2017 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -14221,19 +14236,19 @@ CREATE TABLE public.nfl_plays_year_2017 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -14261,9 +14276,9 @@ CREATE TABLE public.nfl_plays_year_2017 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -14280,15 +14295,15 @@ CREATE TABLE public.nfl_plays_year_2017 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -14325,7 +14340,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -14347,16 +14362,16 @@ CREATE TABLE public.nfl_plays_year_2018 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -14381,48 +14396,48 @@ CREATE TABLE public.nfl_plays_year_2018 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -14443,8 +14458,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -14457,43 +14472,43 @@ CREATE TABLE public.nfl_plays_year_2018 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -14544,19 +14559,19 @@ CREATE TABLE public.nfl_plays_year_2018 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -14582,14 +14597,14 @@ CREATE TABLE public.nfl_plays_year_2018 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -14629,13 +14644,13 @@ CREATE TABLE public.nfl_plays_year_2018 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -14655,19 +14670,19 @@ CREATE TABLE public.nfl_plays_year_2018 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -14695,9 +14710,9 @@ CREATE TABLE public.nfl_plays_year_2018 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -14714,15 +14729,15 @@ CREATE TABLE public.nfl_plays_year_2018 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -14759,7 +14774,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -14781,16 +14796,16 @@ CREATE TABLE public.nfl_plays_year_2019 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -14815,48 +14830,48 @@ CREATE TABLE public.nfl_plays_year_2019 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -14877,8 +14892,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -14891,43 +14906,43 @@ CREATE TABLE public.nfl_plays_year_2019 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -14978,19 +14993,19 @@ CREATE TABLE public.nfl_plays_year_2019 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -15016,14 +15031,14 @@ CREATE TABLE public.nfl_plays_year_2019 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -15063,13 +15078,13 @@ CREATE TABLE public.nfl_plays_year_2019 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -15089,19 +15104,19 @@ CREATE TABLE public.nfl_plays_year_2019 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -15129,9 +15144,9 @@ CREATE TABLE public.nfl_plays_year_2019 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -15148,15 +15163,15 @@ CREATE TABLE public.nfl_plays_year_2019 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -15193,7 +15208,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -15215,16 +15230,16 @@ CREATE TABLE public.nfl_plays_year_2020 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -15249,48 +15264,48 @@ CREATE TABLE public.nfl_plays_year_2020 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -15311,8 +15326,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -15325,43 +15340,43 @@ CREATE TABLE public.nfl_plays_year_2020 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -15412,19 +15427,19 @@ CREATE TABLE public.nfl_plays_year_2020 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -15450,14 +15465,14 @@ CREATE TABLE public.nfl_plays_year_2020 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -15497,13 +15512,13 @@ CREATE TABLE public.nfl_plays_year_2020 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -15523,19 +15538,19 @@ CREATE TABLE public.nfl_plays_year_2020 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -15563,9 +15578,9 @@ CREATE TABLE public.nfl_plays_year_2020 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -15582,15 +15597,15 @@ CREATE TABLE public.nfl_plays_year_2020 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -15627,7 +15642,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -15649,16 +15664,16 @@ CREATE TABLE public.nfl_plays_year_2021 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -15683,48 +15698,48 @@ CREATE TABLE public.nfl_plays_year_2021 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -15745,8 +15760,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -15759,43 +15774,43 @@ CREATE TABLE public.nfl_plays_year_2021 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -15846,19 +15861,19 @@ CREATE TABLE public.nfl_plays_year_2021 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -15884,14 +15899,14 @@ CREATE TABLE public.nfl_plays_year_2021 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -15931,13 +15946,13 @@ CREATE TABLE public.nfl_plays_year_2021 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -15957,19 +15972,19 @@ CREATE TABLE public.nfl_plays_year_2021 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -15997,9 +16012,9 @@ CREATE TABLE public.nfl_plays_year_2021 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -16016,15 +16031,15 @@ CREATE TABLE public.nfl_plays_year_2021 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -16061,7 +16076,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -16083,16 +16098,16 @@ CREATE TABLE public.nfl_plays_year_2022 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -16117,48 +16132,48 @@ CREATE TABLE public.nfl_plays_year_2022 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -16179,8 +16194,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -16193,43 +16208,43 @@ CREATE TABLE public.nfl_plays_year_2022 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -16280,19 +16295,19 @@ CREATE TABLE public.nfl_plays_year_2022 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -16318,14 +16333,14 @@ CREATE TABLE public.nfl_plays_year_2022 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -16365,13 +16380,13 @@ CREATE TABLE public.nfl_plays_year_2022 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -16391,19 +16406,19 @@ CREATE TABLE public.nfl_plays_year_2022 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -16431,9 +16446,9 @@ CREATE TABLE public.nfl_plays_year_2022 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -16450,15 +16465,15 @@ CREATE TABLE public.nfl_plays_year_2022 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -16495,7 +16510,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -16517,16 +16532,16 @@ CREATE TABLE public.nfl_plays_year_2023 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -16551,48 +16566,48 @@ CREATE TABLE public.nfl_plays_year_2023 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -16613,8 +16628,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -16627,43 +16642,43 @@ CREATE TABLE public.nfl_plays_year_2023 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -16714,19 +16729,19 @@ CREATE TABLE public.nfl_plays_year_2023 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -16752,14 +16767,14 @@ CREATE TABLE public.nfl_plays_year_2023 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -16799,13 +16814,13 @@ CREATE TABLE public.nfl_plays_year_2023 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -16825,19 +16840,19 @@ CREATE TABLE public.nfl_plays_year_2023 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -16865,9 +16880,9 @@ CREATE TABLE public.nfl_plays_year_2023 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -16884,15 +16899,15 @@ CREATE TABLE public.nfl_plays_year_2023 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -16929,7 +16944,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -16951,16 +16966,16 @@ CREATE TABLE public.nfl_plays_year_2024 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -16985,48 +17000,48 @@ CREATE TABLE public.nfl_plays_year_2024 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -17047,8 +17062,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -17061,43 +17076,43 @@ CREATE TABLE public.nfl_plays_year_2024 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -17148,19 +17163,19 @@ CREATE TABLE public.nfl_plays_year_2024 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -17186,14 +17201,14 @@ CREATE TABLE public.nfl_plays_year_2024 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -17233,13 +17248,13 @@ CREATE TABLE public.nfl_plays_year_2024 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -17259,19 +17274,19 @@ CREATE TABLE public.nfl_plays_year_2024 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -17299,9 +17314,9 @@ CREATE TABLE public.nfl_plays_year_2024 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -17318,15 +17333,15 @@ CREATE TABLE public.nfl_plays_year_2024 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -17363,7 +17378,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -17385,16 +17400,16 @@ CREATE TABLE public.nfl_plays_year_2025 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -17419,48 +17434,48 @@ CREATE TABLE public.nfl_plays_year_2025 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -17481,8 +17496,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -17495,43 +17510,43 @@ CREATE TABLE public.nfl_plays_year_2025 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -17582,19 +17597,19 @@ CREATE TABLE public.nfl_plays_year_2025 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -17620,14 +17635,14 @@ CREATE TABLE public.nfl_plays_year_2025 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -17667,13 +17682,13 @@ CREATE TABLE public.nfl_plays_year_2025 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -17693,19 +17708,19 @@ CREATE TABLE public.nfl_plays_year_2025 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -17733,9 +17748,9 @@ CREATE TABLE public.nfl_plays_year_2025 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -17752,15 +17767,15 @@ CREATE TABLE public.nfl_plays_year_2025 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -17797,7 +17812,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     state character varying(36),
     dwn integer,
     home_score smallint,
-    special boolean,
+    is_special_teams_play boolean,
     play_description text,
     play_type_ngs character varying(36),
     possession_nfl_team character varying(4),
@@ -17819,16 +17834,16 @@ CREATE TABLE public.nfl_plays_year_2026 (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    first_down boolean,
-    goal_to_go boolean,
+    is_first_down boolean,
+    is_goal_to_go boolean,
     next_play_type character varying(36),
-    penalty boolean,
+    is_penalty boolean,
     drive_yds integer,
     drive_play_count integer,
     play_clock smallint,
-    deleted boolean,
+    is_deleted boolean,
     review text,
-    score boolean,
+    is_scoring_play boolean,
     score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
@@ -17853,48 +17868,48 @@ CREATE TABLE public.nfl_plays_year_2026 (
     yards_after_catch integer,
     yards_after_any_contact integer,
     ret_yds integer,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    highlight_pass boolean,
-    int_worthy boolean,
-    dropped_pass boolean,
-    contested_ball boolean,
+    is_qb_pressure boolean,
+    is_qb_hit boolean,
+    is_qb_hurry boolean,
+    is_highlight_pass boolean,
+    is_interception_worthy boolean,
+    is_dropped_pass boolean,
+    is_contested_ball boolean,
     mbt smallint,
-    fumbles_lost boolean,
-    interceptions boolean,
-    sk boolean,
-    successful_play boolean,
-    comp boolean,
-    td boolean,
-    ret_td boolean,
+    is_fumble_lost boolean,
+    is_interception boolean,
+    is_sack boolean,
+    is_successful_play boolean,
+    is_completion boolean,
+    is_touchdown boolean,
+    is_return_touchdown boolean,
     td_tm character varying(5),
     ret_tm character varying(5),
-    charted boolean,
+    has_charting_data boolean,
     yfog integer,
     true_air_yards smallint,
-    created_reception boolean,
+    is_created_reception boolean,
     avsk smallint,
-    no_huddle boolean,
-    play_action boolean,
-    trick_look boolean,
-    trick_play boolean,
-    qb_rush boolean,
-    qb_sneak boolean,
-    qb_scramble boolean,
-    hindered_pass boolean,
-    zero_blitz boolean,
-    stunt boolean,
-    out_of_pocket_pass boolean,
-    phyb boolean,
-    catchable_ball boolean,
-    throw_away boolean,
-    shovel_pass boolean,
-    sideline_pass boolean,
-    batted_pass boolean,
-    screen_pass boolean,
-    pain_free_play boolean,
-    qb_fault_sack boolean,
+    is_no_huddle boolean,
+    is_play_action boolean,
+    is_trick_look boolean,
+    is_trick_play boolean,
+    is_qb_rush boolean,
+    is_qb_sneak boolean,
+    is_qb_scramble boolean,
+    is_hindered_pass boolean,
+    is_zero_blitz boolean,
+    is_stunt boolean,
+    is_out_of_pocket_pass boolean,
+    is_physical_ball boolean,
+    is_catchable_ball boolean,
+    is_throw_away boolean,
+    is_shovel_pass boolean,
+    is_sideline_pass boolean,
+    is_batted_pass boolean,
+    is_screen_pass boolean,
+    is_pain_free_play boolean,
+    is_qb_fault_sack boolean,
     ttscrm numeric(16,12),
     time_to_pass numeric(16,12),
     ttsk numeric(16,12),
@@ -17915,8 +17930,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
-    drive_inside20 boolean,
-    drive_score boolean,
+    is_drive_inside_20 boolean,
+    is_drive_score boolean,
     drive_start_qtr smallint,
     drive_end_qtr smallint,
     drive_yds_penalized integer,
@@ -17929,43 +17944,43 @@ CREATE TABLE public.nfl_plays_year_2026 (
     drive_start_play_id integer,
     drive_end_play_id integer,
     series_seq integer,
-    series_suc boolean,
+    is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    fum boolean,
-    incomp boolean,
-    touchback boolean,
-    safety boolean,
-    oob boolean,
-    tfl boolean,
-    rush boolean,
-    pass boolean,
-    solo_tk boolean,
-    assist_tk boolean,
+    is_fumble boolean,
+    is_incompletion boolean,
+    is_touchback boolean,
+    is_safety boolean,
+    is_out_of_bounds boolean,
+    is_tackle_for_loss boolean,
+    is_rushing_play boolean,
+    is_passing_play boolean,
+    is_solo_tackle boolean,
+    is_assist_tackle boolean,
     pen_team character varying(3),
     pen_yds integer,
-    pass_td boolean,
-    rush_td boolean,
+    is_passing_touchdown boolean,
+    is_rushing_touchdown boolean,
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qb_dropback boolean,
-    qb_kneel boolean,
-    qb_spike boolean,
+    is_qb_dropback boolean,
+    is_qb_kneel boolean,
+    is_qb_spike boolean,
     run_location public.play_direction,
-    first_down_rush boolean,
-    first_down_pass boolean,
-    first_down_penalty boolean,
-    third_down_converted boolean,
-    third_down_failed boolean,
-    fourth_down_converted boolean,
-    fourth_down_failed boolean,
+    is_first_down_rush boolean,
+    is_first_down_pass boolean,
+    is_first_down_penalty boolean,
+    is_third_down_converted boolean,
+    is_third_down_failed boolean,
+    is_fourth_down_converted boolean,
+    is_fourth_down_failed boolean,
     ep numeric(16,12),
     epa numeric(16,12),
-    ep_succ boolean,
+    is_epa_successful boolean,
     total_home_epa numeric(16,12),
     total_away_epa numeric(16,12),
     total_home_rush_epa numeric(16,12),
@@ -18016,19 +18031,19 @@ CREATE TABLE public.nfl_plays_year_2026 (
     xyac_median_yds numeric(16,12),
     xyac_succ_prob numeric(16,12),
     xyac_fd_prob numeric(16,12),
-    ep_att boolean,
-    two_att boolean,
-    fg_att boolean,
-    kickoff_att boolean,
-    punt_att boolean,
+    is_extra_point_attempt boolean,
+    is_two_point_conversion_attempt boolean,
+    is_field_goal_attempt boolean,
+    is_kickoff_attempt boolean,
+    is_punt_attempt boolean,
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    punt_blocked boolean,
+    is_punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
     pos_to_rem smallint,
     def_to_rem smallint,
-    timeouts boolean,
+    is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
@@ -18054,14 +18069,14 @@ CREATE TABLE public.nfl_plays_year_2026 (
     route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
-    qb_pressure_tracking boolean,
+    is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
     n_offense_backfield numeric,
-    run_play_option boolean,
+    is_run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean,
+    is_motion boolean,
     solo_tackle_1_gsis character varying(36),
     solo_tackle_1_pid character varying(25),
     solo_tackle_2_gsis character varying(36),
@@ -18101,13 +18116,13 @@ CREATE TABLE public.nfl_plays_year_2026 (
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
-    endzone_target boolean,
+    is_endzone_target boolean,
     targeted_receiver_separation public.receiver_separation,
     coverage_type public.coverage_type,
     targeted_defender_gsis character varying(36),
-    pass_breakup boolean,
-    motion_before_snap boolean,
-    motion_during_snap boolean,
+    is_pass_breakup boolean,
+    is_motion_before_snap boolean,
+    is_motion_during_snap boolean,
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
@@ -18127,19 +18142,19 @@ CREATE TABLE public.nfl_plays_year_2026 (
     penalty_player_gsis character varying(36),
     penalty_player_sportradar_id character varying,
     penalty_type character varying(50),
-    penalty_declined boolean,
-    penalty_offset boolean,
+    is_penalty_declined boolean,
+    is_penalty_offset boolean,
     kickoff_yds integer,
     punt_yds integer,
     punt_hang_time numeric,
-    punt_inside_20 boolean,
-    punt_touchback boolean,
-    punt_fair_catch boolean,
-    punt_out_of_bounds boolean,
-    kickoff_onside boolean,
-    kickoff_touchback boolean,
-    kickoff_out_of_bounds boolean,
-    fg_blocked boolean,
+    is_punt_inside_20 boolean,
+    is_punt_touchback boolean,
+    is_punt_fair_catch boolean,
+    is_punt_out_of_bounds boolean,
+    is_kickoff_onside boolean,
+    is_kickoff_touchback boolean,
+    is_kickoff_out_of_bounds boolean,
+    is_field_goal_blocked boolean,
     fg_result_detail public.nfl_fg_result_detail,
     pocket_time numeric,
     tackle_for_loss_1_gsis character varying(36),
@@ -18167,9 +18182,9 @@ CREATE TABLE public.nfl_plays_year_2026 (
     pocket_location public.nfl_pocket_location,
     left_tightends smallint,
     right_tightends smallint,
-    fake_punt boolean,
-    fake_field_goal boolean,
-    blitz boolean,
+    is_fake_punt boolean,
+    is_fake_field_goal boolean,
+    is_blitz boolean,
     fg_result public.nfl_kick_result,
     tp_result public.nfl_two_point_result,
     desc_nflfastr text,
@@ -18186,15 +18201,15 @@ CREATE TABLE public.nfl_plays_year_2026 (
     mofc_look character varying(20),
     pass_width numeric(8,4),
     qb_scramble_side character varying(20),
-    split_run boolean,
-    reverse_run boolean,
-    pitch_run boolean,
-    option_run boolean,
-    qb_left_pocket boolean,
-    end_around_run boolean,
-    jet_sweep_run boolean,
-    lead_run boolean,
-    own_fumble_recovery boolean,
+    is_split_run boolean,
+    is_reverse_run boolean,
+    is_pitch_run boolean,
+    is_option_run boolean,
+    is_qb_left_pocket boolean,
+    is_end_around_run boolean,
+    is_jet_sweep_run boolean,
+    is_lead_run boolean,
+    is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
@@ -18989,7 +19004,7 @@ CREATE TABLE public.pff_player_seasonlogs (
     run_defense numeric(4,1),
     special_teams_rank smallint,
     run_snaps smallint,
-    meets_snap_minimum boolean,
+    is_meeting_snap_minimum boolean,
     kickoff_kicker numeric(4,1),
     pass numeric(4,1),
     receiving_snaps smallint,
@@ -19308,7 +19323,7 @@ CREATE TABLE public.player (
     pro_day_forty_designation character varying(12),
     sixty_yard_shuttle_seconds numeric(4,2),
     sixty_yard_shuttle_designation character varying(12),
-    combine_attendance boolean,
+    has_combine_attendance boolean,
     hometown character varying(100),
     sumer_player_id character varying(36),
     fantasylabs_player_id integer,
@@ -20488,8 +20503,8 @@ CREATE TABLE public.player_gamelogs (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -20569,7 +20584,7 @@ CREATE TABLE public.player_gamelogs (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -20594,10 +20609,10 @@ PARTITION BY RANGE (season_year);
 
 
 --
--- Name: COLUMN player_gamelogs.ruled_out_in_game; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_gamelogs.is_ruled_out_in_game; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_gamelogs.ruled_out_in_game IS 'Indicates player was active (suited up) but left game early due to injury and was ruled OUT during/after the game. Used for reserve eligibility grace period.';
+COMMENT ON COLUMN public.player_gamelogs.is_ruled_out_in_game IS 'Indicates player was active (suited up) but left game early due to injury and was ruled OUT during/after the game. Used for reserve eligibility grace period.';
 
 
 --
@@ -20611,8 +20626,8 @@ CREATE TABLE public.player_gamelogs_default (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -20692,7 +20707,7 @@ CREATE TABLE public.player_gamelogs_default (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -20726,8 +20741,8 @@ CREATE TABLE public.player_gamelogs_year_2000 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -20807,7 +20822,7 @@ CREATE TABLE public.player_gamelogs_year_2000 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -20841,8 +20856,8 @@ CREATE TABLE public.player_gamelogs_year_2001 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -20922,7 +20937,7 @@ CREATE TABLE public.player_gamelogs_year_2001 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -20956,8 +20971,8 @@ CREATE TABLE public.player_gamelogs_year_2002 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -21037,7 +21052,7 @@ CREATE TABLE public.player_gamelogs_year_2002 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -21071,8 +21086,8 @@ CREATE TABLE public.player_gamelogs_year_2003 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -21152,7 +21167,7 @@ CREATE TABLE public.player_gamelogs_year_2003 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -21186,8 +21201,8 @@ CREATE TABLE public.player_gamelogs_year_2004 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -21267,7 +21282,7 @@ CREATE TABLE public.player_gamelogs_year_2004 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -21301,8 +21316,8 @@ CREATE TABLE public.player_gamelogs_year_2005 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -21382,7 +21397,7 @@ CREATE TABLE public.player_gamelogs_year_2005 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -21416,8 +21431,8 @@ CREATE TABLE public.player_gamelogs_year_2006 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -21497,7 +21512,7 @@ CREATE TABLE public.player_gamelogs_year_2006 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -21531,8 +21546,8 @@ CREATE TABLE public.player_gamelogs_year_2007 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -21612,7 +21627,7 @@ CREATE TABLE public.player_gamelogs_year_2007 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -21646,8 +21661,8 @@ CREATE TABLE public.player_gamelogs_year_2008 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -21727,7 +21742,7 @@ CREATE TABLE public.player_gamelogs_year_2008 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -21761,8 +21776,8 @@ CREATE TABLE public.player_gamelogs_year_2009 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -21842,7 +21857,7 @@ CREATE TABLE public.player_gamelogs_year_2009 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -21876,8 +21891,8 @@ CREATE TABLE public.player_gamelogs_year_2010 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -21957,7 +21972,7 @@ CREATE TABLE public.player_gamelogs_year_2010 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -21991,8 +22006,8 @@ CREATE TABLE public.player_gamelogs_year_2011 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -22072,7 +22087,7 @@ CREATE TABLE public.player_gamelogs_year_2011 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -22106,8 +22121,8 @@ CREATE TABLE public.player_gamelogs_year_2012 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -22187,7 +22202,7 @@ CREATE TABLE public.player_gamelogs_year_2012 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -22221,8 +22236,8 @@ CREATE TABLE public.player_gamelogs_year_2013 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -22302,7 +22317,7 @@ CREATE TABLE public.player_gamelogs_year_2013 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -22336,8 +22351,8 @@ CREATE TABLE public.player_gamelogs_year_2014 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -22417,7 +22432,7 @@ CREATE TABLE public.player_gamelogs_year_2014 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -22451,8 +22466,8 @@ CREATE TABLE public.player_gamelogs_year_2015 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -22532,7 +22547,7 @@ CREATE TABLE public.player_gamelogs_year_2015 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -22566,8 +22581,8 @@ CREATE TABLE public.player_gamelogs_year_2016 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -22647,7 +22662,7 @@ CREATE TABLE public.player_gamelogs_year_2016 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -22681,8 +22696,8 @@ CREATE TABLE public.player_gamelogs_year_2017 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -22762,7 +22777,7 @@ CREATE TABLE public.player_gamelogs_year_2017 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -22796,8 +22811,8 @@ CREATE TABLE public.player_gamelogs_year_2018 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -22877,7 +22892,7 @@ CREATE TABLE public.player_gamelogs_year_2018 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -22911,8 +22926,8 @@ CREATE TABLE public.player_gamelogs_year_2019 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -22992,7 +23007,7 @@ CREATE TABLE public.player_gamelogs_year_2019 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -23026,8 +23041,8 @@ CREATE TABLE public.player_gamelogs_year_2020 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -23107,7 +23122,7 @@ CREATE TABLE public.player_gamelogs_year_2020 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -23141,8 +23156,8 @@ CREATE TABLE public.player_gamelogs_year_2021 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -23222,7 +23237,7 @@ CREATE TABLE public.player_gamelogs_year_2021 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -23256,8 +23271,8 @@ CREATE TABLE public.player_gamelogs_year_2022 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -23337,7 +23352,7 @@ CREATE TABLE public.player_gamelogs_year_2022 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -23371,8 +23386,8 @@ CREATE TABLE public.player_gamelogs_year_2023 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -23452,7 +23467,7 @@ CREATE TABLE public.player_gamelogs_year_2023 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -23486,8 +23501,8 @@ CREATE TABLE public.player_gamelogs_year_2024 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -23567,7 +23582,7 @@ CREATE TABLE public.player_gamelogs_year_2024 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -23601,8 +23616,8 @@ CREATE TABLE public.player_gamelogs_year_2025 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -23682,7 +23697,7 @@ CREATE TABLE public.player_gamelogs_year_2025 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -23716,8 +23731,8 @@ CREATE TABLE public.player_gamelogs_year_2026 (
     nfl_team character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
     jnum smallint,
-    active boolean,
-    started boolean,
+    is_active boolean,
+    is_starter boolean,
     passing_attempts smallint DEFAULT '0'::smallint,
     passing_completions smallint DEFAULT '0'::smallint,
     passing_yards integer DEFAULT 0,
@@ -23797,7 +23812,7 @@ CREATE TABLE public.player_gamelogs_year_2026 (
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
     receiving_first_downs smallint DEFAULT 0 NOT NULL,
     rushing_yards_excluding_kneels integer DEFAULT 0 NOT NULL,
-    ruled_out_in_game boolean DEFAULT false,
+    is_ruled_out_in_game boolean DEFAULT false,
     fumble_return_touchdowns smallint DEFAULT 0,
     q1_snaps_off smallint,
     q1_snaps_off_pct numeric(5,2),
@@ -24499,7 +24514,7 @@ CREATE TABLE public.poaches (
     submitted integer NOT NULL,
     reason text,
     processed integer,
-    succ boolean
+    is_successful boolean
 );
 
 
@@ -25642,8 +25657,8 @@ CREATE TABLE public.prop_markets_history (
     source_id public.market_source_id NOT NULL,
     source_market_id character varying(255) NOT NULL,
     source_market_name character varying(500),
-    open boolean,
-    live boolean,
+    is_open boolean,
+    is_live boolean,
     selection_count integer NOT NULL,
     observed_at timestamp with time zone NOT NULL
 );
@@ -25661,13 +25676,13 @@ CREATE TABLE public.prop_markets_index (
     esbid bigint,
     source_event_id character varying(255),
     source_event_name character varying(255),
-    open boolean,
-    live boolean,
+    is_open boolean,
+    is_live boolean,
     selection_count integer NOT NULL,
     time_type public.time_type NOT NULL,
     observed_at timestamp with time zone NOT NULL,
     season_year smallint,
-    market_settled boolean DEFAULT false
+    is_market_settled boolean DEFAULT false
 );
 
 
@@ -25748,8 +25763,8 @@ CREATE TABLE public.props (
     u_am integer,
     sourceid integer NOT NULL,
     observed_at timestamp with time zone NOT NULL,
-    active boolean,
-    live boolean,
+    is_active boolean,
+    is_live boolean,
     prop_type character varying(50)
 );
 
@@ -25830,7 +25845,7 @@ CREATE TABLE public.restricted_free_agency_bids (
     tid integer NOT NULL,
     year smallint,
     lid integer NOT NULL,
-    succ boolean,
+    is_successful boolean,
     submitted integer NOT NULL,
     processed integer,
     cancelled integer,
@@ -25988,7 +26003,7 @@ CREATE TABLE public.roster_asset_holding (
     is_rookie_tag boolean DEFAULT false NOT NULL,
     protected_for_year smallint,
     super_priority_until timestamp without time zone,
-    audit_corrected boolean DEFAULT false NOT NULL,
+    is_audit_corrected boolean DEFAULT false NOT NULL,
     correction_note text,
     terminated_by smallint,
     league_format_id text NOT NULL
@@ -26117,7 +26132,7 @@ CREATE TABLE public.roster_asset_transformation (
     target_holding_id bigint,
     source_share numeric(4,3),
     target_share numeric(4,3),
-    audit_corrected boolean DEFAULT false NOT NULL,
+    is_audit_corrected boolean DEFAULT false NOT NULL,
     correction_note text,
     trade_uid integer
 );
@@ -26335,7 +26350,7 @@ CREATE TABLE public.seasons (
     wildcard_round smallint,
     championship_round integer[],
     rookie_draft_completed_at bigint,
-    free_agency_auction_slow_mode boolean DEFAULT false NOT NULL,
+    is_free_agency_auction_slow_mode boolean DEFAULT false NOT NULL,
     season_finalized_at bigint,
     scoring_format_id text NOT NULL,
     league_format_id text NOT NULL,
@@ -26403,7 +26418,7 @@ CREATE TABLE public.selection_combination_definitions (
     combination_name character varying(255) NOT NULL,
     combination_description text,
     selections jsonb NOT NULL,
-    active boolean DEFAULT true,
+    is_active boolean DEFAULT true,
     created_at timestamp with time zone DEFAULT now(),
     updated_at timestamp with time zone DEFAULT now()
 );
@@ -26966,7 +26981,7 @@ CREATE TABLE public.waivers (
     bid integer,
     po integer DEFAULT 0,
     type smallint NOT NULL,
-    succ boolean,
+    is_successful boolean,
     reason text,
     processed integer,
     cancelled integer,
@@ -30354,7 +30369,7 @@ CREATE INDEX idx_espn_team_win_rates_history_season_year ON public.espn_team_win
 -- Name: idx_external_league_connections_auto_sync; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_external_league_connections_auto_sync ON public.external_league_connections USING btree (auto_sync_enabled) WHERE (auto_sync_enabled = true);
+CREATE INDEX idx_external_league_connections_auto_sync ON public.external_league_connections USING btree (is_auto_sync_enabled) WHERE (is_auto_sync_enabled = true);
 
 
 --
@@ -30760,14 +30775,14 @@ CREATE INDEX idx_nfl_plays_box_defenders ON ONLY public.nfl_plays USING btree (b
 -- Name: idx_nfl_plays_catchable_ball; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_catchable_ball ON ONLY public.nfl_plays USING btree (catchable_ball);
+CREATE INDEX idx_nfl_plays_catchable_ball ON ONLY public.nfl_plays USING btree (is_catchable_ball);
 
 
 --
 -- Name: idx_nfl_plays_drive_seq_coherence; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_drive_seq_coherence ON ONLY public.nfl_plays USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX idx_nfl_plays_drive_seq_coherence ON ONLY public.nfl_plays USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -30788,7 +30803,7 @@ CREATE INDEX idx_nfl_plays_esbid ON ONLY public.nfl_plays USING btree (esbid);
 -- Name: idx_nfl_plays_fantasy; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_fantasy ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX idx_nfl_plays_fantasy ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -30809,7 +30824,7 @@ CREATE INDEX idx_nfl_plays_fuml_pid_week_year ON ONLY public.nfl_plays USING btr
 -- Name: idx_nfl_plays_motion; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_motion ON ONLY public.nfl_plays USING btree (motion);
+CREATE INDEX idx_nfl_plays_motion ON ONLY public.nfl_plays USING btree (is_motion);
 
 
 --
@@ -30858,7 +30873,7 @@ CREATE INDEX idx_nfl_plays_pid_types ON ONLY public.nfl_plays USING btree (ball_
 -- Name: idx_nfl_plays_play_action; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_play_action ON ONLY public.nfl_plays USING btree (play_action);
+CREATE INDEX idx_nfl_plays_play_action ON ONLY public.nfl_plays USING btree (is_play_action);
 
 
 --
@@ -31264,14 +31279,14 @@ CREATE INDEX idx_player_game_outcome_correlations_season_year ON public.player_g
 -- Name: idx_player_gamelogs_active_pid_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_gamelogs_active_pid_season_year ON ONLY public.player_gamelogs USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX idx_player_gamelogs_active_pid_season_year ON ONLY public.player_gamelogs USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: idx_player_gamelogs_esbid_active_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_gamelogs_esbid_active_pid ON ONLY public.player_gamelogs USING btree (esbid, pid, active);
+CREATE INDEX idx_player_gamelogs_esbid_active_pid ON ONLY public.player_gamelogs USING btree (esbid, pid, is_active);
 
 
 --
@@ -31299,7 +31314,7 @@ CREATE INDEX idx_player_gamelogs_pid_week_teams ON ONLY public.player_gamelogs U
 -- Name: idx_player_gamelogs_ruled_out; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_gamelogs_ruled_out ON ONLY public.player_gamelogs USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX idx_player_gamelogs_ruled_out ON ONLY public.player_gamelogs USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -31649,7 +31664,7 @@ CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_id ON public.s
 -- Name: idx_selection_combination_definitions_active; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_selection_combination_definitions_active ON public.selection_combination_definitions USING btree (active);
+CREATE INDEX idx_selection_combination_definitions_active ON public.selection_combination_definitions USING btree (is_active);
 
 
 --
@@ -31978,7 +31993,7 @@ CREATE INDEX nfl_plays_year_2000_box_defenders_idx ON public.nfl_plays_year_2000
 -- Name: nfl_plays_year_2000_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_catchable_ball_idx ON public.nfl_plays_year_2000 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2000_catchable_ball_idx ON public.nfl_plays_year_2000 USING btree (is_catchable_ball);
 
 
 --
@@ -32006,7 +32021,7 @@ CREATE INDEX nfl_plays_year_2000_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2000_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_ds_coherence_idx ON public.nfl_plays_year_2000 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2000_ds_coherence_idx ON public.nfl_plays_year_2000 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -32027,7 +32042,7 @@ CREATE INDEX nfl_plays_year_2000_esbid_idx ON public.nfl_plays_year_2000 USING b
 -- Name: nfl_plays_year_2000_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_motion_idx ON public.nfl_plays_year_2000 USING btree (motion);
+CREATE INDEX nfl_plays_year_2000_motion_idx ON public.nfl_plays_year_2000 USING btree (is_motion);
 
 
 --
@@ -32076,7 +32091,7 @@ CREATE INDEX "nfl_plays_year_2000_playId_idx" ON public.nfl_plays_year_2000 USIN
 -- Name: nfl_plays_year_2000_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_play_action_idx ON public.nfl_plays_year_2000 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2000_play_action_idx ON public.nfl_plays_year_2000 USING btree (is_play_action);
 
 
 --
@@ -32251,7 +32266,7 @@ CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -32363,7 +32378,7 @@ CREATE INDEX nfl_plays_year_2001_box_defenders_idx ON public.nfl_plays_year_2001
 -- Name: nfl_plays_year_2001_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_catchable_ball_idx ON public.nfl_plays_year_2001 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2001_catchable_ball_idx ON public.nfl_plays_year_2001 USING btree (is_catchable_ball);
 
 
 --
@@ -32391,7 +32406,7 @@ CREATE INDEX nfl_plays_year_2001_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2001_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_ds_coherence_idx ON public.nfl_plays_year_2001 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2001_ds_coherence_idx ON public.nfl_plays_year_2001 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -32412,7 +32427,7 @@ CREATE INDEX nfl_plays_year_2001_esbid_idx ON public.nfl_plays_year_2001 USING b
 -- Name: nfl_plays_year_2001_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_motion_idx ON public.nfl_plays_year_2001 USING btree (motion);
+CREATE INDEX nfl_plays_year_2001_motion_idx ON public.nfl_plays_year_2001 USING btree (is_motion);
 
 
 --
@@ -32461,7 +32476,7 @@ CREATE INDEX "nfl_plays_year_2001_playId_idx" ON public.nfl_plays_year_2001 USIN
 -- Name: nfl_plays_year_2001_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_play_action_idx ON public.nfl_plays_year_2001 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2001_play_action_idx ON public.nfl_plays_year_2001 USING btree (is_play_action);
 
 
 --
@@ -32636,7 +32651,7 @@ CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -32748,7 +32763,7 @@ CREATE INDEX nfl_plays_year_2002_box_defenders_idx ON public.nfl_plays_year_2002
 -- Name: nfl_plays_year_2002_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_catchable_ball_idx ON public.nfl_plays_year_2002 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2002_catchable_ball_idx ON public.nfl_plays_year_2002 USING btree (is_catchable_ball);
 
 
 --
@@ -32776,7 +32791,7 @@ CREATE INDEX nfl_plays_year_2002_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2002_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_ds_coherence_idx ON public.nfl_plays_year_2002 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2002_ds_coherence_idx ON public.nfl_plays_year_2002 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -32797,7 +32812,7 @@ CREATE INDEX nfl_plays_year_2002_esbid_idx ON public.nfl_plays_year_2002 USING b
 -- Name: nfl_plays_year_2002_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_motion_idx ON public.nfl_plays_year_2002 USING btree (motion);
+CREATE INDEX nfl_plays_year_2002_motion_idx ON public.nfl_plays_year_2002 USING btree (is_motion);
 
 
 --
@@ -32846,7 +32861,7 @@ CREATE INDEX "nfl_plays_year_2002_playId_idx" ON public.nfl_plays_year_2002 USIN
 -- Name: nfl_plays_year_2002_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_play_action_idx ON public.nfl_plays_year_2002 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2002_play_action_idx ON public.nfl_plays_year_2002 USING btree (is_play_action);
 
 
 --
@@ -33021,7 +33036,7 @@ CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -33133,7 +33148,7 @@ CREATE INDEX nfl_plays_year_2003_box_defenders_idx ON public.nfl_plays_year_2003
 -- Name: nfl_plays_year_2003_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_catchable_ball_idx ON public.nfl_plays_year_2003 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2003_catchable_ball_idx ON public.nfl_plays_year_2003 USING btree (is_catchable_ball);
 
 
 --
@@ -33161,7 +33176,7 @@ CREATE INDEX nfl_plays_year_2003_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2003_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_ds_coherence_idx ON public.nfl_plays_year_2003 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2003_ds_coherence_idx ON public.nfl_plays_year_2003 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -33182,7 +33197,7 @@ CREATE INDEX nfl_plays_year_2003_esbid_idx ON public.nfl_plays_year_2003 USING b
 -- Name: nfl_plays_year_2003_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_motion_idx ON public.nfl_plays_year_2003 USING btree (motion);
+CREATE INDEX nfl_plays_year_2003_motion_idx ON public.nfl_plays_year_2003 USING btree (is_motion);
 
 
 --
@@ -33231,7 +33246,7 @@ CREATE INDEX "nfl_plays_year_2003_playId_idx" ON public.nfl_plays_year_2003 USIN
 -- Name: nfl_plays_year_2003_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_play_action_idx ON public.nfl_plays_year_2003 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2003_play_action_idx ON public.nfl_plays_year_2003 USING btree (is_play_action);
 
 
 --
@@ -33406,7 +33421,7 @@ CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -33518,7 +33533,7 @@ CREATE INDEX nfl_plays_year_2004_box_defenders_idx ON public.nfl_plays_year_2004
 -- Name: nfl_plays_year_2004_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_catchable_ball_idx ON public.nfl_plays_year_2004 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2004_catchable_ball_idx ON public.nfl_plays_year_2004 USING btree (is_catchable_ball);
 
 
 --
@@ -33546,7 +33561,7 @@ CREATE INDEX nfl_plays_year_2004_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2004_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_ds_coherence_idx ON public.nfl_plays_year_2004 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2004_ds_coherence_idx ON public.nfl_plays_year_2004 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -33567,7 +33582,7 @@ CREATE INDEX nfl_plays_year_2004_esbid_idx ON public.nfl_plays_year_2004 USING b
 -- Name: nfl_plays_year_2004_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_motion_idx ON public.nfl_plays_year_2004 USING btree (motion);
+CREATE INDEX nfl_plays_year_2004_motion_idx ON public.nfl_plays_year_2004 USING btree (is_motion);
 
 
 --
@@ -33616,7 +33631,7 @@ CREATE INDEX "nfl_plays_year_2004_playId_idx" ON public.nfl_plays_year_2004 USIN
 -- Name: nfl_plays_year_2004_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_play_action_idx ON public.nfl_plays_year_2004 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2004_play_action_idx ON public.nfl_plays_year_2004 USING btree (is_play_action);
 
 
 --
@@ -33791,7 +33806,7 @@ CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -33903,7 +33918,7 @@ CREATE INDEX nfl_plays_year_2005_box_defenders_idx ON public.nfl_plays_year_2005
 -- Name: nfl_plays_year_2005_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_catchable_ball_idx ON public.nfl_plays_year_2005 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2005_catchable_ball_idx ON public.nfl_plays_year_2005 USING btree (is_catchable_ball);
 
 
 --
@@ -33931,7 +33946,7 @@ CREATE INDEX nfl_plays_year_2005_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2005_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_ds_coherence_idx ON public.nfl_plays_year_2005 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2005_ds_coherence_idx ON public.nfl_plays_year_2005 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -33952,7 +33967,7 @@ CREATE INDEX nfl_plays_year_2005_esbid_idx ON public.nfl_plays_year_2005 USING b
 -- Name: nfl_plays_year_2005_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_motion_idx ON public.nfl_plays_year_2005 USING btree (motion);
+CREATE INDEX nfl_plays_year_2005_motion_idx ON public.nfl_plays_year_2005 USING btree (is_motion);
 
 
 --
@@ -34001,7 +34016,7 @@ CREATE INDEX "nfl_plays_year_2005_playId_idx" ON public.nfl_plays_year_2005 USIN
 -- Name: nfl_plays_year_2005_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_play_action_idx ON public.nfl_plays_year_2005 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2005_play_action_idx ON public.nfl_plays_year_2005 USING btree (is_play_action);
 
 
 --
@@ -34176,7 +34191,7 @@ CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -34288,7 +34303,7 @@ CREATE INDEX nfl_plays_year_2006_box_defenders_idx ON public.nfl_plays_year_2006
 -- Name: nfl_plays_year_2006_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_catchable_ball_idx ON public.nfl_plays_year_2006 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2006_catchable_ball_idx ON public.nfl_plays_year_2006 USING btree (is_catchable_ball);
 
 
 --
@@ -34316,7 +34331,7 @@ CREATE INDEX nfl_plays_year_2006_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2006_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_ds_coherence_idx ON public.nfl_plays_year_2006 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2006_ds_coherence_idx ON public.nfl_plays_year_2006 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -34337,7 +34352,7 @@ CREATE INDEX nfl_plays_year_2006_esbid_idx ON public.nfl_plays_year_2006 USING b
 -- Name: nfl_plays_year_2006_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_motion_idx ON public.nfl_plays_year_2006 USING btree (motion);
+CREATE INDEX nfl_plays_year_2006_motion_idx ON public.nfl_plays_year_2006 USING btree (is_motion);
 
 
 --
@@ -34386,7 +34401,7 @@ CREATE INDEX "nfl_plays_year_2006_playId_idx" ON public.nfl_plays_year_2006 USIN
 -- Name: nfl_plays_year_2006_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_play_action_idx ON public.nfl_plays_year_2006 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2006_play_action_idx ON public.nfl_plays_year_2006 USING btree (is_play_action);
 
 
 --
@@ -34561,7 +34576,7 @@ CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -34673,7 +34688,7 @@ CREATE INDEX nfl_plays_year_2007_box_defenders_idx ON public.nfl_plays_year_2007
 -- Name: nfl_plays_year_2007_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_catchable_ball_idx ON public.nfl_plays_year_2007 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2007_catchable_ball_idx ON public.nfl_plays_year_2007 USING btree (is_catchable_ball);
 
 
 --
@@ -34701,7 +34716,7 @@ CREATE INDEX nfl_plays_year_2007_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2007_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_ds_coherence_idx ON public.nfl_plays_year_2007 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2007_ds_coherence_idx ON public.nfl_plays_year_2007 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -34722,7 +34737,7 @@ CREATE INDEX nfl_plays_year_2007_esbid_idx ON public.nfl_plays_year_2007 USING b
 -- Name: nfl_plays_year_2007_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_motion_idx ON public.nfl_plays_year_2007 USING btree (motion);
+CREATE INDEX nfl_plays_year_2007_motion_idx ON public.nfl_plays_year_2007 USING btree (is_motion);
 
 
 --
@@ -34771,7 +34786,7 @@ CREATE INDEX "nfl_plays_year_2007_playId_idx" ON public.nfl_plays_year_2007 USIN
 -- Name: nfl_plays_year_2007_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_play_action_idx ON public.nfl_plays_year_2007 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2007_play_action_idx ON public.nfl_plays_year_2007 USING btree (is_play_action);
 
 
 --
@@ -34946,7 +34961,7 @@ CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -35058,7 +35073,7 @@ CREATE INDEX nfl_plays_year_2008_box_defenders_idx ON public.nfl_plays_year_2008
 -- Name: nfl_plays_year_2008_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_catchable_ball_idx ON public.nfl_plays_year_2008 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2008_catchable_ball_idx ON public.nfl_plays_year_2008 USING btree (is_catchable_ball);
 
 
 --
@@ -35086,7 +35101,7 @@ CREATE INDEX nfl_plays_year_2008_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2008_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_ds_coherence_idx ON public.nfl_plays_year_2008 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2008_ds_coherence_idx ON public.nfl_plays_year_2008 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -35107,7 +35122,7 @@ CREATE INDEX nfl_plays_year_2008_esbid_idx ON public.nfl_plays_year_2008 USING b
 -- Name: nfl_plays_year_2008_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_motion_idx ON public.nfl_plays_year_2008 USING btree (motion);
+CREATE INDEX nfl_plays_year_2008_motion_idx ON public.nfl_plays_year_2008 USING btree (is_motion);
 
 
 --
@@ -35156,7 +35171,7 @@ CREATE INDEX "nfl_plays_year_2008_playId_idx" ON public.nfl_plays_year_2008 USIN
 -- Name: nfl_plays_year_2008_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_play_action_idx ON public.nfl_plays_year_2008 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2008_play_action_idx ON public.nfl_plays_year_2008 USING btree (is_play_action);
 
 
 --
@@ -35331,7 +35346,7 @@ CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -35443,7 +35458,7 @@ CREATE INDEX nfl_plays_year_2009_box_defenders_idx ON public.nfl_plays_year_2009
 -- Name: nfl_plays_year_2009_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_catchable_ball_idx ON public.nfl_plays_year_2009 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2009_catchable_ball_idx ON public.nfl_plays_year_2009 USING btree (is_catchable_ball);
 
 
 --
@@ -35471,7 +35486,7 @@ CREATE INDEX nfl_plays_year_2009_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2009_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_ds_coherence_idx ON public.nfl_plays_year_2009 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2009_ds_coherence_idx ON public.nfl_plays_year_2009 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -35492,7 +35507,7 @@ CREATE INDEX nfl_plays_year_2009_esbid_idx ON public.nfl_plays_year_2009 USING b
 -- Name: nfl_plays_year_2009_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_motion_idx ON public.nfl_plays_year_2009 USING btree (motion);
+CREATE INDEX nfl_plays_year_2009_motion_idx ON public.nfl_plays_year_2009 USING btree (is_motion);
 
 
 --
@@ -35541,7 +35556,7 @@ CREATE INDEX "nfl_plays_year_2009_playId_idx" ON public.nfl_plays_year_2009 USIN
 -- Name: nfl_plays_year_2009_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_play_action_idx ON public.nfl_plays_year_2009 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2009_play_action_idx ON public.nfl_plays_year_2009 USING btree (is_play_action);
 
 
 --
@@ -35716,7 +35731,7 @@ CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -35828,7 +35843,7 @@ CREATE INDEX nfl_plays_year_2010_box_defenders_idx ON public.nfl_plays_year_2010
 -- Name: nfl_plays_year_2010_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_catchable_ball_idx ON public.nfl_plays_year_2010 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2010_catchable_ball_idx ON public.nfl_plays_year_2010 USING btree (is_catchable_ball);
 
 
 --
@@ -35856,7 +35871,7 @@ CREATE INDEX nfl_plays_year_2010_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2010_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_ds_coherence_idx ON public.nfl_plays_year_2010 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2010_ds_coherence_idx ON public.nfl_plays_year_2010 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -35877,7 +35892,7 @@ CREATE INDEX nfl_plays_year_2010_esbid_idx ON public.nfl_plays_year_2010 USING b
 -- Name: nfl_plays_year_2010_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_motion_idx ON public.nfl_plays_year_2010 USING btree (motion);
+CREATE INDEX nfl_plays_year_2010_motion_idx ON public.nfl_plays_year_2010 USING btree (is_motion);
 
 
 --
@@ -35926,7 +35941,7 @@ CREATE INDEX "nfl_plays_year_2010_playId_idx" ON public.nfl_plays_year_2010 USIN
 -- Name: nfl_plays_year_2010_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_play_action_idx ON public.nfl_plays_year_2010 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2010_play_action_idx ON public.nfl_plays_year_2010 USING btree (is_play_action);
 
 
 --
@@ -36101,7 +36116,7 @@ CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -36213,7 +36228,7 @@ CREATE INDEX nfl_plays_year_2011_box_defenders_idx ON public.nfl_plays_year_2011
 -- Name: nfl_plays_year_2011_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_catchable_ball_idx ON public.nfl_plays_year_2011 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2011_catchable_ball_idx ON public.nfl_plays_year_2011 USING btree (is_catchable_ball);
 
 
 --
@@ -36241,7 +36256,7 @@ CREATE INDEX nfl_plays_year_2011_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2011_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_ds_coherence_idx ON public.nfl_plays_year_2011 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2011_ds_coherence_idx ON public.nfl_plays_year_2011 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -36262,7 +36277,7 @@ CREATE INDEX nfl_plays_year_2011_esbid_idx ON public.nfl_plays_year_2011 USING b
 -- Name: nfl_plays_year_2011_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_motion_idx ON public.nfl_plays_year_2011 USING btree (motion);
+CREATE INDEX nfl_plays_year_2011_motion_idx ON public.nfl_plays_year_2011 USING btree (is_motion);
 
 
 --
@@ -36311,7 +36326,7 @@ CREATE INDEX "nfl_plays_year_2011_playId_idx" ON public.nfl_plays_year_2011 USIN
 -- Name: nfl_plays_year_2011_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_play_action_idx ON public.nfl_plays_year_2011 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2011_play_action_idx ON public.nfl_plays_year_2011 USING btree (is_play_action);
 
 
 --
@@ -36486,7 +36501,7 @@ CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -36598,7 +36613,7 @@ CREATE INDEX nfl_plays_year_2012_box_defenders_idx ON public.nfl_plays_year_2012
 -- Name: nfl_plays_year_2012_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_catchable_ball_idx ON public.nfl_plays_year_2012 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2012_catchable_ball_idx ON public.nfl_plays_year_2012 USING btree (is_catchable_ball);
 
 
 --
@@ -36626,7 +36641,7 @@ CREATE INDEX nfl_plays_year_2012_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2012_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_ds_coherence_idx ON public.nfl_plays_year_2012 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2012_ds_coherence_idx ON public.nfl_plays_year_2012 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -36647,7 +36662,7 @@ CREATE INDEX nfl_plays_year_2012_esbid_idx ON public.nfl_plays_year_2012 USING b
 -- Name: nfl_plays_year_2012_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_motion_idx ON public.nfl_plays_year_2012 USING btree (motion);
+CREATE INDEX nfl_plays_year_2012_motion_idx ON public.nfl_plays_year_2012 USING btree (is_motion);
 
 
 --
@@ -36696,7 +36711,7 @@ CREATE INDEX "nfl_plays_year_2012_playId_idx" ON public.nfl_plays_year_2012 USIN
 -- Name: nfl_plays_year_2012_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_play_action_idx ON public.nfl_plays_year_2012 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2012_play_action_idx ON public.nfl_plays_year_2012 USING btree (is_play_action);
 
 
 --
@@ -36871,7 +36886,7 @@ CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -36983,7 +36998,7 @@ CREATE INDEX nfl_plays_year_2013_box_defenders_idx ON public.nfl_plays_year_2013
 -- Name: nfl_plays_year_2013_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_catchable_ball_idx ON public.nfl_plays_year_2013 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2013_catchable_ball_idx ON public.nfl_plays_year_2013 USING btree (is_catchable_ball);
 
 
 --
@@ -37011,7 +37026,7 @@ CREATE INDEX nfl_plays_year_2013_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2013_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_ds_coherence_idx ON public.nfl_plays_year_2013 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2013_ds_coherence_idx ON public.nfl_plays_year_2013 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -37032,7 +37047,7 @@ CREATE INDEX nfl_plays_year_2013_esbid_idx ON public.nfl_plays_year_2013 USING b
 -- Name: nfl_plays_year_2013_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_motion_idx ON public.nfl_plays_year_2013 USING btree (motion);
+CREATE INDEX nfl_plays_year_2013_motion_idx ON public.nfl_plays_year_2013 USING btree (is_motion);
 
 
 --
@@ -37081,7 +37096,7 @@ CREATE INDEX "nfl_plays_year_2013_playId_idx" ON public.nfl_plays_year_2013 USIN
 -- Name: nfl_plays_year_2013_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_play_action_idx ON public.nfl_plays_year_2013 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2013_play_action_idx ON public.nfl_plays_year_2013 USING btree (is_play_action);
 
 
 --
@@ -37256,7 +37271,7 @@ CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -37368,7 +37383,7 @@ CREATE INDEX nfl_plays_year_2014_box_defenders_idx ON public.nfl_plays_year_2014
 -- Name: nfl_plays_year_2014_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_catchable_ball_idx ON public.nfl_plays_year_2014 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2014_catchable_ball_idx ON public.nfl_plays_year_2014 USING btree (is_catchable_ball);
 
 
 --
@@ -37396,7 +37411,7 @@ CREATE INDEX nfl_plays_year_2014_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2014_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_ds_coherence_idx ON public.nfl_plays_year_2014 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2014_ds_coherence_idx ON public.nfl_plays_year_2014 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -37417,7 +37432,7 @@ CREATE INDEX nfl_plays_year_2014_esbid_idx ON public.nfl_plays_year_2014 USING b
 -- Name: nfl_plays_year_2014_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_motion_idx ON public.nfl_plays_year_2014 USING btree (motion);
+CREATE INDEX nfl_plays_year_2014_motion_idx ON public.nfl_plays_year_2014 USING btree (is_motion);
 
 
 --
@@ -37466,7 +37481,7 @@ CREATE INDEX "nfl_plays_year_2014_playId_idx" ON public.nfl_plays_year_2014 USIN
 -- Name: nfl_plays_year_2014_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_play_action_idx ON public.nfl_plays_year_2014 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2014_play_action_idx ON public.nfl_plays_year_2014 USING btree (is_play_action);
 
 
 --
@@ -37641,7 +37656,7 @@ CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -37753,7 +37768,7 @@ CREATE INDEX nfl_plays_year_2015_box_defenders_idx ON public.nfl_plays_year_2015
 -- Name: nfl_plays_year_2015_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_catchable_ball_idx ON public.nfl_plays_year_2015 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2015_catchable_ball_idx ON public.nfl_plays_year_2015 USING btree (is_catchable_ball);
 
 
 --
@@ -37781,7 +37796,7 @@ CREATE INDEX nfl_plays_year_2015_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2015_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_ds_coherence_idx ON public.nfl_plays_year_2015 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2015_ds_coherence_idx ON public.nfl_plays_year_2015 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -37802,7 +37817,7 @@ CREATE INDEX nfl_plays_year_2015_esbid_idx ON public.nfl_plays_year_2015 USING b
 -- Name: nfl_plays_year_2015_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_motion_idx ON public.nfl_plays_year_2015 USING btree (motion);
+CREATE INDEX nfl_plays_year_2015_motion_idx ON public.nfl_plays_year_2015 USING btree (is_motion);
 
 
 --
@@ -37851,7 +37866,7 @@ CREATE INDEX "nfl_plays_year_2015_playId_idx" ON public.nfl_plays_year_2015 USIN
 -- Name: nfl_plays_year_2015_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_play_action_idx ON public.nfl_plays_year_2015 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2015_play_action_idx ON public.nfl_plays_year_2015 USING btree (is_play_action);
 
 
 --
@@ -38026,7 +38041,7 @@ CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -38138,7 +38153,7 @@ CREATE INDEX nfl_plays_year_2016_box_defenders_idx ON public.nfl_plays_year_2016
 -- Name: nfl_plays_year_2016_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_catchable_ball_idx ON public.nfl_plays_year_2016 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2016_catchable_ball_idx ON public.nfl_plays_year_2016 USING btree (is_catchable_ball);
 
 
 --
@@ -38166,7 +38181,7 @@ CREATE INDEX nfl_plays_year_2016_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2016_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_ds_coherence_idx ON public.nfl_plays_year_2016 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2016_ds_coherence_idx ON public.nfl_plays_year_2016 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -38187,7 +38202,7 @@ CREATE INDEX nfl_plays_year_2016_esbid_idx ON public.nfl_plays_year_2016 USING b
 -- Name: nfl_plays_year_2016_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_motion_idx ON public.nfl_plays_year_2016 USING btree (motion);
+CREATE INDEX nfl_plays_year_2016_motion_idx ON public.nfl_plays_year_2016 USING btree (is_motion);
 
 
 --
@@ -38236,7 +38251,7 @@ CREATE INDEX "nfl_plays_year_2016_playId_idx" ON public.nfl_plays_year_2016 USIN
 -- Name: nfl_plays_year_2016_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_play_action_idx ON public.nfl_plays_year_2016 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2016_play_action_idx ON public.nfl_plays_year_2016 USING btree (is_play_action);
 
 
 --
@@ -38411,7 +38426,7 @@ CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -38523,7 +38538,7 @@ CREATE INDEX nfl_plays_year_2017_box_defenders_idx ON public.nfl_plays_year_2017
 -- Name: nfl_plays_year_2017_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_catchable_ball_idx ON public.nfl_plays_year_2017 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2017_catchable_ball_idx ON public.nfl_plays_year_2017 USING btree (is_catchable_ball);
 
 
 --
@@ -38551,7 +38566,7 @@ CREATE INDEX nfl_plays_year_2017_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2017_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_ds_coherence_idx ON public.nfl_plays_year_2017 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2017_ds_coherence_idx ON public.nfl_plays_year_2017 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -38572,7 +38587,7 @@ CREATE INDEX nfl_plays_year_2017_esbid_idx ON public.nfl_plays_year_2017 USING b
 -- Name: nfl_plays_year_2017_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_motion_idx ON public.nfl_plays_year_2017 USING btree (motion);
+CREATE INDEX nfl_plays_year_2017_motion_idx ON public.nfl_plays_year_2017 USING btree (is_motion);
 
 
 --
@@ -38621,7 +38636,7 @@ CREATE INDEX "nfl_plays_year_2017_playId_idx" ON public.nfl_plays_year_2017 USIN
 -- Name: nfl_plays_year_2017_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_play_action_idx ON public.nfl_plays_year_2017 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2017_play_action_idx ON public.nfl_plays_year_2017 USING btree (is_play_action);
 
 
 --
@@ -38796,7 +38811,7 @@ CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -38908,7 +38923,7 @@ CREATE INDEX nfl_plays_year_2018_box_defenders_idx ON public.nfl_plays_year_2018
 -- Name: nfl_plays_year_2018_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_catchable_ball_idx ON public.nfl_plays_year_2018 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2018_catchable_ball_idx ON public.nfl_plays_year_2018 USING btree (is_catchable_ball);
 
 
 --
@@ -38936,7 +38951,7 @@ CREATE INDEX nfl_plays_year_2018_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2018_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_ds_coherence_idx ON public.nfl_plays_year_2018 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2018_ds_coherence_idx ON public.nfl_plays_year_2018 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -38957,7 +38972,7 @@ CREATE INDEX nfl_plays_year_2018_esbid_idx ON public.nfl_plays_year_2018 USING b
 -- Name: nfl_plays_year_2018_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_motion_idx ON public.nfl_plays_year_2018 USING btree (motion);
+CREATE INDEX nfl_plays_year_2018_motion_idx ON public.nfl_plays_year_2018 USING btree (is_motion);
 
 
 --
@@ -39006,7 +39021,7 @@ CREATE INDEX "nfl_plays_year_2018_playId_idx" ON public.nfl_plays_year_2018 USIN
 -- Name: nfl_plays_year_2018_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_play_action_idx ON public.nfl_plays_year_2018 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2018_play_action_idx ON public.nfl_plays_year_2018 USING btree (is_play_action);
 
 
 --
@@ -39181,7 +39196,7 @@ CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -39293,7 +39308,7 @@ CREATE INDEX nfl_plays_year_2019_box_defenders_idx ON public.nfl_plays_year_2019
 -- Name: nfl_plays_year_2019_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_catchable_ball_idx ON public.nfl_plays_year_2019 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2019_catchable_ball_idx ON public.nfl_plays_year_2019 USING btree (is_catchable_ball);
 
 
 --
@@ -39321,7 +39336,7 @@ CREATE INDEX nfl_plays_year_2019_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2019_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_ds_coherence_idx ON public.nfl_plays_year_2019 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2019_ds_coherence_idx ON public.nfl_plays_year_2019 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -39342,7 +39357,7 @@ CREATE INDEX nfl_plays_year_2019_esbid_idx ON public.nfl_plays_year_2019 USING b
 -- Name: nfl_plays_year_2019_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_motion_idx ON public.nfl_plays_year_2019 USING btree (motion);
+CREATE INDEX nfl_plays_year_2019_motion_idx ON public.nfl_plays_year_2019 USING btree (is_motion);
 
 
 --
@@ -39391,7 +39406,7 @@ CREATE INDEX "nfl_plays_year_2019_playId_idx" ON public.nfl_plays_year_2019 USIN
 -- Name: nfl_plays_year_2019_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_play_action_idx ON public.nfl_plays_year_2019 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2019_play_action_idx ON public.nfl_plays_year_2019 USING btree (is_play_action);
 
 
 --
@@ -39566,7 +39581,7 @@ CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -39678,7 +39693,7 @@ CREATE INDEX nfl_plays_year_2020_box_defenders_idx ON public.nfl_plays_year_2020
 -- Name: nfl_plays_year_2020_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_catchable_ball_idx ON public.nfl_plays_year_2020 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2020_catchable_ball_idx ON public.nfl_plays_year_2020 USING btree (is_catchable_ball);
 
 
 --
@@ -39706,7 +39721,7 @@ CREATE INDEX nfl_plays_year_2020_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2020_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_ds_coherence_idx ON public.nfl_plays_year_2020 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2020_ds_coherence_idx ON public.nfl_plays_year_2020 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -39727,7 +39742,7 @@ CREATE INDEX nfl_plays_year_2020_esbid_idx ON public.nfl_plays_year_2020 USING b
 -- Name: nfl_plays_year_2020_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_motion_idx ON public.nfl_plays_year_2020 USING btree (motion);
+CREATE INDEX nfl_plays_year_2020_motion_idx ON public.nfl_plays_year_2020 USING btree (is_motion);
 
 
 --
@@ -39776,7 +39791,7 @@ CREATE INDEX "nfl_plays_year_2020_playId_idx" ON public.nfl_plays_year_2020 USIN
 -- Name: nfl_plays_year_2020_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_play_action_idx ON public.nfl_plays_year_2020 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2020_play_action_idx ON public.nfl_plays_year_2020 USING btree (is_play_action);
 
 
 --
@@ -39951,7 +39966,7 @@ CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -40063,7 +40078,7 @@ CREATE INDEX nfl_plays_year_2021_box_defenders_idx ON public.nfl_plays_year_2021
 -- Name: nfl_plays_year_2021_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_catchable_ball_idx ON public.nfl_plays_year_2021 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2021_catchable_ball_idx ON public.nfl_plays_year_2021 USING btree (is_catchable_ball);
 
 
 --
@@ -40091,7 +40106,7 @@ CREATE INDEX nfl_plays_year_2021_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2021_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_ds_coherence_idx ON public.nfl_plays_year_2021 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2021_ds_coherence_idx ON public.nfl_plays_year_2021 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -40112,7 +40127,7 @@ CREATE INDEX nfl_plays_year_2021_esbid_idx ON public.nfl_plays_year_2021 USING b
 -- Name: nfl_plays_year_2021_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_motion_idx ON public.nfl_plays_year_2021 USING btree (motion);
+CREATE INDEX nfl_plays_year_2021_motion_idx ON public.nfl_plays_year_2021 USING btree (is_motion);
 
 
 --
@@ -40161,7 +40176,7 @@ CREATE INDEX "nfl_plays_year_2021_playId_idx" ON public.nfl_plays_year_2021 USIN
 -- Name: nfl_plays_year_2021_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_play_action_idx ON public.nfl_plays_year_2021 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2021_play_action_idx ON public.nfl_plays_year_2021 USING btree (is_play_action);
 
 
 --
@@ -40336,7 +40351,7 @@ CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -40448,7 +40463,7 @@ CREATE INDEX nfl_plays_year_2022_box_defenders_idx ON public.nfl_plays_year_2022
 -- Name: nfl_plays_year_2022_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_catchable_ball_idx ON public.nfl_plays_year_2022 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2022_catchable_ball_idx ON public.nfl_plays_year_2022 USING btree (is_catchable_ball);
 
 
 --
@@ -40476,7 +40491,7 @@ CREATE INDEX nfl_plays_year_2022_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2022_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_ds_coherence_idx ON public.nfl_plays_year_2022 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2022_ds_coherence_idx ON public.nfl_plays_year_2022 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -40497,7 +40512,7 @@ CREATE INDEX nfl_plays_year_2022_esbid_idx ON public.nfl_plays_year_2022 USING b
 -- Name: nfl_plays_year_2022_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_motion_idx ON public.nfl_plays_year_2022 USING btree (motion);
+CREATE INDEX nfl_plays_year_2022_motion_idx ON public.nfl_plays_year_2022 USING btree (is_motion);
 
 
 --
@@ -40546,7 +40561,7 @@ CREATE INDEX "nfl_plays_year_2022_playId_idx" ON public.nfl_plays_year_2022 USIN
 -- Name: nfl_plays_year_2022_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_play_action_idx ON public.nfl_plays_year_2022 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2022_play_action_idx ON public.nfl_plays_year_2022 USING btree (is_play_action);
 
 
 --
@@ -40721,7 +40736,7 @@ CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -40833,7 +40848,7 @@ CREATE INDEX nfl_plays_year_2023_box_defenders_idx ON public.nfl_plays_year_2023
 -- Name: nfl_plays_year_2023_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_catchable_ball_idx ON public.nfl_plays_year_2023 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2023_catchable_ball_idx ON public.nfl_plays_year_2023 USING btree (is_catchable_ball);
 
 
 --
@@ -40861,7 +40876,7 @@ CREATE INDEX nfl_plays_year_2023_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2023_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_ds_coherence_idx ON public.nfl_plays_year_2023 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2023_ds_coherence_idx ON public.nfl_plays_year_2023 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -40882,7 +40897,7 @@ CREATE INDEX nfl_plays_year_2023_esbid_idx ON public.nfl_plays_year_2023 USING b
 -- Name: nfl_plays_year_2023_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_motion_idx ON public.nfl_plays_year_2023 USING btree (motion);
+CREATE INDEX nfl_plays_year_2023_motion_idx ON public.nfl_plays_year_2023 USING btree (is_motion);
 
 
 --
@@ -40931,7 +40946,7 @@ CREATE INDEX "nfl_plays_year_2023_playId_idx" ON public.nfl_plays_year_2023 USIN
 -- Name: nfl_plays_year_2023_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_play_action_idx ON public.nfl_plays_year_2023 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2023_play_action_idx ON public.nfl_plays_year_2023 USING btree (is_play_action);
 
 
 --
@@ -41106,7 +41121,7 @@ CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -41218,7 +41233,7 @@ CREATE INDEX nfl_plays_year_2024_box_defenders_idx ON public.nfl_plays_year_2024
 -- Name: nfl_plays_year_2024_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_catchable_ball_idx ON public.nfl_plays_year_2024 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2024_catchable_ball_idx ON public.nfl_plays_year_2024 USING btree (is_catchable_ball);
 
 
 --
@@ -41246,7 +41261,7 @@ CREATE INDEX nfl_plays_year_2024_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2024_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_ds_coherence_idx ON public.nfl_plays_year_2024 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2024_ds_coherence_idx ON public.nfl_plays_year_2024 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -41267,7 +41282,7 @@ CREATE INDEX nfl_plays_year_2024_esbid_idx ON public.nfl_plays_year_2024 USING b
 -- Name: nfl_plays_year_2024_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_motion_idx ON public.nfl_plays_year_2024 USING btree (motion);
+CREATE INDEX nfl_plays_year_2024_motion_idx ON public.nfl_plays_year_2024 USING btree (is_motion);
 
 
 --
@@ -41316,7 +41331,7 @@ CREATE INDEX "nfl_plays_year_2024_playId_idx" ON public.nfl_plays_year_2024 USIN
 -- Name: nfl_plays_year_2024_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_play_action_idx ON public.nfl_plays_year_2024 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2024_play_action_idx ON public.nfl_plays_year_2024 USING btree (is_play_action);
 
 
 --
@@ -41491,7 +41506,7 @@ CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -41603,7 +41618,7 @@ CREATE INDEX nfl_plays_year_2025_box_defenders_idx ON public.nfl_plays_year_2025
 -- Name: nfl_plays_year_2025_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_catchable_ball_idx ON public.nfl_plays_year_2025 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2025_catchable_ball_idx ON public.nfl_plays_year_2025 USING btree (is_catchable_ball);
 
 
 --
@@ -41631,7 +41646,7 @@ CREATE INDEX nfl_plays_year_2025_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2025_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_ds_coherence_idx ON public.nfl_plays_year_2025 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2025_ds_coherence_idx ON public.nfl_plays_year_2025 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -41652,7 +41667,7 @@ CREATE INDEX nfl_plays_year_2025_esbid_idx ON public.nfl_plays_year_2025 USING b
 -- Name: nfl_plays_year_2025_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_motion_idx ON public.nfl_plays_year_2025 USING btree (motion);
+CREATE INDEX nfl_plays_year_2025_motion_idx ON public.nfl_plays_year_2025 USING btree (is_motion);
 
 
 --
@@ -41701,7 +41716,7 @@ CREATE INDEX "nfl_plays_year_2025_playId_idx" ON public.nfl_plays_year_2025 USIN
 -- Name: nfl_plays_year_2025_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_play_action_idx ON public.nfl_plays_year_2025 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2025_play_action_idx ON public.nfl_plays_year_2025 USING btree (is_play_action);
 
 
 --
@@ -41876,7 +41891,7 @@ CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -41988,7 +42003,7 @@ CREATE INDEX nfl_plays_year_2026_box_defenders_idx ON public.nfl_plays_year_2026
 -- Name: nfl_plays_year_2026_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_catchable_ball_idx ON public.nfl_plays_year_2026 USING btree (catchable_ball);
+CREATE INDEX nfl_plays_year_2026_catchable_ball_idx ON public.nfl_plays_year_2026 USING btree (is_catchable_ball);
 
 
 --
@@ -42016,7 +42031,7 @@ CREATE INDEX nfl_plays_year_2026_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2026_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_ds_coherence_idx ON public.nfl_plays_year_2026 USING btree (esbid, qtr, drive_seq) INCLUDE (deleted);
+CREATE INDEX nfl_plays_year_2026_ds_coherence_idx ON public.nfl_plays_year_2026 USING btree (esbid, qtr, drive_seq) INCLUDE (is_deleted);
 
 
 --
@@ -42037,7 +42052,7 @@ CREATE INDEX nfl_plays_year_2026_esbid_idx ON public.nfl_plays_year_2026 USING b
 -- Name: nfl_plays_year_2026_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_motion_idx ON public.nfl_plays_year_2026 USING btree (motion);
+CREATE INDEX nfl_plays_year_2026_motion_idx ON public.nfl_plays_year_2026 USING btree (is_motion);
 
 
 --
@@ -42086,7 +42101,7 @@ CREATE INDEX "nfl_plays_year_2026_playId_idx" ON public.nfl_plays_year_2026 USIN
 -- Name: nfl_plays_year_2026_play_action_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_play_action_idx ON public.nfl_plays_year_2026 USING btree (play_action);
+CREATE INDEX nfl_plays_year_2026_play_action_idx ON public.nfl_plays_year_2026 USING btree (is_play_action);
 
 
 --
@@ -42261,7 +42276,7 @@ CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, rush_td, pass_yds, pass_td, interceptions, recv_yds, comp, first_down, week, td, sk, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -42604,14 +42619,14 @@ CREATE UNIQUE INDEX player_fantasypoints_id_unique ON public.player USING btree 
 -- Name: player_gamelogs_default_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_default_active_pid_year_idx ON public.player_gamelogs_default USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_default_active_pid_year_idx ON public.player_gamelogs_default USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_default_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_default_esbid_pid_active_idx ON public.player_gamelogs_default USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_default_esbid_pid_active_idx ON public.player_gamelogs_default USING btree (esbid, pid, is_active);
 
 
 --
@@ -42632,7 +42647,7 @@ CREATE INDEX player_gamelogs_default_pid_tm_idx ON public.player_gamelogs_defaul
 -- Name: player_gamelogs_default_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_default_ruled_out_in_game_idx ON public.player_gamelogs_default USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_default_ruled_out_in_game_idx ON public.player_gamelogs_default USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -42653,14 +42668,14 @@ CREATE UNIQUE INDEX player_gamelogs_default_year_esbid_pid_idx ON public.player_
 -- Name: player_gamelogs_year_2000_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2000_active_pid_year_idx ON public.player_gamelogs_year_2000 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2000_active_pid_year_idx ON public.player_gamelogs_year_2000 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2000_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2000_esbid_pid_active_idx ON public.player_gamelogs_year_2000 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2000_esbid_pid_active_idx ON public.player_gamelogs_year_2000 USING btree (esbid, pid, is_active);
 
 
 --
@@ -42681,7 +42696,7 @@ CREATE INDEX player_gamelogs_year_2000_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2000_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2000_ruled_out_in_game_idx ON public.player_gamelogs_year_2000 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2000_ruled_out_in_game_idx ON public.player_gamelogs_year_2000 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -42702,14 +42717,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2000_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2001_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2001_active_pid_year_idx ON public.player_gamelogs_year_2001 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2001_active_pid_year_idx ON public.player_gamelogs_year_2001 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2001_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2001_esbid_pid_active_idx ON public.player_gamelogs_year_2001 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2001_esbid_pid_active_idx ON public.player_gamelogs_year_2001 USING btree (esbid, pid, is_active);
 
 
 --
@@ -42730,7 +42745,7 @@ CREATE INDEX player_gamelogs_year_2001_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2001_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2001_ruled_out_in_game_idx ON public.player_gamelogs_year_2001 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2001_ruled_out_in_game_idx ON public.player_gamelogs_year_2001 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -42751,14 +42766,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2001_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2002_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2002_active_pid_year_idx ON public.player_gamelogs_year_2002 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2002_active_pid_year_idx ON public.player_gamelogs_year_2002 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2002_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2002_esbid_pid_active_idx ON public.player_gamelogs_year_2002 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2002_esbid_pid_active_idx ON public.player_gamelogs_year_2002 USING btree (esbid, pid, is_active);
 
 
 --
@@ -42779,7 +42794,7 @@ CREATE INDEX player_gamelogs_year_2002_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2002_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2002_ruled_out_in_game_idx ON public.player_gamelogs_year_2002 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2002_ruled_out_in_game_idx ON public.player_gamelogs_year_2002 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -42800,14 +42815,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2002_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2003_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2003_active_pid_year_idx ON public.player_gamelogs_year_2003 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2003_active_pid_year_idx ON public.player_gamelogs_year_2003 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2003_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2003_esbid_pid_active_idx ON public.player_gamelogs_year_2003 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2003_esbid_pid_active_idx ON public.player_gamelogs_year_2003 USING btree (esbid, pid, is_active);
 
 
 --
@@ -42828,7 +42843,7 @@ CREATE INDEX player_gamelogs_year_2003_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2003_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2003_ruled_out_in_game_idx ON public.player_gamelogs_year_2003 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2003_ruled_out_in_game_idx ON public.player_gamelogs_year_2003 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -42849,14 +42864,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2003_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2004_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2004_active_pid_year_idx ON public.player_gamelogs_year_2004 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2004_active_pid_year_idx ON public.player_gamelogs_year_2004 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2004_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2004_esbid_pid_active_idx ON public.player_gamelogs_year_2004 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2004_esbid_pid_active_idx ON public.player_gamelogs_year_2004 USING btree (esbid, pid, is_active);
 
 
 --
@@ -42877,7 +42892,7 @@ CREATE INDEX player_gamelogs_year_2004_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2004_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2004_ruled_out_in_game_idx ON public.player_gamelogs_year_2004 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2004_ruled_out_in_game_idx ON public.player_gamelogs_year_2004 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -42898,14 +42913,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2004_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2005_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2005_active_pid_year_idx ON public.player_gamelogs_year_2005 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2005_active_pid_year_idx ON public.player_gamelogs_year_2005 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2005_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2005_esbid_pid_active_idx ON public.player_gamelogs_year_2005 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2005_esbid_pid_active_idx ON public.player_gamelogs_year_2005 USING btree (esbid, pid, is_active);
 
 
 --
@@ -42926,7 +42941,7 @@ CREATE INDEX player_gamelogs_year_2005_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2005_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2005_ruled_out_in_game_idx ON public.player_gamelogs_year_2005 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2005_ruled_out_in_game_idx ON public.player_gamelogs_year_2005 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -42947,14 +42962,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2005_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2006_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2006_active_pid_year_idx ON public.player_gamelogs_year_2006 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2006_active_pid_year_idx ON public.player_gamelogs_year_2006 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2006_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2006_esbid_pid_active_idx ON public.player_gamelogs_year_2006 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2006_esbid_pid_active_idx ON public.player_gamelogs_year_2006 USING btree (esbid, pid, is_active);
 
 
 --
@@ -42975,7 +42990,7 @@ CREATE INDEX player_gamelogs_year_2006_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2006_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2006_ruled_out_in_game_idx ON public.player_gamelogs_year_2006 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2006_ruled_out_in_game_idx ON public.player_gamelogs_year_2006 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -42996,14 +43011,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2006_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2007_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2007_active_pid_year_idx ON public.player_gamelogs_year_2007 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2007_active_pid_year_idx ON public.player_gamelogs_year_2007 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2007_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2007_esbid_pid_active_idx ON public.player_gamelogs_year_2007 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2007_esbid_pid_active_idx ON public.player_gamelogs_year_2007 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43024,7 +43039,7 @@ CREATE INDEX player_gamelogs_year_2007_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2007_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2007_ruled_out_in_game_idx ON public.player_gamelogs_year_2007 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2007_ruled_out_in_game_idx ON public.player_gamelogs_year_2007 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43045,14 +43060,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2007_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2008_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2008_active_pid_year_idx ON public.player_gamelogs_year_2008 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2008_active_pid_year_idx ON public.player_gamelogs_year_2008 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2008_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2008_esbid_pid_active_idx ON public.player_gamelogs_year_2008 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2008_esbid_pid_active_idx ON public.player_gamelogs_year_2008 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43073,7 +43088,7 @@ CREATE INDEX player_gamelogs_year_2008_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2008_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2008_ruled_out_in_game_idx ON public.player_gamelogs_year_2008 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2008_ruled_out_in_game_idx ON public.player_gamelogs_year_2008 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43094,14 +43109,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2008_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2009_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2009_active_pid_year_idx ON public.player_gamelogs_year_2009 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2009_active_pid_year_idx ON public.player_gamelogs_year_2009 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2009_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2009_esbid_pid_active_idx ON public.player_gamelogs_year_2009 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2009_esbid_pid_active_idx ON public.player_gamelogs_year_2009 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43122,7 +43137,7 @@ CREATE INDEX player_gamelogs_year_2009_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2009_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2009_ruled_out_in_game_idx ON public.player_gamelogs_year_2009 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2009_ruled_out_in_game_idx ON public.player_gamelogs_year_2009 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43143,14 +43158,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2009_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2010_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2010_active_pid_year_idx ON public.player_gamelogs_year_2010 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2010_active_pid_year_idx ON public.player_gamelogs_year_2010 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2010_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2010_esbid_pid_active_idx ON public.player_gamelogs_year_2010 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2010_esbid_pid_active_idx ON public.player_gamelogs_year_2010 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43171,7 +43186,7 @@ CREATE INDEX player_gamelogs_year_2010_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2010_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2010_ruled_out_in_game_idx ON public.player_gamelogs_year_2010 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2010_ruled_out_in_game_idx ON public.player_gamelogs_year_2010 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43192,14 +43207,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2010_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2011_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2011_active_pid_year_idx ON public.player_gamelogs_year_2011 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2011_active_pid_year_idx ON public.player_gamelogs_year_2011 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2011_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2011_esbid_pid_active_idx ON public.player_gamelogs_year_2011 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2011_esbid_pid_active_idx ON public.player_gamelogs_year_2011 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43220,7 +43235,7 @@ CREATE INDEX player_gamelogs_year_2011_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2011_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2011_ruled_out_in_game_idx ON public.player_gamelogs_year_2011 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2011_ruled_out_in_game_idx ON public.player_gamelogs_year_2011 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43241,14 +43256,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2011_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2012_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2012_active_pid_year_idx ON public.player_gamelogs_year_2012 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2012_active_pid_year_idx ON public.player_gamelogs_year_2012 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2012_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2012_esbid_pid_active_idx ON public.player_gamelogs_year_2012 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2012_esbid_pid_active_idx ON public.player_gamelogs_year_2012 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43269,7 +43284,7 @@ CREATE INDEX player_gamelogs_year_2012_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2012_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2012_ruled_out_in_game_idx ON public.player_gamelogs_year_2012 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2012_ruled_out_in_game_idx ON public.player_gamelogs_year_2012 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43290,14 +43305,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2012_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2013_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2013_active_pid_year_idx ON public.player_gamelogs_year_2013 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2013_active_pid_year_idx ON public.player_gamelogs_year_2013 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2013_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2013_esbid_pid_active_idx ON public.player_gamelogs_year_2013 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2013_esbid_pid_active_idx ON public.player_gamelogs_year_2013 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43318,7 +43333,7 @@ CREATE INDEX player_gamelogs_year_2013_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2013_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2013_ruled_out_in_game_idx ON public.player_gamelogs_year_2013 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2013_ruled_out_in_game_idx ON public.player_gamelogs_year_2013 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43339,14 +43354,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2013_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2014_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2014_active_pid_year_idx ON public.player_gamelogs_year_2014 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2014_active_pid_year_idx ON public.player_gamelogs_year_2014 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2014_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2014_esbid_pid_active_idx ON public.player_gamelogs_year_2014 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2014_esbid_pid_active_idx ON public.player_gamelogs_year_2014 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43367,7 +43382,7 @@ CREATE INDEX player_gamelogs_year_2014_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2014_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2014_ruled_out_in_game_idx ON public.player_gamelogs_year_2014 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2014_ruled_out_in_game_idx ON public.player_gamelogs_year_2014 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43388,14 +43403,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2014_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2015_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2015_active_pid_year_idx ON public.player_gamelogs_year_2015 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2015_active_pid_year_idx ON public.player_gamelogs_year_2015 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2015_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2015_esbid_pid_active_idx ON public.player_gamelogs_year_2015 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2015_esbid_pid_active_idx ON public.player_gamelogs_year_2015 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43416,7 +43431,7 @@ CREATE INDEX player_gamelogs_year_2015_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2015_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2015_ruled_out_in_game_idx ON public.player_gamelogs_year_2015 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2015_ruled_out_in_game_idx ON public.player_gamelogs_year_2015 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43437,14 +43452,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2015_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2016_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2016_active_pid_year_idx ON public.player_gamelogs_year_2016 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2016_active_pid_year_idx ON public.player_gamelogs_year_2016 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2016_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2016_esbid_pid_active_idx ON public.player_gamelogs_year_2016 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2016_esbid_pid_active_idx ON public.player_gamelogs_year_2016 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43465,7 +43480,7 @@ CREATE INDEX player_gamelogs_year_2016_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2016_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2016_ruled_out_in_game_idx ON public.player_gamelogs_year_2016 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2016_ruled_out_in_game_idx ON public.player_gamelogs_year_2016 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43486,14 +43501,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2016_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2017_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2017_active_pid_year_idx ON public.player_gamelogs_year_2017 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2017_active_pid_year_idx ON public.player_gamelogs_year_2017 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2017_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2017_esbid_pid_active_idx ON public.player_gamelogs_year_2017 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2017_esbid_pid_active_idx ON public.player_gamelogs_year_2017 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43514,7 +43529,7 @@ CREATE INDEX player_gamelogs_year_2017_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2017_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2017_ruled_out_in_game_idx ON public.player_gamelogs_year_2017 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2017_ruled_out_in_game_idx ON public.player_gamelogs_year_2017 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43535,14 +43550,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2017_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2018_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2018_active_pid_year_idx ON public.player_gamelogs_year_2018 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2018_active_pid_year_idx ON public.player_gamelogs_year_2018 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2018_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2018_esbid_pid_active_idx ON public.player_gamelogs_year_2018 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2018_esbid_pid_active_idx ON public.player_gamelogs_year_2018 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43563,7 +43578,7 @@ CREATE INDEX player_gamelogs_year_2018_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2018_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2018_ruled_out_in_game_idx ON public.player_gamelogs_year_2018 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2018_ruled_out_in_game_idx ON public.player_gamelogs_year_2018 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43584,14 +43599,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2018_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2019_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2019_active_pid_year_idx ON public.player_gamelogs_year_2019 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2019_active_pid_year_idx ON public.player_gamelogs_year_2019 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2019_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2019_esbid_pid_active_idx ON public.player_gamelogs_year_2019 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2019_esbid_pid_active_idx ON public.player_gamelogs_year_2019 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43612,7 +43627,7 @@ CREATE INDEX player_gamelogs_year_2019_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2019_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2019_ruled_out_in_game_idx ON public.player_gamelogs_year_2019 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2019_ruled_out_in_game_idx ON public.player_gamelogs_year_2019 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43633,14 +43648,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2019_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2020_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2020_active_pid_year_idx ON public.player_gamelogs_year_2020 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2020_active_pid_year_idx ON public.player_gamelogs_year_2020 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2020_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2020_esbid_pid_active_idx ON public.player_gamelogs_year_2020 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2020_esbid_pid_active_idx ON public.player_gamelogs_year_2020 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43661,7 +43676,7 @@ CREATE INDEX player_gamelogs_year_2020_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2020_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2020_ruled_out_in_game_idx ON public.player_gamelogs_year_2020 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2020_ruled_out_in_game_idx ON public.player_gamelogs_year_2020 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43682,14 +43697,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2020_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2021_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2021_active_pid_year_idx ON public.player_gamelogs_year_2021 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2021_active_pid_year_idx ON public.player_gamelogs_year_2021 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2021_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2021_esbid_pid_active_idx ON public.player_gamelogs_year_2021 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2021_esbid_pid_active_idx ON public.player_gamelogs_year_2021 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43710,7 +43725,7 @@ CREATE INDEX player_gamelogs_year_2021_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2021_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2021_ruled_out_in_game_idx ON public.player_gamelogs_year_2021 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2021_ruled_out_in_game_idx ON public.player_gamelogs_year_2021 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43731,14 +43746,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2021_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2022_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2022_active_pid_year_idx ON public.player_gamelogs_year_2022 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2022_active_pid_year_idx ON public.player_gamelogs_year_2022 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2022_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2022_esbid_pid_active_idx ON public.player_gamelogs_year_2022 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2022_esbid_pid_active_idx ON public.player_gamelogs_year_2022 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43759,7 +43774,7 @@ CREATE INDEX player_gamelogs_year_2022_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2022_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2022_ruled_out_in_game_idx ON public.player_gamelogs_year_2022 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2022_ruled_out_in_game_idx ON public.player_gamelogs_year_2022 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43780,14 +43795,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2022_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2023_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2023_active_pid_year_idx ON public.player_gamelogs_year_2023 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2023_active_pid_year_idx ON public.player_gamelogs_year_2023 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2023_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2023_esbid_pid_active_idx ON public.player_gamelogs_year_2023 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2023_esbid_pid_active_idx ON public.player_gamelogs_year_2023 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43808,7 +43823,7 @@ CREATE INDEX player_gamelogs_year_2023_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2023_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2023_ruled_out_in_game_idx ON public.player_gamelogs_year_2023 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2023_ruled_out_in_game_idx ON public.player_gamelogs_year_2023 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43829,14 +43844,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2023_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2024_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2024_active_pid_year_idx ON public.player_gamelogs_year_2024 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2024_active_pid_year_idx ON public.player_gamelogs_year_2024 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2024_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2024_esbid_pid_active_idx ON public.player_gamelogs_year_2024 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2024_esbid_pid_active_idx ON public.player_gamelogs_year_2024 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43857,7 +43872,7 @@ CREATE INDEX player_gamelogs_year_2024_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2024_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2024_ruled_out_in_game_idx ON public.player_gamelogs_year_2024 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2024_ruled_out_in_game_idx ON public.player_gamelogs_year_2024 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43878,14 +43893,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2024_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2025_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2025_active_pid_year_idx ON public.player_gamelogs_year_2025 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2025_active_pid_year_idx ON public.player_gamelogs_year_2025 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2025_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2025_esbid_pid_active_idx ON public.player_gamelogs_year_2025 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2025_esbid_pid_active_idx ON public.player_gamelogs_year_2025 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43906,7 +43921,7 @@ CREATE INDEX player_gamelogs_year_2025_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2025_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2025_ruled_out_in_game_idx ON public.player_gamelogs_year_2025 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2025_ruled_out_in_game_idx ON public.player_gamelogs_year_2025 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --
@@ -43927,14 +43942,14 @@ CREATE UNIQUE INDEX player_gamelogs_year_2025_year_esbid_pid_idx ON public.playe
 -- Name: player_gamelogs_year_2026_active_pid_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2026_active_pid_year_idx ON public.player_gamelogs_year_2026 USING btree (active, pid, season_year) WHERE (active = true);
+CREATE INDEX player_gamelogs_year_2026_active_pid_year_idx ON public.player_gamelogs_year_2026 USING btree (is_active, pid, season_year) WHERE (is_active = true);
 
 
 --
 -- Name: player_gamelogs_year_2026_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2026_esbid_pid_active_idx ON public.player_gamelogs_year_2026 USING btree (esbid, pid, active);
+CREATE INDEX player_gamelogs_year_2026_esbid_pid_active_idx ON public.player_gamelogs_year_2026 USING btree (esbid, pid, is_active);
 
 
 --
@@ -43955,7 +43970,7 @@ CREATE INDEX player_gamelogs_year_2026_pid_tm_idx ON public.player_gamelogs_year
 -- Name: player_gamelogs_year_2026_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX player_gamelogs_year_2026_ruled_out_in_game_idx ON public.player_gamelogs_year_2026 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+CREATE INDEX player_gamelogs_year_2026_ruled_out_in_game_idx ON public.player_gamelogs_year_2026 USING btree (is_ruled_out_in_game) WHERE (is_ruled_out_in_game = true);
 
 
 --

@@ -29,7 +29,7 @@ describe('data-views participation status', () => {
       expect(sql).to.match(/g\.season_type\s*=\s*'REG'/)
       expect(sql).to.match(/INNER JOIN nfl_games g ON g\.esbid = pgl\.esbid/)
       // active carried through as bool_or to defend against duplicate week rows
-      expect(sql).to.match(/bool_or\(active\) AS active/)
+      expect(sql).to.match(/bool_or\(is_active\) AS is_active/)
       // grouped at week grain
       expect(sql).to.match(/GROUP BY pid, year, week/)
     })
@@ -47,12 +47,15 @@ describe('data-views participation status', () => {
       const sql = player_participation_weeks_cte_sql({
         year_range: [2025],
         columns: [
-          { inner: 'pgl.started', outer: 'bool_or(started) AS started' }
+          {
+            inner: 'pgl.is_starter',
+            outer: 'bool_or(is_starter) AS is_starter'
+          }
         ]
       })
-      expect(sql).to.match(/pgl\.active, pgl\.started/)
+      expect(sql).to.match(/pgl\.is_active, pgl\.is_starter/)
       expect(sql).to.match(
-        /bool_or\(active\) AS active, bool_or\(started\) AS started/
+        /bool_or\(is_active\) AS is_active, bool_or\(is_starter\) AS is_starter/
       )
     })
 
@@ -79,7 +82,7 @@ describe('data-views participation status', () => {
     it('emits exactly the active / bye / NULL arms', () => {
       const sql = participation_status_select(refs)
       expect(sql).to.match(
-        /WHEN player_participation_weeks\.active THEN 'active'/
+        /WHEN player_participation_weeks\.is_active THEN 'active'/
       )
       expect(sql).to.match(/THEN 'bye'/)
       expect(sql).to.match(/ELSE NULL/)

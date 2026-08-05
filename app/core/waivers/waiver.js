@@ -6,7 +6,7 @@ export const Waiver = new Record({
   pid: null,
   po: 0,
   release: new List(),
-  succ: null,
+  is_successful: null,
   reason: null,
   bid: null,
   type: null,
@@ -19,7 +19,7 @@ export function createWaiver({
   pid,
   po,
   release,
-  succ,
+  is_successful,
   reason,
   bid,
   type
@@ -30,7 +30,7 @@ export function createWaiver({
     pid,
     po,
     release: new List(release),
-    succ,
+    is_successful,
     reason,
     bid,
     type

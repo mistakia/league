@@ -116,8 +116,8 @@ const format_market = async ({
     source_event_id: event?.matchId || null,
     source_event_name: event?.longName || null,
 
-    open: gambet_market.status === 'active',
-    live: gambet_market.isLive,
+    is_open: gambet_market.status === 'active',
+    is_live: gambet_market.isLive,
     selection_count: gambet_market.odds.length,
 
     observed_at,

@@ -146,7 +146,7 @@ export default async function report_job({
     await with_connection_retry(() =>
       db('jobs').insert({
         type: job_type,
-        succ: job_success,
+        is_successful: job_success,
         reason: job_reason,
         timestamp: job_report_timestamp
       })

@@ -365,7 +365,7 @@ router.put('/:leagueId', async (req, res) => {
  *               uid: 2
  *               name: "TEFLON LEAGUE"
  *               commishid: 5
- *               hosted: false
+ *               is_hosted: false
  *               num_teams: 14
  *               sqb: 1
  *               srb: 2
@@ -434,7 +434,7 @@ router.get('/:leagueId/?', async (req, res) => {
  *               uid: 2
  *               name: "TEFLON LEAGUE"
  *               commishid: 5
- *               hosted: false
+ *               is_hosted: false
  *               num_teams: 14
  *               sqb: 1
  *               srb: 2

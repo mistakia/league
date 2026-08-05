@@ -179,7 +179,7 @@ describe('libs-server prop market selection reaper', function () {
       const market = {
         source_id: 'FANATICS',
         source_market_id: SHARED_MARKET_ID,
-        live: false
+        is_live: false
       }
 
       const { cleanup_operations } = await insert_prop_market_selections({

@@ -60,7 +60,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        succ: 1,
+        is_successful: 1,
         processed: Math.round(Date.now() / 1000),
         type: waiver_types.POACH
       })
@@ -108,7 +108,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check poaching claim
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
-      expect(poaches[0].succ).to.equal(true)
+      expect(poaches[0].is_successful).to.equal(true)
       expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].pid).to.equal(player.pid)
@@ -143,7 +143,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        succ: 1,
+        is_successful: 1,
         processed: Math.round(Date.now() / 1000),
         type: waiver_types.POACH
       })
@@ -185,7 +185,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        succ: 1,
+        is_successful: 1,
         processed: Math.round(Date.now() / 1000),
         type: waiver_types.POACH
       })
@@ -247,12 +247,12 @@ describe('SCRIPTS /waivers - poach', function () {
       const poach1 = poaches.find((p) => p.tid === 2)
       const poach2 = poaches.find((p) => p.tid === 4)
       expect(poaches.length).to.equal(2)
-      expect(poach1.succ).to.equal(true)
+      expect(poach1.is_successful).to.equal(true)
       expect(poach1.processed).to.equal(Math.round(Date.now() / 1000))
       expect(poach1.reason).to.equal(null)
       expect(poach1.pid).to.equal(player1.pid)
 
-      expect(poach2.succ).to.equal(null)
+      expect(poach2.is_successful).to.equal(null)
       expect(poach2.processed).to.equal(null)
       expect(poach2.reason).to.equal(null)
       expect(poach2.pid).to.equal(player2.pid)
@@ -279,7 +279,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        succ: 1,
+        is_successful: 1,
         processed: Math.round(Date.now() / 1000),
         type: waiver_types.POACH
       })
@@ -321,7 +321,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check poaching claim
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
-      expect(poaches[0].succ).to.equal(null)
+      expect(poaches[0].is_successful).to.equal(null)
       expect(poaches[0].processed).to.equal(null)
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].pid).to.equal(player.pid)
@@ -357,7 +357,7 @@ describe('SCRIPTS /waivers - poach', function () {
           po: 9999,
           submitted: Math.round(Date.now() / 1000),
           bid: 0,
-          succ: 1,
+          is_successful: 1,
           processed: Math.round(Date.now() / 1000),
           type: waiver_types.POACH
         })
@@ -418,7 +418,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check poaching claim
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
-      expect(poaches[0].succ).to.equal(true)
+      expect(poaches[0].is_successful).to.equal(true)
       expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].pid).to.equal(player.pid)
@@ -453,7 +453,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        succ: 1,
+        is_successful: 1,
         processed: Math.round(Date.now() / 1000),
         type: waiver_types.POACH
       })
@@ -519,7 +519,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check poaching claim
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
-      expect(poaches[0].succ).to.equal(false)
+      expect(poaches[0].is_successful).to.equal(false)
       expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(poaches[0].reason).to.equal('player is not on a practice squad')
       expect(poaches[0].pid).to.equal(player.pid)

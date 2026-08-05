@@ -1,17 +1,17 @@
 /**
  * Import NFLverse Weekly Rosters
  *
- * Replaces the active=false signal that was lost when commit 84c52f63
+ * Replaces the is_active=false signal that was lost when commit 84c52f63
  * deleted scripts/import-player-gamelogs.mjs and libs-server/nfl.mjs::get_plays_v3
  * (the NFL.com FDL gameDetail GraphQL inactive lists). NFL Pro's teams/rosterWeek
  * endpoint -- which private/scripts/import-gameday-rosters.mjs hits -- returns
  * only the 48-man dressed roster, no inactives.
  *
  * nflverse weekly_rosters covers 2002+ with a stable status enum:
- *   ACT -> active=true   (dressed for the game)
- *   INA -> active=false  (game-day inactive)
- *   RES -> active=false  (reserve list: IR / PUP / NFI / SUSP)
- *   DEV -> active=false  (practice squad -- not on the active 53 for this week)
+ *   ACT -> is_active=true   (dressed for the game)
+ *   INA -> is_active=false  (game-day inactive)
+ *   RES -> is_active=false  (reserve list: IR / PUP / NFI / SUSP)
+ *   DEV -> is_active=false  (practice squad -- not on the active 53 for this week)
  *   CUT, RET, EXE, TRC, TRD -> skipped (not on the team for this week's game)
  *
  * Source: https://github.com/nflverse/nflverse-data/releases/tag/weekly_rosters
@@ -51,8 +51,8 @@ debug.enable('import-nflverse-weekly-rosters')
 
 const SOURCE_SENTINEL = 'nflverse-weekly-rosters'
 const BATCH_SIZE = 500
-// active=true:  ACT (dressed gameday)
-// active=false: INA (2020+ gameday inactive), RES (IR/PUP/NFI), RSN (reserve non-football),
+// is_active=true:  ACT (dressed gameday)
+// is_active=false: INA (2020+ gameday inactive), RES (IR/PUP/NFI), RSN (reserve non-football),
 //               RSR (reserve, retired -- rare), PUP (pre-2020 PUP token), SUS (suspended)
 // skip:         everything else -- player was not on the team's active 53-man for this week
 //               (DEV practice squad, CUT, RET, TRC trade-claim, TRD traded, TRT tryout,
@@ -269,7 +269,7 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
       // generator derives it the same way. Writing the vendor's spelling here
       // is what put UNK, KR and PR in the column.
       pos: pid_match.primary_position,
-      active: STATUS_ACTIVE.has(row.status),
+      is_active: STATUS_ACTIVE.has(row.status),
       source: SOURCE_SENTINEL
     })
   }
@@ -282,7 +282,7 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
   for (const ins of inserts) {
     const key = `${ins.esbid}|${ins.pid}|${ins.season_year}`
     const existing = dedup.get(key)
-    if (!existing || (ins.active && !existing.active)) {
+    if (!existing || (ins.is_active && !existing.is_active)) {
       dedup.set(key, ins)
     }
   }
@@ -322,7 +322,7 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
   // build an in-memory index keyed on (esbid, pid).
   const existing_rows = inserts.length
     ? await db('player_gamelogs')
-        .select('esbid', 'pid', 'active')
+        .select('esbid', 'pid', 'is_active')
         .where({ season_year: year })
     : []
   const existing_by_key = new Map(
@@ -342,20 +342,20 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
       diff.new_insert += 1
       continue
     }
-    if (existing.active === null && ins.active === true)
+    if (existing.is_active === null && ins.is_active === true)
       diff.active_null_to_true += 1
-    else if (existing.active === null && ins.active === false)
+    else if (existing.is_active === null && ins.is_active === false)
       diff.active_null_to_false += 1
-    else if (existing.active === true && ins.active === false)
+    else if (existing.is_active === true && ins.is_active === false)
       diff.flip_true_to_false += 1
-    else if (existing.active === false && ins.active === true)
+    else if (existing.is_active === false && ins.is_active === true)
       diff.flip_false_to_true += 1
     else diff.no_change += 1
   }
   log(`diff preflight for ${year}: ${JSON.stringify(diff)}`)
 
   // Sanity floor on true->false flips: if we're flipping more than 10% of
-  // touched-existing rows from active=true to active=false, something is
+  // touched-existing rows from is_active=true to is_active=false, something is
   // wrong (data corruption or wrong-year mismatch). Abort before writing.
   const touched_existing =
     diff.no_change +
@@ -367,7 +367,7 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
     touched_existing > 0 ? diff.flip_true_to_false / touched_existing : 0
   if (true_to_false_pct > 0.1) {
     return {
-      shortfall: `${year}: ${(true_to_false_pct * 100).toFixed(1)}% of touched rows flip active true->false (${diff.flip_true_to_false}/${touched_existing}) -- exceeds 10% sanity floor`,
+      shortfall: `${year}: ${(true_to_false_pct * 100).toFixed(1)}% of touched rows flip is_active true->false (${diff.flip_true_to_false}/${touched_existing}) -- exceeds 10% sanity floor`,
       inserts_written: 0
     }
   }
@@ -388,7 +388,7 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
     items: inserts,
     batch_size: BATCH_SIZE,
     save: async (batch) => {
-      // Narrow merge to `active` only. Existing rows from other importers
+      // Narrow merge to `is_active` only. Existing rows from other importers
       // (gameday-rosters, stat builders) keep their source/pos/nfl_team/
       // opponent_nfl_team -- we
       // only assert authority over the boolean this importer exists to
@@ -397,7 +397,7 @@ const import_for_year = async ({ year, dry_run, force_download }) => {
       await db('player_gamelogs')
         .insert(batch)
         .onConflict(['esbid', 'pid', 'season_year'])
-        .merge(['active'])
+        .merge(['is_active'])
     }
   })
   log(`wrote ${inserts.length} rows for ${year} with source=${SOURCE_SENTINEL}`)

@@ -106,7 +106,7 @@ const run = async ({ daily = false } = {}) => {
 
       await db('waivers')
         .update({
-          succ: error ? 0 : 1,
+          is_successful: error ? 0 : 1,
           reason: error ? error.message : null, // TODO - add error codes
           processed: timestamp
         })

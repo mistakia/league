@@ -237,7 +237,7 @@ export default function ({ is_logged_in }) {
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'combine_attendance'
+      player_value_path: 'has_combine_attendance'
     },
     player_bench_press: {
       column_title: 'Bench Press',

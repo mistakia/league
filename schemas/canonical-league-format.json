@@ -311,7 +311,7 @@
           "default": 0,
           "description": "Points per target"
         },
-        "exclude_quarterback_kneels": {
+        "is_excluding_quarterback_kneels": {
           "type": "boolean",
           "default": false,
           "description": "Whether to exclude QB kneels from rushing stats"

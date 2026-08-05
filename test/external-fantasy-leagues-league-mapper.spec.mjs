@@ -88,7 +88,7 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
         scoring_config: { exclude_qb_kneels: true, pass_yd: 0.04 }
       })
 
-      result.should.have.property('exclude_quarterback_kneels', true)
+      result.should.have.property('is_excluding_quarterback_kneels', true)
       result.should.have.property('passing_yards', 4)
     })
 
@@ -109,6 +109,126 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
       result.should.have.property('rushing_yards', 10)
       result.should.have.property('receptions', 1)
       result.should.have.property('receiving_yards', 10)
+    })
+
+    it('maps Sleeper field goal distance bands and extra points', function () {
+      const result = mapper.map_scoring_config({
+        platform: 'sleeper',
+        scoring_config: {
+          fgm_0_19: 3,
+          fgm_20_29: 3,
+          fgm_30_39: 3,
+          fgm_40_49: 4,
+          fgm_50p: 5,
+          xpm: 1
+        }
+      })
+
+      result.should.have.property('field_goals_made_0_19_yards', 3)
+      result.should.have.property('field_goals_made_20_29_yards', 3)
+      result.should.have.property('field_goals_made_30_39_yards', 3)
+      result.should.have.property('field_goals_made_40_49_yards', 4)
+      result.should.have.property('field_goals_made_50_plus_yards', 5)
+      result.should.have.property('extra_points_made', 1)
+    })
+
+    // Scoring is additive -- bands PLUS a per-yard rate -- and find-or-create
+    // fills an absent field_goal_yards from the registry default of 0.1. A
+    // banded league that did not zero the rate would score every field goal
+    // twice, and nothing downstream could detect it.
+    it('zeroes the per-yard field goal rate when Sleeper bands are present', function () {
+      const result = mapper.map_scoring_config({
+        platform: 'sleeper',
+        scoring_config: { fgm_40_49: 4 }
+      })
+
+      result.should.have.property('field_goal_yards', 0)
+    })
+
+    it('leaves field_goal_yards absent when the platform scores no bands', function () {
+      const result = mapper.map_scoring_config({
+        platform: 'sleeper',
+        scoring_config: { pass_yd: 0.04 }
+      })
+
+      result.should.not.have.property('field_goal_yards')
+    })
+
+    it('maps the flat Sleeper DST events', function () {
+      const result = mapper.map_scoring_config({
+        platform: 'sleeper',
+        scoring_config: {
+          sack: 1,
+          int: 2,
+          ff: 1,
+          fum_rec: 2,
+          def_td: 6,
+          safe: 2,
+          blk_kick: 2,
+          pass_int: -2
+        }
+      })
+
+      result.should.have.property('defensive_sacks', 1)
+      result.should.have.property('defensive_interceptions', 2)
+      result.should.have.property('defensive_forced_fumbles', 1)
+      result.should.have.property('defensive_recovered_fumbles', 2)
+      result.should.have.property('defensive_touchdowns', 6)
+      result.should.have.property('defensive_safeties', 2)
+      result.should.have.property('defensive_blocked_kicks', 2)
+
+      // `int` is the DST interception and `pass_int` the passing one; mapping
+      // both onto the same column would be silent and wrong.
+      result.should.have.property('passing_interceptions', -2)
+    })
+
+    // Sleeper scores points allowed as a seven-band step function, which a
+    // rate-beyond-threshold pair cannot represent. Dropping it is deliberate:
+    // the registry default of -0.4 per point beyond 20 is OUR scoring, and
+    // letting it stand would invent a rule the imported league never had.
+    it('drops points-against scoring when Sleeper supplies banded points allowed', function () {
+      const result = mapper.map_scoring_config({
+        platform: 'sleeper',
+        scoring_config: { pts_allow_0: 10, pts_allow_35p: -4 }
+      })
+
+      result.should.have.property('defensive_points_against', 0)
+    })
+
+    it('leaves points-against absent when no banded points allowed are supplied', function () {
+      const result = mapper.map_scoring_config({
+        platform: 'sleeper',
+        scoring_config: { sack: 1 }
+      })
+
+      result.should.not.have.property('defensive_points_against')
+    })
+
+    // Every sibling default is 0 and no platform map carries a source key for
+    // this column, so a nonzero default was the only value it could ever take
+    // -- it silently gave every imported league six points per fumble return
+    // touchdown whether or not the platform scored them.
+    it('defaults fumble return touchdowns to zero, like every sibling', function () {
+      const result = mapper.map_scoring_config({
+        platform: 'sleeper',
+        scoring_config: { pass_yd: 0.04 }
+      })
+
+      result.should.have.property('fumble_return_touchdowns', 0)
+    })
+
+    // The 21 kicking and DST columns are absent by design so find-or-create
+    // fills them from the registry, rather than minting a format that scores
+    // all of them at nothing.
+    it('omits unmapped kicking and DST columns rather than zeroing them', function () {
+      const result = mapper.map_scoring_config({
+        platform: 'sleeper',
+        scoring_config: { pass_yd: 0.04 }
+      })
+
+      result.should.not.have.property('defensive_sacks')
+      result.should.not.have.property('extra_points_made')
+      result.should.not.have.property('defensive_points_against_threshold')
     })
   })
 

@@ -532,9 +532,8 @@ const execute_processing = async ({
   if (enable_job_reporting && !config.dry_run) {
     await report_job({
       job_type: job_types.PROCESS_MARKET_RESULTS,
-      succ: true,
-      reason: `Processed ${results.length} markets in ${format_duration(total_duration)}`,
-      timestamp: Math.round(start_time / 1000)
+      job_success: true,
+      job_reason: `Processed ${results.length} markets in ${format_duration(total_duration)}`
     })
   }
 
@@ -577,9 +576,8 @@ const main = async () => {
       try {
         await report_job({
           job_type: job_types.PROCESS_MARKET_RESULTS,
-          succ: false,
-          reason: error.message,
-          timestamp: Math.round(start_time / 1000)
+          job_success: false,
+          job_reason: error.message
         })
       } catch (report_error) {
         log(`Failed to report job error: ${report_error.message}`)

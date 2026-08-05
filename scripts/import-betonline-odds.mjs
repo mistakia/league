@@ -69,8 +69,8 @@ const format_market = async ({
     source_event_id,
     source_event_name: null,
 
-    open: true,
-    live: null,
+    is_open: true,
+    is_live: null,
     selection_count: 1,
 
     observed_at,

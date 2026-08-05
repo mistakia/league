@@ -274,7 +274,7 @@ async function handle_get_connection_status(ws, payload) {
         'status',
         'last_sync',
         'last_validated',
-        'auto_sync_enabled',
+        'is_auto_sync_enabled',
         'created_at'
       )
       .first()
@@ -307,7 +307,7 @@ async function handle_get_connection_status(ws, payload) {
       is_active: connection.status === 'active',
       last_sync_at: connection.last_sync,
       last_validated_at: connection.last_validated,
-      auto_sync_enabled: connection.auto_sync_enabled,
+      auto_sync_enabled: connection.is_auto_sync_enabled,
       created_at: connection.created_at,
       sync_statistics: {
         total_jobs: parseInt(job_stats?.total_jobs || 0),

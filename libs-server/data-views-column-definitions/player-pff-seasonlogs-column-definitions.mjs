@@ -110,7 +110,7 @@ const PFF_PLAYER_RANGE_OFFSET_AGGREGATE = {
   punter_rank: 'AVG',
   offense_ranked: 'AVG',
   defense_ranked: 'AVG',
-  meets_snap_minimum: 'BOOL_OR',
+  is_meeting_snap_minimum: 'BOOL_OR',
   height: 'AVG',
   weight: 'AVG'
 }
@@ -203,8 +203,9 @@ export default {
   player_pff_special_teams_rank:
     create_field_from_pff_player_seasonlogs('special_teams_rank'),
   player_pff_run_snaps: create_field_from_pff_player_seasonlogs('run_snaps'),
-  player_pff_meets_snap_minimum:
-    create_field_from_pff_player_seasonlogs('meets_snap_minimum'),
+  player_pff_meets_snap_minimum: create_field_from_pff_player_seasonlogs(
+    'is_meeting_snap_minimum'
+  ),
   player_pff_kickoff_kicker:
     create_field_from_pff_player_seasonlogs('kickoff_kicker'),
   player_pff_pass: create_field_from_pff_player_seasonlogs('pass'),

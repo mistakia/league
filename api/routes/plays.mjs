@@ -45,13 +45,13 @@ const HISTORICAL_PLAYS_FIELDS = [
   'nfl_plays.game_clock_start',
   'nfl_plays.ydl_end',
   'nfl_plays.ydl_start',
-  'nfl_plays.first_down',
-  'nfl_plays.goal_to_go',
+  'nfl_plays.is_first_down',
+  'nfl_plays.is_goal_to_go',
   'nfl_plays.drive_play_count',
   'nfl_plays.play_time_of_day',
   'nfl_plays.play_type_nfl',
   'nfl_plays.updated',
-  'nfl_plays.qb_kneel',
+  'nfl_plays.is_qb_kneel',
   'nfl_games.home_nfl_team as h',
   'nfl_games.away_nfl_team as v'
 ]
@@ -107,8 +107,8 @@ function build_current_week_play_stats_query({ db }) {
     .select(
       'nfl_play_stats_current_week.*',
       'nfl_plays_current_week.week',
-      'nfl_plays_current_week.qb_kneel',
-      'nfl_plays_current_week.first_down'
+      'nfl_plays_current_week.is_qb_kneel',
+      'nfl_plays_current_week.is_first_down'
     )
     .leftJoin('nfl_plays_current_week', function () {
       this.on(
@@ -123,7 +123,7 @@ function build_current_week_play_stats_query({ db }) {
     })
     .where('nfl_plays_current_week.season_year', current_season.year)
     .where('nfl_plays_current_week.season_type', current_season.nfl_seas_type)
-    .where('nfl_play_stats_current_week.valid', true)
+    .where('nfl_play_stats_current_week.is_valid', true)
 }
 
 /**
@@ -139,8 +139,8 @@ function build_historical_play_stats_query({
     .select(
       'nfl_play_stats.*',
       'nfl_plays.week',
-      'nfl_plays.qb_kneel',
-      'nfl_plays.first_down'
+      'nfl_plays.is_qb_kneel',
+      'nfl_plays.is_first_down'
     )
     .leftJoin('nfl_plays', function () {
       this.on('nfl_play_stats.esbid', '=', 'nfl_plays.esbid').andOn(
@@ -152,7 +152,7 @@ function build_historical_play_stats_query({
     .where('nfl_plays.season_year', year)
     .where('nfl_plays.week', week)
     .where('nfl_plays.season_type', seas_type)
-    .where('nfl_play_stats.valid', true)
+    .where('nfl_play_stats.is_valid', true)
 }
 
 // ============================================================================
@@ -386,8 +386,8 @@ router.get('/all', async (req, res) => {
  *                     yards: 15
  *                     touchdown: false
  *                     interception: false
- *                     valid: true
- *                     qb_kneel: false
+ *                     is_valid: true
+ *                     is_qb_kneel: false
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -505,8 +505,8 @@ router.get('/stats', async (req, res) => {
  *                     yards_gained: 7
  *                     ball_carrier_pid: "PATR-MAHO-005785"
  *                     rush_yds: 7
- *                     first_down: false
- *                     successful_play: true
+ *                     is_first_down: false
+ *                     is_successful_play: true
  *                     dwn: 1
  *                     dot: 75
  *                     ydl_100: 25

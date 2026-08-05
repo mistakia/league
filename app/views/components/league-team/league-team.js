@@ -44,7 +44,7 @@ export default function LeagueTeam({
     set_is_practice_squad_drafted_expanded
   ] = useState(false)
 
-  const is_hosted_league = Boolean(league.hosted)
+  const is_hosted_league = Boolean(league.is_hosted)
   const teamId = Number(tid)
 
   useEffect(() => {

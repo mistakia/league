@@ -19,7 +19,7 @@ export default async function ({ lid, year = null }) {
       'restricted_free_agency_bids.nomination_id'
     )
     .where({
-      succ: true,
+      is_successful: true,
       'restricted_free_agency_bids.lid': lid
     })
 

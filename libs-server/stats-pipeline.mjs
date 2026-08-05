@@ -30,7 +30,7 @@ const log = debug('stats-pipeline')
  */
 export const get_hosted_league_ids = async () => {
   return db('leagues')
-    .where({ hosted: 1 })
+    .where({ is_hosted: 1 })
     .whereNull('archived_at')
     .pluck('uid')
 }

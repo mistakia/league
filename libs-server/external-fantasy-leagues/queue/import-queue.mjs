@@ -72,7 +72,7 @@ class ExternalLeagueSyncQueue {
           lid: connection.lid,
           job_type,
           sync_components: JSON.stringify(validated_sync_components),
-          dry_run,
+          is_dry_run: dry_run,
           initiated_by: user_id,
           status: 'queued'
         })
@@ -292,7 +292,7 @@ class ExternalLeagueSyncQueue {
         job_id,
         platform: job.platform,
         job_type: job.job_type,
-        dry_run: job.dry_run
+        dry_run: job.is_dry_run
       })
 
       // Send start notification
@@ -319,7 +319,7 @@ class ExternalLeagueSyncQueue {
 
       // Execute the sync operation
       let result
-      if (job.dry_run) {
+      if (job.is_dry_run) {
         // Dry run: fetch data without writing to database
         result = await this.sync_orchestrator.fetch_league_data({
           platform_name: job.platform,

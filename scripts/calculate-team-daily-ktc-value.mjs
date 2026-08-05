@@ -555,7 +555,7 @@ const main = async () => {
       // get all hosted leagues that are not archived
       const leagues = await db('leagues')
         .select('uid')
-        .where({ hosted: 1 })
+        .where({ is_hosted: 1 })
         .whereNull('archived_at')
 
       for (const league of leagues) {

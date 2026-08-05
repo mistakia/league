@@ -30,7 +30,7 @@ export default async function (knex) {
   await createLeague({
     commishid: userId,
     lid: 1,
-    hosted: 1,
+    is_hosted: 1,
     draft_start: Math.round(Date.now() / 1000),
     free_agency_live_auction_start: current_season.regular_season_start
       .add(1, 'week')

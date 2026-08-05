@@ -3,29 +3,21 @@
   "description": "Test case for should create a year splits query with player age at time of split",
   "request": {
     "sort": [
-      {
-        "column_id": "player_receiving_yards_from_plays",
-        "desc": true
-      }
+      { "column_id": "player_receiving_yards_from_plays", "desc": true }
     ],
     "prefix_columns": ["player_name"],
     "columns": [
       {
         "column_id": "player_receiving_yards_from_plays",
-        "params": {
-          "year": [2023, 2022, 2021, 2020]
-        }
+        "params": { "year": [2023, 2022, 2021, 2020] }
       },
       "player_age"
     ],
     "where": [],
     "row_axes": ["year"]
   },
-  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"t0a1286e29a881dbb25dbfc5a1b73d78a\" as materialized (select COALESCE(target_pid) as pid, \"nfl_plays\".\"season_year\" as \"year\", SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2020, 2021, 2022, 2023) group by \"nfl_plays\".\"season_year\", COALESCE(target_pid)) select \"player\".\"pid\", player.first_name, player.last_name, \"t0a1286e29a881dbb25dbfc5a1b73d78a\".\"rec_yds_from_plays\" AS \"rec_yds_from_plays_0\", CASE WHEN player.date_of_birth IS NULL OR player.date_of_birth = '0000-00-00' THEN NULL ELSE ROUND(EXTRACT(YEAR FROM AGE(opening_days.opening_day, TO_DATE(player.date_of_birth, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(opening_days.opening_day, TO_DATE(player.date_of_birth, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(opening_days.opening_day, TO_DATE(player.date_of_birth, 'YYYY-MM-DD'))) / 365.25), 2) END as age_0, \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t0a1286e29a881dbb25dbfc5a1b73d78a\" on \"t0a1286e29a881dbb25dbfc5a1b73d78a\".\"pid\" = \"player\".\"pid\" and t0a1286e29a881dbb25dbfc5a1b73d78a.year = player_years.year and \"t0a1286e29a881dbb25dbfc5a1b73d78a\".\"year\" in (2023, 2022, 2021, 2020) left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" group by player.first_name, player.last_name, \"t0a1286e29a881dbb25dbfc5a1b73d78a\".\"rec_yds_from_plays\", player.date_of_birth, opening_days.opening_day, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"td958bb492ea4a1dfd616420c0c9e39d4\" as materialized (select COALESCE(target_pid) as pid, \"nfl_plays\".\"season_year\" as \"year\", SUM(CASE WHEN is_completion = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2020, 2021, 2022, 2023) group by \"nfl_plays\".\"season_year\", COALESCE(target_pid)) select \"player\".\"pid\", player.first_name, player.last_name, \"td958bb492ea4a1dfd616420c0c9e39d4\".\"rec_yds_from_plays\" AS \"rec_yds_from_plays_0\", CASE WHEN player.date_of_birth IS NULL OR player.date_of_birth = '0000-00-00' THEN NULL ELSE ROUND(EXTRACT(YEAR FROM AGE(opening_days.opening_day, TO_DATE(player.date_of_birth, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(opening_days.opening_day, TO_DATE(player.date_of_birth, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(opening_days.opening_day, TO_DATE(player.date_of_birth, 'YYYY-MM-DD'))) / 365.25), 2) END as age_0, \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"td958bb492ea4a1dfd616420c0c9e39d4\" on \"td958bb492ea4a1dfd616420c0c9e39d4\".\"pid\" = \"player\".\"pid\" and td958bb492ea4a1dfd616420c0c9e39d4.year = player_years.year and \"td958bb492ea4a1dfd616420c0c9e39d4\".\"year\" in (2023, 2022, 2021, 2020) left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" group by player.first_name, player.last_name, \"td958bb492ea4a1dfd616420c0c9e39d4\".\"rec_yds_from_plays\", player.date_of_birth, opening_days.opening_day, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["player", "plays", "parameters", "sorting", "cte", "joins"],
   "timeout_ms": 40000,
-  "expected_metadata": {
-    "cache_ttl": "one_week",
-    "cache_expire_at": null
-  }
+  "expected_metadata": { "cache_ttl": "one_week", "cache_expire_at": null }
 }

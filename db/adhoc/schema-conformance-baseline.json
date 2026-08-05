@@ -1,7 +1,7 @@
 {
   "note": "Checked-in ratchet baseline for db/adhoc/audit-schema-conformance.mjs, enforced by db/adhoc/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/adhoc/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-04T19:25:42.425Z",
-  "count": 553,
+  "generated_at": "2026-08-05T01:50:53.855Z",
+  "count": 304,
   "violations": [
     {
       "table": "config",
@@ -12,16 +12,6 @@
       "table": "config",
       "column": "value",
       "rule": "shorthand"
-    },
-    {
-      "table": "dfs_contests",
-      "column": "ownership_imported",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "draft",
-      "column": "comp",
-      "rule": "boolean_prefix"
     },
     {
       "table": "draft",
@@ -62,21 +52,6 @@
       "table": "espn_receiving_metrics_history",
       "column": "pos",
       "rule": "shorthand"
-    },
-    {
-      "table": "external_league_connections",
-      "column": "auto_sync_enabled",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "external_league_import_job_history",
-      "column": "success",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "external_league_import_jobs",
-      "column": "dry_run",
-      "rule": "boolean_prefix"
     },
     {
       "table": "footballoutsiders",
@@ -199,51 +174,6 @@
       "rule": "season_grain"
     },
     {
-      "table": "historical_injury_index",
-      "column": "changelog_injury_event",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "historical_injury_index",
-      "column": "changelog_nfl_reserve_event",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "historical_injury_index",
-      "column": "changelog_unavailable",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "historical_injury_index",
-      "column": "gamelog_active",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "historical_injury_index",
-      "column": "played",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "historical_injury_index",
-      "column": "practice_listed_injury",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "historical_injury_index",
-      "column": "practice_questionable_or_worse",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "historical_injury_index",
-      "column": "ruled_out_in_game",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "jobs",
-      "column": "succ",
-      "rule": "boolean_prefix"
-    },
-    {
       "table": "jobs",
       "column": "timestamp",
       "rule": "reserved_word"
@@ -272,11 +202,6 @@
       "table": "league_format_draft_pick_value",
       "column": "rank",
       "rule": "shorthand"
-    },
-    {
-      "table": "league_format_player_projection_values_history",
-      "column": "removed",
-      "rule": "boolean_prefix"
     },
     {
       "table": "league_format_player_projection_values_history",
@@ -364,11 +289,6 @@
       "rule": "season_grain"
     },
     {
-      "table": "league_scoring_formats",
-      "column": "exclude_quarterback_kneels",
-      "rule": "boolean_prefix"
-    },
-    {
       "table": "league_team_careerlogs",
       "column": "ties",
       "rule": "shorthand"
@@ -412,11 +332,6 @@
       "table": "league_team_lineup_contribution_weeks",
       "column": "sp",
       "rule": "shorthand"
-    },
-    {
-      "table": "league_team_lineup_contribution_weeks",
-      "column": "start",
-      "rule": "boolean_prefix"
     },
     {
       "table": "league_team_lineup_contribution_weeks",
@@ -500,11 +415,6 @@
     },
     {
       "table": "leagues",
-      "column": "hosted",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "leagues",
       "column": "mfl_id",
       "rule": "external_id"
     },
@@ -575,16 +485,6 @@
     },
     {
       "table": "nfl_games",
-      "column": "div",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_games",
-      "column": "ot",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_games",
       "column": "stad",
       "rule": "shorthand"
     },
@@ -605,28 +505,13 @@
     },
     {
       "table": "nfl_play_stats_current_week",
-      "column": "valid",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_play_stats_current_week",
       "column": "yards",
       "rule": "shorthand"
     },
     {
       "table": "nfl_play_stats",
-      "column": "valid",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_play_stats",
       "column": "yards",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "assist_tk",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays_current_week",
@@ -637,11 +522,6 @@
       "table": "nfl_plays_current_week",
       "column": "back",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "batted_pass",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays_current_week",
@@ -655,26 +535,6 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "catchable_ball",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "charted",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "comp",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "contested_ball",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "cov",
       "rule": "shorthand"
     },
@@ -690,18 +550,8 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "created_reception",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "db",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "deleted",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays_current_week",
@@ -710,38 +560,8 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "drive_inside20",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "drive_score",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "dropped_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "dwn",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "end_around_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "ep_att",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "ep_succ",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays_current_week",
@@ -750,113 +570,8 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "fg_att",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "first_down_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "first_down_penalty",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "first_down_rush",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "first_down",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "fourth_down_converted",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "fourth_down_failed",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "fum",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "fumbles_lost",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "goal_to_go",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "highlight_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "hindered_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "incomp",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "int_worthy",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "interceptions",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "jet_sweep_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "kickoff_att",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "lead_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "mbt",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "motion",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "no_huddle",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "oob",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays_current_week",
@@ -865,128 +580,8 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "option_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "out_of_pocket_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "own_fumble_recovery",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "pain_free_play",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "pass_td",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "penalty",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "phyb",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "pitch_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "play_action",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "pru",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "punt_att",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "punt_blocked",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_dropback",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_fault_sack",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_hit",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_hurry",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_kneel",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_left_pocket",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_pressure_tracking",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_pressure",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_rush",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_scramble",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_sneak",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_spike",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays_current_week",
@@ -995,48 +590,8 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "ret_td",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "reverse_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "route",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "run_play_option",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "rush_td",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "rush",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "safety",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "score",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "screen_pass",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays_current_week",
@@ -1045,103 +600,8 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "series_suc",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "shovel_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "sideline_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "sk",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "solo_tk",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "special",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "split_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "stunt",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "successful_play",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "td",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "tfl",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "third_down_converted",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "third_down_failed",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "throw_away",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "timeouts",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "touchback",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "trick_look",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "trick_play",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "ttsk",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "two_att",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays_current_week",
@@ -1164,104 +624,9 @@
       "rule": "shorthand"
     },
     {
-      "table": "nfl_plays_current_week",
-      "column": "zero_blitz",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_passer",
-      "column": "hurry",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_passer",
-      "column": "pass_dropped",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_passer",
-      "column": "pressure_at_pass_forward",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_passer",
-      "column": "pressure",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_passer",
-      "column": "spike",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "caused_pressure",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "lined_up_in_the_box",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "pass_defended",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "pressure_caused_turnover",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "was_blitzing",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "was_running_route",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_receiver",
-      "column": "completion",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_receiver",
-      "column": "interception",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_receiver",
-      "column": "isolated",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_receiver",
-      "column": "pass_dropped",
-      "rule": "boolean_prefix"
-    },
-    {
       "table": "nfl_plays_receiver",
       "column": "route",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_receiver",
-      "column": "touchdown",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays_rusher",
-      "column": "touchdown",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "assist_tk",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays",
@@ -1275,38 +640,8 @@
     },
     {
       "table": "nfl_plays",
-      "column": "batted_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "blitz",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
       "column": "boxdb",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "catchable_ball",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "charted",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "comp",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "contested_ball",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays",
@@ -1325,18 +660,8 @@
     },
     {
       "table": "nfl_plays",
-      "column": "created_reception",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
       "column": "db",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "deleted",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays",
@@ -1345,103 +670,13 @@
     },
     {
       "table": "nfl_plays",
-      "column": "drive_inside20",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "drive_score",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "dropped_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
       "column": "dwn",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
-      "column": "end_around_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "endzone_target",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "ep_att",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "ep_succ",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
       "column": "ep",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "fake_field_goal",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "fake_punt",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "fg_att",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "fg_blocked",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "first_down_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "first_down_penalty",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "first_down_rush",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "first_down",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "fourth_down_converted",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "fourth_down_failed",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "fum",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays",
@@ -1455,98 +690,8 @@
     },
     {
       "table": "nfl_plays",
-      "column": "fumbles_lost",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "goal_to_go",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "highlight_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "hindered_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "incomp",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "int_worthy",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "interceptions",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "jet_sweep_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "kickoff_att",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "kickoff_onside",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "kickoff_out_of_bounds",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "kickoff_touchback",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "lead_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
       "column": "mbt",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "motion_before_snap",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "motion_during_snap",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "motion",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "no_huddle",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "oob",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays",
@@ -1555,73 +700,8 @@
     },
     {
       "table": "nfl_plays",
-      "column": "option_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "out_of_pocket_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "own_fumble_recovery",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "pain_free_play",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "pass_breakup",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "pass_td",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "penalty_declined",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "penalty_offset",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
       "column": "penalty_player_sportradar_id",
       "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "penalty",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "phyb",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "pitch_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "play_action",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays",
@@ -1630,128 +710,13 @@
     },
     {
       "table": "nfl_plays",
-      "column": "punt_att",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "punt_blocked",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "punt_fair_catch",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "punt_inside_20",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "punt_out_of_bounds",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "punt_touchback",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_dropback",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_fault_sack",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_hit",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_hurry",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_kneel",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_left_pocket",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_pressure_tracking",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_pressure",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_rush",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_scramble",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_sneak",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_spike",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
       "column": "qtr",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
-      "column": "ret_td",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "reverse_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
       "column": "route",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "run_play_option",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "rush_td",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "rush",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays",
@@ -1765,68 +730,8 @@
     },
     {
       "table": "nfl_plays",
-      "column": "safety",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "score",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "screen_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
       "column": "sep",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "series_suc",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "shovel_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "sideline_pass",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "sk",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "solo_tk",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "special",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "split_run",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "stunt",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "successful_play",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays",
@@ -1840,58 +745,8 @@
     },
     {
       "table": "nfl_plays",
-      "column": "td",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "tfl",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "third_down_converted",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "third_down_failed",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "throw_away",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "timeouts",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "touchback",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "trick_look",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "trick_play",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "nfl_plays",
       "column": "ttsk",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "two_att",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_plays",
@@ -1912,11 +767,6 @@
       "table": "nfl_plays",
       "column": "yfog",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "zero_blitz",
-      "rule": "boolean_prefix"
     },
     {
       "table": "nfl_team_seasonlogs",
@@ -2042,11 +892,6 @@
       "table": "pff_player_facet_seasonlogs",
       "column": "yards",
       "rule": "shorthand"
-    },
-    {
-      "table": "pff_player_seasonlogs",
-      "column": "meets_snap_minimum",
-      "rule": "boolean_prefix"
     },
     {
       "table": "pff_player_seasonlogs",
@@ -2250,11 +1095,6 @@
     },
     {
       "table": "player_gamelogs",
-      "column": "active",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "player_gamelogs",
       "column": "jnum",
       "rule": "shorthand"
     },
@@ -2262,16 +1102,6 @@
       "table": "player_gamelogs",
       "column": "pos",
       "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "ruled_out_in_game",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "started",
-      "rule": "boolean_prefix"
     },
     {
       "table": "player_passing_gamelogs",
@@ -2339,19 +1169,9 @@
       "rule": "shorthand"
     },
     {
-      "table": "player",
-      "column": "combine_attendance",
-      "rule": "boolean_prefix"
-    },
-    {
       "table": "playoffs",
       "column": "year",
       "rule": "season_grain"
-    },
-    {
-      "table": "poaches",
-      "column": "succ",
-      "rule": "boolean_prefix"
     },
     {
       "table": "position_game_outcome_defaults",
@@ -2399,31 +1219,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "prop_markets_history",
-      "column": "live",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "prop_markets_history",
-      "column": "open",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "prop_markets_index",
-      "column": "live",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "prop_markets_index",
-      "column": "market_settled",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "prop_markets_index",
-      "column": "open",
-      "rule": "boolean_prefix"
-    },
-    {
       "table": "props_index",
       "column": "ln",
       "rule": "shorthand"
@@ -2442,16 +1237,6 @@
       "table": "props_index",
       "column": "u",
       "rule": "shorthand"
-    },
-    {
-      "table": "props",
-      "column": "active",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "props",
-      "column": "live",
-      "rule": "boolean_prefix"
     },
     {
       "table": "props",
@@ -2475,23 +1260,8 @@
     },
     {
       "table": "restricted_free_agency_bids",
-      "column": "succ",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "restricted_free_agency_bids",
       "column": "year",
       "rule": "season_grain"
-    },
-    {
-      "table": "roster_asset_holding",
-      "column": "audit_corrected",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "roster_asset_transformation",
-      "column": "audit_corrected",
-      "rule": "boolean_prefix"
     },
     {
       "table": "roster_asset_transformation",
@@ -2585,11 +1355,6 @@
     },
     {
       "table": "seasons",
-      "column": "free_agency_auction_slow_mode",
-      "rule": "boolean_prefix"
-    },
-    {
-      "table": "seasons",
       "column": "fte",
       "rule": "shorthand"
     },
@@ -2662,11 +1427,6 @@
       "table": "seasons",
       "column": "year",
       "rule": "season_grain"
-    },
-    {
-      "table": "selection_combination_definitions",
-      "column": "active",
-      "rule": "boolean_prefix"
     },
     {
       "table": "super_priority",
@@ -2762,11 +1522,6 @@
       "table": "waivers",
       "column": "po",
       "rule": "shorthand"
-    },
-    {
-      "table": "waivers",
-      "column": "succ",
-      "rule": "boolean_prefix"
     }
   ]
 }

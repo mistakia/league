@@ -28,7 +28,7 @@ const create_conditional_pick = async function ({ tid, league }) {
     tid,
     lid: league.uid,
     otid: tid,
-    comp: 1,
+    is_compensatory: 1,
     round: 4,
     year,
     pick

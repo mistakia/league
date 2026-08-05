@@ -863,7 +863,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                         type: string
  *                         description: Event name from sportsbook
  *                         example: "Kansas City Chiefs @ Buffalo Bills"
- *                       market_settled:
+ *                       is_market_settled:
  *                         type: boolean
  *                         description: Whether the market has been settled
  *                         example: false
@@ -991,9 +991,9 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                     esbid: "2024011401"
  *                     source_event_id: "ev_67890"
  *                     source_event_name: "Kansas City Chiefs @ Buffalo Bills"
- *                     open: true
- *                     live: false
- *                     market_settled: false
+ *                     is_open: true
+ *                     is_live: false
+ *                     is_market_settled: false
  *                     metric_result_value: null
  *                     time_type: "CLOSE"
  *                     timestamp: "2024-01-14T15:30:00Z"
@@ -1036,9 +1036,9 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                     esbid: "2024010701"
  *                     source_event_id: "ev_98765"
  *                     source_event_name: "San Francisco 49ers @ Green Bay Packers"
- *                     open: false
- *                     live: false
- *                     market_settled: true
+ *                     is_open: false
+ *                     is_live: false
+ *                     is_market_settled: true
  *                     metric_result_value: 98.0
  *                     time_type: "CLOSE"
  *                     timestamp: "2024-01-07T16:30:00Z"
@@ -1227,9 +1227,9 @@ router.get('/:pid/markets/?', async (req, res) => {
           esbid: row.esbid,
           source_event_id: row.source_event_id,
           source_event_name: row.source_event_name,
-          open: row.open,
-          live: row.live,
-          market_settled: row.market_settled,
+          is_open: row.is_open,
+          is_live: row.is_live,
+          is_market_settled: row.is_market_settled,
           time_type: row.time_type,
           timestamp: row.observed_at,
           year: row.season_year,

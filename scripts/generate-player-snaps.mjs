@@ -69,7 +69,7 @@ const generate_player_snaps_for_week = async ({
       'nfl_plays.ydl_100',
       'nfl_plays.score_diff',
       'nfl_plays.wp',
-      'nfl_plays.no_huddle',
+      'nfl_plays.is_no_huddle',
       'nfl_plays.sec_rem_half',
       'nfl_plays.yards_to_go',
       'nfl_plays.dwn',
@@ -108,7 +108,7 @@ const generate_player_snaps_for_week = async ({
       ydl_100,
       score_diff,
       wp,
-      no_huddle,
+      is_no_huddle,
       sec_rem_half,
       yards_to_go,
       dwn,
@@ -172,7 +172,7 @@ const generate_player_snaps_for_week = async ({
       if (score_diff > 0) team_totals[off].off.snaps_leading.add(play_key)
       if (score_diff < 0) team_totals[off].off.snaps_trailing.add(play_key)
       if (wp > 0.2 && wp < 0.8) team_totals[off].off.snaps_neutral.add(play_key)
-      if (no_huddle) team_totals[off].off.snaps_no_huddle.add(play_key)
+      if (is_no_huddle) team_totals[off].off.snaps_no_huddle.add(play_key)
       if (sec_rem_half <= 120)
         team_totals[off].off.snaps_under_two_minutes.add(play_key)
       if (sec_rem_half <= 300)
@@ -278,7 +278,7 @@ const generate_player_snaps_for_week = async ({
           if (play.score_diff > 0) player_snaps.leading.add(play_key)
           if (play.score_diff < 0) player_snaps.trailing.add(play_key)
           if (play.wp > 0.2 && play.wp < 0.8) player_snaps.neutral.add(play_key)
-          if (play.no_huddle) player_snaps.no_huddle.add(play_key)
+          if (play.is_no_huddle) player_snaps.no_huddle.add(play_key)
 
           if (play.sec_rem_half <= 120)
             player_snaps.under_two_minutes.add(play_key)
@@ -328,7 +328,7 @@ const generate_player_snaps_for_week = async ({
     player_snap_inserts.push({
       esbid,
       pid: player_row.pid,
-      active: true,
+      is_active: true,
       year,
       opp,
       pos,

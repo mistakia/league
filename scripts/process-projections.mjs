@@ -658,7 +658,7 @@ const run = async ({ year = current_season.year } = {}) => {
   // active, hosted league derived from the leagues table.
   const hosted_league_rows = await db('leagues')
     .select('uid')
-    .where({ hosted: true })
+    .where({ is_hosted: true })
     .whereNull('archived_at')
   const lids = [0, ...hosted_league_rows.map((row) => row.uid)]
 
@@ -736,7 +736,7 @@ const run = async ({ year = current_season.year } = {}) => {
 
   for (const lid of lids) {
     const league = leagues_cache[lid]
-    if (!league.hosted) {
+    if (!league.is_hosted) {
       continue
     }
 
@@ -769,7 +769,7 @@ const check_oracle = async ({ seas_type }) => {
   const two_hours_ago = Math.round(Date.now() / 1000) - 7200
   const stale_leagues = await db('leagues')
     .select('uid', 'processed_at')
-    .where({ hosted: true })
+    .where({ is_hosted: true })
     .whereNull('archived_at')
     .where(function () {
       this.whereNull('processed_at').orWhere('processed_at', '<', two_hours_ago)
@@ -825,7 +825,7 @@ const check_lineup_starter_identity_oracle = async () => {
     left join player_starters ps
       on ps.lid = l.lid and ps.tid = l.tid and ps.week = l.week
     where l.year = ?
-      and lg.hosted = true
+      and lg.is_hosted = true
       and lg.archived_at is null
       and l.total > 0
       and ps.week is null

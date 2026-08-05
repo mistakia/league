@@ -78,7 +78,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
   // clear any pending poaching claims for player
   await db('poaches')
     .update({
-      succ: 0,
+      is_successful: 0,
       processed: timestamp,
       reason: 'player is not on a practice squad' // TODO use constant
     })

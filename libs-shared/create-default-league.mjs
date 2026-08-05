@@ -61,7 +61,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     targets: 0.0,
     rushing_first_downs: 0.0,
     receiving_first_downs: 0.0,
-    exclude_quarterback_kneels: false,
+    is_excluding_quarterback_kneels: false,
     draft_start: null,
     free_agency_live_auction_start: null,
     min_bid: 1,

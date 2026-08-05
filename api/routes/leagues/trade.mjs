@@ -833,7 +833,7 @@ router.post(
           await trx('poaches')
             .update('processed', Math.round(Date.now() / 1000))
             .update('reason', 'Player traded')
-            .update('succ', 0)
+            .update('is_successful', 0)
             .where('lid', leagueId)
             .whereIn(
               'pid',

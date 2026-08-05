@@ -303,7 +303,7 @@ const format_player_gamelog = ({
     }),
     pid,
     pos,
-    active: true,
+    is_active: true,
     source: PLAY_STATS_GAMELOG_SOURCE
   }
 }
@@ -677,7 +677,7 @@ const generate_snap_based_gamelogs = async ({
         nfl_team: team,
         opponent_nfl_team: opponent,
         season_year: year,
-        active: true,
+        is_active: true,
         source: PLAY_STATS_GAMELOG_SOURCE
         // All counting stats default to NULL/0
       })
@@ -733,7 +733,7 @@ const load_team_dropbacks = async ({ unique_esbids }) => {
     .select('possession_nfl_team as tm', 'esbid')
     .count('* as dropbacks')
     .whereIn('esbid', unique_esbids)
-    .where({ qb_dropback: true })
+    .where({ is_qb_dropback: true })
     .whereNot({ play_type: 'NOPL' })
     .groupBy('possession_nfl_team', 'esbid')
 
@@ -968,7 +968,7 @@ const generate_defense_gamelogs = ({ playStats, player_gamelog_inserts }) => {
 // uncontrolled -- a regenerate would have rewritten it from one unnormalized
 // snapshot to another. The vocabulary is canonical and CHECK-constrained now,
 // so a regenerate can only write the same value.
-export const GAMELOG_COLUMNS_NOT_MERGED = ['active']
+export const GAMELOG_COLUMNS_NOT_MERGED = ['is_active']
 
 /**
  * Delete the gamelogs this run owns but no longer produces.

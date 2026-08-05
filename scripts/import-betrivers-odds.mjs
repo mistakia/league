@@ -92,8 +92,8 @@ const format_market = async ({
     source_event_id: event?.id,
     source_event_name: event?.name,
 
-    open: betrivers_market.status === 'OPEN',
-    live: null,
+    is_open: betrivers_market.status === 'OPEN',
+    is_live: null,
     selection_count: betrivers_market.outcomes.length,
 
     observed_at,

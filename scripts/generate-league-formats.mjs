@@ -78,7 +78,7 @@ const generate_league_formats = async () => {
     targets: [0],
     rushing_first_downs: [0],
     receiving_first_downs: [0],
-    exclude_quarterback_kneels: [false],
+    is_excluding_quarterback_kneels: [false],
     cap: [200],
     min_bid: [0]
   }
@@ -132,7 +132,7 @@ const generate_league_formats = async () => {
     targets: c.targets,
     rushing_first_downs: c.rushing_first_downs,
     receiving_first_downs: c.receiving_first_downs,
-    exclude_quarterback_kneels: c.exclude_quarterback_kneels
+    is_excluding_quarterback_kneels: c.is_excluding_quarterback_kneels
   })
 
   const extract_league = (c) => ({
