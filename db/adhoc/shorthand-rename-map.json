@@ -1955,16 +1955,17 @@
   ],
   "applied": {
     "date": "2026-08-05",
-    "commit": "72346e579",
+    "commit": "72346e579 (200 renames + 9 drops), ba25f64c9 (the pff_team_gamelogs outcome-flag drop)",
     "ddl": [
       "db/adhoc/2026-08-04-conform-shorthand-plays.sql (47 statements)",
       "db/adhoc/2026-08-04-conform-shorthand-tail.sql (157 statements)",
-      "db/adhoc/2026-08-04-drop-dead-shorthand-columns.sql (9 statements)"
+      "db/adhoc/2026-08-04-drop-dead-shorthand-columns.sql (9 statements)",
+      "db/adhoc/2026-08-04-drop-pff-team-gamelog-outcome-flags.sql (1 statement, 3 columns)"
     ],
-    "result": "Audit shorthand 234 -> 25, total 304 -> 95. Ratchet confirms 209 baselined violations retired.",
-    "records_now_dead": "All 200 `rename` records and all 9 `drop` records in this file are APPLIED to league_production. They are history, not work. Do not re-apply them.",
-    "records_still_live": "23 `superseded` (22 footballoutsiders.* plus league_formats.cap), owned by the tasks that remove those tables/columns; and pff_team_gamelogs.wins/.ties, ruled DROP on 2026-08-04 and owned by db/adhoc/2026-08-04-drop-pff-team-gamelog-outcome-flags.sql. The 6 `keep` records are already encoded as exemptions in audit-schema-conformance.mjs.",
-    "retirement": "This file is a migration instrument and should be DELETED once the superseded and blocked records are cleared by their owning tasks. It was NOT deleted when the rename class closed, because doing so would have destroyed the disposition record for those 25 still-open columns.",
+    "result": "Audit shorthand 234 -> 25 at 72346e579, then 25 -> 23 at ba25f64c9. Total conformance debt 304 -> 95 -> 93. The ratchet baseline was pruned to match at each step. 23 is the FLOOR this map drives to, as anticipated in `measured.note`.",
+    "records_now_dead": "All 200 `rename` records and ALL 11 `drop` records in this file are APPLIED to league_production. That includes the two `blocked_operator_ruling` records (pff_team_gamelogs.wins/.ties), which were ruled DROP on 2026-08-04 and applied on 2026-08-05 along with the unflagged sibling `losses`. They are history, not work. Do not re-apply any of them.",
+    "records_still_live": "23 `superseded` records only: 22 footballoutsiders.* columns plus league_formats.cap. Each disappears with its table or is removed by another task, so none is work for a naming cluster. They are the sole remaining reason this file exists. The 6 `keep` records are already encoded as exemptions in audit-schema-conformance.mjs and need nothing.",
+    "retirement": "DELETE THIS FILE once the 23 `superseded` records are cleared by their owning tasks -- that is now the only outstanding condition. Whoever removes the footballoutsiders table and league_formats.cap should delete this map in the same change. Until then it is the only disposition record those 23 columns have, which is why it survived the rename class closing on 2026-08-05.",
     "four_renames_beyond_this_map": "league_team_careerlogs, league_team_seasonlogs, league_user_careerlogs and pff_team_seasonlogs each also had `losses` renamed alongside their `wins`/`ties`. `losses` is six characters so the audit never flagged it and it is absent from the records below; renaming only its two siblings would have split an obvious trio across two naming conventions."
   }
 }
