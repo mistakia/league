@@ -88,6 +88,27 @@ const walk_directory = async (directory) => {
   return out
 }
 
+// Comments are stripped before tokenizing, because the presence-grep cannot tell
+// a consumer from PROSE ABOUT a consumer -- and the prose that names a legacy key
+// is, by construction, written in exactly the files this scans. Two comments made
+// `qtr` permanently unreportable: the migration module's own incident note
+// ("across 45 saved views (qtr 25, dot 7, route 7, dwn 5, wp 5)") and an aside in
+// player-fantasy-points-from-plays-column-definitions.mjs. So the gate answered OK
+// for `qtr`, `dot`, `route` and `dwn` whether or not any rule existed -- verified
+// 2026-08-05 by deleting the `qtr` rule and re-running, which still passed. That
+// is the worst shape for an oracle: green because it cannot see, over the exact
+// five keys the incident was about.
+//
+// A legacy key REQUIRES a rule in data-views-saved-view-migration.mjs, and
+// MIGRATED_PARAM_KEYS already recognises those exactly, so nothing legitimate is
+// lost by making a comment stop counting as coverage.
+const strip_comments = (text) =>
+  text
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    // A `//` preceded by `:` is a URL scheme, not a comment opener. Stripping
+    // there would eat the rest of a real line of code.
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1')
+
 const build_recognised_key_set = async () => {
   const [common, plays, team, migration] = await Promise.all([
     import('#libs-shared/common-column-params.mjs'),
@@ -116,7 +137,8 @@ const build_recognised_key_set = async () => {
   const consumed = new Set(migration.MIGRATED_PARAM_KEYS)
   for (const file of files) {
     const text = await fs.readFile(file, 'utf8')
-    for (const token of text.match(/[a-z][a-z0-9_]{2,}/g) || []) {
+    for (const token of strip_comments(text).match(/[a-z][a-z0-9_]{2,}/g) ||
+      []) {
       consumed.add(token)
     }
   }
