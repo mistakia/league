@@ -22,11 +22,37 @@ if (process.env.LEAGUE_MOCK_DATE) {
   MockDate.set(process.env.LEAGUE_MOCK_DATE)
 }
 
-// Optional filename filters. Without them this rewrites every fixture that
-// currently mismatches -- including drift from a sibling session's uncommitted
-// edits in this shared tree. Pass the fixtures you actually intend to bless:
+// Name the fixtures you intend to bless:
 //   node scripts/update-data-view-snapshots.mjs some-fixture.json other.json
-const filters = process.argv.slice(2).map((arg) => path.basename(arg))
+//
+// An EMPTY filter list rewrites every fixture that currently mismatches, which
+// silently absorbs a sibling session's uncommitted drift in this shared tree
+// along with whatever you meant to regenerate. That is not a hypothetical: an
+// argument list built from a `git diff` that happened to return nothing blessed
+// 28 fixtures instead of 13 on 2026-08-05, with a success message and no gate
+// downstream that could see it. A header comment warning about it was already
+// here and did not prevent it, so the empty list is now refused and the
+// whole-corpus regeneration has to be asked for by name.
+const args = process.argv.slice(2)
+const regenerate_all = args.includes('--all')
+const filters = args
+  .filter((arg) => arg !== '--all')
+  .map((arg) => path.basename(arg))
+
+if (!filters.length && !regenerate_all) {
+  console.error(
+    'Refusing to regenerate every mismatching fixture.\n' +
+      'Name the fixtures to bless, or pass --all deliberately:\n' +
+      '  node scripts/update-data-view-snapshots.mjs some-fixture.json other.json\n' +
+      '  node scripts/update-data-view-snapshots.mjs --all'
+  )
+  process.exit(1)
+}
+
+if (filters.length && regenerate_all) {
+  console.error('Pass filenames or --all, not both.')
+  process.exit(1)
+}
 
 const main = async () => {
   const cases = await load_data_view_test_queries()
@@ -46,7 +72,16 @@ const main = async () => {
 
   let updated = 0
   let skipped = 0
+  let inert_skipped = 0
   for (const test_case of selected) {
+    // A `skip_query_match` fixture's expected_query is inert -- the harness
+    // logs its diff and continues, so the fixture cannot fail on a query
+    // change. Rewriting one is bookkeeping, not coverage, and under --all it
+    // is pure noise in the diff. Regenerate one only when it is named.
+    if (!filters.length && test_case.skip_query_match) {
+      inert_skipped++
+      continue
+    }
     if (test_case.expected_query && test_case.expected_query.includes('${')) {
       skipped++
       continue
@@ -81,7 +116,10 @@ const main = async () => {
       console.error(`error ${test_case.filename}: ${e.message}`)
     }
   }
-  console.log(`\n${updated} updated, ${skipped} template-skipped`)
+  console.log(
+    `\n${updated} updated, ${skipped} template-skipped` +
+      (inert_skipped ? `, ${inert_skipped} skip_query_match-skipped` : '')
+  )
 }
 
 main().then(() => process.exit(0))
