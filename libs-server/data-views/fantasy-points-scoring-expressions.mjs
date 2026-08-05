@@ -137,7 +137,8 @@ const PLAYS_SOURCED_ROLES = [
         kind: 'rate',
         expr: 'COALESCE(is_completion::int, 0)'
       }
-    ]
+    ],
+    bonus_stat: { stat: 'passing_yards', yards_expr: 'COALESCE(pass_yds, 0)' }
   },
   {
     name: 'rushing',
@@ -161,9 +162,18 @@ const PLAYS_SOURCED_ROLES = [
       {
         column: 'rushing_first_downs',
         kind: 'conditional',
-        predicate: "is_first_down = true AND play_type = 'RUSH'"
+        predicate: "is_first_down = true AND play_type = 'RUSH'",
+        // Appended to the predicate when a format sets touchdown_is_first_down
+        // = false, so a rushing touchdown that also gained a first down scores
+        // the touchdown only. Mirrors the excluding-TD stat the gamelog path
+        // substitutes; both paths must agree or the same play scores twice on
+        // one of them.
+        excluding_touchdown_predicate: 'is_rushing_touchdown IS NOT TRUE'
       }
-    ]
+    ],
+    // The per-play yardage a bonus rule for this role reads. `stat` is the
+    // vocabulary a bonus rule names; `yards_expr` is how this role measures it.
+    bonus_stat: { stat: 'rushing_yards', yards_expr: 'COALESCE(rush_yds, 0)' }
   },
   {
     name: 'receiving',
@@ -215,13 +225,82 @@ const PLAYS_SOURCED_ROLES = [
       {
         column: 'receiving_first_downs',
         kind: 'conditional',
-        predicate: "is_first_down = true AND play_type = 'PASS'"
+        predicate: "is_first_down = true AND play_type = 'PASS'",
+        excluding_touchdown_predicate: 'is_passing_touchdown IS NOT TRUE',
+        // The tight-end first-down premium. Same shape as the reception
+        // override above; `predicate` is filled from the term's own predicate
+        // at render time, since the excluding-touchdown toggle can change it.
+        position_override: {
+          position_column: 'trg_pos',
+          join_positions: ['RB', 'WR', 'TE', 'FB'],
+          columns: [['TE', 'tight_end_receiving_first_downs']]
+        }
       }
-    ]
+    ],
+    bonus_stat: { stat: 'receiving_yards', yards_expr: 'COALESCE(recv_yds, 0)' }
   }
 ]
 
 const scoring_value = (scoring_format, column) => scoring_format[column] || 0
+
+// A term's effective predicate. Identical to the declared one unless the format
+// says a touchdown does not count as a first down, in which case the term's
+// excluding-touchdown clause is appended. Emitting the clause only then is what
+// keeps SQL byte-identical for the 65 production formats, all of which carry
+// touchdown_is_first_down = true.
+//
+// Read as `!== false` rather than through the registry default, matching how
+// every other value in this module is read: a format row that does not carry
+// the column at all must behave as it did before the column existed.
+const term_predicate = (term, scoring_format) => {
+  if (
+    term.excluding_touchdown_predicate &&
+    scoring_format.touchdown_is_first_down === false
+  ) {
+    return `${term.predicate} AND ${term.excluding_touchdown_predicate}`
+  }
+  return term.predicate
+}
+
+// The bonus rules this role can express, split by class.
+//
+//   big_play   LINEAR -- a per-play condition, so it is an ordinary summed term
+//              and needs no grain beyond the play.
+//   milestone  AGGREGATE-CONDITIONAL -- a condition on the player-GAME total,
+//              which is only expressible above the per-game stage in
+//              build_role_union_period_cte.
+//
+// A rule naming a stat this role does not source is skipped here and picked up
+// by the role that does. `rush_rec_yd` spans two roles and so is handled by the
+// milestone builder rather than by any single role.
+const bonus_rules = (scoring_format) => {
+  const rules = scoring_format?.bonuses
+  return Array.isArray(rules) ? rules : []
+}
+
+const is_usable_rule = (rule) =>
+  rule &&
+  typeof rule === 'object' &&
+  Number(rule.points) !== 0 &&
+  Number.isFinite(Number(rule.threshold))
+
+// `points * count(qualifying plays)` as a per-play CASE, one term per rule.
+const render_big_play_terms = (role, scoring_format) => {
+  if (!role.bonus_stat) {
+    return []
+  }
+  return bonus_rules(scoring_format)
+    .filter(
+      (rule) =>
+        is_usable_rule(rule) &&
+        rule.type === 'big_play' &&
+        rule.stat === role.bonus_stat.stat
+    )
+    .map(
+      (rule) =>
+        `(CASE WHEN ${role.bonus_stat.yards_expr} >= ${Number(rule.threshold)} THEN ${Number(rule.points)} ELSE 0 END)`
+    )
+}
 
 const render_position_override = (
   term,
@@ -231,23 +310,41 @@ const render_position_override = (
 ) => {
   const { predicate, position_column, columns } = term.position_override
   const cases = columns
-    .map(
-      ([position, column]) =>
-        `WHEN '${position}' THEN ${scoring_value(scoring_format, column)}`
-    )
+    .map(([position, column]) => {
+      // An override of exactly 0 falls back to the base value rather than
+      // scoring nothing. That is the gamelog path's pinned behaviour
+      // (calculate-points uses `||`, not `??`), and the two paths must agree.
+      const override = scoring_value(scoring_format, column)
+      return `WHEN '${position}' THEN ${override || base_value}`
+    })
     .join(' ')
   const column_reference = position_column_override || position_column
-  return `CASE WHEN ${predicate} THEN CASE ${column_reference} ${cases} ELSE ${base_value} END ELSE 0 END`
+  // A `rate` term's override declares its own predicate (a reception is
+  // `is_completion = true`); a `conditional` term's IS its predicate, which the
+  // touchdown toggle can change, so it is taken from the term rather than
+  // restated on the override.
+  const effective_predicate = predicate || term_predicate(term, scoring_format)
+  return `CASE WHEN ${effective_predicate} THEN CASE ${column_reference} ${cases} ELSE ${base_value} END ELSE 0 END`
 }
 
+// An override applies only when it is NONZERO and differs from the base.
+//
+// The nonzero half is load bearing rather than defensive. `tight_end_reception`
+// and the two beside it are set equal to the base by every production format,
+// but `tight_end_receiving_first_downs` defaults to 0 while
+// `receiving_first_downs` is commonly 0.5 -- so a strict `!== base` test would
+// switch positional scoring ON for existing formats and emit a CASE paying a
+// tight end nothing. Treating 0 as "no override" matches calculate-points,
+// which reads the override through `||`.
 const uses_position_override = (term, scoring_format, has_position_data) => {
   if (!has_position_data || !term.position_override) {
     return false
   }
   const base_value = scoring_value(scoring_format, term.column)
-  return term.position_override.columns.some(
-    ([, column]) => scoring_value(scoring_format, column) !== base_value
-  )
+  return term.position_override.columns.some(([, column]) => {
+    const override = scoring_value(scoring_format, column)
+    return override !== 0 && override !== base_value
+  })
 }
 
 const render_term = (
@@ -273,7 +370,7 @@ const render_term = (
     case 'flat':
       return `${value}`
     case 'conditional':
-      return `(CASE WHEN ${term.predicate} THEN ${value} ELSE 0 END)`
+      return `(CASE WHEN ${term_predicate(term, scoring_format)} THEN ${value} ELSE 0 END)`
     default:
       throw new Error(`unknown scoring term kind: ${term.kind}`)
   }
@@ -299,17 +396,23 @@ const generate_role_scoring_inner = async (
     }
   }
 
-  return role.terms
-    .filter((term) => term_is_emitted(term, scoring_format, has_position_data))
-    .map((term) =>
-      render_term(
-        term,
-        scoring_format,
-        has_position_data,
-        position_column_override
+  return [
+    ...role.terms
+      .filter((term) =>
+        term_is_emitted(term, scoring_format, has_position_data)
       )
-    )
-    .join(' + ')
+      .map((term) =>
+        render_term(
+          term,
+          scoring_format,
+          has_position_data,
+          position_column_override
+        )
+      ),
+    // Appended after the declared terms, so a format with no big_play rule
+    // emits exactly the SQL it did before bonuses existed.
+    ...render_big_play_terms(role, scoring_format)
+  ].join(' + ')
 }
 
 const role_by_name = Object.fromEntries(
@@ -348,6 +451,86 @@ export const generate_receiving_scoring_sql = async (
   has_position_data = false
 ) =>
   `ROUND(SUM(${await generate_receiving_scoring_inner(scoring_format, has_position_data)}), 2)`
+
+// --- Milestone bonuses: the aggregate-conditional class ---
+//
+// A milestone is a condition on the player-GAME total, which no per-play
+// expression can express. build_role_union_period_cte grew a per-game stage for
+// exactly this: a role declares `game_aggregates` (per-play expressions summed
+// per player-game) and the column declares `game_conditional_expr` (evaluated
+// once per player-game against those sums).
+//
+// `rush_rec_yd` is why the aggregates are declared per ROLE and evaluated
+// centrally rather than inside a role: rushing yards come from the
+// ball_carrier_pid arm and receiving yards from the target_pid arm, so their sum
+// only exists after the union.
+const MILESTONE_ALIAS_BY_STAT = {
+  passing_yards: 'bonus_passing_yards',
+  rushing_yards: 'bonus_rushing_yards',
+  receiving_yards: 'bonus_receiving_yards'
+}
+
+// The stats a milestone rule may name, and how each resolves against the
+// per-game aliases. A rule naming anything else is ignored rather than thrown,
+// so a config written for a newer engine does not break an older one.
+const milestone_value_expr = (stat) => {
+  if (MILESTONE_ALIAS_BY_STAT[stat]) {
+    return `role_union.${MILESTONE_ALIAS_BY_STAT[stat]}`
+  }
+  if (stat === 'rush_rec_yd') {
+    return `(role_union.${MILESTONE_ALIAS_BY_STAT.rushing_yards} + role_union.${MILESTONE_ALIAS_BY_STAT.receiving_yards})`
+  }
+  return null
+}
+
+const milestone_rules = (scoring_format) =>
+  bonus_rules(scoring_format).filter(
+    (rule) =>
+      is_usable_rule(rule) &&
+      rule.type === 'milestone' &&
+      milestone_value_expr(rule.stat)
+  )
+
+// The per-game aggregates a role must project for this format's milestones.
+// Empty for every format carrying no milestone rule, which is what keeps the
+// per-game stage unemitted and the SQL unchanged.
+export const resolve_role_game_aggregates = (role_name, scoring_format) => {
+  const role = role_by_name[role_name]
+  if (!role?.bonus_stat) {
+    return null
+  }
+
+  const stats_needed = new Set(
+    milestone_rules(scoring_format).flatMap((rule) =>
+      rule.stat === 'rush_rec_yd'
+        ? ['rushing_yards', 'receiving_yards']
+        : [rule.stat]
+    )
+  )
+
+  if (!stats_needed.has(role.bonus_stat.stat)) {
+    return null
+  }
+  return {
+    [MILESTONE_ALIAS_BY_STAT[role.bonus_stat.stat]]: role.bonus_stat.yards_expr
+  }
+}
+
+// The SQL added once per player-game: the sum of every milestone that fires.
+// Null when the format declares none, which leaves the per-game stage unemitted.
+export const generate_milestone_conditional = (scoring_format) => {
+  const rules = milestone_rules(scoring_format)
+  if (!rules.length) {
+    return null
+  }
+
+  return rules
+    .map(
+      (rule) =>
+        `(CASE WHEN ${milestone_value_expr(rule.stat)} >= ${Number(rule.threshold)} THEN ${Number(rule.points)} ELSE 0 END)`
+    )
+    .join(' + ')
+}
 
 // Does this format need position data to score receptions correctly?
 //
@@ -646,14 +829,24 @@ const STAT_SOURCED_ROLES = [
 // residual -- the spec's header carries the full argument.
 export const from_plays_scored_columns = [
   ...new Set([
-    ...PLAYS_SOURCED_ROLES.flatMap((role) =>
-      role.terms.flatMap((term) => [
+    ...PLAYS_SOURCED_ROLES.flatMap((role) => [
+      ...role.terms.flatMap((term) => [
         term.column,
         ...(term.position_override
           ? term.position_override.columns.map(([, column]) => column)
+          : []),
+        // A term carrying an excluding-touchdown clause is what makes
+        // `touchdown_is_first_down` a scored column here: the switch has no
+        // term of its own, it changes another term's predicate.
+        ...(term.excluding_touchdown_predicate
+          ? ['touchdown_is_first_down']
           : [])
-      ])
-    ),
+      ]),
+      // Likewise `bonuses` has no single term -- a role that declares a
+      // bonus_stat can emit big_play terms and project milestone aggregates
+      // from the rule list, which is what scoring it means on this path.
+      ...(role.bonus_stat ? ['bonuses'] : [])
+    ]),
     ...STAT_SOURCED_ROLES.flatMap((role) => role.scoring.columns)
   ])
 ]

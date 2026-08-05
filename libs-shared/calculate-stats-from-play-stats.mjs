@@ -30,6 +30,13 @@ const calculateStatsFromPlayStats = (playStats) => {
   // New statistics for fantasy points support
   stats.rushing_first_downs = 0
   stats.receiving_first_downs = 0
+  // The excluding-touchdown twins, incremented only in the NON-touchdown
+  // cases (10 rushing, 21 receiving) and never in the touchdown cases (11,
+  // 22). That asymmetry IS the stat: a format with touchdown_is_first_down =
+  // false scores these in place of the plain counts, so a touchdown that also
+  // gained a first down scores once rather than twice.
+  stats.rushing_first_downs_excluding_touchdowns = 0
+  stats.receiving_first_downs_excluding_touchdowns = 0
   stats.rushing_yards_excluding_kneels = 0
 
   for (const playStat of playStats) {
@@ -91,6 +98,9 @@ const calculateStatsFromPlayStats = (playStats) => {
         // Track rushing first downs using play-level first_down flag
         if (playStat.is_first_down) {
           stats.rushing_first_downs += 1
+          // Case 10 is the non-touchdown rush, so this is the
+          // excluding-touchdown count. Case 11 deliberately does not.
+          stats.rushing_first_downs_excluding_touchdowns += 1
         }
 
         stats.longest_rush = Math.max(stats.longest_rush, playStat.stat_yards)
@@ -196,6 +206,9 @@ const calculateStatsFromPlayStats = (playStats) => {
         // Track receiving first downs using play-level first_down flag
         if (playStat.is_first_down) {
           stats.receiving_first_downs += 1
+          // Case 21 is the non-touchdown reception, so this is the
+          // excluding-touchdown count. Case 22 deliberately does not.
+          stats.receiving_first_downs_excluding_touchdowns += 1
         }
         break
 

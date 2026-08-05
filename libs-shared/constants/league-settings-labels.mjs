@@ -42,14 +42,17 @@ export const scoring_field_labels = {
     receiving_yards: 'Yards',
     receiving_touchdowns: 'Tds',
     targets: 'Targets',
-    receiving_first_downs: 'First Downs'
+    receiving_first_downs: 'First Downs',
+    tight_end_receiving_first_downs: 'First Downs (TE)'
   },
   misc: {
     two_point_conversions: 'Two PT Conv.',
     punt_return_touchdowns: 'Punt Return Tds',
     kickoff_return_touchdowns: 'Kick Return Tds',
     fumble_return_touchdowns: 'Fumble Return Tds',
-    is_excluding_quarterback_kneels: 'Exclude QB Kneels'
+    is_excluding_quarterback_kneels: 'Exclude QB Kneels',
+    touchdown_is_first_down: 'TD Counts As First Down',
+    bonuses: 'Bonuses'
   },
   kicking: {
     field_goal_yards: 'FG Yards',

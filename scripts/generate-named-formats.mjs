@@ -170,6 +170,13 @@ const emit_catalog_object = (entries, indent, extra_fields) => {
   return out.slice(0, -2) + '\n'
 }
 
+// A config value may be a structure rather than a scalar -- `bonuses` is a rule
+// list. Interpolating one raw renders `[object Object]`, so render it as JSON.
+const render_config_value = (value) =>
+  typeof value === 'object' && value !== null
+    ? `\`${JSON.stringify(value)}\``
+    : value
+
 const generate_catalog_content = (scoring, league) => {
   const timestamp = new Date().toISOString()
   let content = `// Auto-generated named format catalog
@@ -265,7 +272,7 @@ This document shows the configuration for each named format in the system. Ident
       const config = league_formats[canonical].config
       content += `**Configuration:**\n\n| Property | Value |\n|----------|-------|\n`
       for (const [prop, value] of Object.entries(config)) {
-        content += `| \`${prop}\` | ${value} |\n`
+        content += `| \`${prop}\` | ${render_config_value(value)} |\n`
       }
       content += '\n'
     }
@@ -287,7 +294,7 @@ This document shows the configuration for each named format in the system. Ident
       const config = scoring_formats[canonical].config
       content += `**Configuration:**\n\n| Property | Value |\n|----------|-------|\n`
       for (const [prop, value] of Object.entries(config)) {
-        content += `| \`${prop}\` | ${value} |\n`
+        content += `| \`${prop}\` | ${render_config_value(value)} |\n`
       }
       content += '\n'
     }

@@ -28,7 +28,10 @@ import {
   SCORING_COLUMNS,
   LEAGUE_COLUMNS
 } from '#libs-server/find-or-create-format.mjs'
-import { default_value_for_column } from '#libs-shared/scoring-columns.mjs'
+import {
+  default_value_for_column,
+  canonicalize_bonuses
+} from '#libs-shared/scoring-columns.mjs'
 
 // `default_resolver` fills a column the source config omits, matching what the
 // writer did on insert. Without it every named format reports a mismatch on all
@@ -44,6 +47,23 @@ const compare_config = (db_row, source_config, columns, default_resolver) => {
           ? default_resolver(col)
           : null
         : source_config[col]
+    // A jsonb column holds a STRUCTURE, and Number() on an array yields NaN --
+    // which never equals itself, so numeric comparison reports a mismatch on
+    // every format for `bonuses` including the ones that agree. Compare those
+    // structurally instead. The stored value is already canonical
+    // (resolve_scoring_config sorts it before insert), so the source has to be
+    // canonicalized too or an equal rule set in a different authored order
+    // reports as drift.
+    if (typeof db_val === 'object' && db_val !== null) {
+      const db_json = JSON.stringify(db_val)
+      const src_json = JSON.stringify(
+        col === 'bonuses' ? canonicalize_bonuses(src_val) : src_val
+      )
+      if (db_json !== src_json) {
+        mismatches.push({ column: col, db: db_json, source: src_json })
+      }
+      continue
+    }
     // Numeric coercion: knex returns numerics as strings on some drivers
     const db_num = typeof db_val === 'string' ? Number(db_val) : db_val
     const src_num = typeof src_val === 'string' ? Number(src_val) : src_val

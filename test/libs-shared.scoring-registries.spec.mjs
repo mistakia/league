@@ -109,6 +109,16 @@ const normalize_schema_default = (default_sql) => {
   return unwrapped.replace(/::\w+(\(\d+(,\d+)?\))?$/, '')
 }
 
+// A jsonb default needs its own comparison. Stripping the cast off `'[]'::jsonb`
+// leaves the STRING "[]", which never equals the JS `[]` the registry holds --
+// and the fix has to be here rather than in the registry, because
+// `default_value` is bound as a real value on the write path (find-or-create
+// fills an absent NOT NULL column from it) and could not bind the string.
+const is_jsonb_default = (default_sql) => /::jsonb$/.test(default_sql)
+
+const parse_jsonb_default = (default_sql) =>
+  JSON.parse(normalize_schema_default(default_sql))
+
 describe('LIBS-SHARED scoring registry', function () {
   let schema_columns
   let dedup_oracle_columns
@@ -163,6 +173,12 @@ describe('LIBS-SHARED scoring registry', function () {
             entry.default_value,
             `${entry.column} has no schema default`
           ).to.equal(undefined)
+        } else if (is_jsonb_default(default_sql)) {
+          // Structural, not stringly: `bonuses` holds a JS array.
+          expect(
+            entry.default_value,
+            `default_value for ${entry.column}`
+          ).to.eql(parse_jsonb_default(default_sql))
         } else {
           const expected = normalize_schema_default(default_sql)
           const actual = String(entry.default_value)
@@ -239,11 +255,13 @@ describe('LIBS-SHARED scoring registry', function () {
         'rushing_yards_excluding_kneels',
         'rushing_touchdowns',
         'rushing_first_downs',
+        'rushing_first_downs_excluding_touchdowns',
         'fumbles_lost',
         'targets',
         'receptions',
         'receiving_yards',
         'receiving_first_downs',
+        'receiving_first_downs_excluding_touchdowns',
         'receiving_touchdowns',
         'two_point_conversions',
         'punt_return_touchdowns',
@@ -330,15 +348,30 @@ describe('LIBS-SHARED scoring registry', function () {
       }
     })
 
-    it('points every positional reception override at a real stat', () => {
+    it('points every positional override at a real stat, and declares a position', () => {
       const overrides = scoring_registry.filter((entry) => entry.overrides_stat)
 
-      expect(overrides).to.have.length(3)
+      // Three reception overrides (RB/WR/TE) plus the tight-end receiving
+      // first-down premium. Pinned by the stat they override rather than by a
+      // bare count, so adding a fourth reception position and adding an
+      // override for a different stat are distinguishable failures.
+      expect(overrides.map((entry) => entry.overrides_stat).sort()).to.eql([
+        'receiving_first_downs',
+        'receptions',
+        'receptions',
+        'receptions'
+      ])
+
       for (const entry of overrides) {
         expect(
           stat_names_for_group(entry.group),
           `${entry.column} overrides ${entry.overrides_stat}`
         ).to.include(entry.overrides_stat)
+        // calculate-points keys its override map by (overrides_stat, position),
+        // so an override with no position is silently unreachable.
+        expect(entry.position, `${entry.column} declares no position`).to.be.a(
+          'string'
+        )
       }
     })
   })

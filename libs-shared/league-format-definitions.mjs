@@ -160,6 +160,135 @@ export const scoring_formats = {
       'Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties'
   },
 
+  // Scott Fish Bowl 2026. Three primitives no earlier format needed: a
+  // tight-end premium on receiving FIRST DOWNS as well as receptions, a bonus
+  // rule list, and -- on the Sleeper variant only -- a touchdown that does not
+  // also count as a first down.
+  //
+  // The TE premium is encoded as an ABSOLUTE value, not an increment, matching
+  // the SFB15 precedent: SFB15 wrote tight_end_reception: 2 for "1 PPR plus 1".
+  // So SFB16's 0.5 base plus a 1.0 premium is 1.5 in both columns.
+  sfb16_mfl: {
+    label: 'Scott Fish Bowl 16 (MFL)',
+    config: {
+      passing_attempts: 0,
+      passing_completions: 0,
+      passing_yards: 0.04,
+      passing_interceptions: 0, // no turnover penalties in SFB
+      passing_touchdowns: 6,
+      rushing_attempts: 0,
+      rushing_yards: 0.1,
+      rushing_touchdowns: 6,
+      receptions: 0.5,
+      running_back_reception: 0.5,
+      wide_receiver_reception: 0.5,
+      tight_end_reception: 1.5, // 0.5 base + 1.0 TE premium
+      receiving_yards: 0.1,
+      receiving_touchdowns: 6,
+      two_point_conversions: 2,
+      fumbles_lost: 0, // no turnover penalties in SFB
+      punt_return_touchdowns: 6,
+      kickoff_return_touchdowns: 6,
+      fumble_return_touchdowns: 6,
+      targets: 0,
+      rushing_first_downs: 0.5,
+      receiving_first_downs: 0.5,
+      tight_end_receiving_first_downs: 1.5, // 0.5 base + 1.0 TE premium
+      is_excluding_quarterback_kneels: false,
+      touchdown_is_first_down: true,
+      // The "video game" bonuses. Milestones fire once per player-GAME on the
+      // aggregate; big plays fire per qualifying play. Order here is
+      // presentational only -- resolve_scoring_config canonicalizes the array
+      // before it is stored, so two orderings dedup onto one format row.
+      bonuses: [
+        { type: 'big_play', stat: 'passing_yards', threshold: 40, points: 10 },
+        { type: 'big_play', stat: 'rushing_yards', threshold: 40, points: 10 },
+        {
+          type: 'big_play',
+          stat: 'receiving_yards',
+          threshold: 40,
+          points: 10
+        },
+        {
+          type: 'milestone',
+          stat: 'passing_yards',
+          threshold: 300,
+          points: 10
+        },
+        {
+          type: 'milestone',
+          stat: 'passing_yards',
+          threshold: 400,
+          points: 10
+        },
+        { type: 'milestone', stat: 'rush_rec_yd', threshold: 100, points: 10 },
+        { type: 'milestone', stat: 'rush_rec_yd', threshold: 200, points: 10 }
+      ]
+    },
+    description:
+      'Scott Fish Bowl 16 MFL scoring (0.5 PPR, 0.5 per first down, TE premium on both) with big-play and milestone bonuses - no turnover penalties'
+  },
+
+  // Identical to sfb16_mfl except for touchdown_is_first_down. Sleeper does not
+  // credit a first down on a scoring play, so a touchdown that also gained a
+  // first down scores the touchdown only.
+  sfb16_sleeper: {
+    label: 'Scott Fish Bowl 16 (Sleeper)',
+    config: {
+      passing_attempts: 0,
+      passing_completions: 0,
+      passing_yards: 0.04,
+      passing_interceptions: 0,
+      passing_touchdowns: 6,
+      rushing_attempts: 0,
+      rushing_yards: 0.1,
+      rushing_touchdowns: 6,
+      receptions: 0.5,
+      running_back_reception: 0.5,
+      wide_receiver_reception: 0.5,
+      tight_end_reception: 1.5,
+      receiving_yards: 0.1,
+      receiving_touchdowns: 6,
+      two_point_conversions: 2,
+      fumbles_lost: 0,
+      punt_return_touchdowns: 6,
+      kickoff_return_touchdowns: 6,
+      fumble_return_touchdowns: 6,
+      targets: 0,
+      rushing_first_downs: 0.5,
+      receiving_first_downs: 0.5,
+      tight_end_receiving_first_downs: 1.5,
+      is_excluding_quarterback_kneels: false,
+      touchdown_is_first_down: false, // the ONLY scoring difference from the MFL variant
+      bonuses: [
+        { type: 'big_play', stat: 'passing_yards', threshold: 40, points: 10 },
+        { type: 'big_play', stat: 'rushing_yards', threshold: 40, points: 10 },
+        {
+          type: 'big_play',
+          stat: 'receiving_yards',
+          threshold: 40,
+          points: 10
+        },
+        {
+          type: 'milestone',
+          stat: 'passing_yards',
+          threshold: 300,
+          points: 10
+        },
+        {
+          type: 'milestone',
+          stat: 'passing_yards',
+          threshold: 400,
+          points: 10
+        },
+        { type: 'milestone', stat: 'rush_rec_yd', threshold: 100, points: 10 },
+        { type: 'milestone', stat: 'rush_rec_yd', threshold: 200, points: 10 }
+      ]
+    },
+    description:
+      'Scott Fish Bowl 16 Sleeper scoring - identical to the MFL variant except a touchdown does not also count as a first down'
+  },
+
   fanduel: {
     label: 'FanDuel DFS',
     config: {
@@ -630,6 +759,56 @@ export const league_formats = {
     scoring_format: 'sfb15_sleeper',
     description:
       'Scott Fish Bowl 15 Sleeper format with 2 superflex and 9 flex positions'
+  },
+
+  sfb16_mfl: {
+    label: 'Scott Fish Bowl 16 (MFL)',
+    config: {
+      num_teams: 12,
+      starter_slots_qb: 0,
+      starter_slots_rb: 0,
+      starter_slots_wr: 0,
+      starter_slots_te: 0,
+      starter_slots_rb_wr_flex: 0,
+      srbwrte: 8, // starting RB/WR/TE flex
+      sqbrbwrte: 2, // starting superflex
+      starter_slots_wr_te_flex: 0,
+      starter_slots_dst: 0,
+      starter_slots_k: 0,
+      bench_slot_count: 10,
+      practice_squad_slot_count: 0,
+      reserve_short_term_limit: 0,
+      cap: 200,
+      min_bid: 0
+    },
+    scoring_format: 'sfb16_mfl',
+    description:
+      'Scott Fish Bowl 16 MFL format with 2 superflex and 8 flex positions'
+  },
+
+  sfb16_sleeper: {
+    label: 'Scott Fish Bowl 16 (Sleeper)',
+    config: {
+      num_teams: 12,
+      starter_slots_qb: 0,
+      starter_slots_rb: 0,
+      starter_slots_wr: 0,
+      starter_slots_te: 0,
+      starter_slots_rb_wr_flex: 0,
+      srbwrte: 8,
+      sqbrbwrte: 2,
+      starter_slots_wr_te_flex: 0,
+      starter_slots_dst: 0,
+      starter_slots_k: 0,
+      bench_slot_count: 10,
+      practice_squad_slot_count: 0,
+      reserve_short_term_limit: 0,
+      cap: 200,
+      min_bid: 0
+    },
+    scoring_format: 'sfb16_sleeper',
+    description:
+      'Scott Fish Bowl 16 Sleeper format with 2 superflex and 8 flex positions'
   },
 
   // DraftKings DFS format. pricing_model: 'dfs_fixed' — DK assigns

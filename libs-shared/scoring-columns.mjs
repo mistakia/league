@@ -158,6 +158,13 @@ export const scoring_registry = [
     input_type: 'float'
   },
   {
+    // Stat with no column, exactly like rushing_yards_excluding_kneels above.
+    // Scored through the rushing_first_downs value, substituted for it when a
+    // format sets touchdown_is_first_down = false.
+    stat: 'rushing_first_downs_excluding_touchdowns',
+    group: 'base'
+  },
+  {
     stat: 'fumbles_lost',
     column: 'fumbles_lost',
     group: 'base',
@@ -252,6 +259,28 @@ export const scoring_registry = [
     input_type: 'float'
   },
   {
+    // Stat with no column, the receiving twin of
+    // rushing_first_downs_excluding_touchdowns above.
+    stat: 'receiving_first_downs_excluding_touchdowns',
+    group: 'base'
+  },
+  {
+    // Column with no stat, mirroring tight_end_reception above: overrides the
+    // receiving_first_downs value for one position. SFB16 pays a tight end 1.5
+    // per receiving first down against a 0.5 base.
+    column: 'tight_end_receiving_first_downs',
+    overrides_stat: 'receiving_first_downs',
+    position: 'TE',
+    group: 'base',
+    section: 'receiving',
+    label: 'First Downs (TE)',
+    sql_type: 'numeric(2,1)',
+    default_value: 0,
+    input_type: 'float',
+    min: 0,
+    max: 2
+  },
+  {
     stat: 'receiving_touchdowns',
     column: 'receiving_touchdowns',
     group: 'base',
@@ -311,6 +340,33 @@ export const scoring_registry = [
     sql_type: 'boolean',
     default_value: false,
     input_type: 'boolean'
+  },
+  {
+    // The second boolean switch, structurally identical to the one above. When
+    // false, the two *_first_downs stats are substituted for their
+    // excluding-touchdowns twins, so a touchdown that also gained a first down
+    // scores once rather than twice. TRUE is what the platform has always done.
+    column: 'touchdown_is_first_down',
+    group: 'base',
+    section: 'misc',
+    label: 'TD Counts As First Down',
+    sql_type: 'boolean',
+    default_value: true,
+    input_type: 'boolean'
+  },
+  {
+    // A rule LIST, not a rate -- the only registry entry whose value is not a
+    // scalar. Each element is { type, stat, threshold, points }; see
+    // canonicalize_bonuses below for why array order is normalized on write.
+    //
+    // No input_type: the settings page has no control for this, and giving it
+    // one of the scalar types would render a broken input rather than nothing.
+    column: 'bonuses',
+    group: 'base',
+    section: 'misc',
+    label: 'Bonuses',
+    sql_type: 'jsonb',
+    default_value: []
   },
 
   // --- kicking ---
@@ -567,8 +623,60 @@ export const default_value_for_column = (column) => {
   return entry && entry.default_value !== undefined ? entry.default_value : null
 }
 
-export const resolve_scoring_config = (config) =>
-  Object.fromEntries(
+// The four fields of a bonus rule, in the order they sort by. All four
+// participate so no two distinct rules can tie and leave the order undefined.
+const BONUS_RULE_KEYS = ['type', 'stat', 'threshold', 'points']
+
+// Put a `bonuses` array into canonical form: rules sorted, and each rule's keys
+// rebuilt in a fixed order.
+//
+// This exists because config_digest is what dedups league_scoring_formats, and
+// it reads `bonuses::text`. jsonb normalizes object key order and whitespace on
+// store, so two equal rule OBJECTS already render identically -- but jsonb
+// preserves array ORDER, so [A, B] and [B, A] would digest differently and mint
+// two format rows for one rule set, with no error anywhere.
+//
+// It runs on WRITE rather than inside the digest expression. A generated column
+// must be IMMUTABLE and cannot contain a set-returning function, which rules out
+// jsonb_array_elements; routing it through a user-defined IMMUTABLE function
+// would make a generated column depend on a function whose pg_dump/restore
+// ordering is a known hazard.
+//
+// Unknown keys on a rule are preserved rather than dropped -- a config written
+// for a newer engine must not be silently rewritten by an older one -- but they
+// sort after the known four so the output stays deterministic.
+export const canonicalize_bonuses = (bonuses) => {
+  if (!Array.isArray(bonuses)) {
+    return []
+  }
+
+  const sort_key = (rule) =>
+    BONUS_RULE_KEYS.map((key) => String(rule?.[key] ?? '')).join(' ')
+
+  return [...bonuses]
+    .map((rule) => {
+      if (rule === null || typeof rule !== 'object' || Array.isArray(rule)) {
+        return rule
+      }
+      const extra_keys = Object.keys(rule)
+        .filter((key) => !BONUS_RULE_KEYS.includes(key))
+        .sort()
+      return Object.fromEntries(
+        [...BONUS_RULE_KEYS, ...extra_keys]
+          .filter((key) => rule[key] !== undefined)
+          .map((key) => [key, rule[key]])
+      )
+    })
+    .sort((a, b) =>
+      sort_key(a) < sort_key(b) ? -1 : sort_key(a) > sort_key(b) ? 1 : 0
+    )
+}
+
+// The single funnel every writer of a scoring config goes through. Fills absent
+// columns from the registry defaults and canonicalizes the one column whose
+// value has an ordering degree of freedom.
+export const resolve_scoring_config = (config) => {
+  const resolved = Object.fromEntries(
     scoring_column_names.map((column) => [
       column,
       config[column] === undefined
@@ -576,6 +684,9 @@ export const resolve_scoring_config = (config) =>
         : config[column]
     ])
   )
+  resolved.bonuses = canonicalize_bonuses(resolved.bonuses)
+  return resolved
+}
 
 export const stat_names_for_group = (group) =>
   scoring_registry

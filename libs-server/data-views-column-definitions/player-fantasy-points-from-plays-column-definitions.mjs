@@ -17,6 +17,8 @@ import {
   generate_receiving_scoring_sql,
   needs_position_data,
   receiving_position_attribution,
+  resolve_role_game_aggregates,
+  generate_milestone_conditional,
   resolve_stat_sourced_roles
 } from '#libs-server/data-views/fantasy-points-scoring-expressions.mjs'
 
@@ -497,18 +499,38 @@ const fantasy_points_role_attributions = async ({ params }) => {
   )
   const stat_sourced_roles = await resolve_stat_sourced_roles(scoring_format)
 
+  // Per-game sums a milestone rule reads. Null for every format declaring no
+  // milestone, which leaves build_period_cte's per-game stage unemitted and the
+  // SQL byte-identical.
+  const game_aggregates = (role_name) =>
+    resolve_role_game_aggregates(role_name, scoring_format)
+
+  const with_aggregates = (role, role_name) => {
+    const aggregates = game_aggregates(role_name)
+    return aggregates ? { ...role, game_aggregates: aggregates } : role
+  }
+
   return [
-    { pid_column: 'ball_carrier_pid', measure_expr: rushing_inner },
-    { pid_column: 'passer_pid', measure_expr: passing_inner },
-    {
-      pid_column: 'target_pid',
-      measure_expr: receiving_inner,
-      // Emitted only when the format needs it, so a uniform-reception format
-      // pays for no join and its SQL is unchanged.
-      ...(requires_position_data
-        ? { apply_joins: receiving_position_attribution.apply_joins }
-        : {})
-    },
+    with_aggregates(
+      { pid_column: 'ball_carrier_pid', measure_expr: rushing_inner },
+      'rushing'
+    ),
+    with_aggregates(
+      { pid_column: 'passer_pid', measure_expr: passing_inner },
+      'passing'
+    ),
+    with_aggregates(
+      {
+        pid_column: 'target_pid',
+        measure_expr: receiving_inner,
+        // Emitted only when the format needs it, so a uniform-reception format
+        // pays for no join and its SQL is unchanged.
+        ...(requires_position_data
+          ? { apply_joins: receiving_position_attribution.apply_joins }
+          : {})
+      },
+      'receiving'
+    ),
     ...stat_sourced_roles.map(({ attribution, expression }) => ({
       pid_expr: attribution.pid_expr,
       apply_joins: attribution.apply_joins,
@@ -570,6 +592,12 @@ export default {
     source: plays_source,
     measure_source: 'plays_role_union',
     role_attributions: fantasy_points_role_attributions,
+    // Milestone bonuses: evaluated once per player-game against the aggregates
+    // the roles project. Null unless the format declares a milestone rule.
+    game_conditional_expr: async ({ params }) =>
+      generate_milestone_conditional(
+        await get_scoring_format(params.scoring_format_id)
+      ),
     apply_filters: fp_apply_filters,
     supports_output: {
       periods: FP_OUTPUT_PERIODS,

@@ -29,15 +29,17 @@ const league_value = (league, column) => {
   return default_value_for_column(column) ?? 0
 }
 
-// Position-specific reception scoring: a scoring format may award a different
-// per-reception value to running backs, wide receivers, and tight ends. The
-// league_scoring_formats config carries one column per position; positions
-// without an override (QB/K/DST) fall back to the base `receptions` value.
-const position_reception_columns = Object.fromEntries(
-  scoring_registry
-    .filter((entry) => entry.overrides_stat === 'receptions' && entry.position)
-    .map((entry) => [entry.position, entry.column])
-)
+// Position-specific scoring: a format may award a different value to a given
+// position for a given stat. Keyed by (overridden stat, position) so any stat
+// can carry overrides -- `receptions` has three (RB/WR/TE) and
+// `receiving_first_downs` has the tight-end premium SFB16 needs. Positions with
+// no override for a stat (QB/K/DST) fall back to its base value.
+const position_override_columns = {}
+for (const entry of scoring_registry) {
+  if (!entry.overrides_stat || !entry.position) continue
+  position_override_columns[entry.overrides_stat] ??= {}
+  position_override_columns[entry.overrides_stat][entry.position] = entry.column
+}
 
 // Every scored stat, in registry order, paired with the config column holding
 // its per-league value. An entry with no column is deliberately unscored and
@@ -53,6 +55,75 @@ const scored_stats = scoring_registry
 const threshold_columns = {
   defensive_points_against: 'defensive_points_against_threshold',
   defensive_yards_against: 'defensive_yards_against_threshold'
+}
+
+// When a format says a touchdown does NOT also count as a first down, each
+// first-down stat is replaced by its excluding-touchdowns twin. Structurally
+// the same substitution as is_excluding_quarterback_kneels below.
+const excluding_touchdown_stats = {
+  rushing_first_downs: 'rushing_first_downs_excluding_touchdowns',
+  receiving_first_downs: 'receiving_first_downs_excluding_touchdowns'
+}
+
+// Bonus rules. Each is { type, stat, threshold, points }.
+//
+//   milestone  adds `points` once when the game aggregate for `stat` reaches
+//              `threshold`. Reads a scalar already on the gamelog.
+//   big_play   adds `points` per PLAY of `stat` gaining at least `threshold`.
+//              Reads a per-play array the caller attaches to `stats`.
+//
+// An unknown type or an unreadable stat scores 0 rather than throwing, so a
+// config written for a newer engine does not crash an older one.
+//
+// `rush_rec_yd` is derived rather than stored: it is the only milestone stat
+// that spans two gamelog columns.
+const milestone_stat_value = (stats) => ({
+  passing_yards: stats.passing_yards || 0,
+  rushing_yards: stats.rushing_yards || 0,
+  receiving_yards: stats.receiving_yards || 0,
+  rush_rec_yd: (stats.rushing_yards || 0) + (stats.receiving_yards || 0)
+})
+
+// Per-play yardage arrays, when the caller supplies them. Absent for
+// projections and for live weekly scoring, where big plays are not knowable --
+// so a big_play rule silently scores 0 there. That is correct (a big play is
+// realized, not projectable) but it is a systematic under-count for any format
+// carrying such a rule, and it is documented rather than left implicit.
+const big_play_lengths = (stats) => ({
+  passing_yards: stats.pass_play_yards,
+  rushing_yards: stats.rush_play_yards,
+  receiving_yards: stats.recv_play_yards
+})
+
+const score_bonuses = ({ stats, bonuses }) => {
+  if (!Array.isArray(bonuses) || !bonuses.length) {
+    return 0
+  }
+
+  const milestones = milestone_stat_value(stats)
+  const lengths = big_play_lengths(stats)
+  let total = 0
+
+  for (const rule of bonuses) {
+    if (!rule || typeof rule !== 'object') continue
+    const points = Number(rule.points) || 0
+    const threshold = Number(rule.threshold)
+    if (!points || !Number.isFinite(threshold)) continue
+
+    if (rule.type === 'milestone') {
+      const value = milestones[rule.stat]
+      if (value !== undefined && value >= threshold) {
+        total += points
+      }
+    } else if (rule.type === 'big_play') {
+      const plays = lengths[rule.stat]
+      if (Array.isArray(plays)) {
+        total += points * plays.filter((yards) => yards >= threshold).length
+      }
+    }
+  }
+
+  return total
 }
 
 const calculatePoints = ({
@@ -80,16 +151,19 @@ const calculatePoints = ({
     let factor = column ? league_value(league, column) : 0
     let stat_value = stats[stat] || 0
 
-    // Position-specific reception scoring. A position override of exactly 0
-    // falls back to the base `receptions` value rather than scoring nothing --
-    // pinned in the characterization spec as current behavior.
-    if (stat === 'receptions') {
-      const override_column = position_reception_columns[position.toUpperCase()]
+    // Position-specific scoring. A position override of exactly 0 falls back to
+    // the base value rather than scoring nothing -- `||`, not `??`. That is
+    // pinned in the characterization spec as current behavior, so it is
+    // deliberate here rather than an oversight.
+    const overrides = position_override_columns[stat]
+    if (overrides) {
+      const override_column = overrides[position.toUpperCase()]
       factor = (override_column && league[override_column]) || factor
     }
+
     // QB kneel exclusion. Only substitute the kneel-adjusted yards when they
     // have been explicitly calculated rather than merely initialized to 0.
-    else if (
+    if (
       stat === 'rushing_yards' &&
       league.is_excluding_quarterback_kneels &&
       stats.rushing_yards_excluding_kneels !== undefined &&
@@ -103,10 +177,35 @@ const calculatePoints = ({
       const threshold = league_value(league, threshold_columns[stat])
       stat_value = Math.max(stat_value - threshold, 0)
     }
+    // Touchdowns not counting as first downs: substitute the excluding-TD twin.
+    // Read through league_value rather than off the raw property, so a partial
+    // config gets the registry default (true) rather than `undefined`, which
+    // would read as false and silently change every existing format.
+    else if (
+      excluding_touchdown_stats[stat] &&
+      !league_value(league, 'touchdown_is_first_down')
+    ) {
+      const excluding = stats[excluding_touchdown_stats[stat]]
+      if (excluding !== undefined && excluding !== null) {
+        stat_value = excluding
+      }
+    }
 
     const score = factor * stat_value
     result[stat] = score
     result.total = result.total + score
+  }
+
+  // Bonuses are scored after the registry loop and before the anytime_td tail,
+  // because a milestone reads the game aggregate the loop has just consumed and
+  // must not itself be rescaled by any per-stat factor.
+  const bonus_points = score_bonuses({
+    stats,
+    bonuses: league_value(league, 'bonuses')
+  })
+  if (bonus_points) {
+    result.bonuses = bonus_points
+    result.total += bonus_points
   }
 
   // Handle anytime_td (simulation-specific stat from ANYTIME_TOUCHDOWN market odds)

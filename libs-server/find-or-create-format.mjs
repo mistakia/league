@@ -1,6 +1,7 @@
 import db from '#db'
 import {
   scoring_column_names,
+  scoring_columns,
   resolve_scoring_config
 } from '#libs-shared/scoring-columns.mjs'
 
@@ -27,6 +28,14 @@ import {
 // is safe: the INSERT column list and its bound values are built from this same
 // array, and Postgres matches an ON CONFLICT column list by set.
 export const SCORING_COLUMNS = scoring_column_names
+
+// Columns whose bound value must be JSON text rather than a JS structure. See
+// find_or_create_scoring_format below for why.
+const JSONB_COLUMNS = new Set(
+  scoring_columns
+    .filter((entry) => entry.sql_type === 'jsonb')
+    .map((entry) => entry.column)
+)
 
 export const LEAGUE_COLUMNS = [
   'num_teams',
@@ -79,7 +88,15 @@ export const find_or_create_scoring_format = async (knex = db, config) => {
   // supplies them yet -- the external-league mapper structurally cannot -- so
   // mapping absent to null here would fail every import.
   const resolved = resolve_scoring_config(config)
-  const values = SCORING_COLUMNS.map((col) => resolved[col])
+  // A jsonb column has to be serialized at the SQL boundary. The pg driver
+  // renders a bound JS ARRAY as a Postgres array literal (`{...}`), which jsonb
+  // rejects with `invalid input syntax for type json` -- so `bonuses` cannot be
+  // passed through as the array that resolve_scoring_config produces and that
+  // calculate-points consumes. Derived from the registry rather than naming the
+  // column, so a second jsonb column needs no change here.
+  const values = SCORING_COLUMNS.map((col) =>
+    JSONB_COLUMNS.has(col) ? JSON.stringify(resolved[col]) : resolved[col]
+  )
   return upsert_and_return_id(
     knex,
     'league_scoring_formats',

@@ -4436,7 +4436,10 @@ CREATE TABLE public.league_scoring_formats (
     defensive_points_against_threshold smallint DEFAULT 20 NOT NULL,
     defensive_yards_against numeric(5,4) DEFAULT '-0.02'::numeric NOT NULL,
     defensive_yards_against_threshold smallint DEFAULT 300 NOT NULL,
-    config_digest text GENERATED ALWAYS AS (md5(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((COALESCE((passing_attempts)::text, ''::text) || '|'::text) || COALESCE((passing_completions)::text, ''::text)) || '|'::text) || COALESCE((passing_yards)::text, ''::text)) || '|'::text) || COALESCE((passing_interceptions)::text, ''::text)) || '|'::text) || COALESCE((passing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_attempts)::text, ''::text)) || '|'::text) || COALESCE((rushing_yards)::text, ''::text)) || '|'::text) || COALESCE((rushing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_first_downs)::text, ''::text)) || '|'::text) || COALESCE((fumbles_lost)::text, ''::text)) || '|'::text) || COALESCE((targets)::text, ''::text)) || '|'::text) || COALESCE((receptions)::text, ''::text)) || '|'::text) || COALESCE((running_back_reception)::text, ''::text)) || '|'::text) || COALESCE((wide_receiver_reception)::text, ''::text)) || '|'::text) || COALESCE((tight_end_reception)::text, ''::text)) || '|'::text) || COALESCE((receiving_yards)::text, ''::text)) || '|'::text) || COALESCE((receiving_first_downs)::text, ''::text)) || '|'::text) || COALESCE((receiving_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((two_point_conversions)::text, ''::text)) || '|'::text) || COALESCE((punt_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((kickoff_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((fumble_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((is_excluding_quarterback_kneels)::text, ''::text)) || '|'::text) || COALESCE((field_goal_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_0_19_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_20_29_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_30_39_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_40_49_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_50_plus_yards)::text, ''::text)) || '|'::text) || COALESCE((extra_points_made)::text, ''::text)) || '|'::text) || COALESCE((defensive_sacks)::text, ''::text)) || '|'::text) || COALESCE((defensive_interceptions)::text, ''::text)) || '|'::text) || COALESCE((defensive_forced_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_recovered_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_three_and_outs)::text, ''::text)) || '|'::text) || COALESCE((defensive_fourth_down_stops)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_blocked_kicks)::text, ''::text)) || '|'::text) || COALESCE((defensive_safeties)::text, ''::text)) || '|'::text) || COALESCE((defensive_two_point_returns)::text, ''::text)) || '|'::text) || COALESCE((defensive_touchdowns)::text, ''::text)))) STORED
+    bonuses jsonb DEFAULT '[]'::jsonb NOT NULL,
+    tight_end_receiving_first_downs numeric(2,1) DEFAULT 0 NOT NULL,
+    touchdown_is_first_down boolean DEFAULT true NOT NULL,
+    config_digest text GENERATED ALWAYS AS (md5(((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((COALESCE((passing_attempts)::text, ''::text) || '|'::text) || COALESCE((passing_completions)::text, ''::text)) || '|'::text) || COALESCE((passing_yards)::text, ''::text)) || '|'::text) || COALESCE((passing_interceptions)::text, ''::text)) || '|'::text) || COALESCE((passing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_attempts)::text, ''::text)) || '|'::text) || COALESCE((rushing_yards)::text, ''::text)) || '|'::text) || COALESCE((rushing_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((rushing_first_downs)::text, ''::text)) || '|'::text) || COALESCE((fumbles_lost)::text, ''::text)) || '|'::text) || COALESCE((targets)::text, ''::text)) || '|'::text) || COALESCE((receptions)::text, ''::text)) || '|'::text) || COALESCE((running_back_reception)::text, ''::text)) || '|'::text) || COALESCE((wide_receiver_reception)::text, ''::text)) || '|'::text) || COALESCE((tight_end_reception)::text, ''::text)) || '|'::text) || COALESCE((receiving_yards)::text, ''::text)) || '|'::text) || COALESCE((receiving_first_downs)::text, ''::text)) || '|'::text) || COALESCE((tight_end_receiving_first_downs)::text, ''::text)) || '|'::text) || COALESCE((receiving_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((two_point_conversions)::text, ''::text)) || '|'::text) || COALESCE((punt_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((kickoff_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((fumble_return_touchdowns)::text, ''::text)) || '|'::text) || COALESCE((is_excluding_quarterback_kneels)::text, ''::text)) || '|'::text) || COALESCE((touchdown_is_first_down)::text, ''::text)) || '|'::text) || COALESCE((bonuses)::text, ''::text)) || '|'::text) || COALESCE((field_goal_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_0_19_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_20_29_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_30_39_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_40_49_yards)::text, ''::text)) || '|'::text) || COALESCE((field_goals_made_50_plus_yards)::text, ''::text)) || '|'::text) || COALESCE((extra_points_made)::text, ''::text)) || '|'::text) || COALESCE((defensive_sacks)::text, ''::text)) || '|'::text) || COALESCE((defensive_interceptions)::text, ''::text)) || '|'::text) || COALESCE((defensive_forced_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_recovered_fumbles)::text, ''::text)) || '|'::text) || COALESCE((defensive_three_and_outs)::text, ''::text)) || '|'::text) || COALESCE((defensive_fourth_down_stops)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_points_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against)::text, ''::text)) || '|'::text) || COALESCE((defensive_yards_against_threshold)::text, ''::text)) || '|'::text) || COALESCE((defensive_blocked_kicks)::text, ''::text)) || '|'::text) || COALESCE((defensive_safeties)::text, ''::text)) || '|'::text) || COALESCE((defensive_two_point_returns)::text, ''::text)) || '|'::text) || COALESCE((defensive_touchdowns)::text, ''::text)))) STORED
 );
 
 
@@ -18847,7 +18850,9 @@ CREATE TABLE public.nfl_team_seasonlogs (
     receiving_first_downs numeric(5,2) DEFAULT 0.00,
     rushing_first_downs numeric(5,2) DEFAULT 0.00,
     rushing_yards_excluding_kneels numeric(6,2) DEFAULT 0.00,
-    fumble_return_touchdowns numeric(4,2) DEFAULT 0.00
+    fumble_return_touchdowns numeric(4,2) DEFAULT 0.00,
+    rushing_first_downs_excluding_touchdowns numeric(5,2) DEFAULT 0.00,
+    receiving_first_downs_excluding_touchdowns numeric(5,2) DEFAULT 0.00
 );
 
 
@@ -20654,6 +20659,8 @@ CREATE TABLE public.player_gamelogs (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 )
 PARTITION BY RANGE (season_year);
@@ -20777,6 +20784,8 @@ CREATE TABLE public.player_gamelogs_default (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -20892,6 +20901,8 @@ CREATE TABLE public.player_gamelogs_year_2000 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21007,6 +21018,8 @@ CREATE TABLE public.player_gamelogs_year_2001 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21122,6 +21135,8 @@ CREATE TABLE public.player_gamelogs_year_2002 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21237,6 +21252,8 @@ CREATE TABLE public.player_gamelogs_year_2003 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21352,6 +21369,8 @@ CREATE TABLE public.player_gamelogs_year_2004 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21467,6 +21486,8 @@ CREATE TABLE public.player_gamelogs_year_2005 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21582,6 +21603,8 @@ CREATE TABLE public.player_gamelogs_year_2006 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21697,6 +21720,8 @@ CREATE TABLE public.player_gamelogs_year_2007 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21812,6 +21837,8 @@ CREATE TABLE public.player_gamelogs_year_2008 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -21927,6 +21954,8 @@ CREATE TABLE public.player_gamelogs_year_2009 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22042,6 +22071,8 @@ CREATE TABLE public.player_gamelogs_year_2010 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22157,6 +22188,8 @@ CREATE TABLE public.player_gamelogs_year_2011 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22272,6 +22305,8 @@ CREATE TABLE public.player_gamelogs_year_2012 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22387,6 +22422,8 @@ CREATE TABLE public.player_gamelogs_year_2013 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22502,6 +22539,8 @@ CREATE TABLE public.player_gamelogs_year_2014 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22617,6 +22656,8 @@ CREATE TABLE public.player_gamelogs_year_2015 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22732,6 +22773,8 @@ CREATE TABLE public.player_gamelogs_year_2016 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22847,6 +22890,8 @@ CREATE TABLE public.player_gamelogs_year_2017 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -22962,6 +23007,8 @@ CREATE TABLE public.player_gamelogs_year_2018 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23077,6 +23124,8 @@ CREATE TABLE public.player_gamelogs_year_2019 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23192,6 +23241,8 @@ CREATE TABLE public.player_gamelogs_year_2020 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23307,6 +23358,8 @@ CREATE TABLE public.player_gamelogs_year_2021 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23422,6 +23475,8 @@ CREATE TABLE public.player_gamelogs_year_2022 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23537,6 +23592,8 @@ CREATE TABLE public.player_gamelogs_year_2023 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23652,6 +23709,8 @@ CREATE TABLE public.player_gamelogs_year_2024 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23767,6 +23826,8 @@ CREATE TABLE public.player_gamelogs_year_2025 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -23882,6 +23943,8 @@ CREATE TABLE public.player_gamelogs_year_2026 (
     q4_snaps_def smallint,
     q4_snaps_def_pct numeric(5,2),
     source character varying(32),
+    rushing_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
+    receiving_first_downs_excluding_touchdowns smallint DEFAULT 0 NOT NULL,
     CONSTRAINT player_gamelogs_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 

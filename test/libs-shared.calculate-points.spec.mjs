@@ -72,11 +72,13 @@ describe('LIBS-SHARED calculatePoints', function () {
         'rushing_yards_excluding_kneels',
         'rushing_touchdowns',
         'rushing_first_downs',
+        'rushing_first_downs_excluding_touchdowns',
         'fumbles_lost',
         'targets',
         'receptions',
         'receiving_yards',
         'receiving_first_downs',
+        'receiving_first_downs_excluding_touchdowns',
         'receiving_touchdowns',
         'two_point_conversions',
         'punt_return_touchdowns',
@@ -136,13 +138,19 @@ describe('LIBS-SHARED calculatePoints', function () {
       expect(per_yard_keys).to.eql(empty_keys)
     })
 
-    it('adds anytime_td as a forty-second key only when the stat is present', () => {
+    it('adds anytime_td as one extra key only when the stat is present', () => {
       const with_anytime = calculatePoints({
         league: ppr_league(),
         stats: { anytime_td: 1 }
       })
 
-      expect(Object.keys(with_anytime)).to.have.length(42)
+      // One more than the base key set. Counted relatively rather than pinned
+      // to a literal, so adding a scored stat does not require editing a number
+      // whose meaning is "the length of the list above".
+      const base_keys = Object.keys(
+        calculatePoints({ league: ppr_league(), stats: {} })
+      )
+      expect(Object.keys(with_anytime)).to.have.length(base_keys.length + 1)
       expect(Object.keys(with_anytime)).to.include('anytime_td')
     })
   })
@@ -667,6 +675,311 @@ describe('LIBS-SHARED calculatePoints', function () {
       close_to(result.extra_points_made, 2)
       close_to(result.defensive_sacks, 3)
       close_to(result.total, 5)
+    })
+  })
+
+  // --- SFB16 primitives ---
+  //
+  // Three things Scott Fish Bowl 2026 needs that no earlier format did: a
+  // tight-end premium on receiving FIRST DOWNS (not just receptions), a toggle
+  // for whether a touchdown also counts as a first down, and a bonus rule list.
+  // Each lands on a different mechanism, so each gets its own block.
+
+  describe('positional first-down override', function () {
+    // Generalizing the override map from `receptions` to any stat is what makes
+    // this work; before that it was keyed by position alone.
+    const te_first_down_league = ppr_league({
+      receiving_first_downs: 0.5,
+      tight_end_receiving_first_downs: 1.5
+    })
+
+    it('pays a tight end the premium and everyone else the base', () => {
+      const stats = { receiving_first_downs: 4 }
+
+      close_to(
+        calculatePoints({ league: te_first_down_league, stats, position: 'TE' })
+          .receiving_first_downs,
+        6
+      )
+      close_to(
+        calculatePoints({ league: te_first_down_league, stats, position: 'WR' })
+          .receiving_first_downs,
+        2
+      )
+      // A position with no override at all, not merely a different one.
+      close_to(
+        calculatePoints({ league: te_first_down_league, stats, position: 'QB' })
+          .receiving_first_downs,
+        2
+      )
+    })
+
+    it('leaves reception overrides working alongside it', () => {
+      // The two overridden stats must not interfere: keying the map by position
+      // alone would have made one clobber the other.
+      const both = ppr_league({
+        receptions: 0.5,
+        tight_end_reception: 1.5,
+        receiving_first_downs: 0.5,
+        tight_end_receiving_first_downs: 1.5
+      })
+      const result = calculatePoints({
+        league: both,
+        stats: { receptions: 2, receiving_first_downs: 2 },
+        position: 'TE'
+      })
+
+      close_to(result.receptions, 3)
+      close_to(result.receiving_first_downs, 3)
+    })
+
+    it('falls back to the base value on an override of exactly 0', () => {
+      // Pinned behavior, `||` not `??`. Same quirk the reception overrides have.
+      const zeroed = ppr_league({
+        receiving_first_downs: 0.5,
+        tight_end_receiving_first_downs: 0
+      })
+
+      close_to(
+        calculatePoints({
+          league: zeroed,
+          stats: { receiving_first_downs: 4 },
+          position: 'TE'
+        }).receiving_first_downs,
+        2
+      )
+    })
+  })
+
+  describe('touchdown_is_first_down', function () {
+    // A touchdown that also gained a first down. The two stats disagree by
+    // exactly that play, which is the whole point of the excluding-TD twin.
+    const stats = {
+      rushing_first_downs: 5,
+      rushing_first_downs_excluding_touchdowns: 4,
+      receiving_first_downs: 3,
+      receiving_first_downs_excluding_touchdowns: 2
+    }
+    const league = (overrides) =>
+      ppr_league({
+        rushing_first_downs: 1,
+        receiving_first_downs: 1,
+        ...overrides
+      })
+
+    it('counts the touchdown as a first down when true', () => {
+      const result = calculatePoints({
+        league: league({ touchdown_is_first_down: true }),
+        stats
+      })
+
+      close_to(result.rushing_first_downs, 5)
+      close_to(result.receiving_first_downs, 3)
+    })
+
+    it('substitutes the excluding-touchdown counts when false', () => {
+      const result = calculatePoints({
+        league: league({ touchdown_is_first_down: false }),
+        stats
+      })
+
+      close_to(result.rushing_first_downs, 4)
+      close_to(result.receiving_first_downs, 2)
+    })
+
+    it('treats an absent key as true rather than as false', () => {
+      // Read through league_value, so a partial config gets the registry
+      // default. Reading the raw property would make `undefined` falsy and
+      // silently change every existing format.
+      const partial = league({})
+      delete partial.touchdown_is_first_down
+
+      close_to(
+        calculatePoints({ league: partial, stats }).rushing_first_downs,
+        5
+      )
+    })
+  })
+
+  describe('bonuses', function () {
+    const with_bonuses = (bonuses) => ppr_league({ bonuses })
+
+    it('scores nothing extra for an empty rule list', () => {
+      const result = calculatePoints({
+        league: with_bonuses([]),
+        stats: { passing_yards: 400 }
+      })
+
+      expect(result.bonuses).to.equal(undefined)
+      close_to(
+        result.total,
+        calculatePoints({
+          league: ppr_league(),
+          stats: { passing_yards: 400 }
+        }).total
+      )
+    })
+
+    it('fires a milestone once at or above its threshold', () => {
+      const league = with_bonuses([
+        { type: 'milestone', stat: 'passing_yards', threshold: 300, points: 20 }
+      ])
+
+      expect(
+        calculatePoints({ league, stats: { passing_yards: 299 } }).bonuses
+      ).to.equal(undefined)
+      close_to(
+        calculatePoints({ league, stats: { passing_yards: 300 } }).bonuses,
+        20
+      )
+      // Once, not per yard beyond.
+      close_to(
+        calculatePoints({ league, stats: { passing_yards: 410 } }).bonuses,
+        20
+      )
+    })
+
+    it('stacks cumulative milestone tiers', () => {
+      const league = with_bonuses([
+        {
+          type: 'milestone',
+          stat: 'passing_yards',
+          threshold: 300,
+          points: 20
+        },
+        { type: 'milestone', stat: 'passing_yards', threshold: 400, points: 30 }
+      ])
+
+      close_to(
+        calculatePoints({ league, stats: { passing_yards: 410 } }).bonuses,
+        50
+      )
+    })
+
+    it('derives rush_rec_yd from two gamelog columns', () => {
+      const league = with_bonuses([
+        { type: 'milestone', stat: 'rush_rec_yd', threshold: 100, points: 10 }
+      ])
+
+      // Neither column clears 100 alone; together they do.
+      close_to(
+        calculatePoints({
+          league,
+          stats: { rushing_yards: 60, receiving_yards: 45 }
+        }).bonuses,
+        10
+      )
+      expect(
+        calculatePoints({
+          league,
+          stats: { rushing_yards: 50, receiving_yards: 40 }
+        }).bonuses
+      ).to.equal(undefined)
+    })
+
+    it('scores a big play once per qualifying play', () => {
+      const league = with_bonuses([
+        { type: 'big_play', stat: 'receiving_yards', threshold: 25, points: 10 }
+      ])
+
+      close_to(
+        calculatePoints({
+          league,
+          stats: { recv_play_yards: [30, 25, 40, 24, 12] }
+        }).bonuses,
+        30
+      )
+    })
+
+    it('honours an arbitrary threshold rather than a fixed band', () => {
+      const league = with_bonuses([
+        { type: 'big_play', stat: 'rushing_yards', threshold: 34, points: 5 },
+        {
+          type: 'milestone',
+          stat: 'receiving_yards',
+          threshold: 125,
+          points: 7
+        }
+      ])
+      const result = calculatePoints({
+        league,
+        stats: { rush_play_yards: [34, 33], receiving_yards: 125 }
+      })
+
+      close_to(result.bonuses, 12)
+    })
+
+    it('scores a big play at 0 when no per-play array is supplied', () => {
+      // Projections and live weekly scoring carry no per-play arrays. Degrading
+      // to 0 is correct -- a big play is realized, not projectable -- but it is
+      // a systematic under-count, so it is pinned rather than left implicit.
+      const league = with_bonuses([
+        { type: 'big_play', stat: 'receiving_yards', threshold: 25, points: 10 }
+      ])
+
+      expect(
+        calculatePoints({ league, stats: { receiving_yards: 200 } }).bonuses
+      ).to.equal(undefined)
+    })
+
+    it('still fires milestones off projected aggregates', () => {
+      const league = with_bonuses([
+        {
+          type: 'milestone',
+          stat: 'receiving_yards',
+          threshold: 100,
+          points: 6
+        }
+      ])
+
+      close_to(
+        calculatePoints({
+          league,
+          stats: { receiving_yards: 120 },
+          use_projected_stats: true
+        }).bonuses,
+        6
+      )
+    })
+
+    it('ignores an unknown type or stat rather than throwing', () => {
+      // A config written for a newer engine must not crash an older one.
+      const league = with_bonuses([
+        {
+          type: 'quantum_leap',
+          stat: 'passing_yards',
+          threshold: 1,
+          points: 99
+        },
+        {
+          type: 'milestone',
+          stat: 'field_goal_yards',
+          threshold: 1,
+          points: 99
+        },
+        { type: 'milestone', stat: 'passing_yards', threshold: 100, points: 4 }
+      ])
+
+      close_to(
+        calculatePoints({ league, stats: { passing_yards: 150 } }).bonuses,
+        4
+      )
+    })
+
+    it('treats a missing or malformed bonuses value as no rules', () => {
+      const partial = ppr_league()
+      delete partial.bonuses
+
+      expect(
+        calculatePoints({ league: partial, stats: { passing_yards: 400 } })
+          .bonuses
+      ).to.equal(undefined)
+      expect(
+        calculatePoints({
+          league: ppr_league({ bonuses: null }),
+          stats: { passing_yards: 400 }
+        }).bonuses
+      ).to.equal(undefined)
     })
   })
 })
