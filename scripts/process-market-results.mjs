@@ -558,7 +558,6 @@ const main = async () => {
     debug.enable('process-market-results,selection-result-writer')
   }
 
-  const start_time = Date.now()
   let processing_error = null
 
   try {
