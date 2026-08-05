@@ -39,3 +39,13 @@ export class MatchedMultiplePlayers extends Error {
     this.name = 'MatchedMultiplePlayersError'
   }
 }
+
+// A find_player_row call that mixes lookup dimensions the query cannot honor
+// together. This is a programming error at the call site, not a data outcome --
+// unlike MatchedMultiplePlayers, which is a legitimate abstention.
+export class AmbiguousPlayerLookup extends Error {
+  constructor(message = 'ambiguous player lookup') {
+    super(message)
+    this.name = 'AmbiguousPlayerLookupError'
+  }
+}

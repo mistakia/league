@@ -202,10 +202,10 @@ const backfill_year = async ({ year, force_download, dry_run }) => {
     // player instead, then enrich it rather than inserting a duplicate. Resolution is
     // deliberately conservative because a wrong match WRITES this CSV row's external ids
     // onto an unrelated player -- a corruption the old mint-only script could not cause:
-    //   1. By each external id the CSV carries, ONE AT A TIME. find_player_row ANDs a
-    //      bundled multi-id query (and always ANDs sleeper_id), so passing several ids at
-    //      once can zero out a real single-id match; every other call site passes one id
-    //      key. First id hit wins.
+    //   1. By each external id the CSV carries, ONE AT A TIME. find_player_row resolves
+    //      exactly one lookup dimension per call and now REFUSES a bundle outright
+    //      (Errors.AmbiguousPlayerLookup), so passing several ids at once is an error
+    //      rather than a query. First id hit wins.
     //   2. Else by name + pos + dob + draft year, but ONLY when a real discriminator
     //      (a non-stub dob or a draft year) is present, and the returned candidate is
     //      accepted for enrichment ONLY if its non-stub dob or its draft year actually

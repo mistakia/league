@@ -134,42 +134,128 @@ const expand_position = (pos) => {
   }
 }
 
-const find_player_row = async ({
-  name,
-  pos,
-  team,
-  teams = [],
-  date_of_birth,
-  sleeper_player_id,
-  keeptradecut_player_id,
-  pfr_player_id,
-  otc_player_id,
-  pff_player_id,
-  esb_player_id,
-  gsis_player_id,
-  short_name,
-  nfl_draft_year,
-  gsis_it_player_id,
-  draftkings_player_id,
-  fanduel_player_id,
-  cbs_player_id,
-  yahoo_player_id,
-  rts_player_id,
-  espn_player_id,
-  nfl_player_id,
-  mfl_player_id,
-  sis_player_id,
-  sportradar_player_id,
-  underdog_player_id,
-  fleaflicker_player_id,
-  ffpc_player_id,
-  nffc_player_id,
-  fantrax_player_id,
-  fantasypoints_player_id,
+// The lookup below resolves exactly ONE dimension per call: an else-if ladder over
+// the external id columns, exclusive with the name/date-of-birth branch in its else.
+// So a call bundling two dimensions gets one honored and the rest silently dropped,
+// which yields a confident WRONG match rather than an abstention. Measured against a
+// scratch database: {pfr_player_id, esb_player_id} naming two different people
+// returns the pfr row (first in ladder order) and ignores the esb id; {esb_player_id,
+// name} where the name belongs to someone else returns the esb row and ignores the
+// name. Refuse the shape instead of silently picking for the caller -- resolve one
+// dimension per call and fall back explicitly, which is what every call site that
+// mints on a miss already does (see scripts/import-players-combine-profiles.mjs).
+//
+// Note this is why bundling was never merely unhelpful: undefined is
+// indistinguishable from "no such player" at every call site, and a caller that
+// mints on undefined mints a duplicate person.
+const EXTERNAL_ID_LOOKUP_PARAMS = [
+  'sleeper_player_id',
+  'keeptradecut_player_id',
+  'pfr_player_id',
+  'esb_player_id',
+  'gsis_player_id',
+  'gsis_it_player_id',
+  'sportradar_player_id',
+  'otc_player_id',
+  'pff_player_id',
+  'draftkings_player_id',
+  'fanduel_player_id',
+  'cbs_player_id',
+  'yahoo_player_id',
+  'rts_player_id',
+  'espn_player_id',
+  'nfl_player_id',
+  'mfl_player_id',
+  'sis_player_id',
+  'underdog_player_id',
+  'fleaflicker_player_id',
+  'ffpc_player_id',
+  'nffc_player_id',
+  'fantrax_player_id',
+  'fantasypoints_player_id'
+]
 
-  ignore_retired = false,
-  ignore_free_agent = false
-}) => {
+// Every parameter the id ladder drops on the floor when it takes a branch.
+const NAME_BRANCH_LOOKUP_PARAMS = [
+  'name',
+  'short_name',
+  'pos',
+  'team',
+  'teams',
+  'date_of_birth',
+  'nfl_draft_year',
+  'ignore_retired',
+  'ignore_free_agent'
+]
+
+const assert_single_lookup_dimension = (params) => {
+  const is_provided = (key) => {
+    const value = params[key]
+    if (Array.isArray(value)) return value.length > 0
+    return Boolean(value)
+  }
+
+  const external_ids = EXTERNAL_ID_LOOKUP_PARAMS.filter(is_provided)
+  if (!external_ids.length) return
+
+  if (external_ids.length > 1) {
+    throw new Errors.AmbiguousPlayerLookup(
+      `find_player_row received multiple external ids (${external_ids.join(
+        ', '
+      )}); the id lookup honors only the first and silently ignores the rest. Look each id up in its own call and fall back explicitly.`
+    )
+  }
+
+  const dropped = NAME_BRANCH_LOOKUP_PARAMS.filter(is_provided)
+  if (dropped.length) {
+    throw new Errors.AmbiguousPlayerLookup(
+      `find_player_row received ${external_ids[0]} together with ${dropped.join(
+        ', '
+      )}; an external id lookup silently ignores every name-branch parameter. Look up by id first, then by name in a separate call.`
+    )
+  }
+}
+
+const find_player_row = async (params) => {
+  assert_single_lookup_dimension(params)
+
+  const {
+    name,
+    pos,
+    team,
+    teams = [],
+    date_of_birth,
+    sleeper_player_id,
+    keeptradecut_player_id,
+    pfr_player_id,
+    otc_player_id,
+    pff_player_id,
+    esb_player_id,
+    gsis_player_id,
+    short_name,
+    nfl_draft_year,
+    gsis_it_player_id,
+    draftkings_player_id,
+    fanduel_player_id,
+    cbs_player_id,
+    yahoo_player_id,
+    rts_player_id,
+    espn_player_id,
+    nfl_player_id,
+    mfl_player_id,
+    sis_player_id,
+    sportradar_player_id,
+    underdog_player_id,
+    fleaflicker_player_id,
+    ffpc_player_id,
+    nffc_player_id,
+    fantrax_player_id,
+    fantasypoints_player_id,
+
+    ignore_retired = false,
+    ignore_free_agent = false
+  } = params
+
   if (team_aliases[name]) {
     const result = await db('player').where({ pid: team_aliases[name] })
     return result[0]
@@ -180,11 +266,13 @@ const find_player_row = async ({
   // Lookup parameters are the canonical player DB column names; the values
   // callers pass come from external feeds. One vocabulary end to end — no
   // param-to-column translation seam.
+  // sleeper_player_id used to sit outside the ladder in its own if, so it ANDed
+  // with whatever branch ran instead of being exclusive like every other id. The
+  // guard above makes it unreachable in combination with anything else, so it is
+  // now an ordinary ladder branch and the two spellings agree.
   if (sleeper_player_id) {
     query.where({ sleeper_player_id })
-  }
-
-  if (keeptradecut_player_id) {
+  } else if (keeptradecut_player_id) {
     query.where({ keeptradecut_player_id })
   } else if (pfr_player_id) {
     query.where({ pfr_player_id })
