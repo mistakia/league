@@ -40,6 +40,7 @@ import {
   nfl_team_abbreviations,
   nfl_season_types
 } from '#constants'
+import { stat_role_fallback_pid_columns } from '#libs-shared/scoring-stat-roles.mjs'
 import { get_play_stats } from '#libs-server/play-stats-utils.mjs'
 import { merge_columns_on_conflict } from '#libs-server/merge-columns-on-conflict.mjs'
 import { resolve_play_stat_player } from '#libs-server/resolve-play-stat-player.mjs'
@@ -95,7 +96,13 @@ const DB_CONSTRAINTS = {
 // that do not attribute a player (team-level rows, special-teams stats whose
 // player already lives in dedicated nfl_plays columns like
 // kicker/punter/returner) are intentionally omitted.
+// The roles the stat registry owns contribute their own fallback columns, so
+// 106 -> player_fuml_pid is not repeated here. libs-server's attribution module
+// reads the same registry entry to reproduce this patch in SQL, and the two
+// drifting apart is what makes the from-plays and gamelogs paths credit
+// different players.
 const STAT_ID_TO_ROLE_PID_COLUMN = {
+  ...stat_role_fallback_pid_columns,
   10: 'ball_carrier_pid',
   11: 'ball_carrier_pid',
   14: 'passer_pid',
@@ -110,7 +117,6 @@ const STAT_ID_TO_ROLE_PID_COLUMN = {
   52: 'player_fuml_pid',
   53: 'player_fuml_pid',
   54: 'player_fuml_pid',
-  106: 'player_fuml_pid',
   111: 'passer_pid',
   112: 'passer_pid',
   113: 'target_pid',

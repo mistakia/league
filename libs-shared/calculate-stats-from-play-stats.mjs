@@ -1,4 +1,5 @@
 import { create_empty_fantasy_stats } from '#constants'
+import { apply_stat_role } from '#libs-shared/scoring-stat-roles.mjs'
 
 /**
  * Calculate player statistics from NFL GSIS play-by-play stat records.
@@ -32,6 +33,14 @@ const calculateStatsFromPlayStats = (playStats) => {
   stats.rushing_yards_excluding_kneels = 0
 
   for (const playStat of playStats) {
+    // Flat per-event roles are served by the registry ahead of the switch, so
+    // their stat ids are written down once. A registry hit skips the switch
+    // entirely, which is what makes it impossible for a registry id and a
+    // bespoke case to both fire for one row.
+    if (apply_stat_role({ stat_id: playStat.stat_id, stats })) {
+      continue
+    }
+
     switch (playStat.stat_id) {
       case 2:
         // Punt Blocked (Offense) - punt was blocked
@@ -255,18 +264,8 @@ const calculateStatsFromPlayStats = (playStats) => {
         // Punt Return Yards - punt return with yards
         break
 
-      case 34:
-        // Punt Return Touchdown - punt returned for TD
-        stats.punt_return_touchdowns += 1
-        break
-
       case 35:
         // Lateral Punt Return - punt return yards after lateral
-        break
-
-      case 36:
-        // Lateral Punt Return Touchdown - punt return TD after lateral
-        stats.punt_return_touchdowns += 1
         break
 
       case 37:
@@ -305,18 +304,8 @@ const calculateStatsFromPlayStats = (playStats) => {
         // Kickoff Return Yards - kickoff return with yards
         break
 
-      case 46:
-        // Kickoff Return Touchdown - kickoff returned for TD
-        stats.kickoff_return_touchdowns += 1
-        break
-
       case 47:
         // Lateral Kickoff Return - kickoff return yards after lateral
-        break
-
-      case 48:
-        // Lateral Kickoff Return Touchdown - kickoff return TD after lateral
-        stats.kickoff_return_touchdowns += 1
         break
 
       case 49:
@@ -347,36 +336,16 @@ const calculateStatsFromPlayStats = (playStats) => {
         // Fumble Recovery (Own) - own fumble recovered with return yards
         break
 
-      case 56:
-        // Fumble Recovery Touchdown (Own) - own fumble recovered for TD
-        stats.fumble_return_touchdowns += 1
-        break
-
       case 57:
         // Lateral Fumble Recovery (Own) - own fumble recovery yards after lateral
-        break
-
-      case 58:
-        // Lateral Fumble Recovery TD (Own) - own fumble recovery TD after lateral
-        stats.fumble_return_touchdowns += 1
         break
 
       case 59:
         // Fumble Recovery (Opponent) - opponent fumble recovered with return yards
         break
 
-      case 60:
-        // Fumble Recovery Touchdown (Opponent) - opponent fumble recovered for TD
-        stats.fumble_return_touchdowns += 1
-        break
-
       case 61:
         // Lateral Fumble Recovery (Opponent) - opponent fumble recovery yards after lateral
-        break
-
-      case 62:
-        // Lateral Fumble Recovery TD (Opponent) - opponent fumble recovery TD after lateral
-        stats.fumble_return_touchdowns += 1
         break
 
       case 63:
@@ -435,18 +404,8 @@ const calculateStatsFromPlayStats = (playStats) => {
         // Extra Point Blocked - extra point blocked
         break
 
-      case 75:
-        // Two Point Rush Good - two point conversion rushing successful
-        stats.two_point_conversions += 1
-        break
-
       case 76:
         // Two Point Rush Failed - two point conversion rushing failed
-        break
-
-      case 77:
-        // Two Point Pass Good - two point conversion passing successful
-        stats.two_point_conversions += 1
         break
 
       case 78:
@@ -525,18 +484,8 @@ const calculateStatsFromPlayStats = (playStats) => {
         // Lateral Sack - sack with lateral
         break
 
-      case 104:
-        // Two Point Reception Good - two point conversion reception successful
-        stats.two_point_conversions += 1
-        break
-
       case 105:
         // Two Point Reception Failed - two point conversion reception failed
-        break
-
-      case 106:
-        // Fumble Lost - fumble lost to opponent
-        stats.fumbles_lost += 1
         break
 
       case 107:

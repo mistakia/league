@@ -1,4 +1,8 @@
 import db from '#db'
+import {
+  stat_ids_for_role,
+  fallback_pid_column_for_role
+} from '#libs-shared/scoring-stat-roles.mjs'
 
 // Attribution for fantasy roles whose player identity lives in nfl_play_stats
 // rather than in a pid column on nfl_plays.
@@ -92,7 +96,9 @@ const create_play_stats_attribution = ({
 // nfl_plays.player_fuml_pid (the fumbler), and nfl_plays carries no usable
 // column for them -- fumble_recovered_1_pid is NULL even on plays that do have
 // a stat_id 56 row.
-export const FUMBLE_RETURN_TOUCHDOWN_STAT_IDS = [56, 58, 60, 62]
+export const FUMBLE_RETURN_TOUCHDOWN_STAT_IDS = stat_ids_for_role(
+  'fumble_return_touchdown'
+)
 
 // Fumble Lost (106) is the stat_id the gamelogs path increments
 // fumbles_lost on. nfl_plays.player_fuml_pid is NOT equivalent: it is set on
@@ -105,15 +111,19 @@ export const FUMBLE_RETURN_TOUCHDOWN_STAT_IDS = [56, 58, 60, 62]
 // fumbles_lost = 0. nfl_plays.is_fumble_lost is a closer proxy but still not the
 // same set (307 REG plays are true there with no stat_id 106 row), so the stat
 // rows are the source of truth here as everywhere else in this module.
-export const FUMBLE_LOST_STAT_IDS = [106]
+export const FUMBLE_LOST_STAT_IDS = stat_ids_for_role('fumble_lost')
 
 // stat_ids that credit a punt return touchdown (34) or the same after a lateral
 // (36), and a kickoff return touchdown (46) or the same after a lateral (48).
 // Like the fumble-return-TD stat_ids, none of these appear in
 // generate-player-gamelogs.mjs STAT_ID_TO_ROLE_PID_COLUMN, so neither role
 // carries a fallback: nfl_plays names no returner column these could read.
-export const PUNT_RETURN_TOUCHDOWN_STAT_IDS = [34, 36]
-export const KICKOFF_RETURN_TOUCHDOWN_STAT_IDS = [46, 48]
+export const PUNT_RETURN_TOUCHDOWN_STAT_IDS = stat_ids_for_role(
+  'punt_return_touchdown'
+)
+export const KICKOFF_RETURN_TOUCHDOWN_STAT_IDS = stat_ids_for_role(
+  'kickoff_return_touchdown'
+)
 
 export const fumble_return_touchdown_attribution =
   create_play_stats_attribution({
@@ -132,11 +142,24 @@ export const kickoff_return_touchdown_attribution =
     alias_prefix: 'kickoff_return_td'
   })
 
+// Two point conversions: rush (75), pass (77) and reception (104). nfl_plays
+// carries no column naming the converting player, and the gamelogs path credits
+// BOTH the passer and the receiver on a two-point pass because each gets its own
+// stat row -- the join's fan-out reproduces that without special handling.
+export const TWO_POINT_CONVERSION_STAT_IDS = stat_ids_for_role(
+  'two_point_conversion'
+)
+
+export const two_point_conversion_attribution = create_play_stats_attribution({
+  stat_ids: TWO_POINT_CONVERSION_STAT_IDS,
+  alias_prefix: 'two_point_conversion'
+})
+
 export const fumble_lost_attribution = create_play_stats_attribution({
   stat_ids: FUMBLE_LOST_STAT_IDS,
   alias_prefix: 'fumble_lost',
-  // STAT_ID_TO_ROLE_PID_COLUMN maps 106 -> player_fuml_pid. The fumble-return-TD
-  // stat_ids are deliberately absent from that map, which is why only this role
-  // carries a fallback.
-  fallback_pid_column: 'player_fuml_pid'
+  // The registry maps 106 -> player_fuml_pid, and it is the same value
+  // generate-player-gamelogs.mjs patches from. The fumble-return-TD stat_ids
+  // carry null there, which is why only this role gets a fallback.
+  fallback_pid_column: fallback_pid_column_for_role('fumble_lost')
 })
