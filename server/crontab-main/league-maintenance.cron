@@ -121,6 +121,16 @@
 ## Check disk space every hour
 0 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/check-disk-space-main-server.mjs >> /var/log/league/league-check-disk-space-main-server.log 2>&1
 
+## Close rookie drafts whose window elapsed with picks unmade (hourly)
+## Expires those picks per the 2023-09-03 ruling. Nothing else closes a draft
+## that does not finish -- the draft route records completion only when the
+## final pick is made -- so without this an abandoned pick stays a tradeable
+## asset forever. Hourly rather than seasonal: the close is what makes a pick
+## stop being tradeable, so the lag between window close and sweep is a window
+## in which an expired pick can still be traded. Self-gates to one grouped
+## query when no league has an outstanding pick past its deadline.
+30 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/close-expired-rookie-drafts.mjs >> /var/log/league/close-expired-rookie-drafts.log 2>&1
+
 
 
 # Crontab Export

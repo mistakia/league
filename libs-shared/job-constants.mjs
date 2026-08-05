@@ -164,7 +164,8 @@ export const job_types = {
   // would let the weekly crawl's success auto-close a pipeline_failure the
   // daily import opened, and would flap the ledger's one-cadence-per-source
   // between the two schedules.
-  CRAWL_SLEEPER_EXTERNAL_LEAGUE_GRAPH: 134
+  CRAWL_SLEEPER_EXTERNAL_LEAGUE_GRAPH: 134,
+  CLOSE_EXPIRED_ROOKIE_DRAFTS: 135
 }
 
 export const job_title_by_id = {
@@ -301,5 +302,6 @@ export const job_title_by_id = {
   131: 'Import Players (FantasyPoints)',
   132: 'Generate DST Market Projections',
   133: 'Refresh Roster Asset Lineage',
-  134: 'Crawl Sleeper External League Graph'
+  134: 'Crawl Sleeper External League Graph',
+  135: 'Close Expired Rookie Drafts'
 }

@@ -10,7 +10,8 @@ import {
   getLeague,
   verifyRestrictedFreeAgency,
   verifyUserTeam,
-  verify_assets_not_trade_protected
+  verify_assets_not_trade_protected,
+  where_outstanding_draft_pick
 } from '#libs-server'
 import trade, { get_trade } from './trade.mjs'
 
@@ -649,7 +650,7 @@ router.post(
       const pickids = proposingTeamPicks.concat(acceptingTeamPicks)
       const draft_pick_rows = await db('draft')
         .whereIn('uid', pickids)
-        .whereNull('pid')
+        .modify(where_outstanding_draft_pick)
 
       // validate sending picks
       for (const pick of proposingTeamPicks) {

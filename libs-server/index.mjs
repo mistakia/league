@@ -92,6 +92,8 @@ export {
 export * as validators from './validators.mjs'
 export { default as get_trades } from './get-trades.mjs'
 export { default as get_draft_data_with_history } from './get-draft-data-with-history.mjs'
+export { default as where_outstanding_draft_pick } from './where-outstanding-draft-pick.mjs'
+export { default as close_rookie_draft } from './close-rookie-draft.mjs'
 export { default as get_restricted_free_agency_signings } from './get-restricted-free-agency-signings.mjs'
 export { default as batch_insert } from './batch-insert.mjs'
 export {

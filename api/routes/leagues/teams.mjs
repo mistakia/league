@@ -1,6 +1,7 @@
 import express from 'express'
 
 import { current_season } from '#constants'
+import { where_outstanding_draft_pick } from '#libs-server'
 import {
   require_auth,
   validate_and_get_league,
@@ -334,7 +335,9 @@ router.get('/?', async (req, res) => {
       lid: leagueId,
       year
     })
-    const picks = await db('draft').where({ lid: leagueId }).whereNull('pid')
+    const picks = await db('draft')
+      .where({ lid: leagueId })
+      .modify(where_outstanding_draft_pick)
 
     const sub_query = db('league_team_forecast')
       .select(db.raw('max(timestamp) AS maxtime, tid AS teamid'))

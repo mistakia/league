@@ -9,6 +9,7 @@ import {
   report_job,
   has_league_notification_been_sent,
   record_league_notification_sent,
+  where_outstanding_draft_pick,
   throw_if_shortfall
 } from '#libs-server'
 import { getDraftWindow } from '#libs-shared'
@@ -52,7 +53,7 @@ const run = async () => {
       .where('draft.year', current_season.year)
       .where('teams.year', current_season.year)
       .where('draft.lid', league.uid)
-      .whereNull('draft.pid')
+      .modify(where_outstanding_draft_pick, 'draft')
       .orderBy('draft.pick')
       .select('draft.pick', 'draft.tid', 'teams.name', 'teams.abbreviation')
       .first()

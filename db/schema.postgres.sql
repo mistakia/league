@@ -2154,8 +2154,17 @@ CREATE TABLE public.draft (
     original_team_id integer NOT NULL,
     lid integer NOT NULL,
     year smallint,
-    selection_timestamp integer
+    selection_timestamp integer,
+    expired_at timestamp with time zone,
+    CONSTRAINT draft_not_both_selected_and_expired CHECK (((pid IS NULL) OR (expired_at IS NULL)))
 );
+
+
+--
+-- Name: COLUMN draft.expired_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.draft.expired_at IS 'When this pick''s draft window closed with no selection made. NULL for picks that were used and for picks whose draft is still open. Mutually exclusive with pid.';
 
 
 --

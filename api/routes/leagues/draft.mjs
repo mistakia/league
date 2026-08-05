@@ -17,7 +17,9 @@ import {
   getRoster,
   sendNotifications,
   verifyUserTeam,
-  verify_reserve_status
+  verify_reserve_status,
+  where_outstanding_draft_pick,
+  close_rookie_draft
 } from '#libs-server'
 import {
   require_auth,
@@ -572,7 +574,9 @@ router.post('/?', async (req, res) => {
     }
 
     // check if previous pick has been made
-    const picks = await db('draft').where({ uid: pickId }).whereNull('pid')
+    const picks = await db('draft')
+      .where({ uid: pickId })
+      .modify(where_outstanding_draft_pick)
     const pick = picks[0]
     if (!pick) {
       return res.status(400).send({ error: 'invalid pickId' })
@@ -678,26 +682,24 @@ router.post('/?', async (req, res) => {
       selection_timestamp
     })
 
-    // Check if this was the last pick in the draft
+    // Check if this was the last pick in the draft. Picks already expired by a
+    // prior close do not count as remaining, so a draft that was swept closed
+    // and then had a straggler selection still reads as complete here.
     const remaining_picks = await db('draft')
       .where({
         lid,
         year: current_season.year
       })
-      .whereNull('pid')
+      .modify(where_outstanding_draft_pick)
       .count('* as count')
       .first()
 
     if (remaining_picks.count === 0) {
-      // All picks have been made, update the seasons table with completion timestamp
-      await db('seasons')
-        .where({
-          lid,
-          year: current_season.year
-        })
-        .update({
-          rookie_draft_completed_at: selection_timestamp
-        })
+      await close_rookie_draft({
+        lid,
+        year: current_season.year,
+        completed_at: selection_timestamp
+      })
 
       logger(
         `Rookie draft completed for league ${lid} at ${selection_timestamp}`

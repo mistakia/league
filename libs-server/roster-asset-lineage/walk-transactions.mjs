@@ -1104,25 +1104,28 @@ const build_event_stream = async ({ lid }) => {
   // ("considering them expired once the draft window expired"). Emit a
   // synthetic `rookie_draft_completed` event per year that the handler uses
   // to close all open PICK holdings with that pick_year, terminating them
-  // with EXPIRED_TO_FA. Timestamp source order:
-  //   1. seasons.rookie_draft_completed_at (when populated; 2025+ only today)
-  //   2. MAX(draft.selection_timestamp) for that year
-  // (Falls through silently if neither is available -- no event emitted.)
-  const max_selection_by_year = new Map()
-  for (const pick of all_picks) {
-    if (!pick.selection_timestamp) continue
-    const prior = max_selection_by_year.get(pick.year)
-    if (prior == null || pick.selection_timestamp > prior) {
-      max_selection_by_year.set(pick.year, pick.selection_timestamp)
-    }
-  }
+  // with EXPIRED_TO_FA.
+  //
+  // `seasons.rookie_draft_completed_at` is the sole timestamp source. It used
+  // to fall back to MAX(draft.selection_timestamp) because only 2025 carried
+  // the column -- nothing closed a draft that ended with picks unmade, so the
+  // one league-year that finished cleanly was the only one ever stamped. That
+  // is now libs-server/close-rookie-draft.mjs's job on both paths, and
+  // db/adhoc/2026-08-05-expire-unused-draft-picks.sql backfilled the prior
+  // seasons with exactly the value the fallback would have computed. Keeping
+  // the fallback would re-derive a fact the table now holds, and would go on
+  // silently masking a league-year that never got closed.
   const seasons_rows = await db('seasons')
     .where({ lid })
     .select('year', 'rookie_draft_completed_at')
   const rookie_draft_completed_by_year = new Map()
   for (const s of seasons_rows) {
-    const ts = s.rookie_draft_completed_at ?? max_selection_by_year.get(s.year)
-    if (ts) rookie_draft_completed_by_year.set(s.year, Number(ts))
+    if (s.rookie_draft_completed_at) {
+      rookie_draft_completed_by_year.set(
+        s.year,
+        Number(s.rookie_draft_completed_at)
+      )
+    }
   }
   for (const [year, ts] of rookie_draft_completed_by_year) {
     events.push({

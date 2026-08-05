@@ -1,5 +1,7 @@
 import { current_season, transaction_type_display_names } from '#constants'
 
+import where_outstanding_draft_pick from '../where-outstanding-draft-pick.mjs'
+
 import { load_configured_league } from './generate-league-context.mjs'
 import get_team_managers from './get-team-managers.mjs'
 import get_players from './get-players.mjs'
@@ -81,7 +83,7 @@ export default async function generate_team_context({
 
   const draft_picks = await db('draft')
     .where({ tid, lid, year })
-    .whereNull('pid')
+    .modify(where_outstanding_draft_pick)
     .orderBy('round')
     .orderBy('pick')
 
