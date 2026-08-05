@@ -406,6 +406,19 @@ export const migrate_table_state = (table_state) => {
     changed = true
   }
 
+  if (Object.prototype.hasOwnProperty.call(next, 'splits')) {
+    const legacy = next.splits
+    delete next.splits
+    if (
+      !Array.isArray(next.row_axes) &&
+      Array.isArray(legacy) &&
+      legacy.length > 0
+    ) {
+      next.row_axes = legacy
+    }
+    changed = true
+  }
+
   if (Object.prototype.hasOwnProperty.call(next, 'subjects')) {
     const legacy = next.subjects
     delete next.subjects

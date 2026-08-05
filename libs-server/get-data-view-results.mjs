@@ -599,19 +599,13 @@ const get_column_index = ({ column_id, index, columns }) => {
 }
 
 const find_sort_column = ({ column_id, column_index = 0, columns }) => {
-  // Special handling for split columns
-  if (column_id === 'year') {
+  // Row axes are not selected columns, so they resolve here rather than in the
+  // lookup below. The physical table is deliberately absent: the sort site
+  // reads the reference off the active identity, since the axis lives in a
+  // different CTE per row grain and in none at all when the axis is inactive.
+  if (column_id === 'year' || column_id === 'week') {
     return {
       column_id,
-      table_name: 'player_years',
-      is_split: true
-    }
-  }
-
-  if (column_id === 'week') {
-    return {
-      column_id,
-      table_name: 'player_years_weeks',
       is_split: true
     }
   }
@@ -2155,15 +2149,37 @@ export const get_data_view_results_query = async ({
       continue
     }
 
-    // Special handling for split columns
+    // Special handling for row-axis columns. The axis reference only exists
+    // when its identity bridge fired, which happens only for an active row
+    // axis -- so an axis sort with no matching axis has nothing to order by
+    // and is skipped, exactly as an unresolvable column sort is above. It
+    // previously emitted a hardcoded `player_years_weeks.week`, which made the
+    // whole statement unexecutable (`missing FROM-clause entry`) rather than
+    // merely unsorted. Take the reference from the identity rather than from a
+    // literal so team-grain views resolve to their own CTEs.
     if (column.is_split) {
+      if (!row_axes.includes(column.column_id)) {
+        log(
+          `Sort skipped for row axis ${column.column_id}: not an active row axis`
+        )
+        continue
+      }
+
+      const axis_reference =
+        column.column_id === 'year'
+          ? data_view_options.year_reference
+          : data_view_options.week_reference
+
+      if (!axis_reference) {
+        log(`Sort skipped for row axis ${column.column_id}: no reference`)
+        continue
+      }
+
       const sort_direction =
         sort_clause.desc === true || sort_clause.desc === 'true'
           ? 'DESC'
           : 'ASC'
-      players_query.orderByRaw(
-        `${column.table_name}.${column.column_id} ${sort_direction} NULLS LAST`
-      )
+      players_query.orderByRaw(`${axis_reference} ${sort_direction} NULLS LAST`)
       continue
     }
 

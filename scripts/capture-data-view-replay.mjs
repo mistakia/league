@@ -34,6 +34,18 @@ const parse_url_to_table_state = (full_url) => {
       }
     }
   }
+  // `splits` is the pre-rename spelling of `row_axes`, still carried by most
+  // shared short URLs and accepted as a permanent alias by the SPA's own parser
+  // (app/core/data-views/parse-table-state-from-url.mjs). The replay is only
+  // faithful to what a user gets if it applies the same alias.
+  if (!table_state.row_axes.length && params.has('splits')) {
+    try {
+      const legacy = JSON.parse(params.get('splits'))
+      if (Array.isArray(legacy)) table_state.row_axes = legacy
+    } catch (e) {
+      return null
+    }
+  }
   if (params.has('offset'))
     table_state.offset = parseInt(params.get('offset'), 10) || 0
   if (params.has('limit'))
@@ -48,14 +60,16 @@ const main = async () => {
     .option('explain', { type: 'boolean', default: true }).argv
 
   const rows = await db('urls')
-    .select(db.raw("encode(url_hash, 'hex') as hash_hex"), 'url')
+    // url_hash stores the short-URL hash as ASCII text, so encoding it to hex
+    // double-encodes and yields 64 characters that resolve to no /u/<hash>.
+    .select(db.raw("convert_from(url_hash, 'UTF8') as hash"), 'url')
     .where('url', 'like', '%/data-views?%')
     .orderBy('created_at', 'desc')
     .limit(argv.limit)
 
   const results = []
   for (const row of rows) {
-    const entry = { hash: row.hash_hex, url: row.url }
+    const entry = { hash: row.hash, url: row.url }
     try {
       const table_state = parse_url_to_table_state(row.url)
       if (!table_state || !table_state.columns?.length) {
