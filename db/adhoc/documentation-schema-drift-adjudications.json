@@ -48,6 +48,14 @@
     {
       "gate": 1,
       "path": "league/CLAUDE.md",
+      "table": "prop_market_selections_index",
+      "column": "esbid",
+      "kind": "history",
+      "reason": "Cites a defect this gate's own EXPLAIN half found — a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
       "table": "league_format_player_seasonlogs",
       "column": "year",
       "kind": "history",
