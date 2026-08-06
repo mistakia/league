@@ -151,6 +151,14 @@ const GATES = [
       'columns this cluster removed vs consumers still reading them, per-site adjudicated'
   },
   {
+    id: 'rename-alias-residue',
+    command: ['db/adhoc/check-rename-alias-residue.mjs'],
+    requires: 'base-ref',
+    negative_control: true,
+    oracle:
+      'alias-backs whose target is a column the table LOST — the class both other rename gates are structurally blind to'
+  },
+  {
     id: 'data-view-sql-validity',
     command: ['db/adhoc/check-data-view-sql-validity.mjs'],
     requires: 'test-container',
