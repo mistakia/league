@@ -61,6 +61,21 @@ const PRODUCTION_ENV = {
   LEAGUE_DB_PORT: String(PRODUCTION_TUNNEL.port)
 }
 
+// A test-container gate must be PINNED to the container, not merely run after
+// probing it. Without this the child inherits whatever `LEAGUE_DB_*` the
+// operator's profile exports, so the runner probes :5433, declares the
+// prerequisite met, and then hands the gate a different database entirely --
+// which is the exact "green over a surface it could not read" the probe exists
+// to prevent, arriving as a TOOLING ERROR and a BLIND instead of a skip.
+// Observed 2026-08-06 with LEAGUE_DB_HOST=localhost and LEAGUE_DB_PORT=15432
+// (the `base db` tunnel) in the environment: data-view-sql-validity and
+// documentation-schema-drift both aimed their scratch `CREATE DATABASE` at
+// PRODUCTION and failed only because `league_test` is not a role there.
+const TEST_CONTAINER_ENV = {
+  LEAGUE_DB_HOST: TEST_CONTAINER.host,
+  LEAGUE_DB_PORT: String(TEST_CONTAINER.port)
+}
+
 // The user-base trees the documentation gate reads. They are arguments rather
 // than a hardcoded path inside that gate because the gate is about the league
 // SCHEMA and the corpus is a parameter of the run — but this repo's cluster
@@ -277,7 +292,9 @@ const run_gate = ({ gate, base_ref }) => {
     env:
       gate.requires === 'production-tunnel'
         ? { ...process.env, ...PRODUCTION_ENV }
-        : process.env
+        : gate.requires === 'test-container'
+          ? { ...process.env, ...TEST_CONTAINER_ENV }
+          : process.env
   })
 
   // A spawn that never produced a process is a tooling error, not a finding.
