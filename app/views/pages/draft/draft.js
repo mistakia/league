@@ -266,35 +266,35 @@ export default function DraftPage({
         </div>
         <div>
           <label>Forty</label>
-          {p.get('forty', '-')}
+          {p.get('forty_yard_dash_seconds', '-')}
         </div>
         <div>
           <label>Bench</label>
-          {p.get('bench', '-')}
+          {p.get('bench_press_reps', '-')}
         </div>
         <div>
           <label>Vertical</label>
-          {p.get('vertical', '-')}
+          {p.get('vertical_jump_inches', '-')}
         </div>
         <div>
           <label>Broad</label>
-          {p.get('broad', '-')}
+          {p.get('broad_jump_inches', '-')}
         </div>
         <div>
           <label>Shuttle</label>
-          {p.get('shuttle', '-')}
+          {p.get('shuttle_run_seconds', '-')}
         </div>
         <div>
           <label>Cone</label>
-          {p.get('cone', '-')}
+          {p.get('three_cone_drill_seconds', '-')}
         </div>
         <div>
           <label>Arm</label>
-          {p.get('arm', '-')}
+          {p.get('arm_length_inches', '-')}
         </div>
         <div>
           <label>Hand</label>
-          {p.get('hand', '-')}
+          {p.get('hand_size_inches', '-')}
         </div>
         <div>
           <label>College</label>
