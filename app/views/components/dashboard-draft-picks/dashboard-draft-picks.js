@@ -50,7 +50,7 @@ export default class DashboardDraftPicks extends React.Component {
   render() {
     const { picks } = this.props
 
-    const draftPicksByYear = groupBy(picks, 'year')
+    const draftPicksByYear = groupBy(picks, 'season_year')
     const draftPickItems = []
 
     Object.keys(draftPicksByYear).forEach((year, idx) => {

@@ -194,10 +194,10 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
         }
         return (
           <DraftPickItem
-            key={`${historical_pick.get('year')}-${historical_pick.get('uid')}`}
+            key={`${historical_pick.get('season_year')}-${historical_pick.get('uid')}`}
             player={player}
             pick={pick_data}
-            year={historical_pick.get('year')}
+            year={historical_pick.get('season_year')}
           />
         )
       })
