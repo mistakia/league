@@ -85,13 +85,13 @@ export default async function ({ team_id, league_id }) {
     })
     player_query.select(
       'player.*',
-      'practice.monday_practice_status as m',
-      'practice.tuesday_practice_status as tu',
-      'practice.wednesday_practice_status as w',
-      'practice.thursday_practice_status as th',
-      'practice.friday_practice_status as f',
-      'practice.saturday_practice_status as s',
-      'practice.sunday_practice_status as su',
+      'practice.monday_practice_status',
+      'practice.tuesday_practice_status',
+      'practice.wednesday_practice_status',
+      'practice.thursday_practice_status',
+      'practice.friday_practice_status',
+      'practice.saturday_practice_status',
+      'practice.sunday_practice_status',
       'nfl_games.day as game_day',
       db.raw(
         'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.is_active = false THEN true ELSE false END as prior_week_inactive'
@@ -103,13 +103,13 @@ export default async function ({ team_id, league_id }) {
   } else {
     player_query.select(
       'player.*',
-      'practice.monday_practice_status as m',
-      'practice.tuesday_practice_status as tu',
-      'practice.wednesday_practice_status as w',
-      'practice.thursday_practice_status as th',
-      'practice.friday_practice_status as f',
-      'practice.saturday_practice_status as s',
-      'practice.sunday_practice_status as su',
+      'practice.monday_practice_status',
+      'practice.tuesday_practice_status',
+      'practice.wednesday_practice_status',
+      'practice.thursday_practice_status',
+      'practice.friday_practice_status',
+      'practice.saturday_practice_status',
+      'practice.sunday_practice_status',
       'nfl_games.day as game_day'
     )
   }
@@ -128,24 +128,32 @@ export default async function ({ team_id, league_id }) {
       prior_week_inactive,
       prior_week_ruled_out,
       game_day,
-      m,
-      tu,
-      w,
-      th,
-      f,
-      s,
-      su
+      monday_practice_status,
+      tuesday_practice_status,
+      wednesday_practice_status,
+      thursday_practice_status,
+      friday_practice_status,
+      saturday_practice_status,
+      sunday_practice_status
     } = player_row
 
     const practice_data =
-      m !== undefined ||
-      tu !== undefined ||
-      w !== undefined ||
-      th !== undefined ||
-      f !== undefined ||
-      s !== undefined ||
-      su !== undefined
-        ? { m, tu, w, th, f, s, su }
+      monday_practice_status !== undefined ||
+      tuesday_practice_status !== undefined ||
+      wednesday_practice_status !== undefined ||
+      thursday_practice_status !== undefined ||
+      friday_practice_status !== undefined ||
+      saturday_practice_status !== undefined ||
+      sunday_practice_status !== undefined
+        ? {
+            monday_practice_status,
+            tuesday_practice_status,
+            wednesday_practice_status,
+            thursday_practice_status,
+            friday_practice_status,
+            saturday_practice_status,
+            sunday_practice_status
+          }
         : null
 
     if (
