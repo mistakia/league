@@ -288,34 +288,64 @@ const is_partition_child = (name) =>
 // `Number(week_points.total)` matches none of the quoted-key shapes.
 //
 // `(?!\s*\()` on the property form drops method calls, so `.total()` is not read
-// as a column. A quoted key on its own is deliberately NOT a read shape here:
-// the table anchor already establishes the row, and matching bare quoted strings
-// is what made the old scan unusable without a word list.
-const column_read_re = (column) =>
-  new RegExp(
-    `\\.get(?:In)?\\(\\s*(?:\\[\\s*)?['"\`]${column}['"\`]` +
-      `|\\[\\s*['"\`]${column}['"\`]\\s*\\]` +
-      `|\\.${column}\\b(?!\\s*\\()`
-  )
+// as a column.
+//
+// `field_argument` is a bare quoted field NAME passed to a helper --
+// `groupBy(picks, 'year')` -- a row read with no receiver to anchor it. It is
+// matched in the SPA ONLY. On the server the table anchor already establishes
+// the row, and matching bare quoted strings is what made the old scan unusable
+// without a word list; in `app/` there is no anchor, and this is the shape a
+// real defect took: dashboard-draft-picks grouped every pick under one
+// `undefined` heading from the season_grain apply until de3e0bb32.
+const READ_SHAPES = [
+  [
+    'accessor',
+    (column) => `\\.get(?:In)?\\(\\s*(?:\\[\\s*)?['"\`]${column}['"\`]`
+  ],
+  ['index', (column) => `\\[\\s*['"\`]${column}['"\`]\\s*\\]`],
+  ['property', (column) => `\\.${column}\\b(?!\\s*\\()`],
+  ['field_argument', (column) => `,\\s*['"\`]${column}['"\`]\\s*\\)`]
+]
+
+const SPA_ONLY_SHAPES = new Set(['field_argument'])
+
+// The shapes worth putting in front of a reviewer. `property` and `index` are
+// excluded because in the SPA both are dominated by redux store keys and module
+// constants that merely share a column's name: on the season_grain cluster
+// `year` had 201 SPA sites, 182 of them `.year` property reads, 145 of those
+// `current_season.year`. Nobody reads a list like that, and not reading it is
+// how `(draft, year)` was adjudicated `already-swept` while two components were
+// still reading the old key off a draft row.
+const HIGH_SIGNAL_SHAPES = new Set(['accessor', 'field_argument'])
+
+const column_read_patterns = (column, surface) =>
+  READ_SHAPES.filter(
+    ([shape]) => surface === 'spa' || !SPA_ONLY_SHAPES.has(shape)
+  ).map(([shape, build]) => [shape, new RegExp(build(column))])
 
 // Every place the old name is still read, with its file, so a finding can say
 // WHERE the stale read is rather than only that one exists somewhere.
 const collect_read_sites = (columns) => {
   const sites = new Map()
   for (const column of columns) sites.set(column, [])
-  const patterns = new Map(
-    [...columns].map((column) => [column, column_read_re(column)])
-  )
   const scan = (roots, surface, extensions) => {
+    const patterns = new Map(
+      [...columns].map((column) => [
+        column,
+        column_read_patterns(column, surface)
+      ])
+    )
     for (const file of walk_files(roots, extensions)) {
       const relative_path = path.relative(repo_root, file)
       const lines = fs.readFileSync(file, 'utf8').split('\n')
       lines.forEach((line, index) => {
         if (is_comment(line)) return
-        for (const [column, pattern] of patterns) {
-          if (!pattern.test(line)) continue
+        for (const [column, shapes] of patterns) {
+          const matched = shapes.find(([, pattern]) => pattern.test(line))
+          if (!matched) continue
           sites.get(column).push({
             surface,
+            shape: matched[0],
             file: relative_path,
             line: index + 1,
             text: line.trim().slice(0, 140)
@@ -475,6 +505,15 @@ const run_gate_2 = ({ tables, base_ref }) => {
             continue
           const sites = read_sites.get(column)
           const same_file = sites.filter((site) => site.file === relative_path)
+          // Listed unconditionally. The `same_file.length ? same_file : sites`
+          // choice below is a good default for the server surface and hides
+          // every SPA site whenever the query file reads the column itself --
+          // the common case -- so the one surface with no table anchor was
+          // represented to the reviewer by a bare count and nothing else.
+          const spa_high_signal = sites.filter(
+            (site) =>
+              site.surface === 'spa' && HIGH_SIGNAL_SHAPES.has(site.shape)
+          )
           findings.push({
             gate: 2,
             column,
@@ -490,6 +529,9 @@ const run_gate_2 = ({ tables, base_ref }) => {
             read_site_count: sites.length,
             spa_read_site_count: sites.filter((site) => site.surface === 'spa')
               .length,
+            spa_high_signal_sites: spa_high_signal.map(
+              (site) => `${site.file}:${site.line} [${site.shape}]`
+            ),
             read_sites: (same_file.length ? same_file : sites).map(
               (site) => `${site.surface}:${site.file}:${site.line}`
             )
@@ -632,6 +674,11 @@ const main = () => {
             `${finding.spa_read_site_count ? ` (${finding.spa_read_site_count} in the SPA)` : ''}: ` +
             `${finding.read_sites.slice(0, 8).join(', ') || 'nowhere'}`
         )
+        if (finding.spa_high_signal_sites.length)
+          console.log(
+            `     SPA row reads (accessor/field-argument): ` +
+              `${finding.spa_high_signal_sites.join(', ')}`
+          )
         console.log(
           `     replacement candidates: ` +
             `${finding.replacement_candidates.join(', ') || 'none'}` +
