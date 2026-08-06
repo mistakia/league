@@ -131,7 +131,7 @@
       "new_column": "projected_points_total",
       "file": "libs-server/get-players.mjs",
       "verdict": "keep-aliased",
-      "reason": "UNIFORM in substance: both producers of this row alias back, and get_player_week_total reads .total off each week's row. This is the column whose UNALIASED select wiped a year of projection values in 72346e579, so the alias is the repair rather than the residue. The new-name key reads the gate lists (scripts/process-projections-for-scoring-format.mjs:82,99) are the WRITER's insert payload, a different boundary that never reads a row from this select. Removing the alias means moving get_player_week_total and every consumer of the points map in the same change."
+      "reason": "UNIFORM in substance FOR THE points-map SHAPE: both producers of that row -- this file and scripts/process-projections-for-league-format.mjs -- alias back, and get_player_week_total (libs-shared/get-player-week-points.mjs:16-21) reads .total off each week's row. This is the column whose UNALIASED select wiped a year of projection values in 72346e579, so the alias is the repair rather than the residue. The new-name key reads the gate lists (scripts/process-projections-for-scoring-format.mjs:82,99) are the WRITER's insert payload, a different boundary that never reads a row from this select. Removing the alias means moving get_player_week_total and every consumer of the points map in the same change. SCOPE CAUTION, added 2026-08-06 by adversarial review: this reason is NOT a claim that only two sites query this table. libs-server/simulation/load-data-with-fallback.mjs:172 aliases the same column to a THIRD name (`as projection`) and reads it bare at :294, and libs-server/simulation/load-projection-data.mjs:121-133 selects and reads the physical name directly. Those feed different downstream shapes, not player.points[week].total, and none is gate-visible (an alias to `projection` targets no lost column). A future rename of this column must sweep libs-server/simulation/ and cannot rely on this entry as an inventory."
     },
     {
       "table": "scoring_format_player_projection_points",
@@ -139,7 +139,7 @@
       "new_column": "projected_points_total",
       "file": "scripts/process-projections-for-league-format.mjs",
       "verdict": "keep-aliased",
-      "reason": "The second producer of the same shape, and its own comment records why: get_player_week_total reads .total, so an unaliased select hands every player NaN which becomes the -999 sentinel, and the writer below deletes by (league_format_id, year) before inserting. Both producers agree, which is the UNIFORM class this gate reports as a standing hazard rather than a defect."
+      "reason": "The second producer of the same shape, and its own comment records why: get_player_week_total reads .total, so an unaliased select hands every player NaN which becomes the -999 sentinel, and the writer below deletes by (league_format_id, year) before inserting. Both producers OF THE points-map SHAPE agree, which is the UNIFORM class this gate reports as a standing hazard rather than a defect. See the SCOPE CAUTION on the libs-server/get-players.mjs entry for this same column: two further query sites in libs-server/simulation/ use other vocabularies and are not covered by either entry."
     }
   ]
 }
