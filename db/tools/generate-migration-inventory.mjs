@@ -9,13 +9,13 @@
 // The inventory is IMMUTABLE and REGENERABLE -- never hand-edit inventory.json;
 // re-run this to refresh it. It carried a companion --emit-trackers mode that
 // stubbed mutable per-cluster progress/<cluster>.md trackers; that substrate was
-// retired on 2026-07-29 (see db/adhoc/check-dropped-table-consumers.mjs), and
+// retired on 2026-07-29 (see db/gates/check-dropped-table-consumers.mjs), and
 // the conformance audit plus the task plan checkboxes carry cluster state now.
 //
 // Usage:
-//   node db/adhoc/generate-migration-inventory.mjs                 # write inventory.json
-//   node db/adhoc/generate-migration-inventory.mjs --no-consumers  # skip the repo grep (fast)
-//   node db/adhoc/generate-migration-inventory.mjs --summary       # print cluster distribution only
+//   node db/tools/generate-migration-inventory.mjs                 # write inventory.json
+//   node db/tools/generate-migration-inventory.mjs --no-consumers  # skip the repo grep (fast)
+//   node db/tools/generate-migration-inventory.mjs --summary       # print cluster distribution only
 //
 // Output roots resolve to the user-base scratch slug when run inside user-base,
 // else to a local ./scratch fallback for a standalone clone.
@@ -231,12 +231,17 @@ const CONSUMER_DIRS = [
   'private'
 ]
 
-// Redesign tooling that pattern-matches table names but is not a real consumer.
-const TOOL_FILES = new Set([
-  'db/adhoc/generate-migration-inventory.mjs',
-  'db/adhoc/audit-schema-conformance.mjs',
-  'db/adhoc/check-dropped-table-consumers.mjs'
-])
+// Redesign tooling pattern-matches table names (cluster rules, rename maps,
+// allowlists) without being a real consumer, and leaving it in the result would
+// make the coverage gate never clear after a rename. That used to need a
+// hand-maintained TOOL_FILES exclusion naming three files, which is the shape
+// that decays: a new gate is a new entry nobody remembers to add, and the
+// omission reads as a consumer rather than as a miss.
+//
+// The 2026-08-06 db/ split removes the need for it. `db/gates`, `db/tools` and
+// `db/archive` are simply NOT consumer directories, so the exclusion is now
+// structural and the list is gone. Keep it that way: put new tooling in one of
+// those three, never in a directory listed above.
 
 // One rg pass per table with a word boundary so `player` does not match
 // `player_gamelogs` and `nfl_plays` does not match `nfl_plays_year_2020`
@@ -252,16 +257,7 @@ function find_consumers(table) {
       ['-l', '--no-messages', `\\b${table}\\b`, ...dirs],
       { cwd: repo_root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }
     )
-    return (
-      out
-        .split('\n')
-        .filter(Boolean)
-        // The redesign tooling itself contains table-name patterns (cluster
-        // rules, allowlists); it is not a real consumer, and leaving it in would
-        // make the coverage gate never clear after a rename.
-        .filter((f) => !TOOL_FILES.has(f))
-        .sort()
-    )
+    return out.split('\n').filter(Boolean).sort()
   } catch (err) {
     // rg exits 1 when there are no matches -- that is a clean empty result.
     if (err.status === 1) return []
@@ -339,7 +335,7 @@ function check_inventory(records) {
     console.error(`  phantom (dropped, or now a partition):  ${t}`)
   }
   console.error(
-    '\nRegenerate with `node db/adhoc/generate-migration-inventory.mjs` and commit the result.'
+    '\nRegenerate with `node db/tools/generate-migration-inventory.mjs` and commit the result.'
   )
   return 1
 }

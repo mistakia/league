@@ -1,6 +1,6 @@
 {
   "$comment": [
-    "Adjudicated non-defects for db/adhoc/check-rename-alias-residue.mjs.",
+    "Adjudicated non-defects for db/gates/check-rename-alias-residue.mjs.",
     "",
     "Every entry is keyed on a SITE -- (table, column, file) -- and NEVER on a",
     "column name alone. `column` is the OLD name the alias targets. A name-keyed",

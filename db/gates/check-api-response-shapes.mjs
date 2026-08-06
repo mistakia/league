@@ -45,8 +45,8 @@
 //
 // Usage:
 //
-//   node db/adhoc/check-api-response-shapes.mjs            # both gates
-//   node db/adhoc/check-api-response-shapes.mjs --gate 1   # the CI-eligible half
+//   node db/gates/check-api-response-shapes.mjs            # both gates
+//   node db/gates/check-api-response-shapes.mjs --gate 1   # the CI-eligible half
 //
 // Exit 1 on any finding. Uses console.log deliberately, never `debug` — the
 // ESM import graph clobbers the namespace set before a module-scope

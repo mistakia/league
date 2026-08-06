@@ -24,7 +24,7 @@ const expect = chai.expect
 //    view rendered at the wrong grain silently. That is what put two of the
 //    three failing URLs into the state defect 1 then failed on.
 //
-// Note db/adhoc/check-data-view-sql-validity.mjs cannot cover this class: it
+// Note db/gates/check-data-view-sql-validity.mjs cannot cover this class: it
 // sweeps columns across grains and axes but never exercises `sort`, and it
 // reported GATE OK on the same tree where these URLs failed.
 

@@ -118,7 +118,7 @@ const scan_apply_scope_call_sites = () => {
 // Both entries resolve at runtime to tables already in the map (the plays family
 // and nfl_games) or to a hash-named CTE alias, for which the map's fallback to
 // the vocabulary names is the correct answer. Their real safety net is
-// db/adhoc/check-data-view-sql-validity.mjs, which EXPLAINs the emitted SQL and
+// db/gates/check-data-view-sql-validity.mjs, which EXPLAINs the emitted SQL and
 // so catches a wrong column name whatever the table turns out to be.
 const REVIEWED_DYNAMIC_CALL_SITES = [
   {

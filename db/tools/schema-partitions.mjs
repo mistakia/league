@@ -1,7 +1,7 @@
 // Partition-child membership for the league schema, derived from the dump.
 //
-// Shared by db/adhoc/audit-schema-conformance.mjs and
-// db/adhoc/generate-migration-inventory.mjs. Both previously carried their own
+// Shared by db/tools/audit-schema-conformance.mjs and
+// db/tools/generate-migration-inventory.mjs. Both previously carried their own
 // copy of a `<base>_year_YYYY` regex, and both were wrong the same way: that is
 // one of four child-naming schemes actually present in this schema, so each tool
 // silently treated 27-35 partition children as logical tables of their own.

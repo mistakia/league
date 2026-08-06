@@ -97,9 +97,9 @@
 // never as a pass/fail condition.
 //
 // Usage:
-//   node db/adhoc/check-rename-alias-residue.mjs --base <pre-cluster-ref>
-//   node db/adhoc/check-rename-alias-residue.mjs --base <ref> --unadjudicated
-//   node db/adhoc/check-rename-alias-residue.mjs --base <ref> --json
+//   node db/gates/check-rename-alias-residue.mjs --base <pre-cluster-ref>
+//   node db/gates/check-rename-alias-residue.mjs --base <ref> --unadjudicated
+//   node db/gates/check-rename-alias-residue.mjs --base <ref> --json
 //
 // Exit 0 clean, 1 on findings no adjudication covers, 2 when the gate could not
 // run. AN UNRESOLVABLE BASE REF IS EXIT 2, NOT A PASS.
@@ -112,7 +112,7 @@
 // revision, so this one has a named one and the full cycle was VERIFIED on
 // 2026-08-06 rather than asserted. In a worktree at `782b78907^`:
 //
-//   node db/adhoc/check-rename-alias-residue.mjs --base 62ca45544
+//   node db/gates/check-rename-alias-residue.mjs --base 62ca45544
 //
 // reports `transactions.player_salary as value` at `libs-server/get-roster.mjs:52`
 // as SPLIT PRODUCERS and exits 1, naming `libs-server/get-league-rosters-from-database.mjs:51`

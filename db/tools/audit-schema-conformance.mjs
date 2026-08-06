@@ -10,10 +10,10 @@
 // anywhere and is safe to wire into the pre-publish gate.
 //
 // Usage:
-//   node db/adhoc/audit-schema-conformance.mjs                 # whole schema
-//   node db/adhoc/audit-schema-conformance.mjs --table player  # one table
-//   node db/adhoc/audit-schema-conformance.mjs --summary       # counts only
-//   node db/adhoc/audit-schema-conformance.mjs --json          # machine output
+//   node db/tools/audit-schema-conformance.mjs                 # whole schema
+//   node db/tools/audit-schema-conformance.mjs --table player  # one table
+//   node db/tools/audit-schema-conformance.mjs --summary       # counts only
+//   node db/tools/audit-schema-conformance.mjs --json          # machine output
 //
 // Exit code is non-zero when any violation is found (gate-friendly).
 
@@ -300,7 +300,7 @@ const non_team_columns = new Set([])
 // vendor-token rule was removed from this audit — a completion gate must only
 // flag genuine defects, and 30 of its findings were names the operator had
 // already ruled to keep. Candidate surfacing lives in the advisory
-// db/adhoc/scan-source-leakage.mjs, which is deliberately not a gate.
+// db/tools/scan-source-leakage.mjs, which is deliberately not a gate.
 const external_system_tokens = ['pff', 'ngs', 'nfl_pro', 'nflpro']
 
 // Operator-ratified metric columns whose name legitimately ends in a word that
@@ -643,7 +643,7 @@ function check_table_name(table) {
 // Partition children duplicate their parent's whole column list in the dump, so
 // auditing them would count the same violation once per partition. They are
 // skipped -- the parent carries the columns and is audited once. Membership is
-// derived from the dump's ATTACH PARTITION lines by db/adhoc/schema-partitions.mjs;
+// derived from the dump's ATTACH PARTITION lines by db/tools/schema-partitions.mjs;
 // see that file for why the previous `<base>_year_YYYY` regex was wrong.
 
 function audit(tables, partition_children, filter) {

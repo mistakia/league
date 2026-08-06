@@ -23,11 +23,11 @@
  *     (pre-existing orphans are expected; a remappable stale value fails STALE).
  *
  * Row-count parity across all pid tables needs a pre-migration baseline:
- *   NODE_ENV=production node db/adhoc/check-pid-rekey-coverage.mjs --snapshot before.json  # run BEFORE prep
- *   NODE_ENV=production node db/adhoc/check-pid-rekey-coverage.mjs --compare  before.json   # run AFTER cutover
+ *   NODE_ENV=production node db/archive/check-pid-rekey-coverage.mjs --snapshot before.json  # run BEFORE prep
+ *   NODE_ENV=production node db/archive/check-pid-rekey-coverage.mjs --compare  before.json   # run AFTER cutover
  *
  * Usage:
- *   NODE_ENV=production node db/adhoc/check-pid-rekey-coverage.mjs
+ *   NODE_ENV=production node db/archive/check-pid-rekey-coverage.mjs
  */
 
 import fs from 'fs'

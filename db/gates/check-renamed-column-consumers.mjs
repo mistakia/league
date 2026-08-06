@@ -62,11 +62,11 @@
 // Nothing is filtered by name, and every suppression names a reviewer's reason.
 //
 // Usage:
-//   node db/adhoc/check-renamed-column-consumers.mjs                  # both gates
-//   node db/adhoc/check-renamed-column-consumers.mjs --base <ref>     # gate 2 base
-//   node db/adhoc/check-renamed-column-consumers.mjs --gate 1         # one gate
-//   node db/adhoc/check-renamed-column-consumers.mjs --json
-//   node db/adhoc/check-renamed-column-consumers.mjs --unadjudicated  # only new sites
+//   node db/gates/check-renamed-column-consumers.mjs                  # both gates
+//   node db/gates/check-renamed-column-consumers.mjs --base <ref>     # gate 2 base
+//   node db/gates/check-renamed-column-consumers.mjs --gate 1         # one gate
+//   node db/gates/check-renamed-column-consumers.mjs --json
+//   node db/gates/check-renamed-column-consumers.mjs --unadjudicated  # only new sites
 //
 // Exit code is non-zero when either gate finds a consumer (gate-friendly).
 // Gate 2 fails only on findings no adjudication covers.
@@ -76,7 +76,7 @@
 // 2026-08-05 rather than merely asserted. In a worktree at `42699c774^` (which
 // carries this gate and its adjudications but not the fix):
 //
-//   node db/adhoc/check-renamed-column-consumers.mjs --gate 2 \
+//   node db/gates/check-renamed-column-consumers.mjs --gate 2 \
 //     --base 62ca45544 --unadjudicated
 //
 // reports exactly ONE unadjudicated finding -- `total` on
@@ -127,7 +127,7 @@
 //     rendered as the raw $200 cap. The gap is general: 22 join-only sites
 //     across the same window.
 //
-//     `db/adhoc/check-rename-alias-residue.mjs` covers that class from the other
+//     `db/gates/check-rename-alias-residue.mjs` covers that class from the other
 //     side. It anchors on the ALIAS-BACK SITE, which needs neither a FROM-target
 //     literal nor a distinctive word, and its discriminator is that the alias
 //     target is a column the table actually LOST. Run it alongside this gate on

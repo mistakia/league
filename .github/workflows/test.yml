@@ -60,10 +60,10 @@ jobs:
       # the schema against a base ref, which makes it depend on which ref CI
       # picks, and its findings need per-site adjudication by someone who knows
       # the cluster. Run it by hand per rename cluster:
-      #   node db/adhoc/check-renamed-column-consumers.mjs --gate 2 \
+      #   node db/gates/check-renamed-column-consumers.mjs --gate 2 \
       #     --base <pre-cluster-ref> --unadjudicated
       - name: Renamed-column consumer gate (gate 1)
-        run: node db/adhoc/check-renamed-column-consumers.mjs --gate 1
+        run: node db/gates/check-renamed-column-consumers.mjs --gate 1
 
       - name: Install PostgreSQL client
         run: |
@@ -88,7 +88,7 @@ jobs:
           psql -c "GRANT ALL PRIVILEGES ON DATABASE league_test TO league_test;" || true
 
       - name: Schema conformance ratchet
-        run: node db/adhoc/check-schema-conformance-ratchet.mjs
+        run: node db/gates/check-schema-conformance-ratchet.mjs
 
       - name: yarn test
         env:

@@ -59,7 +59,7 @@
   ## Running it
 
     NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 \
-      node db/adhoc/check-conflated-player-rows.mjs
+      node db/gates/check-conflated-player-rows.mjs
 
   Read-only. Writes nothing but the baseline file, and only under --rebaseline.
   `main()` is called bare rather than through `is_main`: that helper compares

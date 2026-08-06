@@ -36,10 +36,10 @@
 // treat a clean `--gate` as necessary, never sufficient.
 //
 // Usage:
-//   node db/adhoc/check-player-column-repoint.mjs            # full report
-//   node db/adhoc/check-player-column-repoint.mjs --gate     # exit 1 if any GATE hit remains
-//   node db/adhoc/check-player-column-repoint.mjs --column pos   # scope to one column
-//   node db/adhoc/check-player-column-repoint.mjs --json     # machine-readable
+//   node db/archive/check-player-column-repoint.mjs            # full report
+//   node db/archive/check-player-column-repoint.mjs --gate     # exit 1 if any GATE hit remains
+//   node db/archive/check-player-column-repoint.mjs --column pos   # scope to one column
+//   node db/archive/check-player-column-repoint.mjs --json     # machine-readable
 //
 // Exit 0 = no gated dangling references; 1 = gated references remain (or --gate
 // with any); 2 = tooling error.

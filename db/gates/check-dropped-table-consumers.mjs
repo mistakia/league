@@ -17,7 +17,7 @@
 // so an inventory name that still exists in the schema is a live table whose
 // consumers are supposed to name it. Grepping every table's name only measures
 // how common the word is -- `teams` matched 293 files and none of them were
-// debt. Column-level residue is covered by db/adhoc/audit-schema-conformance.mjs
+// debt. Column-level residue is covered by db/tools/audit-schema-conformance.mjs
 // and the repoint detectors.
 //
 // This replaces the former check-migration-coverage.mjs, which also aggregated
@@ -30,7 +30,7 @@
 // audit cannot see.
 //
 // Usage:
-//   node db/adhoc/check-dropped-table-consumers.mjs
+//   node db/gates/check-dropped-table-consumers.mjs
 //
 // Exit non-zero if any dropped table still has a consumer.
 

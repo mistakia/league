@@ -25,13 +25,13 @@
 // the scan cannot run and exits 2 (distinct from a leak finding, which exits 1).
 //
 // Usage:
-//   node db/adhoc/scan-source-leakage.mjs                       # default public surface
-//   node db/adhoc/scan-source-leakage.mjs --path db/adhoc/2026-07-19-x.sql  # scope
-//   node db/adhoc/scan-source-leakage.mjs --summary             # counts only
-//   node db/adhoc/scan-source-leakage.mjs --detail              # every occurrence
-//   node db/adhoc/scan-source-leakage.mjs --json                # machine output
-//   node db/adhoc/scan-source-leakage.mjs --selftest            # verify the matcher
-//   node db/adhoc/scan-source-leakage.mjs --legend <path>       # override legend
+//   node db/tools/scan-source-leakage.mjs                       # default public surface
+//   node db/tools/scan-source-leakage.mjs --path db/adhoc/2026-07-19-x.sql  # scope
+//   node db/tools/scan-source-leakage.mjs --summary             # counts only
+//   node db/tools/scan-source-leakage.mjs --detail              # every occurrence
+//   node db/tools/scan-source-leakage.mjs --json                # machine output
+//   node db/tools/scan-source-leakage.mjs --selftest            # verify the matcher
+//   node db/tools/scan-source-leakage.mjs --legend <path>       # override legend
 //
 // Exit codes: 0 = ran successfully (WITH OR WITHOUT findings — findings are not a
 // failure), 1 = --selftest matcher failure, 2 = legend unavailable. Findings

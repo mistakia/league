@@ -26,10 +26,10 @@
 // clean `--gate` here as necessary, never sufficient.
 //
 // Usage:
-//   node db/adhoc/check-fantasy-stat-repoint.mjs            # full report
-//   node db/adhoc/check-fantasy-stat-repoint.mjs --gate     # exit 1 if any GATE hit
-//   node db/adhoc/check-fantasy-stat-repoint.mjs --code recy # scope to one code
-//   node db/adhoc/check-fantasy-stat-repoint.mjs --json     # machine-readable
+//   node db/archive/check-fantasy-stat-repoint.mjs            # full report
+//   node db/archive/check-fantasy-stat-repoint.mjs --gate     # exit 1 if any GATE hit
+//   node db/archive/check-fantasy-stat-repoint.mjs --code recy # scope to one code
+//   node db/archive/check-fantasy-stat-repoint.mjs --json     # machine-readable
 //
 // Exit 0 = no gated dangling references; 1 = gated references remain; 2 = error.
 

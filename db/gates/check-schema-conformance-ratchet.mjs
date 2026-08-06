@@ -9,8 +9,8 @@
 // go down through CI; it can only go up through a reviewed baseline commit.
 //
 // Usage:
-//   node db/adhoc/check-schema-conformance-ratchet.mjs              # check (CI mode)
-//   node db/adhoc/check-schema-conformance-ratchet.mjs --rebaseline # regenerate baseline
+//   node db/gates/check-schema-conformance-ratchet.mjs              # check (CI mode)
+//   node db/gates/check-schema-conformance-ratchet.mjs --rebaseline # regenerate baseline
 //
 // Exit non-zero if any violation is present that the baseline does not know
 // about. Exit zero if every current violation is already baselined (whether
@@ -25,7 +25,16 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const audit_script = path.join(__dirname, 'audit-schema-conformance.mjs')
+// The audit lives in db/tools, not here, and that split is the point: it exits 1
+// by design on standing debt, so it is an ORACLE and not a gate. This file is the
+// gate -- it turns the oracle's output into a pass/fail against a checked-in
+// baseline. See db/README.md for the boundary.
+const audit_script = path.join(
+  __dirname,
+  '..',
+  'tools',
+  'audit-schema-conformance.mjs'
+)
 const baseline_path = path.join(__dirname, 'schema-conformance-baseline.json')
 
 function key_of(finding) {
@@ -68,9 +77,9 @@ function write_baseline(findings) {
   const violations = sorted_violations(findings)
   const payload = {
     note:
-      'Checked-in ratchet baseline for db/adhoc/audit-schema-conformance.mjs, ' +
-      'enforced by db/adhoc/check-schema-conformance-ratchet.mjs in CI. Regenerate ' +
-      'with `node db/adhoc/check-schema-conformance-ratchet.mjs --rebaseline` -- never ' +
+      'Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, ' +
+      'enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate ' +
+      'with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never ' +
       'hand-edit. Clearing a violation needs no edit here; only a deliberate widening ' +
       'of the audit (a new rule, a broadened heuristic) should add entries.',
     generated_at: new Date().toISOString(),
@@ -122,8 +131,8 @@ function main() {
         'the name before merging -- see user:guideline/league/database-schema-standards.md.\n' +
         'If this is a deliberate audit widening (a new/broadened rule that legitimately ' +
         'surfaces existing debt): run ' +
-        '`node db/adhoc/check-schema-conformance-ratchet.mjs --rebaseline` and commit the ' +
-        'updated db/adhoc/schema-conformance-baseline.json alongside the audit change.'
+        '`node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` and commit the ' +
+        'updated db/gates/schema-conformance-baseline.json alongside the audit change.'
     )
     process.exitCode = 1
     return

@@ -42,7 +42,7 @@
 // `base db query league` means the tunnel is up):
 //
 //   NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 \
-//     node db/adhoc/check-data-view-url-param-coverage.mjs
+//     node db/gates/check-data-view-url-param-coverage.mjs
 //
 //   ... --json      machine-readable report
 //   ... --verbose   list every accepted key with its URL count
@@ -59,7 +59,7 @@
 //   1. Delete the `splits: 'row_axes'` entry from LEGACY_URL_PARAM_ALIASES in
 //      app/core/data-views/parse-table-state-from-url.mjs.
 //   2. NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 \
-//        node db/adhoc/check-data-view-url-param-coverage.mjs
+//        node db/gates/check-data-view-url-param-coverage.mjs
 //   3. REQUIRED result: `UNACCEPTED  splits` over 423 url(s), exit 1.
 //   4. Restore the entry; re-run; exit 0.
 //

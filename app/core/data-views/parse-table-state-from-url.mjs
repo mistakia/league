@@ -18,7 +18,7 @@ import {
 // they rendered at the wrong grain silently, and the three that also sorted on
 // the lost axis emitted an unreachable reference and produced unexecutable SQL.
 //
-// `db/adhoc/check-data-view-url-param-coverage.mjs` is the gate that makes the
+// `db/gates/check-data-view-url-param-coverage.mjs` is the gate that makes the
 // next such rename loud. It reads this map as its set of accepted legacy keys,
 // so an entry deleted here becomes a reported finding there — which is also how
 // that gate's negative control works.

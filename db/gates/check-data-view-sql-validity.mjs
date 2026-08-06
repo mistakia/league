@@ -46,12 +46,12 @@
 //
 // Usage:
 //   yarn test:db:up
-//   node db/adhoc/check-data-view-sql-validity.mjs              # full report
-//   node db/adhoc/check-data-view-sql-validity.mjs --json
-//   node db/adhoc/check-data-view-sql-validity.mjs --column player_fantasy_points_from_plays
-//   node db/adhoc/check-data-view-sql-validity.mjs --shape plain
-//   node db/adhoc/check-data-view-sql-validity.mjs --saved-view-columns /tmp/saved-view-columns.json
-//   node db/adhoc/check-data-view-sql-validity.mjs --keep-database   # leave the DB for inspection
+//   node db/gates/check-data-view-sql-validity.mjs              # full report
+//   node db/gates/check-data-view-sql-validity.mjs --json
+//   node db/gates/check-data-view-sql-validity.mjs --column player_fantasy_points_from_plays
+//   node db/gates/check-data-view-sql-validity.mjs --shape plain
+//   node db/gates/check-data-view-sql-validity.mjs --saved-view-columns /tmp/saved-view-columns.json
+//   node db/gates/check-data-view-sql-validity.mjs --keep-database   # leave the DB for inspection
 //
 // Exit 0 = every generated statement is valid; 1 = at least one is invalid;
 // 2 = tooling error (container down, schema load failed).

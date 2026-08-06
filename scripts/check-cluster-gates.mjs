@@ -105,7 +105,7 @@ const USER_BASE_ROOTS = [
 const GATES = [
   {
     id: 'schema-conformance-ratchet',
-    command: ['db/adhoc/check-schema-conformance-ratchet.mjs'],
+    command: ['db/gates/check-schema-conformance-ratchet.mjs'],
     requires: 'none',
     negative_control: false,
     oracle:
@@ -113,7 +113,7 @@ const GATES = [
   },
   {
     id: 'api-response-shapes',
-    command: ['db/adhoc/check-api-response-shapes.mjs'],
+    command: ['db/gates/check-api-response-shapes.mjs'],
     requires: 'none',
     negative_control: true,
     oracle:
@@ -121,7 +121,7 @@ const GATES = [
   },
   {
     id: 'renamed-column-consumers-gate-1',
-    command: ['db/adhoc/check-renamed-column-consumers.mjs', '--gate', '1'],
+    command: ['db/gates/check-renamed-column-consumers.mjs', '--gate', '1'],
     requires: 'none',
     negative_control: false,
     oracle:
@@ -129,14 +129,14 @@ const GATES = [
   },
   {
     id: 'dropped-table-consumers',
-    command: ['db/adhoc/check-dropped-table-consumers.mjs'],
+    command: ['db/gates/check-dropped-table-consumers.mjs'],
     requires: 'none',
     negative_control: false,
     oracle: 'each deliberately dropped table name has no surviving consumer'
   },
   {
     id: 'plays-column-repoint',
-    command: ['db/adhoc/check-plays-column-repoint.mjs'],
+    command: ['db/gates/check-plays-column-repoint.mjs'],
     requires: 'none',
     negative_control: false,
     oracle:
@@ -144,7 +144,7 @@ const GATES = [
   },
   {
     id: 'renamed-column-consumers-gate-2',
-    command: ['db/adhoc/check-renamed-column-consumers.mjs', '--gate', '2'],
+    command: ['db/gates/check-renamed-column-consumers.mjs', '--gate', '2'],
     requires: 'base-ref',
     negative_control: false,
     oracle:
@@ -152,7 +152,7 @@ const GATES = [
   },
   {
     id: 'rename-alias-residue',
-    command: ['db/adhoc/check-rename-alias-residue.mjs'],
+    command: ['db/gates/check-rename-alias-residue.mjs'],
     requires: 'base-ref',
     negative_control: true,
     oracle:
@@ -160,7 +160,7 @@ const GATES = [
   },
   {
     id: 'data-view-sql-validity',
-    command: ['db/adhoc/check-data-view-sql-validity.mjs'],
+    command: ['db/gates/check-data-view-sql-validity.mjs'],
     requires: 'test-container',
     negative_control: false,
     oracle: 'every generated data-view statement EXPLAINs against the schema'
@@ -168,7 +168,7 @@ const GATES = [
   {
     id: 'documentation-schema-drift',
     command: [
-      'db/adhoc/check-documentation-schema-drift.mjs',
+      'db/gates/check-documentation-schema-drift.mjs',
       ...USER_BASE_ROOTS
     ],
     requires: 'test-container',
@@ -178,14 +178,14 @@ const GATES = [
   },
   {
     id: 'conflated-player-rows',
-    command: ['db/adhoc/check-conflated-player-rows.mjs'],
+    command: ['db/gates/check-conflated-player-rows.mjs'],
     requires: 'production-tunnel',
     negative_control: false,
     oracle: 'player rows whose own identity fields contradict each other'
   },
   {
     id: 'saved-view-param-coverage',
-    command: ['db/adhoc/check-saved-view-param-coverage.mjs'],
+    command: ['db/gates/check-saved-view-param-coverage.mjs'],
     requires: 'production-tunnel',
     negative_control: false,
     oracle:
@@ -193,7 +193,7 @@ const GATES = [
   },
   {
     id: 'data-view-url-param-coverage',
-    command: ['db/adhoc/check-data-view-url-param-coverage.mjs'],
+    command: ['db/gates/check-data-view-url-param-coverage.mjs'],
     requires: 'production-tunnel',
     negative_control: false,
     oracle:

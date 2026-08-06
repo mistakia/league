@@ -84,11 +84,11 @@
 // Usage:
 //
 //   yarn test:db:up                            # gate 2 only
-//   node db/adhoc/check-documentation-schema-drift.mjs \
+//   node db/gates/check-documentation-schema-drift.mjs \
 //     --root ../../../guideline/nfl --root ../../../text/league \
 //     --root ../../../workflow/nfl
 //
-//   node db/adhoc/check-documentation-schema-drift.mjs --gate 1   # no database
+//   node db/gates/check-documentation-schema-drift.mjs --gate 1   # no database
 //
 // League roots (`docs/`, `api/swagger/`, `server/crontab-*`) are checked by
 // default. The user-base trees live outside this checkout, so they are passed as
@@ -138,7 +138,7 @@ const SCANNED_EXTENSIONS = new Set(['.md', '.mjs', '.cron', '.sql'])
 
 const adjudications_file = path.join(
   repo_root,
-  'db/adhoc/documentation-schema-drift-adjudications.json'
+  'db/gates/documentation-schema-drift-adjudications.json'
 )
 
 // ---------------------------------------------------------------------------

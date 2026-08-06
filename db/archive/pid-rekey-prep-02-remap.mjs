@@ -52,9 +52,9 @@
  * sentinel table created).
  *
  * Usage:
- *   NODE_ENV=production node db/adhoc/pid-rekey-prep-02-remap.mjs            # remap
- *   NODE_ENV=production node db/adhoc/pid-rekey-prep-02-remap.mjs --dry-run  # report only
- *   NODE_ENV=production node db/adhoc/pid-rekey-prep-02-remap.mjs --no-vacuum
+ *   NODE_ENV=production node db/archive/pid-rekey-prep-02-remap.mjs            # remap
+ *   NODE_ENV=production node db/archive/pid-rekey-prep-02-remap.mjs --dry-run  # report only
+ *   NODE_ENV=production node db/archive/pid-rekey-prep-02-remap.mjs --no-vacuum
  *   PID_REKEY_THRESHOLD=5 ... (override the 100K size threshold; used by the seeded rehearsal)
  */
 

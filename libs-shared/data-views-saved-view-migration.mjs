@@ -8,7 +8,7 @@ const TEAM_FROM_PLAYS_RE = /^team_(.+)_from_plays$/
 // apply_play_by_play_column_params_to_query iterates the registry and skips
 // anything it does not recognise, which produces a wrong answer rather than an
 // error. As of 2026-07-28 production still carried 131 such occurrences across
-// 13 saved views, found by db/adhoc/check-saved-view-param-coverage.mjs.
+// 13 saved views, found by db/gates/check-saved-view-param-coverage.mjs.
 //
 // The value vocabularies are unchanged across each rename, so rewriting the key
 // alone is lossless. Note qb_pressure_ngs maps to qb_pressure_tracking, NOT to
@@ -217,7 +217,7 @@ const PARAM_KEY_RENAMES = {
 }
 
 // Every legacy param key this module rewrites at read time, exported so
-// db/adhoc/check-saved-view-param-coverage.mjs can recognise them EXACTLY. That
+// db/gates/check-saved-view-param-coverage.mjs can recognise them EXACTLY. That
 // checker otherwise infers handling by grepping this file for tokens, and its
 // tokenizer requires three characters or more -- so a two-character legacy key
 // (wp, cp, ep, db) is structurally unmatchable and reports as an orphan even

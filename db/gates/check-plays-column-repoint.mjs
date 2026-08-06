@@ -30,11 +30,11 @@
 // (LEAGUE_SCHEMA_FILE) plus opus review.
 //
 // Usage:
-//   node db/adhoc/check-plays-column-repoint.mjs           # full report
-//   node db/adhoc/check-plays-column-repoint.mjs --gate     # exit 1 if any GATE hit remains
-//   node db/adhoc/check-plays-column-repoint.mjs --column playId
-//   node db/adhoc/check-plays-column-repoint.mjs --json
-//   node db/adhoc/check-plays-column-repoint.mjs --map <file>   # another cluster
+//   node db/gates/check-plays-column-repoint.mjs           # full report
+//   node db/gates/check-plays-column-repoint.mjs --gate     # exit 1 if any GATE hit remains
+//   node db/gates/check-plays-column-repoint.mjs --column playId
+//   node db/gates/check-plays-column-repoint.mjs --json
+//   node db/gates/check-plays-column-repoint.mjs --map <file>   # another cluster
 // Exit 0 = no gated dangling refs; 1 = gated refs remain; 2 = tooling error.
 //
 // --map takes a JSON file shaped

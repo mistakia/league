@@ -199,7 +199,7 @@ This is also the reason `consumes_params` on an output-aggregator plugin is a di
 - `test/data-views-output-parity.spec.mjs` — legacy `rate_type` and native `output` inputs produce identical SQL, across six column families.
 - `test/data-views.output-aggregator.spec.mjs` — count FILTER semantics, period keying, materialization and year pushdown, per-instance CTE identity for `year` and `year_offset`, and the week-axis sanitization rules.
 - `test/data-views.measure-contract.spec.mjs` — `derive_measure` for both measure kinds.
-- `db/adhoc/check-data-view-sql-validity.mjs` — sweeps every column across every admitted row grain, row-axis combination, and two param shapes, and runs `EXPLAIN` against a throwaway database. Not in CI; run it manually as a gate before any grain or column-name cutover.
+- `db/gates/check-data-view-sql-validity.mjs` — sweeps every column across every admitted row grain, row-axis combination, and two param shapes, and runs `EXPLAIN` against a throwaway database. Not in CI; run it manually as a gate before any grain or column-name cutover.
 
 ## See also
 

@@ -33,7 +33,7 @@
 // `base db query league` means the tunnel is up):
 //
 //   NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 \
-//     node db/adhoc/check-saved-view-param-coverage.mjs
+//     node db/gates/check-saved-view-param-coverage.mjs
 //
 //   ... --json                    machine-readable report
 //   ... --column-ids              emit the JSON array of column ids persisted in

@@ -1,6 +1,6 @@
 {
   "$comment": [
-    "Adjudicated non-defects for db/adhoc/check-documentation-schema-drift.mjs.",
+    "Adjudicated non-defects for db/gates/check-documentation-schema-drift.mjs.",
     "",
     "Every entry is keyed on a SITE -- (path, table, column) for gate 1, or",
     "(path, statement_contains) for gate 2 -- and NEVER on a column name alone.",

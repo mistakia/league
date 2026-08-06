@@ -634,7 +634,7 @@ const consolidate_results = async ({ results, pos, team }) => {
   // (loop var named source_player, not player: this is a Sleeper API record,
   // not a db('player') row -- the field names below are Sleeper's own and
   // are not renamed; see PLAYER_COLUMN_RENAMES disambiguation in
-  // db/adhoc/check-player-column-repoint.mjs)
+  // db/archive/check-player-column-repoint.mjs)
   for (const source_player of results.sleeper) {
     const entry = find_or_create_entry({
       source_name:

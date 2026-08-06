@@ -37,10 +37,10 @@
  *   --verify      exit non-zero if any real old pid still lingers (post-cutover oracle)
  *
  * Usage:
- *   NODE_ENV=production node db/adhoc/scan-embedded-pids.mjs
- *   NODE_ENV=production node db/adhoc/scan-embedded-pids.mjs --apply              # Phase A (live)
- *   NODE_ENV=production node db/adhoc/scan-embedded-pids.mjs --apply --skip-large # in-window
- *   NODE_ENV=production node db/adhoc/scan-embedded-pids.mjs --verify
+ *   NODE_ENV=production node db/archive/scan-embedded-pids.mjs
+ *   NODE_ENV=production node db/archive/scan-embedded-pids.mjs --apply              # Phase A (live)
+ *   NODE_ENV=production node db/archive/scan-embedded-pids.mjs --apply --skip-large # in-window
+ *   NODE_ENV=production node db/archive/scan-embedded-pids.mjs --verify
  *   PID_REKEY_THRESHOLD=5 ... (override the 100K threshold; used by the seeded rehearsal)
  *
  * Prereq for --apply/--verify: prep-01 populated player.new_pid.

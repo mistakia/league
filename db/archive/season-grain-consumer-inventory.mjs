@@ -40,11 +40,11 @@
 // and fixing it per-file in either direction is a defect.
 //
 // Usage:
-//   node db/adhoc/season-grain-consumer-inventory.mjs            # summary
-//   node db/adhoc/season-grain-consumer-inventory.mjs --files    # file list
-//   node db/adhoc/season-grain-consumer-inventory.mjs --lines    # every line
-//   node db/adhoc/season-grain-consumer-inventory.mjs --json
-//   node db/adhoc/season-grain-consumer-inventory.mjs --verify   # self-test
+//   node db/archive/season-grain-consumer-inventory.mjs            # summary
+//   node db/archive/season-grain-consumer-inventory.mjs --files    # file list
+//   node db/archive/season-grain-consumer-inventory.mjs --lines    # every line
+//   node db/archive/season-grain-consumer-inventory.mjs --json
+//   node db/archive/season-grain-consumer-inventory.mjs --verify   # self-test
 //
 // Always exits 0 except under --verify. It reports scope; it does not judge.
 
