@@ -18,7 +18,11 @@
     "kind = history      accurate past-tense record of what a rename DID; only",
     "                    live instruction counts as a defect",
     "kind = not_a_column the token is a real thing that is not a database column",
-    "                    (a config key, a JS property, a spec basename, a value)"
+    "                    (a config key, a JS property, a spec basename, a value)",
+    "kind = fragment     a documented block that continues a structure an EARLIER",
+    "                    block defined, so it names a relation that is real in the",
+    "                    doc's narrative and absent from any schema. Record which",
+    "                    block defines it, so the entry falls when that one moves."
   ],
   "adjudications": [
     {
@@ -51,7 +55,7 @@
       "table": "prop_market_selections_index",
       "column": "esbid",
       "kind": "history",
-      "reason": "Cites a defect this gate's own EXPLAIN half found — a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
+      "reason": "Cites a defect this gate's own EXPLAIN half found \u2014 a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
     },
     {
       "gate": 1,
@@ -308,6 +312,21 @@
       "column": "year",
       "kind": "history",
       "reason": "Same inventory."
+    },
+    {
+      "gate": 2,
+      "path": "docs/data-views-system.md",
+      "statement_contains": "WITH player_years_weeks AS",
+      "kind": "fragment",
+      "reason": "The week-split CTE is documented as a continuation of the year-split CTE shown in the preceding block, which defines player_years; that block is the one the gate checks against the schema. Reported only once the CTE-only completion made this fragment EXPLAINable, and the relation it names is the doc's own, not a table that was renamed away."
+    },
+    {
+      "gate": 1,
+      "path": "docs/adding-new-fantasy-statistics.md",
+      "table": "league_scoring_formats",
+      "column": "your_new_stat",
+      "kind": "not_a_column",
+      "reason": "A fill-in marker in a how-to that tells the reader to add THEIR stat; the surrounding index name is idx_league_scoring_formats_your_stat. It carries no angle brackets or braces, so nothing in the placeholder vocabulary can recognise it and the site has to be judged rather than parsed."
     }
   ]
 }
