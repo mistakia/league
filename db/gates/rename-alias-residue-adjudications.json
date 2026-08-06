@@ -99,7 +99,7 @@
       "new_column": "player_position",
       "file": "libs-server/get-league-rosters-from-database.mjs",
       "verdict": "migrate-tracked",
-      "reason": "Adjudicated MIGRATE, tracked in user:task/league/migrate-roster-row-position-and-roster-id-to-physical-names.md. It is a shared-class API rename across 55+ call sites reaching libs-shared/roster.mjs and the SPA, so it is sequenced behind this gate rather than folded into it -- the gate is the instrument that makes the migration auditable. This entry falls out when that task ships."
+      "reason": "Adjudicated MIGRATE, tracked in user:task/league/migrate-roster-row-position-and-roster-id-to-physical-names.md. It is a shared-class API rename across 55+ call sites reaching libs-shared/roster.mjs and the SPA, so it is sequenced behind this gate rather than folded into it -- the gate is the instrument that makes the migration auditable. This entry falls out when that task ships. CLASS NOTE, 2026-08-06: this finding moved from ORPHANED ALIAS to SPLIT PRODUCERS when the gate's bare side learned to read the shapes its alias side already read. The three bare producers it now names were each OPENED and each reads the PHYSICAL name, so none is a live defect: compute-actuals-optimal-lineup.mjs:47 selects 'player_position' and reads row.player_position at :68,71; generate-tag-board.mjs:43 selects it and never reads a short name; calculate-franchise-tag.mjs:38 selects 'rosters_players.*' wholesale and groups on 'player_position' at :62. They are the divergent-vocabulary surface the tracked migration has to sweep, not a defect standing today."
     },
     {
       "table": "rosters_players",
@@ -107,7 +107,7 @@
       "new_column": "roster_id",
       "file": "libs-server/get-league-rosters-from-database.mjs",
       "verdict": "migrate-tracked",
-      "reason": "Same migration as rosters_players.pos at this file, tracked in user:task/league/migrate-roster-row-position-and-roster-id-to-physical-names.md. Migrating pos while leaving rid aliased produces the partially-swept roster row 782b78907 recorded as more dangerous than an untouched one, so the two move together."
+      "reason": "Same migration as rosters_players.pos at this file, tracked in user:task/league/migrate-roster-row-position-and-roster-id-to-physical-names.md. Migrating pos while leaving rid aliased produces the partially-swept roster row 782b78907 recorded as more dangerous than an untouched one, so the two move together. CLASS NOTE, 2026-08-06: now SPLIT PRODUCERS rather than ORPHANED ALIAS. The one bare producer named is calculate-franchise-tag.mjs:38, which selects 'rosters_players.*' wholesale; it was opened and reads no short name off the row, so this is divergent vocabulary for the tracked migration to sweep and not a defect standing today."
     },
     {
       "table": "rosters_players",
@@ -115,7 +115,7 @@
       "new_column": "player_position",
       "file": "libs-server/get-roster.mjs",
       "verdict": "migrate-tracked",
-      "reason": "The second producer of the same roster row, tracked in the same task as the get-league-rosters-from-database.mjs site. This one is the UNQUALIFIED alias form -- .select('*', 'player_position as pos', 'roster_id as rid') -- and a scan anchored only on 'table.column as alias' misses it, which is why this gate resolves the table from the enclosing db('<table>') statement."
+      "reason": "The second producer of the same roster row, tracked in the same task as the get-league-rosters-from-database.mjs site. This one is the UNQUALIFIED alias form -- .select('*', 'player_position as pos', 'roster_id as rid') -- and a scan anchored only on 'table.column as alias' misses it, which is why this gate resolves the table from the enclosing db('<table>') statement. CLASS NOTE, 2026-08-06: this finding moved from ORPHANED ALIAS to SPLIT PRODUCERS when the gate's bare side learned to read the shapes its alias side already read. The three bare producers it now names were each OPENED and each reads the PHYSICAL name, so none is a live defect: compute-actuals-optimal-lineup.mjs:47 selects 'player_position' and reads row.player_position at :68,71; generate-tag-board.mjs:43 selects it and never reads a short name; calculate-franchise-tag.mjs:38 selects 'rosters_players.*' wholesale and groups on 'player_position' at :62. They are the divergent-vocabulary surface the tracked migration has to sweep, not a defect standing today."
     },
     {
       "table": "rosters_players",
@@ -123,7 +123,7 @@
       "new_column": "roster_id",
       "file": "libs-server/get-roster.mjs",
       "verdict": "migrate-tracked",
-      "reason": "Same migration and same unqualified anchor as rosters_players.pos at this file, tracked in user:task/league/migrate-roster-row-position-and-roster-id-to-physical-names.md."
+      "reason": "Same migration and same unqualified anchor as rosters_players.pos at this file, tracked in user:task/league/migrate-roster-row-position-and-roster-id-to-physical-names.md. CLASS NOTE, 2026-08-06: now SPLIT PRODUCERS rather than ORPHANED ALIAS, naming the same single wholesale bare producer as the get-league-rosters-from-database.mjs entry (calculate-franchise-tag.mjs:38, opened, reads no short name)."
     },
     {
       "table": "scoring_format_player_projection_points",
@@ -131,7 +131,7 @@
       "new_column": "projected_points_total",
       "file": "libs-server/get-players.mjs",
       "verdict": "keep-aliased",
-      "reason": "UNIFORM in substance FOR THE points-map SHAPE: both producers of that row -- this file and scripts/process-projections-for-league-format.mjs -- alias back, and get_player_week_total (libs-shared/get-player-week-points.mjs:16-21) reads .total off each week's row. This is the column whose UNALIASED select wiped a year of projection values in 72346e579, so the alias is the repair rather than the residue. The new-name key reads the gate lists (scripts/process-projections-for-scoring-format.mjs:82,99) are the WRITER's insert payload, a different boundary that never reads a row from this select. Removing the alias means moving get_player_week_total and every consumer of the points map in the same change. SCOPE CAUTION, added 2026-08-06 by adversarial review: this reason is NOT a claim that only two sites query this table. libs-server/simulation/load-data-with-fallback.mjs:172 aliases the same column to a THIRD name (`as projection`) and reads it bare at :294, and libs-server/simulation/load-projection-data.mjs:121-133 selects and reads the physical name directly. Those feed different downstream shapes, not player.points[week].total, and none is gate-visible (an alias to `projection` targets no lost column). A future rename of this column must sweep libs-server/simulation/ and cannot rely on this entry as an inventory."
+      "reason": "UNIFORM in substance FOR THE points-map SHAPE: both producers of that row -- this file and scripts/process-projections-for-league-format.mjs -- alias back, and get_player_week_total (libs-shared/get-player-week-points.mjs:16-21) reads .total off each week's row. This is the column whose UNALIASED select wiped a year of projection values in 72346e579, so the alias is the repair rather than the residue. The new-name key reads the gate lists (scripts/process-projections-for-scoring-format.mjs:82,99) are the WRITER's insert payload, a different boundary that never reads a row from this select. Removing the alias means moving get_player_week_total and every consumer of the points map in the same change. SCOPE CAUTION, added 2026-08-06 by adversarial review: this reason is NOT a claim that only two sites query this table. libs-server/simulation/load-data-with-fallback.mjs:172 aliases the same column to a THIRD name (`as projection`) and reads it bare at :294, and libs-server/simulation/load-projection-data.mjs:121-133 selects and reads the physical name directly. Those feed different downstream shapes, not player.points[week].total, and none is gate-visible (an alias to `projection` targets no lost column). A future rename of this column must sweep libs-server/simulation/ and cannot rely on this entry as an inventory. CLASS NOTE, 2026-08-06: now SPLIT PRODUCERS rather than ORPHANED ALIAS, naming libs-server/simulation/load-projection-data.mjs:128 as the bare producer -- which is the site the SCOPE CAUTION above already identified by hand. It selects the physical name and reads it directly, feeding a different downstream shape than player.points[week].total, so the verdict is unchanged and the class change is the gate catching up to the caution."
     },
     {
       "table": "scoring_format_player_projection_points",
@@ -139,7 +139,7 @@
       "new_column": "projected_points_total",
       "file": "scripts/process-projections-for-league-format.mjs",
       "verdict": "keep-aliased",
-      "reason": "The second producer of the same shape, and its own comment records why: get_player_week_total reads .total, so an unaliased select hands every player NaN which becomes the -999 sentinel, and the writer below deletes by (league_format_id, year) before inserting. Both producers OF THE points-map SHAPE agree, which is the UNIFORM class this gate reports as a standing hazard rather than a defect. See the SCOPE CAUTION on the libs-server/get-players.mjs entry for this same column: two further query sites in libs-server/simulation/ use other vocabularies and are not covered by either entry."
+      "reason": "The second producer of the same shape, and its own comment records why: get_player_week_total reads .total, so an unaliased select hands every player NaN which becomes the -999 sentinel, and the writer below deletes by (league_format_id, year) before inserting. Both producers OF THE points-map SHAPE agree. The gate reports this as SPLIT PRODUCERS rather than UNIFORM as of 2026-08-06, naming libs-server/simulation/load-projection-data.mjs:128 -- which selects the physical name for a different downstream shape and is exactly the site the SCOPE CAUTION below already named by hand. The bare producer does not feed the points map, so the verdict stands. See the SCOPE CAUTION on the libs-server/get-players.mjs entry for this same column: two further query sites in libs-server/simulation/ use other vocabularies and are not covered by either entry."
     }
   ]
 }

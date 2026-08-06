@@ -41,6 +41,24 @@
 // qualifier, so a scan anchored only on the qualified form misses one of the two
 // producers this gate exists to find.
 //
+// THE BARE SIDE MUST READ EVERY SHAPE THE ALIAS SIDE READS, and it did not until
+// 2026-08-06. It matched only qualified `'table.column'` literals, so a
+// `select('*')` producer -- the very shape league CLAUDE.md documents as gate
+// 2's silent defect -- and an unqualified `select('widget_salary')` producer
+// both contributed NOTHING. A genuine SPLIT PRODUCERS finding was then reported
+// as UNIFORM, "correct today", with an empty bare-producer list: the reviewer
+// was told every producer aliases back at exactly the moment one does not.
+// Three bare shapes count now (qualified, unqualified, and wholesale `'*'` /
+// `'table.*'`), and on the real corpus the fix reclassified SIX of the fifteen
+// findings out of ORPHANED ALIAS into SPLIT PRODUCERS, naming four bare
+// producers no run had ever printed.
+//
+// The obvious over-fire is the other direction, and it has its own control:
+// `get-roster.mjs:48` wildcards AND aliases back in ONE statement, so its row
+// carries both names and it must not be counted as a producer split against
+// itself. A wholesale site is suppressed for exactly the pairs its own
+// statement aliases back.
+//
 // THREE FINDING CLASSES, each with its own verdict question:
 //
 //   SPLIT PRODUCERS  the column is aliased back at one site and projected BARE at
@@ -69,13 +87,22 @@
 //   positions.
 //
 //   REGISTRY PATHS EXCLUDED, as a real filter carrying its own weight. Column
-//   definitions and data-view paths declare WIRE IDS; a zero-read alias there is
-//   expected rather than suspicious. The original design asserted this exclusion
-//   was belt-and-braces because a registry alias name is never a former column.
+//   definitions declare WIRE IDS; a zero-read alias there is expected rather
+//   than suspicious. The original design asserted this exclusion was
+//   belt-and-braces because a registry alias name is never a former column.
 //   Asserted rather than assumed, that fails:
 //   `libs-server/data-views-column-definitions/player-adp-column-definitions.mjs:107`
 //   aliases to `adp`, which `player_adp_index` did lose, so it passes the
 //   lost-column filter and the path exclusion is the only thing removing it.
+//
+//   The filter was TWO markers until 2026-08-06, and the second one was a
+//   liability rather than a widening. `data-view` is a substring match over the
+//   whole relative path, so it excluded 132 files -- 99 outside any
+//   column-definitions directory, 13 of them real `db('<table>')` emitters
+//   including `api/routes/data-views.mjs`, all of `libs-server/data-views/rate-type/`,
+//   and two `scripts/` files caught on filename alone. It was not what removed
+//   the load-bearing case above (that path contains `column-definitions` too),
+//   so dropping it lost nothing and returned 13 emitters to the scan.
 //
 // WHAT IS DELIBERATELY OUT: THE PRODUCER-ANCHORED SWEEP. The `player_salary`
 // migration found its ten consumer sites with a fourth anchor -- sweep
@@ -100,6 +127,12 @@
 //   node db/gates/check-rename-alias-residue.mjs --base <pre-cluster-ref>
 //   node db/gates/check-rename-alias-residue.mjs --base <ref> --unadjudicated
 //   node db/gates/check-rename-alias-residue.mjs --base <ref> --json
+//
+// `--base` is REQUIRED and has no default. It defaulted to `origin/master`
+// until 2026-08-06, against which the schema diff is empty by construction --
+// zero lost columns, therefore zero residue, therefore every adjudication reads
+// as stale, for a guaranteed exit 1 that says nothing about the tree. A missing
+// base ref is the same exit 2 as an unresolvable one.
 //
 // Exit 0 clean, 1 on findings no adjudication covers, 2 when the gate could not
 // run. AN UNRESOLVABLE BASE REF IS EXIT 2, NOT A PASS.
@@ -141,12 +174,42 @@
 //   - An alias built by string concatenation or held in a constant names no
 //     literal and is invisible.
 //   - An unqualified alias whose statement's FROM target is not a `db('<table>')`
-//     literal cannot be resolved to a table. Same hazard gate 2 records.
+//     literal cannot be resolved to a table. Same hazard gate 2 records. 65 such
+//     literals in the corpus today, down from 76 before the builder-binding
+//     walk. The imperative form (`const query = db('t')` then
+//     `query.select('a as b')`) is NO LONGER in this class, but its walk keys on
+//     the binding NAME, so a shadowed or reassigned binding resolves wrong.
+//   - AN UNQUALIFIED ALIAS RETURNED FROM A HELPER is the live instance of the
+//     above and is worth naming, because it looks covered and is not:
+//     `libs-server/data-views/add-defensive-play-by-play-with-statement.mjs:72-73`
+//     returns the strings `'season_year as year'` and `'season_type as seas_type'`
+//     from a `to_inner_select_expr` helper, genuine `nfl_plays` rename
+//     alias-backs sitting inside no `db('<table>')` statement at all. Removing
+//     the over-broad `data-view` path marker returned that FILE to the scan; it
+//     did not make those two SITES resolvable, and they are still unreported.
 //   - A rename with no schema change (a pure API-shape rename) has no diff to
 //     derive lost columns from.
 //   - The ORPHANED ALIAS test is tree-wide, not per-consumer: it cannot prove the
 //     aliased row reaches the code reading the new name. It reports the pairing
 //     and asks a human, exactly as gate 2 does for cross-file reads.
+//   - The comment stripper does not parse REGEX LITERALS, so a regex containing
+//     an unescaped `//` can over-strip to end of line. `\/\/` is guarded; the
+//     bare form is not, and over-stripping loses sites silently.
+//   - A statement with no projection call at all (`db('t').where(...)` awaited
+//     directly) projects the row wholesale and is NOT counted as a bare
+//     producer. Only `select`/`first`/`pluck`/`returning` argument positions
+//     are read, which keeps `groupBy` out at the cost of this shape.
+//
+// IMPORTABLE WITHOUT RUNNING. `main()` was called bare at module scope, so
+// importing any export ran the whole gate and set `process.exitCode = 1` -- no
+// harness and no spec could load this file. The bare call was there because
+// `is_main` compares `process.argv[1]` VERBATIM and everything under `db/` is
+// run from a relative path, so a guard would silently no-op and exit 0. Both
+// are the same defect: an UNRESOLVED path comparison. Resolving both sides
+// through `realpathSync` fixes the cause, so a relative invocation runs and an
+// import does not. The external backstop against a silent no-op is the cluster
+// runner's own rule -- a gate declaring an always-on negative control must
+// PRINT one, and a no-op prints nothing.
 
 import fs from 'fs'
 import path from 'path'
@@ -167,7 +230,17 @@ const SPA_ROOTS = ['app']
 // player-adp-column-definitions.mjs:107 aliases to `adp`, which
 // `player_adp_index` did lose, so it passes the lost-column filter and only the
 // path exclusion removes it.
-const REGISTRY_PATH_MARKERS = ['column-definitions', 'data-view']
+//
+// `column-definitions` is the whole filter, and it is the one that carries the
+// load-bearing case above. A second marker `data-view` stood here until it was
+// measured: it is a SUBSTRING match over the entire relative path, so it
+// excluded 132 files -- 99 of them outside any column-definitions directory and
+// 13 of those real `db('<table>')` query emitters, including
+// `api/routes/data-views.mjs`, every file under `libs-server/data-views/rate-type/`,
+// and two `scripts/` files caught on filename alone. It was not covering the
+// load-bearing exclusion (that path contains `column-definitions` too), so
+// dropping it loses nothing and restores 13 emitters to the scan.
+const REGISTRY_PATH_MARKERS = ['column-definitions']
 
 const adjudications_path = path.join(
   __dirname,
@@ -178,10 +251,19 @@ const adjudications_path = path.join(
 // schema
 // ---------------------------------------------------------------------------
 
-const parse_schema = (sql) => {
+// The terminator is `\n)` followed by anything up to the statement's semicolon,
+// NOT `\n);` -- a partitioned parent closes as `)\nPARTITION BY RANGE (...);`.
+// With the tighter form the parent's body ran on to swallow its first partition
+// child, and SIX tables were absent from the parsed map entirely
+// (`nfl_plays_current_week`, `historical_injury_index_2009`, `nfl_snaps_year_2000`,
+// `player_gamelogs_default`, `projections_history_default`, `projections_index_default`).
+// Benign only because the children carry identical columns; the failure
+// direction is a silent miss, since an absent table means every alias against
+// it fails the lost-column discriminator and is never reported.
+export const parse_schema = (sql) => {
   const tables = new Map()
   const create_re =
-    /CREATE TABLE (?:public\.)?"?([a-z_0-9]+)"?\s*\(([\s\S]*?)\n\);/g
+    /CREATE TABLE (?:public\.)?"?([a-z_0-9]+)"?\s*\(([\s\S]*?)\n\)[^;]*;/g
   let match
   while ((match = create_re.exec(sql)) !== null) {
     const [, table_name, body] = match
@@ -263,6 +345,70 @@ const is_registry_path = (relative_path) =>
   REGISTRY_PATH_MARKERS.some((marker) => relative_path.includes(marker))
 
 // ---------------------------------------------------------------------------
+// comments
+// ---------------------------------------------------------------------------
+
+// A comment is prose ABOUT code, and this gate's own corpus is full of prose
+// about alias literals: `scripts/process-projections-for-league-format.mjs:113,205`
+// discuss its `projected_points_total as total` alias in backticks, and both
+// were reported as alias SITES. Same tokenize-comments trap that blinded
+// `check-saved-view-param-coverage`, where a comment naming a legacy key made
+// that key permanently unreportable -- there the comment documenting an
+// incident is what hid the incident.
+//
+// A commented-out `db('<table>')` is worse than noise. It mints a PHANTOM
+// statement span, and because the span sort is innermost-wins, a short phantom
+// beats the real enclosing statement and resolves a live unqualified alias to
+// the WRONG table -- which drops it from the scan entirely.
+//
+// Comment bodies are replaced with SPACES rather than removed, so every index
+// and line number in the stripped source still matches the original file and
+// `line_of` needs no adjustment.
+const strip_comments = (source) => {
+  const characters = source.split('')
+  let index = 0
+  const blank_through = (end_index) => {
+    const limit = Math.min(end_index, source.length)
+    for (; index < limit; index++)
+      if (source[index] !== '\n') characters[index] = ' '
+  }
+  while (index < source.length) {
+    const character = source[index]
+    const next_character = source[index + 1]
+    // `\/\/` inside a regex literal is not a comment. Regex literals are
+    // otherwise unparsed here, which is the one over-strip this can still do.
+    if (
+      character === '/' &&
+      next_character === '/' &&
+      source[index - 1] !== '\\'
+    ) {
+      const end_index = source.indexOf('\n', index)
+      blank_through(end_index === -1 ? source.length : end_index)
+    } else if (character === '/' && next_character === '*') {
+      const end_index = source.indexOf('*/', index + 2)
+      blank_through(end_index === -1 ? source.length : end_index + 2)
+    } else if (character === "'" || character === '"' || character === '`') {
+      // Skip the string body so a `//` inside a URL literal survives.
+      index += 1
+      while (index < source.length) {
+        if (source[index] === '\\') {
+          index += 2
+          continue
+        }
+        if (source[index] === character) {
+          index += 1
+          break
+        }
+        index += 1
+      }
+    } else {
+      index += 1
+    }
+  }
+  return characters.join('')
+}
+
+// ---------------------------------------------------------------------------
 // statement and projection spans
 // ---------------------------------------------------------------------------
 
@@ -312,6 +458,41 @@ const statement_span_at = (source, start_index) => {
   return { start: start_index, end }
 }
 
+// `const query = db('widgets')` followed by `query.select('widget_salary as
+// salary')` is one knex statement broken across two JS statements. The `db()`
+// chain ends at the assignment, so the projection sits outside every span, the
+// unqualified alias resolves to no table, and `run_scan` drops it -- the gate
+// reports NOTHING for a genuine alias-back. The declared blind spot covers a
+// FROM target that is not a `db('<table>')` literal; it does not cover this.
+const BUILDER_BINDING_RE = /(?:const|let|var)\s+([a-z_$][a-zA-Z_0-9$]*)\s*=\s*$/
+
+// Each later `<binding>.<method>(...)` call gets a span of its OWN carrying the
+// bound table, rather than stretching the original span across whatever code
+// sits between -- a narrower claim, and one that cannot swallow an unrelated
+// statement. The walk stops at a rebinding of the same name.
+const builder_binding_spans = ({ source, table, binding, from_index }) => {
+  const spans = []
+  const rebinding = new RegExp(`(?:const|let|var)\\s+${binding}\\s*=`, 'g')
+  rebinding.lastIndex = from_index
+  const rebinding_match = rebinding.exec(source)
+  const limit = rebinding_match ? rebinding_match.index : source.length
+
+  const call_re = new RegExp(`\\b${binding}\\s*\\.[a-zA-Z_0-9]+\\(`, 'g')
+  call_re.lastIndex = from_index
+  let match
+  while ((match = call_re.exec(source)) !== null) {
+    if (match.index >= limit) break
+    const end = end_of_call(
+      source,
+      match.index + match[0].length - 1,
+      source.length
+    )
+    if (end === null) continue
+    spans.push({ table, start: match.index, end })
+  }
+  return spans
+}
+
 // Every `db('<table>')` statement in a file, innermost-first so a nested
 // subquery's table wins over the outer one.
 const collect_statement_spans = (source) => {
@@ -321,6 +502,20 @@ const collect_statement_spans = (source) => {
   while ((match = from_re.exec(source)) !== null) {
     const { start, end } = statement_span_at(source, match.index)
     spans.push({ table: match[1], start, end })
+
+    const line_start = source.lastIndexOf('\n', match.index) + 1
+    const binding_match = source
+      .slice(line_start, match.index)
+      .match(BUILDER_BINDING_RE)
+    if (binding_match)
+      spans.push(
+        ...builder_binding_spans({
+          source,
+          table: match[1],
+          binding: binding_match[1],
+          from_index: end
+        })
+      )
   }
   // Innermost wins: a shorter span nested inside a longer one is the closer FROM.
   return spans.sort((a, b) => a.end - a.start - (b.end - b.start))
@@ -359,15 +554,51 @@ const QUALIFIED_ALIAS_RE =
   /['"`]([a-z_][a-z_0-9]*)\.([a-z_][a-z_0-9]*)\s+as\s+([a-z_][a-z_0-9]*)['"`]/gi
 const UNQUALIFIED_ALIAS_RE =
   /['"`]([a-z_][a-z_0-9]*)\s+as\s+([a-z_][a-z_0-9]*)['"`]/gi
-const QUALIFIED_BARE_RE = /['"`]([a-z_][a-z_0-9]*)\.([a-z_][a-z_0-9]*)['"`]/g
+// A bare projection literal, qualified (`'table.column'`) or not (`'column'`).
+// The closing quote is anchored, so an alias literal cannot match it.
+const BARE_RE = /['"`]([a-z_][a-z_0-9]*)(?:\.([a-z_][a-z_0-9]*))?['"`]/g
+// `select('*')` and `select('table.*')` project the row WHOLESALE -- the exact
+// shape league CLAUDE.md records as gate 2's silent defect.
+const WILDCARD_RE = /['"`](?:([a-z_][a-z_0-9]*)\.)?\*['"`]/g
+
+// Case-INSENSITIVE, matching the alias regexes. Spelled `includes(' as ')` this
+// skipped any file whose only alias literals use `AS`.
+const has_alias_literal = / as /i
 
 const line_of = (source, index) => source.slice(0, index).split('\n').length
+
+// The same count `collect_alias_sites` produces, over whatever source it is
+// handed. The negative control runs it on UNSTRIPPED source to prove the
+// comment strip removes real prose from the real corpus.
+const count_alias_literals = (source) => {
+  let total = 0
+  const qualified_indexes = new Set()
+  QUALIFIED_ALIAS_RE.lastIndex = 0
+  let match
+  while ((match = QUALIFIED_ALIAS_RE.exec(source)) !== null) {
+    qualified_indexes.add(match.index)
+    total += 1
+  }
+  UNQUALIFIED_ALIAS_RE.lastIndex = 0
+  while ((match = UNQUALIFIED_ALIAS_RE.exec(source)) !== null) {
+    if (qualified_indexes.has(match.index)) continue
+    if (match[0].includes('.')) continue
+    total += 1
+  }
+  return total
+}
 
 // Every alias literal in one file, both anchor forms, with the table resolved.
 // `table` is null for an unqualified alias whose statement has no `db('<table>')`
 // literal to resolve against -- a declared blind spot, counted rather than
 // silently dropped.
-export const collect_alias_sites = ({ relative_path, source }) => {
+//
+// Comments are stripped HERE rather than left to the caller. The strip is
+// idempotent, so `run_scan` doing it once per file costs one extra pass on
+// aliasing files and no caller of the export can forget it -- including the
+// negative control, whose real-corpus denominator would otherwise count prose.
+export const collect_alias_sites = ({ relative_path, source: raw_source }) => {
+  const source = strip_comments(raw_source)
   const statement_spans = collect_statement_spans(source)
   const sites = []
   const seen = new Set()
@@ -409,25 +640,86 @@ export const collect_alias_sites = ({ relative_path, source }) => {
   return sites
 }
 
-// Bare `'<table>.<column>'` projections -- the other half of SPLIT PRODUCERS.
-// Restricted to projection context; an alias literal is not a bare reference.
-const collect_bare_projections = ({ relative_path, source }) => {
+// The other half of SPLIT PRODUCERS: a producer of the same column that does
+// NOT alias it back. Restricted to projection context, because a bare
+// `rosters_players.roster_id` inside `groupBy(...)` is not a producer.
+//
+// THE BARE SIDE MUST READ EVERY SHAPE THE ALIAS SIDE READS. It matched only
+// QUALIFIED `'table.column'` literals until 2026-08-06, so a `select('*')`
+// producer and an unqualified `select('widget_salary')` producer both
+// contributed nothing -- the finding was classed UNIFORM ("correct today") with
+// an empty bare-producer list, telling the reviewer every producer aliases back
+// when one does not. That is the `transactions.value` shape itself, and the
+// wildcard case is the one league CLAUDE.md already documents as gate 2's
+// silent defect. Three shapes now count:
+//
+//   qualified     'widgets.widget_salary'
+//   unqualified   'widget_salary', resolved against the enclosing statement
+//   wholesale     '*' or 'widgets.*', which projects every column of the table
+//
+// A wholesale site names no column, so it is a bare producer of EVERY column of
+// its table and is matched by table alone at classification time.
+const collect_bare_projections = ({
+  relative_path,
+  source,
+  statement_spans,
+  alias_sites
+}) => {
   const projection_spans = collect_projection_spans(source)
-  const alias_indexes = new Set()
-  QUALIFIED_ALIAS_RE.lastIndex = 0
-  let alias_match
-  while ((alias_match = QUALIFIED_ALIAS_RE.exec(source)) !== null)
-    alias_indexes.add(alias_match.index)
+
+  // A statement that aliases the column back is not a bare producer of it, even
+  // when it also wildcards -- `libs-server/get-roster.mjs:48` writes
+  // `.select('*', 'player_position as pos', 'roster_id as rid')`, whose row
+  // carries BOTH names, so counting it against itself would report every such
+  // producer as split with itself.
+  const span_of = (index) => {
+    const span = statement_spans.find(
+      (entry) => index >= entry.start && index < entry.end
+    )
+    return span ? `${span.start}:${span.end}` : null
+  }
+  // (table.column) pairs aliased back within each statement span.
+  const aliased_by_span = new Map()
+  for (const site of alias_sites) {
+    if (!site.table) continue
+    const span_key = span_of(site.index)
+    if (!aliased_by_span.has(span_key)) aliased_by_span.set(span_key, new Set())
+    aliased_by_span.get(span_key).add(`${site.table}.${site.new_column}`)
+  }
+  const aliased_pairs_at = (index) =>
+    aliased_by_span.get(span_of(index)) || new Set()
 
   const sites = []
-  QUALIFIED_BARE_RE.lastIndex = 0
+
+  WILDCARD_RE.lastIndex = 0
   let match
-  while ((match = QUALIFIED_BARE_RE.exec(source)) !== null) {
-    if (alias_indexes.has(match.index)) continue
+  while ((match = WILDCARD_RE.exec(source)) !== null) {
     if (!in_projection(projection_spans, match.index)) continue
+    const table = match[1] || table_at(statement_spans, match.index)
+    if (!table) continue
+    // A wholesale site names no column, so which pairs it is suppressed for is
+    // decided at classification time against the pairs its own statement
+    // aliases back.
     sites.push({
-      table: match[1],
-      column: match[2],
+      table,
+      column: null,
+      aliased_pairs: aliased_pairs_at(match.index),
+      file: relative_path,
+      line: line_of(source, match.index)
+    })
+  }
+
+  BARE_RE.lastIndex = 0
+  while ((match = BARE_RE.exec(source)) !== null) {
+    if (!in_projection(projection_spans, match.index)) continue
+    const [, first, second] = match
+    const table = second ? first : table_at(statement_spans, match.index)
+    const column = second || first
+    if (!table) continue
+    if (aliased_pairs_at(match.index).has(`${table}.${column}`)) continue
+    sites.push({
+      table,
+      column,
       file: relative_path,
       line: line_of(source, match.index)
     })
@@ -460,11 +752,6 @@ export const READ_SHAPES = [
   ['destructure', (name) => new RegExp(`\\{[^{}]*\\b${name}\\b[^{}]*\\}\\s*=`)]
 ]
 
-const is_comment = (line) => {
-  const trimmed = line.trim()
-  return trimmed.startsWith('//') || trimmed.startsWith('*')
-}
-
 // Every place a name is read as an in-memory key, tree-wide. Feeds the ORPHANED
 // ALIAS class: a NEW column name also read as a key means two vocabularies for
 // one column, so some producer/consumer pair disagrees.
@@ -479,9 +766,10 @@ const collect_key_reads = ({ names, files, read_file }) => {
   )
   for (const file of files) {
     const relative_path = path.relative(repo_root, file)
-    const lines = read_file(file).split('\n')
+    // Stripped rather than line-filtered: a trailing `// reads .salary` comment
+    // is not a read site, and a line-leading test cannot see one.
+    const lines = strip_comments(read_file(file)).split('\n')
     lines.forEach((line, index) => {
-      if (is_comment(line)) return
       for (const [name, shapes] of patterns) {
         const matched = shapes.find(([, pattern]) => pattern.test(line))
         if (!matched) continue
@@ -519,15 +807,11 @@ export const run_scan = ({
 
   for (const file of producer_files) {
     const relative_path = path.relative(repo_root, file)
-    const source = read_file(file)
-    if (!source.includes(' as ')) {
-      // Cheap skip; a file with no alias literal can still hold bare projections.
-      bare_projections.push(
-        ...collect_bare_projections({ relative_path, source })
-      )
-      continue
-    }
-    const sites = collect_alias_sites({ relative_path, source })
+    const source = strip_comments(read_file(file))
+    const statement_spans = collect_statement_spans(source)
+    const sites = has_alias_literal.test(source)
+      ? collect_alias_sites({ relative_path, source })
+      : []
     total_alias_literals += sites.length
     for (const site of sites) {
       if (site.anchor === 'qualified') qualified_literals += 1
@@ -538,8 +822,14 @@ export const run_scan = ({
       }
       alias_sites.push(site)
     }
+    // A file with no alias literal can still hold bare projections.
     bare_projections.push(
-      ...collect_bare_projections({ relative_path, source })
+      ...collect_bare_projections({
+        relative_path,
+        source,
+        statement_spans,
+        alias_sites: sites
+      })
     )
   }
 
@@ -569,13 +859,29 @@ export const run_scan = ({
     read_file
   })
 
-  // A bare producer of the same (table, new column) that aliases nothing.
+  // A bare producer of the same (table, new column) that aliases nothing. A
+  // WHOLESALE producer names no column, so it is indexed by table and resolved
+  // per column below -- minus the columns its own statement aliases back.
   const bare_by_pair = new Map()
+  const wholesale_by_table = new Map()
   for (const site of bare_projections) {
+    if (site.column === null) {
+      if (!wholesale_by_table.has(site.table))
+        wholesale_by_table.set(site.table, [])
+      wholesale_by_table.get(site.table).push(site)
+      continue
+    }
     const key = `${site.table}.${site.column}`
     if (!bare_by_pair.has(key)) bare_by_pair.set(key, [])
     bare_by_pair.get(key).push(site)
   }
+
+  const bare_producers_of = ({ table, column }) => [
+    ...(bare_by_pair.get(`${table}.${column}`) || []),
+    ...(wholesale_by_table.get(table) || []).filter(
+      (site) => !site.aliased_pairs.has(`${table}.${column}`)
+    )
+  ]
 
   // Auditability note context: does the old name survive on ANOTHER table?
   const surviving_tables = (old_column) =>
@@ -584,8 +890,10 @@ export const run_scan = ({
       .map(([table]) => table)
 
   const findings = residue.map((site) => {
-    const pair_key = `${site.table}.${site.new_column}`
-    const bare_producers = bare_by_pair.get(pair_key) || []
+    const bare_producers = bare_producers_of({
+      table: site.table,
+      column: site.new_column
+    })
     const reads = key_reads.get(site.new_column) || []
 
     const finding_class = bare_producers.length
@@ -605,7 +913,9 @@ export const run_scan = ({
       file: site.file,
       line: site.line,
       bare_producers: bare_producers.map(
-        (producer) => `${producer.file}:${producer.line}`
+        (producer) =>
+          `${producer.file}:${producer.line}` +
+          (producer.column === null ? ' [wholesale]' : '')
       ),
       new_name_key_reads: reads
         .slice(0, 8)
@@ -728,8 +1038,76 @@ export const get_bare_widgets = () =>
   db('widgets').select('widgets.widget_salary', 'widgets.uid')
 `
 
-// Two mutations, per the design, plus the denominator cases that keep them from
-// going vacuous. A case that stops failing fails the whole run.
+// The bare side must read every shape the alias side reads. Each of these three
+// was invisible to it until 2026-08-06, so an aliased producer paired with any
+// of them reported UNIFORM -- "every producer aliases back" -- over a tree where
+// one does not.
+const CONTROL_WHOLESALE_PRODUCER = `
+import db from '#db'
+export const get_all_widgets = () => db('widgets').select('*')
+`
+
+const CONTROL_UNQUALIFIED_BARE_PRODUCER = `
+import db from '#db'
+export const get_some_widgets = () => db('widgets').select('widget_salary')
+`
+
+// get-roster.mjs's real shape: one statement that wildcards AND aliases back.
+// The row carries both names, so it is not a divergent producer and must not be
+// counted against itself -- the over-fire the wholesale rule could easily cause.
+const CONTROL_WHOLESALE_AND_ALIAS_PRODUCER = `
+import db from '#db'
+export const get_roster = () =>
+  db('widgets').select('*', 'widget_salary as salary')
+`
+
+// The imperative builder: one knex statement across two JS statements.
+const CONTROL_IMPERATIVE_PRODUCER = `
+import db from '#db'
+export const get_widgets_imperatively = () => {
+  const query = db('widgets')
+  query.where({ uid: 1 })
+  query.select('widget_salary as salary')
+  return query
+}
+`
+
+// Prose ABOUT an alias is not an alias site. This is the exact shape that made
+// four keys permanently unreportable in check-saved-view-param-coverage.
+const CONTROL_COMMENT_PROSE = `
+import db from '#db'
+// historical note: this used to read 'widgets.widget_salary as salary'
+/* and in block form: 'widgets.widget_salary as salary' */
+export const get_widgets = () => db('widgets').select('widgets.uid')
+`
+
+// A commented-out db() call must not mint a phantom statement span. The span
+// sort is innermost-wins, so a short phantom beats the real enclosing statement
+// and resolves this live alias to `gizmos` -- dropping it from the scan.
+const CONTROL_PHANTOM_SPAN_PRODUCER = `
+import db from '#db'
+export const get_widgets = () =>
+  db('widgets')
+    // superseded: db('gizmos')
+    .select('widget_salary as salary')
+`
+
+// The fast path was case-sensitive while the alias regexes are /i.
+const CONTROL_UPPERCASE_ALIAS_PRODUCER = `
+import db from '#db'
+export const get_widgets = () =>
+  db('widgets').select('widgets.widget_salary AS salary')
+`
+
+// The synthetic cases, plus the real-corpus denominator cases that keep them
+// from going vacuous. A case that stops failing fails the whole run.
+//
+// Eleven of these were PROVEN RED at the pre-fix revision `23269028b` before
+// the fix that makes them green was written, using a synthetic `run_scan` with
+// an injected `read_file` -- the same rig the control uses. A fix whose test was
+// never red proves nothing, and this gate's own adversarial review found nine
+// defects behind an all-green control precisely because the control asserted
+// existence rather than behaviour.
 const run_negative_control = ({ current_tables }) => {
   const cases = []
 
@@ -826,6 +1204,207 @@ const run_negative_control = ({ current_tables }) => {
     ])
   }
 
+  // 3c. THE WHOLESALE BARE PRODUCER. A `select('*')` producer aliases nothing,
+  //     so the finding is SPLIT PRODUCERS -- and it read UNIFORM ("correct
+  //     today", empty bare-producer list) until 2026-08-06. This case goes red
+  //     the moment the bare side stops seeing wildcards.
+  {
+    const files = [
+      synthetic_path('aliased.mjs'),
+      synthetic_path('wholesale.mjs')
+    ]
+    const sources = {
+      [files[0]]: CONTROL_ALIASED_PRODUCER,
+      [files[1]]: CONTROL_WHOLESALE_PRODUCER
+    }
+    const { findings } = run_scan({
+      lost_columns: control_lost,
+      current_tables: control_current,
+      producer_files: files,
+      read_file: control_reader(sources)
+    })
+    const reported = findings.find(
+      (finding) => finding.table === 'widgets' && finding.column === 'salary'
+    )
+    cases.push([
+      "a select('*') producer makes the finding SPLIT PRODUCERS, not UNIFORM",
+      Boolean(reported) && reported.finding_class === 'SPLIT PRODUCERS'
+    ])
+  }
+
+  // 3d. The UNQUALIFIED bare producer, the second shape the bare side could not
+  //     see while the alias side could.
+  {
+    const files = [
+      synthetic_path('aliased.mjs'),
+      synthetic_path('unqualified-bare.mjs')
+    ]
+    const sources = {
+      [files[0]]: CONTROL_ALIASED_PRODUCER,
+      [files[1]]: CONTROL_UNQUALIFIED_BARE_PRODUCER
+    }
+    const { findings } = run_scan({
+      lost_columns: control_lost,
+      current_tables: control_current,
+      producer_files: files,
+      read_file: control_reader(sources)
+    })
+    const reported = findings.find(
+      (finding) => finding.table === 'widgets' && finding.column === 'salary'
+    )
+    cases.push([
+      'an unqualified bare producer makes the finding SPLIT PRODUCERS',
+      Boolean(reported) && reported.finding_class === 'SPLIT PRODUCERS'
+    ])
+  }
+
+  // 3e. The other direction, which the two above make easy to break: a
+  //     statement that wildcards AND aliases back is ONE producer carrying both
+  //     names, not a producer split against itself.
+  {
+    const files = [synthetic_path('wholesale-and-alias.mjs')]
+    const sources = { [files[0]]: CONTROL_WHOLESALE_AND_ALIAS_PRODUCER }
+    const { findings } = run_scan({
+      lost_columns: control_lost,
+      current_tables: control_current,
+      producer_files: files,
+      read_file: control_reader(sources)
+    })
+    const reported = findings.find(
+      (finding) => finding.table === 'widgets' && finding.column === 'salary'
+    )
+    cases.push([
+      'a statement that wildcards AND aliases back is not its own bare producer',
+      Boolean(reported) && reported.finding_class !== 'SPLIT PRODUCERS'
+    ])
+  }
+
+  // 3f. The imperative builder. Reported NOTHING AT ALL before 2026-08-06 --
+  //     not a misclassification, a total miss.
+  {
+    const files = [synthetic_path('imperative.mjs')]
+    const sources = { [files[0]]: CONTROL_IMPERATIVE_PRODUCER }
+    const { findings } = run_scan({
+      lost_columns: control_lost,
+      current_tables: control_current,
+      producer_files: files,
+      read_file: control_reader(sources)
+    })
+    cases.push([
+      'an imperative builder alias-back resolves its table and is reported',
+      findings.some(
+        (finding) => finding.table === 'widgets' && finding.column === 'salary'
+      )
+    ])
+  }
+
+  // 3g. Comment prose is not an alias site, and a commented-out db() does not
+  //     mint a phantom span that steals a live alias's table.
+  {
+    const files = [synthetic_path('prose.mjs')]
+    const sources = { [files[0]]: CONTROL_COMMENT_PROSE }
+    const { findings } = run_scan({
+      lost_columns: control_lost,
+      current_tables: control_current,
+      producer_files: files,
+      read_file: control_reader(sources)
+    })
+    cases.push([
+      'an alias literal inside a comment is not an alias site',
+      findings.length === 0
+    ])
+  }
+
+  {
+    const files = [synthetic_path('phantom.mjs')]
+    const sources = { [files[0]]: CONTROL_PHANTOM_SPAN_PRODUCER }
+    const { findings } = run_scan({
+      lost_columns: control_lost,
+      current_tables: control_current,
+      producer_files: files,
+      read_file: control_reader(sources)
+    })
+    cases.push([
+      'a commented-out db() call does not mint a phantom statement span',
+      findings.some(
+        (finding) => finding.table === 'widgets' && finding.column === 'salary'
+      )
+    ])
+  }
+
+  // 3h. The fast path is case-insensitive, matching the alias regexes.
+  {
+    const files = [synthetic_path('uppercase.mjs')]
+    const sources = { [files[0]]: CONTROL_UPPERCASE_ALIAS_PRODUCER }
+    const { findings } = run_scan({
+      lost_columns: control_lost,
+      current_tables: control_current,
+      producer_files: files,
+      read_file: control_reader(sources)
+    })
+    cases.push([
+      'an uppercase AS alias is not skipped by the fast path',
+      findings.some(
+        (finding) => finding.table === 'widgets' && finding.column === 'salary'
+      )
+    ])
+  }
+
+  // 3i. A partitioned parent parses, and its first child is a table of its own.
+  //     Six tables were absent from the parsed map before this, which makes
+  //     every alias against them fail the discriminator silently.
+  {
+    const parsed = parse_schema(`
+CREATE TABLE public.control_parent (
+    esbid integer NOT NULL,
+    season_year smallint
+)
+PARTITION BY RANGE (season_year);
+
+CREATE TABLE public.control_parent_default (
+    esbid integer NOT NULL,
+    season_year smallint
+);
+`)
+    cases.push([
+      'a PARTITION BY parent parses and does not swallow its first child',
+      Boolean(
+        parsed.get('control_parent') &&
+          parsed.get('control_parent').has('season_year') &&
+          parsed.get('control_parent_default')
+      )
+    ])
+  }
+
+  // 3j. The registry filter excludes the registry and NOTHING ELSE. The
+  //     load-bearing exclusion must keep working while a real db() emitter
+  //     living under a data-views path must be scanned.
+  {
+    const registry_file = path.join(
+      repo_root,
+      'libs-server/data-views-column-definitions/player-adp-column-definitions.mjs'
+    )
+    const emitter_file = path.join(
+      repo_root,
+      'libs-server/data-views/add-defensive-play-by-play-with-statement.mjs'
+    )
+    const scan_one = (file) =>
+      run_scan({
+        lost_columns: control_lost,
+        current_tables: control_current,
+        producer_files: [file],
+        read_file: control_reader({ [file]: CONTROL_ALIASED_PRODUCER })
+      }).findings
+    cases.push([
+      'the column-definitions registry stays excluded (load-bearing)',
+      scan_one(registry_file).length === 0
+    ])
+    cases.push([
+      'a real db() emitter under a data-views path is scanned',
+      scan_one(emitter_file).length === 1
+    ])
+  }
+
   // 4. The lost-column discriminator actually discriminates. Without it the scan
   //    reports 196 join-disambiguation aliases and is unusable.
   {
@@ -843,32 +1422,52 @@ const run_negative_control = ({ current_tables }) => {
     ])
   }
 
-  // 5 and 6. DENOMINATOR against the REAL corpus. Cases 1-4 are synthetic, so a
-  //    corpus that stopped being walked, or an extractor that stopped matching,
-  //    would leave them all green. These state the denominator directly, and they
-  //    are anchored on ALL alias literals rather than on residue -- residue goes
-  //    to zero when the tree is clean, which is the success state, not a blindness.
+  // 5, 6 and 7. DENOMINATOR against the REAL corpus. The synthetic cases above
+  //    all pass over a corpus that stopped being walked or an extractor that
+  //    stopped matching, so these state the denominator directly, anchored on
+  //    ALL alias literals rather than on residue -- residue goes to zero when
+  //    the tree is clean, which is the success state, not a blindness.
+  //
+  //    The first two asserted only `> 0` until 2026-08-06, and their count
+  //    included COMMENT PROSE: `scripts/process-projections-for-league-format.mjs`
+  //    discusses its own alias in backticks twice, so the denominator could have
+  //    been carried entirely by prose while the extractor had stopped matching
+  //    real code. The third case is what closes that -- it measures the corpus
+  //    with comments left IN and requires the stripped count to be strictly
+  //    lower, so the strip is proven to be doing work on real files rather than
+  //    asserted. Both halves fail if either the walk or the strip breaks.
   {
     let qualified = 0
     let unqualified = 0
+    let unstripped_literals = 0
     for (const file of walk_files(SERVER_ROOTS, ['.mjs', '.js'])) {
-      const source = fs.readFileSync(file, 'utf8')
-      if (!source.includes(' as ')) continue
+      const raw_source = fs.readFileSync(file, 'utf8')
+      if (!has_alias_literal.test(raw_source)) continue
+      const relative_path = path.relative(repo_root, file)
       for (const site of collect_alias_sites({
-        relative_path: path.relative(repo_root, file),
-        source
+        relative_path,
+        source: raw_source
       })) {
         if (site.anchor === 'qualified') qualified += 1
         else unqualified += 1
       }
+      // `collect_alias_sites` strips; count the raw source separately by
+      // re-inserting nothing and running the same regexes over it.
+      unstripped_literals += count_alias_literals(raw_source)
     }
+    const stripped_literals = qualified + unqualified
     cases.push([
-      `the extractor still finds qualified alias literals in the real corpus (${qualified})`,
+      `the extractor still finds qualified alias literals in real CODE (${qualified})`,
       qualified > 0
     ])
     cases.push([
-      `the extractor still finds unqualified alias literals in the real corpus (${unqualified})`,
+      `the extractor still finds unqualified alias literals in real CODE (${unqualified})`,
       unqualified > 0
+    ])
+    cases.push([
+      `comment prose is excluded from the real corpus denominator ` +
+        `(${unstripped_literals} raw, ${stripped_literals} in code)`,
+      unstripped_literals > stripped_literals
     ])
   }
 
@@ -924,10 +1523,14 @@ const run_negative_control = ({ current_tables }) => {
 
 const main = () => {
   const argv = yargs(hideBin(process.argv))
+    // No DEFAULT. `origin/master` was one, and against it the schema diff is
+    // empty by construction: zero lost columns, therefore zero residue,
+    // therefore all 15 adjudications stale -- a guaranteed exit 1 that says
+    // nothing about the tree. A gate with no base ref cannot run, which is the
+    // same exit 2 an unresolvable ref gets.
     .option('base', {
       type: 'string',
-      default: 'origin/master',
-      describe: 'git ref to diff the schema against'
+      describe: 'git ref to diff the schema against (REQUIRED)'
     })
     .option('json', { type: 'boolean', default: false })
     .option('unadjudicated', {
@@ -936,6 +1539,16 @@ const main = () => {
       describe: 'report only findings no adjudication covers'
     })
     .parse()
+
+  if (!argv.base) {
+    console.error(
+      'GATE ERROR: --base is required. This gate derives its whole candidate ' +
+        'list from the schema diff, so with no base ref there are no lost ' +
+        'columns, no residue, and every adjudication reads as stale. Give it ' +
+        'the pre-cluster revision.'
+    )
+    return 2
+  }
 
   if (!fs.existsSync(schema_path)) {
     console.error(`missing schema file: ${schema_path}`)
@@ -1057,7 +1670,28 @@ const main = () => {
   return unadjudicated.length ? 1 : 0
 }
 
-// `db/adhoc` scripts are run by hand from a relative path, and `is_main` compares
-// process.argv[1] VERBATIM against the resolved module path -- so a guarded call
-// would silently do nothing and exit 0. Call main bare, as the sibling gates do.
-process.exitCode = main()
+// Everything under `db/` is run by hand from a RELATIVE path, and `is_main`
+// compares `process.argv[1]` VERBATIM against the resolved module path -- so an
+// `is_main` guard here would silently do nothing and exit 0, the failure the
+// sibling gates avoid by calling `main()` bare. But bare means importing any of
+// the exported functions runs the whole gate and sets `process.exitCode = 1`,
+// so no harness and no spec can import this file cleanly.
+//
+// Both are the same defect: `is_main` compares an UNRESOLVED path. Resolving
+// BOTH sides through `realpathSync` removes the reason `is_main` fails here,
+// so `node db/gates/check-rename-alias-residue.mjs` runs and an import does
+// not. Anything that cannot be resolved is treated as not-direct rather than
+// guessed at, and the negative control pins the relative-invocation case.
+const is_direct_invocation = () => {
+  if (!process.argv[1]) return false
+  try {
+    return (
+      fs.realpathSync(path.resolve(process.argv[1])) ===
+      fs.realpathSync(fileURLToPath(import.meta.url))
+    )
+  } catch {
+    return false
+  }
+}
+
+if (is_direct_invocation()) process.exitCode = main()
