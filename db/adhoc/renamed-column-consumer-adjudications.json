@@ -958,7 +958,7 @@
         "scripts/set-draft-pick-number.mjs"
       ],
       "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+      "reason": "Server consumers were repointed to season_year by the season_grain cluster. The original reason claimed every flagged read of the old name was current_season.year, a request/CLI parameter, or a same-named column surviving on another table -- that was FALSE when written: dashboard-draft-picks.js:53 read groupBy(picks, 'year') and draft-pick-sheet.js:197,200 read historical_pick.get('year') off draft rows, so the team page grouped every pick under one 'undefined' heading until de3e0bb32 (2026-08-06). The claim was unfalsifiable because the entry records query sites only, and the gate showed the SPA reads as a bare count of 198. Both are repointed and the gate now lists accessor/field-argument SPA reads explicitly (1974ccb88). The one remaining high-signal SPA read of 'year' is restricted-free-agency/index.js:13, which is the redux store's own UI selection key and not a draft row."
     },
     {
       "table": "league_baselines",
