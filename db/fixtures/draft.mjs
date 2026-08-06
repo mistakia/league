@@ -58,13 +58,15 @@ export default async function (knex) {
     if (player_index === -1) break
 
     const [player] = players.splice(player_index, 1)
-    const value = Math.floor(Math.random() * Math.min(r.availableCap, 60))
+    const player_salary = Math.floor(
+      Math.random() * Math.min(r.availableCap, 60)
+    )
 
     r.addPlayer({
       slot: roster_slot_types.BENCH,
       pid: player.pid,
       pos: player.secondary_position,
-      value
+      player_salary
     })
 
     roster_player_rows.push({
@@ -88,7 +90,7 @@ export default async function (knex) {
         lid: league.uid,
         pid: player.pid,
         type,
-        player_salary: value,
+        player_salary,
         week: current_season.week,
         season_year: current_season.year,
         timestamp

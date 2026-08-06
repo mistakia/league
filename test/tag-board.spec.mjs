@@ -159,7 +159,7 @@ describe('tag board', function () {
         tag: 1,
         pos: 'WR',
         extensions: 2,
-        value: 30,
+        player_salary: 30,
         season,
         extensions_processed: false
       }).should.equal(45)
@@ -171,7 +171,7 @@ describe('tag board', function () {
         tag: 2,
         pos: 'RB',
         extensions: 0,
-        value: 61,
+        player_salary: 61,
         season,
         extensions_processed: false
       }).should.equal(41)
@@ -184,7 +184,7 @@ describe('tag board', function () {
         tag: 3,
         pos: 'RB',
         extensions: 0,
-        value: 10,
+        player_salary: 10,
         season,
         extensions_processed: false
       }).should.equal(10)
@@ -200,7 +200,7 @@ describe('tag board', function () {
         tag: 4,
         pos: 'WR',
         extensions: 1,
-        value: 21,
+        player_salary: 21,
         season,
         extensions_processed: false
       }).should.equal(31)
@@ -214,7 +214,7 @@ describe('tag board', function () {
       const args = {
         pos: 'WR',
         extensions: 1,
-        value: 21,
+        player_salary: 21,
         season,
         extensions_processed: false
       }
@@ -233,7 +233,7 @@ describe('tag board', function () {
         tag: 1,
         pos: 'WR',
         extensions: 2,
-        value: 15,
+        player_salary: 15,
         season,
         extensions_processed: false
       }).should.equal(30)
@@ -247,7 +247,7 @@ describe('tag board', function () {
         tag: 1,
         pos: 'WR',
         extensions: 3,
-        value: 30,
+        player_salary: 30,
         season,
         extensions_processed: true
       }).should.equal(30)
@@ -261,7 +261,7 @@ describe('tag board', function () {
         tag: 2,
         pos: 'RB',
         extensions: 0,
-        value: 41,
+        player_salary: 41,
         season,
         extensions_processed: true
       }).should.equal(41)
@@ -1178,7 +1178,7 @@ describe('tag board', function () {
       // artifact at all.
       row.post_deadline_salary.should.equal(25)
       row.market_gap.should.equal(-5)
-      expect(row.value).to.equal(undefined)
+      expect(row.player_salary).to.equal(undefined)
 
       // Still in neither shed pool: those describe a contract an owner might
       // shed for cap relief, and the auction is already re-settling this one.

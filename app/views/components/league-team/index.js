@@ -57,7 +57,7 @@ const map_state_to_props = createSelector(
     const projectionType = current_season.isRegularSeason ? 'ros' : '0'
     const items = []
     players.players.forEach((p) => {
-      const value = p.get('value', 0)
+      const player_salary = p.get('player_salary', 0)
       const tag = p.get('tag')
       const isRestrictedFreeAgent =
         tag === player_tag_types.RESTRICTED_FREE_AGENCY
@@ -78,13 +78,15 @@ const map_state_to_props = createSelector(
         tag: is_before_extension_deadline ? tag : player_tag_types.REGULAR,
         extensions,
         league,
-        value,
+        player_salary,
         bid
       })
       const savings =
         !is_restricted_free_agency_period || has_bid || !isRestrictedFreeAgent
           ? market_salary -
-            (is_before_extension_deadline ? extendedSalary : (bid ?? value))
+            (is_before_extension_deadline
+              ? extendedSalary
+              : (bid ?? player_salary))
           : null
 
       let rookie_tag_savings = null
@@ -97,13 +99,13 @@ const map_state_to_props = createSelector(
           tag: player_tag_types.REGULAR,
           extensions,
           league,
-          value
+          player_salary
         })
 
         const is_rookie = p.get('nfl_draft_year') >= current_season.year - 1
         if (is_rookie) {
           rookie_tag_savings =
-            Math.max(regular_extended_salary - value, 0) || null
+            Math.max(regular_extended_salary - player_salary, 0) || null
         }
 
         franchise_tag_savings =
@@ -117,7 +119,7 @@ const map_state_to_props = createSelector(
       }
 
       items.push({
-        salary: value,
+        salary: player_salary,
         savings,
         market_salary,
         rookie_tag_savings,

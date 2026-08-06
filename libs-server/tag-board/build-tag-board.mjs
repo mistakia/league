@@ -156,11 +156,11 @@ export const post_deadline_salary = ({
   tag,
   pos,
   extensions,
-  value,
+  player_salary,
   season,
   extensions_processed
 }) => {
-  if (extensions_processed) return value
+  if (extensions_processed) return player_salary
 
   return get_extension_amount({
     extensions,
@@ -170,7 +170,7 @@ export const post_deadline_salary = ({
         : tag,
     pos,
     league: season,
-    value
+    player_salary
   })
 }
 
@@ -323,7 +323,7 @@ export default function build_tag_board({
 
   const all_rows = roster_rows.map((row) => {
     const player = players.get(row.pid) || {}
-    const value = contracts.get(contract_key(row.tid, row.pid)) ?? 0
+    const player_salary = contracts.get(contract_key(row.tid, row.pid)) ?? 0
     const dynasty = dynasty_values.get(row.pid) || null
     return {
       tid: row.tid,
@@ -334,7 +334,7 @@ export default function build_tag_board({
       tag: row.tag,
       extensions: row.extensions || 0,
       nfl_draft_year: player.nfl_draft_year ?? null,
-      value,
+      player_salary,
       dynasty_value: dynasty ? Number(dynasty.composite_value) : null,
       coverage: dynasty ? Number(dynasty.composite_coverage_score) : null
     }
@@ -343,13 +343,13 @@ export default function build_tag_board({
   const active_rows = all_rows.filter((row) => is_active_slot(row.slot))
 
   for (const row of active_rows) {
-    row.extension_price = row.value + (row.extensions + 1) * 5
+    row.extension_price = row.player_salary + (row.extensions + 1) * 5
     row.franchise_price = franchise_price_for({ pos: row.pos, season })
     row.post_deadline_salary = post_deadline_salary({
       tag: row.tag,
       pos: row.pos,
       extensions: row.extensions,
-      value: row.value,
+      player_salary: row.player_salary,
       season,
       extensions_processed
     })
@@ -364,7 +364,7 @@ export default function build_tag_board({
     // A rookie tag buys the extension for $0 rather than zeroing the contract,
     // so it saves exactly the extension cost it avoids — the value itself still
     // sits on the cap line either way.
-    row.rookie_saving = row.extension_price - row.value
+    row.rookie_saving = row.extension_price - row.player_salary
     row.franchise_consecutive_year_ok = passes_consecutive_year_check({
       tid: row.tid,
       pid: row.pid,
@@ -447,7 +447,7 @@ export default function build_tag_board({
 
   const cap_exposure = team_ids.map((tid) => {
     const rows = rows_by_tid.get(tid)
-    const current_salary = rows.reduce((sum, row) => sum + row.value, 0)
+    const current_salary = rows.reduce((sum, row) => sum + row.player_salary, 0)
     const post_extension_salary = rows.reduce(
       (sum, row) => sum + row.post_deadline_salary,
       0
@@ -752,7 +752,7 @@ export default function build_tag_board({
           pid: row.pid,
           name: row.name,
           pos: row.pos,
-          value: row.value,
+          player_salary: row.player_salary,
           extensions: row.extensions,
           tag: row.tag,
           extension_price: row.extension_price,

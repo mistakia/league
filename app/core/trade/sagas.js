@@ -66,7 +66,7 @@ function ensure_complete_slot_assignments({
       game_day: player_map.get('game_day'),
       prior_week_inactive: player_map.get('prior_week_inactive'),
       prior_week_ruled_out: player_map.get('prior_week_ruled_out'),
-      value: player_map.get('value')
+      player_salary: player_map.get('player_salary')
     }
 
     const default_slot = get_default_trade_slot({

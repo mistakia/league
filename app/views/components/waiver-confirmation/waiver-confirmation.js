@@ -172,7 +172,7 @@ export default function WaiverConfirmation({
       pos: releasePlayerMap.get('primary_position'),
       team: releasePlayerMap.get('team'),
       pname: releasePlayerMap.get('short_name'),
-      value: releasePlayerMap.get('value')
+      value: releasePlayerMap.get('player_salary')
     })
   }
 
@@ -187,7 +187,7 @@ export default function WaiverConfirmation({
       pos: releasePlayerMap.get('primary_position'),
       team: releasePlayerMap.get('team'),
       pname: releasePlayerMap.get('short_name'),
-      value: releasePlayerMap.get('value')
+      value: releasePlayerMap.get('player_salary')
     })
   })
 

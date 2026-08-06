@@ -167,11 +167,14 @@ function PlayerFields({ week, opponent_time_period, state }) {
         return pts
       }
     },
+    // The field KEY stays `value`: it is a persisted column identifier carried
+    // by saved views and share URLs, so renaming it would orphan them. Only the
+    // PATH moves, because that reads the player map's salary field.
     value: {
       category: 'management',
       column_header: 'Salary',
       csv_header: 'Projected Salary',
-      player_value_path: 'value'
+      player_value_path: 'player_salary'
     },
     'salary_adj_pts_added.week': {
       category: 'management',

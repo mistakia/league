@@ -45,7 +45,7 @@ const map_state_to_props = createSelector(
 
     // Calculate extension salaries
     const extensions = player_map.get('extensions', 0)
-    const value = player_map.get('value')
+    const player_salary = player_map.get('player_salary')
     const extension_salaries = []
     const extended_salary = is_before_extension_deadline
       ? getExtensionAmount({
@@ -53,9 +53,9 @@ const map_state_to_props = createSelector(
           tag: player_map.get('tag'),
           extensions,
           league,
-          value
+          player_salary
         })
-      : value
+      : player_salary
     extension_salaries.push({
       year: current_season.year,
       extended_salary
@@ -68,7 +68,7 @@ const map_state_to_props = createSelector(
         pos: player_map.get('primary_position'),
         extensions: i,
         league,
-        value: salary
+        player_salary: salary
       })
       year += 1
       extension_salaries.push({
@@ -86,7 +86,7 @@ const map_state_to_props = createSelector(
       draft_transaction,
       extension_salaries,
       extensions,
-      value,
+      player_salary,
       loadingTransactions: player_map.get('loadingTransactions', false)
     }
   }

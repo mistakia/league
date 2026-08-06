@@ -38,7 +38,7 @@ class PlayerRosterRow extends Player {
       !practice_drafted &&
       current_season.now.isBefore(deadline)
     const extensions = player_map.get('extensions', 0)
-    const value = player_map.get('value')
+    const player_salary = player_map.get('player_salary')
     const bid = player_map.get('bid_amount')
     const salary = calculate_extension
       ? getExtensionAmount({
@@ -46,9 +46,9 @@ class PlayerRosterRow extends Player {
           tag: player_map.get('tag'),
           extensions,
           league,
-          value
+          player_salary
         })
-      : (show_bid && bid) || value
+      : (show_bid && bid) || player_salary
 
     return (
       <div className={class_names.join(' ')}>

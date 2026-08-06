@@ -103,7 +103,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow2.players[0].pid).to.equal(player.pid)
       expect(rosterRow2.players[0].slot).to.equal(roster_slot_types.BENCH)
       expect(rosterRow2.players[0].type).to.equal(transaction_types.POACHED)
-      expect(rosterRow2.players[0].value).to.equal(3)
+      expect(rosterRow2.players[0].player_salary).to.equal(3)
 
       // check poaching claim
       const poaches = await knex('poaches')
@@ -230,14 +230,14 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow2.players[0].pid).to.equal(player1.pid)
       expect(rosterRow2.players[0].slot).to.equal(roster_slot_types.BENCH)
       expect(rosterRow2.players[0].type).to.equal(transaction_types.POACHED)
-      expect(rosterRow2.players[0].value).to.equal(3)
+      expect(rosterRow2.players[0].player_salary).to.equal(3)
 
       expect(rosterRow3.tid).to.equal(3)
       expect(rosterRow3.players.length).to.equal(1)
       expect(rosterRow3.players[0].pid).to.equal(player2.pid)
       expect(rosterRow3.players[0].slot).to.equal(roster_slot_types.PS)
       expect(rosterRow3.players[0].type).to.equal(transaction_types.DRAFT)
-      expect(rosterRow3.players[0].value).to.equal(1)
+      expect(rosterRow3.players[0].player_salary).to.equal(1)
 
       expect(rosterRow4.tid).to.equal(4)
       expect(rosterRow4.players.length).to.equal(0)
@@ -313,7 +313,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow1.players[0].pid).to.equal(player.pid)
       expect(rosterRow1.players[0].slot).to.equal(roster_slot_types.PS)
       expect(rosterRow1.players[0].type).to.equal(transaction_types.DRAFT)
-      expect(rosterRow1.players[0].value).to.equal(1)
+      expect(rosterRow1.players[0].player_salary).to.equal(1)
 
       expect(rosterRow2.tid).to.equal(2)
       expect(rosterRow2.players.length).to.equal(0)
@@ -413,7 +413,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow2.players[0].pid).to.equal(player.pid)
       expect(rosterRow2.players[0].slot).to.equal(roster_slot_types.BENCH)
       expect(rosterRow2.players[0].type).to.equal(transaction_types.POACHED)
-      expect(rosterRow2.players[0].value).to.equal(3)
+      expect(rosterRow2.players[0].player_salary).to.equal(3)
 
       // check poaching claim
       const poaches = await knex('poaches')
@@ -511,7 +511,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow1.players[0].type).to.equal(
         transaction_types.ROSTER_ACTIVATE
       )
-      expect(rosterRow1.players[0].value).to.equal(1)
+      expect(rosterRow1.players[0].player_salary).to.equal(1)
 
       expect(rosterRow2.tid).to.equal(2)
       expect(rosterRow2.players.length).to.equal(0)

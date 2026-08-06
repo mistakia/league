@@ -42,15 +42,10 @@ export const build_roster_players_query = ({
     // columns, and the Roster constructor destructures the former. Translate
     // here rather than renaming a non-column field across the SPA.
     //
-    // `value` is likewise in-memory vocabulary: rosters_players carries no
-    // salary column at all, so the Roster constructor's `value` has to come
-    // from the joined transaction's player_salary (formerly `transactions.value`).
-    .select(
-      '*',
-      'player_position as pos',
-      'roster_id as rid',
-      'transactions.player_salary as value'
-    )
+    // The salary needs no such translation: `rosters_players` carries no salary
+    // column at all, and the Roster constructor reads the joined transaction's
+    // `player_salary` under that same name.
+    .select('*', 'player_position as pos', 'roster_id as rid')
     .orderBy('transactions.timestamp', 'desc')
     .orderBy('transactions.uid', 'desc')
 

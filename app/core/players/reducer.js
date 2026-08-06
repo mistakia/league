@@ -350,7 +350,7 @@ export function players_reducer(state = initialState, { payload, type }) {
               restricted_free_agency_tag_announced
             } = rosterSlot
             const params = {
-              value: player_salary,
+              player_salary,
               tag,
               type,
               tid: roster.tid,
@@ -398,7 +398,7 @@ export function players_reducer(state = initialState, { payload, type }) {
     case auction_actions.AUCTION_PROCESSED: {
       const { tid, pid, player_salary, type } = payload
       return state.mergeIn(['items', pid], {
-        value: player_salary,
+        player_salary,
         type,
         tid,
         slot: roster_slot_types.BENCH
@@ -415,7 +415,7 @@ export function players_reducer(state = initialState, { payload, type }) {
       }
 
       return state.mergeIn(['items', pid], {
-        value: null,
+        player_salary: null,
         tag: null,
         type: null,
         tid: null,
@@ -429,7 +429,7 @@ export function players_reducer(state = initialState, { payload, type }) {
           const t = p.transaction
           if (t.type === transaction_types.ROSTER_RELEASE) {
             state.mergeIn(['items', t.pid], {
-              value: null,
+              player_salary: null,
               tag: null,
               type: null,
               tid: null,
@@ -437,7 +437,7 @@ export function players_reducer(state = initialState, { payload, type }) {
             })
           } else {
             state.mergeIn(['items', t.pid], {
-              value: t.player_salary,
+              player_salary: t.player_salary,
               type: t.type,
               tid: t.tid,
               slot: p.slot
@@ -514,7 +514,7 @@ export function players_reducer(state = initialState, { payload, type }) {
       const { pid, slot, transaction } = payload.data
       const { player_salary, type, tid } = transaction
       return state.mergeIn(['items', pid], {
-        value: player_salary,
+        player_salary,
         type,
         slot,
         tid

@@ -117,9 +117,10 @@ const calculatePrices = ({ league_format, players, aggregate_key }) => {
       0
     )
     const salary_diff =
-      typeof player.value === 'undefined' || player.value === null
+      typeof player.player_salary === 'undefined' ||
+      player.player_salary === null
         ? 0
-        : market_salary - player.value
+        : market_salary - player.player_salary
 
     const pts_added_from_salary_savings = salary_diff / pts_added_salary_rate
     const pts_added_salary_adjusted =

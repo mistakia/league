@@ -215,7 +215,7 @@ export function getFilteredPlayers(state) {
         availability.includes('POTENTIAL FREE AGENT') &&
         player_map.get('tid')
       ) {
-        const salary = player_map.get('value')
+        const salary = player_map.get('player_salary')
         const market_salary_adj = player_map.get('market_salary_adj', 0)
         const tag = player_map.get('tag')
         const slot = player_map.get('slot')

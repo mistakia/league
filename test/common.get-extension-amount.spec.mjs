@@ -35,7 +35,7 @@ describe('LIBS-SHARED getExtensionAmount', function () {
         tag: player_tag_types.RESTRICTED_FREE_AGENCY,
         pos: 'WR',
         league,
-        value: 6,
+        player_salary: 6,
         extensions: 0,
         bid
       })
@@ -79,7 +79,7 @@ describe('LIBS-SHARED getExtensionAmount', function () {
             tag: player_tag_types.RESTRICTED_FREE_AGENCY,
             pos: 'WR',
             league,
-            value: 4,
+            player_salary: 4,
             extensions: 2,
             bid: 30
           })
@@ -94,7 +94,7 @@ describe('LIBS-SHARED getExtensionAmount', function () {
           tag: player_tag_types.RESTRICTED_FREE_AGENCY,
           pos: 'WR',
           league,
-          value: 4,
+          player_salary: 4,
           extensions: 2,
           bid: 30
         })
@@ -108,7 +108,7 @@ describe('LIBS-SHARED getExtensionAmount', function () {
         tag: player_tag_types.FRANCHISE,
         pos,
         league,
-        value: 9,
+        player_salary: 9,
         extensions: 3
       })
 
@@ -129,7 +129,7 @@ describe('LIBS-SHARED getExtensionAmount', function () {
           tag: player_tag_types.FRANCHISE,
           pos: 'QB',
           league: {},
-          value: 9,
+          player_salary: 9,
           extensions: 3
         })
       ).to.equal(0)
@@ -143,7 +143,7 @@ describe('LIBS-SHARED getExtensionAmount', function () {
           tag: player_tag_types.ROOKIE,
           pos: 'RB',
           league,
-          value: 7,
+          player_salary: 7,
           extensions: 4
         })
       ).to.equal(7)
@@ -156,7 +156,7 @@ describe('LIBS-SHARED getExtensionAmount', function () {
         tag: player_tag_types.REGULAR,
         pos: 'RB',
         league,
-        value: 7,
+        player_salary: 7,
         extensions
       })
 
@@ -175,7 +175,7 @@ describe('LIBS-SHARED getExtensionAmount', function () {
           tag: undefined,
           pos: 'RB',
           league,
-          value: 7,
+          player_salary: 7,
           extensions: 1
         })
       ).to.equal(17)
@@ -187,7 +187,7 @@ describe('LIBS-SHARED getExtensionAmount', function () {
           tag: player_tag_types.REGULAR,
           pos: 'RB',
           league,
-          value: 7,
+          player_salary: 7,
           extensions: 0,
           bid: 40
         })

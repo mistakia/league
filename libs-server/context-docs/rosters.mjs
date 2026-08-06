@@ -76,7 +76,7 @@ export function build_roster_rows({ team, roster, players }) {
         name: info.name || roster_entry.pid,
         pos: info.primary_position || roster_entry.pos,
         nfl_team: info.nfl_team || null,
-        salary: roster_entry.value,
+        salary: roster_entry.player_salary,
         tag: is_tagged ? player_tag_display_names[roster_entry.tag] : null,
         extensions: roster_entry.extensions || 0
       }

@@ -93,7 +93,7 @@ export default class PoachConfirmation extends React.Component {
         tag: activePlayerMap.get('tag'),
         extensions,
         league,
-        value: activePlayerMap.get('value'),
+        player_salary: activePlayerMap.get('player_salary'),
         bid: activePlayerMap.get('bid_amount')
       })
       options.push({
@@ -151,7 +151,7 @@ export default class PoachConfirmation extends React.Component {
         pos: releasePlayerMap.get('primary_position'),
         team: releasePlayerMap.get('team'),
         pname: releasePlayerMap.get('short_name'),
-        value: releasePlayerMap.get('value')
+        value: releasePlayerMap.get('player_salary')
       })
     })
 

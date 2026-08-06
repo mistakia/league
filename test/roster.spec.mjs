@@ -260,7 +260,7 @@ describe('LIBS-SHARED Roster', function () {
       slot: roster_slot_types.BENCH,
       pid: 'player-with-extensions',
       pos: 'RB',
-      value: 10,
+      player_salary: 10,
       extensions: 3
     })
 
@@ -315,7 +315,7 @@ describe('LIBS-SHARED Roster', function () {
       slot: roster_slot_types.BENCH,
       pid: 'player-no-extensions',
       pos: 'WR',
-      value: 5
+      player_salary: 5
     })
 
     // Verify extensions default to 0
@@ -623,7 +623,7 @@ describe('LIBS-SHARED Roster', function () {
             slot: roster_slot_types.BENCH,
             pid: 'restricted',
             pos: 'WR',
-            value: 42,
+            player_salary: 42,
             tag: player_tag_types.RESTRICTED_FREE_AGENCY,
             extensions: 0,
             bid: 0
@@ -632,7 +632,7 @@ describe('LIBS-SHARED Roster', function () {
             slot: roster_slot_types.BENCH,
             pid: 'regular',
             pos: 'RB',
-            value: 10,
+            player_salary: 10,
             tag: player_tag_types.REGULAR,
             extensions: 0
           }
@@ -641,9 +641,9 @@ describe('LIBS-SHARED Roster', function () {
 
       const r = new Roster({ roster, league })
 
-      r.get('restricted').value.should.equal(0)
+      r.get('restricted').player_salary.should.equal(0)
       // A player with no bid at all still falls back to their contract value.
-      r.get('regular').value.should.equal(10)
+      r.get('regular').player_salary.should.equal(10)
       r.availableCap.should.equal(190)
     })
 
@@ -661,7 +661,7 @@ describe('LIBS-SHARED Roster', function () {
             slot: roster_slot_types.PS,
             pid: 'practice',
             pos: 'WR',
-            value: 10,
+            player_salary: 10,
             tag: player_tag_types.REGULAR,
             extensions: 0
           },
@@ -669,7 +669,7 @@ describe('LIBS-SHARED Roster', function () {
             slot: roster_slot_types.BENCH,
             pid: 'active',
             pos: 'WR',
-            value: 10,
+            player_salary: 10,
             tag: player_tag_types.REGULAR,
             extensions: 0
           }
@@ -680,8 +680,8 @@ describe('LIBS-SHARED Roster', function () {
 
       // A practice squad contract carries no extension ladder, so it prices at
       // value while an active contract picks up the next extension step.
-      r.get('practice').value.should.equal(10)
-      r.get('active').value.should.equal(15)
+      r.get('practice').player_salary.should.equal(10)
+      r.get('active').player_salary.should.equal(15)
     })
   })
 })

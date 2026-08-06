@@ -44,7 +44,7 @@ export default class Roster {
       slot,
       pid,
       pos,
-      value,
+      player_salary,
       tag,
       extensions,
       bid,
@@ -62,19 +62,19 @@ export default class Roster {
             tag,
             extensions,
             league,
-            value,
+            player_salary,
             bid
           })
         : is_after_restricted_free_agency_end
-          ? value
-          : (bid ?? value)
+          ? player_salary
+          : (bid ?? player_salary)
 
       this._players.set(pid, {
         slot,
         pid,
         pos,
         rid: roster.uid,
-        value: salary,
+        player_salary: salary,
         extensions,
         tag,
         restricted_free_agency_tag_processed,
@@ -94,7 +94,10 @@ export default class Roster {
   }
 
   get availableCap() {
-    const used = this.active.reduce((a, b) => a + b.value, 0) || 0
+    const used = this.active.reduce(
+      (a, b) => a + (b.player_salary === null ? 0 : b.player_salary),
+      0
+    )
     return this._league.cap - used
   }
 
@@ -115,8 +118,15 @@ export default class Roster {
 
   get players() {
     const arr = []
-    for (const { slot, pid, pos, rid, tag, value } of this._players.values()) {
-      arr.push({ slot, pid, pos, rid, tag, value })
+    for (const {
+      slot,
+      pid,
+      pos,
+      rid,
+      tag,
+      player_salary
+    } of this._players.values()) {
+      arr.push({ slot, pid, pos, rid, tag, player_salary })
     }
     return arr
   }
@@ -244,9 +254,9 @@ export default class Roster {
     return this.players.filter((p) => p.slot === slot)
   }
 
-  updateValue(pid, value = 0) {
+  update_player_salary(pid, player_salary = 0) {
     const data = this.get(pid)
-    this._players.set(pid, { ...data, value })
+    this._players.set(pid, { ...data, player_salary })
   }
 
   updateSlot(pid, slot) {
@@ -270,7 +280,7 @@ export default class Roster {
     slot,
     pid,
     pos,
-    value = 0,
+    player_salary = 0,
     tag = 1,
     extensions = 0,
     restricted_free_agency_original_team = null
@@ -289,7 +299,7 @@ export default class Roster {
       pid,
       pos,
       rid: this.uid,
-      value,
+      player_salary,
       tag,
       extensions,
       restricted_free_agency_original_team

@@ -381,7 +381,7 @@ router.post('/?', async (req, res) => {
       }
 
       // update value to bid
-      roster.updateValue(pid, bid)
+      roster.update_player_salary(pid, bid)
 
       // make sure tag does not exceed limits
       if (remove) {
@@ -453,7 +453,7 @@ router.post('/?', async (req, res) => {
         slot: roster_slot_types.BENCH,
         pid,
         pos: player_row.primary_position,
-        value: bid,
+        player_salary: bid,
         restricted_free_agency_original_team: playerTid
       })
     }
@@ -1044,13 +1044,13 @@ router.put('/?', async (req, res) => {
         slot: roster_slot_types.BENCH,
         pid,
         pos: player_row.primary_position,
-        value: bid,
+        player_salary: bid,
         restricted_free_agency_original_team:
           restrictedFreeAgencyBid.original_team_id
       })
     } else {
       // update value to bid
-      roster.updateValue(pid, bid)
+      roster.update_player_salary(pid, bid)
 
       // check that the bid is within 10 dollars of the market salary
       const market_salary = await db('league_format_player_projection_values')

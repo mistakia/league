@@ -16,7 +16,7 @@ export default class TradePlayer extends React.Component {
           <PlayerNameExpanded pid={player_map.get('pid')} hideActions />
         </div>
         <div className='trade__player-metric metric'>
-          <label>Sal</label>${player_map.getIn(['value'], 0)}
+          <label>Sal</label>${player_map.getIn(['player_salary'], 0)}
         </div>
         <div className='trade__player-metric metric'>
           <label>Pts+</label>

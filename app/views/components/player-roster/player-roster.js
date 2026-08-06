@@ -49,16 +49,16 @@ class PlayerRoster extends Player {
       'restricted_free_agency_tag_processed'
     )
 
-    const value = player_map.get('value', 0)
+    const player_salary = player_map.get('player_salary', 0)
     const bid = player_map.get('bid_amount')
     const salary = is_before_extension_deadline
-      ? value
+      ? player_salary
       : is_before_restricted_free_agency_end &&
           !is_restricted_free_agent_tag_processed &&
           isRestrictedFreeAgent &&
           (is_team_manager || isRestrictedFreeAgency)
         ? bid
-        : value
+        : player_salary
     const extensions = player_map.get('extensions', 0)
     const pos = player_map.get('primary_position', '')
     const slot = player_map.get('slot')
@@ -70,7 +70,7 @@ class PlayerRoster extends Player {
           tag: is_before_extension_deadline ? tag : player_tag_types.REGULAR,
           extensions,
           league,
-          value,
+          player_salary,
           bid
         })
     const projectionType = isRegularSeason ? 'ros' : '0'
@@ -82,7 +82,7 @@ class PlayerRoster extends Player {
       if (isRestrictedFreeAgency || isRestrictedFreeAgent)
         return typeof bid === 'number' ? market_salary - bid : null
       if (is_before_extension_deadline) return market_salary - extendedSalary
-      return market_salary - value
+      return market_salary - player_salary
     }
     const savings = get_savings()
 
@@ -137,7 +137,7 @@ class PlayerRoster extends Player {
       tag: player_tag_types.REGULAR,
       extensions,
       league,
-      value
+      player_salary
     })
 
     if (is_before_extension_deadline) {
@@ -145,7 +145,7 @@ class PlayerRoster extends Player {
         player_map.get('nfl_draft_year') >= current_season.year - 1
       if (is_rookie) {
         rookie_tag_savings =
-          Math.max(regular_extended_salary - value, 0) || null
+          Math.max(regular_extended_salary - player_salary, 0) || null
       }
 
       franchise_tag_savings =
@@ -219,7 +219,7 @@ class PlayerRoster extends Player {
               {!isRestrictedFreeAgency && (
                 <PercentileMetric
                   scaled
-                  value={isPoach ? value + 2 : salary}
+                  value={isPoach ? player_salary + 2 : salary}
                   percentile={percentiles.salary}
                   prefix='$'
                 />

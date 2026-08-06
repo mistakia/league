@@ -47,7 +47,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
             pid,
             pos,
             userid,
-            value: player_salary,
+            player_salary,
             type,
             season_year,
             timestamp,
@@ -110,7 +110,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
                   tid: t.tid,
                   lid: t.lid,
                   type: t.type,
-                  value: t.player_salary,
+                  player_salary: t.player_salary,
                   season_year: t.season_year,
                   timestamp: t.timestamp
                 })
@@ -177,7 +177,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           )
 
           if (payload.data.transaction) {
-            const { type, value, timestamp } = payload.data.transaction
+            const { type, player_salary, timestamp } = payload.data.transaction
             state.mergeIn(
               [
                 payload.data.tid,
@@ -188,7 +188,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
               ],
               {
                 type,
-                value,
+                player_salary,
                 timestamp
               }
             )
@@ -230,7 +230,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
 
     case roster_actions.POST_ROSTERS_FULFILLED: {
       const { rid, slot, pos, pid } = payload.data
-      const { userid, tid, lid, type, value, season_year, timestamp } =
+      const { userid, tid, lid, type, player_salary, season_year, timestamp } =
         payload.data.transaction
       return state.updateIn(
         [
@@ -250,7 +250,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
             tid,
             lid,
             type,
-            value,
+            player_salary,
             season_year,
             timestamp
           })

@@ -1637,7 +1637,7 @@ router.post(
             slot: origin_slot_by_pid.get(row.pid) ?? roster_slot_types.BENCH,
             pid: row.pid,
             pos: pos_by_pid.get(row.pid),
-            value: value_by_pid.get(row.pid) ?? 0
+            player_salary: value_by_pid.get(row.pid) ?? 0
           })
         }
 
@@ -1648,7 +1648,7 @@ router.post(
             slot: row.origin_slot ?? roster_slot_types.BENCH,
             pid: row.pid,
             pos: pos_by_pid.get(row.pid),
-            value: value_by_pid.get(row.pid) ?? 0
+            player_salary: value_by_pid.get(row.pid) ?? 0
           })
         }
       } catch (error) {

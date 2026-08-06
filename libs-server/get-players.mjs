@@ -335,7 +335,7 @@ export default async function ({
     // Preserve seasonlog points before overwriting with projection points object
     // The SQL query returns 'points' from scoring_format_player_seasonlogs which would be overwritten
     player_row.seasonlog_points = player_row.points
-    player_row.value = null
+    player_row.player_salary = null
     player_row.points = {}
     player_row.pts_added = {}
     player_row.salary_adj_pts_added = {}
@@ -358,7 +358,7 @@ export default async function ({
 
     for (const tran of playerTransactions) {
       const player_row = player_rows.find((p) => p.pid === tran.pid)
-      player_row.value = tran.player_salary
+      player_row.player_salary = tran.player_salary
     }
   }
 

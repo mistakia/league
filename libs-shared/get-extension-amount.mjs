@@ -23,7 +23,15 @@ const getFranchiseAmount = ({ pos, league }) => {
   }
 }
 
-export default function ({ extensions, tag, pos, league, value, bid, slot }) {
+export default function ({
+  extensions,
+  tag,
+  pos,
+  league,
+  player_salary,
+  bid,
+  slot
+}) {
   if (
     slot &&
     (slot === roster_slot_types.PS ||
@@ -31,7 +39,7 @@ export default function ({ extensions, tag, pos, league, value, bid, slot }) {
       slot === roster_slot_types.PSD ||
       slot === roster_slot_types.PSDP)
   ) {
-    return value
+    return player_salary
   }
 
   switch (tag) {
@@ -39,15 +47,15 @@ export default function ({ extensions, tag, pos, league, value, bid, slot }) {
       return getFranchiseAmount({ pos, league })
 
     case player_tag_types.ROOKIE:
-      return value
+      return player_salary
 
     case player_tag_types.RESTRICTED_FREE_AGENCY:
       // `??`, not `||` — a $0 bid is a real bid, and coalescing on falsiness
       // prices the player at their prior salary instead of the committed $0.
-      return bid ?? value
+      return bid ?? player_salary
 
     case player_tag_types.REGULAR:
     default:
-      return value + (extensions + 1) * 5
+      return player_salary + (extensions + 1) * 5
   }
 }

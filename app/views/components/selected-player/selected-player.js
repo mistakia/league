@@ -129,7 +129,7 @@ export default function SelectedPlayer({
   const draftNum = player_map.get('draft_overall_pick')
   const draftYear = player_map.get('nfl_draft_year')
   const draftRound = player_map.get('draft_round')
-  const playerValue = player_map.get('value')
+  const playerValue = player_map.get('player_salary')
   const rosPoints = player_map.getIn(['points', 'ros', 'total'], 0)
 
   // Both rest-of-season, so the pair is comparable: `ros` floors each remaining

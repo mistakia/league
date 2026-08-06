@@ -311,7 +311,7 @@ export const get_auction_info_for_position = createSelector(
       0
     )
     const actual = active_rostered.reduce(
-      (sum, player_map) => sum + (player_map.get('value') || 0),
+      (sum, player_map) => sum + (player_map.get('player_salary') || 0),
       0
     )
     return {
@@ -3107,7 +3107,7 @@ export function get_trade_is_valid(state) {
         game_day: player_map.get('game_day'),
         prior_week_inactive: player_map.get('prior_week_inactive'),
         prior_week_ruled_out: player_map.get('prior_week_ruled_out'),
-        value: player_map.get('value')
+        player_salary: player_map.get('player_salary')
       }
 
       target_slot = get_default_trade_slot({
@@ -3152,7 +3152,7 @@ export function get_trade_is_valid(state) {
         slot: target_slot,
         pid,
         pos: player_map.get('primary_position'),
-        value: player_map.get('value')
+        player_salary: player_map.get('player_salary')
       })
     } catch (error) {
       // If roster is full or any other error, return false to show release section
@@ -3222,7 +3222,7 @@ export function get_trade_validation_details(state) {
         game_day: player_map.get('game_day'),
         prior_week_inactive: player_map.get('prior_week_inactive'),
         prior_week_ruled_out: player_map.get('prior_week_ruled_out'),
-        value: player_map.get('value')
+        player_salary: player_map.get('player_salary')
       }
 
       target_slot = get_default_trade_slot({
@@ -3270,7 +3270,7 @@ export function get_trade_validation_details(state) {
         slot: target_slot,
         pid,
         pos: player_map.get('primary_position'),
-        value: player_map.get('value')
+        player_salary: player_map.get('player_salary')
       })
     } catch (error) {
       if (
@@ -3614,7 +3614,10 @@ function getTeamTradeSummary(
         Math.max(pMap.getIn(['salary_adj_pts_added', pts_added_type], 0), 0),
       0
     ),
-    salary: playerMaps.reduce((sum, pMap) => sum + pMap.get('value', 0), 0)
+    salary: playerMaps.reduce(
+      (sum, pMap) => sum + pMap.get('player_salary', 0),
+      0
+    )
   }
 
   return values
