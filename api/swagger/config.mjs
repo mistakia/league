@@ -1238,9 +1238,11 @@ const options = {
               example: 'DK_12345_ABC'
             },
             public: {
-              type: 'boolean',
-              description: 'Whether the wager is publicly visible',
-              example: true
+              type: 'integer',
+              enum: [0, 1],
+              description:
+                'Whether the wager is publicly visible (smallint flag, 1 = public)',
+              example: 1
             },
             selections: {
               type: 'array',

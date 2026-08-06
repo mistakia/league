@@ -218,49 +218,51 @@ const query_params_validator = v.compile({
  *               successful_parlay:
  *                 summary: Successful parlay wager
  *                 value:
- *                   - id: 12345
+ *                   - wager_id: 12345
  *                     userid: 123
  *                     wager_type: PARLAY
  *                     placed_at: "2022-01-01T00:00:00.000Z"
  *                     bet_count: 1
  *                     selection_count: 3
  *                     selection_lost: 0
- *                     status: WON
+ *                     wager_status: WON
  *                     bet_wager_amount: 50.00
  *                     total_wager_amount: 50.00
  *                     wager_returned_amount: 175.50
  *                     book_id: DRAFTKINGS
  *                     book_wager_id: "DK_12345_ABC"
- *                     public: true
- *                     selection_1_id: "sel_123"
- *                     selection_1_odds: -110
- *                     selection_1_status: WON
- *                     selection_2_id: "sel_456"
- *                     selection_2_odds: 120
- *                     selection_2_status: WON
- *                     selection_3_id: "sel_789"
- *                     selection_3_odds: -105
- *                     selection_3_status: WON
+ *                     public: 1
+ *                     selections:
+ *                       - id: "sel_123"
+ *                         odds: -110
+ *                         status: WON
+ *                       - id: "sel_456"
+ *                         odds: 120
+ *                         status: WON
+ *                       - id: "sel_789"
+ *                         odds: -105
+ *                         status: WON
  *               open_single:
  *                 summary: Open single bet
  *                 value:
- *                   - id: 12346
+ *                   - wager_id: 12346
  *                     userid: 123
  *                     wager_type: SINGLE
  *                     placed_at: "2022-01-02T00:00:00.000Z"
  *                     bet_count: 1
  *                     selection_count: 1
  *                     selection_lost: 0
- *                     status: OPEN
+ *                     wager_status: OPEN
  *                     bet_wager_amount: 25.00
  *                     total_wager_amount: 25.00
  *                     wager_returned_amount: 0.00
  *                     book_id: FANDUEL
  *                     book_wager_id: "FD_67890_XYZ"
- *                     public: false
- *                     selection_1_id: "sel_abc"
- *                     selection_1_odds: -115
- *                     selection_1_status: OPEN
+ *                     public: 0
+ *                     selections:
+ *                       - id: "sel_abc"
+ *                         odds: -115
+ *                         status: OPEN
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *       401:
@@ -293,8 +295,9 @@ router.get('/:user_id', async (req, res) => {
       wager_status = [wager_status]
     }
 
-    const public_only =
-      req.auth && req.auth.userId && req.auth.userId !== user_id
+    // this router mounts ahead of the blanket auth guard, so an anonymous
+    // caller is not the owner and must be restricted to public wagers
+    const public_only = !req.auth || req.auth.userId !== user_id
 
     const validation_response = query_params_validator({
       user_id,
@@ -347,11 +350,12 @@ router.get('/:user_id', async (req, res) => {
     }
 
     if (wager_status) {
-      wagers_query.whereIn('status', wager_status)
+      wagers_query.whereIn('wager_status', wager_status)
     }
 
+    // placed_wagers.public is a smallint, so bind 1 rather than a boolean
     if (public_only) {
-      wagers_query.where('public', true)
+      wagers_query.where('public', 1)
     }
 
     if (limit) {

@@ -1,10 +1,11 @@
-/* global describe, before, it */
+/* global describe, before, after, it */
 import * as chai from 'chai'
 import chai_http, { request as chai_request } from 'chai-http'
 
 import server from '#api'
 import knex from '#db'
 import users from '#db/fixtures/users.mjs'
+import { user1, user2 } from './fixtures/token.mjs'
 
 process.env.NODE_ENV = 'test'
 chai.use(chai_http)
@@ -24,6 +25,108 @@ describe('API /wagers', function () {
 
     res.should.be.json
     res.body.should.be.an('array')
+  })
+
+  describe('filters', function () {
+    const base_wager = {
+      wager_type: 'SINGLE',
+      placed_at: new Date('2026-01-01T00:00:00.000Z'),
+      bet_count: 1,
+      selection_count: 1,
+      selection_lost: 0,
+      bet_wager_amount: 10,
+      total_wager_amount: 10,
+      wager_returned_amount: 0,
+      book_id: 'DRAFTKINGS'
+    }
+
+    before(async function () {
+      await knex('placed_wagers').del()
+      await knex('placed_wagers').insert([
+        {
+          ...base_wager,
+          wager_id: 90001,
+          userid: 1,
+          public: 1,
+          wager_status: 'OPEN',
+          book_wager_id: 'TEST_WAGER_OPEN_PUBLIC'
+        },
+        {
+          ...base_wager,
+          wager_id: 90002,
+          userid: 1,
+          public: 1,
+          wager_status: 'WON',
+          book_wager_id: 'TEST_WAGER_WON_PUBLIC'
+        },
+        {
+          ...base_wager,
+          wager_id: 90003,
+          userid: 1,
+          public: 0,
+          wager_status: 'LOST',
+          book_wager_id: 'TEST_WAGER_LOST_PRIVATE'
+        }
+      ])
+    })
+
+    after(async function () {
+      await knex('placed_wagers').del()
+    })
+
+    it('filters by a single wager_status', async () => {
+      const res = await chai_request
+        .execute(server)
+        .get('/api/wagers/1?wager_status=OPEN')
+        .set('Authorization', `Bearer ${user1}`)
+      res.should.have.status(200)
+
+      res.body.should.be.an('array')
+      res.body.length.should.equal(1)
+      res.body[0].wager_id.should.equal(90001)
+      res.body[0].wager_status.should.equal('OPEN')
+    })
+
+    it('filters by multiple wager_status values', async () => {
+      const res = await chai_request
+        .execute(server)
+        .get('/api/wagers/1?wager_status=OPEN&wager_status=LOST')
+        .set('Authorization', `Bearer ${user1}`)
+      res.should.have.status(200)
+
+      res.body.should.be.an('array')
+      const wager_ids = res.body.map((w) => w.wager_id).sort()
+      wager_ids.should.eql([90001, 90003])
+    })
+
+    it('returns every wager to the owner', async () => {
+      const res = await chai_request
+        .execute(server)
+        .get('/api/wagers/1')
+        .set('Authorization', `Bearer ${user1}`)
+      res.should.have.status(200)
+
+      res.body.length.should.equal(3)
+    })
+
+    it('returns only public wagers to another authenticated user', async () => {
+      const res = await chai_request
+        .execute(server)
+        .get('/api/wagers/1')
+        .set('Authorization', `Bearer ${user2}`)
+      res.should.have.status(200)
+
+      const wager_ids = res.body.map((w) => w.wager_id).sort()
+      wager_ids.should.eql([90001, 90002])
+    })
+
+    it('returns only public wagers to an unauthenticated caller', async () => {
+      const res = await chai_request.execute(server).get('/api/wagers/1')
+      res.should.have.status(200)
+
+      const wager_ids = res.body.map((w) => w.wager_id).sort()
+      wager_ids.should.eql([90001, 90002])
+    })
   })
 
   describe('errors', function () {
