@@ -153,7 +153,7 @@ const check_team_salary_cap = async ({ tid, lid, league }) => {
       // Log additional details about the roster
       const active_players = roster.active
       const total_salary = active_players.reduce(
-        (sum, player) => sum + player.value,
+        (sum, player) => sum + player.player_salary,
         0
       )
 

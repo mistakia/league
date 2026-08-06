@@ -1037,7 +1037,7 @@ export function get_cutlist_total_salary(state) {
       return sum
     }
 
-    return sum + roster_player.value
+    return sum + roster_player.player_salary
   }, 0)
 }
 

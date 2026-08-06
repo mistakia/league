@@ -317,7 +317,7 @@ const walk_transactions = async ({ lid }) => {
         player_id: event.player_id,
         occurred_at: event.occurred_at,
         salary_basis: cfg.salary_basis,
-        salary_paid: event.value ?? null,
+        salary_paid: event.player_salary ?? null,
         year: event.year
       })
       if (event.transaction_type === transaction_types.ROOKIE_TAG) {
@@ -371,7 +371,7 @@ const walk_transactions = async ({ lid }) => {
       // The restored salary AMOUNT is already resolved at write time by
       // process-super-priority.mjs, which walks back to the last PRACTICE_ADD /
       // DRAFT / ROSTER_DEACTIVATE on the original team and stamps it on the
-      // transaction, so event.value is authoritative and needs no re-derivation
+      // transaction, so event.player_salary is authoritative and needs no re-derivation
       // here. The BASIS is not carried on the transaction, and it is not always
       // the PS rate: ROSTER_DEACTIVATE copies the salary forward untouched, so
       // a drafted rookie returns on a rookie contract and a free-agent signing
@@ -398,7 +398,7 @@ const walk_transactions = async ({ lid }) => {
         salary_basis: pre_poach
           ? pre_poach.salary_basis
           : SALARY_BASIS.PS_SALARY,
-        salary_paid: event.value ?? released?.salary_paid ?? null,
+        salary_paid: event.player_salary ?? released?.salary_paid ?? null,
         year: event.year
       })
       emit_edge({
@@ -750,7 +750,7 @@ const build_event_stream = async ({ lid }) => {
         player_id: tran.pid,
         occurred_at: ts,
         year: tran.season_year,
-        value: tran.player_salary,
+        player_salary: tran.player_salary,
         transaction_id: tran.uid
       })
       continue
@@ -799,7 +799,7 @@ const build_event_stream = async ({ lid }) => {
         transaction_type: tran.type,
         occurred_at: ts,
         year: tran.season_year,
-        value: tran.player_salary,
+        player_salary: tran.player_salary,
         transaction_id: tran.uid
       })
     } else if (tran.type === transaction_types.RESTRICTED_FREE_AGENCY_TAG) {
@@ -814,7 +814,7 @@ const build_event_stream = async ({ lid }) => {
         transaction_type: tran.type,
         occurred_at: ts,
         year: tran.season_year,
-        value: tran.player_salary,
+        player_salary: tran.player_salary,
         transaction_id: tran.uid
       })
     } else {

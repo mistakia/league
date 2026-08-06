@@ -82,7 +82,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
   get_active_charge = (pid) => {
     const roster_player = this.props.team.roster.get(pid)
     return roster_player && isSlotActive(roster_player.slot)
-      ? roster_player.value
+      ? roster_player.player_salary
       : 0
   }
 

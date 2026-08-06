@@ -62,7 +62,7 @@ export default class SettingsTeamsTeam extends React.Component {
           key={index}
           pid={rosterPlayer.pid}
           teamId={team.uid}
-          value={rosterPlayer.value}
+          value={rosterPlayer.player_salary}
         />
       )
     }

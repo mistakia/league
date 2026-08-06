@@ -421,7 +421,7 @@ const process_league = async ({ year, lid }) => {
   // update player rows with current salary
   for (const tran of transactions) {
     const player_row = player_rows.find((p) => p.pid === tran.pid)
-    player_row.value = tran.player_salary
+    player_row.player_salary = tran.player_salary
   }
 
   week = first_projection_week_to_recompute({ year })
@@ -463,7 +463,7 @@ const process_league = async ({ year, lid }) => {
     const is_available = !rostered_pids.includes(player_row.pid)
     const league_adjusted_rate = is_available
       ? league_available_salary_space / league_available_pts_added
-      : (league_available_salary_space + player_row.value) /
+      : (league_available_salary_space + player_row.player_salary) /
         (league_available_pts_added + Math.max(player_row.pts_added[0], 0))
     const market_salary_adj = Math.max(
       Math.round(league_adjusted_rate * player_row.pts_added[0]) || 0,
