@@ -210,6 +210,19 @@ Two rules the scale encodes and a literal cannot. **A surface that is always ope
 
 **A `VALUES` list restoring a wide table types every column from the FIRST row, so a backup replay of a sparse table fails on a column that is `NULL` everywhere.** Postgres infers `text` for an all-`NULL` column and then rejects it against the real type — `column "jnum" is of type smallint but expression is of type text` — naming one column when the problem is the whole list. Cast every value in the first row (`CAST(NULL AS int2)`, `CAST(2001093004 AS int4)`, ...) and the remaining rows coerce to it. Hit 2026-08-04 replaying 256 `player_gamelogs` rows across 106 columns, 57 of them null on every row; the rollback-only dry run caught it before the real apply.
 
+**The cluster gates run as ONE command — `yarn check:cluster`.** Every durable gate below is in its manifest (`scripts/check-cluster-gates.mjs`), ordered cheapest-first, and a gate whose prerequisite is missing SKIPS LOUDLY naming what it needs rather than being silently absent from the run. Add `--base <pre-cluster-ref>` to include the gates that diff against a base revision; `--list` prints the manifest and each gate's oracle without running anything. This exists because the recurring failure here was never a gate returning the wrong answer — it was a gate nobody ran, and the invocation list living only in this file is what made skipping one invisible. The 18 renamed param keys that dropped filters on 45 saved views are the standing example, and this file's own verdict on them is that what was missing was running the check at all.
+
+It fails on more than findings. **A gate that declares an always-on negative control must print one, and a control reporting STAYED GREEN fails the whole run even when that gate exited 0** — which turns the "never accept a green you have not shown can go red" rule from a convention each gate keeps privately into something checked from outside. The runner's own verdict rule is driven by synthetic controls on every invocation, for the same reason.
+
+**Four things it cannot decide for you, and they are the whole judgment half of a cluster.**
+
+- **A skipped gate is not a passed gate.** The run says so in its summary; believing it is on you. Same for the count it prints of gates that carry no negative control — 8 of 11 today — whose greens are unproven by construction.
+- **Whether a finding is a defect or accurate history.** A doc site describing what a rename DID is correct; only live instruction counts. That call needs someone who knows what the cluster did, which is the deciding reason none of this is in CI.
+- **Which findings to read first.** `check-data-view-sql-validity` ranks by reachability tier, not by how broken the SQL looks; ranking by severity once put a dormant seasonal path above a route that had been 500ing for a year.
+- **Whether the green is yours.** Several gates read the WORKING TREE — its schema file, its prose, its column definitions — so a sibling mid-cluster turns them red on findings belonging to nobody in your push. When the shared tree is dirty, run from a clean worktree at your HEAD.
+
+And it stops at the repo boundary: a cluster is not done when its gates are green, it is done when the sweep is DEPLOYED. Nothing here can see what production is executing.
+
 **Run `node db/adhoc/check-schema-conformance-ratchet.mjs` before pushing any commit that adds a table or column — it is CI-only, so a fully green local suite tells you nothing about it.** The ratchet is a separate CI step and nothing in `yarn test`, `yarn lint`, or the SQL-validity gate exercises it, so the first signal is a red master. On 2026-08-02 a new `scoring_format_projection_calibration` table shipped with columns `n`, `r`, `slope` and `position` — three bare names of five characters or fewer plus a reserved word — against a local suite that was green at 2600 passing. The cost is not yours alone: a red master makes the sync-all pre-push guard defer **every** push to `mistakia/league`, so unrelated sessions pile up behind a failure invisible in their diffs, and clearing it needs `PUSH_TO_RED_MAIN=mistakia/league cli/sync/sync-all.sh`. The check takes about a second. When it fires on a table you just added, that is new debt and the fix is renaming the columns — **never `--rebaseline`**, which is reserved for a deliberate audit widening. Full-word snake_case; no bare name of five characters or fewer (an underscore is what conforms `slope` -> `fit_slope`); no reserved words (`position`, `timestamp`, `order`, `desc`, ...). Post a bulletin naming the cause if you do turn master red, so siblings do not debug your gate.
 
 **A writer that names a column which does not exist passes the whole suite, because `test/global.mjs` loads the SAME `db/schema.postgres.sql` that is missing it.** The two halves of the check fail together, so a green suite is not evidence the writer can execute against any database — and the number is reassuringly large while it happens. On 2026-08-04 `dd48ce077` shipped `generate-league-format-player-seasonlogs.mjs` writing `points_added_net_rank`, `points_added_net_position_rank`, `points_added_net_per_game_rank`, `points_added_net_per_game_position_rank` and `points_added_net_cap_dollars`; none of the five existed, 2947 tests passed, and the commit was pushed and deployed. It would have thrown `column ... does not exist` on the generator's next run and taken the stats pipeline with it (`libs-server/stats-pipeline.mjs`). The gap is that no spec runs that generator, so nothing ever executed the insert. **When a commit adds a column to an insert object, check the column exists in `db/schema.postgres.sql` — a `git show HEAD:db/schema.postgres.sql | grep` costs one command** — and prefer running the generator itself over trusting the suite — where it has a `--dry` flag, which builds the full insert and logs samples without writing. **Check for the flag rather than assuming it: only 98 of the 240 scripts have one, and it is absent from several of the highest-risk generators.** A 2026-08-05 validation pass reached for it on `generate-rosters`, `generate-league-formats`, `calculate-league-careerlogs`, `process-projections`, `project-lineups`, `import-rotowire-practice-report` and `generate-nfl-team-seasonlogs` and **none of the seven had it**, so the intended validation could not run as written. The fallback that needs no execution and no writes: extract the insert payload's keys and check each against `information_schema` for the target table, plus the `onConflict` target and the `merge()` list. That is what found three nonexistent columns in `generate-player-snaps` (2026-08-05, `6ba0d1d02`). Note this is the exact inverse of the deploy-lag rule further up: there, committed code was ahead of a deployed schema; here, committed code was ahead of the schema file that both production AND the suite derive from, which is why neither could see it.
@@ -224,10 +237,7 @@ Two rules the scale encodes and a literal cannot. **A surface that is always ope
 
 **Its sibling `check-data-view-url-param-coverage.mjs` covers the OTHER data-view surface, and it is the one a rename forgets — a shared short URL cannot be rewritten, so a missed key there is permanent.** The saved-view gate checks the params nested inside a column; this one checks the top-level query-string keys of the production `urls` table against `SHARE_LINK_URL_SCHEMA` plus `LEGACY_URL_PARAM_ALIASES`. The distinction that made the June 2026 `splits` -> `row_axes` rename fail is that **a URL query string carries no version field**, so it never enters the versioned migration chain in `libs-shared/data-view-storage/migrations.mjs` — the rename did ship a `v2_to_v3` rule and 188 of 682 production URLs still rendered at the wrong grain for six weeks, three of them emitting unexecutable SQL. Run it alongside the saved-view gate on any cluster touching a top-level `table_state` key:
 
-```
-NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 \
-  node db/adhoc/check-data-view-url-param-coverage.mjs
-```
+`yarn check:cluster` runs it, supplying the production environment itself and skipping loudly when the tunnel is down.
 
 The only remedy for a reported key is a permanent entry in `LEGACY_URL_PARAM_ALIASES` (`app/core/data-views/parse-table-state-from-url.mjs`); there is no migration to write, because the link is immutable. Two things worth copying from it. Its accepted-key sets are **imported rather than grepped**, which is the direct fix for the failure that blinded the saved-view gate — a presence-grep cannot tell a consumer from prose about one, so a comment naming a legacy key made that key unreportable. And its URL population is **five routes, not one**: `/leagues/:lid/players-table` is a `<Navigate>` redirect preserving `location.search`, so scoping to `/data-views` alone misses 159 of the 863 URLs. Its negative control is deleting the `splits` alias and confirming the gate reports it — take that as seriously here as everywhere else in this file.
 
@@ -261,9 +271,9 @@ The durable fix for anything whose log IS its audit trail — a scheduled job, a
 
 **`db/adhoc/check-renamed-column-consumers.mjs` is the gate for that sweep, and its two halves are wired differently on purpose.** GATE 1 — every `'<table>.<column>'` literal in server code must resolve against `db/schema.postgres.sql` — needs no rename list and no base ref, so it cannot drift and cannot go red on a sibling's in-flight migration; it runs in CI. GATE 2 answers the harder question: did THIS change remove a column whose old name a consumer still reads. It diffs the schema against a base ref, so **run it by hand per cluster** and give it the pre-cluster revision:
 
-```
-node db/adhoc/check-renamed-column-consumers.mjs --gate 2 --base <pre-cluster-ref> --unadjudicated
-```
+`yarn check:cluster --base <pre-cluster-ref>` runs it; `node db/adhoc/check-renamed-column-consumers.mjs --gate 2 --base <pre-cluster-ref> --unadjudicated` is the direct form when you want the unadjudicated set.
+
+**Give it a ref that resolves, and check that it did.** Handed a base ref git cannot resolve, this gate prints a one-line `SKIPPED: could not read db/schema.postgres.sql at <ref>` in the middle of its output and then exits **0** with `GATE OK` — so a typo, or a ref that has since been garbage-collected, reads as a passed gate from every angle except the one line. `yarn check:cluster` resolves the ref itself and treats an unresolvable one as a missing prerequisite, which is the only reason a run through it cannot be fooled this way.
 
 It is deliberately NOT in CI. A gate finding turns master red, and a red master defers **every** session's push to `mistakia/league`; gate 2's findings also need per-site adjudication by someone who knows the cluster, which CI cannot do.
 
@@ -299,11 +309,7 @@ A doc that a script MAINTAINS decays worse than plain prose, because the rename 
 
 **`db/adhoc/check-documentation-schema-drift.mjs` is the gate for that sweep, and it is the only one here whose corpus reaches OUTSIDE this checkout.** It makes the 2026-08-05 hand repair a ratchet instead of a one-time act. Run it per cluster, giving it the user-base roots explicitly — they are arguments rather than a hardcoded path, because this gate is about the league SCHEMA and the corpus is a parameter of the run:
 
-```
-yarn test:db:up
-node db/adhoc/check-documentation-schema-drift.mjs \
-  --root ../../../guideline/nfl --root ../../../text/league --root ../../../workflow/nfl
-```
+`yarn check:cluster` supplies those three roots and skips the gate loudly when the `:5433` container is down.
 
 Two derivations, and the second is not redundant. GATE 1 checks every `table.column` token whose table half is a real table, statically, needing no database — `node db/adhoc/check-documentation-schema-drift.mjs --gate 1` is the whole run. It also reads every documented `CREATE INDEX ... ON <table> (<columns>)`, which makes the same claim in the one form neither derivation could otherwise see: the columns are unqualified, so the pair regex has no table to bind them to, and DDL is not EXPLAINable. That is the entire content of `docs/database-index-naming.md`, which had no oracle at all until 2026-08-05. GATE 2 splits every fenced ` ```sql ` block into statements, substitutes template placeholders and EXPLAINs each against a throwaway database loaded from `db/schema.postgres.sql`. Gate 1 structurally cannot see an UNQUALIFIED column reference, which is not a hypothetical gap: gate 2 is what catches `FROM projections` (the table is `projections_history`) and a join on a `prop_market_selections_index.esbid` that table has never had. Both were among seven sites the regex half missed on the manual sweep.
 
@@ -353,10 +359,7 @@ As of 2026-05, the anchored count was **zero** and the join was genuinely unreac
 
 The gate that does work is now committed as **`db/adhoc/check-data-view-sql-validity.mjs`**, and it must run per cluster on any grain-column rename:
 
-```
-yarn test:db:up
-node db/adhoc/check-data-view-sql-validity.mjs      # exit 1 on any invalid statement
-```
+`yarn check:cluster` runs it once the `:5433` container is up (`yarn test:db:up`).
 
 It provisions its own database on the shared :5433 container (so it cannot collide with a sibling's suite run), loads `db/schema.postgres.sql`, generates SQL for all 551 data-view columns across the plain and `year_offset` range shapes, and `EXPLAIN`s each of the 1102 statements in about five seconds. Run ad hoc on 2026-07-27 it found six defects that 232 goldens and a fully green 2214-test suite did not; on its first committed run it found two more, both pre-existing (`player_pro_bowl_selections` naming a physical column that does not exist, and a `NaN` interpolated raw into the keeptradecut `year_offset` range SQL).
 
@@ -372,10 +375,7 @@ To validate a single golden by hand, extract its `expected_query` and run `EXPLA
 
 **A renamed column PARAM silently drops the filter — sweep saved views at apply time, not authoring time.** `apply_play_by_play_column_params_to_query` iterates the param registry and skips any key it does not recognise, so a param renamed code-side leaves every saved view still persisting the old key with a filter that is quietly ignored: no error, no failed test, just a wrong answer. `db/adhoc/check-saved-view-param-coverage.mjs` finds them against production:
 
-```
-NODE_ENV=production LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=15432 \
-  node db/adhoc/check-saved-view-param-coverage.mjs
-```
+`yarn check:cluster` runs it against production when the tunnel is up.
 
 The remedy for anything it reports is a rule in `libs-shared/data-views-saved-view-migration.mjs`, which rewrites persisted params at read time. A one-shot SQL migration written when the rename is AUTHORED cannot cover a view saved between that check and cutover — which is precisely the hole the 2026-07-24 plays/snaps saved-view migration left. This check found 196 orphaned occurrences across 13 saved views from a 2025-07-24 rename that shipped with no saved-view migration at all.
 
@@ -411,10 +411,7 @@ So for any rename touching a column the SPA reads, **the frontend deploy is part
 
 **`db/adhoc/check-api-response-shapes.mjs` is the gate for that class, and it is the first thing here that reads the swagger response schemas at all.** `api/swagger` declares response schemas across 53 route files and nothing validated a response against them, which is exactly why the `leagues.hosted` window above was invisible server-side and why the season_grain wire question had to be settled by reading routes by hand. Two halves, wired differently on purpose. GATE 1 compares the spec to ITSELF — every `required` name and every `$ref` must resolve against the schema's own resolved properties. It needs no database and no base ref, cannot go red on a sibling's in-flight migration, and cannot produce a false positive. GATE 2 compares the spec to the SCHEMA FILE, for handlers that echo a wholesale single-table read to `res.send`: there the response key set IS the table's column set, so a documented non-column is a field that is never emitted. Run both per cluster; it takes about a second and needs no container.
 
-```
-node db/adhoc/check-api-response-shapes.mjs            # both gates
-node db/adhoc/check-api-response-shapes.mjs --gate 1   # spec-only, safe anywhere
-```
+`yarn check:cluster` runs both gates. `node db/adhoc/check-api-response-shapes.mjs --gate 1` is the spec-only form, safe anywhere and the one to reach for from a dirty tree.
 
 **Its ORACLE choice is the load-bearing decision, and the intuitive answer is the wrong one.** Executing each route against the test container and validating the body sounds stronger. It is weaker: in a fresh test database nearly every list route answers `[]`, which validates vacuously against `type: array`, so an executed gate runs green across the whole surface while structurally unable to see a renamed column — the failure this file already records three times. Its power would be bounded by fixture coverage rather than by the spec. For the wholesale-read shape, `db/schema.postgres.sql` states the key set completely, so the static comparison is a COMPLETE oracle for those routes and strictly better than execution. What static analysis cannot do is the rest of the surface, which is why the run always prints the denominator.
 
