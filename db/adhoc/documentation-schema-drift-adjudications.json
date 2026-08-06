@@ -1,0 +1,305 @@
+{
+  "$comment": [
+    "Adjudicated non-defects for db/adhoc/check-documentation-schema-drift.mjs.",
+    "",
+    "Every entry is keyed on a SITE -- (path, table, column) for gate 1, or",
+    "(path, statement_contains) for gate 2 -- and NEVER on a column name alone.",
+    "Judging per (table, column) is the difference between fixing and breaking:",
+    "pff_player_seasonlogs.pff_id survives while player.pff_id does not, and",
+    "scoring_format_player_seasonlogs.year survives while player_seasonlogs.year",
+    "does not. A name-keyed entry here would be the stoplist that hid a real",
+    "defect in check-renamed-column-consumers, which returned 129 findings with",
+    "not one of them `total` over a rename that wiped a year of projection values.",
+    "",
+    "An entry that no longer suppresses anything is reported as a FINDING, so a",
+    "repaired or deleted site forces its entry out rather than leaving a standing",
+    "exemption. Do not add an entry to quiet a gate you have not read.",
+    "",
+    "kind = history      accurate past-tense record of what a rename DID; only",
+    "                    live instruction counts as a defect",
+    "kind = not_a_column the token is a real thing that is not a database column",
+    "                    (a config key, a JS property, a spec basename, a value)"
+  ],
+  "adjudications": [
+    {
+      "gate": 1,
+      "path": "crontab-main/league-imports.cron",
+      "table": "player_changelog",
+      "column": "nfl_status",
+      "kind": "not_a_column",
+      "reason": "Shorthand for a VALUE, not a column: player_changelog.column_name = 'nfl_status' has 25,773 rows. The comment names the changelog rows the importer writes."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "config",
+      "column": "databases",
+      "kind": "not_a_column",
+      "reason": "A user-base config KEY path (config.databases.instances.league.tunnel.local_port), not a column. `config` is a real league table, so this cannot be filtered by name."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "teams",
+      "column": "restricted",
+      "kind": "not_a_column",
+      "reason": "The spec basename `teams.restricted-free-agency`. Structurally indistinguishable from a qualified reference: no directory prefix and no file extension."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "league_format_player_seasonlogs",
+      "column": "year",
+      "kind": "history",
+      "reason": "Conformed to season_year by the season_grain cluster; the text says so explicitly."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "scoring_format_player_seasonlogs",
+      "column": "year",
+      "kind": "history",
+      "reason": "Same cluster as above, cited as the other side of a (table, column) asymmetry that has since moved."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "player_seasonlogs",
+      "column": "year",
+      "kind": "history",
+      "reason": "Became season_year; cited as the conform's other side."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "nfl_games",
+      "column": "start_time",
+      "kind": "history",
+      "reason": "Never existed under that name; cited as a now-repaired finding in the user-base doc sweep."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "nfl_games",
+      "column": "year",
+      "kind": "history",
+      "reason": "Conformed to season_year in the 2026-07-29 nfl_games cluster."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "nfl_plays",
+      "column": "year",
+      "kind": "history",
+      "reason": "The 2026-07 plays/snaps conformance; cited as the regenerated-golden failure that blessed a live 42703."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "leagues",
+      "column": "hosted",
+      "kind": "history",
+      "reason": "Became is_hosted; cited as the SPA deploy-lag outage that took eleven pages down for logged-in users."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "player",
+      "column": "pff_id",
+      "kind": "history",
+      "reason": "Became pff_player_id. Cited precisely because pff_player_seasonlogs.pff_id survives -- the asymmetry is the lesson."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "player",
+      "column": "formatted",
+      "kind": "history",
+      "reason": "Became formatted_name; cited as the base-storage stale-checkout failure that wrote nothing for three weeks while exiting 0."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "practice",
+      "column": "seas_type",
+      "kind": "history",
+      "reason": "Conformed to season_type; cited as an undeployed-sweep 42703 waiting on a September cron fire."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "prop_markets_index",
+      "column": "year",
+      "kind": "history",
+      "reason": "Conformed to season_year; cited as the `pmi.` alias grep false negative that hid a four-day outage."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "league_player_season_projection_values",
+      "column": "year",
+      "kind": "history",
+      "reason": "Became season_year; cited as the onConflict target the rename sweep missed, which emptied the table."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "scoring_format_player_projection_points",
+      "column": "total",
+      "kind": "history",
+      "reason": "Renamed in 72346e579; cited as the defect the name stoplist suppressed. Removing this citation would delete the evidence for the rule against name filters."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "restricted_free_agency_bids",
+      "column": "announced",
+      "kind": "history",
+      "reason": "Column removed; window state moved to restricted_free_agency_nominations."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "restricted_free_agency_bids",
+      "column": "reason",
+      "kind": "history",
+      "reason": "Replaced by outcome plus outcome_detail."
+    },
+    {
+      "gate": 1,
+      "path": "league/data-model-reference.md",
+      "table": "seasons",
+      "column": "league_format_hash",
+      "kind": "history",
+      "reason": "Left column of a rename MAPPING table whose right column is seasons.league_format_id. The old name is the point of the row."
+    },
+    {
+      "gate": 1,
+      "path": "league/data-model-reference.md",
+      "table": "league_format_player_projection_values",
+      "column": "league_format_hash",
+      "kind": "history",
+      "reason": "Same mapping table; the right column is .league_format_id."
+    },
+    {
+      "gate": 1,
+      "path": "league/data-model-reference.md",
+      "table": "player",
+      "column": "fname",
+      "kind": "history",
+      "reason": "Same mapping table; the row maps fname/lname/pos onto first_name/last_name/primary_position."
+    },
+    {
+      "gate": 1,
+      "path": "league/data-quality-and-validation.md",
+      "table": "nfl_plays",
+      "column": "bc_pid",
+      "kind": "history",
+      "reason": "Inside a dated [assessment] observation recording what was measured at the time, under the name the column carried then."
+    },
+    {
+      "gate": 1,
+      "path": "league/data-quality-and-validation.md",
+      "table": "player",
+      "column": "gsisid",
+      "kind": "history",
+      "reason": "Same observation log; conformed to gsis_player_id by the vendor-id cluster after these entries were written."
+    },
+    {
+      "gate": 1,
+      "path": "league/data-quality-and-validation.md",
+      "table": "player",
+      "column": "sportradar_id",
+      "kind": "history",
+      "reason": "Same observation log; conformed to sportradar_player_id."
+    },
+    {
+      "gate": 1,
+      "path": "league/data-view-regression-harness.md",
+      "table": "nfl_games",
+      "column": "year",
+      "kind": "history",
+      "reason": "Inside a [bug] observation describing SQL the harness emitted at the time. Rewriting it would falsify the bug report."
+    },
+    {
+      "gate": 1,
+      "path": "league/data-view-regression-harness.md",
+      "table": "nfl_plays_receiver",
+      "column": "year",
+      "kind": "history",
+      "reason": "Same [bug] observation."
+    },
+    {
+      "gate": 1,
+      "path": "league/digitalocean-0.md",
+      "table": "config",
+      "column": "proxy_config_pinnacle",
+      "kind": "not_a_column",
+      "reason": "A config KEY, not a column. `config` is a real league table, so this cannot be filtered by name."
+    },
+    {
+      "gate": 1,
+      "path": "league/player-valuation-system.md",
+      "table": "player",
+      "column": "pts_added",
+      "kind": "not_a_column",
+      "reason": "A JS object property on the in-memory player object in calculate-points-added.mjs, never a database column."
+    },
+    {
+      "gate": 1,
+      "path": "league/props-archive-canonical-migration-feasibility.md",
+      "table": "prop_markets_index",
+      "column": "settled",
+      "kind": "history",
+      "reason": "The doc's own sentence says it became is_market_settled. This is the mapping, not a claim about today."
+    },
+    {
+      "gate": 1,
+      "path": "league/season-grain-split-proposal.md",
+      "table": "draft",
+      "column": "year",
+      "kind": "history",
+      "reason": "Pre-conform code-site inventory. The proposal was applied and deployed on 2026-08-05, so every old name in its worked examples is a record of the surface it changed."
+    },
+    {
+      "gate": 1,
+      "path": "league/season-grain-split-proposal.md",
+      "table": "seasons",
+      "column": "year",
+      "kind": "history",
+      "reason": "Same inventory."
+    },
+    {
+      "gate": 1,
+      "path": "league/season-grain-split-proposal.md",
+      "table": "teams",
+      "column": "year",
+      "kind": "history",
+      "reason": "Same inventory."
+    },
+    {
+      "gate": 1,
+      "path": "league/season-grain-split-proposal.md",
+      "table": "users_teams",
+      "column": "year",
+      "kind": "history",
+      "reason": "Same inventory."
+    },
+    {
+      "gate": 1,
+      "path": "league/season-grain-split-proposal.md",
+      "table": "transactions",
+      "column": "year",
+      "kind": "history",
+      "reason": "Same inventory."
+    },
+    {
+      "gate": 1,
+      "path": "league/season-grain-split-proposal.md",
+      "table": "league_format_player_seasonlogs",
+      "column": "year",
+      "kind": "history",
+      "reason": "Same inventory."
+    }
+  ]
+}
