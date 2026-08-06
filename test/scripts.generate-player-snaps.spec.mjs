@@ -54,7 +54,20 @@ describe('SCRIPTS generate-player-snaps', function () {
   // A PASS or a RUSH is what the team-total loop counts as an offensive snap;
   // anything else contributes nothing and the player would be skipped for a
   // missing team total.
-  const play_row = (play_id, play_type) => ({
+  //
+  // `quarter` and `down_number` are given DISTINCT distributions on purpose --
+  // see the plays table below. Every other field is held at a value that keeps
+  // the buckets this file does not assert on stable: ydl_100 50 (outside all
+  // three field-position bands), score_diff 0 (neither leading nor trailing),
+  // sec_rem_half 900 (outside both clock bands), yards_to_go 10 (neutral_long
+  // rather than neutral_short, so the down split is what varies).
+  const play_row = ({
+    play_id,
+    play_type,
+    quarter,
+    down_number,
+    win_probability
+  }) => ({
     esbid,
     play_id,
     season_year,
@@ -65,13 +78,76 @@ describe('SCRIPTS generate-player-snaps', function () {
     play_type,
     ydl_100: 50,
     score_diff: 0,
-    win_probability: 0.5,
+    win_probability,
     is_no_huddle: false,
     sec_rem_half: 900,
     yards_to_go: 10,
-    down_number: 1,
-    quarter: 1
+    down_number,
+    quarter
   })
+
+  // The thresholds are read off the script, not guessed: `snaps_neutral` is
+  // `win_probability > 0.2 && < 0.8`, `snaps_low_prob` is `< 0.2`, and the
+  // early/late down split is that same neutral band plus `down_number <= 2` /
+  // `> 2`. NEUTRAL_WP sits inside the band and LOW_WP below it.
+  const NEUTRAL_WP = 0.5
+  const LOW_WP = 0.1
+
+  // The fixture's whole point. `quarter` and `down_number` must not be
+  // interchangeable, or a transposition of the two -- the natural failure of a
+  // word-boundary replace across `qtr`/`dwn`/`wp` -- leaves every assertion
+  // below green. So the two columns are given distributions of DIFFERENT shape:
+  //
+  //   quarter      q1 1, q2 1, q3 2, q4 1
+  //   down_number  d1 2, d2 1, d3 1, d4 1
+  //
+  // Read as quarters, the down column would put 2 snaps in q1 and 1 in q3 --
+  // the mirror image of the truth. Play 5 is the win-probability play: it is
+  // the only one below the neutral band, so it lands in `snaps_low_prob` and in
+  // NEITHER down bucket, which is what pins the wp half of the early/late-down
+  // predicate rather than just the down half.
+  const plays = [
+    {
+      play_id: 1,
+      play_type: 'PASS',
+      quarter: 1,
+      down_number: 1,
+      win_probability: NEUTRAL_WP
+    },
+    {
+      play_id: 2,
+      play_type: 'RUSH',
+      quarter: 2,
+      down_number: 1,
+      win_probability: NEUTRAL_WP
+    },
+    {
+      play_id: 3,
+      play_type: 'PASS',
+      quarter: 3,
+      down_number: 2,
+      win_probability: NEUTRAL_WP
+    },
+    {
+      play_id: 4,
+      play_type: 'PASS',
+      quarter: 3,
+      down_number: 3,
+      win_probability: NEUTRAL_WP
+    },
+    {
+      play_id: 5,
+      play_type: 'RUSH',
+      quarter: 4,
+      down_number: 4,
+      win_probability: LOW_WP
+    }
+  ]
+
+  // The defender takes his snaps on plays 2 and 4 -- quarters 2 and 3 against
+  // downs 1 and 3, so the defensive quarter columns are transposition-sensitive
+  // for the same reason the offensive ones are.
+  const defense_play_ids = [2, 4]
 
   // The gamelog is both an INPUT and the write target: the script joins it to
   // read opponent and position, then upserts the snap counts back onto the same
@@ -132,16 +208,21 @@ describe('SCRIPTS generate-player-snaps', function () {
       away_nfl_team: defense_nfl_team
     })
 
-    await db('nfl_plays').insert([
-      play_row(1, 'PASS'),
-      play_row(2, 'RUSH'),
-      play_row(3, 'PASS')
-    ])
+    await db('nfl_plays').insert(plays.map(play_row))
 
     await db('nfl_snaps').insert([
-      { esbid, play_id: 1, gsis_it_id: offense_gsis_it_id, season_year },
-      { esbid, play_id: 2, gsis_it_id: offense_gsis_it_id, season_year },
-      { esbid, play_id: 1, gsis_it_id: defense_gsis_it_id, season_year }
+      ...plays.map(({ play_id }) => ({
+        esbid,
+        play_id,
+        gsis_it_id: offense_gsis_it_id,
+        season_year
+      })),
+      ...defense_play_ids.map((play_id) => ({
+        esbid,
+        play_id,
+        gsis_it_id: defense_gsis_it_id,
+        season_year
+      }))
     ])
 
     await db('player_gamelogs').insert([
@@ -180,7 +261,7 @@ describe('SCRIPTS generate-player-snaps', function () {
       .first()
 
     expect(row).to.not.equal(undefined)
-    expect(row.snaps_off).to.equal(2)
+    expect(row.snaps_off).to.equal(plays.length)
   })
 
   it('writes the conformed column names, not their pre-rename spellings', async () => {
@@ -207,7 +288,56 @@ describe('SCRIPTS generate-player-snaps', function () {
       .first()
 
     expect(row).to.not.equal(undefined)
-    expect(row.snaps_def).to.equal(1)
+    expect(row.snaps_def).to.equal(defense_play_ids.length)
+  })
+
+  // The three tests below are the ones the fixture above was widened for. Until
+  // 2026-08-06 this file asserted on no column derived from `quarter`,
+  // `down_number` or `win_probability`, and set the first two identically on
+  // every play -- so transposing the two in the script left it 4/4 green. Each
+  // of these is proven red under that transposition.
+  it('counts offensive snaps into the quarter the play was in', async () => {
+    await run()
+
+    const row = await db('player_gamelogs')
+      .where({ esbid, pid: offense_pid, season_year })
+      .first()
+
+    // The computed key `q${quarter}_off` is the specific thing worth pinning:
+    // it is built by template literal from a renamed variable, so neither a
+    // grep for the old name nor a column-existence check can reach it.
+    expect(row.q1_snaps_off).to.equal(1)
+    expect(row.q2_snaps_off).to.equal(1)
+    expect(row.q3_snaps_off).to.equal(2)
+    expect(row.q4_snaps_off).to.equal(1)
+  })
+
+  it('counts defensive snaps into the quarter the play was in', async () => {
+    await run()
+
+    const row = await db('player_gamelogs')
+      .where({ esbid, pid: defense_pid, season_year })
+      .first()
+
+    expect(row.q1_snaps_def).to.equal(0)
+    expect(row.q2_snaps_def).to.equal(1)
+    expect(row.q3_snaps_def).to.equal(1)
+    expect(row.q4_snaps_def).to.equal(0)
+  })
+
+  it('splits neutral snaps on down and counts the low win-probability play', async () => {
+    await run()
+
+    const row = await db('player_gamelogs')
+      .where({ esbid, pid: offense_pid, season_year })
+      .first()
+
+    // Play 5 is below the neutral band, so it is in neither down bucket -- the
+    // two counts sum to 4, not to all 5 offensive snaps.
+    expect(row.snaps_neutral).to.equal(4)
+    expect(row.snaps_neutral_early_down).to.equal(3)
+    expect(row.snaps_neutral_late_down).to.equal(1)
+    expect(row.snaps_low_prob).to.equal(1)
   })
 
   it('merges onto an existing gamelog rather than failing its conflict target', async () => {
@@ -229,7 +359,7 @@ describe('SCRIPTS generate-player-snaps', function () {
     })
 
     expect(rows).to.have.length(1)
-    expect(rows[0].snaps_off).to.equal(2)
+    expect(rows[0].snaps_off).to.equal(plays.length)
     // A column the writer does not name must survive the merge.
     expect(rows[0].targets).to.equal(7)
   })
