@@ -27,6 +27,25 @@ adhoc migration.
 A handful of `.mjs` and `.py` files carry dates too. Those are one-shot data
 repairs that needed more than SQL; same rule, equally spent.
 
+## A dated file may name a tool path that no longer resolves
+
+Several files here carry a header comment telling you to run something like
+`node db/adhoc/audit-schema-conformance.mjs`. That path moved on 2026-08-06 and
+those comments were deliberately NOT rewritten — a file here is a record of what
+was done at the time, and editing it to stay current is exactly the thing this
+directory's contract forbids. Treat such a line as history, not as an
+instruction you can paste.
+
+The tooling is where `../README.md` says it is: durable gates under `db/gates`,
+standing tools under `db/tools`, and closed-cluster scripts under `db/archive`.
+`audit-schema-conformance.mjs` is now `db/tools/audit-schema-conformance.mjs`,
+`check-*.mjs` is now `db/gates/check-*.mjs` unless it is in `db/archive`.
+
+At least one such reference (`check-migration-coverage.mjs`) named a file that
+had already ceased to exist before the split, which is the same class and a
+reminder that this is not new: a comment in an append-only file is dated the day
+it was written.
+
 ## Workflow
 
 ```bash
