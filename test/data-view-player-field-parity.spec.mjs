@@ -39,6 +39,20 @@
 // aliases (@components, @constants) and imports React components, so it is not
 // Node-importable without an alias harness. Parsing costs the ability to see
 // computed keys, which this file does not use.
+//
+// The registration and description halves are NOT specific to the player table,
+// and scoping them there let the identical drift run for two years on the
+// scoring-format-logs pair. 6ce38f740 (2024-08-03) deleted the four non-rank
+// fantasy points fields from the frontend file alone, leaving the server
+// definitions and the descriptions in place; the columns stayed queryable over
+// the API, went unselectable in the UI, and threw "Field not found for
+// column_id" on any saved view still holding one (signal 124653). Both pairs are
+// covered below.
+//
+// The value-path assertion stays scoped to the player table on purpose. Every
+// scoring-format-logs definition carries a `select_as`, and the existing rule
+// skips those because the result key is built from a parameter rather than being
+// the physical column name -- there is no single alias to compare against.
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -46,6 +60,7 @@ import { fileURLToPath } from 'node:url'
 import * as chai from 'chai'
 
 import player_table_column_definitions from '#libs-server/data-views-column-definitions/player-table-column-definitions.mjs'
+import player_scoring_format_logs_column_definitions from '#libs-server/data-views-column-definitions/player-scoring-format-logs-column-definitions.mjs'
 import data_view_fields_index from '#libs-shared/data-view-fields-index.mjs'
 
 const { expect } = chai
@@ -59,6 +74,32 @@ const player_table_fields_source = fs.readFileSync(
   player_table_fields_path,
   'utf8'
 )
+
+const scoring_format_logs_fields_source = fs.readFileSync(
+  path.resolve(
+    __dirname,
+    '../app/core/data-views-fields/scoring-format-logs-table-fields.js'
+  ),
+  'utf8'
+)
+
+// The `export default { ... }` files are a different shape from the selector
+// form above: two-space indent, and a key whose helper call is frequently on the
+// FOLLOWING line when prettier wraps a long column id --
+//
+//   player_fantasy_points_per_game_from_seasonlogs:
+//     from_scoring_format_seasonlogs({
+//
+// A parser anchored on `<key>: <helper>({` on one line silently drops exactly
+// the longest ids, which are the ones most likely to be missing, so the key is
+// matched alone and the wrap is not part of the pattern.
+const parse_export_default_field_ids = (source) => {
+  const ids = new Set()
+  const key_pattern = /^ {2}(player_[a-z0-9_]+):/gm
+  let match
+  while ((match = key_pattern.exec(source)) !== null) ids.add(match[1])
+  return ids
+}
 
 // Each field is a `    player_<name>: {` entry at a fixed indent inside the
 // returned object literal, carrying an optional player_value_path before the
@@ -163,6 +204,51 @@ describe('data view player field parity', function () {
     expect(
       mismatched,
       `frontend value paths that render an empty cell: ${mismatched.join('; ')}`
+    ).to.deep.equal([])
+  })
+})
+
+describe('data view scoring format logs field parity', function () {
+  const frontend_field_ids = parse_export_default_field_ids(
+    scoring_format_logs_fields_source
+  )
+  const server_column_ids = Object.keys(
+    player_scoring_format_logs_column_definitions
+  )
+
+  it('parses the frontend field file', function () {
+    // Positive control, same reasoning as the player-table one: a parser that
+    // matches nothing passes both assertions below by vacuous iteration.
+    expect(frontend_field_ids.size).to.be.greaterThan(10)
+    // The same-line form.
+    expect(
+      frontend_field_ids.has('player_fantasy_points_rank_from_seasonlogs')
+    ).to.equal(true)
+    // The prettier-wrapped form, which a one-line pattern would miss.
+    expect(
+      frontend_field_ids.has(
+        'player_fantasy_points_per_game_position_rank_from_seasonlogs'
+      )
+    ).to.equal(true)
+  })
+
+  it('registers every server column in the frontend field file', function () {
+    const missing = server_column_ids.filter(
+      (column_id) => !frontend_field_ids.has(column_id)
+    )
+    expect(
+      missing,
+      `scoring format logs columns with no frontend field (unselectable in the UI): ${missing.join(', ')}`
+    ).to.deep.equal([])
+  })
+
+  it('describes every server column in the shared fields index', function () {
+    const missing = server_column_ids.filter(
+      (column_id) => !data_view_fields_index[column_id]
+    )
+    expect(
+      missing,
+      `scoring format logs columns with no description: ${missing.join(', ')}`
     ).to.deep.equal([])
   })
 })

@@ -40,7 +40,27 @@ const from_scoring_format_careerlogs = (field) => ({
   }
 })
 
+// The four non-rank fantasy points fields were removed from this file alone in
+// 6ce38f740 (2024-08-03), leaving the server definitions and the shared
+// description index carrying them. That is the drift the player-table parity
+// spec exists to prevent, on the one registry pair it did not cover: the columns
+// stayed queryable over the API and became unselectable in the UI, and a saved
+// view still holding one threw "Field not found for column_id" on every render
+// (signal 124653). Restored with the player_value_paths the server aliases them
+// as -- `${column_name}_from_{season,career}logs` per
+// player-scoring-format-logs-column-definitions.mjs.
 export default {
+  player_fantasy_points_from_seasonlogs: from_scoring_format_seasonlogs({
+    column_title: 'Fantasy Points (By Season)',
+    header_label: 'PTS',
+    player_value_path: 'points_from_seasonlogs'
+  }),
+  player_fantasy_points_per_game_from_seasonlogs:
+    from_scoring_format_seasonlogs({
+      column_title: 'Fantasy Points Per Game (By Season)',
+      header_label: 'PTS/G',
+      player_value_path: 'points_per_game_from_seasonlogs'
+    }),
   player_fantasy_points_rank_from_seasonlogs: from_scoring_format_seasonlogs({
     column_title: 'Fantasy Points Rank (By Season)',
     header_label: 'RNK',
@@ -69,6 +89,17 @@ export default {
       reverse_percentiles: true
     }),
 
+  player_fantasy_points_from_careerlogs: from_scoring_format_careerlogs({
+    column_title: 'Fantasy Points (Career)',
+    header_label: 'PTS',
+    player_value_path: 'points_from_careerlogs'
+  }),
+  player_fantasy_points_per_game_from_careerlogs:
+    from_scoring_format_careerlogs({
+      column_title: 'Fantasy Points Per Game (Career)',
+      header_label: 'PTS/G',
+      player_value_path: 'points_per_game_from_careerlogs'
+    }),
   player_fantasy_top_1_seasons_from_careerlogs: from_scoring_format_careerlogs({
     column_title: 'Top 1 Season (Career)',
     header_label: 'TOP 1',

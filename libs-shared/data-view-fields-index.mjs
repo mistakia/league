@@ -498,6 +498,10 @@ export default {
   player_fantasy_points_rank_from_seasonlogs: 'Fantasy Points Rank (By Season)',
   player_fantasy_points_position_rank_from_seasonlogs:
     'Fantasy Points Position Rank (By Season)',
+  player_fantasy_points_per_game_rank_from_seasonlogs:
+    'Fantasy Points Per Game Rank (By Season)',
+  player_fantasy_points_per_game_position_rank_from_seasonlogs:
+    'Fantasy Points Per Game Position Rank (By Season)',
   player_fantasy_top_1_seasons_from_careerlogs:
     'Top 1 Positional Fantasy Points Rank Season (Career)',
   player_fantasy_top_3_seasons_from_careerlogs:

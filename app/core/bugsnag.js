@@ -29,27 +29,45 @@ const KEEPALIVE_STACK_LIMIT = 16000
 const CHUNK_RELOAD_KEY = 'xo_chunk_reload_at'
 const CHUNK_RELOAD_WINDOW_MS = 60 * 1000
 
-// Browser-extension scripts inject into the user's page and share our window,
-// so their unhandled rejections reach our 'unhandledrejection' listener and
-// were shipped as league-client log_error signals — e.g. MetaMask's inpage.js
+// Third-party scripts share our window, so their errors reach our listeners and
+// were shipped as league-client log_error signals. Two populations, one test.
+//
+// Browser extensions inject into the user's page — e.g. MetaMask's inpage.js
 // rejecting "Failed to connect to MetaMask" when the wallet is locked
-// (signals #124239, #124431, same fingerprint 546a1cde). Nothing in that class
-// is ours to fix and no stack we symbolicate can recover it.
+// (signals #124239, #124431, same fingerprint 546a1cde).
+//
+// Cross-origin scripts we do not serve reach the page the same way. Cloudflare
+// sits in front of xo.football and injects its Web Analytics beacon from
+// static.cloudflareinsights.com; that beacon calls Array.prototype.at, which
+// Chrome gained in 92, so every visit on an older browser threw
+// "t.entries.at is not a function" / "this.i.at is not a function" through
+// window.onerror (signals #124657, #124658, both from a Chrome 79 client).
+// Nothing in either class is ours to fix and no stack we symbolicate can
+// recover it — the frames name a minified bundle on someone else's origin.
 //
 // The test mirrors the window.onerror opaque-cross-origin guard below: webpack
 // serves the SPA same-origin from publicPath '/dist/', so a stack whose frames
-// are ALL extension-scheme cannot be our bundle. Requiring every URL-bearing
-// frame to be an extension (rather than just the topmost) keeps an app error
-// that merely calls into an extension reportable.
+// are ALL off-origin cannot be our bundle. Requiring every URL-bearing frame to
+// be third-party (rather than just the topmost) keeps an app error that merely
+// calls into an extension or a vendor script reportable.
 const EXTENSION_SCHEME_RE =
   /\b(?:chrome-extension|moz-extension|safari-extension|safari-web-extension|ms-browser-extension):\/\//
 
-const is_extension_origin_error = (err) => {
+const is_same_origin_frame = (url) => {
+  const origin =
+    typeof window !== 'undefined' ? window.location?.origin : undefined
+  if (!origin) return false
+  return url.startsWith(`${origin}/`)
+}
+
+const is_third_party_origin_error = (err) => {
   const stack = err?.stack
   if (typeof stack !== 'string') return false
   const frame_urls = stack.match(/\b[a-z][a-z0-9+.-]*:\/\/\S+/gi)
   if (!frame_urls || !frame_urls.length) return false
-  return frame_urls.every((url) => EXTENSION_SCHEME_RE.test(url))
+  return frame_urls.every(
+    (url) => EXTENSION_SCHEME_RE.test(url) || !is_same_origin_frame(url)
+  )
 }
 
 const is_chunk_load_error = (err) => {
@@ -124,6 +142,11 @@ const post_to_league_api = (err, metadata) => {
     // Drop expected client 4xx (e.g. invalid/stale saved data_view_id) before
     // it becomes log_error noise — the user already saw a notification.
     if (is_expected_client_error(err)) return
+    // An injected extension or a vendor script on someone else's origin lands
+    // on our window but is not ours. Gated here rather than per-listener: the
+    // beacon population arrives through window.onerror and the extension
+    // population through unhandledrejection, and both are the same finding.
+    if (is_third_party_origin_error(err)) return
     const enriched =
       current_user && typeof current_user === 'object'
         ? { ...(metadata || {}), user: current_user }
@@ -182,8 +205,6 @@ export const init_error_reporting = () => {
         : new Error(
             typeof reason === 'string' ? reason : 'Unhandled promise rejection'
           )
-    // An injected extension's rejection lands on our window but is not ours.
-    if (is_extension_origin_error(error)) return
     post_to_league_api(error, { handler: 'unhandledrejection' })
   })
 }

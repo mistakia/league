@@ -206,6 +206,24 @@ const SCORING_FORMAT_HASH_TO_ID = {
     'b7855f1f-9f5e-47c4-ba3a-3e906272a60c'
 }
 
+// Column ids superseded by a differently-named column. Unlike the param maps
+// above, these rewrite the column_id itself, so a sort or filter entry naming
+// the old id follows through `rename_map` in migrate_entries_array.
+//
+// The two scoring-format-log games-played ids were removed in edc8ec9a9
+// (2024-08-08) when `player_games_played` unified the per-game denominator
+// across sources. They have no server column definition and no shared
+// description, so they are DEAD rather than drifted -- a saved view still
+// carrying one threw "Field not found for column_id" on every render (signal
+// 124652) with no way to recover the column. `player_games_played` declares
+// `row_axes: ['year']` and the per-game CTE honours `params.year`
+// (rate-type-per-game.mjs), so a persisted year window carries over unchanged;
+// the careerlogs id carries no year window to begin with.
+const COLUMN_ID_RENAMES = {
+  player_fantasy_games_played_from_seasonlogs: 'player_games_played',
+  player_fantasy_games_played_from_careerlogs: 'player_games_played'
+}
+
 // Merge order is load-bearing: a legacy key may chain through two maps in the
 // single migrate_params pass below, and only this order resolves the chains
 // (qb_pressure_ngs -> qb_pressure_tracking -> is_qb_pressure_tracking;
@@ -295,6 +313,11 @@ export const migrate_column_entry = ({ column_id, params }) => {
   let next_column_id = column_id
   let next_params = entry.params
   let changed = entry.changed
+
+  if (Object.prototype.hasOwnProperty.call(COLUMN_ID_RENAMES, next_column_id)) {
+    next_column_id = COLUMN_ID_RENAMES[next_column_id]
+    changed = true
+  }
 
   const team_match = TEAM_FROM_PLAYS_RE.exec(column_id)
   if (team_match && next_params.limit_to_player_active_games) {

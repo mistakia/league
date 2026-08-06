@@ -415,6 +415,67 @@ describe('data-views saved-view migrator', () => {
     })
   })
 
+  // The two ids were removed in edc8ec9a9 (2024-08-08) when player_games_played
+  // unified the per-game denominator. They have no server column definition, so
+  // a saved view still holding one threw "Field not found for column_id" on
+  // every render (signal 124652) rather than merely losing a filter.
+  describe('dead scoring-format-logs games-played column ids', () => {
+    it('rewrites the seasonlogs id to player_games_played, keeping the year window', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_fantasy_games_played_from_seasonlogs',
+        params: { year: [2023, 2022] }
+      })
+      expect(result.changed).to.equal(true)
+      expect(result.column_id).to.equal('player_games_played')
+      expect(result.params).to.deep.equal({ year: [2023, 2022] })
+    })
+
+    it('rewrites the careerlogs id to player_games_played', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_fantasy_games_played_from_careerlogs',
+        params: {}
+      })
+      expect(result.changed).to.equal(true)
+      expect(result.column_id).to.equal('player_games_played')
+    })
+
+    it('leaves the live rank ids alone', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_fantasy_points_rank_from_seasonlogs',
+        params: { year: [2023] }
+      })
+      expect(result.changed).to.equal(false)
+      expect(result.column_id).to.equal(
+        'player_fantasy_points_rank_from_seasonlogs'
+      )
+    })
+
+    it('carries the rename into a sort entry naming the dead id', () => {
+      const result = migrate_table_state({
+        columns: [
+          {
+            column_id: 'player_fantasy_games_played_from_seasonlogs',
+            params: { year: [2023] }
+          }
+        ],
+        sort: [
+          {
+            column_id: 'player_fantasy_games_played_from_seasonlogs',
+            desc: true
+          }
+        ],
+        row_grain: ['player']
+      })
+      expect(result.changed).to.equal(true)
+      expect(result.table_state.columns[0].column_id).to.equal(
+        'player_games_played'
+      )
+      expect(result.table_state.sort[0].column_id).to.equal(
+        'player_games_played'
+      )
+    })
+  })
+
   describe('migrate_table_state', () => {
     it('wraps missing row_grain with the default player row_grain', () => {
       const result = migrate_table_state({
