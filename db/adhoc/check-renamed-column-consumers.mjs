@@ -113,6 +113,32 @@
 //     A table name held in a constant, or reached through a knex instance bound
 //     elsewhere, names no literal and is invisible. Same hazard the league
 //     CLAUDE.md records for table-name-anchored counts generally.
+//   - A JOINED table is invisible to gate 2, which is a stronger statement than
+//     the line above and was not documented here until 2026-08-06. The candidate
+//     set is built from `db('<table>')` FROM-target literals only, so a table
+//     reached through `.join`/`.leftJoin` off a DIFFERENT `db('<other>')` is
+//     structurally unreachable no matter how literal its name is. That is how
+//     `72346e579`'s `transactions.value` rename shipped a live defect:
+//     `libs-server/get-league-rosters-from-database.mjs` reaches `transactions`
+//     through `.leftJoin` off `db('rosters_players')`, so it never entered the
+//     candidate set -- at `--base 62ca45544` this gate produces 36 sites for
+//     that pair and that file is not among them. The pair was then adjudicated
+//     already-swept off a single producer, and every team's salary space
+//     rendered as the raw $200 cap. The gap is general: 22 join-only sites
+//     across the same window.
+//
+//     `db/adhoc/check-rename-alias-residue.mjs` covers that class from the other
+//     side. It anchors on the ALIAS-BACK SITE, which needs neither a FROM-target
+//     literal nor a distinctive word, and its discriminator is that the alias
+//     target is a column the table actually LOST. Run it alongside this gate on
+//     any rename cluster; `yarn check:cluster --base <ref>` runs both.
+//
+//     Extending this gate's candidate set to `.join`/`.leftJoin` literals is a
+//     small change to `from_re` below and is deliberately NOT done here: it
+//     reopens every existing adjudication, since site lists are keyed on file
+//     and adding join sites adds files, which per CLAUDE.md defers every
+//     session's push behind a red master. It belongs in its own cluster with its
+//     own re-adjudication pass.
 //   - Gate 2 cannot prove a cross-file read reaches a given query. It reports
 //     the pairing and asks a human; `libs-server` is a barrel, so import-graph
 //     reachability collapses to "everything" and cannot narrow it.
