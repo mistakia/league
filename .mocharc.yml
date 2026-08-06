@@ -31,7 +31,16 @@ timeout: 10000
 #
 # `ignore` is safe here -- it is the rc spelling of the CLI's `--exclude`, and
 # it stays exclusionary under a positional argument instead of widening it.
-# These two files are excluded from `yarn test` and CI on purpose.
+# This file is excluded from `yarn test` and CI on purpose: it hits the live
+# ESPN API.
+#
+# An entry naming a file that does not exist excludes NOTHING while reading as a
+# deliberate exclusion. A second entry here did exactly that from 2025-06-11
+# (d468e3ca8) until 2026-08-05: it named
+# test/libs-server.get-players-table-view-results-debug.mjs, which has never
+# existed at any revision -- the files in that family were
+# get-players-table-view-results{,-2,-3}.mjs, and all three are now gone.
+# `yarn check:test-collection` now fails on a literal `ignore` entry with no
+# file behind it, so this cannot recur silently.
 ignore:
   - 'test/importer-espn.spec.mjs'
-  - 'test/libs-server.get-players-table-view-results-debug.mjs'

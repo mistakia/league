@@ -18,6 +18,12 @@
  * INTENTIONALLY_UNCOLLECTED carrying a reason. That is the whole point: an
  * exclusion becomes a reviewed line in this file rather than an invisible
  * property of where someone happened to put a spec.
+ *
+ * Both exclusion lists are also checked for entries that no longer bite —
+ * INTENTIONALLY_UNCOLLECTED and .mocharc's own `ignore`. A stale entry in
+ * either excludes nothing while reading as a deliberate exclusion, which is
+ * the same silent-difference defect one level up: an `ignore` entry naming a
+ * spec that has never existed sat in .mocharc from 2025-06-11 to 2026-08-05.
  */
 
 import fs from 'fs'
@@ -95,7 +101,24 @@ const main = () => {
     }
   )
 
-  if (uncollected.length === 0 && dead_exemptions.length === 0) {
+  // Same rule one level up, for .mocharc's own `ignore` list. An entry naming a
+  // file that does not exist excludes nothing while reading as a deliberate
+  // exclusion, and nothing reports the difference -- one sat here from
+  // 2025-06-11 to 2026-08-05 naming a spec that has never existed at any
+  // revision. Only literal paths are judged: a glob legitimately matches
+  // nothing, so patterns are left alone rather than guessed at.
+  const dead_ignores = (options.ignore || []).filter((pattern) => {
+    if (/[*?[\]{}!]/.test(pattern)) {
+      return false
+    }
+    return !fs.existsSync(path.resolve(repo_root, pattern))
+  })
+
+  if (
+    uncollected.length === 0 &&
+    dead_exemptions.length === 0 &&
+    dead_ignores.length === 0
+  ) {
     console.log(
       `test spec collection OK — ${on_disk.length} test files under test/, ` +
         `${on_disk.length - INTENTIONALLY_UNCOLLECTED.size} collected by mocha`
@@ -130,6 +153,22 @@ const main = () => {
     }
     console.error(
       '\nRemove them so a real regression cannot hide behind one.\n'
+    )
+  }
+
+  if (dead_ignores.length) {
+    console.error(
+      `\n${dead_ignores.length} stale entr(ies) in .mocharc.yml \`ignore\` — ` +
+        'no such file, so the entry excludes nothing:\n'
+    )
+    for (const pattern of dead_ignores) {
+      console.error(`  ${pattern}`)
+    }
+    console.error(
+      '\nRemove them. An ignore entry with no file behind it reads as a ' +
+        'deliberate exclusion and is not one, which is how a spec someone ' +
+        'meant to exclude can run for a year unnoticed — or how a spec ' +
+        'someone believes is excluded can be silently absent instead.\n'
     )
   }
 
