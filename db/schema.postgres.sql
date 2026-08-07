@@ -4845,10 +4845,10 @@ CREATE TABLE public.nfl_draft_rankings_history (
     season_year smallint NOT NULL,
     overall_rank integer,
     position_rank integer,
-    "position" character varying(4),
+    player_position character varying(4),
     observed_at timestamp with time zone NOT NULL,
     draft_ranking_type public.draft_ranking_type DEFAULT 'BIG_BOARD'::public.draft_ranking_type NOT NULL,
-    CONSTRAINT nfl_draft_rankings_history_position_vocabulary CHECK ((("position" IS NULL) OR (("position")::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT nfl_draft_rankings_history_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
 
@@ -4862,10 +4862,10 @@ CREATE TABLE public.nfl_draft_rankings_index (
     season_year smallint NOT NULL,
     overall_rank integer,
     position_rank integer,
-    "position" character varying(4),
+    player_position character varying(4),
     observed_at timestamp with time zone NOT NULL,
     draft_ranking_type public.draft_ranking_type DEFAULT 'BIG_BOARD'::public.draft_ranking_type NOT NULL,
-    CONSTRAINT nfl_draft_rankings_index_position_vocabulary CHECK ((("position" IS NULL) OR (("position")::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT nfl_draft_rankings_index_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
 
@@ -18950,7 +18950,7 @@ CREATE TABLE public.pff_player_facet_gamelogs (
     pff_id integer,
     franchise_id smallint,
     nfl_team character varying(3),
-    "position" character varying(5),
+    player_position character varying(5),
     facet_payload jsonb NOT NULL,
     snap_count integer,
     pff_grade numeric(5,2),
@@ -18972,7 +18972,7 @@ CREATE TABLE public.pff_player_facet_gamelogs (
     routes integer,
     targets_per_route numeric(6,3),
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT pff_player_facet_gamelogs_position_vocabulary CHECK ((("position" IS NULL) OR (("position")::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT pff_player_facet_gamelogs_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
 
@@ -18987,7 +18987,7 @@ CREATE TABLE public.pff_player_facet_seasonlogs (
     pff_id integer,
     franchise_id smallint,
     nfl_team character varying(3),
-    "position" character varying(5),
+    player_position character varying(5),
     facet_payload jsonb NOT NULL,
     snap_count integer,
     pff_grade numeric(5,2),
@@ -19009,7 +19009,7 @@ CREATE TABLE public.pff_player_facet_seasonlogs (
     routes integer,
     targets_per_route numeric(6,3),
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT pff_player_facet_seasonlogs_position_vocabulary CHECK ((("position" IS NULL) OR (("position")::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT pff_player_facet_seasonlogs_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
 
@@ -19044,7 +19044,7 @@ CREATE TABLE public.pff_player_seasonlogs (
     draft_selection smallint,
     draft_type character varying(20),
     offense_ranked smallint,
-    "position" character varying(5),
+    player_position character varying(5),
     defense_snaps smallint,
     pass_snaps smallint,
     name character varying(100),
@@ -19071,7 +19071,7 @@ CREATE TABLE public.pff_player_seasonlogs (
     overall_snaps smallint,
     offense_rank smallint,
     CONSTRAINT pff_player_seasonlogs_grade_position_vocabulary CHECK (((grade_position IS NULL) OR ((grade_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[])))),
-    CONSTRAINT pff_player_seasonlogs_position_vocabulary CHECK ((("position" IS NULL) OR (("position")::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT pff_player_seasonlogs_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
 
@@ -19201,7 +19201,7 @@ CREATE TABLE public.pff_unresolved_players (
     season_year smallint NOT NULL,
     facet character varying(64) NOT NULL,
     name character varying(100),
-    "position" character varying(5),
+    pff_position character varying(5),
     pff_nfl_team character varying(8),
     nfl_team character varying(3),
     source_file character varying(255),
@@ -20313,7 +20313,7 @@ CREATE TABLE public.player_college_seasonlogs (
 CREATE TABLE public.player_contracts (
     pid character varying(25) NOT NULL,
     season_year character varying(5) NOT NULL,
-    team character varying(3),
+    nfl_team character varying(3),
     base_salary numeric(10,3),
     prorated_bonus numeric(10,5),
     roster_bonus numeric(10,6),
@@ -20350,10 +20350,10 @@ COMMENT ON COLUMN public.player_contracts.season_year IS 'Contract year or "Tota
 
 
 --
--- Name: COLUMN player_contracts.team; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_contracts.nfl_team; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_contracts.team IS 'Team abbreviation';
+COMMENT ON COLUMN public.player_contracts.nfl_team IS 'Team abbreviation';
 
 
 --
