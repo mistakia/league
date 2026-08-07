@@ -130,7 +130,7 @@ const format_contract_summary = (row) => ({
  */
 const format_yearly_contract_detail = (row) => ({
   season_year: row.year,
-  team: row.team === 'Total' ? null : fixTeam(row.team),
+  nfl_team: row.team === 'Total' ? null : fixTeam(row.team),
   base_salary: row.base_salary,
   prorated_bonus: row.prorated_bonus,
   roster_bonus: row.roster_bonus,
