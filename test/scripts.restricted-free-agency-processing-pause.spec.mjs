@@ -58,6 +58,7 @@ describe('SCRIPTS - restricted free agency processing pause', function () {
         restricted_free_agency_first_window_at: dayjs.unix(tran_date).toDate(),
         restricted_free_agency_window_hours: 24,
         restricted_free_agency_processing_lead_hours: 3,
+        restricted_free_agency_processing_paused_at: null,
         restricted_free_agency_processing_paused_until: null,
         restricted_free_agency_processing_paused_reason: null
       })
@@ -101,16 +102,42 @@ describe('SCRIPTS - restricted free agency processing pause', function () {
     return player
   }
 
-  const set_pause = async ({ paused_until, reason }) =>
+  const set_pause = async ({ paused_at = null, paused_until = null, reason }) =>
     knex('seasons')
       .where({ lid: leagueId, season_year: current_season.year })
       .update({
+        restricted_free_agency_processing_paused_at:
+          paused_at || dayjs().toISOString(),
         restricted_free_agency_processing_paused_until: paused_until,
         restricted_free_agency_processing_paused_reason: reason
       })
 
   describe('pause', function () {
-    it('holds a due bid while the pause is active', async () => {
+    it('holds a due bid open-ended when no expiry is set', async () => {
+      // The normal case. Resuming settles bids irreversibly -- signing
+      // players, moving cap space, writing transactions -- so that step wants
+      // a human rather than a lapsed timer, and an operator who does not yet
+      // know how long they need must not be forced to guess.
+      const player = await seed_due_auction({
+        team_id: 1,
+        bid_amount: 10,
+        announced_ago: 30 * HOUR
+      })
+
+      await set_pause({ reason: 'commissioner is playing it by ear' })
+
+      const result = await run({ dry_run: false })
+
+      const bid = await knex('restricted_free_agency_bids')
+        .where({ pid: player.pid })
+        .first()
+
+      expect(bid.processed).to.equal(null)
+      expect(bid.is_successful).to.equal(null)
+      expect(result.shortfall).to.equal(null)
+    })
+
+    it('holds a due bid while a bounded pause is active', async () => {
       const player = await seed_due_auction({
         team_id: 1,
         bid_amount: 10,

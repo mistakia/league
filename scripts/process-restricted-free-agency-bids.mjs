@@ -157,34 +157,43 @@ function get_bid_processing_due({ league, announced }) {
  * self-reports its five-minute cadence to the runs ledger, so a dark job is
  * indistinguishable from a broken one to the staleness sweep.
  *
- * `restricted_free_agency_processing_paused_until` is a timestamptz, so it is
- * read with `dayjs(value).unix()` and never `dayjs.unix(value)` or
- * `Number(value)` -- the first yields a nonsense year and the second yields
- * milliseconds, and neither throws.
+ * `paused_at` is the state and `paused_until` is an OPTIONAL auto-expiry. A
+ * hold with no end is the normal case: the resume settles bids irreversibly --
+ * signing players, moving cap space, writing transactions -- so it wants a
+ * human, not a lapsed timer. An end is set only when it is genuinely known.
+ *
+ * What guards against a forgotten hold is therefore not an expiry but the log
+ * line at the call site, which states how long this league has been held on
+ * every run. A pause is loud rather than self-cancelling.
+ *
+ * Both columns are timestamptz, so they are read with `dayjs(value).unix()`
+ * and never `dayjs.unix(value)` or `Number(value)` -- the first yields a
+ * nonsense year and the second yields milliseconds, and neither throws.
  *
  * @param {Object} params
  * @param {Object} params.league - League-season row (carries the pause columns)
  * @param {number} params.timestamp - Run timestamp, unix seconds
- * @returns {?{paused_until: number, reason: string}} Null when not paused
+ * @returns {?{paused_at: number, paused_until: ?number, reason: string}} Null
+ *   when not paused
  */
 const get_processing_pause = ({ league, timestamp }) => {
-  const paused_until = league.restricted_free_agency_processing_paused_until
+  const paused_at = league.restricted_free_agency_processing_paused_at
 
-  if (!paused_until) {
+  if (!paused_at) {
     return null
   }
 
-  const paused_until_unix = dayjs(paused_until).unix()
+  const paused_until = league.restricted_free_agency_processing_paused_until
 
-  // An elapsed pause is simply over -- it needs no clearing, which is the
-  // whole reason this is a timestamp rather than a boolean flag someone has
-  // to remember to unset.
-  if (paused_until_unix <= timestamp) {
+  // An expiry is optional. When one was set and has passed, the hold is over
+  // and needs no clearing step.
+  if (paused_until && dayjs(paused_until).unix() <= timestamp) {
     return null
   }
 
   return {
-    paused_until: paused_until_unix,
+    paused_at: dayjs(paused_at).unix(),
+    paused_until: paused_until ? dayjs(paused_until).unix() : null,
     reason: league.restricted_free_agency_processing_paused_reason
   }
 }
@@ -256,13 +265,25 @@ const run = async ({ dry_run = false } = {}) => {
 
     const processing_pause = get_processing_pause({ league, timestamp })
     if (processing_pause) {
-      log(
-        `league ${lid}: RFA bid processing PAUSED until ` +
-          `${dayjs
+      // This line is the guard against a forgotten hold, which is why it
+      // states the DURATION rather than only the fact of the pause: an
+      // open-ended hold has no expiry to notice, so "held 4 hours" growing
+      // run over run is what makes one visible.
+      const held_hours = (
+        (timestamp - processing_pause.paused_at) /
+        3600
+      ).toFixed(1)
+
+      const ends = processing_pause.paused_until
+        ? `until ${dayjs
             .unix(processing_pause.paused_until)
             .tz(league_timezone)
-            .format('YYYY-MM-DD HH:mm:ss [ET]')} -- ` +
-          `${processing_pause.reason}`
+            .format('YYYY-MM-DD HH:mm:ss [ET]')}`
+        : 'until manually resumed'
+
+      log(
+        `league ${lid}: RFA bid processing PAUSED ${ends} ` +
+          `(held ${held_hours}h) -- ${processing_pause.reason}`
       )
       continue
     }
@@ -534,8 +555,9 @@ const run = async ({ dry_run = false } = {}) => {
       // every paused run into a false pipeline failure, which is the same
       // "a hold reads as a break" defect that makes the crontab lever wrong.
       .whereRaw(
-        `(seasons.restricted_free_agency_processing_paused_until is null
-          or seasons.restricted_free_agency_processing_paused_until <= to_timestamp(?))`,
+        `(seasons.restricted_free_agency_processing_paused_at is null
+          or (seasons.restricted_free_agency_processing_paused_until is not null
+              and seasons.restricted_free_agency_processing_paused_until <= to_timestamp(?)))`,
         [timestamp]
       )
       .where(function () {

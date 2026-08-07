@@ -26477,7 +26477,8 @@ CREATE TABLE public.seasons (
     draft_pick_interval smallint DEFAULT 1,
     restricted_free_agency_processing_paused_until timestamp with time zone,
     restricted_free_agency_processing_paused_reason text,
-    CONSTRAINT rfa_processing_pause_states_a_reason CHECK ((((restricted_free_agency_processing_paused_until IS NULL) AND (restricted_free_agency_processing_paused_reason IS NULL)) OR ((restricted_free_agency_processing_paused_until IS NOT NULL) AND (restricted_free_agency_processing_paused_reason IS NOT NULL)))),
+    restricted_free_agency_processing_paused_at timestamp with time zone,
+    CONSTRAINT rfa_processing_pause_states_a_reason CHECK ((((restricted_free_agency_processing_paused_at IS NULL) AND (restricted_free_agency_processing_paused_reason IS NULL) AND (restricted_free_agency_processing_paused_until IS NULL)) OR ((restricted_free_agency_processing_paused_at IS NOT NULL) AND (restricted_free_agency_processing_paused_reason IS NOT NULL)))),
     CONSTRAINT rfa_processing_precedes_announcement CHECK (((restricted_free_agency_processing_lead_hours >= 1) AND (restricted_free_agency_processing_lead_hours < restricted_free_agency_window_hours))),
     CONSTRAINT rfa_window_divides_day CHECK ((restricted_free_agency_window_hours = ANY (ARRAY[1, 2, 3, 4, 6, 8, 12, 24]))),
     CONSTRAINT seasons_at_large_selection_method_known CHECK ((at_large_selection_method = ANY (ARRAY['head_to_head'::text, 'all_play'::text, 'points_for'::text]))),
@@ -26526,14 +26527,21 @@ COMMENT ON COLUMN public.seasons.has_division_winner_berths IS 'When true, every
 -- Name: COLUMN seasons.restricted_free_agency_processing_paused_until; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.seasons.restricted_free_agency_processing_paused_until IS 'When set and in the future, restricted free agency bid processing is held for this league-season. The processing job still runs and still reports success; it treats the league as having no due bids. Null means not paused.';
+COMMENT ON COLUMN public.seasons.restricted_free_agency_processing_paused_until IS 'Optional auto-expiry for the hold. Null while paused means held until someone resumes it, which is the normal case -- an unattended resume settles bids irreversibly, so an end is only set when it is genuinely known.';
 
 
 --
 -- Name: COLUMN seasons.restricted_free_agency_processing_paused_reason; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.seasons.restricted_free_agency_processing_paused_reason IS 'Why processing is paused. Moves with restricted_free_agency_processing_paused_until via the rfa_processing_pause_states_a_reason constraint.';
+COMMENT ON COLUMN public.seasons.restricted_free_agency_processing_paused_reason IS 'Why processing is paused. Mandatory whenever restricted_free_agency_processing_paused_at is set, via the rfa_processing_pause_states_a_reason constraint -- it is the entire audit trail for the hold.';
+
+
+--
+-- Name: COLUMN seasons.restricted_free_agency_processing_paused_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.seasons.restricted_free_agency_processing_paused_at IS 'When the current hold on restricted free agency bid processing began. Set means processing is held for this league-season; null means it is running. The processing job still runs and still reports success while held.';
 
 
 --

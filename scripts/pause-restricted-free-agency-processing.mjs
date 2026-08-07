@@ -78,6 +78,7 @@ const get_season_row = async ({ lid, season_year }) => {
       'season_year',
       'restricted_free_agency_period_start',
       'restricted_free_agency_period_end',
+      'restricted_free_agency_processing_paused_at',
       'restricted_free_agency_processing_paused_until',
       'restricted_free_agency_processing_paused_reason'
     )
@@ -91,21 +92,27 @@ const get_season_row = async ({ lid, season_year }) => {
 }
 
 const report_status = (season_row) => {
+  const paused_at = season_row.restricted_free_agency_processing_paused_at
   const paused_until = season_row.restricted_free_agency_processing_paused_until
+  const label = `league ${season_row.lid} (${season_row.season_year})`
 
-  if (!paused_until) {
-    console.log(
-      `league ${season_row.lid} (${season_row.season_year}): RFA bid processing is ACTIVE`
-    )
+  if (!paused_at) {
+    console.log(`${label}: RFA bid processing is ACTIVE`)
     return
   }
 
-  const is_elapsed = dayjs(paused_until).isBefore(dayjs())
+  const is_elapsed = paused_until && dayjs(paused_until).isBefore(dayjs())
+  const held_hours = (dayjs().diff(dayjs(paused_at), 'minute') / 60).toFixed(1)
 
   console.log(
-    `league ${season_row.lid} (${season_row.season_year}): RFA bid processing is ` +
-      `${is_elapsed ? 'ACTIVE (pause elapsed)' : 'PAUSED'} ` +
-      `until ${format_et(paused_until)}`
+    `${label}: RFA bid processing is ${
+      is_elapsed ? 'ACTIVE (pause elapsed)' : 'PAUSED'
+    } -- held ${held_hours}h since ${format_et(paused_at)}`
+  )
+  console.log(
+    `  ends: ${
+      paused_until ? format_et(paused_until) : 'when manually resumed'
+    }`
   )
   console.log(
     `  reason: ${season_row.restricted_free_agency_processing_paused_reason}`
@@ -138,40 +145,36 @@ const pause_restricted_free_agency_processing = async ({
   }
 
   if (resume) {
-    if (!season_row.restricted_free_agency_processing_paused_until) {
+    if (!season_row.restricted_free_agency_processing_paused_at) {
       console.log(
         `league ${lid} (${season_year}): RFA bid processing was not paused -- nothing to do`
       )
       return
     }
 
-    // Both columns move together: the rfa_processing_pause_states_a_reason
-    // CHECK constraint refuses a pause with no stated reason, so a resume
-    // that cleared only the timestamp would be rejected outright.
+    // All three columns move together: the rfa_processing_pause_states_a_reason
+    // CHECK constraint refuses a reason or an expiry without a start, so a
+    // resume that cleared only one of them would be rejected outright.
     await db('seasons').where({ lid, season_year }).update({
+      restricted_free_agency_processing_paused_at: null,
       restricted_free_agency_processing_paused_until: null,
       restricted_free_agency_processing_paused_reason: null
     })
 
+    const held_hours = (
+      dayjs().diff(
+        dayjs(season_row.restricted_free_agency_processing_paused_at),
+        'minute'
+      ) / 60
+    ).toFixed(1)
+
     console.log(
-      `league ${lid} (${season_year}): RFA bid processing RESUMED ` +
-        `(was held until ${format_et(
-          season_row.restricted_free_agency_processing_paused_until
-        )})`
+      `league ${lid} (${season_year}): RFA bid processing RESUMED after ${held_hours}h`
     )
     console.log(
       '  every auction past its window processing time settles on the next run, in window order'
     )
     return
-  }
-
-  if (!until) {
-    throw new Error(
-      '--until is required (e.g. --until=12h, --until=2026-08-08T20:00:00Z). ' +
-        'There is deliberately no indefinite pause: a hold with no end is the ' +
-        'one that gets forgotten, and a forgotten hold silently freezes the ' +
-        'rest of the auction period.'
-    )
   }
 
   if (!reason) {
@@ -180,9 +183,14 @@ const pause_restricted_free_agency_processing = async ({
     )
   }
 
-  const pause_until = resolve_pause_until(until)
+  // --until is OPTIONAL, and omitting it is the normal case. Resuming settles
+  // bids irreversibly, so that step wants a human rather than a lapsed timer;
+  // an end is set only when it is genuinely known ("hold until the next
+  // window opens"). What surfaces a forgotten hold instead is the processing
+  // job, which logs how long the league has been held on every run.
+  const pause_until = until ? resolve_pause_until(until) : null
 
-  if (!pause_until.isAfter(dayjs())) {
+  if (pause_until && !pause_until.isAfter(dayjs())) {
     throw new Error(
       `--until resolves to ${format_et(pause_until)}, which is not in the future`
     )
@@ -192,24 +200,43 @@ const pause_restricted_free_agency_processing = async ({
   // meaningless -- every auction settles or expires at period end regardless
   // -- so say so rather than silently accepting it.
   const period_end = season_row.restricted_free_agency_period_end
-  if (period_end && pause_until.unix() > Number(period_end)) {
+  if (period_end && pause_until && pause_until.unix() > Number(period_end)) {
     console.log(
       `  note: the hold outlasts the restricted free agency period, which ends ` +
         `${format_et(dayjs.unix(Number(period_end)))}`
     )
   }
 
-  await db('seasons').where({ lid, season_year }).update({
-    restricted_free_agency_processing_paused_until: pause_until.toISOString(),
-    restricted_free_agency_processing_paused_reason: reason
-  })
+  await db('seasons')
+    .where({ lid, season_year })
+    .update({
+      restricted_free_agency_processing_paused_at: dayjs().toISOString(),
+      restricted_free_agency_processing_paused_until: pause_until
+        ? pause_until.toISOString()
+        : null,
+      restricted_free_agency_processing_paused_reason: reason
+    })
 
   console.log(
-    `league ${lid} (${season_year}): RFA bid processing PAUSED until ${format_et(
+    `league ${lid} (${season_year}): RFA bid processing PAUSED -- ${
       pause_until
-    )}`
+        ? `until ${format_et(pause_until)}`
+        : 'open-ended, until you resume it'
+    }`
   )
   console.log(`  reason: ${reason}`)
+
+  if (!pause_until && period_end) {
+    console.log(
+      `  the hold cannot outlast the restricted free agency period, which ends ${format_et(
+        dayjs.unix(Number(period_end))
+      )}`
+    )
+  }
+
+  console.log(
+    `  resume with: node scripts/pause-restricted-free-agency-processing.mjs --lid=${lid} --resume`
+  )
   console.log(
     '  announcements are unaffected, and teams can still submit and cancel bids'
   )
@@ -232,7 +259,9 @@ const main = async () => {
       })
       .option('until', {
         type: 'string',
-        describe: 'Pause end: a duration (12h, 90m, 2d) or a timestamp'
+        describe:
+          'Optional auto-expiry: a duration (12h, 90m, 2d) or a timestamp. ' +
+          'Omit to hold until you resume it.'
       })
       .option('reason', { type: 'string', describe: 'Why processing is held' })
       .option('resume', { type: 'boolean', describe: 'Clear an active pause' })
