@@ -37,7 +37,7 @@ export default function LeagueSettingsExternal({
       )}
       <EditableLeagueField
         label='ESPN ID'
-        field='espn_id'
+        field='espn_league_id'
         type='int'
         max={4294967295}
         min={0}
@@ -45,7 +45,7 @@ export default function LeagueSettingsExternal({
       />
       <EditableLeagueField
         label='Sleeper ID'
-        field='sleeper_id'
+        field='sleeper_league_id'
         type='int'
         max={4294967295}
         min={0}
@@ -53,7 +53,7 @@ export default function LeagueSettingsExternal({
       />
       <EditableLeagueField
         label='MFL ID'
-        field='mfl_id'
+        field='mfl_league_id'
         type='int'
         max={4294967295}
         min={0}
@@ -61,7 +61,7 @@ export default function LeagueSettingsExternal({
       />
       <EditableLeagueField
         label='Fleaflicker ID'
-        field='fleaflicker_id'
+        field='fleaflicker_league_id'
         type='int'
         max={4294967295}
         min={0}

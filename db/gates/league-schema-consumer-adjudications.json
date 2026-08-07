@@ -119,7 +119,7 @@
       "table": "player",
       "column": "pff_id",
       "kind": "history",
-      "reason": "Became pff_player_id. Cited precisely because pff_player_seasonlogs.pff_id survives -- the asymmetry is the lesson."
+      "reason": "Became pff_player_id. The three PFF log tables followed on 2026-08-07, so the schema is now uniform on pff_player_id and this pair no longer illustrates an asymmetry."
     },
     {
       "gate": 1,

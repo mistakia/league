@@ -1299,6 +1299,62 @@
       ],
       "verdict": "already-swept",
       "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
+      "table": "leagues",
+      "column": "espn_id",
+      "sites": [
+        "api/routes/me.mjs",
+        "libs-server/get-league.mjs",
+        "scripts/generate-draft-picks.mjs",
+        "scripts/generate-rosters.mjs",
+        "scripts/generate-seasons.mjs",
+        "scripts/notifications-draft.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
+    },
+    {
+      "table": "leagues",
+      "column": "sleeper_id",
+      "sites": [
+        "api/routes/me.mjs",
+        "libs-server/get-league.mjs",
+        "scripts/generate-draft-picks.mjs",
+        "scripts/generate-rosters.mjs",
+        "scripts/generate-seasons.mjs",
+        "scripts/notifications-draft.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
+    },
+    {
+      "table": "leagues",
+      "column": "mfl_id",
+      "sites": [
+        "api/routes/me.mjs",
+        "libs-server/get-league.mjs",
+        "scripts/generate-draft-picks.mjs",
+        "scripts/generate-rosters.mjs",
+        "scripts/generate-seasons.mjs",
+        "scripts/notifications-draft.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
+    },
+    {
+      "table": "leagues",
+      "column": "fleaflicker_id",
+      "sites": [
+        "api/routes/me.mjs",
+        "libs-server/get-league.mjs",
+        "scripts/generate-draft-picks.mjs",
+        "scripts/generate-rosters.mjs",
+        "scripts/generate-seasons.mjs",
+        "scripts/notifications-draft.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
     }
   ]
 }

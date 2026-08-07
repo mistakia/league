@@ -11,7 +11,7 @@
  *           items:
  *             type: string
  *           description: Basic league identification and external platform fields
- *           example: ["name", "espn_id", "sleeper_id", "mfl_id", "fleaflicker_id"]
+ *           example: ["name", "espn_league_id", "sleeper_league_id", "mfl_league_id", "fleaflicker_league_id"]
  *         league_format_fields:
  *           type: array
  *           items:
@@ -147,12 +147,12 @@
  *               field_definitions:
  *                 summary: Complete field definitions and validation rules
  *                 value:
- *                   league_fields: ["name", "espn_id", "sleeper_id", "mfl_id", "fleaflicker_id"]
+ *                   league_fields: ["name", "espn_league_id", "sleeper_league_id", "mfl_league_id", "fleaflicker_league_id"]
  *                   league_format_fields: ["num_teams", "starter_slots_qb", "starter_slots_rb", "starter_slots_wr", "starter_slots_te", "bench_slot_count", "practice_squad_slot_count", "reserve_short_term_limit", "cap", "min_bid"]
  *                   league_scoring_format_fields: ["passing_attempts", "passing_completions", "passing_yards", "passing_touchdowns", "rushing_attempts", "rushing_yards", "rushing_touchdowns", "receptions", "receiving_yards", "receiving_touchdowns"]
  *                   season_fields: ["max_roster_qb", "max_roster_rb", "max_roster_wr", "max_roster_te", "max_roster_dst", "max_roster_k", "starting_faab_budget"]
- *                   integer_fields: ["num_teams", "starter_slots_qb", "starter_slots_rb", "starter_slots_wr", "starter_slots_te", "bench_slot_count", "practice_squad_slot_count", "reserve_short_term_limit", "cap", "passing_attempts", "passing_completions", "passing_yards", "passing_touchdowns", "espn_id", "sleeper_id"]
- *                   positive_integer_fields: ["starter_slots_qb", "starter_slots_rb", "starter_slots_wr", "starter_slots_te", "bench_slot_count", "practice_squad_slot_count", "reserve_short_term_limit", "cap", "min_bid", "espn_id", "sleeper_id", "mfl_id"]
+ *                   integer_fields: ["num_teams", "starter_slots_qb", "starter_slots_rb", "starter_slots_wr", "starter_slots_te", "bench_slot_count", "practice_squad_slot_count", "reserve_short_term_limit", "cap", "passing_attempts", "passing_completions", "passing_yards", "passing_touchdowns", "espn_league_id", "sleeper_league_id"]
+ *                   positive_integer_fields: ["starter_slots_qb", "starter_slots_rb", "starter_slots_wr", "starter_slots_te", "bench_slot_count", "practice_squad_slot_count", "reserve_short_term_limit", "cap", "min_bid", "espn_league_id", "sleeper_league_id", "mfl_league_id"]
  *                   float_fields: ["passing_attempts", "passing_completions", "passing_yards", "rushing_attempts", "rushing_yards", "receptions", "receiving_yards"]
  *       400:
  *         description: Invalid league ID
@@ -200,10 +200,10 @@ const scoring_float_fields = scoring_columns
 
 export const league_fields = [
   'name',
-  'espn_id',
-  'sleeper_id',
-  'mfl_id',
-  'fleaflicker_id'
+  'espn_league_id',
+  'sleeper_league_id',
+  'mfl_league_id',
+  'fleaflicker_league_id'
 ]
 
 export const league_format_fields = [
@@ -278,10 +278,10 @@ export const integer_fields = [
   'cap',
   'num_teams',
   'min_bid',
-  'espn_id',
-  'sleeper_id',
-  'mfl_id',
-  'fleaflicker_id',
+  'espn_league_id',
+  'sleeper_league_id',
+  'mfl_league_id',
+  'fleaflicker_league_id',
   ...scoring_numeric_fields
 ]
 
@@ -312,10 +312,10 @@ export const positive_integer_fields = [
   'punt_return_touchdowns',
   'kickoff_return_touchdowns',
   'fumble_return_touchdowns',
-  'espn_id',
-  'sleeper_id',
-  'mfl_id',
-  'fleaflicker_id'
+  'espn_league_id',
+  'sleeper_league_id',
+  'mfl_league_id',
+  'fleaflicker_league_id'
 ]
 
 export const float_fields = scoring_float_fields

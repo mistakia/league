@@ -107,19 +107,19 @@ const router = express.Router()
  *           type: integer
  *           description: Points per receiving touchdown
  *           example: 6
- *         espn_id:
+ *         espn_league_id:
  *           type: integer
  *           description: ESPN league ID for data sync
  *           example: 12345
- *         sleeper_id:
+ *         sleeper_league_id:
  *           type: integer
  *           description: Sleeper league ID for data sync
  *           example: 67890
- *         mfl_id:
+ *         mfl_league_id:
  *           type: integer
  *           description: MyFantasyLeague ID for data sync
  *           example: 54321
- *         fleaflicker_id:
+ *         fleaflicker_league_id:
  *           type: integer
  *           description: Fleaflicker league ID for data sync
  *           example: 98765
@@ -226,8 +226,8 @@ const router = express.Router()
  *                   receptions: 0.5
  *                   receiving_yards: 0.1
  *                   receiving_touchdowns: 6
- *                   espn_id: null
- *                   sleeper_id: 67890
+ *                   espn_league_id: null
+ *                   sleeper_league_id: 67890
  *       400:
  *         description: Invalid league ID
  *         content:

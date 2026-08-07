@@ -36,12 +36,12 @@ export const SPORTRADAR_EXCLUSIVE_FIELDS = new Set([
   'fg_result_detail', // Detailed FG miss reason
 
   // Defensive Player Tracking
-  'sack_player_1_sportradar_id',
-  'sack_player_2_sportradar_id',
-  'tackle_for_loss_1_sportradar_id',
-  'tackle_for_loss_2_sportradar_id',
-  'fumble_forced_1_sportradar_id',
-  'fumble_recovered_1_sportradar_id',
+  'sack_1_sportradar_player_id',
+  'sack_2_sportradar_player_id',
+  'tackle_for_loss_1_sportradar_player_id',
+  'tackle_for_loss_2_sportradar_player_id',
+  'fumble_forced_1_sportradar_player_id',
+  'fumble_recovered_1_sportradar_player_id',
   'fumble_recovered_team',
 
   // Penalty Details
@@ -49,13 +49,13 @@ export const SPORTRADAR_EXCLUSIVE_FIELDS = new Set([
   // which is more accurate than Sportradar's API (see sportradar errors on special teams)
   'is_penalty_declined', // Penalty was declined
   'is_penalty_offset', // Offsetting penalty
-  'penalty_player_sportradar_id',
+  'penalty_sportradar_player_id',
   'play_direction', // Play direction from pass details
 
   // Kicker/Returner IDs
-  'kicker_sportradar_id',
-  'punter_sportradar_id',
-  'returner_sportradar_id',
+  'kicker_sportradar_player_id',
+  'punter_sportradar_player_id',
+  'returner_sportradar_player_id',
 
   // Metadata
   'wall_clock', // Real-world timestamp

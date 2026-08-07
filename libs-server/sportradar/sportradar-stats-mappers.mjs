@@ -197,7 +197,7 @@ export const map_field_goal_stats = async ({
     if (kicker) {
       mapped.kicker_pid = kicker.pid
       mapped.kicker_gsis = kicker.gsisid
-      mapped.kicker_sportradar_id = field_goal_stats.kicker.id
+      mapped.kicker_sportradar_player_id = field_goal_stats.kicker.id
     }
   }
 
@@ -241,7 +241,7 @@ export const map_punt_stats = async ({
     if (punter) {
       mapped.punter_pid = punter.pid
       mapped.punter_gsis = punter.gsisid
-      mapped.punter_sportradar_id = punt_stats.punter.id
+      mapped.punter_sportradar_player_id = punt_stats.punter.id
     }
   }
 
@@ -279,7 +279,7 @@ export const map_kickoff_stats = async ({
     if (kicker) {
       mapped.kicker_pid = kicker.pid
       mapped.kicker_gsis = kicker.gsisid
-      mapped.kicker_sportradar_id = kick_stats.player.id
+      mapped.kicker_sportradar_player_id = kick_stats.player.id
     }
   }
 
@@ -313,7 +313,7 @@ export const map_return_stats = async ({
     if (returner) {
       mapped.returner_pid = returner.pid
       mapped.returner_gsis = returner.gsisid
-      mapped.returner_sportradar_id = return_stats.returner.id
+      mapped.returner_sportradar_player_id = return_stats.returner.id
     }
   }
 
@@ -368,7 +368,7 @@ export const map_penalty_stats = async ({
     if (penalty_player) {
       mapped.penalty_player_pid = penalty_player.pid
       mapped.penalty_player_gsis = penalty_player.gsisid
-      mapped.penalty_player_sportradar_id = primary_penalty.player.id
+      mapped.penalty_sportradar_player_id = primary_penalty.player.id
     }
   }
 
@@ -448,7 +448,8 @@ export const map_play_details = async ({
     if (forcer) {
       mapped.fumble_forced_1_pid = forcer.pid
       mapped.fumble_forced_1_gsis = forcer.gsisid
-      mapped.fumble_forced_1_sportradar_id = forced_fumble_detail.players[0].id
+      mapped.fumble_forced_1_sportradar_player_id =
+        forced_fumble_detail.players[0].id
     }
   }
 
@@ -470,7 +471,8 @@ export const map_play_details = async ({
       })
       mapped.fumble_recovered_1_pid = recoverer.pid
       mapped.fumble_recovered_1_gsis = recoverer.gsisid
-      mapped.fumble_recovered_1_sportradar_id = recovery_detail.players[0].id
+      mapped.fumble_recovered_1_sportradar_player_id =
+        recovery_detail.players[0].id
       mapped.fumble_recovered_team = recovery_team
     }
   }
@@ -489,7 +491,7 @@ export const map_play_details = async ({
         const idx = i + 1
         mapped[`sack_player_${idx}_pid`] = sacker.pid
         mapped[`sack_player_${idx}_gsis`] = sacker.gsisid
-        mapped[`sack_player_${idx}_sportradar_id`] = sack_players[i].id
+        mapped[`sack_${idx}_sportradar_player_id`] = sack_players[i].id
       }
     }
   }
@@ -514,7 +516,8 @@ export const map_play_details = async ({
         const idx = i + 1
         mapped[`tackle_for_loss_${idx}_pid`] = tackler.pid
         mapped[`tackle_for_loss_${idx}_gsis`] = tackler.gsisid
-        mapped[`tackle_for_loss_${idx}_sportradar_id`] = tfl_stats[i].player.id
+        mapped[`tackle_for_loss_${idx}_sportradar_player_id`] =
+          tfl_stats[i].player.id
       }
     }
   }

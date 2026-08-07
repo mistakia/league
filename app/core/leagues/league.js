@@ -105,10 +105,10 @@ export const League = new Record({
   teams: new List(),
   years: new List(),
 
-  espn_id: null,
-  sleeper_id: null,
-  mfl_id: null,
-  fleaflicker_id: null,
+  espn_league_id: null,
+  sleeper_league_id: null,
+  mfl_league_id: null,
+  fleaflicker_league_id: null,
 
   season_due_amount: null,
 
@@ -212,10 +212,10 @@ export function createLeague(league_data = {}) {
     teams,
     years,
 
-    espn_id,
-    sleeper_id,
-    mfl_id,
-    fleaflicker_id,
+    espn_league_id,
+    sleeper_league_id,
+    mfl_league_id,
+    fleaflicker_league_id,
 
     season_due_amount,
 
@@ -318,10 +318,10 @@ export function createLeague(league_data = {}) {
     teams: new List(teams),
     years: years ? new List(years) : new List([current_season.year]),
 
-    espn_id,
-    sleeper_id,
-    mfl_id,
-    fleaflicker_id,
+    espn_league_id,
+    sleeper_league_id,
+    mfl_league_id,
+    fleaflicker_league_id,
 
     season_due_amount,
 

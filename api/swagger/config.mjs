@@ -312,25 +312,25 @@ const options = {
               description: 'Whether fantasy league is hosted on platform',
               example: false
             },
-            espn_id: {
+            espn_league_id: {
               type: 'integer',
               nullable: true,
               description: 'ESPN league ID for integration',
               example: null
             },
-            sleeper_id: {
+            sleeper_league_id: {
               type: 'integer',
               nullable: true,
               description: 'Sleeper league ID for integration',
               example: null
             },
-            mfl_id: {
+            mfl_league_id: {
               type: 'integer',
               nullable: true,
               description: 'MyFantasyLeague ID for integration',
               example: null
             },
-            fleaflicker_id: {
+            fleaflicker_league_id: {
               type: 'integer',
               nullable: true,
               description: 'Fleaflicker league ID for integration',
@@ -3206,22 +3206,22 @@ const options = {
               description: 'Points per receiving touchdown',
               example: 6
             },
-            espn_id: {
+            espn_league_id: {
               type: 'integer',
               description: 'ESPN league ID for data sync',
               example: 12345
             },
-            sleeper_id: {
+            sleeper_league_id: {
               type: 'integer',
               description: 'Sleeper league ID for data sync',
               example: 67890
             },
-            mfl_id: {
+            mfl_league_id: {
               type: 'integer',
               description: 'MyFantasyLeague ID for data sync',
               example: 54321
             },
-            fleaflicker_id: {
+            fleaflicker_league_id: {
               type: 'integer',
               description: 'Fleaflicker league ID for data sync',
               example: 98765

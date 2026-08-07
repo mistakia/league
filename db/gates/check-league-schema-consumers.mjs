@@ -57,9 +57,10 @@
 //   GATE 1  qualified pairs -- every `table.column` token in the corpus whose
 //           table is a real table must name a real column of that table. Static,
 //           needs no database. Judged per (table, column), NEVER per column name:
-//           `pff_player_seasonlogs.pff_id` survives while `player.pff_id` does
-//           not, and a global rename would have damaged four of five such cases
-//           in a 2026-07-30 sweep. It also reads every documented
+//           `nfl_plays.psr_gsis`/`trg_gsis` survive while `psr_pid`/`trg_pid`
+//           became `passer_pid`/`target_pid` -- same conform, same table,
+//           opposite outcomes -- and a global rename would have damaged four of
+//           five such cases in a 2026-07-30 sweep. It also reads every documented
 //           `CREATE INDEX ... ON <table> (<columns>)`, which states the same
 //           claim in the one form the pair regex cannot see -- the columns are
 //           unqualified -- and which gate 2 cannot reach either, DDL being
@@ -1463,9 +1464,13 @@ const explain_statements = async ({
 // An adjudication is keyed on the SITE -- file plus the specific pair or the
 // specific error -- and never on a column name alone. Judging per (table, column)
 // rather than per column is the difference between fixing and breaking:
-// `pff_player_seasonlogs.pff_id` survives while `player.pff_id` does not, and
-// `scoring_format_player_seasonlogs.year` survives while `player_seasonlogs.year`
-// does not.
+// `nfl_plays.psr_gsis`/`trg_gsis` survive while `psr_pid`/`trg_pid` became
+// `passer_pid`/`target_pid` -- one conform, one table, opposite outcomes.
+//
+// The `pff_id` pair that used to stand here is no longer an example of anything:
+// `player.pff_id` became `pff_player_id` first and the three PFF log tables
+// followed on 2026-08-07, so the schema is uniform on one spelling. An asymmetry
+// is a fact with a shelf life -- re-check the pair rather than citing a list.
 const load_adjudications = () => {
   if (!fs.existsSync(adjudications_file)) return []
   const parsed = JSON.parse(fs.readFileSync(adjudications_file, 'utf8'))

@@ -512,9 +512,18 @@ function check_column(table, col) {
     /_?id$/.test(lower) && !allowlisted_identifiers.has(lower)
   // {system}_{entitytype}_id, where {system} may be multi-token (gsis_it,
   // fantasy_data) so gsis_it_player_id / fantasy_data_player_id conform; plus the
-  // two-token form and the {role}_pid form. `league` is an entitytype so the
-  // external-league keys conform once renamed (leagues.espn_id -> espn_league_id,
-  // .sleeper_id -> sleeper_league_id).
+  // two-token form and the {role}_pid form. `league` is an entitytype, which is
+  // what lets the external-league keys conform: leagues.espn_id became
+  // espn_league_id and .sleeper_id became sleeper_league_id on 2026-08-07.
+  //
+  // The two-token alternation is also this rule's known blind spot. It reads
+  // token COUNT and never token ORDER, so a {role}_{vendor}_id column is
+  // indistinguishable from a {system}_{entitytype}_id one: kicker_sportradar_id,
+  // punter_sportradar_id and returner_sportradar_id passed as clean while their
+  // three-or-more-token siblings on the same table were flagged. All ten were
+  // conformed together on 2026-08-07 by enumerating from the schema rather than
+  // from this audit's output. nfl_games.stad_nfl_id is the same shape and is
+  // still unflagged -- see the task entity for the scoping call.
   const conforms_external =
     /^[a-z0-9]+(_[a-z0-9]+)*_(player|team|game|league|site)_id$/.test(lower) ||
     /^[a-z0-9]+_[a-z0-9]+_id$/.test(lower) ||
