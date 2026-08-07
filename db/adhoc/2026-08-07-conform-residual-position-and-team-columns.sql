@@ -1,5 +1,5 @@
 -- Conform the residual reserved-word and ambiguous-team columns
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-07 against league_production
 --
 -- Two settled precedents, no new naming decisions:
 --
