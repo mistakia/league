@@ -25,8 +25,17 @@ const ForgotPasswordPage = ({
 }) => {
   const email_or_username_ref = React.useRef()
 
+  // `is_password_reset_requested` lives in redux and is only cleared by the
+  // next request's PENDING, so it survives navigating away and coming back.
+  // Gating on a local submit flag as well is what stops the page rendering the
+  // acknowledgement to someone who has not submitted anything and leaving them
+  // no form to retry with — and retrying is the expected path here, since the
+  // whole point of the page is a user waiting on an email that may not arrive.
+  const [is_submitted, set_is_submitted] = React.useState(false)
+
   const handle_submit = (event) => {
     event.preventDefault()
+    set_is_submitted(true)
     request_password_reset({
       email_or_username: email_or_username_ref.current.value
     })
@@ -34,7 +43,7 @@ const ForgotPasswordPage = ({
 
   let body
 
-  if (is_password_reset_requested) {
+  if (is_submitted && is_password_reset_requested) {
     body = (
       <div className='forgot-password'>
         <div className='forgot-password__main'>

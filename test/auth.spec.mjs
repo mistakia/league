@@ -406,11 +406,14 @@ describe('API /auth', function () {
 
     let reset_user_id = null
 
-    // Mint a token exactly as POST /auth/reset-password does. This spec cannot
-    // read the emailed token — nothing is sent in test, since `config.email`
-    // is unset — so the two derivations are asserted to agree by construction
-    // rather than by round trip. That is the one gap here; everything below it
-    // (expiry, tampering, replay, the write itself) is exercised end to end.
+    // Mint a token exactly as POST /auth/reset-password does, so this block can
+    // exercise the shapes a real link cannot produce — an expired token, one
+    // signed with the bare jwt secret, one naming a user that does not exist.
+    //
+    // Restating the derivation here asserts nothing about whether the request
+    // route agrees with it. That seam is covered by round trip in the
+    // `password reset round trip` block below, which reads the token out of the
+    // email instead of building one.
     const sign_reset_token = ({ user, expires_in = '1h' }) =>
       jwt.sign({ user_id: user.id }, `${config.jwt.secret}${user.password}`, {
         expiresIn: expires_in
