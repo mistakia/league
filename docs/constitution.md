@@ -475,11 +475,11 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 3.  In the event a team’s optimal lineup does not meet the requirements of a complete set of starters who were active, if they are in possession of their own first round pick for the following year, they will receive a Potential Points Penalty (PPP) so that their Potential Points for that week is equal to that of the team with the highest Potential Points for that week.
 
-4.  Playoff team draft order will be based on the following results:
+4.  The six (6) Teams admitted to the post-season shall receive the last six (6) picks of each round, ordered as follows:
 
-    1.  The losers of the Week 15 Wildcard round will receive the 7th and 8th pick, with the lowest scoring team receiving the 7th pick.
+    1.  Where the LEAGUE consists of ten (10) Teams, the losers of the WILDCARD ROUND shall receive the 5th and 6th picks, with the lower scoring Team receiving the 5th pick; and the winner of the LEAGUE CHAMPIONSHIP shall receive the 10th pick, while the 2nd, 3rd and 4th place Teams shall receive the 9th, 8th and 7th picks respectively.
 
-    2.  The winner of the LEAGUE CHAMPIONSHIP will receive the 12th pick, while the 2nd, 3rd and 4th place Teams will receive the 11th, 10th, and 9th picks respectively.
+    2.  Where the LEAGUE consists of twelve (12) Teams, the losers of the WILDCARD ROUND shall receive the 7th and 8th picks, with the lower scoring Team receiving the 7th pick; and the winner of the LEAGUE CHAMPIONSHIP shall receive the 12th pick, while the 2nd, 3rd and 4th place Teams shall receive the 11th, 10th and 9th picks respectively.
 
 ### Contracts.
 
