@@ -361,11 +361,13 @@ router.post('/reset-password', async (req, res) => {
       }
     }
 
+    // The token is a signed JWT carrying its own expiry, and nothing ever reads
+    // it back — the reset link is the only thing that presents it. `users` has
+    // no `reset_token` column, so persisting it raised 42703 and took the whole
+    // route with it on every call.
     const reset_token = jwt.sign({ user_id: user.id }, config.jwt.secret, {
       expiresIn: '1h'
     })
-
-    await db('users').where({ id: user.id }).update({ reset_token })
 
     const reset_link = `${config.url}/reset-password?token=${reset_token}`
 

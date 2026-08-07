@@ -327,6 +327,38 @@
       "column": "your_new_stat",
       "kind": "not_a_column",
       "reason": "A fill-in marker in a how-to that tells the reader to add THEIR stat; the surrounding index name is idx_league_scoring_formats_your_stat. It carries no angle brackets or braces, so nothing in the placeholder vocabulary can recognise it and the site has to be judged rather than parsed."
+    },
+    {
+      "gate": 1,
+      "path": "cli/claude/deploy-claude-oauth-token.sh",
+      "table": "config",
+      "column": "claude_accounts",
+      "kind": "not_a_column",
+      "reason": "user-base config namespace, not the league `config` table. `config.claude_accounts` is a key path into user-base's own config.json, which this script reads; the league table named `config` is unrelated and this script issues no league SQL."
+    },
+    {
+      "gate": 1,
+      "path": "cli/finance/import-beacon-validator-balances.sh",
+      "table": "config",
+      "column": "beacon_api_url",
+      "kind": "not_a_column",
+      "reason": "user-base config namespace, not the league `config` table. Same collision: a key path into user-base config.json, in a finance script that never touches the league database."
+    },
+    {
+      "gate": 1,
+      "path": "cli/finance/update-credentials.sh",
+      "table": "config",
+      "column": "owner_public_key",
+      "kind": "not_a_column",
+      "reason": "user-base config namespace, not the league `config` table. Key path into user-base config.json; this script resolves a finance credential owner and issues no league SQL."
+    },
+    {
+      "gate": 1,
+      "path": "cli/lib/assert-node-lan.sh",
+      "table": "config",
+      "column": "postgres",
+      "kind": "not_a_column",
+      "reason": "JavaScript property access inside an embedded heredoc (`config.postgres?.connection`), reading user-base's own config object. Not prose and not a league schema claim."
     }
   ]
 }

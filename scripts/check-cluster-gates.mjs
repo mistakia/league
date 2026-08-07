@@ -86,7 +86,15 @@ const USER_BASE_ROOTS = [
   '--root',
   '../../../text/league',
   '--root',
-  '../../../workflow/nfl'
+  '../../../workflow/nfl',
+  // The user-base CLI tree, for GATE 3. It holds EXECUTABLE schema consumers --
+  // monitoring scripts shipping SQL over ssh to psql — which is a different
+  // corpus from the three prose roots above and was in no gate at all until
+  // 2026-08-07, when a lineage check had been exiting 1 nightly since the
+  // season_grain conform. Not content-gated: every `.sh` under it is read, so the
+  // denominator cannot move when a table reference is renamed away.
+  '--executable-root',
+  '../../../cli'
 ]
 
 /**
@@ -126,6 +134,14 @@ const GATES = [
     negative_control: false,
     oracle:
       "every 'table.column' literal in server code resolves against the schema file"
+  },
+  {
+    id: 'knex-column-resolution',
+    command: ['db/gates/check-knex-column-resolution.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'alias-qualified and unqualified knex column references, resolved through the statement that binds them, vs the schema file'
   },
   {
     id: 'dropped-table-consumers',

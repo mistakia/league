@@ -191,7 +191,7 @@ export async function load_player_points_with_game_status({
 
   // Load scoring format for market projection calculation
   const league_settings = await db('league_scoring_formats')
-    .where({ scoring_format_id })
+    .where({ id: scoring_format_id })
     .first()
 
   // Import merge helper dynamically to avoid circular dependency

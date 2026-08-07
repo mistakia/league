@@ -65,6 +65,20 @@ jobs:
       - name: Renamed-column consumer gate (gate 1)
         run: node db/gates/check-renamed-column-consumers.mjs --gate 1
 
+      # The companion to the gate above, covering the references that name no
+      # table LITERALLY: an alias-qualified 'r.year' bound by a join, and an
+      # unqualified object key like .where({ lid, year }). Both were invisible to
+      # every gate until 2026-08-07, which is how the season_grain conform left
+      # rosters_players.year live in compute-roster-slot-metrics (37cc9f36b) and
+      # three more 42703s on master besides.
+      #
+      # CI-eligible on exactly gate 1's terms: it resolves against the current
+      # schema, so it needs no rename list and no base ref, cannot drift, and
+      # cannot go red on a sibling's in-flight migration. Static read, no
+      # database. Its five negative controls run on every invocation.
+      - name: Knex column resolution gate
+        run: node db/gates/check-knex-column-resolution.mjs
+
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update

@@ -67,8 +67,10 @@ ref and treats an unresolvable one as a missing prerequisite.
 
 Only the gates that compare a spec or the schema file against ITSELF are
 CI-eligible: they cannot go red on a sibling's in-flight migration.
-`check-renamed-column-consumers --gate 1` and the conformance ratchet are in CI
-for that reason.
+`check-renamed-column-consumers --gate 1`, `check-knex-column-resolution` and the
+conformance ratchet are in CI for that reason. The knex resolver qualifies on the
+same test: it resolves each column reference through the statement that binds it
+against the current schema file, so it carries no rename list and no base ref.
 
 Everything else stays out. Those gates read the WORKING TREE and diff against a
 base ref, and their findings need per-site adjudication by someone who knows what

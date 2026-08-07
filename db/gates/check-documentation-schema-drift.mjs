@@ -134,7 +134,10 @@ const DEFAULT_ROOTS = [
   'server/crontab-worker-1'
 ]
 
-const SCANNED_EXTENSIONS = new Set(['.md', '.mjs', '.cron', '.sql'])
+// `.sh` is here for GATE 3. A shell script holding SQL in a bash variable is an
+// EXECUTABLE schema consumer, not documentation -- see the gate 3 header for why
+// it nonetheless belongs in this gate's corpus rather than in one of its own.
+const SCANNED_EXTENSIONS = new Set(['.md', '.mjs', '.cron', '.sql', '.sh'])
 
 const adjudications_file = path.join(
   repo_root,
@@ -203,26 +206,43 @@ const walk_files = (dir, acc = []) => {
   return acc
 }
 
+// A root may restrict which extensions it contributes. `--executable-root` uses
+// this to bring in shell scripts WITHOUT bringing in their sibling `.mjs` files,
+// and the reason is measured rather than stylistic: gate 1's `table.column`
+// derivation is built for PROSE, where a dotted pair is a schema claim. In
+// JavaScript it is ordinary property access, and the object name collides with a
+// table name often enough to drown the gate -- adding `cli/` unrestricted
+// produced 64 findings, 52 of them `.mjs` property reads like `config.degraded`
+// off a local variable, against 10 genuine stale pairs in shell comments. The
+// league repo already solves the JavaScript case a different way, in
+// `check-renamed-column-consumers` gate 1, which reads only QUOTED literals for
+// exactly this reason. Widening that derivation to user-base `.mjs` is real work
+// with its own adjudication pass; it is not this gate's corpus.
 const collect_corpus = (roots) => {
   const files = []
   const missing = []
-  for (const root of roots) {
+  for (const entry of roots) {
+    const { path: root, extensions } =
+      typeof entry === 'string' ? { path: entry, extensions: null } : entry
     const absolute = path.isAbsolute(root) ? root : path.join(repo_root, root)
     if (!fs.existsSync(absolute)) {
       missing.push(root)
       continue
     }
+    const permitted = (file) =>
+      !extensions || extensions.has(path.extname(file))
     // A root may name a single file (`CLAUDE.md`) as well as a directory.
     if (fs.statSync(absolute).isFile()) {
-      files.push({
-        file: absolute,
-        root,
-        absolute_root: path.dirname(absolute)
-      })
+      if (permitted(absolute))
+        files.push({
+          file: absolute,
+          root,
+          absolute_root: path.dirname(absolute)
+        })
       continue
     }
     for (const file of walk_files(absolute)) {
-      files.push({ file, root, absolute_root: absolute })
+      if (permitted(file)) files.push({ file, root, absolute_root: absolute })
     }
   }
   return { files, missing }
@@ -270,6 +290,7 @@ const FILE_EXTENSIONS = new Set([
   'env',
   'lock',
   'html',
+  'htm',
   'xml',
   'png',
   'svg'
@@ -311,12 +332,16 @@ const is_structurally_not_a_reference = (line, match) => {
   // (`teams.mjs:333`) and trailing markdown emphasis (`**config.production.js**`)
   // both leave the extension attached to punctuation, and both were reported as
   // findings on the first run of this gate.
-  const final_segment = token
+  // The last NON-EMPTY segment. A filename ending a sentence (`lives in
+  // config.json.`) keeps the trailing period inside the token, so a bare `pop()`
+  // returns the empty string, the extension test fails, and the filename is
+  // reported as a schema claim. That is how `config.json` and `draft.htm` were
+  // reported the first time `.sh` files entered the corpus.
+  const segments = token
     .split('.')
-    .pop()
-    .toLowerCase()
-    .replace(/[^a-z0-9].*$/, '')
-  return FILE_EXTENSIONS.has(final_segment)
+    .map((segment) => segment.toLowerCase().replace(/[^a-z0-9].*$/, ''))
+    .filter(Boolean)
+  return FILE_EXTENSIONS.has(segments[segments.length - 1])
 }
 
 // `CREATE INDEX ... ON <table> (<columns>)` is a documented claim about a real
@@ -656,6 +681,17 @@ const complete_dangling_with = (sql) => {
   let in_string = false
   let in_line_comment = false
   let body_start = -1
+  // Only the CTE LIST can end; once it has, a later paren returning to depth 0
+  // is part of the body and must not move `body_start`. Without this the scan
+  // reset `body_start` on EVERY depth-0 close, so a query whose body happens to
+  // end on `)` -- `WITH ... SELECT (SELECT COUNT(*) ...), (SELECT COUNT(*) ...)`
+  // -- looked like a bare CTE list with an empty tail and had
+  // `SELECT * FROM <last_cte>` appended to a statement that already had a body.
+  // The result was a syntax error, which lands in the UNCOVERED bucket, so the
+  // statement was silently never checked against the schema and the run still
+  // read green. Found 2026-08-07 on the user-base lineage-consistency query,
+  // which is exactly the shape; it applies to fenced blocks identically.
+  let in_cte_list = true
 
   for (let index = 0; index < sql.length; index++) {
     const character = sql[index]
@@ -681,10 +717,19 @@ const complete_dangling_with = (sql) => {
     }
     if (character === ')') {
       depth--
-      if (depth === 0) body_start = index + 1
+      // A comma after the close means another CTE follows; anything else ends
+      // the list and starts the body.
+      if (depth === 0 && in_cte_list) {
+        const rest = sql.slice(index + 1).replace(/^(?:\s|--[^\n]*\n)*/, '')
+        if (!rest.startsWith(',')) {
+          in_cte_list = false
+          body_start = index + 1
+        }
+      }
       continue
     }
     if (depth !== 0) continue
+    if (!in_cte_list) continue
     const opener =
       /^([a-z_][a-z0-9_]*)[ \t\n]+AS[ \t\n]*(?:(?:NOT[ \t\n]+)?MATERIALIZED[ \t\n]*)?\(/i.exec(
         sql.slice(index)
@@ -786,6 +831,167 @@ const collect_sql_blocks = (
   return { statements, uncovered, sql_fences, sql_like_non_sql_fences }
 }
 
+// ---------------------------------------------------------------------------
+// gate 3: executable SQL embedded in shell scripts
+// ---------------------------------------------------------------------------
+
+// WHY THIS IS IN THIS GATE AND NOT ITS OWN.
+//
+// `87066b585` fixed `cli/monitoring/check-league-lineage-consistency.sh` in
+// user-base, which had been exiting 1 nightly since the season_grain conform: it
+// queried `year` on `transactions` and `rosters_players` from a bash variable
+// shipped over ssh to psql. NO gate's corpus contained it. This gate already
+// reaches outside the checkout -- it is the only one that does, and its roots are
+// arguments precisely because the corpus is a parameter of the run -- but its two
+// derivations could not see this file. Gate 1 reads QUALIFIED `table.column`
+// tokens and the script writes unqualified references and two-letter aliases
+// (`rp.year`, where `rp` is bound in the FROM clause). Gate 2 reads fenced
+// ```sql blocks and a bash variable is not a fence.
+//
+// The oracle that DOES work is the one gate 2 already owns: EXPLAIN. It resolves
+// `rp.year` through the statement's own FROM clause and it resolves unqualified
+// references, both for free, which is exactly what neither regex derivation can
+// do. So gate 3 is a third EXTRACTION feeding the SAME oracle, adjudication file,
+// scratch database and coverage discipline -- not a second gate provisioning its
+// own database to answer the same question.
+//
+// The name `check-documentation-schema-drift` is now narrower than the corpus,
+// which is a real and deliberate mismatch: the file's durable identity is "schema
+// consumers that live outside this checkout", and renaming it mid-program would
+// churn the manifest, the adjudication path, CLAUDE.md and README for a sibling
+// session's muscle memory. Recorded here rather than silently lived with.
+//
+// THE CORPUS IS NOT CONTENT-GATED, and that is the design decision worth stating.
+// The obvious scoping -- "files under cli/ that mention a league table" -- makes
+// the DENOMINATOR move with the content, so a file silently leaves the corpus at
+// the exact moment its table reference is renamed away, which is the failure mode
+// this gate exists to catch. Instead the corpus is every `.sh` under the supplied
+// roots, mechanically; files carrying no SQL contribute nothing and are counted.
+// The coverage block prints the denominator so a derivation going blind shows up
+// as a number falling rather than as a green.
+//
+// TWO BLIND SPOTS, both currently benign and both worth knowing before trusting a
+// green. A shell script may target a DIFFERENT database -- `check-nano-*` query
+// the nano-community archive, not league -- and this gate would judge their SQL
+// against the league schema if it could parse it. Today it cannot: both assemble
+// their projection at runtime (`SELECT $(IFS=,; echo "${select_parts[*]}")`), so
+// they land in the UNCOVERED bucket rather than producing a false finding. The
+// safe direction, but it is luck rather than design, and a hand-written query
+// against a non-league database WOULD be reported. Second, a rendered identifier
+// (`FROM {{ table }}`) is unEXPLAINable by construction and is counted uncovered,
+// same as in gate 2.
+
+// A bash variable assignment whose body opens on a SQL statement keyword. The
+// body runs to the matching close quote, which is what makes it multi-line --
+// `read_query='WITH live_week AS (` ... `)'` is 20 lines in the fixed instance.
+// Single quotes are literal in bash; double quotes interpolate, handled below.
+const SHELL_ASSIGNMENT_RE =
+  /^[ \t]*(?:local[ \t]+|export[ \t]+|declare[ \t]+-[A-Za-z]+[ \t]+)?([A-Za-z_][A-Za-z_0-9]*)=(['"])([\s\S]*?)\2/gm
+
+// `psql ... -c "SELECT ..."`. The quote style is captured so the body ends at the
+// matching close rather than at the first quote of either kind.
+const SHELL_PSQL_INLINE_RE = /-c[ \t]+(['"])([\s\S]*?)\1/g
+
+// A heredoc body, `<<TAG` / `<<'TAG'` / `<<-TAG`, ending at a line holding only
+// the tag. There are none carrying SQL in the corpus today (15 `<<EOF`, 8
+// `<<'EOF'`, plus JS/PY/USAGE bodies) -- which is why the coverage block prints
+// the count found, so the first SQL heredoc someone writes is not silently
+// outside the derivation.
+const SHELL_HEREDOC_RE =
+  /<<-?[ \t]*(['"]?)([A-Za-z_][A-Za-z_0-9]*)\1[^\n]*\n([\s\S]*?)\n[ \t]*\2[ \t]*$/gm
+
+// Bash interpolation reaching into SQL. `${VAR}` is already a shared placeholder
+// pattern; a bare `$VAR` is not, and adding it to the shared list would change
+// how every fenced block is substituted. Normalised here instead, so the shared
+// pipeline stays untouched.
+const normalise_shell_interpolation = (sql) =>
+  sql.replace(/\$([A-Za-z_][A-Za-z_0-9]*)/g, '{{ $1 }}')
+
+const looks_like_shell_sql = (body) => EXPLAINABLE_RE.test(body.trim())
+
+const collect_shell_sql_blocks = (
+  corpus,
+  read_file = (file) => fs.readFileSync(file, 'utf8')
+) => {
+  const statements = []
+  const uncovered = []
+  const coverage = {
+    shell_files: 0,
+    assignments: 0,
+    psql_inline: 0,
+    heredocs_seen: 0,
+    heredocs_with_sql: 0
+  }
+
+  for (const entry of corpus) {
+    if (path.extname(entry.file) !== '.sh') continue
+    coverage.shell_files += 1
+    const source = read_file(entry.file)
+    const relative = display_path(entry)
+
+    const take = (body, index, shape) => {
+      const line = source.slice(0, index).split('\n').length
+      const split = split_statements(normalise_shell_interpolation(body))
+      if (!split) {
+        uncovered.push({
+          path: relative,
+          line,
+          reason: `${shape}: dollar-quoted body; cannot be EXPLAINed`
+        })
+        return
+      }
+      for (const original of split) {
+        const raw = strip_leading_comments(original)
+        if (!EXPLAINABLE_RE.test(raw)) {
+          uncovered.push({
+            path: relative,
+            line,
+            reason: `${shape}: not an EXPLAINable statement (${raw.trim().split(/\s+/)[0] || 'empty'})`
+          })
+          continue
+        }
+        if (has_identifier_placeholder(raw)) {
+          uncovered.push({
+            path: relative,
+            line,
+            reason: `${shape}: interpolation sits inside an identifier; no substitution can make this EXPLAINable`
+          })
+          continue
+        }
+        const { sql, substitutions } = substitute_placeholders(
+          complete_dangling_with(raw) || raw
+        )
+        statements.push({ path: relative, line, sql, raw, substitutions })
+      }
+    }
+
+    SHELL_ASSIGNMENT_RE.lastIndex = 0
+    let match
+    while ((match = SHELL_ASSIGNMENT_RE.exec(source))) {
+      if (!looks_like_shell_sql(match[3])) continue
+      coverage.assignments += 1
+      take(match[3], match.index, 'bash assignment')
+    }
+
+    SHELL_PSQL_INLINE_RE.lastIndex = 0
+    while ((match = SHELL_PSQL_INLINE_RE.exec(source))) {
+      if (!looks_like_shell_sql(match[2])) continue
+      coverage.psql_inline += 1
+      take(match[2], match.index, 'psql -c')
+    }
+
+    SHELL_HEREDOC_RE.lastIndex = 0
+    while ((match = SHELL_HEREDOC_RE.exec(source))) {
+      coverage.heredocs_seen += 1
+      if (!looks_like_shell_sql(match[3])) continue
+      coverage.heredocs_with_sql += 1
+      take(match[3], match.index, 'heredoc')
+    }
+  }
+
+  return { statements, uncovered, coverage }
+}
+
 // knex formats a query error as `${sql} - ${message}`, so on a multi-line
 // documented query the naive `message.split('\n')[0]` is the first line of the
 // SELECT and the actual Postgres error is nowhere in the finding. Read the driver
@@ -796,7 +1002,12 @@ const explain_error_detail = (error) => {
   return (tail.includes(' - ') ? tail.split(' - ').pop() : tail).trim()
 }
 
-const explain_statements = async ({ db, statements, adjudications }) => {
+const explain_statements = async ({
+  db,
+  statements,
+  adjudications,
+  gate = 2
+}) => {
   const findings = []
   const uncovered = []
   let explained = 0
@@ -816,7 +1027,7 @@ const explain_statements = async ({ db, statements, adjudications }) => {
       }
       explained++
       const site = {
-        gate: 2,
+        gate,
         kind: 'documented_sql_does_not_execute',
         path: statement.path,
         line: statement.line,
@@ -887,6 +1098,42 @@ const match_adjudication = (adjudications, site) => {
 // the one direction a control must never fail, and it fired the moment a
 // different corpus statement became the first EXPLAINable one. Skips a match
 // preceded on its line by `--`, or sitting inside a single-quoted string.
+// `FROM` is not always a relation keyword. `EXTRACT(YEAR FROM CURRENT_DATE)`,
+// `SUBSTRING(x FROM 2)` and `TRIM(BOTH ' ' FROM x)` all use it as ARGUMENT
+// SEPARATOR, and rewriting one of those produces a SYNTAX error rather than the
+// 42P01 the control asserts -- so the control reports STAYED GREEN over a gate
+// that is working. That is the mirror image of the comment-and-string case this
+// helper already guards, failing closed instead of open, and it blocked the run
+// on `check-league-cross-source-counters.sh` whose first `FROM` is inside an
+// EXTRACT. Detected by walking back to the nearest unclosed `(` and reading the
+// identifier that opened it.
+const FUNCTIONS_TAKING_FROM_AS_A_SEPARATOR = new Set([
+  'extract',
+  'substring',
+  'trim',
+  'overlay',
+  'position'
+])
+
+const sits_inside_a_from_taking_function = (sql, index) => {
+  let depth = 0
+  for (let cursor = index - 1; cursor >= 0; cursor--) {
+    const character = sql[cursor]
+    if (character === ')') depth++
+    else if (character === '(') {
+      if (depth === 0) {
+        const opener = /([a-z_][a-z0-9_]*)\s*$/i.exec(sql.slice(0, cursor))
+        return Boolean(
+          opener &&
+            FUNCTIONS_TAKING_FROM_AS_A_SEPARATOR.has(opener[1].toLowerCase())
+        )
+      }
+      depth--
+    }
+  }
+  return false
+}
+
 const mutate_first_relation_reference = (sql) => {
   const pattern = /\b(FROM|JOIN)\s+("?)([a-z0-9_]+)\2/gi
   let match
@@ -895,6 +1142,7 @@ const mutate_first_relation_reference = (sql) => {
     const preceding = sql.slice(line_start, match.index)
     if (preceding.includes('--')) continue
     if ((preceding.match(/'/g) || []).length % 2 === 1) continue
+    if (sits_inside_a_from_taking_function(sql, match.index)) continue
     return (
       sql.slice(0, match.index) +
       `${match[1]} __negative_control_absent__` +
@@ -909,7 +1157,8 @@ const run_negative_control = async ({
   tables,
   views,
   db,
-  statements
+  statements,
+  shell_statements = []
 }) => {
   const cases = []
 
@@ -1170,6 +1419,76 @@ const run_negative_control = async ({
     ])
   }
 
+  // 7. gate 3: the shell extractor still pulls SQL out of a bash assignment, and
+  //    still declines a bash assignment that is not SQL. Both directions in one
+  //    case, on a synthetic file, because the over-eager direction is the one
+  //    that fails toward success -- an extractor that swallowed every quoted
+  //    string would hand EXPLAIN arbitrary prose and bury the real findings.
+  {
+    const synthetic_path = path.join(repo_root, '__negative_control__.sh')
+    // The declined lines must NOT open on a SQL keyword: the extractor keys on
+    // the opening statement keyword, which is the documented rule, so a "prose"
+    // example beginning with SELECT is prose only to a human. Writing one is how
+    // this control first reported STAYED GREEN against a working extractor.
+    const source = [
+      "read_query='SELECT pid FROM player'",
+      "MESSAGE='counted the rows and reported them'",
+      'GREETING="hello world"'
+    ].join('\n')
+    const extracted = collect_shell_sql_blocks(
+      [
+        {
+          file: synthetic_path,
+          root: '.',
+          absolute_root: repo_root
+        }
+      ],
+      () => source
+    )
+    const took_the_sql = extracted.statements.some((statement) =>
+      /FROM player/i.test(statement.sql)
+    )
+    const declined_the_prose = !extracted.statements.some((statement) =>
+      /proceed|hello/i.test(statement.sql)
+    )
+    cases.push([
+      'gate 3 extracts SQL from a bash assignment and declines one that is not SQL',
+      took_the_sql && declined_the_prose
+    ])
+  }
+
+  // 8. gate 3: an EXPLAIN that must fail, on a REAL extracted shell statement.
+  //    This is the case that detects the corpus going away: if no `.sh` root is
+  //    supplied, or the extractor stops matching, there is nothing to mutate and
+  //    it reports STAYED GREEN rather than passing over an unread tree. That is
+  //    the whole reason gate 3 has no minimum-sites threshold either.
+  if (db) {
+    let reported = false
+    let victim = null
+    for (const statement of shell_statements) {
+      try {
+        await db.raw(`EXPLAIN ${statement.sql}`)
+      } catch {
+        continue
+      }
+      victim = statement
+      const mutated = mutate_first_relation_reference(statement.sql)
+      if (!mutated) continue
+      try {
+        await db.raw(`EXPLAIN ${mutated}`)
+      } catch (error) {
+        reported = error.code === '42P01'
+      }
+      break
+    }
+    cases.push([
+      victim
+        ? `gate 3 reports a shell statement pointed at a table that does not exist (${victim.path}:${victim.line})`
+        : 'gate 3 reports a shell statement pointed at a table that does not exist -- NO SHELL SQL IN CORPUS',
+      reported
+    ])
+  }
+
   console.log('')
   console.log('NEGATIVE CONTROL')
   let ok = true
@@ -1186,11 +1505,15 @@ const run_negative_control = async ({
 
 const parse_argv = () => {
   const argv = process.argv.slice(2)
-  const options = { gates: [1, 2], roots: [], keep_database: false }
+  const options = { gates: [1, 2, 3], roots: [], keep_database: false }
   for (let index = 0; index < argv.length; index++) {
     const flag = argv[index]
     if (flag === '--gate') options.gates = [Number(argv[++index])]
     else if (flag === '--root') options.roots.push(argv[++index])
+    // A root contributing EXECUTABLE SQL only. See collect_corpus for the
+    // measurement behind the restriction.
+    else if (flag === '--executable-root')
+      options.roots.push({ path: argv[++index], extensions: new Set(['.sh']) })
     else if (flag === '--keep-database') options.keep_database = true
     else {
       console.error(`unknown argument: ${flag}`)
@@ -1246,10 +1569,15 @@ const main = async () => {
   console.log('DOCUMENTATION SCHEMA DRIFT GATE')
   console.log('')
   console.log('CORPUS')
-  for (const root of options.roots) {
-    const count = corpus.filter((entry) => entry.root === root).length
+  for (const entry of options.roots) {
+    const root = typeof entry === 'string' ? entry : entry.path
+    const restriction =
+      typeof entry === 'string'
+        ? ''
+        : `  (${[...entry.extensions].join(', ')} only — executable SQL)`
+    const count = corpus.filter((file) => file.root === root).length
     console.log(
-      `  ${missing.includes(root) ? 'MISSING  ' : String(count).padStart(4)} ${missing.includes(root) ? '' : 'files  '}${root}`
+      `  ${missing.includes(root) ? 'MISSING  ' : String(count).padStart(4)} ${missing.includes(root) ? '' : 'files  '}${root}${restriction}`
     )
   }
   if (missing.length) {
@@ -1268,17 +1596,35 @@ const main = async () => {
 
   let provisioned = null
   let gate_2 = { findings: [], uncovered: [], explained: 0 }
+  let gate_3 = { findings: [], uncovered: [], explained: 0 }
   const blocks = collect_sql_blocks(corpus)
+  const shell_blocks = collect_shell_sql_blocks(corpus)
 
-  if (options.gates.includes(2)) {
+  // Gates 2 and 3 share one scratch database: same oracle, same schema, and
+  // provisioning it twice would double the only slow step in the run.
+  const needs_database = options.gates.includes(2) || options.gates.includes(3)
+  if (needs_database) {
     provisioned = await provision_database()
     if (!provisioned) process.exit(2)
+  }
+
+  if (options.gates.includes(2)) {
     gate_2 = await explain_statements({
       db: provisioned.db,
       statements: blocks.statements,
       adjudications
     })
     findings.push(...gate_2.findings)
+  }
+
+  if (options.gates.includes(3)) {
+    gate_3 = await explain_statements({
+      db: provisioned.db,
+      statements: shell_blocks.statements,
+      adjudications,
+      gate: 3
+    })
+    findings.push(...gate_3.findings)
   }
 
   console.log('')
@@ -1308,9 +1654,25 @@ const main = async () => {
   console.log(
     `  gate 2: statements EXPLAINed            ${options.gates.includes(2) ? gate_2.explained : 'not run'} of ${blocks.statements.length} extracted`
   )
-  const uncovered = [...blocks.uncovered, ...gate_2.uncovered]
   console.log(
-    `  gate 2: NOT checked                     ${uncovered.length} — listed below`
+    `  gate 3: shell scripts read              ${shell_blocks.coverage.shell_files}`
+  )
+  console.log(
+    `  gate 3: SQL-bearing bash assignments    ${shell_blocks.coverage.assignments}` +
+      `, psql -c ${shell_blocks.coverage.psql_inline}` +
+      `, heredocs ${shell_blocks.coverage.heredocs_with_sql} of ${shell_blocks.coverage.heredocs_seen} seen`
+  )
+  console.log(
+    `  gate 3: statements EXPLAINed            ${options.gates.includes(3) ? gate_3.explained : 'not run'} of ${shell_blocks.statements.length} extracted`
+  )
+  const uncovered = [
+    ...blocks.uncovered,
+    ...gate_2.uncovered,
+    ...shell_blocks.uncovered,
+    ...gate_3.uncovered
+  ]
+  console.log(
+    `  gates 2+3: NOT checked                  ${uncovered.length} — listed below`
   )
 
   if (uncovered.length) {
@@ -1371,7 +1733,8 @@ const main = async () => {
     tables,
     views,
     db: provisioned ? provisioned.db : null,
-    statements: blocks.statements
+    statements: blocks.statements,
+    shell_statements: shell_blocks.statements
   })
 
   if (provisioned) {

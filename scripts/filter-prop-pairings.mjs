@@ -606,7 +606,7 @@ const filter_prop_pairings = async ({
 
   // Load team seasonlogs once before batch processing
   const nfl_team_seasonlogs = await db('nfl_team_seasonlogs').where({
-    year: current_season.year
+    season_year: current_season.year
   })
   log(`loaded ${nfl_team_seasonlogs.length} team seasonlogs`)
 
