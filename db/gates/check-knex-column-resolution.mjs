@@ -882,7 +882,7 @@ const apply_adjudications = (findings, adjudications) => {
 // Five controls, run on EVERY invocation. Two of them assert the gate stays
 // SILENT on a mutation, because half of what this gate does is decide a token is
 // NOT a column reference -- and an over-eager filter fails in the direction that
-// looks like success. `check-documentation-schema-drift` shipped exactly that:
+// looks like success. `check-league-schema-consumers` shipped exactly that:
 // its control mutated a `FROM` inside a COMMENT, the query came back identical,
 // EXPLAIN succeeded, and the control reported STAYED GREEN over a working gate.
 //

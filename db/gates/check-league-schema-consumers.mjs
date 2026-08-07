@@ -1,6 +1,47 @@
-// Documentation-vs-schema drift gate.
+// League-schema consumer gate.
 //
-// WHY THIS EXISTS. Documentation is a schema consumer that no other gate reads.
+// WHAT THIS FILE IS. Every statement in the corpus that is bound to the LEAGUE
+// database, from any transport, inside or outside this checkout, checked against
+// `db/schema.postgres.sql`. Three extractions -- prose pairs, fenced SQL, and
+// executable SQL out of shell scripts and `/api/db/league/query` calls -- feeding
+// one oracle, one adjudication file and one scratch database.
+//
+// A STATEMENT IS BOUND TO THE DATABASE ITS TRANSPORT NAMES, NOT TO THE FILE THAT
+// HOLDS IT. This is the load-bearing rule and it is the reason the gate can reach
+// executable surfaces at all. Both transports state their database in text this
+// gate already reads: a shell script names it in the `psql -d <target>` that runs
+// the SQL, and an API caller names it in the `/api/db/<database>/query` path. So
+// the corpus can hold `check-nano-archive-fresh.sh` beside
+// `check-league-lineage-consistency.sh` and judge only the second against the
+// league schema, without either file's NAME entering the derivation.
+//
+// **THIS IS NOT A NAME FILTER, AND THE DISTINCTION IS THE WHOLE POINT.** A
+// name/stoplist filter is how a real defect got hidden: `check-renamed-column-
+// consumers` carried a list of common column names and returned 129 findings with
+// not one of them `total`, over a rename that wiped a year of projection values.
+// The derivation here never reads the filename. That `check-league-*.sh` and
+// `league_production` happen to agree is a coincidence the resolver cannot see,
+// and it is exactly what lets the same rule separate `check-nano-archive-fresh.sh`
+// correctly. What it reads is the transport's own statement of its target.
+//
+// The two ways that resolution can decline are PRINTED BUCKETS, never a silent
+// pass and never a silent skip:
+//
+//   DATABASE-SCOPED  the transport names a database that is not league, so this
+//                    gate's schema is the wrong oracle for it. Counted, listed,
+//                    and not EXPLAINed. `check-nano-*` and the two finance
+//                    scripts live here.
+//   UNRESOLVED       the transport names a target this resolver cannot reduce to
+//                    a literal (`psql -d $database`, where the target is a loop
+//                    variable). Counted, listed, and not EXPLAINed.
+//
+// Both exist because of entry 028's rule: a gate that cannot classify a statement
+// and a gate that checked it and found nothing wrong are indistinguishable in a
+// summary line, and only one of them is coverage. Read those two buckets as
+// adversarially as the findings.
+//
+// WHY THE DOCUMENTATION HALF EXISTS. Documentation is a schema consumer that no
+// other gate reads.
 // The mocha suite, the data-view goldens, `check-data-view-sql-validity`, the
 // conformance ratchet and `check-api-response-shapes` all pass straight over
 // prose, so a rename cluster that conforms a column and forgets its docs leaves
@@ -34,6 +75,14 @@
 //           `FROM projections` (the table is `projections_history`) and a join on
 //           a `prop_market_selections_index.esbid` that table has never had.
 //
+//   GATE 3  executable SQL -- SQL lifted out of a bash assignment, a heredoc, an
+//           inline `psql -c`, or the `sql` argument of an `/api/db/<database>/
+//           query` call, bound to its transport's database and EXPLAINed against
+//           the same throwaway database as gate 2. Gate 1 cannot see these (they
+//           write unqualified references and short aliases like `rp.year`) and
+//           gate 2 cannot either (a bash variable is not a fence). EXPLAIN is the
+//           only oracle that resolves both shapes, and gate 2 already owns it.
+//
 // ADJUDICATIONS, NOT A NAME DENYLIST. Dropped league column names include
 // ordinary English words, so a bare-name filter is tempting and is exactly the
 // mistake that hid a real defect: `check-renamed-column-consumers` carried a
@@ -41,7 +90,7 @@
 // precisely the names renames concentrate on, and it returned 129 findings with
 // not one of them `total` over a defect that wiped a year of projection values.
 // So there is no name filter here. Genuine non-defects are adjudicated per SITE
-// in `documentation-schema-drift-adjudications.json`, each with a reason, and an
+// in `league-schema-consumer-adjudications.json`, each with a reason, and an
 // adjudication that no longer suppresses anything is itself a FINDING -- which is
 // what keeps the file from silently becoming a denylist as the corpus moves.
 //
@@ -83,12 +132,12 @@
 //
 // Usage:
 //
-//   yarn test:db:up                            # gate 2 only
-//   node db/gates/check-documentation-schema-drift.mjs \
+//   yarn test:db:up                            # gates 2 and 3 only
+//   node db/gates/check-league-schema-consumers.mjs \
 //     --root ../../../guideline/nfl --root ../../../text/league \
-//     --root ../../../workflow/nfl
+//     --root ../../../workflow/nfl --executable-root ../../../cli
 //
-//   node db/gates/check-documentation-schema-drift.mjs --gate 1   # no database
+//   node db/gates/check-league-schema-consumers.mjs --gate 1      # no database
 //
 // League roots (`docs/`, `api/swagger/`, `server/crontab-*`) are checked by
 // default. The user-base trees live outside this checkout, so they are passed as
@@ -134,14 +183,15 @@ const DEFAULT_ROOTS = [
   'server/crontab-worker-1'
 ]
 
-// `.sh` is here for GATE 3. A shell script holding SQL in a bash variable is an
-// EXECUTABLE schema consumer, not documentation -- see the gate 3 header for why
-// it nonetheless belongs in this gate's corpus rather than in one of its own.
+// `.sh` and `.mjs` are here for GATE 3. A shell script holding SQL in a bash
+// variable, and a script POSTing SQL to `/api/db/<database>/query`, are both
+// EXECUTABLE schema consumers rather than documentation -- see the gate 3 header
+// for why they belong in this gate rather than in one of their own.
 const SCANNED_EXTENSIONS = new Set(['.md', '.mjs', '.cron', '.sql', '.sh'])
 
 const adjudications_file = path.join(
   repo_root,
-  'db/gates/documentation-schema-drift-adjudications.json'
+  'db/gates/league-schema-consumer-adjudications.json'
 )
 
 // ---------------------------------------------------------------------------
@@ -206,24 +256,36 @@ const walk_files = (dir, acc = []) => {
   return acc
 }
 
-// A root may restrict which extensions it contributes. `--executable-root` uses
-// this to bring in shell scripts WITHOUT bringing in their sibling `.mjs` files,
-// and the reason is measured rather than stylistic: gate 1's `table.column`
-// derivation is built for PROSE, where a dotted pair is a schema claim. In
-// JavaScript it is ordinary property access, and the object name collides with a
-// table name often enough to drown the gate -- adding `cli/` unrestricted
-// produced 64 findings, 52 of them `.mjs` property reads like `config.degraded`
-// off a local variable, against 10 genuine stale pairs in shell comments. The
-// league repo already solves the JavaScript case a different way, in
-// `check-renamed-column-consumers` gate 1, which reads only QUOTED literals for
-// exactly this reason. Widening that derivation to user-base `.mjs` is real work
-// with its own adjudication pass; it is not this gate's corpus.
+// A root declares which extensions it contributes AND which of those gate 1 may
+// read as prose. The split is measured rather than stylistic, and it is what lets
+// `--executable-root` bring `.mjs` into the corpus for gate 3 without handing it
+// to gate 1.
+//
+// Gate 1's `table.column` derivation is built for PROSE, where a dotted pair is a
+// schema claim. In JavaScript it is ordinary property access, and the object name
+// collides with a table name often enough to drown the gate: adding `cli/`
+// unrestricted produced 64 gate-1 findings, 52 of them `.mjs` property reads like
+// `config.degraded` off a local variable, against 10 genuine stale pairs in shell
+// COMMENTS. So `.sh` stays prose-eligible (its comments are prose and the ten
+// findings were real) and `.mjs` does not.
+//
+// The measurement that made `.mjs` worth admitting for gate 3 at all: exactly ONE
+// user-base `.mjs` queries league, `cli/content/refresh-player-snapshot.mjs`, via
+// the only `/api/db/league/query` call site in the repository against six for
+// `content-feed`. The surface is HAND-WRITTEN SQL, which gate 3's extractor and
+// EXPLAIN already handle -- so it costs one extractor, not the second quoted-
+// literal derivation and adjudication pass that was previously prescribed for it.
 const collect_corpus = (roots) => {
   const files = []
   const missing = []
   for (const entry of roots) {
-    const { path: root, extensions } =
-      typeof entry === 'string' ? { path: entry, extensions: null } : entry
+    const {
+      path: root,
+      extensions,
+      prose_extensions
+    } = typeof entry === 'string'
+      ? { path: entry, extensions: null, prose_extensions: null }
+      : entry
     const absolute = path.isAbsolute(root) ? root : path.join(repo_root, root)
     if (!fs.existsSync(absolute)) {
       missing.push(root)
@@ -231,18 +293,27 @@ const collect_corpus = (roots) => {
     }
     const permitted = (file) =>
       !extensions || extensions.has(path.extname(file))
+    const prose = (file) =>
+      !prose_extensions || prose_extensions.has(path.extname(file))
     // A root may name a single file (`CLAUDE.md`) as well as a directory.
     if (fs.statSync(absolute).isFile()) {
       if (permitted(absolute))
         files.push({
           file: absolute,
           root,
-          absolute_root: path.dirname(absolute)
+          absolute_root: path.dirname(absolute),
+          prose: prose(absolute)
         })
       continue
     }
     for (const file of walk_files(absolute)) {
-      if (permitted(file)) files.push({ file, root, absolute_root: absolute })
+      if (permitted(file))
+        files.push({
+          file,
+          root,
+          absolute_root: absolute,
+          prose: prose(file)
+        })
     }
   }
   return { files, missing }
@@ -394,9 +465,17 @@ const run_gate_1 = ({
   let pairs_skipped_view = 0
   let indexed_columns_checked = 0
   let indexed_columns_skipped_unknown_table = 0
+  let files_skipped_not_prose = 0
   const files_with_pairs = new Set()
 
   for (const entry of corpus) {
+    // A file its root declared non-prose (user-base `.mjs`) is in the corpus for
+    // gate 3 only. Counted rather than quietly dropped, so the exclusion stays
+    // visible in the coverage block instead of reading as an empty derivation.
+    if (entry.prose === false) {
+      files_skipped_not_prose++
+      continue
+    }
     const source = read_file(entry.file)
     const lines = source.split('\n')
     for (let index = 0; index < lines.length; index++) {
@@ -474,6 +553,7 @@ const run_gate_1 = ({
       pairs_skipped_view,
       indexed_columns_checked,
       indexed_columns_skipped_unknown_table,
+      files_skipped_not_prose,
       files_with_pairs: files_with_pairs.size
     }
   }
@@ -832,7 +912,7 @@ const collect_sql_blocks = (
 }
 
 // ---------------------------------------------------------------------------
-// gate 3: executable SQL embedded in shell scripts
+// gate 3: executable SQL, bound to the database its transport names
 // ---------------------------------------------------------------------------
 
 // WHY THIS IS IN THIS GATE AND NOT ITS OWN.
@@ -855,12 +935,6 @@ const collect_sql_blocks = (
 // scratch database and coverage discipline -- not a second gate provisioning its
 // own database to answer the same question.
 //
-// The name `check-documentation-schema-drift` is now narrower than the corpus,
-// which is a real and deliberate mismatch: the file's durable identity is "schema
-// consumers that live outside this checkout", and renaming it mid-program would
-// churn the manifest, the adjudication path, CLAUDE.md and README for a sibling
-// session's muscle memory. Recorded here rather than silently lived with.
-//
 // THE CORPUS IS NOT CONTENT-GATED, and that is the design decision worth stating.
 // The obvious scoping -- "files under cli/ that mention a league table" -- makes
 // the DENOMINATOR move with the content, so a file silently leaves the corpus at
@@ -870,16 +944,46 @@ const collect_sql_blocks = (
 // The coverage block prints the denominator so a derivation going blind shows up
 // as a number falling rather than as a green.
 //
-// TWO BLIND SPOTS, both currently benign and both worth knowing before trusting a
-// green. A shell script may target a DIFFERENT database -- `check-nano-*` query
-// the nano-community archive, not league -- and this gate would judge their SQL
-// against the league schema if it could parse it. Today it cannot: both assemble
-// their projection at runtime (`SELECT $(IFS=,; echo "${select_parts[*]}")`), so
-// they land in the UNCOVERED bucket rather than producing a false finding. The
-// safe direction, but it is luck rather than design, and a hand-written query
-// against a non-league database WOULD be reported. Second, a rendered identifier
-// (`FROM {{ table }}`) is unEXPLAINable by construction and is counted uncovered,
-// same as in gate 2.
+// THE DATABASE BINDING, which is what makes a mixed corpus safe. Until 2026-08-07
+// this gate judged every statement it extracted against the LEAGUE schema no
+// matter which database that statement runs against. `check-nano-*` query the
+// nano-community archive and landed in the UNCOVERED bucket only because they
+// assemble their projection at runtime (`SELECT $(IFS=,; echo "${select_parts[*]}")`)
+// -- luck rather than design, and a hand-written query against a non-league
+// database WOULD have been reported as league schema drift. There are three such
+// databases in the corpus today, not one: `nano_community_archive`,
+// `nano_production`, and `finance_production` in the two `cli/finance` scripts.
+//
+// So a statement is bound to the database its TRANSPORT names, and every
+// transport in this corpus states it in text already being read:
+//
+//   .sh    the `psql -d <target>` that executes the SQL. Resolved through simple
+//          `VAR="literal"` and `VAR="${X:-literal}"` assignments -- which is
+//          enough for every SQL-carrying shell script in the corpus.
+//   .mjs   the `/api/db/<database>/query` endpoint, which names its database in
+//          the path, per call site rather than per file.
+//
+// Nothing here reads a FILENAME. That `check-league-*.sh` and `league_production`
+// agree is a coincidence this resolver cannot see, which is precisely what lets
+// the same rule separate `check-nano-archive-fresh.sh` correctly and what keeps
+// this from being the name filter CLAUDE.md forbids.
+//
+// A target that resolves to a non-league database goes to DATABASE-SCOPED. A
+// target that cannot be reduced to a literal goes to UNRESOLVED --
+// `check-index-corruption.sh` is the standing example, whose `-d $database` is a
+// loop variable. Both are PRINTED, because a statement this gate silently skipped
+// and a statement it checked and cleared read identically in a summary line.
+//
+// Remaining blind spot, unchanged: a rendered identifier (`FROM {{ table }}`) is
+// unEXPLAINable by construction and is counted uncovered, same as in gate 2.
+
+// The database whose schema `db/schema.postgres.sql` describes. This is the one
+// place a database NAME appears, and it is an oracle declaration rather than a
+// filter: it states which database this gate's schema file is a copy of. Anything
+// else is reported as DATABASE-SCOPED rather than dropped, so a league database
+// that is one day spelled differently surfaces as a visible bucket entry instead
+// of a silent skip.
+const LEAGUE_DATABASE_NAMES = new Set(['league_production'])
 
 // A bash variable assignment whose body opens on a SQL statement keyword. The
 // body runs to the matching close quote, which is what makes it multi-line --
@@ -909,18 +1013,164 @@ const normalise_shell_interpolation = (sql) =>
 
 const looks_like_shell_sql = (body) => EXPLAINABLE_RE.test(body.trim())
 
+// A bash assignment whose right-hand side reduces to a bare literal. Two forms
+// carry every database target in the corpus: `DB_NAME="league_production"` and
+// `ARCHIVE_DB="${ARCHIVE_DB:-nano_community_archive}"`, the second being the
+// override-with-a-default idiom the monitoring scripts use. Anything else -- a
+// command substitution, a concatenation, an array element -- is deliberately NOT
+// reduced, because a resolver that guesses produces a confident binding to the
+// wrong schema, and UNRESOLVED is a printed bucket while a wrong binding is not.
+const SHELL_LITERAL_ASSIGNMENT_RE =
+  /^[ \t]*(?:local[ \t]+|export[ \t]+|declare[ \t]+-[A-Za-z]+[ \t]+)?([A-Za-z_][A-Za-z_0-9]*)=([^\n]*)$/gm
+
+const reduce_shell_rhs = (raw) => {
+  let value = raw.trim()
+  // Only a wholly-quoted RHS is reduced; a quote in the middle means the value is
+  // assembled from parts this resolver does not model.
+  if (
+    (value.startsWith('"') && value.endsWith('"') && value.length > 1) ||
+    (value.startsWith("'") && value.endsWith("'") && value.length > 1)
+  ) {
+    value = value.slice(1, -1)
+  }
+  const defaulted =
+    /^\$\{[A-Za-z_][A-Za-z_0-9]*:-([A-Za-z_][A-Za-z_0-9]*)\}$/.exec(value)
+  if (defaulted) return defaulted[1]
+  if (/^[A-Za-z_][A-Za-z_0-9]*$/.test(value)) return value
+  return null
+}
+
+const collect_shell_variable_literals = (source) => {
+  const literals = new Map()
+  SHELL_LITERAL_ASSIGNMENT_RE.lastIndex = 0
+  let match
+  while ((match = SHELL_LITERAL_ASSIGNMENT_RE.exec(source))) {
+    const value = reduce_shell_rhs(match[2])
+    // Last assignment wins, which is what bash does.
+    if (value) literals.set(match[1], value)
+    else literals.delete(match[1])
+  }
+  return literals
+}
+
+// Every `-d <target>` on a line that invokes psql, plus the `dbname=` form of a
+// connection string. Read per line because that is how every invocation in the
+// corpus is written, and because a line-scoped match cannot pick up a `-d` that
+// belongs to some other command further down the file.
+const PSQL_DASH_D_RE =
+  /[ \t]-d[ \t]+("?)(\$\{?[A-Za-z_][A-Za-z_0-9]*\}?|[A-Za-z_][A-Za-z_0-9]*)\1/g
+const PSQL_DBNAME_RE =
+  /\bdbname=(\$\{?[A-Za-z_][A-Za-z_0-9]*\}?|[A-Za-z_][A-Za-z_0-9]*)/g
+
+const resolve_shell_database_target = (source) => {
+  const literals = collect_shell_variable_literals(source)
+  const resolved = new Set()
+  const unresolvable = []
+
+  const consider = (token) => {
+    const variable = /^\$\{?([A-Za-z_][A-Za-z_0-9]*)\}?$/.exec(token)
+    if (!variable) {
+      resolved.add(token)
+      return
+    }
+    const literal = literals.get(variable[1])
+    if (literal) resolved.add(literal)
+    else unresolvable.push(token)
+  }
+
+  for (const line of source.split('\n')) {
+    if (!/\bpsql\b/.test(line)) continue
+    for (const pattern of [PSQL_DASH_D_RE, PSQL_DBNAME_RE]) {
+      pattern.lastIndex = 0
+      let match
+      while ((match = pattern.exec(line))) consider(match[match.length - 1])
+    }
+  }
+
+  if (unresolvable.length) {
+    return {
+      database: null,
+      reason: `psql target ${unresolvable[0]} does not reduce to a literal`
+    }
+  }
+  if (!resolved.size) {
+    return {
+      database: null,
+      reason: 'no psql -d target names a database in this script'
+    }
+  }
+  if (resolved.size > 1) {
+    return {
+      database: null,
+      reason: `script names ${resolved.size} databases (${[...resolved].sort().join(', ')}); a per-statement binding is not derivable`
+    }
+  }
+  return { database: [...resolved][0], reason: null }
+}
+
+// Shared by both gate-3 extractors. Splits a body into statements, files the ones
+// that cannot be put into EXPLAINable shape as uncovered, and pushes the rest.
+const push_extracted_statements = ({
+  body,
+  line,
+  relative,
+  shape,
+  database,
+  statements,
+  uncovered,
+  normalise = (value) => value
+}) => {
+  const split = split_statements(normalise(body))
+  if (!split) {
+    uncovered.push({
+      path: relative,
+      line,
+      reason: `${shape}: dollar-quoted body; cannot be EXPLAINed`
+    })
+    return
+  }
+  for (const original of split) {
+    const raw = strip_leading_comments(original)
+    if (!EXPLAINABLE_RE.test(raw)) {
+      uncovered.push({
+        path: relative,
+        line,
+        reason: `${shape}: not an EXPLAINable statement (${raw.trim().split(/\s+/)[0] || 'empty'})`
+      })
+      continue
+    }
+    if (has_identifier_placeholder(raw)) {
+      uncovered.push({
+        path: relative,
+        line,
+        reason: `${shape}: interpolation sits inside an identifier; no substitution can make this EXPLAINable`
+      })
+      continue
+    }
+    const { sql, substitutions } = substitute_placeholders(
+      complete_dangling_with(raw) || raw
+    )
+    statements.push({ path: relative, line, sql, raw, substitutions, database })
+  }
+}
+
 const collect_shell_sql_blocks = (
   corpus,
   read_file = (file) => fs.readFileSync(file, 'utf8')
 ) => {
   const statements = []
   const uncovered = []
+  const database_scoped = []
+  const unresolved = []
   const coverage = {
     shell_files: 0,
     assignments: 0,
     psql_inline: 0,
     heredocs_seen: 0,
-    heredocs_with_sql: 0
+    heredocs_with_sql: 0,
+    files_bound_to_league: 0,
+    files_database_scoped: 0,
+    files_unresolved: 0
   }
 
   for (const entry of corpus) {
@@ -929,41 +1179,22 @@ const collect_shell_sql_blocks = (
     const source = read_file(entry.file)
     const relative = display_path(entry)
 
-    const take = (body, index, shape) => {
-      const line = source.slice(0, index).split('\n').length
-      const split = split_statements(normalise_shell_interpolation(body))
-      if (!split) {
-        uncovered.push({
-          path: relative,
-          line,
-          reason: `${shape}: dollar-quoted body; cannot be EXPLAINed`
-        })
-        return
-      }
-      for (const original of split) {
-        const raw = strip_leading_comments(original)
-        if (!EXPLAINABLE_RE.test(raw)) {
-          uncovered.push({
-            path: relative,
-            line,
-            reason: `${shape}: not an EXPLAINable statement (${raw.trim().split(/\s+/)[0] || 'empty'})`
-          })
-          continue
-        }
-        if (has_identifier_placeholder(raw)) {
-          uncovered.push({
-            path: relative,
-            line,
-            reason: `${shape}: interpolation sits inside an identifier; no substitution can make this EXPLAINable`
-          })
-          continue
-        }
-        const { sql, substitutions } = substitute_placeholders(
-          complete_dangling_with(raw) || raw
-        )
-        statements.push({ path: relative, line, sql, raw, substitutions })
-      }
-    }
+    // Extraction runs FIRST and binding second, so a script carrying no SQL never
+    // reaches the resolver — its target is irrelevant and reporting it would fill
+    // both buckets with files that have nothing to check.
+    const extracted = []
+    const extracted_uncovered = []
+    const take = (body, index, shape) =>
+      push_extracted_statements({
+        body,
+        line: source.slice(0, index).split('\n').length,
+        relative,
+        shape,
+        database: null,
+        statements: extracted,
+        uncovered: extracted_uncovered,
+        normalise: normalise_shell_interpolation
+      })
 
     SHELL_ASSIGNMENT_RE.lastIndex = 0
     let match
@@ -987,9 +1218,187 @@ const collect_shell_sql_blocks = (
       coverage.heredocs_with_sql += 1
       take(match[3], match.index, 'heredoc')
     }
+
+    if (!extracted.length && !extracted_uncovered.length) continue
+
+    const { database, reason } = resolve_shell_database_target(source)
+    const sites = [...extracted, ...extracted_uncovered]
+    if (!database) {
+      coverage.files_unresolved += 1
+      for (const site of sites)
+        unresolved.push({ path: site.path, line: site.line, reason })
+      continue
+    }
+    if (!LEAGUE_DATABASE_NAMES.has(database)) {
+      coverage.files_database_scoped += 1
+      for (const site of sites)
+        database_scoped.push({ path: site.path, line: site.line, database })
+      continue
+    }
+    coverage.files_bound_to_league += 1
+    for (const site of extracted) statements.push({ ...site, database })
+    uncovered.push(...extracted_uncovered)
   }
 
-  return { statements, uncovered, coverage }
+  return { statements, uncovered, database_scoped, unresolved, coverage }
+}
+
+// ---------------------------------------------------------------------------
+// gate 3, second transport: SQL POSTed to `/api/db/<database>/query`
+// ---------------------------------------------------------------------------
+
+// The endpoint names its database in the PATH, so the binding is per call site
+// rather than per file — one script may legitimately query two databases, and
+// this transport says which on every call.
+const API_QUERY_ENDPOINT_RE = /['"`]\/api\/db\/([a-z0-9_-]+)\/query['"`]/g
+
+// The endpoint's path segment is the base INSTANCE key (`config.databases.
+// instances.<key>` in user-base), not the Postgres database name -- the league
+// instance is reached as `/api/db/league/query` and resolves to
+// `league_production`. So this transport needs its own spelling of "league",
+// declared here beside the endpoint it belongs to rather than folded into
+// LEAGUE_DATABASE_NAMES, where it would read as a second name for the same
+// thing. Every other instance key (`content-feed`, `finance`, `parcels`, ...)
+// is DATABASE-SCOPED by the same rule that scopes the nano scripts.
+const LEAGUE_API_INSTANCE_NAMES = new Set(['league'])
+
+// Reads one JavaScript string or template literal starting at `index`. Returns
+// null for anything else, which is the safe direction: an unread argument is an
+// extraction that did not happen, and the coverage block prints the difference
+// between endpoints seen and statements taken.
+const read_javascript_string_literal = (source, index) => {
+  const quote = source[index]
+  if (quote !== '`' && quote !== "'" && quote !== '"') return null
+  let value = ''
+  for (let cursor = index + 1; cursor < source.length; cursor++) {
+    const character = source[cursor]
+    if (character === '\\') {
+      value += source[cursor + 1]
+      cursor++
+      continue
+    }
+    if (character === quote) return { value, end: cursor }
+    if (quote !== '`' && character === '\n') return null
+    value += character
+  }
+  return null
+}
+
+// `sql: QUERY` is the shape the one live call site uses, so an identifier has to
+// resolve to its module-level declaration or the statement is simply not
+// extracted. Deliberately does not follow reassignment or imports: a value this
+// cannot read is uncovered, not guessed.
+const resolve_module_constant = (source, name) => {
+  const declaration = new RegExp(
+    `(?:^|\\n)[ \\t]*(?:const|let|var)[ \\t]+${name}[ \\t]*=[ \\t]*`
+  ).exec(source)
+  if (!declaration) return null
+  const literal = read_javascript_string_literal(
+    source,
+    declaration.index + declaration[0].length
+  )
+  return literal ? literal.value : null
+}
+
+const collect_api_query_sql_blocks = (
+  corpus,
+  read_file = (file) => fs.readFileSync(file, 'utf8')
+) => {
+  const statements = []
+  const uncovered = []
+  const database_scoped = []
+  const coverage = {
+    javascript_files: 0,
+    endpoints_seen: 0,
+    endpoints_bound_to_league: 0,
+    endpoints_database_scoped: 0,
+    sql_arguments_read: 0
+  }
+
+  for (const entry of corpus) {
+    if (path.extname(entry.file) !== '.mjs') continue
+    if (entry.prose !== false) continue
+    coverage.javascript_files += 1
+    const source = read_file(entry.file)
+    const relative = display_path(entry)
+
+    // Collected up front rather than iterated live, because each call site needs
+    // to look ahead to the NEXT one to bound its own argument window, and doing
+    // that on the iterating regex leaves its `lastIndex` describing a position
+    // the loop never agreed to.
+    API_QUERY_ENDPOINT_RE.lastIndex = 0
+    const call_sites = []
+    let match
+    while ((match = API_QUERY_ENDPOINT_RE.exec(source))) {
+      call_sites.push({
+        database: match[1],
+        end: match.index + match[0].length
+      })
+    }
+
+    for (let index = 0; index < call_sites.length; index++) {
+      const site = call_sites[index]
+      coverage.endpoints_seen += 1
+      const { database } = site
+      const line = source.slice(0, site.end).split('\n').length
+      if (!LEAGUE_API_INSTANCE_NAMES.has(database)) {
+        coverage.endpoints_database_scoped += 1
+        database_scoped.push({ path: relative, line, database })
+        continue
+      }
+      coverage.endpoints_bound_to_league += 1
+
+      // The `sql` argument of THIS call: searched forward from the endpoint
+      // literal but stopped at the next endpoint, so a file with several calls
+      // cannot attribute one call's SQL to another's database.
+      const window = source.slice(
+        site.end,
+        index + 1 < call_sites.length
+          ? call_sites[index + 1].end
+          : source.length
+      )
+      const property = /\bsql[ \t]*:[ \t]*/.exec(window)
+      if (!property) {
+        uncovered.push({
+          path: relative,
+          line,
+          reason:
+            '/api/db/league/query call has no readable `sql` argument; nothing extracted'
+        })
+        continue
+      }
+      const value_at = property.index + property[0].length
+      const literal = read_javascript_string_literal(window, value_at)
+      let body = literal ? literal.value : null
+      if (!body) {
+        const identifier = /^([A-Za-z_$][A-Za-z0-9_$]*)/.exec(
+          window.slice(value_at)
+        )
+        if (identifier) body = resolve_module_constant(source, identifier[1])
+      }
+      if (!body) {
+        uncovered.push({
+          path: relative,
+          line,
+          reason:
+            'the `sql` argument is not a literal this gate can resolve; nothing extracted'
+        })
+        continue
+      }
+      coverage.sql_arguments_read += 1
+      push_extracted_statements({
+        body,
+        line,
+        relative,
+        shape: '/api/db/league/query',
+        database: 'league_production',
+        statements,
+        uncovered
+      })
+    }
+  }
+
+  return { statements, uncovered, database_scoped, coverage }
 }
 
 // knex formats a query error as `${sql} - ${message}`, so on a multi-line
@@ -1175,6 +1584,10 @@ const run_negative_control = async ({
     // the mutation is the only reason it can be reported.
     const find_victim = () => {
       for (const entry of corpus) {
+        // Must match what gate 1 actually reads. A victim picked from a file gate
+        // 1 skips as non-prose can never be reported, so the mutation would look
+        // like a gate that stopped working — a control failing OPEN.
+        if (entry.prose === false) continue
         const source = fs.readFileSync(entry.file, 'utf8')
         PAIR_RE.lastIndex = 0
         let match
@@ -1430,10 +1843,17 @@ const run_negative_control = async ({
     // the opening statement keyword, which is the documented rule, so a "prose"
     // example beginning with SELECT is prose only to a human. Writing one is how
     // this control first reported STAYED GREEN against a working extractor.
+    // The `psql -d` line is load-bearing, not decoration: extraction is bound to
+    // a resolved database, so a script naming no target lands in UNRESOLVED and
+    // yields no statements — which reads exactly like an extractor that stopped
+    // matching. This control's subject is the extraction, so it has to satisfy
+    // the binding precondition to test it.
     const source = [
+      'DB_NAME="league_production"',
       "read_query='SELECT pid FROM player'",
       "MESSAGE='counted the rows and reported them'",
-      'GREETING="hello world"'
+      'GREETING="hello world"',
+      `psql -d "$DB_NAME" -At -c "\${read_query}"`
     ].join('\n')
     const extracted = collect_shell_sql_blocks(
       [
@@ -1489,6 +1909,140 @@ const run_negative_control = async ({
     ])
   }
 
+  // 9. THE DATABASE BINDING, which is the discriminator this gate now rests on.
+  //    Cases 9 and 10 are the SAME synthetic script carrying the SAME
+  //    league-invalid column, differing only in the database its `psql -d`
+  //    names. One half alone proves nothing: a gate that reports both is the
+  //    pre-2026-08-07 behaviour that would call nano SQL league drift, and a gate
+  //    that reports neither has simply stopped extracting. Only the pair
+  //    separates them.
+  if (db) {
+    const synthetic_path = path.join(repo_root, '__negative_control_bound__.sh')
+    const script = (database) =>
+      [
+        `DB_NAME="${database}"`,
+        "read_query='SELECT p.negative_control_absent FROM player p'",
+        `rows=$(psql -d "$DB_NAME" -At -F'|' -c "\${read_query}")`
+      ].join('\n')
+    const extract = (database) =>
+      collect_shell_sql_blocks(
+        [{ file: synthetic_path, root: '.', absolute_root: repo_root }],
+        () => script(database)
+      )
+
+    const league_run = extract('league_production')
+    let league_reported = false
+    if (league_run.statements.length === 1) {
+      const result = await explain_statements({
+        db,
+        statements: league_run.statements,
+        adjudications: [],
+        gate: 3
+      })
+      league_reported =
+        result.findings.length === 1 && result.findings[0].code === '42703'
+    }
+    cases.push([
+      'gate 3 reports a league_production script naming a column the table does not have',
+      league_reported
+    ])
+
+    const nano_run = extract('nano_community_archive')
+    cases.push([
+      'gate 3 stays SILENT on the identical script bound to nano_community_archive, and buckets it DATABASE-SCOPED',
+      nano_run.statements.length === 0 &&
+        nano_run.database_scoped.length === 1 &&
+        nano_run.database_scoped[0].database === 'nano_community_archive'
+    ])
+  }
+
+  // 10. An unresolvable target must reach the UNRESOLVED bucket rather than being
+  //     judged against the league schema or dropped. `-d $database` off a
+  //     function parameter is the live shape (`check-index-corruption.sh`).
+  {
+    const synthetic_path = path.join(
+      repo_root,
+      '__negative_control_unresolved__.sh'
+    )
+    const source = [
+      'check_one() {',
+      '  local database="$1"',
+      "  read_query='SELECT p.negative_control_absent FROM player p'",
+      `  psql -d $database -tAc "\${read_query}"`,
+      '}'
+    ].join('\n')
+    const run = collect_shell_sql_blocks(
+      [{ file: synthetic_path, root: '.', absolute_root: repo_root }],
+      () => source
+    )
+    cases.push([
+      'gate 3 buckets an unresolvable `psql -d $var` target as UNRESOLVED rather than judging or dropping it',
+      run.statements.length === 0 &&
+        run.database_scoped.length === 0 &&
+        run.unresolved.length === 1 &&
+        /does not reduce to a literal/.test(run.unresolved[0].reason)
+    ])
+  }
+
+  // 11. The `/api/db/<database>/query` transport, the same discriminator on the
+  //     other extractor. Identical SQL in identical shape — including the
+  //     `sql: QUERY` identifier indirection the one live call site actually uses,
+  //     so a module-constant resolver that stops resolving fails here rather than
+  //     silently emptying the corpus — differing only in the path segment.
+  if (db) {
+    const synthetic_path = path.join(repo_root, '__negative_control_api__.mjs')
+    const script = (database) =>
+      [
+        'const QUERY = `',
+        '  SELECT p.negative_control_absent',
+        '    FROM player p',
+        '`',
+        '',
+        'const run = async () =>',
+        `  api_mutate('/api/db/${database}/query', 'POST', {`,
+        '    sql: QUERY,',
+        '    params: []',
+        '  })'
+      ].join('\n')
+    const extract = (database) =>
+      collect_api_query_sql_blocks(
+        [
+          {
+            file: synthetic_path,
+            root: '.',
+            absolute_root: repo_root,
+            prose: false
+          }
+        ],
+        () => script(database)
+      )
+
+    const league_run = extract('league')
+    let league_reported = false
+    if (league_run.statements.length === 1) {
+      const result = await explain_statements({
+        db,
+        statements: league_run.statements,
+        adjudications: [],
+        gate: 3
+      })
+      league_reported =
+        result.findings.length === 1 && result.findings[0].code === '42703'
+    }
+    cases.push([
+      'gate 3 reports an /api/db/league/query call naming a column the table does not have',
+      league_reported
+    ])
+
+    const feed_run = extract('content-feed')
+    cases.push([
+      'gate 3 stays SILENT on the identical /api/db/content-feed/query call, and buckets it DATABASE-SCOPED',
+      feed_run.statements.length === 0 &&
+        feed_run.database_scoped.length === 1 &&
+        feed_run.database_scoped[0].database === 'content-feed'
+    ])
+  }
+
   console.log('')
   console.log('NEGATIVE CONTROL')
   let ok = true
@@ -1513,7 +2067,13 @@ const parse_argv = () => {
     // A root contributing EXECUTABLE SQL only. See collect_corpus for the
     // measurement behind the restriction.
     else if (flag === '--executable-root')
-      options.roots.push({ path: argv[++index], extensions: new Set(['.sh']) })
+      options.roots.push({
+        path: argv[++index],
+        extensions: new Set(['.sh', '.mjs']),
+        // `.mjs` is gate-3 only. See collect_corpus for the 52-false-positive
+        // measurement that keeps JavaScript out of the prose derivation.
+        prose_extensions: new Set(['.sh'])
+      })
     else if (flag === '--keep-database') options.keep_database = true
     else {
       console.error(`unknown argument: ${flag}`)
@@ -1566,7 +2126,7 @@ const main = async () => {
   const { files: corpus, missing } = collect_corpus(options.roots)
   const adjudications = load_adjudications()
 
-  console.log('DOCUMENTATION SCHEMA DRIFT GATE')
+  console.log('LEAGUE SCHEMA CONSUMER GATE')
   console.log('')
   console.log('CORPUS')
   for (const entry of options.roots) {
@@ -1599,6 +2159,18 @@ const main = async () => {
   let gate_3 = { findings: [], uncovered: [], explained: 0 }
   const blocks = collect_sql_blocks(corpus)
   const shell_blocks = collect_shell_sql_blocks(corpus)
+  const api_blocks = collect_api_query_sql_blocks(corpus)
+  // Both gate-3 transports feed one oracle, so their league-bound statements are
+  // one list from here on.
+  const executable_statements = [
+    ...shell_blocks.statements,
+    ...api_blocks.statements
+  ]
+  const database_scoped = [
+    ...shell_blocks.database_scoped,
+    ...api_blocks.database_scoped
+  ]
+  const unresolved = [...shell_blocks.unresolved]
 
   // Gates 2 and 3 share one scratch database: same oracle, same schema, and
   // provisioning it twice would double the only slow step in the run.
@@ -1620,7 +2192,7 @@ const main = async () => {
   if (options.gates.includes(3)) {
     gate_3 = await explain_statements({
       db: provisioned.db,
-      statements: shell_blocks.statements,
+      statements: executable_statements,
       adjudications,
       gate: 3
     })
@@ -1649,6 +2221,9 @@ const main = async () => {
     `  gate 1: index skipped, table not a table ${gate_1.coverage.indexed_columns_skipped_unknown_table}`
   )
   console.log(
+    `  gate 1: files skipped, not prose        ${gate_1.coverage.files_skipped_not_prose} — user-base .mjs, gate 3 only`
+  )
+  console.log(
     `  gate 2: \`\`\`sql fences found              ${blocks.sql_fences}`
   )
   console.log(
@@ -1663,16 +2238,37 @@ const main = async () => {
       `, heredocs ${shell_blocks.coverage.heredocs_with_sql} of ${shell_blocks.coverage.heredocs_seen} seen`
   )
   console.log(
-    `  gate 3: statements EXPLAINed            ${options.gates.includes(3) ? gate_3.explained : 'not run'} of ${shell_blocks.statements.length} extracted`
+    `  gate 3: SQL-bearing scripts bound       ${shell_blocks.coverage.files_bound_to_league} league` +
+      `, ${shell_blocks.coverage.files_database_scoped} other database` +
+      `, ${shell_blocks.coverage.files_unresolved} unresolved`
+  )
+  console.log(
+    `  gate 3: javascript files read           ${api_blocks.coverage.javascript_files}`
+  )
+  console.log(
+    `  gate 3: /api/db/<database>/query sites  ${api_blocks.coverage.endpoints_seen}` +
+      ` — ${api_blocks.coverage.endpoints_bound_to_league} league` +
+      `, ${api_blocks.coverage.endpoints_database_scoped} other database` +
+      `, ${api_blocks.coverage.sql_arguments_read} sql arguments read`
+  )
+  console.log(
+    `  gate 3: statements EXPLAINed            ${options.gates.includes(3) ? gate_3.explained : 'not run'} of ${executable_statements.length} extracted`
   )
   const uncovered = [
     ...blocks.uncovered,
     ...gate_2.uncovered,
     ...shell_blocks.uncovered,
+    ...api_blocks.uncovered,
     ...gate_3.uncovered
   ]
   console.log(
     `  gates 2+3: NOT checked                  ${uncovered.length} — listed below`
+  )
+  console.log(
+    `  gate 3: DATABASE-SCOPED                 ${database_scoped.length} — not league, listed below`
+  )
+  console.log(
+    `  gate 3: UNRESOLVED                      ${unresolved.length} — target not derivable, listed below`
   )
 
   if (uncovered.length) {
@@ -1685,6 +2281,53 @@ const main = async () => {
       const key = entry.reason.replace(/\(.*\)/, '(...)')
       if (!by_reason.has(key)) by_reason.set(key, [])
       by_reason.get(key).push(entry)
+    }
+    for (const [reason, entries] of [...by_reason].sort(
+      (a, b) => b[1].length - a[1].length
+    )) {
+      console.log(`  ${entries.length}  ${reason}`)
+      for (const entry of entries)
+        console.log(`       ${entry.path}:${entry.line}`)
+    }
+  }
+
+  // Printed rather than counted, and printed even when empty. A statement whose
+  // database this gate declined to judge and a statement it judged and cleared
+  // are indistinguishable in a summary line, and only one of them is coverage.
+  console.log('')
+  console.log(
+    'GATE 3 DATABASE-SCOPED — bound to a database that is NOT league, so this ' +
+      "gate's schema is the wrong oracle and they are NOT checked"
+  )
+  if (!database_scoped.length) {
+    console.log('  none')
+  } else {
+    const by_database = new Map()
+    for (const entry of database_scoped) {
+      if (!by_database.has(entry.database)) by_database.set(entry.database, [])
+      by_database.get(entry.database).push(entry)
+    }
+    for (const [database, entries] of [...by_database].sort(
+      (a, b) => b[1].length - a[1].length
+    )) {
+      console.log(`  ${entries.length}  ${database}`)
+      for (const entry of entries)
+        console.log(`       ${entry.path}:${entry.line}`)
+    }
+  }
+
+  console.log('')
+  console.log(
+    'GATE 3 UNRESOLVED — the transport names a database target this gate cannot ' +
+      'reduce to a literal, so they are NOT checked'
+  )
+  if (!unresolved.length) {
+    console.log('  none')
+  } else {
+    const by_reason = new Map()
+    for (const entry of unresolved) {
+      if (!by_reason.has(entry.reason)) by_reason.set(entry.reason, [])
+      by_reason.get(entry.reason).push(entry)
     }
     for (const [reason, entries] of [...by_reason].sort(
       (a, b) => b[1].length - a[1].length
@@ -1734,7 +2377,7 @@ const main = async () => {
     views,
     db: provisioned ? provisioned.db : null,
     statements: blocks.statements,
-    shell_statements: shell_blocks.statements
+    shell_statements: executable_statements
   })
 
   if (provisioned) {

@@ -1,6 +1,6 @@
 {
   "$comment": [
-    "Adjudicated non-defects for db/gates/check-documentation-schema-drift.mjs.",
+    "Adjudicated non-defects for db/gates/check-league-schema-consumers.mjs.",
     "",
     "Every entry is keyed on a SITE -- (path, table, column) for gate 1, or",
     "(path, statement_contains) for gate 2 -- and NEVER on a column name alone.",
@@ -398,7 +398,15 @@
       "table": "config",
       "column": "degraded",
       "kind": "not_a_column",
-      "reason": "Cited as an EXAMPLE of the false-positive class that keeps user-base .mjs out of this gate's corpus: a JavaScript property read off a local variable whose name collides with the league `config` table. The sentence's whole point is that it is not a schema claim."
+      "reason": "Cited as an EXAMPLE of the false-positive class that keeps user-base .mjs out of gate 1's prose derivation: a JavaScript property read off a local variable whose name collides with the league `config` table. The sentence's whole point is that it is not a schema claim."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "config",
+      "column": "email",
+      "kind": "not_a_column",
+      "reason": "The league repo's own JS config object, read at libs-server/send-email.mjs module load (`config.email` gates whether the Resend client is built at all). `config` is a real league table, so this cannot be filtered by name -- same collision as config.databases and config.degraded above. Arrived with c6443c4c3, which documented why config-test.json enables mail."
     }
   ]
 }

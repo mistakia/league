@@ -69,17 +69,17 @@ const PRODUCTION_ENV = {
 // to prevent, arriving as a TOOLING ERROR and a BLIND instead of a skip.
 // Observed 2026-08-06 with LEAGUE_DB_HOST=localhost and LEAGUE_DB_PORT=15432
 // (the `base db` tunnel) in the environment: data-view-sql-validity and
-// documentation-schema-drift both aimed their scratch `CREATE DATABASE` at
+// league-schema-consumers both aimed their scratch `CREATE DATABASE` at
 // PRODUCTION and failed only because `league_test` is not a role there.
 const TEST_CONTAINER_ENV = {
   LEAGUE_DB_HOST: TEST_CONTAINER.host,
   LEAGUE_DB_PORT: String(TEST_CONTAINER.port)
 }
 
-// The user-base trees the documentation gate reads. They are arguments rather
-// than a hardcoded path inside that gate because the gate is about the league
-// SCHEMA and the corpus is a parameter of the run — but this repo's cluster
-// recipe always passes these three, so the runner supplies them.
+// The user-base trees the league-schema-consumer gate reads. They are arguments
+// rather than a hardcoded path inside that gate because the gate is about the
+// league SCHEMA and the corpus is a parameter of the run — but this repo's
+// cluster recipe always passes these, so the runner supplies them.
 const USER_BASE_ROOTS = [
   '--root',
   '../../../guideline/nfl',
@@ -88,11 +88,14 @@ const USER_BASE_ROOTS = [
   '--root',
   '../../../workflow/nfl',
   // The user-base CLI tree, for GATE 3. It holds EXECUTABLE schema consumers --
-  // monitoring scripts shipping SQL over ssh to psql — which is a different
-  // corpus from the three prose roots above and was in no gate at all until
-  // 2026-08-07, when a lineage check had been exiting 1 nightly since the
-  // season_grain conform. Not content-gated: every `.sh` under it is read, so the
-  // denominator cannot move when a table reference is renamed away.
+  // monitoring scripts shipping SQL over ssh to psql, and scripts POSTing SQL to
+  // `/api/db/<database>/query` — a different corpus from the three prose roots
+  // above, and in no gate at all until 2026-08-07, when a lineage check had been
+  // exiting 1 nightly since the season_grain conform. Not content-gated: every
+  // `.sh` and `.mjs` under it is read, so the denominator cannot move when a
+  // table reference is renamed away. Each statement is bound to the database its
+  // TRANSPORT names, so the tree can hold nano, finance and content-feed SQL
+  // beside league SQL without any of it being judged against the league schema.
   '--executable-root',
   '../../../cli'
 ]
@@ -182,15 +185,12 @@ const GATES = [
     oracle: 'every generated data-view statement EXPLAINs against the schema'
   },
   {
-    id: 'documentation-schema-drift',
-    command: [
-      'db/gates/check-documentation-schema-drift.mjs',
-      ...USER_BASE_ROOTS
-    ],
+    id: 'league-schema-consumers',
+    command: ['db/gates/check-league-schema-consumers.mjs', ...USER_BASE_ROOTS],
     requires: 'test-container',
     negative_control: true,
     oracle:
-      'documented table.column pairs and fenced SQL, in this repo AND the user-base trees, vs the schema'
+      'every statement bound to the league database — documented pairs, fenced SQL, and executable SQL from shell and /api/db/league/query — vs the schema'
   },
   {
     id: 'conflated-player-rows',
