@@ -147,6 +147,48 @@ function get_bid_processing_due({ league, announced }) {
   return get_restricted_free_agency_processing_time({ league, window_index })
 }
 
+/**
+ * A league-season's active processing hold, or null when it is not paused.
+ *
+ * The pause is deliberately IN-BAND: the job still runs on its normal cadence
+ * and still reports success, it just treats a paused league as having no due
+ * bids. The lever this replaces was commenting out the crontab line, which
+ * makes the job go dark -- and `service:league-process-restricted-free-agency-bids`
+ * self-reports its five-minute cadence to the runs ledger, so a dark job is
+ * indistinguishable from a broken one to the staleness sweep.
+ *
+ * `restricted_free_agency_processing_paused_until` is a timestamptz, so it is
+ * read with `dayjs(value).unix()` and never `dayjs.unix(value)` or
+ * `Number(value)` -- the first yields a nonsense year and the second yields
+ * milliseconds, and neither throws.
+ *
+ * @param {Object} params
+ * @param {Object} params.league - League-season row (carries the pause columns)
+ * @param {number} params.timestamp - Run timestamp, unix seconds
+ * @returns {?{paused_until: number, reason: string}} Null when not paused
+ */
+const get_processing_pause = ({ league, timestamp }) => {
+  const paused_until = league.restricted_free_agency_processing_paused_until
+
+  if (!paused_until) {
+    return null
+  }
+
+  const paused_until_unix = dayjs(paused_until).unix()
+
+  // An elapsed pause is simply over -- it needs no clearing, which is the
+  // whole reason this is a timestamp rather than a boolean flag someone has
+  // to remember to unset.
+  if (paused_until_unix <= timestamp) {
+    return null
+  }
+
+  return {
+    paused_until: paused_until_unix,
+    reason: league.restricted_free_agency_processing_paused_reason
+  }
+}
+
 const run = async ({ dry_run = false } = {}) => {
   if (dry_run) {
     log('DRY RUN MODE: No database changes will be made')
@@ -211,6 +253,20 @@ const run = async ({ dry_run = false } = {}) => {
   // processing time, so there is no league-level hour gate to apply here.
   for (const league of active_leagues) {
     const { lid } = league
+
+    const processing_pause = get_processing_pause({ league, timestamp })
+    if (processing_pause) {
+      log(
+        `league ${lid}: RFA bid processing PAUSED until ` +
+          `${dayjs
+            .unix(processing_pause.paused_until)
+            .tz(league_timezone)
+            .format('YYYY-MM-DD HH:mm:ss [ET]')} -- ` +
+          `${processing_pause.reason}`
+      )
+      continue
+    }
+
     const { window_hours, processing_lead_hours, bid_window_hours } =
       get_restricted_free_agency_window_config({ league })
 
@@ -472,6 +528,16 @@ const run = async ({ dry_run = false } = {}) => {
       .whereNotNull('seasons.restricted_free_agency_first_window_at')
       .where('seasons.restricted_free_agency_period_start', '<=', timestamp)
       .where('seasons.restricted_free_agency_period_end', '>=', timestamp)
+      // A paused league's bids are held ON PURPOSE, so they are not a
+      // shortfall. Without this the pause would trip the very oracle that
+      // exists to detect the loop silently skipping eligible bids -- turning
+      // every paused run into a false pipeline failure, which is the same
+      // "a hold reads as a break" defect that makes the crontab lever wrong.
+      .whereRaw(
+        `(seasons.restricted_free_agency_processing_paused_until is null
+          or seasons.restricted_free_agency_processing_paused_until <= to_timestamp(?))`,
+        [timestamp]
+      )
       .where(function () {
         // bid meets the time-since-announcement requirement
         // The announcement belongs to the player's NOMINATION, which now has a

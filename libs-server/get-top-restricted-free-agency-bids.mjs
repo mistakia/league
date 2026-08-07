@@ -10,8 +10,13 @@ const ORIGINAL_TEAM_MIN_BOOST_DOLLARS = 2
  * Get the highest priority restricted free agency bids for a league that are ready to be processed.
  * This function finds active restricted free agents and selects the top bid(s) for processing.
  *
- * Original team bids get a boost of 20% or $2, whichever is greater.
- * If multiple bids have the same maximum amount, they are sorted by player ID.
+ * Exactly one auction is returned per call -- the one whose nomination was
+ * announced earliest, so a backlog of ready windows settles in window order.
+ * The caller settles it and calls again for the next.
+ *
+ * Original team bids get a boost of 20% or $2, whichever is greater. Every bid
+ * tied at that auction's maximum effective amount is returned, leaving the
+ * original-team and waiver-order rules to the caller.
  *
  * Each returned bid carries `original_team_id`, resolved through the player's
  * nomination. The rights holder is a property of the auction, not of a bid: two
@@ -92,18 +97,61 @@ export default async function get_top_restricted_free_agency_bids(leagueId) {
     bid._bid = bid.bid_amount + boost_amount
   })
 
-  // Find highest restricted free agency bids
-  const bid_amounts = restricted_free_agency_bid_rows.map((bid) => bid._bid)
-  const max_bid = Math.max(...bid_amounts)
-  const max_bids = restricted_free_agency_bid_rows.filter(
-    (bid) => bid._bid === max_bid
+  // Choose WHICH auction settles next by window order -- the nomination
+  // announced earliest -- and only then find the top bids within it.
+  //
+  // This used to take the globally highest effective bid across every open
+  // auction and settle that one first. Under normal operation the two agree,
+  // because a window's bids are processed
+  // `restricted_free_agency_processing_lead_hours` before the next window
+  // opens, so exactly one auction is ever open at a time. They diverge only
+  // when several windows are ready at once -- which is precisely what a
+  // processing pause, an outage, or a late manual announcement produces.
+  //
+  // Three things went wrong in that state, and window order fixes all three.
+  //
+  // Settling out of order changes OUTCOMES rather than merely the sequence:
+  // signing a player consumes cap space and a roster slot, so an auction
+  // settled early can starve a team's bid in an auction that
+  // constitutionally preceded it.
+  //
+  // The caller filters the returned bids against their own window's
+  // processing time and skips the whole league when none are due. Selecting
+  // by bid amount could therefore return a not-yet-due auction and mask an
+  // earlier one that WAS due, deferring the earlier auction until the richer
+  // one matured. The earliest-announced auction is by construction the first
+  // to come due, so that filter is coherent now.
+  //
+  // And the tiebreak here was a no-op: pids are strings
+  // (`DRAK-LOND-025029`), so `(a, b) => a - b` yields NaN for every
+  // comparison, which `sort` reads as "equal" and leaves the array in
+  // whatever order the database happened to return. Ties resolve explicitly
+  // now.
+  const biddable_pids = [
+    ...new Set(restricted_free_agency_bid_rows.map((bid) => bid.pid))
+  ]
+
+  const next_pid = biddable_pids.sort((pid_a, pid_b) => {
+    const announced_delta =
+      nominations_by_pid[pid_a].announced - nominations_by_pid[pid_b].announced
+    if (announced_delta !== 0) return announced_delta
+
+    // Two auctions sharing an announcement timestamp is unreachable today --
+    // claim_league_notification holds one announcement per (league, season,
+    // window timestamp) -- but a tie must still resolve deterministically
+    // rather than by row order.
+    if (pid_a < pid_b) return -1
+    if (pid_a > pid_b) return 1
+    return 0
+  })[0]
+
+  // Within that auction, return every bid tied at the maximum effective
+  // amount (the original team's boost is already applied above) so the caller
+  // can apply the original-team and waiver-order rules.
+  const auction_bids = restricted_free_agency_bid_rows.filter(
+    (bid) => bid.pid === next_pid
   )
+  const max_bid = Math.max(...auction_bids.map((bid) => bid._bid))
 
-  // If more than one bid with the same amount, process player based on player ID order
-  const max_pids = max_bids.map((bid) => bid.pid)
-  const sorted_pids = max_pids.sort((a, b) => a - b)
-  const top_pid = sorted_pids[0]
-
-  // Return all bids for the top priority player
-  return max_bids.filter((bid) => bid.pid === top_pid)
+  return auction_bids.filter((bid) => bid._bid === max_bid)
 }

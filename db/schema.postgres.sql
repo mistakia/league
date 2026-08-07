@@ -26475,6 +26475,9 @@ CREATE TABLE public.seasons (
     has_division_winner_berths boolean DEFAULT false NOT NULL,
     trade_veto_window_hours smallint DEFAULT 24 NOT NULL,
     draft_pick_interval smallint DEFAULT 1,
+    restricted_free_agency_processing_paused_until timestamp with time zone,
+    restricted_free_agency_processing_paused_reason text,
+    CONSTRAINT rfa_processing_pause_states_a_reason CHECK ((((restricted_free_agency_processing_paused_until IS NULL) AND (restricted_free_agency_processing_paused_reason IS NULL)) OR ((restricted_free_agency_processing_paused_until IS NOT NULL) AND (restricted_free_agency_processing_paused_reason IS NOT NULL)))),
     CONSTRAINT rfa_processing_precedes_announcement CHECK (((restricted_free_agency_processing_lead_hours >= 1) AND (restricted_free_agency_processing_lead_hours < restricted_free_agency_window_hours))),
     CONSTRAINT rfa_window_divides_day CHECK ((restricted_free_agency_window_hours = ANY (ARRAY[1, 2, 3, 4, 6, 8, 12, 24]))),
     CONSTRAINT seasons_at_large_selection_method_known CHECK ((at_large_selection_method = ANY (ARRAY['head_to_head'::text, 'all_play'::text, 'points_for'::text]))),
@@ -26517,6 +26520,20 @@ COMMENT ON COLUMN public.seasons.bye_selection_method IS 'Ladder that ranks the 
 --
 
 COMMENT ON COLUMN public.seasons.has_division_winner_berths IS 'When true, every division winner is guaranteed a place in the playoff field (a berth, not a seed); when false, berths are won on record alone.';
+
+
+--
+-- Name: COLUMN seasons.restricted_free_agency_processing_paused_until; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.seasons.restricted_free_agency_processing_paused_until IS 'When set and in the future, restricted free agency bid processing is held for this league-season. The processing job still runs and still reports success; it treats the league as having no due bids. Null means not paused.';
+
+
+--
+-- Name: COLUMN seasons.restricted_free_agency_processing_paused_reason; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.seasons.restricted_free_agency_processing_paused_reason IS 'Why processing is paused. Moves with restricted_free_agency_processing_paused_until via the rfa_processing_pause_states_a_reason constraint.';
 
 
 --
