@@ -14,6 +14,42 @@ process.env.NODE_ENV = 'test'
 chai.use(chai_http)
 chai.should()
 
+// Resend (libs-server/send-email.mjs) POSTs to api.resend.com over the global
+// `fetch`. Replacing it captures every outbound message and guarantees the
+// suite makes no network call, which is what lets a spec read the token the
+// reset route actually emailed.
+const RESEND_API_PREFIX = 'https://api.resend.com/'
+const original_fetch = globalThis.fetch
+let sent_emails = []
+
+const install_email_capture = () => {
+  sent_emails = []
+  globalThis.fetch = async (resource, options) => {
+    if (!String(resource).startsWith(RESEND_API_PREFIX)) {
+      return original_fetch(resource, options)
+    }
+    sent_emails.push(JSON.parse(options.body))
+    return new Response(JSON.stringify({ id: 'captured-by-test' }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' }
+    })
+  }
+}
+
+const restore_email_capture = () => {
+  globalThis.fetch = original_fetch
+  sent_emails = []
+}
+
+// A JWT is three base64url segments. Anchoring on that shape rather than on a
+// looser character class keeps the sentence's trailing period out of the token.
+const extract_reset_token_from_email = (email) => {
+  const match = String(email.text).match(
+    /reset-password\?token=([A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)/
+  )
+  return match ? match[1] : null
+}
+
 describe('API /auth', function () {
   before(async function () {
     this.timeout(60 * 1000)
@@ -271,6 +307,22 @@ describe('API /auth', function () {
     const generic_message =
       'If an account exists, a password reset email has been sent'
 
+    // `config.email` is set in config-test.json, so sendEmail really runs and
+    // really calls Resend — which transports over the global `fetch`. Swapping
+    // that out captures the outbound message without any network egress, and
+    // without a test-only branch in the route or the mailer.
+    //
+    // This is what makes the round trip below a SEAM test rather than a
+    // restatement: the token it confirms is the one the request route actually
+    // minted and actually put in the email body.
+    before(() => {
+      install_email_capture()
+    })
+
+    after(() => {
+      restore_email_capture()
+    })
+
     it('should return the generic message for a known email', async () => {
       const res = await chai_request
         .execute(server)
@@ -312,6 +364,29 @@ describe('API /auth', function () {
 
       res.should.have.status(200)
       res.body.message.should.equal(generic_message)
+    })
+
+    // The response body being identical is only half the enumeration property.
+    // A known account must produce an email and an unknown one must not, and
+    // both must be invisible to the caller.
+    it('should send an email for a known account and none for an unknown one', async () => {
+      sent_emails = []
+
+      await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({ email: 'user1@email.com' })
+
+      sent_emails.should.have.lengthOf(1)
+      sent_emails[0].to.should.equal('user1@email.com')
+      sent_emails[0].from.should.equal(config.email.from)
+
+      await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({ email: 'no-such-user-anywhere@email.com' })
+
+      sent_emails.should.have.lengthOf(1)
     })
 
     it('should return error for missing username and email', async () => {
@@ -467,6 +542,126 @@ describe('API /auth', function () {
         .execute(server)
         .post('/api/auth/reset-password/confirm')
         .send({ token, password: 'yet_another_password' })
+
+      await error(replay, 'invalid or expired reset token')
+    })
+  })
+
+  // THE SEAM. Everything above mints the token in the spec, so nothing there
+  // asserts that POST /auth/reset-password and POST /auth/reset-password/confirm
+  // agree on how the signing secret is derived — a divergence would break every
+  // real reset link while leaving the suite green. This block never derives a
+  // token: it reads the one the request route emailed and hands it to confirm,
+  // so the two derivations are checked against each other by round trip.
+  //
+  // The oracle is deliberately NOT a 200. Confirm answers 200 only after the
+  // token verifies, and the run ends by logging in with the new password and
+  // being refused the old one, so a flow that merely returned 200s cannot pass.
+  describe('password reset round trip (request -> email -> confirm -> login)', () => {
+    const round_trip_username = 'reset_round_trip'
+    const round_trip_email = 'round_trip_reset_user@email.com'
+    const original_password = 'round-trip-original-password'
+    const new_password = 'round-trip-new-password'
+
+    let round_trip_user_id = null
+
+    before(async () => {
+      install_email_capture()
+      const salt = await bcrypt.genSalt(10)
+      const hashed_password = await bcrypt.hash(original_password, salt)
+      const inserted = await knex('users')
+        .insert({
+          email: round_trip_email,
+          username: round_trip_username,
+          password: hashed_password
+        })
+        .returning('id')
+      round_trip_user_id = inserted[0].id
+    })
+
+    after(async () => {
+      restore_email_capture()
+      await knex('users').where({ id: round_trip_user_id }).del()
+    })
+
+    it('should complete a reset using only the emailed token', async () => {
+      sent_emails = []
+
+      const request_res = await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({ email: round_trip_email })
+
+      request_res.should.have.status(200)
+
+      // Positive control: if the mailer were a no-op (as it is whenever
+      // `config.email` is unset) there would be no token to read, and this
+      // spec must fail loudly rather than skip the seam it exists to cover.
+      sent_emails.should.have.lengthOf(1)
+      const emailed_token = extract_reset_token_from_email(sent_emails[0])
+      chai
+        .expect(emailed_token, 'no reset token in the emailed link')
+        .to.be.a('string')
+
+      // The token has to be the route's own, not one this spec could have
+      // built. Nothing here re-derives the signing secret.
+      const confirm_res = await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ token: emailed_token, password: new_password })
+
+      confirm_res.should.have.status(200)
+      confirm_res.body.message.should.equal('password has been reset')
+
+      const login_with_new = await chai_request
+        .execute(server)
+        .post('/api/auth/login')
+        .send({
+          email_or_username: round_trip_username,
+          password: new_password
+        })
+
+      login_with_new.should.have.status(200)
+      login_with_new.body.should.have.property('token')
+
+      const login_with_old = chai_request
+        .execute(server)
+        .post('/api/auth/login')
+        .send({
+          email_or_username: round_trip_username,
+          password: original_password
+        })
+
+      await error(login_with_old, 'invalid params')
+    })
+
+    it('should refuse the emailed token a second time', async () => {
+      sent_emails = []
+
+      await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({ username: round_trip_username })
+
+      sent_emails.should.have.lengthOf(1)
+      const emailed_token = extract_reset_token_from_email(sent_emails[0])
+      chai
+        .expect(emailed_token, 'no reset token in the emailed link')
+        .to.be.a('string')
+
+      const first = await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ token: emailed_token, password: 'round-trip-second-password' })
+
+      first.should.have.status(200)
+
+      // Writing the new hash changes the signing secret, so the same emailed
+      // link stops verifying — single use with no server-side state.
+      const replay = chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ token: emailed_token, password: 'round-trip-third-password' })
 
       await error(replay, 'invalid or expired reset token')
     })

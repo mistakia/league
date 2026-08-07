@@ -20,6 +20,11 @@
       "loadExtensions": [".mjs"]
     }
   },
+  "url": "http://127.0.0.1:8080",
+  "email": {
+    "resend_api_key": "re_not_a_real_key_test_fixture_only",
+    "from": "no-reply@test.invalid"
+  },
   "signals_api_url": "",
   "signals_secret": ""
 }
