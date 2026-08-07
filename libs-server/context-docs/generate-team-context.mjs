@@ -117,7 +117,7 @@ export default async function generate_team_context({
       salary_basis: salary_basis.frontmatter_value,
       salary_year: year,
       extension_deadline: league.ext_date
-        ? new Date(Number(league.ext_date) * 1000).toISOString()
+        ? new Date(league.ext_date).toISOString()
         : null
     },
     related: {

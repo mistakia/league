@@ -536,7 +536,7 @@ router.post('/?', async (req, res) => {
     const league = await validate_and_get_league(leagueId, res)
     if (!league) return
 
-    const draft_start = dayjs.unix(league.draft_start)
+    const draft_start = dayjs(league.draft_start)
     if (current_season.now.isBefore(draft_start)) {
       return res.status(400).send({ error: 'draft has not started' })
     }

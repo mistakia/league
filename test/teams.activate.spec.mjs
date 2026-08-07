@@ -198,7 +198,7 @@ describe('API /teams - activate', function () {
           season_year: current_season.year
         })
         .whereIn('pid', [activate_player.pid, deactivate_player.pid])
-        .orderBy('timestamp', 'desc')
+        .orderBy('occurred_at', 'desc')
 
       const activate_transaction = transactions.find(
         (t) =>

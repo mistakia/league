@@ -295,8 +295,7 @@ describe('API /teams - restricted free agency', function () {
       await knex('seasons')
         .where({ lid: leagueId, season_year: current_season.year })
         .update({
-          restricted_free_agency_period_end:
-            Math.floor(Date.now() / 1000) - 86400
+          restricted_free_agency_period_end: new Date(Date.now() - 86400 * 1000)
         }) // 1 day ago
 
       const res = await chai_request

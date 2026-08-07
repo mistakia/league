@@ -10,7 +10,7 @@ import set_draft_pick_number from '#scripts/set-draft-pick-number.mjs'
 
 const create_conditional_pick = async function ({ tid, league }) {
   const is_before_draft = league.draft_start
-    ? current_season.now.isBefore(dayjs.unix(league.draft_start))
+    ? current_season.now.isBefore(dayjs(league.draft_start))
     : true
   const year = is_before_draft ? current_season.year : current_season.year + 1
 

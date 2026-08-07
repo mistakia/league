@@ -7,6 +7,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { current_season } from '#constants'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 import {
   get_restricted_free_agency_window_start,
   get_restricted_free_agency_window_index,
@@ -101,7 +102,10 @@ const announce_restricted_free_agent = async ({
 
   const current_timestamp = Math.round(Date.now() / 1000)
 
-  if (current_timestamp > Number(league.restricted_free_agency_period_end)) {
+  if (
+    current_timestamp >
+    timestamptz_to_epoch(league.restricted_free_agency_period_end)
+  ) {
     throw new Error(
       `The restricted free agency period ended on ${format_et(
         league.restricted_free_agency_period_end

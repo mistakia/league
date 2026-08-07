@@ -62,7 +62,7 @@ const generate_league_player_seasonlogs = async ({
     if (start_tid) {
       const salary_query = await db('transactions')
         .where({ lid, pid, season_year: year, week: 0, tid: start_tid })
-        .orderBy('timestamp', 'desc')
+        .orderBy('occurred_at', 'desc')
         .limit(1)
 
       salary = salary_query.length ? salary_query[0].player_salary : 0

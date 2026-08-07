@@ -62,7 +62,7 @@ describe('LINEAGE - super priority resign', function () {
       type,
       player_salary: ORIGINAL_SALARY,
       season_year: current_season.year,
-      timestamp: origin_timestamp + index,
+      occurred_at: epoch_to_timestamptz(origin_timestamp + index),
       week: current_season.week,
       userid: 1
     }))

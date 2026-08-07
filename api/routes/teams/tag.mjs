@@ -181,7 +181,7 @@ router.post('/?', async (req, res) => {
     if (
       current_season.week === 0 &&
       league.ext_date &&
-      current_season.now.isAfter(dayjs.unix(league.ext_date))
+      current_season.now.isAfter(dayjs(league.ext_date))
     ) {
       return res.status(400).send({ error: 'extension deadline has passed' })
     }
@@ -336,7 +336,7 @@ router.delete('/?', async (req, res) => {
     if (
       current_season.week === 0 &&
       league.ext_date &&
-      current_season.now.isAfter(dayjs.unix(league.ext_date))
+      current_season.now.isAfter(dayjs(league.ext_date))
     ) {
       return res.status(400).send({ error: 'extension deadline has passed' })
     }

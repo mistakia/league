@@ -13,7 +13,7 @@ import {
   player_tag_types,
   restricted_free_agency_bid_outcomes
 } from '#constants'
-import { Roster } from '#libs-shared'
+import { Roster, epoch_to_timestamptz } from '#libs-shared'
 import {
   getLeague,
   getRoster,
@@ -64,10 +64,10 @@ describe('SCRIPTS - restricted free agency bids', function () {
       await knex('seasons')
         .update({
           season_year: current_season.year,
-          restricted_free_agency_period_start: tran_date,
+          restricted_free_agency_period_start: epoch_to_timestamptz(tran_date),
           restricted_free_agency_period_end: regular_season_start
             .subtract('1', 'month')
-            .unix(),
+            .toDate(),
           ext_date,
           restricted_free_agency_first_window_at: dayjs
             .unix(tran_date)
@@ -383,10 +383,10 @@ describe('SCRIPTS - restricted free agency bids', function () {
       await knex('seasons')
         .update({
           season_year: current_season.year,
-          restricted_free_agency_period_start: tran_date,
+          restricted_free_agency_period_start: epoch_to_timestamptz(tran_date),
           restricted_free_agency_period_end: regular_season_start
             .subtract('1', 'month')
-            .unix(),
+            .toDate(),
           restricted_free_agency_first_window_at: dayjs
             .unix(tran_date)
             .toDate(),

@@ -110,7 +110,7 @@ describe('API /teams - add', function () {
       const leagueId = 1
       await knex('seasons')
         .update({
-          draft_start: regular_season_start.subtract('1', 'week').unix()
+          draft_start: regular_season_start.subtract('1', 'week').toDate()
         })
         .where({ lid: leagueId })
       MockDate.set(regular_season_start.subtract('4', 'days').toISOString())

@@ -9,12 +9,12 @@ export default async function ({ league, pids }) {
     (!current_season.isRegularSeason &&
       !league.restricted_free_agency_period_start) ||
     (league.restricted_free_agency_period_start &&
-      now.isBefore(dayjs.unix(league.restricted_free_agency_period_start)))
+      now.isBefore(dayjs(league.restricted_free_agency_period_start)))
   const is_before_restricted_free_agency_end =
     (!current_season.isRegularSeason &&
       !league.restricted_free_agency_period_end) ||
     (league.restricted_free_agency_period_end &&
-      now.isBefore(dayjs.unix(league.restricted_free_agency_period_end)))
+      now.isBefore(dayjs(league.restricted_free_agency_period_end)))
   const isRestrictedFreeAgency =
     !is_before_restricted_free_agency_start &&
     is_before_restricted_free_agency_end

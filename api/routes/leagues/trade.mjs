@@ -623,7 +623,7 @@ router.post(
       const league = await getLeague({ lid: leagueId })
 
       // make sure trade deadline has not passed
-      const deadline = dayjs.unix(league.tddate)
+      const deadline = dayjs(league.tddate)
       if (dayjs().isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
       }
@@ -931,7 +931,7 @@ router.post(
               .player_salary,
             week: current_season.week,
             season_year: current_season.year,
-            timestamp: Math.round(Date.now() / 1000)
+            occurred_at: new Date()
           })
         }
         for (const pid of proposingTeamPlayers) {
@@ -945,7 +945,7 @@ router.post(
               .player_salary,
             week: current_season.week,
             season_year: current_season.year,
-            timestamp: Math.round(Date.now() / 1000)
+            occurred_at: new Date()
           })
         }
 
@@ -971,7 +971,7 @@ router.post(
               player_salary: 0,
               week: current_season.week,
               season_year: current_season.year,
-              timestamp: Math.round(Date.now() / 1000)
+              occurred_at: new Date()
             })
           }
 
@@ -985,7 +985,7 @@ router.post(
               player_salary: 0,
               week: current_season.week,
               season_year: current_season.year,
-              timestamp: Math.round(Date.now() / 1000)
+              occurred_at: new Date()
             })
           }
 

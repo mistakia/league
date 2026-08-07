@@ -340,7 +340,7 @@ router.get('/?', async (req, res) => {
       .modify(where_outstanding_draft_pick)
 
     const sub_query = db('league_team_forecast')
-      .select(db.raw('max(timestamp) AS maxtime, tid AS teamid'))
+      .select(db.raw('max(generated_at) AS maxtime, tid AS teamid'))
       .groupBy('teamid')
       .where('season_year', year)
       .as('sub_query')
@@ -364,7 +364,7 @@ router.get('/?', async (req, res) => {
       .innerJoin('league_team_forecast', function () {
         this.on(function () {
           this.on('teamid', '=', 'tid')
-          this.andOn('timestamp', '=', 'maxtime')
+          this.andOn('generated_at', '=', 'maxtime')
         })
       })
 

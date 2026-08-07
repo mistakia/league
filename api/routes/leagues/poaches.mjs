@@ -65,7 +65,7 @@ router.post('/?', async (req, res) => {
         pid,
         lid: leagueId
       })
-      .orderBy('timestamp', 'desc')
+      .orderBy('occurred_at', 'desc')
       .orderBy('uid', 'desc')
       .limit(1)
     const tran = transactions[0]
@@ -240,7 +240,7 @@ router.put('/:poachId', async (req, res) => {
     // verify team has salary space during offseason
     const transactions = await db('transactions')
       .where({ pid: poach_player_row.pid, lid: leagueId })
-      .orderBy('timestamp', 'desc')
+      .orderBy('occurred_at', 'desc')
       .orderBy('uid', 'desc')
       .limit(1)
     const tran = transactions[0]

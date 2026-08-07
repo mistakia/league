@@ -373,7 +373,7 @@ router.post('/?', async (req, res) => {
     const transactions = await db('transactions')
       .where('pid', pid)
       .where({ lid: leagueId })
-      .orderBy('timestamp', 'desc')
+      .orderBy('occurred_at', 'desc')
       .orderBy('uid', 'desc')
 
     if (

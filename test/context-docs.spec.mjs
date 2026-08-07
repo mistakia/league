@@ -197,14 +197,17 @@ const seed_full_league = async () => {
   await knex('seasons')
     .where({ lid: 1, season_year: year })
     .update({
-      season_started_at: t.subtract(20, 'weeks').unix(),
-      free_agency_period_start: t.subtract(6, 'weeks').unix(),
-      free_agency_live_auction_start: t.subtract(5, 'weeks').unix(),
-      free_agency_live_auction_end: t.subtract(5, 'weeks').add(1, 'day').unix(),
-      free_agency_period_end: t.subtract(2, 'weeks').unix(),
-      restricted_free_agency_period_start: t.subtract(4, 'weeks').unix(),
-      restricted_free_agency_period_end: t.subtract(3, 'weeks').unix(),
-      season_finalized_at: t.add(20, 'weeks').unix(),
+      season_started_at: t.subtract(20, 'weeks').toDate(),
+      free_agency_period_start: t.subtract(6, 'weeks').toDate(),
+      free_agency_live_auction_start: t.subtract(5, 'weeks').toDate(),
+      free_agency_live_auction_end: t
+        .subtract(5, 'weeks')
+        .add(1, 'day')
+        .toDate(),
+      free_agency_period_end: t.subtract(2, 'weeks').toDate(),
+      restricted_free_agency_period_start: t.subtract(4, 'weeks').toDate(),
+      restricted_free_agency_period_end: t.subtract(3, 'weeks').toDate(),
+      season_finalized_at: t.add(20, 'weeks').toDate(),
       wildcard_round: 15,
       championship_round: [16, 17]
     })
@@ -444,7 +447,7 @@ describe('context documents', function () {
       const year = current_season.year
       await knex('seasons')
         .where({ lid: 1, season_year: year })
-        .update({ ext_date: current_season.now.add(1, 'week').unix() })
+        .update({ ext_date: current_season.now.add(1, 'week').toDate() })
 
       // A regular contract with one extension already used: the recorded $20
       // becomes $20 + (1 + 1) * 5 = $30 on the post-extension basis.

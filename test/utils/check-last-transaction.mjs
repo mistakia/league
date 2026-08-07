@@ -6,7 +6,7 @@ const expect = chai.expect
 
 export default async function ({ leagueId, type, value, pid, teamId, userId }) {
   const transactions = await db('transactions')
-    .orderBy('timestamp', 'desc')
+    .orderBy('occurred_at', 'desc')
     .orderBy('uid', 'desc')
     .limit(1)
   const transaction = transactions[0]

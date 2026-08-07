@@ -291,7 +291,7 @@ describe('roster salary consumer contract', function () {
     // That is the basis the four consumers read; extension pricing has its own
     // coverage in libs-shared.get-extension-amount.spec.mjs.
     const league = {
-      ext_date: 1577854800, // 2020-01-01
+      ext_date: new Date(1577854800 * 1000), // 2020-01-01
       cap: 200,
       num_teams: 12,
       sqb: 1,

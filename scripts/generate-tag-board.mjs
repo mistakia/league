@@ -58,7 +58,7 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
         .whereIn('pid', pids)
         .orderBy('tid')
         .orderBy('pid')
-        .orderBy('timestamp', 'desc')
+        .orderBy('occurred_at', 'desc')
         .orderBy('uid', 'desc')
         .as('latest')
     )

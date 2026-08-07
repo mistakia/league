@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 
 import db from '#db'
 import { transaction_types } from '#constants/transaction-constants.mjs'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
 import {
   ASSET_TYPE,
@@ -129,7 +130,7 @@ const resolve_endowment_date = async ({ lid, year }) => {
     .select('draft_start')
     .where({ lid, season_year: year - 1 })
     .first()
-  if (prior?.draft_start) return new Date(Number(prior.draft_start) * 1000)
+  if (prior?.draft_start) return prior.draft_start
   return new Date(`${year}-01-01T00:00:00Z`)
 }
 
@@ -712,13 +713,13 @@ const build_event_stream = async ({ lid }) => {
       'tid',
       'pid',
       'type',
-      'timestamp',
+      'occurred_at',
       'season_year',
       'player_salary'
     )
     .where('lid', lid)
     .whereNotNull('pid')
-    .orderBy('timestamp', 'asc')
+    .orderBy('occurred_at', 'asc')
   for (const tran of transactions) {
     if (trade_tran_ids.has(tran.uid)) continue
     // The trades table is the canonical source for trade lineage. Some older
@@ -726,11 +727,14 @@ const build_event_stream = async ({ lid }) => {
     // rows; we still skip them here so the trade walker resolves the basket
     // once per trade rather than per leg.
     if (tran.type === transaction_types.TRADE) continue
-    const ts = new Date(tran.timestamp * 1000)
+    // sort_ts merges this stream with events derived from tables outside the
+    // timestamptz cluster, so it stays epoch seconds; `ts` is the instant.
+    const ts = tran.occurred_at
+    const tran_sort_ts = timestamptz_to_epoch(tran.occurred_at)
     if (INTRA_HOLDING_TRANSACTION_TYPES.has(tran.type)) continue
     if (tran.type === transaction_types.PRACTICE_PROTECTED) {
       events.push({
-        sort_ts: tran.timestamp,
+        sort_ts: tran_sort_ts,
         sort_priority: 5, // after acquisitions/releases at the same timestamp
         kind: 'practice_protected',
         tid: tran.tid,
@@ -743,7 +747,7 @@ const build_event_stream = async ({ lid }) => {
     }
     if (tran.type === transaction_types.SUPER_PRIORITY) {
       events.push({
-        sort_ts: tran.timestamp,
+        sort_ts: tran_sort_ts,
         sort_priority: 5, // after releases (priority 1) at the same timestamp
         kind: 'super_priority_resign',
         tid: tran.tid,
@@ -771,7 +775,7 @@ const build_event_stream = async ({ lid }) => {
         tran.uid
       )
       events.push({
-        sort_ts: tran.timestamp,
+        sort_ts: tran_sort_ts,
         sort_priority: 5,
         kind: 'coverage_warning',
         label: 'rfa_tag_cross_team_dual_path_skipped',
@@ -781,7 +785,7 @@ const build_event_stream = async ({ lid }) => {
     }
     if (tran.type === transaction_types.ROSTER_RELEASE) {
       events.push({
-        sort_ts: tran.timestamp,
+        sort_ts: tran_sort_ts,
         sort_priority: 1,
         kind: 'player_release',
         tid: tran.tid,
@@ -791,7 +795,7 @@ const build_event_stream = async ({ lid }) => {
       })
     } else if (PLAYER_ACQUISITION_TRANSACTION_TYPES[tran.type]) {
       events.push({
-        sort_ts: tran.timestamp,
+        sort_ts: tran_sort_ts,
         sort_priority: 2,
         kind: 'player_acquisition',
         tid: tran.tid,
@@ -806,7 +810,7 @@ const build_event_stream = async ({ lid }) => {
       // RFA tag rows are emitted via rfa_cross_team_win events below
       // (same-team tag is intra-roster and treated as a new salary_basis=rfa holding).
       events.push({
-        sort_ts: tran.timestamp,
+        sort_ts: tran_sort_ts,
         sort_priority: 2,
         kind: 'player_acquisition',
         tid: tran.tid,
@@ -819,7 +823,7 @@ const build_event_stream = async ({ lid }) => {
       })
     } else {
       events.push({
-        sort_ts: tran.timestamp,
+        sort_ts: tran_sort_ts,
         sort_priority: 5,
         kind: 'coverage_warning',
         label: `unhandled_transaction_type_${tran.type}`,
@@ -1107,13 +1111,13 @@ const build_event_stream = async ({ lid }) => {
     })
     if (pick.selection_timestamp && pick.pid) {
       events.push({
-        sort_ts: pick.selection_timestamp,
+        sort_ts: timestamptz_to_epoch(pick.selection_timestamp),
         sort_priority: 4, // after DRAFT-transaction acquisition (priority 2) so the player draft exists
         kind: 'pick_conversion',
         tid: pick.tid,
         pickid: pick.uid,
         player_id: pick.pid,
-        occurred_at: new Date(pick.selection_timestamp * 1000)
+        occurred_at: pick.selection_timestamp
       })
     }
   }
@@ -1142,7 +1146,7 @@ const build_event_stream = async ({ lid }) => {
     if (s.rookie_draft_completed_at) {
       rookie_draft_completed_by_year.set(
         s.season_year,
-        Number(s.rookie_draft_completed_at)
+        timestamptz_to_epoch(s.rookie_draft_completed_at)
       )
     }
   }

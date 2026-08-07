@@ -12,6 +12,7 @@ import get_top_restricted_free_agency_bids from '#libs-server/get-top-restricted
 import { selectPlayer, addPlayer } from './utils/index.mjs'
 import { insert_restricted_free_agency_bid } from './utils/insert-restricted-free-agency-bid.mjs'
 import run from '#scripts/process-restricted-free-agency-bids.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -50,11 +51,11 @@ describe('SCRIPTS - restricted free agency processing pause', function () {
     await knex('seasons')
       .update({
         season_year: current_season.year,
-        restricted_free_agency_period_start: tran_date,
+        restricted_free_agency_period_start: epoch_to_timestamptz(tran_date),
         restricted_free_agency_period_end: regular_season_start
           .subtract('1', 'month')
-          .unix(),
-        ext_date: regular_season_start.subtract('4', 'month').unix(),
+          .toDate(),
+        ext_date: regular_season_start.subtract('4', 'month').toDate(),
         restricted_free_agency_first_window_at: dayjs.unix(tran_date).toDate(),
         restricted_free_agency_window_hours: 24,
         restricted_free_agency_processing_lead_hours: 3,

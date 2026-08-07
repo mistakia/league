@@ -37,7 +37,7 @@ describe('SCRIPTS /waivers - poach', function () {
         .update({
           free_agency_live_auction_start: regular_season_start
             .subtract('1', 'week')
-            .unix()
+            .toDate()
         })
         .where('lid', 1)
     })

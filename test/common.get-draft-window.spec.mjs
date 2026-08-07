@@ -341,8 +341,11 @@ describe('LIBS-SHARED getDraftWindow', function () {
   })
 
   describe('get_draft_window_config', function () {
+    // seasons.draft_start is timestamptz, so a real row carries a Date here;
+    // get_draft_window_config is the boundary that turns it back into the epoch
+    // seconds getDraftWindow does arithmetic on.
     const season_row = {
-      draft_start: draft_start_timestamp,
+      draft_start: new Date(draft_start_timestamp * 1000),
       draft_type: 'hour',
       draft_pick_interval: 1,
       draft_hour_min: 9,

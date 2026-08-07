@@ -267,10 +267,11 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .where({ lid: 1, season_year: current_season.year })
         .update({
           free_agency_live_auction_start:
-            free_agency_auction_regular_season_start.unix(),
+            free_agency_auction_regular_season_start.toDate(),
+          // Draft completed before FA
           draft_start: free_agency_auction_regular_season_start
             .subtract('1', 'week')
-            .unix() // Draft completed before FA
+            .toDate()
         })
 
       // Update timestamps to be relative to current mock time
@@ -281,11 +282,13 @@ describe('SCRIPTS - Super Priority Processing', function () {
       // Update existing transactions with proper timestamps
       await knex('transactions')
         .where({ pid: player.pid, type: transaction_types.PRACTICE_ADD })
-        .update({ timestamp: poach_time - 24 * 60 * 60 })
+        .update({
+          occurred_at: epoch_to_timestamptz(poach_time - 24 * 60 * 60)
+        })
 
       await knex('transactions')
         .where({ pid: player.pid, type: transaction_types.POACHED })
-        .update({ timestamp: poach_time })
+        .update({ occurred_at: epoch_to_timestamptz(poach_time) })
 
       await knex('transactions')
         .where({ pid: player.pid, type: transaction_types.ROSTER_RELEASE })
@@ -599,7 +602,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           lid: 1,
           type: transaction_types.SUPER_PRIORITY
         })
-        .orderBy('timestamp', 'desc')
+        .orderBy('occurred_at', 'desc')
         .first()
 
       expect(transaction).to.not.equal(undefined)
