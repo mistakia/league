@@ -9,11 +9,12 @@
 // That is not hypothetical. A restricted free agency bid on a COMPETING team's
 // player names a pid that is not on the bidding team's roster, so every such bid
 // retagged the last roster row and repriced it at the bid amount -- league 1
-// team 11 saw a $34 bid on Drake London reprice Jameson Williams from $8 to $34
-// and the bid dialog quote a max bid of $11 against a true $37 of cap space.
-// Nothing failed: the server is authoritative and accepted the bid, so there was
-// no error, no 4xx, and no signal anywhere. The reducer had carried the shape
-// since 2020.
+// team 11's $34 bid on Drake London repriced Jameson Williams from $8 to $34,
+// which took the dialog's cap-space term from $37 to $11 and its max bid from
+// $60 to $34 (the difference is a $23 conditional release, which the dialog adds
+// on top of cap space). Nothing failed: the server prices from its own roster
+// and accepted the bid, so there was no error, no 4xx, and no signal anywhere.
+// The reducer had carried the shape since 2020.
 //
 // The reducers cannot be imported from mocha -- they resolve `@core/app`,
 // `@core/auction` and `@constants` through webpack aliases -- so this checks the
