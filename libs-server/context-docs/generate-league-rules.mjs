@@ -1,4 +1,5 @@
 import { current_season } from '#constants'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 import {
   scoring_field_labels,
   starting_lineup_labels,
@@ -128,7 +129,10 @@ export default async function generate_league_rules({
     markdown_table(
       ['Setting', 'Value'],
       [
-        ['Extension deadline', format_date_et(league.ext_date)],
+        [
+          'Extension deadline',
+          format_date_et(timestamptz_to_epoch(league.ext_date))
+        ],
         ['Cost per extension', '$5 over the prior season salary']
       ]
     ),
@@ -147,9 +151,9 @@ export default async function generate_league_rules({
       ]
     ),
     `Restricted free agency window: ${format_date_et(
-      league.restricted_free_agency_period_start
+      timestamptz_to_epoch(league.restricted_free_agency_period_start)
     )} to ${format_date_et(
-      league.restricted_free_agency_period_end
+      timestamptz_to_epoch(league.restricted_free_agency_period_end)
     )} — one nomination announced every ${league.restricted_free_agency_window_hours} hours, with bids on it processed ${league.restricted_free_agency_processing_lead_hours} hour(s) before the next announcement.`
   ])
 

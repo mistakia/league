@@ -13,6 +13,7 @@ import {
   TRANSFORMATION_TYPE
 } from '#libs-server/roster-asset-lineage/constants.mjs'
 import { selectPlayer } from './utils/index.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
@@ -75,7 +76,7 @@ describe('LINEAGE - super priority resign', function () {
         type: transaction_types.POACHED,
         player_salary: 10,
         season_year: current_season.year,
-        timestamp: poach_timestamp,
+        occurred_at: epoch_to_timestamptz(poach_timestamp),
         week: current_season.week,
         userid: 2
       },
@@ -86,7 +87,7 @@ describe('LINEAGE - super priority resign', function () {
         type: transaction_types.ROSTER_RELEASE,
         player_salary: 10,
         season_year: current_season.year,
-        timestamp: release_timestamp,
+        occurred_at: epoch_to_timestamptz(release_timestamp),
         week: current_season.week,
         userid: 2
       },
@@ -99,7 +100,7 @@ describe('LINEAGE - super priority resign', function () {
         // PRACTICE_ADD / DRAFT / ROSTER_DEACTIVATE on the original team.
         player_salary: ORIGINAL_SALARY,
         season_year: current_season.year,
-        timestamp: exercise_timestamp,
+        occurred_at: epoch_to_timestamptz(exercise_timestamp),
         week: current_season.week,
         userid: 1
       }

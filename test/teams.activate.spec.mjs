@@ -22,6 +22,7 @@ import {
   invalid,
   error
 } from './utils/index.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 
@@ -417,7 +418,7 @@ describe('API /teams - activate', function () {
         player_salary: 2,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: Math.round(Date.now() / 1000) - 10
+        occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 10)
       })
 
       await addPlayer({
@@ -488,7 +489,9 @@ describe('API /teams - activate', function () {
         player_salary: 1,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: Math.round(Date.now() / 1000) - 60 * 60 * 49 // 49 hours ago
+        occurred_at: epoch_to_timestamptz(
+          Math.round(Date.now() / 1000) - 60 * 60 * 49
+        ) // 49 hours ago
       })
 
       await knex('rosters_players').insert({

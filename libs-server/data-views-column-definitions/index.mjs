@@ -285,7 +285,7 @@ export default {
       query.leftJoin(
         db('transactions')
           .select('pid')
-          .select(db.raw('MAX(timestamp) as latest_timestamp'))
+          .select(db.raw('MAX(occurred_at) as latest_occurred_at'))
           .where('lid', lid)
           .groupBy('pid')
           .as('transactions'),
@@ -295,9 +295,9 @@ export default {
       query.leftJoin('transactions as latest_transactions', function () {
         this.on('latest_transactions.pid', '=', data_view_options.pid_reference)
         this.andOn(
-          'latest_transactions.timestamp',
+          'latest_transactions.occurred_at',
           '=',
-          'transactions.latest_timestamp'
+          'transactions.latest_occurred_at'
         )
       })
     },

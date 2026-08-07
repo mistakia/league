@@ -28,6 +28,6 @@ export default async function ({ leagueId, player, teamId, userId }) {
     player_salary: 0,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp: Math.round(Date.now() / 1000)
+    occurred_at: new Date()
   })
 }

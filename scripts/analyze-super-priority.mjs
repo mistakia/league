@@ -65,7 +65,7 @@ async function analyze_player({ pid, lid }) {
     log(`  Original team: ${cached_record.original_tid}`)
     log(`  Poaching team: ${cached_record.poaching_tid}`)
     log(
-      `  Poach timestamp: ${new Date(cached_record.poach_timestamp * 1000).toLocaleDateString()}`
+      `  Poach timestamp: ${cached_record.poach_timestamp.toLocaleDateString()}`
     )
     log(`  Eligible: ${cached_record.eligible ? 'YES' : 'NO'}`)
     log(`  Claimed: ${cached_record.claimed ? 'YES' : 'NO'}`)
@@ -131,11 +131,9 @@ async function analyze_all_players({ year, lid, validate }) {
   if (eligible_records.length > 0) {
     log(`\n=== CURRENTLY ELIGIBLE PLAYERS ===`)
     for (const record of eligible_records) {
-      const poach_date = new Date(
-        record.poach_timestamp * 1000
-      ).toLocaleDateString()
+      const poach_date = record.poach_timestamp.toLocaleDateString()
       const days_since = Math.floor(
-        (Date.now() / 1000 - record.poach_timestamp) / (24 * 60 * 60)
+        (Date.now() - record.poach_timestamp.getTime()) / (24 * 60 * 60 * 1000)
       )
       log(
         `${record.first_name} ${record.last_name} (${record.primary_position}) - ${record.poaching_team_abbrv} → ${record.original_team_abbrv} | Poached: ${poach_date} (${days_since} days ago)`
@@ -146,11 +144,9 @@ async function analyze_all_players({ year, lid, validate }) {
   if (claimed_records.length > 0) {
     log(`\n=== ALREADY CLAIMED ===`)
     for (const record of claimed_records) {
-      const poach_date = new Date(
-        record.poach_timestamp * 1000
-      ).toLocaleDateString()
+      const poach_date = record.poach_timestamp.toLocaleDateString()
       const claimed_date = record.claimed_at
-        ? new Date(record.claimed_at * 1000).toLocaleDateString()
+        ? record.claimed_at.toLocaleDateString()
         : 'Unknown'
       log(
         `${record.first_name} ${record.last_name} (${record.primary_position}) - Claimed: ${claimed_date} | Originally poached: ${poach_date}`

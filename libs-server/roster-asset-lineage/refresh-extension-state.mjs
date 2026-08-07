@@ -1,5 +1,6 @@
 import db from '#db'
 import { transaction_types } from '#constants/transaction-constants.mjs'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
 import { LAST_RESET_EVENT } from './constants.mjs'
 
@@ -42,9 +43,9 @@ const refresh_extension_state = async ({
   const query = trx || db
 
   const transactions = await query('transactions')
-    .select('uid', 'tid', 'pid', 'type', 'season_year', 'timestamp')
+    .select('uid', 'tid', 'pid', 'type', 'season_year', 'occurred_at')
     .where('lid', lid)
-    .orderBy('timestamp', 'asc')
+    .orderBy('occurred_at', 'asc')
 
   // Cross-team RFA wins: source of TRADED_AWAY-style reset on the losing team.
   const rfa_wins = await query('restricted_free_agency_bids')
@@ -69,7 +70,7 @@ const refresh_extension_state = async ({
     if (!tran.pid) continue
     if (SIMPLE_RESET_TRANSACTION_TYPES.has(tran.type)) {
       reset_events.push({
-        ts: tran.timestamp,
+        ts: timestamptz_to_epoch(tran.occurred_at),
         tid: tran.tid,
         pid: tran.pid,
         event: LAST_RESET_EVENT.RELEASE
@@ -116,7 +117,11 @@ const refresh_extension_state = async ({
   let ri = 0
   for (const tran of transactions) {
     if (!tran.pid) continue
-    while (ri < reset_events.length && reset_events[ri].ts <= tran.timestamp) {
+    // The reset stream carries epoch seconds because its other source,
+    // restricted_free_agency_bids.processed, is still an epoch integer. Merging
+    // a Date into it would compare milliseconds against seconds.
+    const tran_ts = timestamptz_to_epoch(tran.occurred_at)
+    while (ri < reset_events.length && reset_events[ri].ts <= tran_ts) {
       apply_reset(reset_events[ri])
       ri += 1
     }

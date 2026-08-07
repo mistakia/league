@@ -180,11 +180,9 @@ export default class Auction {
 
       const nominating_team_id = this.nominating_team_id
       if (!nominating_team_id) {
-        await db('seasons')
-          .where('lid', this._lid)
-          .update({
-            free_agency_live_auction_end: Math.round(Date.now() / 1000)
-          })
+        await db('seasons').where('lid', this._lid).update({
+          free_agency_live_auction_end: new Date()
+        })
 
         this._league = await getLeague({ lid: this._lid })
         return this.broadcast({ type: 'AUCTION_COMPLETE' })
@@ -733,7 +731,7 @@ export default class Auction {
       player_salary: value,
       week: 0,
       season_year: current_season.year,
-      timestamp: Math.round(Date.now() / 1000)
+      occurred_at: new Date()
     }
 
     const insert_query = await db('transactions').insert(bid).returning('uid')
@@ -762,7 +760,7 @@ export default class Auction {
       lid: this._lid,
       week: 0,
       season_year: current_season.year,
-      timestamp: Math.round(Date.now() / 1000)
+      occurred_at: new Date()
     }
 
     const insert_query = await db('transactions').insert(bid).returning('uid')
@@ -828,7 +826,7 @@ export default class Auction {
       player_salary: bid.player_salary,
       week: 0,
       season_year: bid.season_year,
-      timestamp: Math.round(Date.now() / 1000)
+      occurred_at: new Date()
     }
 
     const insert_query = await db('transactions')
@@ -1098,7 +1096,7 @@ export default class Auction {
         transaction_types.AUCTION_BID,
         transaction_types.AUCTION_PROCESSED
       ])
-      .orderBy('timestamp', 'desc')
+      .orderBy('occurred_at', 'desc')
       .orderBy('uid', 'desc')
   }
 

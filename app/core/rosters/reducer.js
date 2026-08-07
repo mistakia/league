@@ -112,7 +112,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
                   type: t.type,
                   player_salary: t.player_salary,
                   season_year: t.season_year,
-                  timestamp: t.timestamp
+                  occurred_at: t.occurred_at
                 })
             )
           }

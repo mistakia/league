@@ -5,7 +5,7 @@ import knex from '#db'
 
 import league from '#db/fixtures/league.mjs'
 import { current_season, transaction_types, waiver_types } from '#constants'
-import { Errors } from '#libs-shared'
+import { Errors, epoch_to_timestamptz } from '#libs-shared'
 import {
   selectPlayer,
   checkLastTransaction,
@@ -315,7 +315,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         player_salary: 0,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: Math.round(Date.now() / 1000)
+        occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000))
       })
 
       const teamId = 1

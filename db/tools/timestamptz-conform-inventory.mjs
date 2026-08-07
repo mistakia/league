@@ -58,7 +58,7 @@ export const cluster_tables = [
 export const cluster_columns = [
   { table: 'config', column: 'updated_at', audit: true, rename: null },
   { table: 'draft', column: 'selection_timestamp', audit: true, rename: null },
-  { table: 'jobs', column: 'timestamp', audit: true, rename: 'occurred_at' },
+  { table: 'jobs', column: 'timestamp', audit: true, rename: 'run_at' },
   {
     table: 'league_team_daily_values',
     column: 'timestamp',

@@ -6,6 +6,7 @@ import dayjs from 'dayjs'
 import knex from '#db'
 import { transaction_types } from '#constants'
 import calculate_team_daily_ktc_value from '#scripts/calculate-team-daily-ktc-value.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 
@@ -35,7 +36,7 @@ const insert_transaction = async ({ uid, tid, pid, type, date }) =>
     player_salary: 0,
     week: 1,
     season_year: year,
-    timestamp: local_noon(date)
+    occurred_at: epoch_to_timestamptz(local_noon(date))
   })
 
 const insert_valuation = async ({ pid, date, keeptradecut_value }) =>

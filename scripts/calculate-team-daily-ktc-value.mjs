@@ -117,7 +117,7 @@ const get_team = ({ teams_index, tid, transaction, site }) => {
   const team = teams_index[tid]
   if (!team) {
     throw new Error(
-      `team ${tid} absent from league index while applying ${site} for transaction ${transaction.uid} (type ${transaction.type}, ${dayjs.unix(transaction.timestamp).format('YYYY-MM-DD')})`
+      `team ${tid} absent from league index while applying ${site} for transaction ${transaction.uid} (type ${transaction.type}, ${dayjs(transaction.occurred_at).format('YYYY-MM-DD')})`
     )
   }
   return team
@@ -131,7 +131,7 @@ const build_day_inserts = ({
   teams_index,
   keeptradecut_index,
   date,
-  timestamp
+  observed_at
 }) => {
   const day_inserts = []
   let day_ktc_total = 0
@@ -160,7 +160,7 @@ const build_day_inserts = ({
       lid,
       tid: team.uid,
       date,
-      timestamp,
+      observed_at,
       ktc_value: team_ktc_value
     })
   }
@@ -201,9 +201,9 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   const teams_index = {}
   const trades = await get_trades({ lid })
   const transactions = await db('transactions')
-    .select('uid', 'tid', 'pid', 'type', 'timestamp', 'season_year')
+    .select('uid', 'tid', 'pid', 'type', 'occurred_at', 'season_year')
     .where('lid', lid)
-    .orderBy('timestamp', 'asc')
+    .orderBy('occurred_at', 'asc')
 
   const restricted_free_agency_signings =
     await get_restricted_free_agency_signings({ lid })
@@ -243,13 +243,13 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   let last_date = null
   let current_year = null
 
-  const emit_day = ({ date, timestamp }) => {
+  const emit_day = ({ date, observed_at }) => {
     const { day_inserts, coverage } = build_day_inserts({
       lid,
       teams_index,
       keeptradecut_index,
       date,
-      timestamp
+      observed_at
     })
     day_coverage.push(coverage)
     for (const insert of day_inserts) {
@@ -262,14 +262,14 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   // calculate team daily keeptradecut value based on end of day roster's total keeptradecut value
   for (let i = 0; i < transactions.length; i++) {
     const transaction = transactions[i]
-    const tran_date = dayjs.unix(transaction.timestamp).format('YYYY-MM-DD')
+    const tran_date = dayjs(transaction.occurred_at).format('YYYY-MM-DD')
 
     // Emit the previous day before anything from this one is applied. The value
     // being recorded is the END of last_date's roster, so applying the first
     // transaction of the following day first — or letting the year rollover
     // below decommission a team — would fold the next day's state into it.
     if (last_date && tran_date !== last_date) {
-      emit_day({ date: last_date, timestamp: dayjs(last_date).valueOf() })
+      emit_day({ date: last_date, observed_at: dayjs(last_date).toDate() })
     }
 
     if (!current_year || current_year !== transaction.season_year) {
@@ -426,16 +426,19 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     }
 
     // check if next tran date is larger than the max interval
-    const next_tran_date = dayjs.unix(transactions[i + 1]?.timestamp)
-    if (next_tran_date.diff(transaction.timestamp, 'day') > max_day_interval) {
+    const next_tran_date = dayjs(transactions[i + 1]?.occurred_at)
+    if (
+      next_tran_date.diff(transaction.occurred_at, 'day') > max_day_interval
+    ) {
       // calculate team daily keeptradecut value for days in between based on max_day_interval
-      let cursor_date = dayjs
-        .unix(transaction.timestamp)
-        .add(max_day_interval, 'day')
+      let cursor_date = dayjs(transaction.occurred_at).add(
+        max_day_interval,
+        'day'
+      )
       while (cursor_date < next_tran_date) {
         emit_day({
           date: cursor_date.format('YYYY-MM-DD'),
-          timestamp: cursor_date.valueOf()
+          observed_at: cursor_date.toDate()
         })
         cursor_date = cursor_date.add(max_day_interval, 'day')
       }
@@ -455,7 +458,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     while (cursor_date < present_date) {
       emit_day({
         date: cursor_date.format('YYYY-MM-DD'),
-        timestamp: cursor_date.valueOf()
+        observed_at: cursor_date.toDate()
       })
       cursor_date = cursor_date.add(max_day_interval, 'day')
     }

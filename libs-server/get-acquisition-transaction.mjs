@@ -8,7 +8,7 @@ export default async function ({ lid, pid, tid, year, week }) {
       tid,
       pid
     })
-    .orderBy('timestamp', 'desc')
+    .orderBy('occurred_at', 'desc')
     .orderBy('uid', 'desc')
 
   if (year) {

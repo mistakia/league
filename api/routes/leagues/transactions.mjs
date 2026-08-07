@@ -194,7 +194,7 @@ router.get('/?', async (req, res) => {
       })
       .select('transactions.*', 'draft.pick', 'draft.pick_str')
       .where({ 'transactions.lid': leagueId })
-      .orderBy('transactions.timestamp', 'desc')
+      .orderBy('transactions.occurred_at', 'desc')
       .orderBy('transactions.uid', 'desc')
       .limit(limit)
       .offset(offset)
@@ -212,7 +212,13 @@ router.get('/?', async (req, res) => {
     }
 
     if (since) {
-      query = query.where('transactions.timestamp', '>', since)
+      // `since` is a unix-seconds query parameter (the documented public
+      // contract); transactions.occurred_at is timestamptz, so bind a Date.
+      query = query.where(
+        'transactions.occurred_at',
+        '>',
+        new Date(Number(since) * 1000)
+      )
     }
 
     const transactions = await query
@@ -302,7 +308,7 @@ router.get('/release', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const cutoff = dayjs().subtract('48', 'hours').unix()
+    const cutoff = dayjs().subtract('48', 'hours').toDate()
     const types = [
       transaction_types.ROSTER_ADD,
       transaction_types.ROSTER_RELEASE,
@@ -313,8 +319,8 @@ router.get('/release', async (req, res) => {
         lid: leagueId
       })
       .whereIn('type', types)
-      .where('timestamp', '>', cutoff)
-      .orderBy('timestamp', 'desc')
+      .where('occurred_at', '>', cutoff)
+      .orderBy('occurred_at', 'desc')
       .orderBy('uid', 'desc')
 
     res.send(transactions)

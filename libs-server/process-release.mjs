@@ -263,7 +263,9 @@ export default async function ({
       player_salary,
       week: current_season.week,
       season_year: current_season.year,
-      timestamp
+      // poaches.processed below is still epoch seconds, so the local stays an
+      // integer and transactions.occurred_at converts here.
+      occurred_at: new Date(timestamp * 1000)
     }
     const [inserted_transaction] = await db('transactions')
       .insert(transaction)
@@ -304,7 +306,7 @@ export default async function ({
     player_salary: 0,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp
+    occurred_at: new Date(timestamp * 1000)
   }
   const [inserted_transaction] = await db('transactions')
     .insert(transaction)

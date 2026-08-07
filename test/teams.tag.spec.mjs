@@ -21,6 +21,7 @@ import {
   invalid,
   error
 } from './utils/index.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 
@@ -250,7 +251,9 @@ describe('API /teams - tag', function () {
         player_salary: 0,
         week: 0,
         season_year: two_years_ago,
-        timestamp: Math.round(Date.now() / 1000) - 63072000 // Approx 2 years ago
+        occurred_at: epoch_to_timestamptz(
+          Math.round(Date.now() / 1000) - 63072000
+        ) // Approx 2 years ago
       })
 
       // Add franchise tag transaction from one year ago
@@ -263,7 +266,9 @@ describe('API /teams - tag', function () {
         player_salary: 0,
         week: 0,
         season_year: one_year_ago,
-        timestamp: Math.round(Date.now() / 1000) - 31536000 // Approx 1 year ago
+        occurred_at: epoch_to_timestamptz(
+          Math.round(Date.now() / 1000) - 31536000
+        ) // Approx 1 year ago
       })
 
       // Attempt to add a franchise tag for the current year

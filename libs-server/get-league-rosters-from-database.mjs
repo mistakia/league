@@ -49,7 +49,7 @@ export default async function ({
       'rosters_players.roster_id as rid',
       'transactions.type',
       'transactions.player_salary',
-      'transactions.timestamp',
+      'transactions.occurred_at',
       'transactions.season_year'
     )
     .join('rosters', 'rosters_players.roster_id', '=', 'rosters.uid')

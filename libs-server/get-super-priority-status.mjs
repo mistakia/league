@@ -79,7 +79,7 @@ async function calculate_super_priority_from_source({
   }
 
   const most_recent_transaction = await most_recent_transaction_query
-    .orderBy('timestamp', 'desc')
+    .orderBy('occurred_at', 'desc')
     .orderBy('uid', 'desc') // Secondary sort by uid for same-timestamp transactions
     .limit(1)
 
@@ -105,34 +105,34 @@ async function calculate_super_priority_from_source({
     // Find poaches that happened before or at this release
     let query = db('transactions')
       .where({ pid, lid, type: transaction_types.POACHED })
-      .where('timestamp', '<=', current_release.timestamp)
+      .where('occurred_at', '<=', current_release.occurred_at)
 
     // Filter by release_tid if provided
     if (release_tid !== null) {
       query = query.where('tid', release_tid)
     }
 
-    poached_transactions = await query.orderBy('timestamp', 'desc').limit(1)
+    poached_transactions = await query.orderBy('occurred_at', 'desc').limit(1)
   } else {
     // For rostered players: consider poaches that happened AFTER the most recent release
     // Player was: released → poached → still rostered
     const most_recent_release = await db('transactions')
       .where({ pid, lid, type: transaction_types.ROSTER_RELEASE })
-      .orderBy('timestamp', 'desc')
+      .orderBy('occurred_at', 'desc')
       .limit(1)
 
     if (most_recent_release.length) {
       // Find poaches after the most recent release
       let query = db('transactions')
         .where({ pid, lid, type: transaction_types.POACHED })
-        .where('timestamp', '>=', most_recent_release[0].timestamp)
+        .where('occurred_at', '>=', most_recent_release[0].occurred_at)
 
       // Filter by release_tid if provided
       if (release_tid !== null) {
         query = query.where('tid', release_tid)
       }
 
-      poached_transactions = await query.orderBy('timestamp', 'desc').limit(1)
+      poached_transactions = await query.orderBy('occurred_at', 'desc').limit(1)
     } else {
       // No release found, consider all poaches
       let query = db('transactions').where({
@@ -146,7 +146,7 @@ async function calculate_super_priority_from_source({
         query = query.where('tid', release_tid)
       }
 
-      poached_transactions = await query.orderBy('timestamp', 'desc').limit(1)
+      poached_transactions = await query.orderBy('occurred_at', 'desc').limit(1)
     }
   }
 
@@ -165,14 +165,17 @@ async function calculate_super_priority_from_source({
 
   const poach_transaction = poached_transactions[0]
   const poaching_tid = poach_transaction.tid
-  const poach_timestamp = poach_transaction.timestamp
+  // transactions.occurred_at is timestamptz, so this is a Date. It flows
+  // straight into super_priority.poach_timestamp, which is timestamptz too, so
+  // the whole chain stays a Date and nothing converts to epoch in between.
+  const poach_occurred_at = poach_transaction.occurred_at
 
   // Find the original team by looking at transactions before or at the poach time
   // Use <= to handle immediate release scenarios where all transactions have same timestamp
   // Exclude the poach transaction itself by filtering out transactions from the poaching team
   const pre_poach_transactions = await db('transactions')
     .where({ pid, lid })
-    .where('timestamp', '<=', poach_timestamp)
+    .where('occurred_at', '<=', poach_occurred_at)
     .whereNot('tid', poaching_tid) // Exclude poaching team's transactions
     .whereIn('type', [
       transaction_types.PRACTICE_ADD,
@@ -181,7 +184,7 @@ async function calculate_super_priority_from_source({
       transaction_types.ROSTER_DEACTIVATE,
       transaction_types.POACHED
     ])
-    .orderBy('timestamp', 'desc')
+    .orderBy('occurred_at', 'desc')
     .orderBy('uid', 'desc')
     .limit(1)
 
@@ -205,7 +208,7 @@ async function calculate_super_priority_from_source({
       transaction_types.TRADE,
       transaction_types.RESTRICTED_FREE_AGENCY_TAG
     ])
-    .where('timestamp', '>', poach_timestamp)
+    .where('occurred_at', '>', poach_occurred_at)
     .limit(1)
 
   if (disqualifying_transactions.length) {
@@ -223,7 +226,7 @@ async function calculate_super_priority_from_source({
   const extension_transactions = await db('transactions')
     .where({ pid, tid: poaching_tid, lid })
     .where('type', transaction_types.EXTENSION)
-    .where('timestamp', '>', poach_timestamp)
+    .where('occurred_at', '>', poach_occurred_at)
     .limit(1)
 
   // Roster snapshots are scoped to the poach year — for prior-season poaches
@@ -333,10 +336,10 @@ async function calculate_super_priority_from_source({
     eligible: true,
     original_tid,
     poaching_tid,
-    poach_date: new Date(poach_timestamp * 1000),
-    poach_timestamp,
+    poach_date: poach_occurred_at,
+    poach_timestamp: poach_occurred_at,
     weeks_since_poach: Math.floor(
-      (Date.now() / 1000 - poach_timestamp) / (7 * 24 * 60 * 60)
+      (Date.now() - poach_occurred_at.getTime()) / (7 * 24 * 60 * 60 * 1000)
     )
   }
 }

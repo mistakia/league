@@ -9,11 +9,12 @@ dayjs.extend(timezone)
 
 export default async function (leagueId) {
   // get relevant transactions from last 24 hours
-  const cutoff = dayjs().subtract('24', 'hours').unix()
+  // transactions.occurred_at is timestamptz, so the bound is a Date.
+  const cutoff = dayjs().subtract('24', 'hours').toDate()
 
   const recent_transaction_rows = await db('transactions')
     .where('type', transaction_types.ROSTER_RELEASE)
-    .where('timestamp', '>=', cutoff)
+    .where('occurred_at', '>=', cutoff)
     .where('lid', leagueId)
 
   const recent_transaction_pids = recent_transaction_rows.map((t) => t.pid)

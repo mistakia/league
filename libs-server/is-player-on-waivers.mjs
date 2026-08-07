@@ -5,15 +5,16 @@ import { transaction_types } from '#constants'
 
 export default async function ({ pid, leagueId }) {
   // get last two transactions for player
-  const cutoff = dayjs().subtract('48', 'hours').unix()
+  // transactions.occurred_at is timestamptz, so the bound is a Date.
+  const cutoff = dayjs().subtract('48', 'hours').toDate()
   const transactions = await db('transactions')
     .where({
       lid: leagueId,
       pid
     })
     .whereNot('type', transaction_types.ROSTER_ACTIVATE)
-    .where('timestamp', '>', cutoff)
-    .orderBy('timestamp', 'desc')
+    .where('occurred_at', '>', cutoff)
+    .orderBy('occurred_at', 'desc')
     .orderBy('uid', 'desc')
     .limit(2)
 

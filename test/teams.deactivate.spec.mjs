@@ -23,6 +23,7 @@ import {
   error
 } from './utils/index.mjs'
 import run from '#scripts/process-waivers-free-agency-active.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 
@@ -85,7 +86,11 @@ describe('API /teams - deactivate', function () {
       )
       res.body.transaction.player_salary.should.equal(value)
       res.body.transaction.season_year.should.equal(current_season.year)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // occurred_at is timestamptz, so it serializes as an ISO string; compare
+      // to the second rather than to an epoch integer.
+      Math.round(
+        new Date(res.body.transaction.occurred_at).getTime() / 1000
+      ).should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({
@@ -161,7 +166,11 @@ describe('API /teams - deactivate', function () {
       )
       res.body.transaction.player_salary.should.equal(value)
       res.body.transaction.season_year.should.equal(current_season.year)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // occurred_at is timestamptz, so it serializes as an ISO string; compare
+      // to the second rather than to an epoch integer.
+      Math.round(
+        new Date(res.body.transaction.occurred_at).getTime() / 1000
+      ).should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({
@@ -380,7 +389,7 @@ describe('API /teams - deactivate', function () {
         player_salary: 2,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: Math.round(Date.now() / 1000) - 10
+        occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 10)
       })
 
       await addPlayer({

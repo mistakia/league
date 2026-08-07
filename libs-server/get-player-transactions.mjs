@@ -2,7 +2,7 @@ import db from '#db'
 
 export default async function ({ lid, pids }) {
   const sub_query = db('transactions')
-    .select(db.raw('max(timestamp) AS maxtime, pid AS playerid'))
+    .select(db.raw('max(occurred_at) AS maxtime, pid AS playerid'))
     .groupBy('pid')
     .where('lid', lid)
     .as('sub_query')
@@ -13,7 +13,7 @@ export default async function ({ lid, pids }) {
     .innerJoin('transactions', function () {
       this.on(function () {
         this.on('playerid', '=', 'pid')
-        this.andOn('maxtime', '=', 'timestamp')
+        this.andOn('maxtime', '=', 'occurred_at')
       })
     })
     .where('lid', lid)

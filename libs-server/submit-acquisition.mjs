@@ -233,7 +233,7 @@ export default async function ({
     week: current_season.week,
     season_year: current_season.year,
     waiverid: waiverId,
-    timestamp: Math.round(Date.now() / 1000)
+    occurred_at: new Date()
   }
   await db('transactions').insert(addTransaction)
 

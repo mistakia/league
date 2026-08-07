@@ -16,7 +16,7 @@ function LeagueRecentTransaction({ transaction }) {
       </div>
       <PlayerName headshot_width={48} headshot_square pid={transaction.pid} />
       <div className='transaction__timestamp'>
-        {timeago.format(transaction.timestamp * 1000, 'league_short')}
+        {timeago.format(new Date(transaction.occurred_at), 'league_short')}
       </div>
     </div>
   )

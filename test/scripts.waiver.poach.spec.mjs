@@ -11,7 +11,7 @@ import {
   transaction_types,
   waiver_types
 } from '#constants'
-import { Errors } from '#libs-shared'
+import { Errors, epoch_to_timestamptz } from '#libs-shared'
 import { selectPlayer, addPlayer } from './utils/index.mjs'
 import run from '#scripts/process-poaching-waivers.mjs'
 
@@ -738,7 +738,7 @@ describe('SCRIPTS /waivers - poach', function () {
         player_salary: 1,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: Math.round(Date.now() / 1000)
+        occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000))
       })
 
       MockDate.set(

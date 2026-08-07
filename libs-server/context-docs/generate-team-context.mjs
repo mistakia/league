@@ -1,4 +1,5 @@
 import { current_season, transaction_type_display_names } from '#constants'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
 import where_outstanding_draft_pick from '../where-outstanding-draft-pick.mjs'
 
@@ -75,7 +76,7 @@ export default async function generate_team_context({
   const roster_pids = roster.all.map((player) => player.pid)
   const recent_transactions = await db('transactions')
     .where({ lid, tid, season_year: year })
-    .orderBy('timestamp', 'desc')
+    .orderBy('occurred_at', 'desc')
     .orderBy('uid', 'desc')
     .limit(10)
   const players = await get_players({
@@ -220,7 +221,7 @@ export default async function generate_team_context({
       ? markdown_table(
           ['Date', 'Action', 'Player', 'Amount'],
           recent_transactions.map((t) => [
-            format_date_et(t.timestamp),
+            format_date_et(timestamptz_to_epoch(t.occurred_at)),
             transaction_type_display_names[t.type] || `Type ${t.type}`,
             t.pid ? players[t.pid]?.name || t.pid : '—',
             `$${t.player_salary}`

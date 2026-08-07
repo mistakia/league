@@ -671,11 +671,13 @@ router.post('/?', async (req, res) => {
       type: transaction_types.DRAFT,
       week: current_season.week,
       season_year: current_season.year,
-      timestamp: Math.round(Date.now() / 1000),
+      occurred_at: new Date(),
       player_salary: value
     })
 
-    const selection_timestamp = Math.round(Date.now() / 1000)
+    // draft.selection_timestamp is timestamptz, as is
+    // seasons.rookie_draft_completed_at that close_rookie_draft writes below.
+    const selection_timestamp = new Date()
 
     await db('draft').where({ uid: pickId }).update({
       pid,
@@ -702,7 +704,7 @@ router.post('/?', async (req, res) => {
       })
 
       logger(
-        `Rookie draft completed for league ${lid} at ${selection_timestamp}`
+        `Rookie draft completed for league ${lid} at ${selection_timestamp.toISOString()}`
       )
     }
 

@@ -73,7 +73,7 @@ export default function DraftPage({
 
   const draftActive =
     league.draft_start &&
-    dayjs().isAfter(dayjs.unix(league.draft_start).startOf('day'))
+    dayjs().isAfter(dayjs(league.draft_start).startOf('day'))
 
   const picksSorted = picks.sort((a, b) => a.round - b.round || a.pick - b.pick)
   // previous pick might not be pick - 1 if it belonged to a commissioned team
@@ -91,7 +91,7 @@ export default function DraftPage({
 
   let draftInfo
   if (league.draft_start) {
-    const start = dayjs.unix(league.draft_start).startOf('day')
+    const start = dayjs(league.draft_start).startOf('day')
     if (dayjs().isBefore(start)) {
       draftInfo = (
         <div className='draft__side-top-pick'>

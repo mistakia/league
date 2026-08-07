@@ -31,6 +31,7 @@ import {
   format_date_et,
   doc_url
 } from '#libs-server/context-docs/index.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 chai.should()
@@ -107,7 +108,7 @@ const seed_full_league = async () => {
       player_salary: 50,
       week: 0,
       season_year: year,
-      timestamp: Math.round(Date.now() / 1000) - 100,
+      occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 100),
       userid: 1
     },
     {
@@ -118,7 +119,7 @@ const seed_full_league = async () => {
       player_salary: 5,
       week: 0,
       season_year: year,
-      timestamp: Math.round(Date.now() / 1000) - 200,
+      occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 200),
       userid: 1
     }
   ])
@@ -463,7 +464,7 @@ describe('context documents', function () {
         player_salary: 20,
         week: 0,
         season_year: year,
-        timestamp: Math.round(Date.now() / 1000) - 300,
+        occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 300),
         userid: 1
       })
       await knex('rosters_players').insert({

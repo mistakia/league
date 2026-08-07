@@ -321,7 +321,7 @@ export default async function ({
       player_salary,
       week: current_season.week,
       season_year: current_season.year,
-      timestamp: Math.round(Date.now() / 1000)
+      occurred_at: new Date()
     }
     await db('transactions').insert(transaction)
 
@@ -380,7 +380,9 @@ export default async function ({
       player_salary,
       week: current_season.week,
       season_year: current_season.year,
-      timestamp
+      // poaches.processed below still takes epoch seconds, so the local stays
+      // an integer and transactions.occurred_at converts here.
+      occurred_at: new Date(timestamp * 1000)
     }
     await db('transactions').insert(activate_transaction)
 
@@ -408,7 +410,7 @@ export default async function ({
     player_salary,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp
+    occurred_at: new Date(timestamp * 1000)
   }
   await db('transactions').insert(transaction)
 
