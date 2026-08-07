@@ -337,7 +337,11 @@ export const get_market_type_offer_1759 = (subcategoryId) => {
     case 17315:
       return player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
 
+    // DraftKings re-keys the receptions subcategory each season: 18435 carried
+    // it through 2025 (last observed 2025-09-05) and 20168 replaced it for
+    // 2026. They never overlap, so both map to the same type.
     case 18435:
+    case 20168:
       return player_prop_types.SEASON_RECEPTIONS
 
     case 17316:
