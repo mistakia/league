@@ -133,6 +133,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
 
         payload.data.forEach(({ pid, slot }) => {
           const index = players.findIndex((p) => p.pid === pid)
+          if (index === -1) return
+
           state.setIn(
             [
               tid,
@@ -163,6 +165,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         if (!players) return state
 
         const index = players.findIndex((p) => p.pid === payload.data.pid)
+        if (index === -1) return state
+
         if (payload.data.slot) {
           state.setIn(
             [
@@ -268,6 +272,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         if (!players) return state
 
         const index = players.findIndex((p) => p.pid === payload.opts.pid)
+        if (index === -1) return state
+
         state.setIn(
           [
             payload.opts.teamId,
@@ -282,6 +288,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
 
         if (payload.opts.remove) {
           const index = players.findIndex((p) => p.pid === payload.opts.remove)
+          if (index === -1) return state
+
           state.setIn(
             [
               payload.opts.teamId,
@@ -322,6 +330,14 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         if (!players) return state
 
         const index = players.findIndex((p) => p.pid === payload.pid)
+
+        // A bid on a COMPETING team's restricted free agent names a player who
+        // is not on this roster, so `findIndex` returns -1 -- and Immutable
+        // resolves a negative index to the LAST element, which made every such
+        // bid retag the last roster row and reprice it at the bid amount. There
+        // is nothing to update locally in that case: the player joins the
+        // roster only when the auction settles server-side.
+        if (index === -1) return state
 
         // Store previous state for potential reversion
         const previous_tag = state.getIn([
@@ -384,6 +400,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           const remove_index = players.findIndex(
             (p) => p.pid === payload.remove
           )
+          if (remove_index === -1) return state
 
           // Store the removed player's tag before changing it
           const removed_player_tag = state.getIn([
@@ -434,6 +451,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
       if (!players) return state
 
       const index = players.findIndex((p) => p.pid === payload.pid)
+      if (index === -1) return state
+
       return state.mergeIn(
         [
           payload.teamId,
@@ -461,6 +480,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         if (!players) return state
 
         const index = players.findIndex((p) => p.pid === payload.opts.pid)
+        if (index === -1) return state
 
         // Get previous state if available
         const previous_state = state.getIn([

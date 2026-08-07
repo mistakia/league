@@ -62,11 +62,15 @@ export function draft_reducer(state = initialState(), { payload, type }) {
     case draft_actions.DRAFTED_PLAYER:
     case draft_actions.POST_DRAFT_FULFILLED: {
       const { data } = payload
+      // Immutable resolves a negative index to the LAST element, so an
+      // unrecognised pick would write the drafted player onto whichever pick
+      // happens to be last rather than being ignored.
+      const index = state.picks.findIndex((i) => i.uid === data.uid)
       return state.merge({
-        picks: state.picks.setIn(
-          [state.picks.findIndex((i) => i.uid === data.uid), 'pid'],
-          data.pid
-        ),
+        picks:
+          index === -1
+            ? state.picks
+            : state.picks.setIn([index, 'pid'], data.pid),
         drafted: state.drafted.push(data.pid)
       })
     }
