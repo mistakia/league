@@ -14,9 +14,11 @@
 -- rollback for everything after it.
 --
 -- ---------------------------------------------------------------------------
--- SIX RENAMES, NOT SEVEN. pff_unresolved_players.position is deliberately NOT
--- in this file.
+-- SEVEN RENAMES, AND THE SEVENTH TAKES A DIFFERENT NAME.
 -- ---------------------------------------------------------------------------
+--
+-- pff_unresolved_players.position becomes pff_position, NOT player_position --
+-- operator ruling 2026-08-07.
 --
 -- That column is a ruled exemption from the position vocabulary, recorded in
 -- db/adhoc/2026-08-04-constrain-position-vocabulary.sql:
@@ -32,17 +34,24 @@
 -- vendor string with no normalize_position call, which is the point of the
 -- table: it records what PFF emitted for a player the resolver could not match.
 --
--- So the column does not hold a canonical player position, and naming it
--- player_position would assert a vocabulary it does not carry. The table
--- already spells the raw-vendor/canonical split as pff_nfl_team vs nfl_team, so
--- the consistent target is pff_position -- but that is a NEW name, not a
--- settled precedent, and it needs an operator ruling. Held out pending that.
--- The reserved_word finding on that column therefore survives this apply.
+-- So the column does not hold a canonical player position, and player_position
+-- would assert a vocabulary it does not carry. The table already spells the
+-- raw-vendor/canonical split as pff_nfl_team vs nfl_team, and pff_position
+-- completes that pairing -- the canonical nfl_team slot is NULL on these rows
+-- precisely because resolution failed.
 --
--- No CHECK constraint is added anywhere in this file. Five of the six
--- position columns already carry the vocabulary CHECK (added 2026-08-04); the
--- sixth is the exemption above. Adding it there would fail on 1,123 rows, and
--- widening the vocabulary to accommodate vendor spellings is the wrong remedy.
+-- The ruling's substance, which constrains any future change to this table:
+-- fidelity to what PFF emitted is the REQUIREMENT, not a preference. The rows
+-- exist so an unmatched player can be matched later, and normalizing on write
+-- would destroy the evidence that makes that possible. ST is the proof -- it is
+-- absent from position_alias_map, so a normalizing writer would THROW rather
+-- than log the miss. Do not add normalize_position to that write path.
+--
+-- No CHECK constraint is added anywhere in this file, and none belongs on
+-- pff_position. Five of the six player-position columns already carry the
+-- vocabulary CHECK (added 2026-08-04); constraining the seventh would fail on
+-- 1,123 rows, and widening the vocabulary to accommodate vendor spellings is
+-- the wrong remedy. No stored value is touched by this file.
 --
 -- ---------------------------------------------------------------------------
 -- Scope and safety
@@ -57,11 +66,14 @@
 -- Row counts at authoring time: nfl_draft_rankings_history 0,
 -- nfl_draft_rankings_index 0, pff_player_facet_gamelogs 0,
 -- pff_player_facet_seasonlogs 21,751, pff_player_seasonlogs 34,613,
--- player_contracts 51,003. RENAME COLUMN is catalog-only, so size is
--- irrelevant -- no rewrite, no lock beyond the catalog update.
+-- pff_unresolved_players 5,551, player_contracts 51,003. RENAME COLUMN is
+-- catalog-only, so size is irrelevant -- no rewrite, no lock beyond the
+-- catalog update.
 --
 -- All five renamed constraint identifiers are 48-54 bytes, under the 63-byte
--- cap that would otherwise truncate with only a NOTICE.
+-- cap that would otherwise truncate with only a NOTICE. pff_unresolved_players
+-- carries no CHECK to rename, and no table here has an index on a renamed
+-- column.
 --
 -- ---------------------------------------------------------------------------
 -- Consumer repoint (must land in the same window as this apply)
@@ -75,10 +87,15 @@
 --     libs-server/data-views-column-definitions/player-pff-seasonlogs-column-definitions.mjs
 --     scripts/import-player-contracts-nflverse.mjs
 --   private:
+--     libs-server/pff-archive.mjs                      (pff_position)
 --     scripts/import-pff-archive-player-facet-gamelogs.mjs
 --     scripts/import-pff-archive-player-facet-seasonlogs.mjs
 --     scripts/import-pff-archive-player-seasonlogs.mjs
 --     scripts/import-pff-seasonlogs.mjs
+--
+-- pff-archive.mjs needs BOTH halves of the upsert moved: the insert payload key
+-- and the .merge() list both name the column, and both are object shorthand
+-- that no table-qualified grep reaches.
 --
 -- The subtle one: import-pff-archive-player-seasonlogs.mjs project_row() copies
 -- a PFF row key straight through when the table has a column of that name. PFF
@@ -120,6 +137,9 @@ ALTER TABLE public.pff_player_seasonlogs
 ALTER TABLE public.pff_player_seasonlogs
   RENAME CONSTRAINT pff_player_seasonlogs_position_vocabulary
                  TO pff_player_seasonlogs_player_position_vocabulary;
+
+ALTER TABLE public.pff_unresolved_players
+  RENAME COLUMN "position" TO pff_position;
 
 ALTER TABLE public.player_contracts
   RENAME COLUMN team TO nfl_team;
