@@ -61,8 +61,8 @@
 //   node db/gates/check-knex-column-resolution.mjs --unadjudicated
 //
 // Exit 1 on an unadjudicated finding, on a stale adjudication, on a failed
-// negative control, or on coverage falling under its floor. Exit 2 on a missing
-// schema file.
+// negative control, or on a declared corpus root contributing nothing. Exit 2 on a
+// missing schema file.
 //
 // ACCEPTANCE TEST -- proven, not asserted. In a worktree at `37cc9f36b~1` with
 // this gate and its adjudications copied in (the gate is a SCANNER, so the code
@@ -75,10 +75,18 @@
 // reports neither and exits 0.
 //
 // NEGATIVE CONTROLS run on EVERY invocation and a control reporting STAYED GREEN
-// fails the run, per the runner's rule. There are five, and two of them run in
+// fails the run, per the runner's rule. There are six, and two of them run in
 // the OVER-EAGER direction, because half of what this gate does is decide that a
 // token is NOT a column reference and an over-eager filter fails in the direction
 // that looks like success. See run_negative_controls.
+//
+// The first four are also what proves the scan is not vacuous, which is why this
+// gate carries no coverage-floor number. Measured by emptying the corpus, by making
+// statement extraction return nothing, and by making alias binding always fail: all
+// four go red with NO MATERIAL in every case, because each one has to FIND real
+// corpus material of its shape before it can mutate it. Coverage is asserted only
+// where those controls are blind -- per root, since one root going dark leaves
+// plenty of material for a control to pick. See ROOT_EXPECTATIONS.
 //
 // BLIND SPOTS -- a floor, not a proof.
 //   - A `db.raw(...)` body is not parsed. Raw SQL is arbitrary text and a
@@ -109,7 +117,39 @@ const adjudications_path = path.join(
   'knex-column-resolution-adjudications.json'
 )
 
-const SERVER_ROOTS = ['api', 'libs-server', 'libs-shared', 'scripts', 'jobs']
+// The corpus, declared as an EXPECTATION per root rather than as a bare list.
+// `queries_the_database` is what each root must prove about itself: every root
+// here opens knex statements except `libs-shared`, which is isomorphic and reaches
+// the SPA bundle, where there is no knex and no `process`. So the `false` is not a
+// coverage exemption -- it is an architectural assertion, and a knex statement
+// appearing there is a finding rather than a number moving.
+//
+// This is asserted PER ROOT, and it replaced three global minimums on files
+// scanned, statements parsed and references resolved. Two reasons, one measured.
+// The global floors were redundant: with the corpus emptied, FOUR of the negative
+// controls below already fail with NO MATERIAL, as they do when statement
+// extraction returns nothing or alias binding always fails, so nothing was left
+// for a floor to catch on the vacuous-scan case it was written for. And they could
+// not see the failure that is actually reachable here -- ONE root going dark, which
+// `walk_files` swallows by design, since it treats an unreadable directory as
+// empty. `jobs` contributes 4 statements of 1493, so no plausible global number
+// notices its loss; the three that stood sat at 22%, 54% and 45% of live coverage,
+// loose enough that a scan could silently halve and still pass. They were also
+// hand-maintained numbers, which operation-log entry 005 records as the same class
+// of thing as a header someone must remember to rewrite: ordinary churn moves them,
+// so an exact match turns unrelated commits red and a loose band is what you get.
+//
+// Nothing below is a measurement, so nothing here needs maintaining when coverage
+// changes. `SERVER_ROOTS` derives from it so the two cannot disagree.
+const ROOT_EXPECTATIONS = {
+  api: { queries_the_database: true },
+  'libs-server': { queries_the_database: true },
+  'libs-shared': { queries_the_database: false },
+  scripts: { queries_the_database: true },
+  jobs: { queries_the_database: true }
+}
+
+const SERVER_ROOTS = Object.keys(ROOT_EXPECTATIONS)
 
 // The identifiers that OPEN a knex statement. `db` and `trx` are what this repo
 // writes (1405 and 76 call sites); `knex` is accepted because it is the library's
@@ -135,14 +175,6 @@ const TABLE_BINDING_METHODS = [
 // A statement long enough to contain its own projection and predicates. The same
 // bound `check-renamed-column-consumers` uses, for the same reason.
 const STATEMENT_SCAN_LIMIT = 8000
-
-// Coverage floors. A resolution change that walks zero files, or stops binding
-// aliases, would otherwise pass vacuously forever -- which is exactly how the
-// physical-season-columns spec shipped enforcing nothing (operation-log 005).
-// These are asserted, not printed.
-const MIN_FILES_SCANNED = 200
-const MIN_STATEMENTS_PARSED = 800
-const MIN_REFERENCES_RESOLVED = 1500
 
 // ---------------------------------------------------------------------------
 // schema
@@ -536,19 +568,76 @@ const run_scan = (tables, { source_override } = {}) => {
     unchecked_no_binding: 0,
     unchecked_shadowed: 0,
     unchecked_unbound_prefix: 0,
-    unchecked_ambiguous: 0
+    unchecked_ambiguous: 0,
+    // Per root, so the coverage verdict can name WHICH root went dark rather than
+    // reporting a total that moves with every ordinary commit.
+    by_root: {}
   }
   const findings = []
-  for (const file of walk_files(SERVER_ROOTS, ['.mjs', '.js'])) {
-    const relative_path = path.relative(repo_root, file)
-    const source =
-      source_override && source_override.file === relative_path
-        ? source_override.source
-        : fs.readFileSync(file, 'utf8')
-    stats.files += 1
-    findings.push(...scan_source({ source, relative_path, tables, stats }))
+  for (const root of SERVER_ROOTS) {
+    const at_root_start = {
+      files: stats.files,
+      statements: stats.statements,
+      resolved: stats.resolved
+    }
+    for (const file of walk_files([root], ['.mjs', '.js'])) {
+      const relative_path = path.relative(repo_root, file)
+      const source =
+        source_override && source_override.file === relative_path
+          ? source_override.source
+          : fs.readFileSync(file, 'utf8')
+      stats.files += 1
+      findings.push(...scan_source({ source, relative_path, tables, stats }))
+    }
+    stats.by_root[root] = {
+      files: stats.files - at_root_start.files,
+      statements: stats.statements - at_root_start.statements,
+      resolved: stats.resolved - at_root_start.resolved
+    }
   }
   return { findings, stats }
+}
+
+// ---------------------------------------------------------------------------
+// coverage
+// ---------------------------------------------------------------------------
+
+/**
+ * The coverage verdict, as a pure function of the per-root counts so a control can
+ * drive it with a root deliberately darkened.
+ *
+ * Every root must contribute at least one FILE -- a root contributing none is the
+ * path-depth failure `db/README.md` records, where this tooling resolves the repo
+ * root as `path.join(__dirname, '..', '..')` and a move to a different depth
+ * silently empties the scan set at exit 0. A root that queries the database must
+ * additionally contribute at least one STATEMENT, and one that does not must
+ * contribute exactly zero.
+ */
+const evaluate_root_coverage = (by_root) => {
+  const failures = []
+  for (const [root, expectation] of Object.entries(ROOT_EXPECTATIONS)) {
+    const counts = by_root[root]
+    if (!counts) {
+      failures.push(`${root} was not walked at all`)
+      continue
+    }
+    if (!counts.files) {
+      failures.push(
+        `${root} contributed no files -- the scan is not reaching it`
+      )
+      continue
+    }
+    if (expectation.queries_the_database && !counts.statements)
+      failures.push(
+        `${root} contributed ${counts.files} file(s) and no knex statements`
+      )
+    if (!expectation.queries_the_database && counts.statements)
+      failures.push(
+        `${root} is isomorphic and must open no knex statement, but ` +
+          `${counts.statements} were parsed there`
+      )
+  }
+  return failures
 }
 
 // ---------------------------------------------------------------------------
@@ -779,6 +868,49 @@ const run_negative_controls = (tables) => {
     })
   }
 
+  // 6. ROOT COVERAGE, both directions on one input. Synthetic for the same reason
+  //    control 5 is: the verdict is a property of the assertion, not of the scan,
+  //    and darkening a real root would mean mutating the filesystem. Both
+  //    directions matter because an assertion that reported every root as dark
+  //    would fail the run for the wrong reason on every invocation, which reads as
+  //    a broken corpus rather than a broken oracle.
+  {
+    const healthy = {}
+    for (const [root, expectation] of Object.entries(ROOT_EXPECTATIONS))
+      healthy[root] = {
+        files: 1,
+        statements: expectation.queries_the_database ? 1 : 0,
+        resolved: 1
+      }
+
+    const [first_querying_root] = Object.entries(ROOT_EXPECTATIONS).find(
+      ([, expectation]) => expectation.queries_the_database
+    )
+    const darkened = {
+      ...healthy,
+      [first_querying_root]: { files: 1, statements: 0, resolved: 0 }
+    }
+    const [isomorphic_root] = Object.entries(ROOT_EXPECTATIONS).find(
+      ([, expectation]) => !expectation.queries_the_database
+    )
+    const leaked = {
+      ...healthy,
+      [isomorphic_root]: { files: 1, statements: 1, resolved: 1 }
+    }
+
+    const reports_a_dark_root = evaluate_root_coverage(darkened).length === 1
+    const reports_a_knex_leak = evaluate_root_coverage(leaked).length === 1
+    const stays_silent_on_healthy = evaluate_root_coverage(healthy).length === 0
+    const passed =
+      reports_a_dark_root && reports_a_knex_leak && stays_silent_on_healthy
+    controls.push({
+      name: 'a root contributing no statements is reported, and a healthy set is not',
+      result: passed ? 'WENT RED' : 'STAYED GREEN',
+      detail: `synthetic -- darkened ${first_querying_root}, leaked into ${isomorphic_root}`,
+      passed
+    })
+  }
+
   return controls
 }
 
@@ -810,19 +942,7 @@ const main = () => {
   const controls = run_negative_controls(tables)
   const failed_controls = controls.filter((control) => !control.passed)
 
-  const coverage_failures = []
-  if (stats.files < MIN_FILES_SCANNED)
-    coverage_failures.push(
-      `scanned ${stats.files} files, floor is ${MIN_FILES_SCANNED}`
-    )
-  if (stats.statements < MIN_STATEMENTS_PARSED)
-    coverage_failures.push(
-      `parsed ${stats.statements} statements, floor is ${MIN_STATEMENTS_PARSED}`
-    )
-  if (stats.resolved < MIN_REFERENCES_RESOLVED)
-    coverage_failures.push(
-      `resolved ${stats.resolved} references, floor is ${MIN_REFERENCES_RESOLVED}`
-    )
+  const coverage_failures = evaluate_root_coverage(stats.by_root)
 
   if (options.json) {
     console.log(
@@ -848,8 +968,20 @@ const main = () => {
         `${stats.unchecked_no_binding} statement(s) binding no known table`
     )
     console.log(
-      `  ${stats.statements_with_raw} statement(s) contain a .raw() body, which is not parsed\n`
+      `  ${stats.statements_with_raw} statement(s) contain a .raw() body, which is not parsed`
     )
+    // Printed per root because that is what the coverage assertion reads. A total
+    // cannot show a single root having gone dark.
+    for (const [root, expectation] of Object.entries(ROOT_EXPECTATIONS))
+      console.log(
+        `  ${root}: ${stats.by_root[root].files} file(s), ` +
+          `${stats.by_root[root].statements} statement(s), ` +
+          `${stats.by_root[root].resolved} resolved` +
+          (expectation.queries_the_database
+            ? ''
+            : '  (isomorphic -- must be 0)')
+      )
+    console.log('')
 
     console.log('NEGATIVE CONTROLS')
     for (const control of controls)
