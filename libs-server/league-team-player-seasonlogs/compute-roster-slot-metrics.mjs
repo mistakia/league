@@ -21,7 +21,7 @@ export default async function compute_roster_slot_metrics({
   const net_key = `pts_added_net_${suffix}`
 
   const weeks_rows = await db('rosters_players')
-    .where({ lid, year })
+    .where({ lid, season_year: year })
     .whereIn('slot', slots)
     .countDistinct({ weeks: 'week' })
     .select('tid', 'pid')
@@ -31,7 +31,7 @@ export default async function compute_roster_slot_metrics({
     .join('nfl_games as n', 'n.esbid', 'g.esbid')
     .join('rosters_players as r', function () {
       this.on('r.pid', '=', 'g.pid')
-        .andOn('r.year', '=', 'n.season_year')
+        .andOn('r.season_year', '=', 'n.season_year')
         .andOn('r.week', '=', 'n.week')
     })
     .where('r.lid', lid)
