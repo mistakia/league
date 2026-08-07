@@ -879,7 +879,7 @@ const apply_adjudications = (findings, adjudications) => {
 // negative controls
 // ---------------------------------------------------------------------------
 
-// Five controls, run on EVERY invocation. Two of them assert the gate stays
+// Ten controls, run on EVERY invocation. Four of them assert the gate stays
 // SILENT on a mutation, because half of what this gate does is decide a token is
 // NOT a column reference -- and an over-eager filter fails in the direction that
 // looks like success. `check-league-schema-consumers` shipped exactly that:
