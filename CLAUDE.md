@@ -99,6 +99,18 @@ yarn test:db:down   # stop and remove the container
 
 **A bare `yarn test` with no database fails with `role "league_test" does not exist`.** That is a missing test DB, NOT a broken or unrunnable suite — start it with `yarn test:db:up` rather than concluding the tests cannot run here. `test/global.mjs` drops all tables and reloads `db/schema.postgres.sql` on every run, so schema edits are exercised by simply running the suite.
 
+**`league-test-pg` is a SHARED container and `test/global.mjs` drops all tables, so two concurrent worktree sessions running `yarn test:local` will stomp each other mid-run.** Every worktree's `compose.test.yaml` names the same `container_name: league-test-pg` on the same `:5433`, so `yarn test:local` from a worktree does not get an isolated database — it gets whichever one is already up. The failure is not a clean error: a sibling's `DROP`/reload lands partway through your run and surfaces as unrelated missing-relation failures. When more than one cluster is live (check `base thread list --running`), start your own instance on a distinct port and point the suite at it rather than sharing:
+
+```bash
+docker run -d --name <slug>-pg -e POSTGRES_USER=league_test -e POSTGRES_PASSWORD=league_test \
+  -e POSTGRES_DB=league_test -p 54XX:5432 \
+  -v "$PWD/db/test/init-roles.sql:/docker-entrypoint-initdb.d/10-init-roles.sql:ro" postgres:16
+LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=54XX TZ=America/New_York NODE_ENV=test TEST=all \
+  node node_modules/mocha/bin/mocha.js --exit --require test/global.mjs
+```
+
+**In a fresh worktree, invoke mocha's real entrypoint — the `node_modules/.bin` shims are broken there.** `.yarnrc.yml` sets `nmMode: hardlinks-global`, so `node_modules/.bin/mocha` is a hardlinked COPY rather than a symlink; its `require('../lib/cli/options')` then resolves against `node_modules/lib`, which does not exist, and both `yarn test` and `npx mocha` die with `Cannot find module '../lib/cli/options'`. The package is fine — `node_modules/mocha/lib/cli/options.js` is present. Run `node node_modules/mocha/bin/mocha.js` instead. Note also that a fresh worktree needs its own install first, and the bare command is blocked fleet-wide: use `sandbox-install yarn install`.
+
 To run one spec against an already-running DB:
 
 ```bash
