@@ -130,9 +130,22 @@
 //
 // `--base` is REQUIRED and has no default. It defaulted to `origin/master`
 // until 2026-08-06, against which the schema diff is empty by construction --
-// zero lost columns, therefore zero residue, therefore every adjudication reads
-// as stale, for a guaranteed exit 1 that says nothing about the tree. A missing
-// base ref is the same exit 2 as an unresolvable one.
+// zero lost columns, therefore zero residue, therefore nothing the gate can
+// say about the tree. A missing base ref is the same exit 2 as an unresolvable
+// one.
+//
+// AN ADJUDICATION IS ONLY STALE IF THIS RUN'S BASE REF SEARCHED FOR IT, and it
+// was not until 2026-08-07. Every `used === 0` entry was reported STALE
+// unconditionally, with the remedy "the site is gone, so the entry must go
+// too" -- so a base ref whose diff was not the rename window an entry was
+// written for condemned that entry, and following the remedy would delete a
+// live, load-bearing suppression. The split was total and had nothing to do
+// with the tree: at `--base 62ca45544` (243 lost columns) all 15 entries were
+// used and the gate read OK, while at `--base 8f1abd79d~1` (27) and
+// `--base c801b5a11` (0) all 15 read as stale, over sites all present in the
+// working tree. An entry outside this run's lost-column set is now NOT
+// EXERCISED -- counted and printed, no verdict. See
+// `classify_unused_adjudications` for the full account.
 //
 // Exit 0 clean, 1 on findings no adjudication covers, 2 when the gate could not
 // run. AN UNRESOLVABLE BASE REF IS EXIT 2, NOT A PASS.
@@ -189,6 +202,11 @@
 //     did not make those two SITES resolvable, and they are still unreported.
 //   - A rename with no schema change (a pure API-shape rename) has no diff to
 //     derive lost columns from.
+//   - THE ADJUDICATION FILE IS ONLY AUDITED WHERE THE BASE REF REACHES. An
+//     entry outside this run's lost-column set is neither confirmed nor
+//     condemned, so a green run is not a statement that every entry still
+//     earns its place. The count is printed for that reason: auditing all 15
+//     takes a base ref spanning every rename window they were written for.
 //   - The ORPHANED ALIAS test is tree-wide, not per-consumer: it cannot prove the
 //     aliased row reaches the code reading the new name. It reports the pairing
 //     and asks a human, exactly as gate 2 does for cross-file reads.
@@ -951,8 +969,11 @@ export const run_scan = ({
 // which returned 129 findings with not one of them `total` over a rename that
 // wiped a year of projection values.
 //
-// An entry that no longer suppresses anything is itself a FINDING, so a repaired
-// site forces its entry out rather than leaving a standing exemption for the name.
+// An entry that no longer suppresses anything is itself a FINDING -- but only
+// when this run's base ref actually searched for it, which is the distinction
+// `classify_unused_adjudications` draws. A repaired site forces its entry out
+// rather than leaving a standing exemption for the name; a base ref that never
+// covered the entry's rename says nothing about it either way.
 const load_adjudications = () => {
   if (!fs.existsSync(adjudications_path)) return []
   const parsed = JSON.parse(fs.readFileSync(adjudications_path, 'utf8'))
@@ -976,10 +997,40 @@ const apply_adjudications = (findings, adjudications) =>
     }
   })
 
-const stale_adjudications = (adjudications) =>
-  adjudications
-    .filter((entry) => entry.used === 0)
-    .map((entry) => ({
+// AN UNUSED ENTRY IS ONLY STALE IF THE GATE ACTUALLY LOOKED FOR IT. This
+// classified every `used === 0` entry as STALE unconditionally until 2026-08-07,
+// which made staleness a property of the CALLER'S BASE REF rather than of the
+// tree. The whole candidate list is derived from the schema diff, so an entry
+// whose `(table, column)` is outside this run's lost set could never have been
+// exercised: the gate never searched for that site, found nothing because it
+// never looked, and then reported the entry with the remedy "the site is gone,
+// so the entry must go too". Measured on the real corpus, the split was total
+// and had nothing to do with the code -- at `--base 62ca45544` (243 lost columns)
+// all 15 entries were used and the gate was OK, while at `--base 8f1abd79d~1`
+// (27 lost columns) and `--base c801b5a11` (0) all 15 read as stale. Acting on
+// that output deletes live, load-bearing suppressions: every one of those sites
+// is present in the working tree, including
+// `scripts/process-projections-for-league-format.mjs:212`, whose own comment
+// says the alias is load-bearing and whose unaliased form wiped a year of
+// projection values in `72346e579`.
+//
+// So the two cases are separated. IN the lost set with no site means the gate
+// searched and found nothing -- STALE, and a finding, because a repaired site
+// must force its entry out rather than leave a standing exemption for the name.
+// OUTSIDE it means NOT EXERCISED: no verdict, counted and printed so a run
+// cannot read as full coverage of the adjudication file when it covered none
+// of it.
+export const classify_unused_adjudications = ({
+  adjudications,
+  lost_columns
+}) => {
+  const was_searched_for = (entry) => {
+    const lost = lost_columns.get(entry.table)
+    return Boolean(lost && lost.has(entry.column))
+  }
+  const unused = adjudications.filter((entry) => entry.used === 0)
+  return {
+    stale: unused.filter(was_searched_for).map((entry) => ({
       finding_class: 'STALE ADJUDICATION',
       table: entry.table,
       column: entry.column,
@@ -997,8 +1048,11 @@ const stale_adjudications = (adjudications) =>
       },
       adjudicated: false,
       verdict: null,
-      reason: `adjudication for ${entry.table}.${entry.column} at ${entry.file} suppresses nothing -- the site is gone, so the entry must go too`
-    }))
+      reason: `adjudication for ${entry.table}.${entry.column} at ${entry.file} suppresses nothing, and ${entry.column} IS in this run's lost-column set -- the gate searched for the site and did not find it, so the entry must go too`
+    })),
+    not_exercised: unused.filter((entry) => !was_searched_for(entry))
+  }
+}
 
 // ---------------------------------------------------------------------------
 // negative control
@@ -1422,6 +1476,94 @@ CREATE TABLE public.control_parent_default (
     ])
   }
 
+  // 4b. STALENESS IS A PROPERTY OF THE TREE, NOT OF THE CALLER'S BASE REF.
+  //     Three cases, and the FIRST is the one that matters -- without it a fix
+  //     for the false positive is indistinguishable from deleting the check.
+  //
+  //     A PLANTED entry whose (table, column) IS in the lost set and which
+  //     suppresses nothing must STILL be reported STALE: the gate genuinely
+  //     searched for that site and did not find it, which is the whole reason
+  //     the class exists. The complement is the false positive itself -- an
+  //     entry outside the lost set was never searched for, so it is NOT
+  //     EXERCISED rather than stale, and reporting it as stale told a reviewer
+  //     to delete a live suppression. Both directions are asserted here because
+  //     each one alone is satisfiable by a gate that has stopped working.
+  {
+    const planted = {
+      table: 'widgets',
+      column: 'salary',
+      file: synthetic_path('never-existed.mjs'),
+      verdict: 'planted',
+      reason: 'synthetic control entry, suppresses nothing by construction',
+      used: 0
+    }
+    const { stale, not_exercised } = classify_unused_adjudications({
+      adjudications: [planted],
+      lost_columns: control_lost
+    })
+    cases.push([
+      'a planted adjudication IN the lost set with no site is still reported STALE',
+      stale.length === 1 &&
+        stale[0].finding_class === 'STALE ADJUDICATION' &&
+        stale[0].table === 'widgets' &&
+        stale[0].column === 'salary' &&
+        not_exercised.length === 0
+    ])
+  }
+
+  {
+    const planted = {
+      table: 'widgets',
+      column: 'salary',
+      file: synthetic_path('never-existed.mjs'),
+      used: 0
+    }
+    const { stale, not_exercised } = classify_unused_adjudications({
+      adjudications: [planted],
+      lost_columns: new Map()
+    })
+    cases.push([
+      'the same entry is NOT EXERCISED, not stale, when the base ref lost no such column',
+      stale.length === 0 && not_exercised.length === 1
+    ])
+  }
+
+  //     And an entry that DID suppress a finding is neither. This is what keeps
+  //     the two lists above from being satisfied by a classifier that ignores
+  //     `used` entirely.
+  {
+    const files = [synthetic_path('aliased.mjs')]
+    const sources = { [files[0]]: CONTROL_ALIASED_PRODUCER }
+    const { findings } = run_scan({
+      lost_columns: control_lost,
+      current_tables: control_current,
+      producer_files: files,
+      read_file: control_reader(sources)
+    })
+    const adjudications = [
+      {
+        table: 'widgets',
+        column: 'salary',
+        file: path.relative(repo_root, files[0]),
+        verdict: 'keep-aliased',
+        reason: 'synthetic control entry that suppresses a real finding',
+        used: 0
+      }
+    ]
+    const applied = apply_adjudications(findings, adjudications)
+    const { stale, not_exercised } = classify_unused_adjudications({
+      adjudications,
+      lost_columns: control_lost
+    })
+    cases.push([
+      'an adjudication that suppresses a finding is neither stale nor not-exercised',
+      applied.length === 1 &&
+        applied[0].adjudicated === true &&
+        stale.length === 0 &&
+        not_exercised.length === 0
+    ])
+  }
+
   // 5, 6 and 7. DENOMINATOR against the REAL corpus. The synthetic cases above
   //    all pass over a corpus that stopped being walked or an extractor that
   //    stopped matching, so these state the denominator directly, anchored on
@@ -1525,9 +1667,9 @@ const main = () => {
   const argv = yargs(hideBin(process.argv))
     // No DEFAULT. `origin/master` was one, and against it the schema diff is
     // empty by construction: zero lost columns, therefore zero residue,
-    // therefore all 15 adjudications stale -- a guaranteed exit 1 that says
-    // nothing about the tree. A gate with no base ref cannot run, which is the
-    // same exit 2 an unresolvable ref gets.
+    // therefore no adjudication exercised and nothing said about the tree. A
+    // gate with no base ref cannot run, which is the same exit 2 an
+    // unresolvable ref gets.
     .option('base', {
       type: 'string',
       describe: 'git ref to diff the schema against (REQUIRED)'
@@ -1588,15 +1730,31 @@ const main = () => {
   })
 
   const adjudications = load_adjudications()
-  const findings = [
-    ...apply_adjudications(scan.findings, adjudications),
-    ...stale_adjudications(adjudications)
-  ]
+  const applied = apply_adjudications(scan.findings, adjudications)
+  const { stale, not_exercised } = classify_unused_adjudications({
+    adjudications,
+    lost_columns
+  })
+  const findings = [...applied, ...stale]
   const unadjudicated = findings.filter((finding) => !finding.adjudicated)
   const reported = argv.unadjudicated ? unadjudicated : findings
 
   if (argv.json) {
-    console.log(JSON.stringify({ ...scan, findings }, null, 2))
+    console.log(
+      JSON.stringify(
+        {
+          ...scan,
+          findings,
+          not_exercised_adjudications: not_exercised.map((entry) => ({
+            table: entry.table,
+            column: entry.column,
+            file: entry.file
+          }))
+        },
+        null,
+        2
+      )
+    )
   } else {
     const lost_count = [...lost_columns.values()].reduce(
       (total, columns) => total + columns.size,
@@ -1611,8 +1769,21 @@ const main = () => {
         `${scan.unresolvable_unqualified} unqualified with no resolvable table)`
     )
     console.log(
-      `${findings.length} finding(s), ${unadjudicated.length} unadjudicated\n`
+      `${findings.length} finding(s), ${unadjudicated.length} unadjudicated`
     )
+    // A run whose base ref covers none of the adjudication file's renames has
+    // searched for none of its entries. Printed rather than silent, so the run
+    // cannot read as coverage of a file it did not exercise.
+    console.log(
+      `${adjudications.length} adjudication(s), ${not_exercised.length} NOT EXERCISED ` +
+        `by this base ref (their column is not in this run's lost-column set, so ` +
+        `the gate never searched for the site -- no verdict, and NOT stale)\n`
+    )
+    for (const entry of not_exercised)
+      console.log(
+        `  [NOT EXERCISED] ${entry.table}.${entry.column}  ${entry.file}`
+      )
+    if (not_exercised.length) console.log('')
 
     const class_order = [
       'SPLIT PRODUCERS',
