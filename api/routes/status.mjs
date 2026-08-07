@@ -217,7 +217,7 @@ router.get('/overall', async (req, res) => {
     }
 
     const errors = failed_jobs.map((job) => {
-      const timestamp = dayjs.unix(job.timestamp).format('YYYY/MM/DD HH:mm')
+      const timestamp = dayjs(job.run_at).format('YYYY/MM/DD HH:mm')
       return {
         job: job_title_by_id[job.type],
         reason: job.reason,

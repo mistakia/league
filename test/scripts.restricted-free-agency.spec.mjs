@@ -58,7 +58,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // Season start is typically in September
       // The restricted free agency period typically occurs during the offseason (June-August)
       const tran_date = regular_season_start.subtract('3', 'month').unix()
-      const ext_date = regular_season_start.subtract('4', 'month').unix()
+      const ext_date = regular_season_start.subtract('4', 'month').toDate()
 
       // 24-hour nomination windows, bids processed 3 hours before the next one
       await knex('seasons')

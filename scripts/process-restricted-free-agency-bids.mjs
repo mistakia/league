@@ -204,6 +204,10 @@ const run = async ({ dry_run = false } = {}) => {
   }
 
   const timestamp = Math.round(Date.now() / 1000)
+  // The seasons window columns are timestamptz as of the 2026-08-07 conformance
+  // pass; everything else here (restricted_free_agency_bids.processed, the
+  // due-time arithmetic) is still epoch seconds, so only the binds convert.
+  const processing_instant = new Date(timestamp * 1000)
 
   log(
     `Current ET date/time: ${dayjs()
@@ -226,8 +230,8 @@ const run = async ({ dry_run = false } = {}) => {
     })
     .whereNotNull('restricted_free_agency_period_start')
     .whereNotNull('restricted_free_agency_first_window_at')
-    .where('restricted_free_agency_period_start', '<=', timestamp)
-    .where('restricted_free_agency_period_end', '>=', timestamp)
+    .where('restricted_free_agency_period_start', '<=', processing_instant)
+    .where('restricted_free_agency_period_end', '>=', processing_instant)
     .groupBy('seasons.lid', 'seasons.season_year', 'leagues.name')
     .whereNull('restricted_free_agency_bids.processed')
     .whereNull('restricted_free_agency_bids.cancelled')
@@ -547,8 +551,16 @@ const run = async ({ dry_run = false } = {}) => {
       .whereNull('rfab.cancelled')
       .whereNotNull('seasons.restricted_free_agency_period_start')
       .whereNotNull('seasons.restricted_free_agency_first_window_at')
-      .where('seasons.restricted_free_agency_period_start', '<=', timestamp)
-      .where('seasons.restricted_free_agency_period_end', '>=', timestamp)
+      .where(
+        'seasons.restricted_free_agency_period_start',
+        '<=',
+        processing_instant
+      )
+      .where(
+        'seasons.restricted_free_agency_period_end',
+        '>=',
+        processing_instant
+      )
       // A paused league's bids are held ON PURPOSE, so they are not a
       // shortfall. Without this the pause would trip the very oracle that
       // exists to detect the loop silently skipping eligible bids -- turning

@@ -82,7 +82,11 @@ describe('API /teams - activate', function () {
       res.body.transaction.type.should.equal(transaction_types.ROSTER_ACTIVATE)
       res.body.transaction.player_salary.should.equal(value)
       res.body.transaction.season_year.should.equal(current_season.year)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // occurred_at is timestamptz, so it serializes as an ISO string; compare
+      // to the second rather than to an epoch integer.
+      Math.round(
+        new Date(res.body.transaction.occurred_at).getTime() / 1000
+      ).should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({

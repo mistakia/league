@@ -36,6 +36,10 @@ const season = {
   draft_start: new Date(1787371200 * 1000)
 }
 
+// `season` carries Dates (the columns are timestamptz); the build_tag_board
+// contract is still epoch seconds for `now_unix`.
+const ext_date_unix = Math.round(season.ext_date.getTime() / 1000)
+
 // 9 starters + 7 bench = an active roster limit of 16.
 const league_format = {
   id: 'genesis_10_team',
@@ -345,7 +349,7 @@ describe('tag board', function () {
             { tid: 2, pid: 'B1', value: 10 }
           ],
           extensions_processed: true,
-          now_unix: season.ext_date
+          now_unix: ext_date_unix
         })
       )
 
@@ -371,7 +375,7 @@ describe('tag board', function () {
             { tid: 2, pid: 'B1', value: 10 }
           ],
           extensions_processed: false,
-          now_unix: season.ext_date + 1
+          now_unix: ext_date_unix + 1
         })
       )
 
@@ -1519,9 +1523,7 @@ describe('tag board', function () {
         new Date(now_unix * 1000).toISOString()
       )
       freshness.next_deadline.field.should.equal('ext_date')
-      freshness.next_deadline.at_iso.should.equal(
-        new Date(season.ext_date * 1000).toISOString()
-      )
+      freshness.next_deadline.at_iso.should.equal(season.ext_date.toISOString())
     })
   })
 

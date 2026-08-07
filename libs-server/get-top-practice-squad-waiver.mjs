@@ -51,7 +51,8 @@ export default async function (lid) {
   const active_waiver_pids = active_waiver_rows.map((w) => w.pid)
 
   // get relevant transactions from last 24 hours
-  const cutoff = dayjs().subtract('24', 'hours').unix()
+  // transactions.occurred_at is timestamptz, so the bound is a Date.
+  const cutoff = dayjs().subtract('24', 'hours').toDate()
   const recent_transaction_rows = await db('transactions')
     .where('type', transaction_types.ROSTER_RELEASE)
     .where('occurred_at', '>=', cutoff)

@@ -75,7 +75,7 @@ router.post('/?', async (req, res) => {
       (tran.type === transaction_types.ROSTER_DEACTIVATE ||
         tran.type === transaction_types.DRAFT ||
         tran.type === transaction_types.PRACTICE_ADD) &&
-      dayjs().isBefore(dayjs.unix(tran.timestamp).add('24', 'hours'))
+      dayjs().isBefore(dayjs(tran.occurred_at).add('24', 'hours'))
     ) {
       return res.status(400).send({ error: 'Player on Sanctuary Period' })
     }
@@ -101,7 +101,7 @@ router.post('/?', async (req, res) => {
       (tran.type === transaction_types.ROSTER_DEACTIVATE ||
         tran.type === transaction_types.DRAFT ||
         tran.type === transaction_types.PRACTICE_ADD) &&
-      dayjs().isBefore(dayjs.unix(tran.timestamp).add('24', 'hours'))
+      dayjs().isBefore(dayjs(tran.occurred_at).add('24', 'hours'))
     ) {
       return res
         .status(400)

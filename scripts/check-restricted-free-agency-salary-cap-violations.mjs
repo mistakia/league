@@ -80,7 +80,7 @@ const get_restricted_free_agency_transactions = async ({ tid, lid }) => {
     .where('transactions.lid', lid)
     .where('transactions.season_year', CURRENT_YEAR)
     .where('transactions.type', RESTRICTED_FREE_AGENCY_TAG_TYPE)
-    .orderBy('transactions.timestamp', 'desc')
+    .orderBy('transactions.occurred_at', 'desc')
 }
 
 /**

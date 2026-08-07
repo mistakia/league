@@ -177,7 +177,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(super_priority_record.claimed).to.equal(1)
-      expect(super_priority_record.claimed_at).to.be.greaterThan(0)
+      expect(super_priority_record.claimed_at).to.be.instanceof(Date)
     })
 
     it('should process regular waivers when no super priority claims exist', async () => {
@@ -467,7 +467,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(super_priority_record.claimed).to.equal(1)
-      expect(super_priority_record.claimed_at).to.be.greaterThan(0)
+      expect(super_priority_record.claimed_at).to.be.instanceof(Date)
     })
 
     it('should handle super priority waiver eligibility check when player was traded instead of waiver claimed', async () => {
@@ -637,7 +637,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(updated_record.claimed).to.equal(1)
-      expect(updated_record.claimed_at).to.be.greaterThan(0)
+      expect(updated_record.claimed_at).to.be.instanceof(Date)
     })
 
     it('should process automatic reversion for PS(D) player', async () => {
