@@ -25,6 +25,7 @@ const initialState = new Record({
   isPending: true,
   isUpdating: false,
   authError: null,
+  is_password_reset: false,
   teamIds: new List(),
   leagueIds: new List([league_defaults.LEAGUE_ID]),
   selected_data_view_id: default_data_view_view_id,
@@ -97,6 +98,27 @@ export function app_reducer(state = initialState(), { payload, type }) {
           leagueIds: new List(payload.data.leagues.map((l) => l.uid)),
           isPending: false
         })
+      })
+
+    case app_actions.RESET_PASSWORD_PENDING:
+      return state.merge({
+        isUpdating: true,
+        authError: null,
+        is_password_reset: false
+      })
+
+    case app_actions.RESET_PASSWORD_FULFILLED:
+      return state.merge({
+        isUpdating: false,
+        authError: null,
+        is_password_reset: true
+      })
+
+    case app_actions.RESET_PASSWORD_FAILED:
+      return state.merge({
+        isUpdating: false,
+        authError: payload.error,
+        is_password_reset: false
       })
 
     case app_actions.REGISTER_FAILED:

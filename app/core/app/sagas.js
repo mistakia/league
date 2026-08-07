@@ -2,7 +2,12 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { get_app } from '@core/selectors'
 import { app_actions } from './actions'
-import { api_post_register, api_post_login, api_get_auth } from '@core/api'
+import {
+  api_post_register,
+  api_post_login,
+  api_get_auth,
+  api_post_reset_password
+} from '@core/api'
 import { localStorageAdapter } from '@core/utils'
 import { league_actions } from '@core/leagues/actions'
 
@@ -21,6 +26,10 @@ export function* register({ payload }) {
 
 export function* login({ payload }) {
   yield call(api_post_login, payload)
+}
+
+export function* reset_password({ payload }) {
+  yield call(api_post_reset_password, payload)
 }
 
 export function logout() {
@@ -49,6 +58,10 @@ export function* watchLogin() {
   yield takeLatest(app_actions.LOGIN, login)
 }
 
+export function* watch_reset_password() {
+  yield takeLatest(app_actions.RESET_PASSWORD, reset_password)
+}
+
 export function* watchLogout() {
   yield takeLatest(app_actions.LOGOUT, logout)
 }
@@ -69,6 +82,7 @@ export const app_sagas = [
   fork(watchInitApp),
   fork(watchRegister),
   fork(watchLogin),
+  fork(watch_reset_password),
   fork(watchLogout),
   fork(watchRegisterFulfilled),
   fork(watchLoginFulfilled)

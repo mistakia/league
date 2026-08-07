@@ -38,6 +38,10 @@ export const api = {
     const url = `${API_URL}/auth/login`
     return { url, ...POST(data) }
   },
+  post_reset_password(data) {
+    const url = `${API_URL}/auth/reset-password/confirm`
+    return { url, ...POST(data) }
+  },
   get_auth() {
     const url = `${API_URL}/me`
     return { url }

@@ -6,6 +6,7 @@ export const app_actions = {
   ...create_api_action_types('AUTH'),
   ...create_api_action_types('REGISTER'),
   ...create_api_action_types('LOGIN'),
+  ...create_api_action_types('RESET_PASSWORD'),
 
   SELECT_YEAR: 'SELECT_YEAR',
   select_year: (year) => ({
@@ -38,6 +39,15 @@ export const app_actions = {
     type: app_actions.LOGOUT
   }),
 
+  RESET_PASSWORD: 'RESET_PASSWORD',
+  reset_password: ({ token, password }) => ({
+    type: app_actions.RESET_PASSWORD,
+    payload: {
+      token,
+      password
+    }
+  }),
+
   REGISTER: 'REGISTER',
   register: ({ email, username, password, leagueId, teamId, invite_code }) => ({
     type: app_actions.REGISTER,
@@ -55,3 +65,4 @@ export const app_actions = {
 export const auth_actions = create_api_actions('AUTH')
 export const register_actions = create_api_actions('REGISTER')
 export const login_actions = create_api_actions('LOGIN')
+export const reset_password_actions = create_api_actions('RESET_PASSWORD')

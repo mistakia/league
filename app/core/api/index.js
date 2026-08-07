@@ -3,6 +3,7 @@ export {
   api_post_register,
   api_post_login,
   api_get_auth,
+  api_post_reset_password,
   api_get_players,
   api_get_all_players,
   api_get_team_players,

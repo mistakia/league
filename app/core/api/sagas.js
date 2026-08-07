@@ -6,7 +6,8 @@ import { get_draft_pick_value_actions } from '@core/draft-pick-value/actions'
 import {
   auth_actions,
   login_actions,
-  register_actions
+  register_actions,
+  reset_password_actions
 } from '@core/app/actions'
 import { get_app } from '@core/selectors'
 import { get_status_actions } from '@core/status/actions'
@@ -178,6 +179,11 @@ export const api_post_register = fetch.bind(
 )
 export const api_post_login = fetch.bind(null, api.post_login, login_actions)
 export const api_get_auth = fetch.bind(null, api.get_auth, auth_actions)
+export const api_post_reset_password = fetch.bind(
+  null,
+  api.post_reset_password,
+  reset_password_actions
+)
 
 export const api_get_players = fetch.bind(
   null,
