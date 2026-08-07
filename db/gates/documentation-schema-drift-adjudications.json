@@ -359,6 +359,46 @@
       "column": "postgres",
       "kind": "not_a_column",
       "reason": "JavaScript property access inside an embedded heredoc (`config.postgres?.connection`), reading user-base's own config object. Not prose and not a league schema claim."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "teams",
+      "column": "year",
+      "kind": "history",
+      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "nfl_team_seasonlogs",
+      "column": "year",
+      "kind": "history",
+      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "league_scoring_formats",
+      "column": "scoring_format_id",
+      "kind": "history",
+      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "users",
+      "column": "reset_token",
+      "kind": "history",
+      "reason": "Accurate HISTORY, not live instruction. This paragraph documents the four live 42703s check-knex-column-resolution found on its first run (league 6c187cf97); every one names the PRE-repair column deliberately, because the finding is the point of the sentence. All four were repaired in that same commit, so the absence this gate reports is exactly what the prose is describing."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "config",
+      "column": "degraded",
+      "kind": "not_a_column",
+      "reason": "Cited as an EXAMPLE of the false-positive class that keeps user-base .mjs out of this gate's corpus: a JavaScript property read off a local variable whose name collides with the league `config` table. The sentence's whole point is that it is not a schema claim."
     }
   ]
 }
