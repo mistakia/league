@@ -14,6 +14,7 @@ import queryString from 'query-string'
 import { get_app } from '@core/selectors'
 
 const AuthPage = lazy(() => import('@pages/auth'))
+const ForgotPasswordPage = lazy(() => import('@pages/forgot-password'))
 const ResetPasswordPage = lazy(() => import('@pages/reset-password'))
 const LeagueHomePage = lazy(() => import('@pages/league-home'))
 const DraftPage = lazy(() => import('@pages/draft'))
@@ -62,6 +63,10 @@ const Routes = ({ app }) => {
   return (
     <RouterRoutes>
       {!app.userId && <Route path='/login' element={<AuthPage />} />}
+      {/* Both halves of the reset flow are for users who cannot log in, so
+          neither is gated on userId — unlike /login, which is hidden once a
+          session exists. */}
+      <Route path='/forgot-password' element={<ForgotPasswordPage />} />
       {/* Reached from an emailed link, so it is deliberately NOT gated on
           userId — a locked-out user has no session, and the token in the
           query string is the only credential the page needs. */}

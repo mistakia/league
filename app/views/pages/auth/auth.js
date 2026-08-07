@@ -1,7 +1,7 @@
 import React from 'react'
 import queryString from 'query-string'
 import PropTypes from 'prop-types'
-import { useLocation } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import TextField from '@mui/material/TextField'
 
 import Button from '@components/button'
@@ -17,7 +17,14 @@ const AuthPageWrapper = (Component) => {
   }
 }
 
-const AuthPage = ({ location, login, register, is_pending, auth_error }) => {
+const AuthPage = ({
+  location,
+  login,
+  register,
+  is_pending,
+  is_updating,
+  auth_error
+}) => {
   const [menu, set_menu] = React.useState(
     queryString.parse(location.search).leagueId ? 'register' : 'login'
   )
@@ -60,6 +67,11 @@ const AuthPage = ({ location, login, register, is_pending, auth_error }) => {
     )
   }
 
+  // `is_pending` is the app's initial auth resolution, not this form's submit.
+  // It starts true and is cleared by INIT_APP (to `Boolean(token)`, so false
+  // for a logged-out visitor) and by AUTH_FULFILLED / AUTH_FAILED, so it
+  // cannot latch on and lock a logged-out user out of the login form. The
+  // submit button below spins on `is_updating` instead.
   if (is_pending) {
     return <Loading loading={is_pending} />
   }
@@ -148,12 +160,17 @@ const AuthPage = ({ location, login, register, is_pending, auth_error }) => {
           )}
           <Button
             type='submit'
-            is_loading={is_pending}
+            isLoading={is_updating}
             className='auth__button'
           >
             {menu}
           </Button>
         </form>
+        {menu === 'login' && (
+          <div className='auth__forgot'>
+            <Link to='/forgot-password'>Forgot password?</Link>
+          </div>
+        )}
         <div className='auth__toggle' onClick={handle_click}>
           {menu === 'register' ? 'Login' : 'Create account'}
         </div>
@@ -168,6 +185,7 @@ AuthPage.propTypes = {
   location: PropTypes.object,
   login: PropTypes.func,
   is_pending: PropTypes.bool,
+  is_updating: PropTypes.bool,
   auth_error: PropTypes.string,
   register: PropTypes.func
 }

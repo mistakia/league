@@ -26,6 +26,7 @@ const initialState = new Record({
   isUpdating: false,
   authError: null,
   is_password_reset: false,
+  is_password_reset_requested: false,
   teamIds: new List(),
   leagueIds: new List([league_defaults.LEAGUE_ID]),
   selected_data_view_id: default_data_view_view_id,
@@ -119,6 +120,30 @@ export function app_reducer(state = initialState(), { payload, type }) {
         isUpdating: false,
         authError: payload.error,
         is_password_reset: false
+      })
+
+    case app_actions.REQUEST_PASSWORD_RESET_PENDING:
+      return state.merge({
+        isUpdating: true,
+        authError: null,
+        is_password_reset_requested: false
+      })
+
+    // The API answers identically for a known and an unknown account, and the
+    // UI must not leak the difference either — so FULFILLED carries no data
+    // and the page renders one generic acknowledgement for both.
+    case app_actions.REQUEST_PASSWORD_RESET_FULFILLED:
+      return state.merge({
+        isUpdating: false,
+        authError: null,
+        is_password_reset_requested: true
+      })
+
+    case app_actions.REQUEST_PASSWORD_RESET_FAILED:
+      return state.merge({
+        isUpdating: false,
+        authError: payload.error,
+        is_password_reset_requested: false
       })
 
     case app_actions.REGISTER_FAILED:

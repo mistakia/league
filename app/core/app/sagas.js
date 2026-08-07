@@ -6,7 +6,8 @@ import {
   api_post_register,
   api_post_login,
   api_get_auth,
-  api_post_reset_password
+  api_post_reset_password_confirm,
+  api_post_request_password_reset
 } from '@core/api'
 import { localStorageAdapter } from '@core/utils'
 import { league_actions } from '@core/leagues/actions'
@@ -29,7 +30,11 @@ export function* login({ payload }) {
 }
 
 export function* reset_password({ payload }) {
-  yield call(api_post_reset_password, payload)
+  yield call(api_post_reset_password_confirm, payload)
+}
+
+export function* request_password_reset({ payload }) {
+  yield call(api_post_request_password_reset, payload)
 }
 
 export function logout() {
@@ -62,6 +67,10 @@ export function* watch_reset_password() {
   yield takeLatest(app_actions.RESET_PASSWORD, reset_password)
 }
 
+export function* watch_request_password_reset() {
+  yield takeLatest(app_actions.REQUEST_PASSWORD_RESET, request_password_reset)
+}
+
 export function* watchLogout() {
   yield takeLatest(app_actions.LOGOUT, logout)
 }
@@ -83,6 +92,7 @@ export const app_sagas = [
   fork(watchRegister),
   fork(watchLogin),
   fork(watch_reset_password),
+  fork(watch_request_password_reset),
   fork(watchLogout),
   fork(watchRegisterFulfilled),
   fork(watchLoginFulfilled)

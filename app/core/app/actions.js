@@ -7,6 +7,7 @@ export const app_actions = {
   ...create_api_action_types('REGISTER'),
   ...create_api_action_types('LOGIN'),
   ...create_api_action_types('RESET_PASSWORD'),
+  ...create_api_action_types('REQUEST_PASSWORD_RESET'),
 
   SELECT_YEAR: 'SELECT_YEAR',
   select_year: (year) => ({
@@ -48,6 +49,14 @@ export const app_actions = {
     }
   }),
 
+  REQUEST_PASSWORD_RESET: 'REQUEST_PASSWORD_RESET',
+  request_password_reset: ({ email_or_username }) => ({
+    type: app_actions.REQUEST_PASSWORD_RESET,
+    payload: {
+      email_or_username
+    }
+  }),
+
   REGISTER: 'REGISTER',
   register: ({ email, username, password, leagueId, teamId, invite_code }) => ({
     type: app_actions.REGISTER,
@@ -66,3 +75,6 @@ export const auth_actions = create_api_actions('AUTH')
 export const register_actions = create_api_actions('REGISTER')
 export const login_actions = create_api_actions('LOGIN')
 export const reset_password_actions = create_api_actions('RESET_PASSWORD')
+export const request_password_reset_actions = create_api_actions(
+  'REQUEST_PASSWORD_RESET'
+)

@@ -38,7 +38,20 @@ export const api = {
     const url = `${API_URL}/auth/login`
     return { url, ...POST(data) }
   },
-  post_reset_password(data) {
+  // Requests the reset email. The API answers identically whether or not the
+  // account exists, so nothing downstream of this may branch on the response.
+  //
+  // The route takes `email` and `username` separately and ORs them, while the
+  // form offers one field — send the value as both rather than guessing which
+  // it is client-side, which gives the same match semantics as POST /auth/login.
+  post_request_password_reset({ email_or_username }) {
+    const url = `${API_URL}/auth/reset-password`
+    return {
+      url,
+      ...POST({ email: email_or_username, username: email_or_username })
+    }
+  },
+  post_reset_password_confirm(data) {
     const url = `${API_URL}/auth/reset-password/confirm`
     return { url, ...POST(data) }
   },
