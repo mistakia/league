@@ -1,9 +1,12 @@
-/* global describe, before, it */
+/* global describe, before, after, it */
 import * as chai from 'chai'
 import chai_http, { request as chai_request } from 'chai-http'
+import jwt from 'jsonwebtoken'
+import bcrypt from 'bcrypt'
 
 import server from '#api'
 import knex from '#db'
+import config from '#config'
 import users from '#db/fixtures/users.mjs'
 import { error } from './utils/index.mjs'
 
@@ -261,6 +264,211 @@ describe('API /auth', function () {
 
       // Clean up
       await knex('invite_codes').where({ code: max_uses_invite_code }).del()
+    })
+  })
+
+  describe('POST /api/auth/reset-password', () => {
+    const generic_message =
+      'If an account exists, a password reset email has been sent'
+
+    it('should return the generic message for a known email', async () => {
+      const res = await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({ email: 'user1@email.com' })
+
+      res.should.have.status(200)
+      res.body.message.should.equal(generic_message)
+    })
+
+    it('should return the generic message for a known username', async () => {
+      const res = await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({ username: 'user1' })
+
+      res.should.have.status(200)
+      res.body.message.should.equal(generic_message)
+    })
+
+    // The route must not be a user-enumeration oracle: an unknown account has
+    // to be indistinguishable from a known one. It answered 400 `user not
+    // found` here until the reset flow was completed.
+    it('should return the generic message for an unknown username', async () => {
+      const res = await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({ username: 'no-such-user-anywhere' })
+
+      res.should.have.status(200)
+      res.body.message.should.equal(generic_message)
+    })
+
+    it('should return the generic message for an unknown email', async () => {
+      const res = await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({ email: 'no-such-user-anywhere@email.com' })
+
+      res.should.have.status(200)
+      res.body.message.should.equal(generic_message)
+    })
+
+    it('should return error for missing username and email', async () => {
+      const res = chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({})
+
+      await error(res, 'missing username or email')
+    })
+  })
+
+  describe('POST /api/auth/reset-password/confirm', () => {
+    const reset_username = 'reset_password_user'
+    const reset_email = 'reset_password_user@email.com'
+    const original_password = 'original_password'
+
+    let reset_user_id = null
+
+    // Mint a token exactly as POST /auth/reset-password does. This spec cannot
+    // read the emailed token — nothing is sent in test, since `config.email`
+    // is unset — so the two derivations are asserted to agree by construction
+    // rather than by round trip. That is the one gap here; everything below it
+    // (expiry, tampering, replay, the write itself) is exercised end to end.
+    const sign_reset_token = ({ user, expires_in = '1h' }) =>
+      jwt.sign({ user_id: user.id }, `${config.jwt.secret}${user.password}`, {
+        expiresIn: expires_in
+      })
+
+    const get_reset_user = () =>
+      knex('users').where({ id: reset_user_id }).first()
+
+    before(async () => {
+      const salt = await bcrypt.genSalt(10)
+      const hashed_password = await bcrypt.hash(original_password, salt)
+      const inserted = await knex('users')
+        .insert({
+          email: reset_email,
+          username: reset_username,
+          password: hashed_password
+        })
+        .returning('id')
+      reset_user_id = inserted[0].id
+    })
+
+    after(async () => {
+      await knex('users').where({ id: reset_user_id }).del()
+    })
+
+    it('should return error for missing token', async () => {
+      const res = chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ password: 'new_password' })
+
+      await error(res, 'missing token param')
+    })
+
+    it('should return error for missing password', async () => {
+      const user = await get_reset_user()
+      const res = chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ token: sign_reset_token({ user }) })
+
+      await error(res, 'missing password param')
+    })
+
+    it('should return error for a malformed token', async () => {
+      const res = chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ token: 'not-a-jwt', password: 'new_password' })
+
+      await error(res, 'invalid or expired reset token')
+    })
+
+    it('should return error for a token signed with the bare jwt secret', async () => {
+      const user = await get_reset_user()
+      const token = jwt.sign({ user_id: user.id }, config.jwt.secret, {
+        expiresIn: '1h'
+      })
+
+      const res = chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ token, password: 'new_password' })
+
+      await error(res, 'invalid or expired reset token')
+    })
+
+    it('should return error for an expired token', async () => {
+      const user = await get_reset_user()
+      const token = sign_reset_token({ user, expires_in: '-1s' })
+
+      const res = chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ token, password: 'new_password' })
+
+      await error(res, 'invalid or expired reset token')
+    })
+
+    it('should return error for a token naming an unknown user', async () => {
+      const token = jwt.sign({ user_id: 999999 }, config.jwt.secret, {
+        expiresIn: '1h'
+      })
+
+      const res = chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ token, password: 'new_password' })
+
+      await error(res, 'invalid or expired reset token')
+    })
+
+    it('should set the new password and reject the old one', async () => {
+      const user = await get_reset_user()
+      const token = sign_reset_token({ user })
+      const new_password = 'a_brand_new_password'
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ token, password: new_password })
+
+      res.should.have.status(200)
+      res.body.message.should.equal('password has been reset')
+
+      const login_with_new = await chai_request
+        .execute(server)
+        .post('/api/auth/login')
+        .send({ email_or_username: reset_username, password: new_password })
+
+      login_with_new.should.have.status(200)
+      login_with_new.body.should.have.property('token')
+
+      const login_with_old = chai_request
+        .execute(server)
+        .post('/api/auth/login')
+        .send({
+          email_or_username: reset_username,
+          password: original_password
+        })
+
+      await error(login_with_old, 'invalid params')
+
+      // The token's signing secret carries the user's password hash, so the
+      // reset above invalidated it — a replayed link cannot set the password
+      // a second time. This is what makes the token single-use without any
+      // server-side state.
+      const replay = chai_request
+        .execute(server)
+        .post('/api/auth/reset-password/confirm')
+        .send({ token, password: 'yet_another_password' })
+
+      await error(replay, 'invalid or expired reset token')
     })
   })
 })

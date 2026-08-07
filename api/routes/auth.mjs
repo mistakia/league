@@ -7,6 +7,15 @@ import { current_season } from '#constants'
 
 const router = express.Router()
 
+// A password reset token is signed with the jwt secret CONCATENATED WITH the
+// user's current bcrypt hash, which makes it self-invalidating without any
+// server-side state: resetting the password (or changing it through PUT /me)
+// replaces the hash, so every token minted against the old one stops
+// verifying. See the header on POST /reset-password/confirm for why it is
+// built this way rather than with a `used` column.
+const get_reset_token_secret = ({ config, user }) =>
+  `${config.jwt.secret}${user.password}`
+
 /**
  * @swagger
  * /auth/login:
@@ -318,7 +327,7 @@ router.post('/register', async (req, res) => {
  *               required:
  *                 - message
  *       400:
- *         description: Bad request - missing required parameters or user not found (when username provided without email)
+ *         description: Bad request - missing required parameters. An unknown account is NOT distinguishable here; it returns the same 200 as a known one.
  *         content:
  *           application/json:
  *             schema:
@@ -328,10 +337,6 @@ router.post('/register', async (req, res) => {
  *                 summary: Missing username or email
  *                 value:
  *                   error: missing username or email
- *               userNotFound:
- *                 summary: User not found (username only)
- *                 value:
- *                   error: user not found
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -351,35 +356,157 @@ router.post('/reset-password', async (req, res) => {
       })
       .first()
 
+    // Answer identically whether or not the account exists. Returning
+    // `user not found` for an unknown username made this route a
+    // user-enumeration oracle that contradicted its own documented contract.
     if (!user) {
-      if (!email) {
-        return res.status(400).send({ error: 'user not found' })
-      } else {
-        return res.status(200).send({
-          message: 'If an account exists, a password reset email has been sent'
-        })
-      }
+      return res.status(200).send({
+        message: 'If an account exists, a password reset email has been sent'
+      })
     }
 
-    // The token is a signed JWT carrying its own expiry, and nothing ever reads
-    // it back — the reset link is the only thing that presents it. `users` has
-    // no `reset_token` column, so persisting it raised 42703 and took the whole
-    // route with it on every call.
-    const reset_token = jwt.sign({ user_id: user.id }, config.jwt.secret, {
-      expiresIn: '1h'
-    })
+    // The token is a signed JWT carrying its own expiry, and nothing is
+    // persisted — the reset link is the only thing that presents it, and
+    // POST /reset-password/confirm re-derives the secret from the user's
+    // current password hash to verify it.
+    const reset_token = jwt.sign(
+      { user_id: user.id },
+      get_reset_token_secret({ config, user }),
+      { expiresIn: '1h' }
+    )
 
     const reset_link = `${config.url}/reset-password?token=${reset_token}`
 
     await sendEmail({
       to: user.email,
       subject: 'Password Reset Request',
-      text: `Click the following link to reset your password: ${reset_link}. If you did not request a password reset, please ignore this email.`
+      message: `Click the following link to reset your password: ${reset_link}. If you did not request a password reset, please ignore this email.`
     })
 
     res.json({
       message: 'If an account exists, a password reset email has been sent'
     })
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
+/**
+ * @swagger
+ * /auth/reset-password/confirm:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Complete a password reset
+ *     description: Set a new password using the token emailed by POST /auth/reset-password. The token expires one hour after it is issued and stops verifying as soon as the password changes.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Reset token from the emailed link's `token` query parameter
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: New password
+ *                 example: mynewpassword123
+ *             required:
+ *               - token
+ *               - password
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: password has been reset
+ *               required:
+ *                 - message
+ *       400:
+ *         description: Bad request - missing parameters, or an invalid or expired token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               missingToken:
+ *                 summary: Missing token
+ *                 value:
+ *                   error: missing token param
+ *               invalidToken:
+ *                 summary: Invalid or expired token
+ *                 value:
+ *                   error: invalid or expired reset token
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+//
+// SINGLE USE: a reset token is single-use in effect, and it costs no server
+// state to get there. The token's signing secret is the jwt secret plus the
+// user's bcrypt hash (`get_reset_token_secret` above), so the moment this
+// route writes a new hash every token issued against the old one fails
+// verification. That covers replay after a successful reset, and it also
+// invalidates outstanding reset links when a password is changed through
+// PUT /me — the case a `used` flag would miss.
+//
+// What it deliberately does NOT do is invalidate a token that was never used:
+// an unused link stays valid for its full hour, and requesting a second reset
+// does not revoke the first. Narrowing that further needs per-token server
+// state, which `users` has no column for and which would be a schema change
+// under db/README.md's workflow. The one-hour window is the accepted exposure.
+//
+router.post('/reset-password/confirm', async (req, res) => {
+  const { db, config, logger } = req.app.locals
+  try {
+    const { token, password } = req.body
+
+    if (!token) {
+      return res.status(400).send({ error: 'missing token param' })
+    }
+
+    if (!password) {
+      return res.status(400).send({ error: 'missing password param' })
+    }
+
+    // Decoding is not verification — it only says which user's hash to build
+    // the verification secret from. The jwt.verify below is the gate, and
+    // nothing is written before it passes.
+    const decoded = jwt.decode(token)
+    const user_id = decoded ? decoded.user_id : null
+
+    if (!user_id) {
+      return res.status(400).send({ error: 'invalid or expired reset token' })
+    }
+
+    const user = await db('users').where({ id: user_id }).first()
+
+    if (!user) {
+      return res.status(400).send({ error: 'invalid or expired reset token' })
+    }
+
+    try {
+      jwt.verify(token, get_reset_token_secret({ config, user }))
+    } catch (verify_error) {
+      return res.status(400).send({ error: 'invalid or expired reset token' })
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    const hashed_password = await bcrypt.hash(password, salt)
+
+    await db('users')
+      .update({ password: hashed_password })
+      .where({ id: user.id })
+
+    res.json({ message: 'password has been reset' })
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })
