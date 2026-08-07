@@ -75,7 +75,7 @@ jobs:
       # CI-eligible on exactly gate 1's terms: it resolves against the current
       # schema, so it needs no rename list and no base ref, cannot drift, and
       # cannot go red on a sibling's in-flight migration. Static read, no
-      # database. Its six negative controls run on every invocation, and four of
+      # database. Its ten negative controls run on every invocation, and four of
       # them are what proves the scan is not vacuous -- each has to find real
       # corpus material of its shape before it can mutate it, so all four go red
       # when the walk reaches nothing. That is why this gate asserts no coverage

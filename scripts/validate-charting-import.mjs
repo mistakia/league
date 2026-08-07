@@ -86,7 +86,7 @@ async function validate_player_match_rates({ year }) {
   log('checking player match rates...')
 
   const total_sumer_ids = await db('player')
-    .whereNotNull('sumer_id')
+    .whereNotNull('sumer_player_id')
     .count('* as count')
     .first()
 

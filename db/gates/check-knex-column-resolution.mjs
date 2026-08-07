@@ -48,6 +48,37 @@
 //                                    scope, because with a join present an
 //                                    unqualified name is genuinely ambiguous and
 //                                    guessing a table would invent findings
+//   BARE STRING .where('status')  -> same single-table restriction
+//
+// THE BARE-STRING HALF, added later, is the shape this codebase writes most and
+// the one `check-api-response-shapes` stumbled into rather than resolved.
+// `api/routes/wagers.mjs` filtered `whereIn('status', wager_status)` against
+// `placed_wagers`, which has no `status` column -- a live 42703 on every request
+// carrying that filter, fixed in `2f0ca9a0f`. Gate 1 cannot see it (no table in
+// the literal) and the object-key half cannot either (no object). It reads the
+// first argument of the predicate family (`.where`, `.whereIn`, `.whereNull`,
+// `.orderBy`, ...) and every argument of the list family (`.groupBy`,
+// `.onConflict`, `.merge`) -- the last of which CLAUDE.md records as its own
+// recurring defect, since payload keys, conflict target and merge list are three
+// separate column references and a rename fix touching one need not touch them.
+//
+// An OUTPUT ALIAS the statement declares for itself is excluded, because a bare
+// reference to one is correct SQL: `.count('* as count')` then `.orderBy('count')`
+// resolves against the projection, not the table. Same concept as the shadowed
+// CTE prefixes, one level down. Measured on this corpus, the exclusion is the
+// difference between 9 findings and 1 -- the 8 it removes are all that shape, and
+// the 1 that survives is real. Control 6 exists because an exclusion that removes
+// 8 of 9 findings is indistinguishable from a collector that finds nothing.
+//
+// WHAT THIS RESOLVES IS NAMES, NOT TYPES -- do not over-trust a green.
+// `.where('public', true)` against `placed_wagers.public`, a `smallint`, PASSES
+// this gate and every other name-resolution gate here: the column exists, and it
+// is the bound VALUE that is wrong. Postgres rejects it only at execution, with
+// `invalid input syntax for type smallint: "true"`. That defect shipped in the
+// same route as the `status` 42703 above and broke every authenticated caller
+// viewing another user's wagers. No static name check can see that class; only
+// executing the predicate against a real schema distinguishes it, which is why
+// the spec for that route seeds rows and runs the round trip.
 //
 // It needs NO rename list and NO base ref: a reference either resolves against
 // the current schema or it does not, which makes it the same shape as gate 1 --
@@ -75,7 +106,7 @@
 // reports neither and exits 0.
 //
 // NEGATIVE CONTROLS run on EVERY invocation and a control reporting STAYED GREEN
-// fails the run, per the runner's rule. There are six, and two of them run in
+// fails the run, per the runner's rule. There are ten, and four of them run in
 // the OVER-EAGER direction, because half of what this gate does is decide that a
 // token is NOT a column reference and an over-eager filter fails in the direction
 // that looks like success. See run_negative_controls.
@@ -92,8 +123,10 @@
 //   - A `db.raw(...)` body is not parsed. Raw SQL is arbitrary text and a
 //     half-parse invents findings; those statements are counted as UNCHECKED and
 //     printed in the coverage block rather than passed over silently.
-//   - An unqualified reference inside a MULTI-table statement is ambiguous and
-//     is not resolved. Counted as UNCHECKED.
+//   - An unqualified or bare reference inside a MULTI-table statement is
+//     ambiguous and is not resolved. Counted as UNCHECKED.
+//   - A bare reference to an alias the statement projects for itself is not
+//     resolved. Counted as UNCHECKED, and printed.
 //   - A table name held in a constant binds no alias, so its statement resolves
 //     nothing. Same hazard CLAUDE.md records for table-anchored counts generally.
 //   - A prefix bound to a subquery (`.as('x')`) or a CTE (`.with('x', ...)`) is
@@ -461,6 +494,158 @@ const collect_object_predicate_keys = (statement) => {
   return keys
 }
 
+// The BARE-STRING argument shape, which is most of what this codebase writes:
+// `.where('status', x)`, `.whereIn('status', [...])`, `.orderBy('week')`,
+// `.groupBy('pid')`, `.onConflict(['pid'])`, `.merge([...])`. It carries no
+// table and no `.`, so gate 1 cannot see it and the qualified scan above does
+// not match it -- this is the `placed_wagers.status` 42703's shape.
+//
+// Two argument conventions, and conflating them would resolve DATA as columns.
+// For the predicate family only the FIRST argument is a column: `.where('type',
+// 'TRADE')` binds a string VALUE second. For the list family every argument is
+// a column, and the whole list may arrive inside one array.
+const BARE_FIRST_ARGUMENT_METHODS = new Set([
+  'where',
+  'andWhere',
+  'orWhere',
+  'whereNot',
+  'orWhereNot',
+  'whereIn',
+  'whereNotIn',
+  'orWhereIn',
+  'orWhereNotIn',
+  'whereNull',
+  'whereNotNull',
+  'orWhereNull',
+  'orWhereNotNull',
+  'whereBetween',
+  'whereNotBetween',
+  'having',
+  'orderBy'
+])
+
+const BARE_COLUMN_LIST_METHODS = new Set(['groupBy', 'onConflict', 'merge'])
+
+// The methods that DECLARE an output alias. A bare reference to one is legal
+// SQL -- Postgres resolves `.orderBy('count')` against the `.count('* as
+// count')` projection, not against the table -- so those references must be
+// excluded or the gate reports correct code. Same concept as
+// collect_shadowed_prefixes, one level down: that one excludes PREFIXES bound
+// to a non-table, this one excludes NAMES projected by the statement itself.
+const OUTPUT_ALIAS_METHODS = new Set([
+  'select',
+  'raw',
+  'count',
+  'countDistinct',
+  'sum',
+  'min',
+  'max',
+  'avg',
+  'first'
+])
+
+// A whole argument that is exactly one quoted identifier. Anchored on both
+// ends deliberately: `'* as count'` is a projection and `'r.year'` belongs to
+// the qualified scan, and neither must reach the bare resolver.
+const BARE_LITERAL_RE = /^\s*['"`]([a-z_][a-z_0-9]*)['"`]\s*$/i
+
+// Split an argument list on its TOP-LEVEL commas. Quote-blind, so a comma
+// inside a string literal would split wrongly -- harmless here, because the
+// predicate family reads only segment 0 and a column name never contains one.
+const split_top_level = (body) => {
+  const segments = []
+  let depth = 0
+  let start = 0
+  for (let index = 0; index < body.length; index++) {
+    const character = body[index]
+    if (character === '(' || character === '[' || character === '{') depth += 1
+    else if (character === ')' || character === ']' || character === '}')
+      depth -= 1
+    else if (character === ',' && depth === 0) {
+      segments.push({ text: body.slice(start, index), offset: start })
+      start = index + 1
+    }
+  }
+  segments.push({ text: body.slice(start), offset: start })
+  return segments
+}
+
+// `.onConflict(['pid', 'year'])` and `.onConflict('pid')` are the same list.
+const unwrap_array_argument = (body) => {
+  const trimmed = body.trim()
+  if (!trimmed.startsWith('[') || !trimmed.endsWith(']'))
+    return { text: body, offset: 0 }
+  const open_index = body.indexOf('[')
+  return {
+    text: body.slice(open_index + 1, body.lastIndexOf(']')),
+    offset: open_index + 1
+  }
+}
+
+const each_call = function* (statement, methods) {
+  const call_re = /\.([a-zA-Z_0-9]+)\(/g
+  let match
+  while ((match = call_re.exec(statement)) !== null) {
+    if (!methods.has(match[1])) continue
+    const open_index = match.index + match[0].length - 1
+    const end = end_of_call(statement, open_index, statement.length)
+    if (end === null) continue
+    yield {
+      method: match[1],
+      body: statement.slice(open_index + 1, end - 1),
+      body_offset: open_index + 1
+    }
+    // Do not re-enter a call we have consumed: a nested `.where(...)` inside
+    // this one's own argument list belongs to it.
+    call_re.lastIndex = end
+  }
+}
+
+const collect_bare_predicate_columns = (statement) => {
+  const references = []
+  const methods = new Set([
+    ...BARE_FIRST_ARGUMENT_METHODS,
+    ...BARE_COLUMN_LIST_METHODS
+  ])
+  for (const call of each_call(statement, methods)) {
+    const is_list = BARE_COLUMN_LIST_METHODS.has(call.method)
+    const { text, offset } = is_list
+      ? unwrap_array_argument(call.body)
+      : { text: call.body, offset: 0 }
+    const all_segments = split_top_level(text)
+    const segments = is_list ? all_segments : all_segments.slice(0, 1)
+    for (const segment of segments) {
+      const literal = segment.text.match(BARE_LITERAL_RE)
+      if (!literal) continue
+      // Point at the OPENING QUOTE, not at the segment. A segment carries the
+      // leading whitespace of a wrapped argument list, and an offset that lands
+      // on a newline silently mis-slices anything reading the literal back.
+      references.push({
+        column: literal[1],
+        offset:
+          call.body_offset +
+          offset +
+          segment.offset +
+          segment.text.indexOf(literal[1]) -
+          1
+      })
+    }
+  }
+  return references
+}
+
+const collect_output_aliases = (statement) => {
+  const aliases = new Set()
+  for (const call of each_call(statement, OUTPUT_ALIAS_METHODS)) {
+    // Both spellings: a quoted `'tid as teamid'` projection and a bare
+    // `AS teamid` inside a raw SQL body.
+    const alias_re = /\bas\s+['"`]?([a-z_][a-z_0-9]*)['"`]?/gi
+    let match
+    while ((match = alias_re.exec(call.body)) !== null) aliases.add(match[1])
+  }
+  return aliases
+}
+
 const RAW_CALL_RE = /\.raw\(|db\.raw\(|knex\.raw\(/
 
 // ---------------------------------------------------------------------------
@@ -545,8 +730,9 @@ const scan_source = ({ source, relative_path, tables, stats }) => {
 
     // UNQUALIFIED -- resolvable only when exactly one table is in scope.
     const keys = collect_object_predicate_keys(statement.text)
+    const bare_references = collect_bare_predicate_columns(statement.text)
     if (tables_in_scope.size !== 1) {
-      stats.unchecked_ambiguous += keys.length
+      stats.unchecked_ambiguous += keys.length + bare_references.length
       continue
     }
     const [only_table] = tables_in_scope
@@ -554,6 +740,19 @@ const scan_source = ({ source, relative_path, tables, stats }) => {
       stats.resolved += 1
       if (tables.get(only_table).has(key.column)) continue
       report(key.column, only_table, 'unqualified', key.offset)
+    }
+
+    // BARE STRING -- same single-table restriction, minus the names the
+    // statement projects for itself.
+    const output_aliases = collect_output_aliases(statement.text)
+    for (const reference of bare_references) {
+      if (output_aliases.has(reference.column)) {
+        stats.unchecked_output_alias += 1
+        continue
+      }
+      stats.resolved += 1
+      if (tables.get(only_table).has(reference.column)) continue
+      report(reference.column, only_table, 'bare', reference.offset)
     }
   }
   return findings
@@ -569,6 +768,7 @@ const run_scan = (tables, { source_override } = {}) => {
     unchecked_shadowed: 0,
     unchecked_unbound_prefix: 0,
     unchecked_ambiguous: 0,
+    unchecked_output_alias: 0,
     // Per root, so the coverage verdict can name WHICH root went dark rather than
     // reporting a total that moves with every ordinary commit.
     by_root: {}
@@ -844,7 +1044,119 @@ const run_negative_controls = (tables) => {
     expectation: (finding) => finding.column === 'zzz_control_absent'
   })
 
-  // 5. STALE ADJUDICATION. A suppression that no longer suppresses anything must
+  // 5. BARE-STRING resolution on a single-table statement. This is the
+  //    `placed_wagers.status` shape: a predicate naming a column and no table.
+  const bare_target = pick(({ statement, environment }) => {
+    if (environment.tables_in_scope.size !== 1) return null
+    const [table] = environment.tables_in_scope
+    const aliases = collect_output_aliases(statement.text)
+    const reference = collect_bare_predicate_columns(statement.text).find(
+      (candidate) =>
+        !aliases.has(candidate.column) &&
+        tables.get(table).has(candidate.column)
+    )
+    return reference
+      ? { reference, table, statement_text: statement.text }
+      : null
+  })
+
+  // Rewrite a bare literal IN PLACE by offset rather than by pattern. A pattern
+  // would also rewrite the same word used as a bound VALUE elsewhere in the
+  // statement, which mutates something the control is not aiming at.
+  const rewrite_bare_literal = (target, replacement) => {
+    const original = target.hit.statement_text
+    const { offset, column } = target.hit.reference
+    const literal = original.slice(offset, offset + column.length + 2)
+    if (!literal.includes(column)) return target.source
+    const replaced =
+      original.slice(0, offset) +
+      literal.replace(column, replacement) +
+      original.slice(offset + literal.length)
+    return original === replaced
+      ? target.source
+      : target.source.replace(original, replaced)
+  }
+
+  run({
+    name: 'bare-string predicate resolves against a single-table statement',
+    direction: 'must-report',
+    target: bare_target,
+    mutate: (target) => rewrite_bare_literal(target, 'zzz_control_absent'),
+    expectation: (finding) =>
+      finding.column === 'zzz_control_absent' && finding.shape === 'bare'
+  })
+
+  // 6. OVER-EAGER, direction three: a bare reference to an OUTPUT ALIAS the
+  //    statement declares must NOT be reported. `.count('* as count')` then
+  //    `.orderBy('count')` is correct SQL -- Postgres resolves the projection,
+  //    not the table. Without this exclusion the corpus yields 8 such findings
+  //    against 1 real one, so this control is what separates "the exclusion
+  //    works" from "the bare collector is broken and finds nothing".
+  const output_alias_target = pick(({ statement, environment }) => {
+    if (environment.tables_in_scope.size !== 1) return null
+    const [table] = environment.tables_in_scope
+    const aliases = [...collect_output_aliases(statement.text)].filter(
+      (alias) => !tables.get(table).has(alias)
+    )
+    if (!aliases.length) return null
+    const reference = collect_bare_predicate_columns(statement.text).find(
+      (candidate) => tables.get(table).has(candidate.column)
+    )
+    return reference
+      ? { reference, alias: aliases[0], table, statement_text: statement.text }
+      : null
+  })
+  run({
+    name: 'bare reference to an output alias the statement declares is NOT reported',
+    direction: 'must-stay-silent',
+    target: output_alias_target,
+    mutate: (target) => rewrite_bare_literal(target, target.hit.alias),
+    expectation: (finding) => finding.column === output_alias_target.hit.alias
+  })
+
+  // 7. OVER-EAGER, direction four: a bare predicate in a MULTI-table statement
+  //    must NOT be resolved, for the same reason its object-key sibling is not.
+  const bare_ambiguous_target = pick(({ statement, environment }) => {
+    if (environment.tables_in_scope.size < 2) return null
+    const [reference] = collect_bare_predicate_columns(statement.text)
+    return reference ? { reference, statement_text: statement.text } : null
+  })
+  run({
+    name: 'bare predicate in a multi-table statement is NOT resolved',
+    direction: 'must-stay-silent',
+    target: bare_ambiguous_target,
+    mutate: (target) => rewrite_bare_literal(target, 'zzz_control_absent'),
+    expectation: (finding) => finding.column === 'zzz_control_absent'
+  })
+
+  // 8. THE ACCEPTANCE TEST, run as a control rather than asserted in prose.
+  //    `scripts/validate-charting-import.mjs` called `.whereNotNull('sumer_id')`
+  //    on `db('player')` where the column is `sumer_player_id` -- a live 42703,
+  //    fixed in the same commit that added this gate's bare-string half. The
+  //    pre-fix source is reconstructed by mutation rather than by shelling out
+  //    to git, so the control works in a CI checkout of any depth.
+  const acceptance_target = (() => {
+    const file = 'scripts/validate-charting-import.mjs'
+    const full_path = path.join(repo_root, file)
+    if (!fs.existsSync(full_path)) return null
+    const source = fs.readFileSync(full_path, 'utf8')
+    const predicate = "whereNotNull('sumer_player_id')"
+    if (!source.includes(predicate)) return null
+    return { file, source, statement: { line: 0 }, hit: { predicate } }
+  })()
+  run({
+    name: 'the sumer_id 42703 is reported at its pre-fix revision',
+    direction: 'must-report',
+    target: acceptance_target,
+    mutate: (target) =>
+      target.source.replace(target.hit.predicate, "whereNotNull('sumer_id')"),
+    expectation: (finding) =>
+      finding.table === 'player' &&
+      finding.column === 'sumer_id' &&
+      finding.shape === 'bare'
+  })
+
+  // 9. STALE ADJUDICATION. A suppression that no longer suppresses anything must
   //    fail the run rather than standing forever as an exemption for the name.
   //    Driven synthetically because it is a property of the adjudication pass,
   //    not of the scan.
@@ -868,7 +1180,7 @@ const run_negative_controls = (tables) => {
     })
   }
 
-  // 6. ROOT COVERAGE, both directions on one input. Synthetic for the same reason
+  // 10. ROOT COVERAGE, both directions on one input. Synthetic for the same reason
   //    control 5 is: the verdict is a property of the assertion, not of the scan,
   //    and darkening a real root would mean mutating the filesystem. Both
   //    directions matter because an assertion that reported every root as dark
@@ -965,7 +1277,8 @@ const main = () => {
         `multi-table statements (genuinely ambiguous), ` +
         `${stats.unchecked_unbound_prefix} reference(s) on an unbound prefix, ` +
         `${stats.unchecked_shadowed} on a subquery/CTE alias, ` +
-        `${stats.unchecked_no_binding} statement(s) binding no known table`
+        `${stats.unchecked_no_binding} statement(s) binding no known table, ` +
+        `${stats.unchecked_output_alias} bare reference(s) to an output alias the statement declares`
     )
     console.log(
       `  ${stats.statements_with_raw} statement(s) contain a .raw() body, which is not parsed`
