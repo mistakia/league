@@ -342,6 +342,72 @@ const known_bad_external_ids = new Set([
   'fantasypros_id'
 ])
 
+// The ENTITY-TYPE vocabulary for the {system}_{entitytype}_id rule, derived from
+// the schema's own table names rather than hand-listed.
+//
+// This closes the third and worst blind spot found in `conforms_external`. The
+// two repaired in cc50e2a49 made a column INVISIBLE, so the count was a floor
+// and everyone knew it; this one reported a non-conforming column as CLEAN,
+// which means audit-zero could not be read as conformance. The mechanism was a
+// bare two-token shape `/^[a-z0-9]+_[a-z0-9]+_id$/` that applied no vocabulary
+// check to EITHER token, so any `qualifier_noun_id` conformed by construction
+// regardless of whether the noun named an entity type at all. Found 2026-08-08
+// on pff_player_seasonlogs.draft_franchise_id (21,489 of 34,613 rows
+// populated), which read as system=`draft`, entity=`franchise` and passed --
+// the audit reported four members of the franchise_id family where the schema
+// had five.
+//
+// The other half of the same rule hand-listed five entity types
+// (player|team|game|league|site), which is the enumeration trap the
+// bare-shorthand rule above was inverted to escape: it reports only the
+// vocabulary someone already thought of. Both halves are replaced by this one
+// derivation, so a new entity type conforms on arrival with no edit here.
+//
+// A table name is the schema's own statement that a thing exists, so its tokens
+// are the honest source. Deliberately NOT derived from the `_id` columns
+// themselves -- that is circular, and would bless `franchise` on the strength of
+// the very column this rule exists to flag.
+//
+// Every token is read, not just the last. A suffixed table name
+// (`prop_markets_index`, `player_gamelogs`) ends on a bookkeeping word, so a
+// last-token derivation both admits junk (`index`, `history`) and LOSES real
+// types: `market`, `selection` and `drive` are entity types this schema stores
+// and none of them is any table's final token. Measured on this schema, the
+// last-token form turns 10 currently-conforming names red and the all-token
+// form turns 4 red -- and `franchise` is absent from both, so the widening this
+// task is aimed at survives the looser derivation intact.
+// Tokens that appear in table names as this schema's own DOMAIN PREFIX rather
+// than as a thing it stores. `nfl` is the whole list, and it is excluded for the
+// identical reason `table_implies_vendor` below reads only
+// `external_system_tokens`: `nfl` prefixes nfl_games / nfl_plays / nfl_snaps and
+// names no entity anywhere. Admitting it lets `stad_nfl_id` read as
+// system=`stad`, entity=`nfl` -- the same false conformance this derivation
+// exists to close, one layer in. This can only ever make the rule STRICTER, so
+// it is not the enumeration trap an accept-list would be; it is exactly one
+// column on this schema.
+const domain_prefix_tokens = new Set(['nfl'])
+
+function derive_entity_type_vocabulary(tables) {
+  const vocabulary = new Set()
+  for (const table of tables.keys()) {
+    for (const token of table.toLowerCase().split('_')) {
+      if (domain_prefix_tokens.has(token)) continue
+      vocabulary.add(token)
+      vocabulary.add(singularize(token))
+    }
+  }
+  return vocabulary
+}
+
+// Deliberately minimal -- it only has to reduce this schema's table names to the
+// noun an id column would use. Every irregular case here is regular.
+function singularize(token) {
+  if (token.endsWith('ies')) return `${token.slice(0, -3)}y`
+  if (/(s|x|z|ch|sh)es$/.test(token)) return token.slice(0, -2)
+  if (token.endsWith('s') && !token.endsWith('ss')) return token.slice(0, -1)
+  return token
+}
+
 // --- schema parsing ----------------------------------------------------------
 
 // Extract { table -> [{ name, quoted, type }] } from CREATE TABLE blocks.
@@ -453,7 +519,7 @@ function looks_like_time_column(table, name) {
   return /(_at|_time|_ts|timestamp|_date)$/.test(name) || name === 'timestamp'
 }
 
-function check_column(table, col) {
+function check_column(table, col, entity_type_vocabulary) {
   const findings = []
   const lower = col.name.toLowerCase()
 
@@ -535,13 +601,15 @@ function check_column(table, col) {
   const is_id_column =
     /_?id$/.test(lower) && !allowlisted_identifiers.has(lower)
   // {system}_{entitytype}_id, where {system} may be multi-token (gsis_it,
-  // fantasy_data) so gsis_it_player_id / fantasy_data_player_id conform; plus the
-  // two-token form and the {role}_pid form. `league` is an entitytype so the
-  // external-league keys conform once renamed (leagues.espn_id -> espn_league_id,
-  // .sleeper_id -> sleeper_league_id).
+  // fantasy_data) so gsis_it_player_id / fantasy_data_player_id conform, and
+  // {entitytype} must be a token the schema's own table names use (see
+  // derive_entity_type_vocabulary). Plus the {role}_pid form.
+  //
+  // At least two tokens before `_id` are required, so a bare `player_id` stays
+  // an internal foreign key rather than an external-id claim -- the same
+  // system-plus-entity shape the rule has always demanded.
   const conforms_external =
-    /^[a-z0-9]+(_[a-z0-9]+)*_(player|team|game|league|site)_id$/.test(lower) ||
-    /^[a-z0-9]+_[a-z0-9]+_id$/.test(lower) ||
+    conforms_qualified_external_id(lower, entity_type_vocabulary) ||
     /_pid$/.test(lower)
   if (
     (known_bad_external_ids.has(lower) ||
@@ -576,6 +644,15 @@ function check_column(table, col) {
   }
 
   return findings
+}
+
+// {system}_{entitytype}_id with a real entity type in the final noun position.
+// Returns false for anything that is not lower snake_case ending in `_id`, for a
+// single-token name, and for a noun the schema names no table after.
+function conforms_qualified_external_id(name, entity_type_vocabulary) {
+  if (!/^[a-z0-9]+(_[a-z0-9]+)+_id$/.test(name)) return false
+  const tokens = name.slice(0, -'_id'.length).split('_')
+  return entity_type_vocabulary.has(tokens[tokens.length - 1])
 }
 
 // Heuristic: an id column referencing an external system rather than an internal
@@ -715,13 +792,17 @@ function check_table_name(table) {
 // see that file for why the previous `<base>_year_YYYY` regex was wrong.
 
 function audit(tables, partition_children, filter) {
+  // Derived from the WHOLE schema, never from the filtered subset: scoping the
+  // run to one table must not shrink the vocabulary its columns are judged
+  // against, or `--table x` and the full run would disagree about x.
+  const entity_type_vocabulary = derive_entity_type_vocabulary(tables)
   const all = []
   for (const [table, columns] of tables) {
     if (filter && table !== filter) continue
     if (!filter && partition_children.has(table)) continue
     all.push(...check_table_name(table))
     for (const col of columns) {
-      all.push(...check_column(table, col))
+      all.push(...check_column(table, col, entity_type_vocabulary))
     }
   }
   return all
@@ -732,9 +813,19 @@ function main() {
     .option('table', { type: 'string', description: 'Audit one table only' })
     .option('summary', { type: 'boolean', default: false })
     .option('json', { type: 'boolean', default: false })
+    // Reads the tracked db/schema.postgres.sql by default. The override exists
+    // so a spec can point the real audit at a synthetic schema and assert what
+    // it reports; note it is a FLAG rather than LEAGUE_SCHEMA_FILE, which
+    // test/global.mjs honors and this tool deliberately does not -- a candidate
+    // schema built for a migration must be copied over the tracked path, or the
+    // reported numbers are the tracked ones and read like a no-op migration.
+    .option('schema-file', {
+      type: 'string',
+      description: 'Audit a schema file other than db/schema.postgres.sql'
+    })
     .help().argv
 
-  const sql = fs.readFileSync(schema_path, 'utf8')
+  const sql = fs.readFileSync(argv.schemaFile || schema_path, 'utf8')
   const tables = parse_schema(sql)
   const partition_children = parse_partition_children(sql)
   const findings = audit(tables, partition_children, argv.table)
