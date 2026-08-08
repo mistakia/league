@@ -137,8 +137,18 @@ if $full; then
     fi
 else
     # User dump: the small, irreplaceable, fast-changing slice. Stays plain-SQL
-    # inside a .tar.gz so the two dev consumers (restore-backup.mjs,
-    # import-database-backup.mjs) keep working unchanged.
+    # inside a .tar.gz so the dev consumer (restore-backup.mjs) keeps working
+    # unchanged.
+    #
+    # NOTE: this slice ships production secrets in the clear -- users.email,
+    # users.password (bcrypt), users.invite_code, invite_codes.code,
+    # leagues.discord_webhook_url, and placed_wagers book ids and amounts.
+    # Nothing scrubs it. import-database-backup.mjs carried a hardcoded
+    # column-name scrub until 2026-08-08, but its first statement named
+    # users.phone, a column dropped 2026-01-12 (adbce55ca), so every run raised
+    # 42703 and scrubbed nothing for seven months; the script was deleted rather
+    # than repaired. A real fix scrubs HERE, at dump time, deny-by-default, so
+    # secrets never leave this host.
     sql_file="$file_name-$backup_type.sql"
     output_file="$file_name-$backup_type.tar.gz"
     dump_tables "$db_user_tables"
