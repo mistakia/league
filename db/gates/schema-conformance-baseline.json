@@ -1,22 +1,12 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-08T19:11:24.754Z",
-  "count": 24,
+  "generated_at": "2026-08-08T20:15:20.603Z",
+  "count": 21,
   "violations": [
     {
       "table": "league_formats",
       "column": "cap",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_games",
-      "column": "ngs_site_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_games",
-      "column": "stad_nfl_id",
-      "rule": "external_id"
     },
     {
       "table": "nfl_plays_current_week",
@@ -41,11 +31,6 @@
     {
       "table": "nfl_plays_rusher",
       "column": "gsis_it_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "sportradar_event_id",
       "rule": "external_id"
     },
     {
