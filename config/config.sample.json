@@ -18,10 +18,10 @@
   "postgres": {
     "client": "postgres",
     "connection": {
-      "host": "localhost",
-      "user": "league_writer",
+      "host": "127.0.0.1",
+      "user": "league_development",
       "password": "<value>",
-      "database": "league_production",
+      "database": "league_development",
       "decimalNumbers": true,
       "port": "5432"
     },

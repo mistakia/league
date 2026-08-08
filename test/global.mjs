@@ -1,4 +1,5 @@
 import knex from '#db'
+import { assert_destructive_target_allowed } from '#db/guard-destructive-target.mjs'
 import path, { dirname } from 'path'
 import fs from 'fs/promises'
 import { fileURLToPath } from 'url'
@@ -49,6 +50,31 @@ process.on('unhandledRejection', (reason) => {
 })
 
 export async function mochaGlobalSetup() {
+  // This function drops every table in the public schema of whatever #db
+  // resolved to, and nothing below it asks which database that is. Run the
+  // suite with NODE_ENV=development, or with LEAGUE_DB_DATABASE pointed
+  // elsewhere, and it would drop production. The guard refuses first, on the
+  // live server's own current_database(), and it is the single chokepoint for
+  // the whole suite -- every spec's teardown, including the unqualified
+  // knex('users').del() ones, runs only after this has passed.
+  //
+  // The refusal EXITS rather than throwing. A throw out of mochaGlobalSetup
+  // leaves the knex pool holding the event loop open, so the run hangs at 0%
+  // CPU printing nothing further -- indistinguishable from the four documented
+  // suite hangs, and the one shape a session is trained to wait out. Measured:
+  // a refusal thrown from here sat until a 180s timeout killed it. Printing and
+  // exiting 1 makes the refusal the fastest possible outcome instead.
+  try {
+    await assert_destructive_target_allowed({
+      knex,
+      operation: 'test suite setup (DROP TABLE on every table in public)'
+    })
+  } catch (error) {
+    console.error(`\n${error.message}\n`)
+    await knex.destroy()
+    process.exit(1)
+  }
+
   // Clear all tables in the database
   const tables = await knex.raw(
     "SELECT tablename FROM pg_tables WHERE schemaname = 'public'"
