@@ -312,12 +312,17 @@ const collect_corpus = (roots) => {
       !extensions || extensions.has(path.extname(file))
     const prose = (file) =>
       !prose_extensions || prose_extensions.has(path.extname(file))
+    // An in-repo root is displayed relative to the REPO, never relative to the
+    // root it was collected under -- see `display_path` for why that distinction
+    // is load-bearing rather than cosmetic.
+    const in_repo = !path.isAbsolute(root)
     // A root may name a single file (`CLAUDE.md`) as well as a directory.
     if (fs.statSync(absolute).isFile()) {
       if (permitted(absolute))
         files.push({
           file: absolute,
           root,
+          in_repo,
           absolute_root: path.dirname(absolute),
           prose: prose(absolute)
         })
@@ -328,6 +333,7 @@ const collect_corpus = (roots) => {
         files.push({
           file,
           root,
+          in_repo,
           absolute_root: absolute,
           prose: prose(file)
         })
@@ -339,11 +345,31 @@ const collect_corpus = (roots) => {
 // A corpus path is reported relative to the root it was collected under, so a
 // finding in user-base reads as `workflow/nfl/betting/x.md` rather than as a
 // twelve-segment absolute path nobody can scan.
+//
+// An IN-REPO file is displayed relative to the REPO ROOT instead, and that is
+// not cosmetic -- this path is the adjudication KEY. Under the root-relative
+// form a single-file root resolves its `absolute_root` to the CHECKOUT
+// DIRECTORY, so `CLAUDE.md` keyed as `league/CLAUDE.md` from
+// `repository/active/league` and as `<worktree-name>/CLAUDE.md` from anywhere
+// else. That put the key under the control of a directory name this repo's own
+// guidance tells you to vary: run the gate from a clean worktree, as the
+// working-tree gates here are all supposed to be run, and every CLAUDE.md
+// adjudication suppressed nothing while reporting itself stale -- measured
+// 2026-08-08 as 26 findings plus 26 stale adjudications from a tree that is
+// GATE OK in the main checkout. A false finding storm is the expensive
+// direction: the remedy it invites is deleting load-bearing suppressions.
+//
+// It also removes a real ambiguity rather than only a hazard. The checkout is
+// named `league` and user-base supplies `text/league` as a root, so both
+// collapsed onto one `league/` prefix and the two namespaces were already
+// sharing keys.
 const display_path = (entry) =>
-  path.join(
-    path.basename(entry.absolute_root),
-    path.relative(entry.absolute_root, entry.file)
-  )
+  entry.in_repo
+    ? path.relative(repo_root, entry.file)
+    : path.join(
+        path.basename(entry.absolute_root),
+        path.relative(entry.absolute_root, entry.file)
+      )
 
 // ---------------------------------------------------------------------------
 // gate 1: qualified table.column pairs
@@ -2349,6 +2375,31 @@ const run_negative_control = async ({
         ? `gate 3 reports a .raw() statement pointed at a table that does not exist (${victim.path}:${victim.line})`
         : 'gate 3 reports a .raw() statement pointed at a table that does not exist -- NO .raw() SQL IN CORPUS',
       reported
+    ])
+  }
+
+  // 15. The reported path IS the adjudication key, so it must not depend on what
+  //     the checkout is NAMED. This asserts the absence of a leak rather than the
+  //     presence of a finding, which is the same shape as the DATABASE-SCOPED
+  //     silence controls above and for the same reason: half of a key's
+  //     correctness is what it does NOT encode. Under the root-relative form a
+  //     single-file root took its prefix from the checkout directory, so every
+  //     CLAUDE.md adjudication suppressed nothing the moment the gate ran from a
+  //     worktree -- 26 findings and 26 stale adjudications over a tree that is
+  //     GATE OK, on exactly the clean-worktree path this repo prescribes for the
+  //     gates that read the working tree. It needs real in-repo material, so a
+  //     corpus that stopped collecting the checkout reports STAYED GREEN here.
+  {
+    const checkout_name = path.basename(repo_root)
+    const in_repo_entries = corpus.filter((entry) => entry.in_repo)
+    const leaks_the_checkout_name = in_repo_entries.some((entry) =>
+      display_path(entry).split(path.sep).includes(checkout_name)
+    )
+    cases.push([
+      in_repo_entries.length
+        ? `an in-repo path is keyed on the repo root and stays SILENT on the checkout directory name (${checkout_name})`
+        : 'an in-repo path is keyed on the repo root -- NO IN-REPO CORPUS',
+      in_repo_entries.length > 0 && !leaks_the_checkout_name
     ])
   }
 
