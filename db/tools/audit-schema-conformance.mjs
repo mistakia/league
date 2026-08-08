@@ -422,7 +422,31 @@ const RULES = {
 // integer epochs the suffix rule reported as clean because the name is a single
 // letter -- until the valuations restructure retyped them to
 // `observed_at timestamptz`, which the pattern recognises on its own.
-const known_time_columns = new Set([])
+//
+// The entries below were found BY VALUE, not by name: db/tools/scan-epoch-columns.mjs
+// read pg_stats histogram bounds against league_production and every one of them
+// decodes through to_timestamp to a date between 2020 and 2026. Do not try to
+// derive them from a naming pattern -- there is none, which is the whole reason
+// the suffix rule reported them clean. Re-run that sweep to extend this set.
+const known_time_columns = new Set([
+  'nfl_plays.updated',
+  // Not a partition child of nfl_plays -- an independent table carrying its own
+  // copy of the column, which is why it needs its own entry.
+  'nfl_plays_current_week.updated',
+  'poaches.processed',
+  'poaches.submitted',
+  'restricted_free_agency_bids.cancelled',
+  'restricted_free_agency_bids.processed',
+  'restricted_free_agency_bids.submitted',
+  'rosters.last_updated',
+  'trades.accepted',
+  'trades.cancelled',
+  'trades.offered',
+  'trades.rejected',
+  'waivers.cancelled',
+  'waivers.processed',
+  'waivers.submitted'
+])
 
 function looks_like_time_column(table, name) {
   if (known_time_columns.has(`${table}.${name}`)) return true
@@ -521,7 +545,9 @@ function check_column(table, col) {
     /_pid$/.test(lower)
   if (
     (known_bad_external_ids.has(lower) ||
-      (is_id_column && !conforms_external && looks_like_external(lower))) &&
+      (is_id_column &&
+        !conforms_external &&
+        looks_like_external(table, lower))) &&
     !conforms_external
   ) {
     findings.push({ rule: 'external_id', table, column: col.name })
@@ -602,6 +628,7 @@ const external_vendor_tokens = [
   'nffc',
   'fantrax',
   'fleaflicker',
+  'groupme',
   'rtsports',
   'draftkings',
   'fanduel',
@@ -615,13 +642,54 @@ const external_vendor_tokens = [
   'gambet'
 ]
 
-function looks_like_external(name) {
+function looks_like_external(table, name) {
   if (external_vendor_tokens.some((t) => name_has_token(name, t))) return true
   // Glued form: vendor token running straight into the rest of the name, either
   // at the start (`espnid`) or after a separator (`home_ngsid`, `site_ngsid`).
-  return external_vendor_tokens.some((t) =>
-    new RegExp(`(^|_)${t}[a-z0-9]`).test(name)
-  )
+  if (
+    external_vendor_tokens.some((t) =>
+      new RegExp(`(^|_)${t}[a-z0-9]`).test(name)
+    )
+  ) {
+    return true
+  }
+  return table_implies_vendor(table, name)
+}
+
+// The vendor is named by the TABLE rather than by the column. `franchise_id` on
+// pff_team_gamelogs is PFF's team identifier and carries no vendor token at all,
+// so every vocabulary widening above is structurally unable to reach it -- and
+// pff_team_gamelogs / pff_team_seasonlogs carry no other id column, so without
+// this they produce no finding whatsoever and never appear in a flagged-list
+// enumeration of the external-id class.
+//
+// Derived rather than enumerated, deliberately: a `table.column` set seeded with
+// the four franchise_id columns would report exactly the debt someone already
+// knew to type in, which is the enumeration trap the bare-shorthand rule above
+// was inverted to escape. A new vendor table conforms on arrival with no edit.
+//
+// Two narrowings, both MEASURED against this schema rather than assumed, because
+// the first draft of this rule took the audit from 39 findings to 86 and every
+// one of the 28 false positives came from one of them.
+//
+// It reads `external_system_tokens`, NOT the full `external_vendor_tokens`
+// vocabulary. Most of that list is unambiguously a third-party name, but `nfl`
+// is simultaneously a vendor token and this schema's own domain prefix, so the
+// full list matches `nfl_plays`, `nfl_snaps`, `nfl_coaches` and `nfl_play_stats`
+// and flags every internal key on them -- `play_id`, `stat_id`, `coach_id`,
+// `drive_start_play_id`. Those are internal app keys, and flagging them is the
+// operation-log 004 failure that got the vendor-leak rule retired: a gate full
+// of non-defects can never reach zero.
+//
+// And the column must end in a real `_id`. `is_id_column` above tests `/_?id$/`,
+// which is deliberately loose so it reaches GLUED vendor ids (`gsisid`,
+// `espnid`) -- but that also matches any name merely ENDING in those two
+// letters, so `nfl_play_stats.is_valid` reported as an external id. The glued
+// form always carries its vendor in the column name and so is reached by the
+// vocabulary above; nothing needs it here.
+function table_implies_vendor(table, name) {
+  if (!/_id$/.test(name)) return false
+  return external_system_tokens.some((t) => name_has_token(table, t))
 }
 
 // Token appears as a word-boundary segment in a snake/qualified name, so `pff`
