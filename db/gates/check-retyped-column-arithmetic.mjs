@@ -111,10 +111,32 @@ const adjudications_file = path.join(
 )
 
 // The server roots plus `libs-shared`, which is isomorphic and reaches the SPA.
-// `app/` is deliberately out: the SPA receives these values as JSON strings
+//
+// `test/` and `private/` are here deliberately, and they are the two surfaces
+// the 2026-08-07 sweep declared as gaps. `private/` is in NO other consumer
+// gate's corpus at all -- CLAUDE.md records that as a standing hole, and the
+// writers it holds are exactly the kind nothing executes in CI. `test/` was not
+// scanned by either sweep, and a fixture is a real consumer: it writes the
+// column, so a fixture on the wrong side of a retype encodes the wrong shape and
+// then makes the suite agree with it, which is the failure
+// `test/scripts.restricted-free-agency.spec.mjs` already had once.
+//
+// Both were re-derived rather than trusted on 2026-08-08 and both are clean of
+// this class -- `private/` with no findings at all, `test/` with three that are
+// the same by-contract shape as `create-league.mjs` and are adjudicated.
+//
+// `app/` is deliberately OUT: the SPA receives these values as JSON strings
 // rather than as Date objects, so its arithmetic is a different question with a
 // different answer, and including it would report every correct site.
-const SCAN_ROOTS = ['api', 'libs-server', 'libs-shared', 'scripts', 'jobs']
+const SCAN_ROOTS = [
+  'api',
+  'libs-server',
+  'libs-shared',
+  'scripts',
+  'jobs',
+  'test',
+  'private'
+]
 
 // A retype is in this gate's class when the OLD type was numeric and the NEW one
 // is temporal. Both halves are structural type tests, not a name list.
@@ -768,9 +790,16 @@ const main = async () => {
   for (const root of SCAN_ROOTS) {
     const absolute = path.join(repo_root, root)
     if (!fs.existsSync(absolute)) {
+      // Exit 2, never a skip. A root that silently resolves to nothing is a gate
+      // reading green over an unread tree, and `walk_files` treats an unreadable
+      // directory as empty -- the exact way check-knex-column-resolution's
+      // coverage floors were shown to miss one root going dark.
       console.error(
-        `TOOLING ERROR: scan root ${root} does not exist. A root that silently ` +
-          'resolves to nothing is a gate reading green over an unread tree.'
+        `TOOLING ERROR: scan root ${root} does not exist, so this gate did NOT run.` +
+          (root === 'private'
+            ? '\n`private` is a submodule and a fresh worktree does not inherit one: run\n' +
+              '`git submodule update --init private` here, then re-run.'
+            : '')
       )
       process.exit(2)
     }
@@ -862,7 +891,7 @@ const main = async () => {
         'site is gone and the entry must go too'
     )
     for (const entry of stale) {
-      console.log(`  ${entry.path}:${entry.line} ${entry.column}`)
+      console.log(`  ${entry.path}  ${entry.column}  ${entry.kind}`)
     }
   }
 
