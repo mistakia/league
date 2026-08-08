@@ -234,38 +234,58 @@ const LOCAL_BACKUP_PATH = '/root/backups'
 const STORAGE_FULL_DUMP_PATH =
   '/storage/backups/database-dumps/league-production'
 
+// This script pulls onto a DEV machine, so it is only ever allowed to see the
+// SCRUBBED dev fixture (`*-dev.tar.gz`, produced by derive-dev-fixture.mjs on
+// the league host). The `*-user.tar.gz` slice beside it is the complete,
+// unscrubbed disaster-recovery artifact: users.email, users.password,
+// invite_codes.code, leagues.discord_webhook_url, placed_wagers financials and
+// -- widest of all -- the config table's third-party vendor credentials.
+//
+// The glob is the whole enforcement, so keep it narrow. It used to be
+// `*.tar.gz`, which matched the DR dump and is how production secrets reached
+// every dev disk for seven months while a scrub that raised 42703 on its first
+// statement reported nothing wrong.
+const DEV_FIXTURE_GLOB = '*-dev.tar.gz'
+
+const no_fixture_error = ({ query, location }) =>
+  new Error(
+    `No scrubbed dev fixture (${DEV_FIXTURE_GLOB}) matching "${query}" in ${location}.\n` +
+      `Refusing to fall back to the *-user.tar.gz dump -- it is the unscrubbed DR\n` +
+      `artifact and carries live user and vendor credentials. Produce a fixture with\n` +
+      `scripts/derive-dev-fixture.mjs on the league host instead.`
+  )
+
 /**
- * Find the latest backup file matching the query.
+ * Find the latest SCRUBBED dev fixture matching the query.
  * Checks local /root/backups/ first (when running on the league server),
  * otherwise lists files on the storage server via SSH.
  * Returns { name, remote_path } where remote_path is set for storage files.
  */
 const find_backup_file = async ({ query }) => {
   if (existsSync(LOCAL_BACKUP_PATH)) {
-    log('Searching local backups at %s', LOCAL_BACKUP_PATH)
+    log('Searching local dev fixtures at %s', LOCAL_BACKUP_PATH)
     const { stdout } = await exec(
-      `ls -t "${LOCAL_BACKUP_PATH}"/*.tar.gz 2>/dev/null || true`
+      `ls -t "${LOCAL_BACKUP_PATH}"/${DEV_FIXTURE_GLOB} 2>/dev/null || true`
     )
     const files = stdout.trim().split('\n').filter(Boolean)
     const match = files.find((f) => path.basename(f).includes(query))
     if (!match) {
-      throw new Error(
-        `No backup files found matching "${query}" in ${LOCAL_BACKUP_PATH}`
-      )
+      throw no_fixture_error({ query, location: LOCAL_BACKUP_PATH })
     }
     return { name: path.basename(match), local_path: match }
   }
 
-  log('Searching storage server backups via SSH')
+  log('Searching storage server dev fixtures via SSH')
   const { stdout } = await exec(
-    `ssh base-storage 'ls -t ${STORAGE_BACKUP_PATH}/*.tar.gz 2>/dev/null || true'`
+    `ssh base-storage 'ls -t ${STORAGE_BACKUP_PATH}/${DEV_FIXTURE_GLOB} 2>/dev/null || true'`
   )
   const files = stdout.trim().split('\n').filter(Boolean)
   const match = files.find((f) => path.basename(f).includes(query))
   if (!match) {
-    throw new Error(
-      `No backup files found matching "${query}" on base-storage:${STORAGE_BACKUP_PATH}`
-    )
+    throw no_fixture_error({
+      query,
+      location: `base-storage:${STORAGE_BACKUP_PATH}`
+    })
   }
   return { name: path.basename(match), remote_path: match }
 }

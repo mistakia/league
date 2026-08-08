@@ -62,7 +62,6 @@ poach_releases
 poaches
 rosters
 rosters_players
-schedule
 seasons
 league_team_seasonlogs
 teams

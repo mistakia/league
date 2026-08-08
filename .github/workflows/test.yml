@@ -116,6 +116,9 @@ jobs:
       - name: Schema conformance ratchet
         run: node db/gates/check-schema-conformance-ratchet.mjs
 
+      - name: Dev fixture scrub
+        run: node db/gates/check-dev-fixture-scrub.mjs
+
       - name: yarn test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -123,6 +123,14 @@ const GATES = [
       'non-production configs must not name league_production or a remote host, and every destructive entrypoint must import the target guard'
   },
   {
+    id: 'dev-fixture-scrub',
+    command: ['db/gates/check-dev-fixture-scrub.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'every dumped column carries a disposition in the dev-fixture projection, and the named secrets are not emitted verbatim'
+  },
+  {
     id: 'schema-conformance-ratchet',
     command: ['db/gates/check-schema-conformance-ratchet.mjs'],
     requires: 'none',
