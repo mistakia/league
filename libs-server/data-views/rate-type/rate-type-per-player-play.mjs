@@ -48,14 +48,14 @@ export const add_per_player_play_cte = ({
   query_context = null
 }) => {
   const cte_query = db('nfl_plays')
-    .select('nfl_snaps.gsis_it_id')
+    .select('nfl_snaps.gsis_it_player_id')
     .join('nfl_snaps', function () {
       this.on('nfl_plays.esbid', '=', 'nfl_snaps.esbid')
         .andOn('nfl_plays.play_id', '=', 'nfl_snaps.play_id')
         .andOn('nfl_plays.season_year', '=', 'nfl_snaps.season_year')
     })
     .whereNot('play_type', 'NOPL')
-    .groupBy('nfl_snaps.gsis_it_id')
+    .groupBy('nfl_snaps.gsis_it_player_id')
 
   let count_expression = 'COUNT(*)'
   if (group_by) {
@@ -139,7 +139,10 @@ export const join_per_player_play_cte = ({
   data_view_options = {}
 }) => {
   players_query.leftJoin(rate_type_table_name, function () {
-    this.on(`${rate_type_table_name}.gsis_it_id`, 'player.gsis_it_player_id')
+    this.on(
+      `${rate_type_table_name}.gsis_it_player_id`,
+      'player.gsis_it_player_id'
+    )
 
     if (row_axes.includes('year')) {
       const offset_range = resolve_year_offset_range(params)
@@ -190,7 +193,7 @@ export const join_per_player_play_cte = ({
     // No group_by correlation here by design: a group_by period
     // (half/quarter/drive/series) is encapsulated in the denominator's
     // COUNT(DISTINCT CONCAT(esbid, <dim>)) expression in add_per_player_play_cte,
-    // which keeps the CTE at gsis_it_id grain. There is no per-dimension column
+    // which keeps the CTE at gsis_it_player_id grain. There is no per-dimension column
     // to join against, and correlating one would fan the denominator out.
   })
 }
@@ -237,7 +240,7 @@ export const join_cte = ({ query_context, cte_name, params }) => {
   // dispatch_params (play_type / group_by) intentionally not threaded into the
   // join: play_type and group_by both affect only the CTE body (the play
   // filter and the COUNT(DISTINCT) denominator), never the join correlation,
-  // which is gsis_it_id (+ year/week split). See join_per_player_play_cte.
+  // which is gsis_it_player_id (+ year/week split). See join_per_player_play_cte.
   join_per_player_play_cte({
     players_query: query_context.players_query,
     params: params ?? query_context.params,

@@ -6264,7 +6264,7 @@ CREATE TABLE public.nfl_plays_passer (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
     season_year smallint NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     player_esbid character varying(20),
     gsis_player_id character varying(20),
     passer_speed_at_pass_forward numeric(10,4),
@@ -6311,7 +6311,7 @@ CREATE TABLE public.nfl_plays_player (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
     season_year smallint NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     player_esbid character varying(20),
     first_name character varying(50),
     gsis_player_id character varying(20),
@@ -6367,7 +6367,7 @@ CREATE TABLE public.nfl_plays_receiver (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
     season_year smallint NOT NULL,
-    gsis_it_id integer,
+    gsis_it_player_id integer,
     player_esbid character varying(20),
     gsis_player_id character varying(20) NOT NULL,
     receiver_location_type character varying(50),
@@ -6404,7 +6404,7 @@ CREATE TABLE public.nfl_plays_rusher (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
     season_year smallint NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     player_esbid character varying(20),
     gsis_player_id character varying(20),
     pre_snap_rush_location character varying(50),
@@ -18129,7 +18129,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
 CREATE TABLE public.nfl_snaps (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 )
 PARTITION BY RANGE (season_year);
@@ -18142,7 +18142,7 @@ PARTITION BY RANGE (season_year);
 CREATE TABLE public.nfl_snaps_year_2000 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18154,7 +18154,7 @@ CREATE TABLE public.nfl_snaps_year_2000 (
 CREATE TABLE public.nfl_snaps_year_2001 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18166,7 +18166,7 @@ CREATE TABLE public.nfl_snaps_year_2001 (
 CREATE TABLE public.nfl_snaps_year_2002 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18178,7 +18178,7 @@ CREATE TABLE public.nfl_snaps_year_2002 (
 CREATE TABLE public.nfl_snaps_year_2003 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18190,7 +18190,7 @@ CREATE TABLE public.nfl_snaps_year_2003 (
 CREATE TABLE public.nfl_snaps_year_2004 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18202,7 +18202,7 @@ CREATE TABLE public.nfl_snaps_year_2004 (
 CREATE TABLE public.nfl_snaps_year_2005 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18214,7 +18214,7 @@ CREATE TABLE public.nfl_snaps_year_2005 (
 CREATE TABLE public.nfl_snaps_year_2006 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18226,7 +18226,7 @@ CREATE TABLE public.nfl_snaps_year_2006 (
 CREATE TABLE public.nfl_snaps_year_2007 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18238,7 +18238,7 @@ CREATE TABLE public.nfl_snaps_year_2007 (
 CREATE TABLE public.nfl_snaps_year_2008 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18250,7 +18250,7 @@ CREATE TABLE public.nfl_snaps_year_2008 (
 CREATE TABLE public.nfl_snaps_year_2009 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18262,7 +18262,7 @@ CREATE TABLE public.nfl_snaps_year_2009 (
 CREATE TABLE public.nfl_snaps_year_2010 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18274,7 +18274,7 @@ CREATE TABLE public.nfl_snaps_year_2010 (
 CREATE TABLE public.nfl_snaps_year_2011 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18286,7 +18286,7 @@ CREATE TABLE public.nfl_snaps_year_2011 (
 CREATE TABLE public.nfl_snaps_year_2012 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18298,7 +18298,7 @@ CREATE TABLE public.nfl_snaps_year_2012 (
 CREATE TABLE public.nfl_snaps_year_2013 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18310,7 +18310,7 @@ CREATE TABLE public.nfl_snaps_year_2013 (
 CREATE TABLE public.nfl_snaps_year_2014 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18322,7 +18322,7 @@ CREATE TABLE public.nfl_snaps_year_2014 (
 CREATE TABLE public.nfl_snaps_year_2015 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18334,7 +18334,7 @@ CREATE TABLE public.nfl_snaps_year_2015 (
 CREATE TABLE public.nfl_snaps_year_2016 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18346,7 +18346,7 @@ CREATE TABLE public.nfl_snaps_year_2016 (
 CREATE TABLE public.nfl_snaps_year_2017 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18358,7 +18358,7 @@ CREATE TABLE public.nfl_snaps_year_2017 (
 CREATE TABLE public.nfl_snaps_year_2018 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18370,7 +18370,7 @@ CREATE TABLE public.nfl_snaps_year_2018 (
 CREATE TABLE public.nfl_snaps_year_2019 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18382,7 +18382,7 @@ CREATE TABLE public.nfl_snaps_year_2019 (
 CREATE TABLE public.nfl_snaps_year_2020 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18394,7 +18394,7 @@ CREATE TABLE public.nfl_snaps_year_2020 (
 CREATE TABLE public.nfl_snaps_year_2021 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18406,7 +18406,7 @@ CREATE TABLE public.nfl_snaps_year_2021 (
 CREATE TABLE public.nfl_snaps_year_2022 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18418,7 +18418,7 @@ CREATE TABLE public.nfl_snaps_year_2022 (
 CREATE TABLE public.nfl_snaps_year_2023 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18430,7 +18430,7 @@ CREATE TABLE public.nfl_snaps_year_2023 (
 CREATE TABLE public.nfl_snaps_year_2024 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18442,7 +18442,7 @@ CREATE TABLE public.nfl_snaps_year_2024 (
 CREATE TABLE public.nfl_snaps_year_2025 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18454,7 +18454,7 @@ CREATE TABLE public.nfl_snaps_year_2025 (
 CREATE TABLE public.nfl_snaps_year_2026 (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -18466,7 +18466,7 @@ CREATE TABLE public.nfl_snaps_year_2026 (
 CREATE TABLE public.nfl_snaps_year_default (
     esbid integer NOT NULL,
     play_id integer NOT NULL,
-    gsis_it_id integer NOT NULL,
+    gsis_it_player_id integer NOT NULL,
     season_year smallint NOT NULL
 );
 
@@ -28674,7 +28674,7 @@ ALTER TABLE ONLY public.nfl_matchup_stats
 --
 
 ALTER TABLE ONLY public.nfl_plays_passer
-    ADD CONSTRAINT nfl_plays_passer_pkey PRIMARY KEY (esbid, play_id, season_year, gsis_it_id);
+    ADD CONSTRAINT nfl_plays_passer_pkey PRIMARY KEY (esbid, play_id, season_year, gsis_it_player_id);
 
 
 --
@@ -28682,7 +28682,7 @@ ALTER TABLE ONLY public.nfl_plays_passer
 --
 
 ALTER TABLE ONLY public.nfl_plays_player
-    ADD CONSTRAINT nfl_plays_player_pkey PRIMARY KEY (esbid, play_id, season_year, gsis_it_id);
+    ADD CONSTRAINT nfl_plays_player_pkey PRIMARY KEY (esbid, play_id, season_year, gsis_it_player_id);
 
 
 --
@@ -28698,7 +28698,7 @@ ALTER TABLE ONLY public.nfl_plays_receiver
 --
 
 ALTER TABLE ONLY public.nfl_plays_rusher
-    ADD CONSTRAINT nfl_plays_rusher_pkey PRIMARY KEY (esbid, play_id, season_year, gsis_it_id);
+    ADD CONSTRAINT nfl_plays_rusher_pkey PRIMARY KEY (esbid, play_id, season_year, gsis_it_player_id);
 
 
 --
@@ -31055,7 +31055,7 @@ CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_trg_pid ON ONLY public.
 -- Name: idx_nfl_snaps_partitioned; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_nfl_snaps_partitioned ON ONLY public.nfl_snaps USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX idx_nfl_snaps_partitioned ON ONLY public.nfl_snaps USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
@@ -42318,196 +42318,196 @@ CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_trg_pid_idx ON pu
 -- Name: nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2000 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2000 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2001 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2001 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2002 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2002 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2003 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2003 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2004 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2004 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2005 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2005 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2006 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2006 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2007 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2007 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2008 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2008 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2009 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2009 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2010 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2010 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2011 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2011 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2012 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2012 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2013 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2013 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2014 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2014 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2015 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2015 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2016 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2016 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2017 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2017 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2018 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2018 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2019 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2019 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2020 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2020 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2021 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2021 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2022 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2022 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2023 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2023 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2024 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2024 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2025 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2025 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_2026_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_2026_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2026 USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_2026_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2026 USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --
 -- Name: nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_default USING btree (season_year, esbid, play_id, gsis_it_id);
+CREATE UNIQUE INDEX "nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_default USING btree (season_year, esbid, play_id, gsis_it_player_id);
 
 
 --

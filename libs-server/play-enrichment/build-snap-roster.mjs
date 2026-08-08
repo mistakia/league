@@ -27,7 +27,7 @@ export const build_snap_roster_by_esbid = async (esbids) => {
   if (!esbids || esbids.length === 0) return roster_by_esbid
 
   const rows = await db('nfl_snaps as s')
-    .join('player as p', 'p.gsis_it_player_id', 's.gsis_it_id')
+    .join('player as p', 'p.gsis_it_player_id', 's.gsis_it_player_id')
     .whereIn('s.esbid', esbids)
     .whereNotNull('p.gsis_player_id')
     .distinct(

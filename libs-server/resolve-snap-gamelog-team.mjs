@@ -3,7 +3,7 @@
  * snaps -- he recorded no counting stat, so nothing in the play-stat feed names
  * his team for that game.
  *
- * `nfl_snaps` carries only (esbid, play_id, gsis_it_id, season_year). There is
+ * `nfl_snaps` carries only (esbid, play_id, gsis_it_player_id, season_year). There is
  * no team column on it, so the snap row cannot name the side by itself and the
  * team has to be established from something else. Two sources are available,
  * and both are properties of the GAME rather than of the player today -- which
@@ -134,7 +134,7 @@ export const create_snap_gamelog_team_resolver = async ({
   const scrimmage_possession_rows = await db('nfl_snaps')
     .select(
       'nfl_snaps.esbid',
-      'nfl_snaps.gsis_it_id',
+      'nfl_snaps.gsis_it_player_id',
       'nfl_plays.offense_nfl_team',
       'nfl_plays.defense_nfl_team'
     )
@@ -152,14 +152,14 @@ export const create_snap_gamelog_team_resolver = async ({
     .whereNotNull('nfl_plays.defense_nfl_team')
     .groupBy(
       'nfl_snaps.esbid',
-      'nfl_snaps.gsis_it_id',
+      'nfl_snaps.gsis_it_player_id',
       'nfl_plays.offense_nfl_team',
       'nfl_plays.defense_nfl_team'
     )
 
   const scrimmage_possession_index = new Map()
   for (const row of scrimmage_possession_rows) {
-    const key = `${row.esbid}_${row.gsis_it_id}`
+    const key = `${row.esbid}_${row.gsis_it_player_id}`
     if (!scrimmage_possession_index.has(key)) {
       scrimmage_possession_index.set(key, [])
     }

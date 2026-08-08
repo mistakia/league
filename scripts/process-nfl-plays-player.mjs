@@ -19,7 +19,7 @@ const process_nfl_plays_player = async () => {
     })
     .where({ 'nfl_plays_player.season_year': current_season.year })
     .select(
-      'nfl_plays_player.gsis_it_id',
+      'nfl_plays_player.gsis_it_player_id',
       'nfl_plays_player.gsis_player_id',
       'nfl_plays_player.player_esbid',
       'nfl_plays_player.first_name',
@@ -33,29 +33,31 @@ const process_nfl_plays_player = async () => {
     `loaded ${nfl_plays_player_rows.length} rows from snaps for ${current_season.year}`
   )
 
-  // get list of gsis_it_id missing from `player` table
-  const missing_gsis_it_ids = await db('nfl_plays_player')
+  // get list of gsis_it_player_id missing from `player` table
+  const missing_gsis_it_player_ids = await db('nfl_plays_player')
     .whereNotExists(function () {
       this.select('*')
         .from('player')
-        .whereRaw('player.gsis_it_player_id = nfl_plays_player.gsis_it_id')
+        .whereRaw(
+          'player.gsis_it_player_id = nfl_plays_player.gsis_it_player_id'
+        )
     })
     .where({ season_year: current_season.year })
-    .select('gsis_it_id')
+    .select('nfl_plays_player.gsis_it_player_id')
     .distinct()
 
   log(
-    `found ${missing_gsis_it_ids.length} missing gsis_it_ids for ${current_season.year}`
+    `found ${missing_gsis_it_player_ids.length} missing gsis_it_player_ids for ${current_season.year}`
   )
 
   // iterate through list and try to match to a player
-  for (const { gsis_it_id } of missing_gsis_it_ids) {
+  for (const { gsis_it_player_id } of missing_gsis_it_player_ids) {
     const nfl_plays_player_row = nfl_plays_player_rows.find(
-      (row) => row.gsis_it_id === gsis_it_id
+      (row) => row.gsis_it_player_id === gsis_it_player_id
     )
 
     if (!nfl_plays_player_row) {
-      log(`No data found for gsis_it_id: ${gsis_it_id}`)
+      log(`No data found for gsis_it_player_id: ${gsis_it_player_id}`)
       continue
     }
 
@@ -104,9 +106,9 @@ const process_nfl_plays_player = async () => {
     }
 
     if (!player_row) {
-      log(`No player found for gsis_it_id: ${gsis_it_id}`)
+      log(`No player found for gsis_it_player_id: ${gsis_it_player_id}`)
       const player_info = {
-        gsis_it_id,
+        gsis_it_player_id,
         name: `${nfl_plays_player_row.first_name} ${nfl_plays_player_row.last_name}`,
         esbid: nfl_plays_player_row.player_esbid,
         teams: [
@@ -128,7 +130,7 @@ const process_nfl_plays_player = async () => {
       await updatePlayer({
         player_row,
         update: {
-          gsis_it_player_id: gsis_it_id,
+          gsis_it_player_id,
           allow_protected_props: true,
           ignore_retired: true
         },

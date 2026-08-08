@@ -59,7 +59,7 @@ const build_game_rosters = async ({ esbids, year }) => {
 
   // Real participation, available from 2016 onward only.
   const snap_participants = await db('nfl_snaps as s')
-    .join('player as p', 'p.gsis_it_player_id', 's.gsis_it_id')
+    .join('player as p', 'p.gsis_it_player_id', 's.gsis_it_player_id')
     .whereIn('s.esbid', esbids)
     .where('s.season_year', year)
     .whereNotNull('p.gsis_player_id')

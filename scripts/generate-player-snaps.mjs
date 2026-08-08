@@ -62,7 +62,7 @@ const generate_player_snaps_for_week = async ({
     .select(
       'nfl_snaps.esbid',
       'nfl_snaps.play_id',
-      'nfl_snaps.gsis_it_id',
+      'nfl_snaps.gsis_it_player_id',
       'nfl_plays.offense_nfl_team',
       'nfl_plays.defense_nfl_team',
       'nfl_plays.play_type',
@@ -87,9 +87,12 @@ const generate_player_snaps_for_week = async ({
 
   log(`found ${nfl_snap_rows.length} nfl snaps`)
 
-  const nfl_snap_rows_by_gsis_it_id = groupBy(nfl_snap_rows, 'gsis_it_id')
-  log(`found ${Object.keys(nfl_snap_rows_by_gsis_it_id).length} players`)
-  const gsis_it_ids = Object.keys(nfl_snap_rows_by_gsis_it_id)
+  const nfl_snap_rows_by_gsis_it_player_id = groupBy(
+    nfl_snap_rows,
+    'gsis_it_player_id'
+  )
+  log(`found ${Object.keys(nfl_snap_rows_by_gsis_it_player_id).length} players`)
+  const gsis_it_ids = Object.keys(nfl_snap_rows_by_gsis_it_player_id)
 
   const player_rows = await db('player')
     .select('pid', 'gsis_it_player_id')
@@ -212,18 +215,18 @@ const generate_player_snaps_for_week = async ({
     }
   }
 
-  for (const gsis_it_id_key in nfl_snap_rows_by_gsis_it_id) {
-    const gsis_it_id = Number(gsis_it_id_key)
+  for (const gsis_it_player_id_key in nfl_snap_rows_by_gsis_it_player_id) {
+    const gsis_it_player_id = Number(gsis_it_player_id_key)
     const player_row = player_rows.find(
-      (p) => p.gsis_it_player_id === gsis_it_id
+      (p) => p.gsis_it_player_id === gsis_it_player_id
     )
     if (!player_row) {
-      log(`player not found for gsis_it_id: ${gsis_it_id}`)
+      log(`player not found for gsis_it_player_id: ${gsis_it_player_id}`)
       continue
     }
 
     const player_gamelog = gamelogs.find(
-      (p) => p.gsis_it_player_id === gsis_it_id
+      (p) => p.gsis_it_player_id === gsis_it_player_id
     )
     if (!player_gamelog) {
       log(`player_gamelog not found for pid: ${player_row.pid}`)
@@ -231,7 +234,8 @@ const generate_player_snaps_for_week = async ({
     }
 
     const { opponent_nfl_team, player_position } = player_gamelog
-    const player_snap_rows = nfl_snap_rows_by_gsis_it_id[gsis_it_id]
+    const player_snap_rows =
+      nfl_snap_rows_by_gsis_it_player_id[gsis_it_player_id]
     const { esbid } = player_snap_rows[0]
 
     const player_snaps = {

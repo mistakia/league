@@ -214,13 +214,13 @@ describe('SCRIPTS generate-player-snaps', function () {
       ...plays.map(({ play_id }) => ({
         esbid,
         play_id,
-        gsis_it_id: offense_gsis_it_id,
+        gsis_it_player_id: offense_gsis_it_id,
         season_year
       })),
       ...defense_play_ids.map((play_id) => ({
         esbid,
         play_id,
-        gsis_it_id: defense_gsis_it_id,
+        gsis_it_player_id: defense_gsis_it_id,
         season_year
       }))
     ])

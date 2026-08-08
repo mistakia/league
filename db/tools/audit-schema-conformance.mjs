@@ -325,7 +325,6 @@ const accepted_non_timestamp_columns = new Set([
 // Detected by pattern; this set is the known non-conforming roster for messaging.
 const known_bad_external_ids = new Set([
   'gsisid',
-  'gsis_it_id',
   'esb_id',
   'pff_id',
   'sleeper_id',

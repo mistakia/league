@@ -531,7 +531,7 @@ const generate_snap_based_gamelogs = async ({
       'player.date_of_birth',
       'nfl_snaps.esbid'
     )
-    .join('player', 'player.gsis_it_player_id', 'nfl_snaps.gsis_it_id')
+    .join('player', 'player.gsis_it_player_id', 'nfl_snaps.gsis_it_player_id')
     .whereIn('nfl_snaps.esbid', unique_esbids)
     .where('nfl_snaps.season_year', year)
     .groupBy(

@@ -58,7 +58,7 @@ const populate_qb_pid = async ({
       LEFT JOIN LATERAL (
         SELECT p2.pid
         FROM nfl_snaps ns
-        JOIN player p2 ON p2.gsis_it_player_id = ns.gsis_it_id AND p2.primary_position = 'QB'
+        JOIN player p2 ON p2.gsis_it_player_id = ns.gsis_it_player_id AND p2.primary_position = 'QB'
         JOIN player_gamelogs pg ON pg.pid = p2.pid AND pg.esbid = np.esbid AND pg.nfl_team = np.possession_nfl_team
         WHERE ns.esbid = np.esbid
           AND ns.play_id = np.play_id
@@ -113,7 +113,7 @@ const populate_qb_pid = async ({
       ? `,
         (SELECT COUNT(DISTINCT ns.esbid || '-' || ns.play_id)
          FROM nfl_snaps ns
-         JOIN player p ON p.gsis_it_player_id = ns.gsis_it_id AND p.primary_position = 'QB'
+         JOIN player p ON p.gsis_it_player_id = ns.gsis_it_player_id AND p.primary_position = 'QB'
          WHERE ns.season_year = ? ${snaps_esbid_filter}) as plays_with_qb_snap`
       : ''
     const snap_count_query = `

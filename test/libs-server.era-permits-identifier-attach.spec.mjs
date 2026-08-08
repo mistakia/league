@@ -6,7 +6,7 @@ import { era_permits_identifier_attach } from '#libs-server/era-permits-identifi
 process.env.NODE_ENV = 'test'
 chai.should()
 
-// The shape this guard exists for, taken from DEVI-TAYL-016049. gsis_it_id
+// The shape this guard exists for, taken from DEVI-TAYL-016049. gsis_it_player_id
 // 40080 carries 956 snaps across 2016 and 2017 (measured against production
 // 2026-08-05). The row it belongs to is an ordinary drafted-2013 player -- the
 // defect is a NAME match landing that identifier on a DIFFERENT Devin Taylor

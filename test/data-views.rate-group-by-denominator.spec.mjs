@@ -12,7 +12,7 @@ const expect = chai.expect
 //
 // The group_by dimension is encapsulated in the denominator's
 // COUNT(DISTINCT CONCAT(esbid, <dim>)) expression in add_*_cte, which keeps the
-// CTE at entity grain (team / gsis_it_id / gsis_id). The JOIN therefore must NOT
+// CTE at entity grain (team / gsis_it_player_id / gsis_id). The JOIN therefore must NOT
 // correlate on the dimension -- there is no per-dimension column on the CTE to
 // join against. An abandoned join branch used to reference a phantom
 // `player_games.<dim>` alias (and CTE columns the denominator never projects);

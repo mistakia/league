@@ -1,0 +1,80 @@
+-- STATUS: APPLIED 2026-08-08 against league_production
+--
+-- Conform the five remaining external_id findings: gsis_it_id -> gsis_it_player_id
+-- on the four nfl_plays participant tables and on nfl_snaps. Audit 21 -> 16, and
+-- the external_id class reaches zero.
+--
+-- THE TARGET NAME IS NOT A PROPOSAL -- IT ALREADY EXISTS IN THIS SCHEMA.
+-- player.gsis_it_player_id holds the same identifier, and
+-- test/db.schema-conformance-external-id.spec.mjs asserts that name CLEAN as a
+-- conforming {system}_{entitytype}_id. That the two are the same value is not
+-- inferred from the name: test/scripts.generate-player-snaps.spec.mjs seeds
+-- player.gsis_it_player_id and nfl_snaps.gsis_it_id from one variable, and every
+-- join in the tree pairs them directly --
+-- `.join('player', 'player.gsis_it_player_id', 'nfl_snaps.gsis_it_id')`.
+-- These five columns are on the audit's own known_bad_external_ids roster, so
+-- their non-conformance was never in question; the permissive two-token shape
+-- repaired in 60495ef2d had been overriding it.
+--
+-- THE SIBLING SET WAS ENUMERATED FROM information_schema, NOT FROM THE FLAGGED
+-- LIST, which is this program's standing rule and it mattered here. All five
+-- tables carry gsis_it_id (integer) BESIDE gsis_player_id (character varying) --
+-- two different GSIS identifiers, the ITId and the 00-00xxxxx id. gsis_player_id
+-- already conforms and is untouched. So does player_esbid. The set is coherent
+-- after this change: gsis_it_player_id / gsis_player_id / player_esbid on the
+-- participant tables, matching player's own spelling of the same three.
+--
+-- nfl_plays_receiver was worth the enumeration on its own: its primary key is
+-- (esbid, play_id, gsis_player_id) rather than the (esbid, play_id, season_year,
+-- gsis_it_id) its three siblings use, so a check that inferred the column set
+-- from the key would have missed that it carries gsis_it_id at all.
+--
+-- SAFETY CHECKS RUN BEFORE AUTHORING, all clean:
+--   - pg_proc: zero function bodies name gsis_it_id.
+--   - pg_views / matviews: zero view definitions name it.
+--   - Indexes and constraints: four primary keys and one partitioned unique
+--     index include the column, and NONE of them embeds it in the index NAME, so
+--     no index or constraint rename is needed and none can silently truncate
+--     past the 63-byte identifier cap. Postgres rewrites index and constraint
+--     definitions on RENAME COLUMN automatically.
+--
+-- THE AMBIGUITY HAZARD WAS THE REAL RISK HERE, and it is the one this program
+-- has already paid for once (season_grain, 83 of 165 suite failures from a single
+-- unqualified predicate). Conforming to a name the JOINED table already carries
+-- collapses the accidental disambiguation the old name provided, so any
+-- unqualified reference in a query joining player becomes 42702. Every consumer
+-- site was read rather than swept: all the query sites were already
+-- table-qualified or alias-qualified, and the one unqualified select
+-- (process-nfl-plays-player.mjs `.select('gsis_it_id')`) is qualified to
+-- nfl_plays_player in the same commit even though its outer FROM has no join and
+-- was not ambiguous.
+--
+-- Three consumer sites are NOT column references and are deliberately untouched,
+-- judged per (table, column) rather than by name: the getPlayer wrapper parameter
+-- in private/libs-server/ngs.mjs (a vendor API concept, mapped to nflId in the
+-- URL), the NFL Pro and NGS importers' local bindings for the source field, and
+-- the sample objects in import-gameday-rosters.mjs, which are log payloads.
+--
+-- Two write paths carried the column in shapes no grep of a qualified name
+-- reaches, both fixed in this commit: the nfl_snaps insert payload in
+-- private/libs-server/ngs.mjs uses object shorthand, and its
+-- onConflict(['esbid','play_id','gsis_it_id','season_year']) is a string array.
+-- The onConflict form is the failure class this program has documented as
+-- invisible to every sweep shape and fatal at write time -- and the writer here
+-- deletes by esbid before inserting, so a miss would have emptied nfl_snaps for
+-- that game rather than leaving it stale.
+--
+-- nfl_snaps is partitioned by season_year; RENAME COLUMN on the parent cascades
+-- by attnum to all 28 children as a catalog-only operation. The four
+-- nfl_plays participant tables are not partitioned.
+--
+-- private/ is in NO consumer gate's corpus, so the two private files are
+-- hand-verified rather than reported as gate-covered.
+--
+-- No BEGIN/COMMIT here -- db-exec.sh runs this under --single-transaction.
+
+ALTER TABLE public.nfl_plays_passer RENAME COLUMN gsis_it_id TO gsis_it_player_id;
+ALTER TABLE public.nfl_plays_player RENAME COLUMN gsis_it_id TO gsis_it_player_id;
+ALTER TABLE public.nfl_plays_receiver RENAME COLUMN gsis_it_id TO gsis_it_player_id;
+ALTER TABLE public.nfl_plays_rusher RENAME COLUMN gsis_it_id TO gsis_it_player_id;
+ALTER TABLE public.nfl_snaps RENAME COLUMN gsis_it_id TO gsis_it_player_id;
