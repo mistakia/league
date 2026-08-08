@@ -1,12 +1,112 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-08T18:10:59.703Z",
-  "count": 1,
+  "generated_at": "2026-08-08T18:12:56.562Z",
+  "count": 21,
   "violations": [
     {
       "table": "league_formats",
       "column": "cap",
       "rule": "shorthand"
+    },
+    {
+      "table": "leagues",
+      "column": "groupme_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "updated",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "updated",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "pff_player_facet_gamelogs",
+      "column": "franchise_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "pff_player_facet_seasonlogs",
+      "column": "franchise_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "pff_team_gamelogs",
+      "column": "franchise_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "pff_team_seasonlogs",
+      "column": "franchise_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "poaches",
+      "column": "processed",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "poaches",
+      "column": "submitted",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "cancelled",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "processed",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "submitted",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "rosters",
+      "column": "last_updated",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "trades",
+      "column": "accepted",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "trades",
+      "column": "cancelled",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "trades",
+      "column": "offered",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "trades",
+      "column": "rejected",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "waivers",
+      "column": "cancelled",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "waivers",
+      "column": "processed",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "waivers",
+      "column": "submitted",
+      "rule": "timestamp_type"
     }
   ]
 }
