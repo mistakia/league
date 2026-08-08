@@ -206,6 +206,79 @@ const SCORING_FORMAT_HASH_TO_ID = {
     'b7855f1f-9f5e-47c4-ba3a-3e906272a60c'
 }
 
+// dvoa_type param VALUES renamed alongside their columns by the run-direction
+// yards rename (db/adhoc/2026-08-08-rename-team-rush-direction-yards.sql). The
+// five columns held rushing yards by direction and said DVOA; the rename made
+// the name honest, and these are the persisted spellings that must follow it.
+//
+// This is a VALUE map, not a key map -- the third distinct shape in this file.
+// The maps above rewrite param KEYS and COLUMN_ID_RENAMES rewrites column ids;
+// `team_rush_left_end_dvoa` is neither. It is a value of the `dvoa_type` param
+// on the `team_unit_dvoa` column (app/core/data-views-fields/team-dvoa-table-fields.js),
+// so the only precedent here is SCORING_FORMAT_HASH_TO_ID, which is likewise a
+// value mapping.
+//
+// That distinction is load-bearing rather than pedantic, because it decides
+// which gate can see this rename: NEITHER of the two param-coverage gates can.
+// check-saved-view-param-coverage walks Object.keys(node.params) and
+// check-data-view-url-param-coverage walks parsed.searchParams.keys(), so both
+// are green across a value rename whether or not a rule exists. There is no
+// gate to lean on, which is why test/data-views.dvoa-type-value-migration.spec.mjs
+// exists and why it was proven red before this map was added.
+//
+// All five are covered although production carried ZERO occurrences on either
+// surface when this shipped (0 saved views, 0 share URLs, against a positive
+// control of 7 URLs carrying team_unit_dvoa at all). A client on a stale bundle
+// can persist any of them at any time, so a value with no occurrences today is a
+// latent instance rather than a non-case -- the same reasoning that put all 18
+// keys in SHORTHAND_PARAM_RENAMES rather than only the 5 with production hits.
+export const DVOA_TYPE_VALUE_RENAMES = {
+  team_rush_left_end_dvoa: 'team_rush_left_end_yards',
+  team_rush_left_tackle_dvoa: 'team_rush_left_tackle_yards',
+  team_rush_mid_guard_dvoa: 'team_rush_mid_guard_yards',
+  team_rush_right_tackle_dvoa: 'team_rush_right_tackle_yards',
+  team_rush_right_end_dvoa: 'team_rush_right_end_yards'
+}
+
+// Rewrites a params object's dvoa_type value(s), returning the params unchanged
+// when nothing matches. Exported because the SHARE-URL path needs exactly this
+// and nothing else: parse_table_state_from_url runs only the nfl-week migration,
+// so without this call a share URL carrying a renamed dvoa_type is rewritten by
+// nothing at all, and a share URL cannot be re-saved the way a view can.
+//
+// Deliberately narrower than running the whole saved-view migration over URL
+// state. That would ALSO newly apply every param-key and column-id rename to
+// share URLs -- a real improvement, since URLs currently receive none of them,
+// but a wider behaviour change than this rename needs and one nobody has
+// measured against the 863 production URLs. Left as a separate question.
+//
+// dvoa_type is declared `single: true` in the field definition, but a persisted
+// value may be a scalar or a one-element array -- the field's own
+// reverse_percentiles reader branches on Array.isArray for the sibling team_unit
+// param -- so both shapes are handled and the shape is preserved. An
+// unrecognised value is left alone: it is one of the ~50 dvoa_type values this
+// rename does not touch.
+export const apply_dvoa_type_value_renames = (params) => {
+  if (!params || !Object.prototype.hasOwnProperty.call(params, 'dvoa_type')) {
+    return { params, changed: false }
+  }
+
+  const raw = params.dvoa_type
+  const rename = (value) =>
+    Object.prototype.hasOwnProperty.call(DVOA_TYPE_VALUE_RENAMES, value)
+      ? DVOA_TYPE_VALUE_RENAMES[value]
+      : value
+
+  const mapped = Array.isArray(raw) ? raw.map(rename) : rename(raw)
+  const changed = Array.isArray(raw)
+    ? mapped.some((value, index) => value !== raw[index])
+    : mapped !== raw
+
+  return changed
+    ? { params: { ...params, dvoa_type: mapped }, changed: true }
+    : { params, changed: false }
+}
+
 // Column ids superseded by a differently-named column. Unlike the param maps
 // above, these rewrite the column_id itself, so a sort or filter entry naming
 // the old id follows through `rename_map` in migrate_entries_array.
@@ -274,6 +347,12 @@ const migrate_params = (params) => {
     next = Object.prototype.hasOwnProperty.call(rest, current_key)
       ? rest
       : { ...rest, [current_key]: value }
+    changed = true
+  }
+
+  const dvoa_type_result = apply_dvoa_type_value_renames(next)
+  if (dvoa_type_result.changed) {
+    next = dvoa_type_result.params
     changed = true
   }
 

@@ -125,11 +125,11 @@ export default {
       'all_downs_pass_dvoa',
       'all_downs_rush_dvoa',
       'all_downs_dvoa',
-      'team_rush_left_end_dvoa',
-      'team_rush_left_tackle_dvoa',
-      'team_rush_mid_guard_dvoa',
-      'team_rush_right_tackle_dvoa',
-      'team_rush_right_end_dvoa'
+      'team_rush_left_end_yards',
+      'team_rush_left_tackle_yards',
+      'team_rush_mid_guard_yards',
+      'team_rush_right_tackle_yards',
+      'team_rush_right_end_yards'
     ]
   })
 }

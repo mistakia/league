@@ -374,6 +374,7 @@ DROP INDEX IF EXISTS public.idx_espn_team_win_rates_history_season_year;
 DROP INDEX IF EXISTS public.idx_espn_receiving_metrics_history;
 DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_season_year;
 DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_espn_win_rate_type;
+DROP INDEX IF EXISTS public.idx_dvoa_team_drive_seasonlogs_grain;
 DROP INDEX IF EXISTS public.idx_draftkings_activity_last_seen;
 DROP INDEX IF EXISTS public.idx_draftkings_activity_checks;
 DROP INDEX IF EXISTS public.idx_draft_tid;
@@ -444,7 +445,6 @@ DROP INDEX IF EXISTS public.idx_24665_player_value;
 DROP INDEX IF EXISTS public.idx_24662_league_stat;
 DROP INDEX IF EXISTS public.idx_24629_tid_pid;
 DROP INDEX IF EXISTS public.idx_24626_baseline;
-DROP INDEX IF EXISTS public.idx_24613_team;
 DROP INDEX IF EXISTS public.idx_24608_pick;
 DROP INDEX IF EXISTS public.idx_historical_injury_index_season_year_week;
 DROP INDEX IF EXISTS public.idx_historical_injury_index_pid_season_year;
@@ -961,7 +961,6 @@ DROP TABLE IF EXISTS public.historical_injury_index_2010;
 DROP TABLE IF EXISTS public.historical_injury_index_2009;
 DROP TABLE IF EXISTS public.historical_injury_index;
 DROP TABLE IF EXISTS public.format_category_signal_mapping;
-DROP TABLE IF EXISTS public.footballoutsiders;
 DROP TABLE IF EXISTS public.external_leagues;
 DROP TABLE IF EXISTS public.external_league_users;
 DROP TABLE IF EXISTS public.external_league_trades;
@@ -979,6 +978,7 @@ DROP TABLE IF EXISTS public.dvoa_team_unit_seasonlogs_history;
 DROP TABLE IF EXISTS public.dvoa_team_seasonlogs_index;
 DROP TABLE IF EXISTS public.dvoa_team_seasonlogs_history;
 DROP TABLE IF EXISTS public.dvoa_team_gamelogs;
+DROP TABLE IF EXISTS public.dvoa_team_drive_seasonlogs;
 DROP TABLE IF EXISTS public.draftkings_category_activity;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
@@ -2143,6 +2143,42 @@ CREATE TABLE public.draftkings_category_activity (
 
 
 --
+-- Name: dvoa_team_drive_seasonlogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.dvoa_team_drive_seasonlogs (
+    season_year integer NOT NULL,
+    week smallint NOT NULL,
+    nfl_team character varying(3) NOT NULL,
+    team_unit public.team_unit NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
+    drives integer,
+    yards_per_drive numeric,
+    points_per_drive numeric,
+    touchdowns_per_drive numeric,
+    field_goals_per_drive numeric,
+    punts_per_drive numeric,
+    turnovers_per_drive numeric,
+    interceptions_per_drive numeric,
+    fumbles_per_drive numeric,
+    line_of_scrimmage_per_drive numeric,
+    stops_per_drive numeric,
+    three_and_outs_per_drive numeric,
+    plays_per_drive numeric,
+    scores_per_drive numeric,
+    time_of_possession_per_drive_seconds numeric,
+    drive_success_rate numeric,
+    touchdown_to_field_goal_ratio numeric,
+    line_of_scrimmage_after_kickoff_return numeric,
+    points_per_red_zone_trip numeric,
+    touchdowns_per_red_zone_trip numeric,
+    predicted_points numeric,
+    predicted_points_per_drive numeric,
+    average_lead numeric
+);
+
+
+--
 -- Name: dvoa_team_gamelogs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2482,16 +2518,16 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
     all_downs_rush_dvoa_rank integer,
     all_downs_dvoa numeric,
     all_downs_dvoa_rank integer,
-    team_rush_left_end_dvoa numeric,
-    team_rush_left_end_dvoa_rank integer,
-    team_rush_left_tackle_dvoa numeric,
-    team_rush_left_tackle_dvoa_rank integer,
-    team_rush_mid_guard_dvoa numeric,
-    team_rush_mid_guard_dvoa_rank integer,
-    team_rush_right_tackle_dvoa numeric,
-    team_rush_right_tackle_dvoa_rank integer,
-    team_rush_right_end_dvoa numeric,
-    team_rush_right_end_dvoa_rank integer,
+    team_rush_left_end_yards numeric,
+    team_rush_left_end_yards_rank integer,
+    team_rush_left_tackle_yards numeric,
+    team_rush_left_tackle_yards_rank integer,
+    team_rush_mid_guard_yards numeric,
+    team_rush_mid_guard_yards_rank integer,
+    team_rush_right_tackle_yards numeric,
+    team_rush_right_tackle_yards_rank integer,
+    team_rush_right_end_yards numeric,
+    team_rush_right_end_yards_rank integer,
     team_running_back_carries numeric,
     team_running_back_carries_rank integer,
     team_rush_left_end_pct numeric,
@@ -2501,7 +2537,8 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
     team_rush_right_end_pct numeric,
     pass_dvoa numeric,
     rush_dvoa numeric,
-    rush_dvoa_rank smallint
+    rush_dvoa_rank smallint,
+    total_dave numeric
 );
 
 
@@ -2669,16 +2706,16 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
     all_downs_rush_dvoa_rank integer,
     all_downs_dvoa numeric,
     all_downs_dvoa_rank integer,
-    team_rush_left_end_dvoa numeric,
-    team_rush_left_end_dvoa_rank integer,
-    team_rush_left_tackle_dvoa numeric,
-    team_rush_left_tackle_dvoa_rank integer,
-    team_rush_mid_guard_dvoa numeric,
-    team_rush_mid_guard_dvoa_rank integer,
-    team_rush_right_tackle_dvoa numeric,
-    team_rush_right_tackle_dvoa_rank integer,
-    team_rush_right_end_dvoa numeric,
-    team_rush_right_end_dvoa_rank integer,
+    team_rush_left_end_yards numeric,
+    team_rush_left_end_yards_rank integer,
+    team_rush_left_tackle_yards numeric,
+    team_rush_left_tackle_yards_rank integer,
+    team_rush_mid_guard_yards numeric,
+    team_rush_mid_guard_yards_rank integer,
+    team_rush_right_tackle_yards numeric,
+    team_rush_right_tackle_yards_rank integer,
+    team_rush_right_end_yards numeric,
+    team_rush_right_end_yards_rank integer,
     team_running_back_carries numeric,
     team_running_back_carries_rank integer,
     team_rush_left_end_pct numeric,
@@ -2688,7 +2725,8 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
     team_rush_right_end_pct numeric,
     pass_dvoa numeric,
     rush_dvoa numeric,
-    rush_dvoa_rank smallint
+    rush_dvoa_rank smallint,
+    total_dave numeric
 );
 
 
@@ -3164,95 +3202,6 @@ COMMENT ON COLUMN public.external_leagues.has_individual_defensive_players IS 'L
 --
 
 COMMENT ON COLUMN public.external_leagues.last_message_at IS 'Weak liveness proxy: Sleeper system messages (waiver runs) bump this, so it partly measures automation rather than human engagement';
-
-
---
--- Name: footballoutsiders; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.footballoutsiders (
-    week smallint NOT NULL,
-    year smallint,
-    team character varying(3) NOT NULL,
-    ork smallint,
-    drk smallint,
-    odvoa numeric(3,1),
-    ddvoa numeric(3,1),
-    olw smallint,
-    dlw smallint,
-    odave numeric(3,1),
-    ddave numeric(3,1),
-    opass numeric(3,1),
-    dpass numeric(3,1),
-    orun numeric(3,1),
-    drun numeric(3,1),
-    olrunaly numeric(4,2),
-    dlrunaly numeric(4,2),
-    olrby numeric(4,2),
-    dlrby numeric(4,2),
-    olpwr integer,
-    dlpwr integer,
-    olstf integer,
-    dlstf integer,
-    olrun2y numeric(4,2),
-    dlrun2y numeric(4,2),
-    olrunofy numeric(4,2),
-    dlrunofy numeric(4,2),
-    olpassrk smallint,
-    dlpassrk smallint,
-    olskrk smallint,
-    dlskrk smallint,
-    olskrt numeric(3,1),
-    dlskrt numeric(3,1),
-    olrunley numeric(4,2),
-    dlrunley numeric(4,2),
-    olrunlty numeric(4,2),
-    dlrunlty numeric(4,2),
-    olrunmgy numeric(4,2),
-    dlrunmgy numeric(4,2),
-    olrunrty numeric(4,2),
-    dlrunrty numeric(4,2),
-    olrunrey numeric(4,2),
-    dlrunrey numeric(4,2),
-    odrv integer,
-    ddrv integer,
-    oypdrv numeric(4,2),
-    dypdrv numeric(4,2),
-    optspdrv numeric(3,2),
-    dptspdrv numeric(3,2),
-    otopdrv numeric(4,3),
-    dtopdrv numeric(4,3),
-    ointpdrv numeric(4,3),
-    dintpdrv numeric(4,3),
-    ofumpdrv numeric(4,3),
-    dfumpdrv numeric(4,3),
-    olospdrv numeric(4,2),
-    dlospdrv numeric(4,2),
-    oplypdrv numeric(4,2),
-    dplypdrv numeric(4,2),
-    otoppdrv character varying(10),
-    dtoppdrv character varying(10),
-    odrvsucc numeric(4,3),
-    ddrvsucc numeric(4,3),
-    otdpdrv numeric(4,3),
-    dtdpdrv numeric(4,3),
-    ofgpdrv numeric(4,3),
-    dfgpdrv numeric(4,3),
-    opntpdrv numeric(4,3),
-    dpntpdrv numeric(4,3),
-    o3opdrv numeric(4,3),
-    d3opdrv numeric(4,3),
-    olosko numeric(4,2),
-    dlosko numeric(4,2),
-    otdfg numeric(5,2),
-    dtdfg numeric(5,2),
-    optsprz numeric(3,2),
-    dptsprz numeric(3,2),
-    otdprz numeric(4,3),
-    dtdprz numeric(4,3),
-    oavgld numeric(4,2),
-    davgld numeric(4,2)
-);
 
 
 --
@@ -29894,13 +29843,6 @@ CREATE UNIQUE INDEX idx_24608_pick ON public.draft USING btree (round, pick, lid
 
 
 --
--- Name: idx_24613_team; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24613_team ON public.footballoutsiders USING btree (team, week, year);
-
-
---
 -- Name: idx_24626_baseline; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30388,6 +30330,13 @@ CREATE INDEX idx_draftkings_activity_checks ON public.draftkings_category_activi
 --
 
 CREATE INDEX idx_draftkings_activity_last_seen ON public.draftkings_category_activity USING btree (last_seen_with_offers);
+
+
+--
+-- Name: idx_dvoa_team_drive_seasonlogs_grain; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_dvoa_team_drive_seasonlogs_grain ON public.dvoa_team_drive_seasonlogs USING btree (season_year, nfl_team, team_unit, week);
 
 
 --
@@ -57416,6 +57365,13 @@ GRANT SELECT ON TABLE public.draftkings_category_activity TO league_reader;
 
 
 --
+-- Name: TABLE dvoa_team_drive_seasonlogs; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.dvoa_team_drive_seasonlogs TO league_reader;
+
+
+--
 -- Name: TABLE dvoa_team_gamelogs; Type: ACL; Schema: public; Owner: -
 --
 
@@ -57532,13 +57488,6 @@ GRANT SELECT ON TABLE public.external_league_users TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.external_leagues TO league_reader;
-
-
---
--- Name: TABLE footballoutsiders; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.footballoutsiders TO league_reader;
 
 
 --

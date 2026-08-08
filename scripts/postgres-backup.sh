@@ -28,7 +28,8 @@ db_host="localhost"
 # derived, no-FK, no-consumer tables regenerated on demand by
 # generate-prop-pairings.mjs; carrying their data into every full would bloat
 # the dump, the B2 copy, and the replica snapshots for no recovery value.
-# Mirrors the legacy mysql-backup.sh --ignore-table treatment.
+# Carries forward the exclusion the retired mysqldump-era backup script applied
+# to these same tables.
 full_exclude_data_tables="
 prop_pairings
 prop_pairing_props

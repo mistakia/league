@@ -48,6 +48,7 @@ const repo_root = path.join(__dirname, '..', '..')
 // rather than silently checking nothing.
 const DROPPED_TABLES = [
   'external_league_import_job_history',
+  'footballoutsiders',
   'keeptradecut_rankings',
   'personnel_count_discrepancies',
   'pff_game_id_map',

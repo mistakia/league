@@ -5,6 +5,21 @@ import {
   migrate_entries_array,
   migrate_sort_array
 } from '#libs-shared/data-views-nfl-week-migration.mjs'
+import { apply_dvoa_type_value_renames } from '#libs-shared/data-views-saved-view-migration.mjs'
+
+// A share URL is rewritten by the nfl-week migration and by nothing else -- it
+// never enters the versioned chain in data-view-storage/migrations.mjs, because
+// a query string carries no version field. So a renamed dvoa_type VALUE has to
+// be rewritten here or it is not rewritten anywhere, and unlike a saved view a
+// shared link cannot be re-saved once it is out.
+const migrate_dvoa_type_entries = (entries) => {
+  if (!Array.isArray(entries)) return entries
+  return entries.map((entry) => {
+    if (!entry || typeof entry !== 'object' || !entry.params) return entry
+    const { params, changed } = apply_dvoa_type_value_renames(entry.params)
+    return changed ? { ...entry, params } : entry
+  })
+}
 
 // Pre-rename spellings of `table_state` keys that a shared short URL may still
 // carry, mapped to the key that replaced them. These are PERMANENT: a short URL
@@ -72,9 +87,13 @@ export default function parse_table_state_from_url(search_params) {
   const table_state = apply_legacy_aliases(search_params, parsed_table_state)
 
   return {
-    columns: migrate_entries_array(table_state.columns),
-    prefix_columns: migrate_entries_array(table_state.prefix_columns),
-    where: migrate_entries_array(table_state.where),
+    columns: migrate_dvoa_type_entries(
+      migrate_entries_array(table_state.columns)
+    ),
+    prefix_columns: migrate_dvoa_type_entries(
+      migrate_entries_array(table_state.prefix_columns)
+    ),
+    where: migrate_dvoa_type_entries(migrate_entries_array(table_state.where)),
     sort: migrate_sort_array(table_state.sort),
     // The schema parser's array branch falls back to `[]` only for absent or
     // unparseable input, so a well-formed non-array (`row_axes={"week":true}`)

@@ -179,7 +179,7 @@ const CLUSTER_RULES = [
   [
     'external-feeds',
     (t) =>
-      /^historical_injury|^footballoutsiders|^percentiles$|^sources$|projection|^ros_|correlation|outcome|player_variance/.test(
+      /^historical_injury|^percentiles$|^sources$|projection|^ros_|correlation|outcome|player_variance/.test(
         t
       )
   ],

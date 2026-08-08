@@ -85,6 +85,7 @@ export * as gambet from './gambet.mjs'
 export * as cache from './cache.mjs'
 export * as betrivers from './betrivers.mjs'
 export { default as get_league_format } from './get-league-format.mjs'
+export { default as get_observed_at_for_season_weeks } from './dvoa/get-observed-at-for-season-weeks.mjs'
 export {
   default as get_game_team_implied_totals,
   parse_game_team_total_market_id
