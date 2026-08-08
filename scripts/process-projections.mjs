@@ -765,10 +765,13 @@ const check_oracle = async ({ seas_type }) => {
 
   // Freshness oracle: every hosted, non-archived league must have been
   // processed within the last 2 hours (4 missed 30-min cron cycles).
-  // leagues.processed_at is set to the script-start epoch at the end of
+  // leagues.processed_at is set to the script-start instant at the end of
   // process_league(), so a stale value means process_league() never completed
   // for that league — a silent partial-success the cron would otherwise miss.
-  const two_hours_ago = Math.round(Date.now() / 1000) - 7200
+  // The column is timestamptz as of the 2026-08-07 conformance pass, so the
+  // bound is an instant; binding epoch seconds threw here and the throw was
+  // swallowed, which left this oracle unable to report its own failure.
+  const two_hours_ago = new Date(Date.now() - 7200 * 1000)
   const stale_leagues = await db('leagues')
     .select('uid', 'processed_at')
     .where({ is_hosted: true })
@@ -887,7 +890,12 @@ const main = async () => {
   try {
     shortfall = await check_oracle({ seas_type })
   } catch (err) {
-    log(`check_oracle threw: ${err.message}`)
+    // An oracle that cannot RUN is a failed oracle, not a passed one. Swallowing
+    // the throw left `shortfall` null, so report_job recorded success and the
+    // exit code stayed 0 for as long as the oracle itself was broken — which is
+    // exactly how its epoch-against-timestamptz bind went unnoticed.
+    shortfall = `process-projections oracle could not run: ${err.message}`
+    log(shortfall)
   }
 
   await report_job({

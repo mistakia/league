@@ -470,8 +470,10 @@ export const get_rookie_draft_end = createSelector(
 
     // Fallback to existing calculation logic
     if (last_pick.selection_timestamp) {
-      return dayjs
-        .unix(last_pick.selection_timestamp)
+      // timestamptz as of the 2026-08-07 conformance pass, so it arrives as an
+      // ISO string through JSON; dayjs.unix() on one yields an Invalid Date,
+      // which silently made every downstream draft-end comparison false.
+      return dayjs(last_pick.selection_timestamp)
         .tz('America/New_York')
         .endOf('day')
     }

@@ -200,10 +200,13 @@ const pause_restricted_free_agency_processing = async ({
   // meaningless -- every auction settles or expires at period end regardless
   // -- so say so rather than silently accepting it.
   const period_end = season_row.restricted_free_agency_period_end
-  if (period_end && pause_until && pause_until.unix() > Number(period_end)) {
+  // period_end is timestamptz as of the 2026-08-07 conformance pass, so it goes
+  // straight into dayjs; Number() on it yields MILLISECONDS, which made this
+  // comparison never true and printed the end date as a year-58,000 date.
+  if (period_end && pause_until && pause_until.isAfter(period_end)) {
     console.log(
       `  note: the hold outlasts the restricted free agency period, which ends ` +
-        `${format_et(dayjs.unix(Number(period_end)))}`
+        `${format_et(period_end)}`
     )
   }
 
@@ -229,7 +232,7 @@ const pause_restricted_free_agency_processing = async ({
   if (!pause_until && period_end) {
     console.log(
       `  the hold cannot outlast the restricted free agency period, which ends ${format_et(
-        dayjs.unix(Number(period_end))
+        period_end
       )}`
     )
   }

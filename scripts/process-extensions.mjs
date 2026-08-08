@@ -18,6 +18,7 @@ import {
   throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
 // Auto-process retry window: keep attempting for this many days past ext_date
 // in case the cron is missed (e.g., outage). The notification marker still
@@ -163,7 +164,14 @@ const process_extensions_for_due_leagues = async () => {
   // before this run starts. These are the leagues we must successfully process.
   const due_leagues = []
 
-  for (const { lid, ext_date } of eligible) {
+  for (const { lid, ext_date: ext_date_instant } of eligible) {
+    // seasons.ext_date is timestamptz as of the 2026-08-07 conformance pass.
+    // Converting once here keeps the deadline comparison, the retry-window
+    // arithmetic and the epoch-seconds marker key all in one unit — read as a
+    // Date, `now < ext_date` coerces to milliseconds and is ALWAYS true, which
+    // silently skipped every league.
+    const ext_date = timestamptz_to_epoch(ext_date_instant)
+
     if (now < ext_date) {
       log(
         `league ${lid}: ext_date ${ext_date} not yet reached (now=${now}); skipping`

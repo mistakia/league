@@ -70,7 +70,10 @@ const run = async () => {
     // The window opens the instant the previous pick is made (draft_start for
     // pick 1), per Article XI Section 8. That timestamp is the true on-clock
     // time and doubles as the stable, unique idempotency key for this pick.
-    let on_clock_at = timestamptz_to_epoch(draft_start)
+    // Carried in both units on purpose: getDraftWindow takes the selection as
+    // an instant, while the marker key and the clock arithmetic below are epoch
+    // seconds.
+    let on_clock_instant = draft_start
     if (frontier.pick > 1) {
       const previous = await db('draft')
         .where({
@@ -79,9 +82,9 @@ const run = async () => {
           pick: frontier.pick - 1
         })
         .first()
-      on_clock_at =
-        timestamptz_to_epoch(previous?.selection_timestamp) ?? on_clock_at
+      on_clock_instant = previous?.selection_timestamp || draft_start
     }
+    const on_clock_at = timestamptz_to_epoch(on_clock_instant)
 
     if (on_clock_at > now) continue // window has not opened yet
 
@@ -111,7 +114,7 @@ const run = async () => {
       pick_number: frontier.pick + 1,
       last_consecutive_pick:
         frontier.pick > 1
-          ? { pick: frontier.pick - 1, selection_timestamp: on_clock_at }
+          ? { pick: frontier.pick - 1, selection_timestamp: on_clock_instant }
           : null
     }).unix()
 
