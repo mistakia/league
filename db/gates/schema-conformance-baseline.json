@@ -1,87 +1,12 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-08T20:30:06.256Z",
-  "count": 16,
+  "generated_at": "2026-08-08T23:36:28.103Z",
+  "count": 1,
   "violations": [
     {
       "table": "league_formats",
       "column": "cap",
       "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "updated",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "updated",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "poaches",
-      "column": "processed",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "poaches",
-      "column": "submitted",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "restricted_free_agency_bids",
-      "column": "cancelled",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "restricted_free_agency_bids",
-      "column": "processed",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "restricted_free_agency_bids",
-      "column": "submitted",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "rosters",
-      "column": "last_updated",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "trades",
-      "column": "accepted",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "trades",
-      "column": "cancelled",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "trades",
-      "column": "offered",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "trades",
-      "column": "rejected",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "waivers",
-      "column": "cancelled",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "waivers",
-      "column": "processed",
-      "rule": "timestamp_type"
-    },
-    {
-      "table": "waivers",
-      "column": "submitted",
-      "rule": "timestamp_type"
     }
   ]
 }
