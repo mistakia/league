@@ -15,6 +15,7 @@ import {
   setupSuperPriority,
   releasePlayer
 } from './utils/index.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 chai.should()
@@ -49,7 +50,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           type: transaction_types.PRACTICE_ADD,
           player_salary: 0,
           season_year: current_season.year,
-          timestamp: poach_timestamp - 24 * 60 * 60,
+          occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 1,
           userid: 1
         },
@@ -60,7 +61,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           type: transaction_types.POACHED,
           player_salary: 0,
           season_year: current_season.year,
-          timestamp: poach_timestamp,
+          occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 1,
           userid: 2
         }
@@ -341,7 +342,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         type: transaction_types.ROSTER_ADD,
         player_salary: 0,
         season_year: current_season.year,
-        timestamp: poach_timestamp + 12 * 60 * 60, // 12 hours later
+        occurred_at: epoch_to_timestamptz(poach_timestamp + 12 * 60 * 60), // 12 hours later
         week: current_season.week - 1,
         userid: 1
       })
@@ -352,10 +353,10 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         original_tid: 1,
         poaching_tid: 2,
         lid: 1,
-        poach_timestamp,
+        poach_timestamp: epoch_to_timestamptz(poach_timestamp),
         eligible: 1,
         claimed: 1,
-        claimed_at: poach_timestamp + 12 * 60 * 60
+        claimed_at: epoch_to_timestamptz(poach_timestamp + 12 * 60 * 60)
       })
 
       // Release player from team 2 to make available for waivers
@@ -519,7 +520,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         player_salary: 0,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: originalTimestamp
+        occurred_at: epoch_to_timestamptz(originalTimestamp)
       })
 
       // Step 2: Poach player (9 days ago)
@@ -533,7 +534,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         player_salary: 0,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: poachTimestamp
+        occurred_at: epoch_to_timestamptz(poachTimestamp)
       })
 
       // Step 3: Release player (5 days ago)
@@ -547,7 +548,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         player_salary: 0,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: releaseTimestamp
+        occurred_at: epoch_to_timestamptz(releaseTimestamp)
       })
 
       // Step 4: Re-add player to make them rostered again (1 day ago)
@@ -561,7 +562,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         player_salary: 0,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: readdTimestamp
+        occurred_at: epoch_to_timestamptz(readdTimestamp)
       })
 
       MockDate.set(regular_season_start.add('2', 'months').toISOString())

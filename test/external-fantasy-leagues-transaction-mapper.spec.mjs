@@ -139,7 +139,7 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
         row.should.have.property('tid')
         row.should.have.property('lid', 'lid-fixture')
         row.should.have.property('season_year', 2025)
-        row.should.have.property('timestamp').that.is.a('number')
+        row.should.have.property('occurred_at').that.is.a('date')
         row.should.have.property('type')
       }
     })
@@ -207,7 +207,7 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
         pid: 'PLAY-1234',
         tid: 'TID-1',
         lid: 'LID-1',
-        timestamp: 1700000000,
+        occurred_at: new Date(1700000000 * 1000),
         type: transaction_types.ROSTER_ADD
       }
       mapper.validate_transaction(valid).should.equal(true)
@@ -218,7 +218,7 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
         pid: 'PLAY-1234',
         tid: 'TID-1',
         lid: 'LID-1',
-        timestamp: 1700000000,
+        occurred_at: new Date(1700000000 * 1000),
         type: transaction_types.ROSTER_ADD
       }
       mapper.validate_transaction({ ...base, pid: null }).should.equal(false)
@@ -234,7 +234,7 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
           pid: 'PLAY-1234',
           tid: 'TID-1',
           lid: 'LID-1',
-          timestamp: 100,
+          occurred_at: new Date(100 * 1000),
           type: transaction_types.ROSTER_ADD
         })
         .should.equal(false)
@@ -246,7 +246,7 @@ describe('External Fantasy Leagues - Transaction Mapper', function () {
           pid: 'PLAY-1234',
           tid: 'TID-1',
           lid: 'LID-1',
-          timestamp: 1700000000,
+          occurred_at: new Date(1700000000 * 1000),
           type: 'NOT_A_REAL_TYPE'
         })
         .should.equal(false)

@@ -265,12 +265,12 @@ router.put('/?', async (req, res) => {
               week: 0,
               pid: item.pid
             })
-            .where('timestamp', '<=', league.free_agency_period_start)
+            .where('occurred_at', '<=', league.free_agency_period_start)
             .whereIn('type', [
               transaction_types.RESERVE_IR,
               transaction_types.ROSTER_ACTIVATE
             ])
-            .orderBy('timestamp', 'desc')
+            .orderBy('occurred_at', 'desc')
             .first()
 
           const was_reserved =

@@ -26,7 +26,7 @@ const run = async ({
       type: transaction_types.POACHED,
       season_year: year
     })
-    .orderBy('timestamp', 'desc')
+    .orderBy('occurred_at', 'desc')
 
   // Filter by league if specified
   if (lid) {
@@ -82,7 +82,7 @@ const run = async ({
             pid: poach_tx.pid,
             original_tid: status.original_tid,
             poaching_tid: status.poaching_tid,
-            poach_timestamp: poach_tx.timestamp,
+            poach_timestamp: poach_tx.occurred_at,
             lid: poach_tx.lid
           })
         }
@@ -95,7 +95,7 @@ const run = async ({
               original_tid: status.original_tid,
               poaching_tid: status.poaching_tid,
               lid: poach_tx.lid,
-              poach_timestamp: poach_tx.timestamp,
+              poach_timestamp: poach_tx.occurred_at,
               eligible: 1,
               claimed: 0,
               claimed_at: null,
@@ -110,7 +110,7 @@ const run = async ({
             ])
             .merge({
               eligible: 1,
-              poach_timestamp: poach_tx.timestamp,
+              poach_timestamp: poach_tx.occurred_at,
               claimed: 0,
               claimed_at: null
             })
@@ -150,9 +150,7 @@ const run = async ({
   if (eligible_players_processed.length > 0) {
     log('\n=== ELIGIBLE PLAYERS ===')
     for (const eligible_player of eligible_players_processed) {
-      const poach_date = new Date(
-        eligible_player.poach_timestamp * 1000
-      ).toLocaleDateString()
+      const poach_date = eligible_player.poach_timestamp.toLocaleDateString()
       log(
         `${eligible_player.fname} ${eligible_player.lname} (${eligible_player.pos}) - Poached by ${eligible_player.poaching_team_abbrv} from ${eligible_player.original_team_abbrv} on ${poach_date}`
       )

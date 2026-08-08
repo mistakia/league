@@ -20,7 +20,10 @@ export default async function process_super_priority({
   userid = null,
   release = []
 }) {
-  const timestamp = Math.floor(Date.now() / 1000)
+  // Both consumers below -- transactions.occurred_at and
+  // super_priority.claimed_at -- are timestamptz, so this stays a Date rather
+  // than an epoch that converts twice.
+  const occurred_at = new Date()
 
   // Get league info
   const league = await getLeague({ lid })
@@ -137,7 +140,7 @@ export default async function process_super_priority({
       transaction_types.DRAFT,
       transaction_types.ROSTER_DEACTIVATE
     ])
-    .orderBy('timestamp', 'desc')
+    .orderBy('occurred_at', 'desc')
     .limit(1)
 
   if (!last_transaction.length) {
@@ -155,7 +158,7 @@ export default async function process_super_priority({
     player_salary,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp
+    occurred_at
   }
 
   await db('transactions').insert(transaction)
@@ -167,7 +170,7 @@ export default async function process_super_priority({
 
   await db('super_priority').where({ uid: super_priority_uid }).update({
     claimed: 1,
-    claimed_at: timestamp
+    claimed_at: occurred_at
   })
 
   // Get team info for notifications

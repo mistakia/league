@@ -143,7 +143,7 @@ export default async function ({
     player_salary: bid_amount,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp: Math.round(Date.now() / 1000)
+    occurred_at: new Date()
   }
   // The tag transaction and the bid's success marking must commit together.
   // calculate-team-daily-ktc-value reads `transactions` first and

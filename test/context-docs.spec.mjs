@@ -31,6 +31,7 @@ import {
   format_date_et,
   doc_url
 } from '#libs-server/context-docs/index.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 chai.should()
@@ -107,7 +108,7 @@ const seed_full_league = async () => {
       player_salary: 50,
       week: 0,
       season_year: year,
-      timestamp: Math.round(Date.now() / 1000) - 100,
+      occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 100),
       userid: 1
     },
     {
@@ -118,7 +119,7 @@ const seed_full_league = async () => {
       player_salary: 5,
       week: 0,
       season_year: year,
-      timestamp: Math.round(Date.now() / 1000) - 200,
+      occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 200),
       userid: 1
     }
   ])
@@ -196,14 +197,17 @@ const seed_full_league = async () => {
   await knex('seasons')
     .where({ lid: 1, season_year: year })
     .update({
-      season_started_at: t.subtract(20, 'weeks').unix(),
-      free_agency_period_start: t.subtract(6, 'weeks').unix(),
-      free_agency_live_auction_start: t.subtract(5, 'weeks').unix(),
-      free_agency_live_auction_end: t.subtract(5, 'weeks').add(1, 'day').unix(),
-      free_agency_period_end: t.subtract(2, 'weeks').unix(),
-      restricted_free_agency_period_start: t.subtract(4, 'weeks').unix(),
-      restricted_free_agency_period_end: t.subtract(3, 'weeks').unix(),
-      season_finalized_at: t.add(20, 'weeks').unix(),
+      season_started_at: t.subtract(20, 'weeks').toDate(),
+      free_agency_period_start: t.subtract(6, 'weeks').toDate(),
+      free_agency_live_auction_start: t.subtract(5, 'weeks').toDate(),
+      free_agency_live_auction_end: t
+        .subtract(5, 'weeks')
+        .add(1, 'day')
+        .toDate(),
+      free_agency_period_end: t.subtract(2, 'weeks').toDate(),
+      restricted_free_agency_period_start: t.subtract(4, 'weeks').toDate(),
+      restricted_free_agency_period_end: t.subtract(3, 'weeks').toDate(),
+      season_finalized_at: t.add(20, 'weeks').toDate(),
       wildcard_round: 15,
       championship_round: [16, 17]
     })
@@ -443,7 +447,7 @@ describe('context documents', function () {
       const year = current_season.year
       await knex('seasons')
         .where({ lid: 1, season_year: year })
-        .update({ ext_date: current_season.now.add(1, 'week').unix() })
+        .update({ ext_date: current_season.now.add(1, 'week').toDate() })
 
       // A regular contract with one extension already used: the recorded $20
       // becomes $20 + (1 + 1) * 5 = $30 on the post-extension basis.
@@ -463,7 +467,7 @@ describe('context documents', function () {
         player_salary: 20,
         week: 0,
         season_year: year,
-        timestamp: Math.round(Date.now() / 1000) - 300,
+        occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 300),
         userid: 1
       })
       await knex('rosters_players').insert({

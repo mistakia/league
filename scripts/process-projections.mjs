@@ -46,7 +46,9 @@ debug.enable(
   'process-projections,project-lineups,simulation:*,calculate-matchup-projection,record-league-format-projection-value-history'
 )
 
-const timestamp = Math.round(Date.now() / 1000)
+// Both consumers are timestamptz: league_team_forecast.generated_at and
+// leagues.processed_at.
+const timestamp = new Date()
 
 /**
  * Run season forecast simulation and save results.
@@ -118,7 +120,7 @@ const run_season_forecast = async (lid) => {
         division_odds: forecast.division_odds,
         bye_odds: forecast.bye_odds,
         championship_odds: forecast.championship_odds,
-        timestamp
+        generated_at: timestamp
       })
     }
 

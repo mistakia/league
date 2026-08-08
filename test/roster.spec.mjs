@@ -606,8 +606,8 @@ describe('LIBS-SHARED Roster', function () {
 
     // 1970 and 2100 -- far enough either side of any mocked clock that these
     // stay on the intended branch of `is_before_extension_deadline`.
-    const past = 1
-    const future = 4102444800
+    const past = new Date(1000)
+    const future = new Date(4102444800 * 1000)
 
     it('charges a $0 restricted free agency bid as $0, not the prior salary', () => {
       const league = {

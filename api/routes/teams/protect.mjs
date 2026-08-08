@@ -181,7 +181,7 @@ router.post('/?', async (req, res) => {
       pid
     })
     const lastTransaction = transactions.reduce((a, b) =>
-      a.timestamp > b.timestamp ? a : b
+      a.occurred_at > b.occurred_at ? a : b
     )
 
     const slot =
@@ -202,7 +202,7 @@ router.post('/?', async (req, res) => {
       player_salary: lastTransaction.player_salary,
       week: current_season.week,
       season_year: current_season.year,
-      timestamp: Math.round(Date.now() / 1000)
+      occurred_at: new Date()
     }
     await db('transactions').insert(transaction)
 

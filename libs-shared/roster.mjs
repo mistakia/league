@@ -38,7 +38,7 @@ export default class Roster {
     const is_after_restricted_free_agency_end =
       league.restricted_free_agency_period_end &&
       current_season.now.isAfter(
-        dayjs.unix(league.restricted_free_agency_period_end)
+        dayjs(league.restricted_free_agency_period_end)
       )
     for (const {
       slot,

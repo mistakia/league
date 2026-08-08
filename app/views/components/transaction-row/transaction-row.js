@@ -60,7 +60,7 @@ export default function TransactionRow({
           </div>
         )}
         <div className='transaction__timestamp'>
-          <Timestamp timestamp={transaction.timestamp} />
+          <Timestamp timestamp={transaction.occurred_at} />
         </div>
         <div className='transaction__value'>${transaction.player_salary}</div>
       </div>
@@ -73,7 +73,7 @@ export default function TransactionRow({
           <div className='transaction__header'>
             <div className='transaction__type'>{transaction_type_content}</div>
             <div className='transaction__timestamp'>
-              <Timestamp timestamp={transaction.timestamp} />
+              <Timestamp timestamp={transaction.occurred_at} />
             </div>
           </div>
           <div className='transaction__content'>

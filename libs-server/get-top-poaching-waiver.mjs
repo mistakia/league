@@ -6,14 +6,15 @@ import { current_season, waiver_types, transaction_types } from '#constants'
 export default async function (league_id) {
   // sanctuary period and waiver period both last 24 hours and overlap
   // exclude players still in these periods from waiver processing (but allow waiver submission)
-  const sanctuary_period = dayjs().subtract('24', 'hours').unix()
+  // transactions.occurred_at is timestamptz, so the bound is a Date.
+  const sanctuary_period = dayjs().subtract('24', 'hours').toDate()
   const transactions = await db('transactions')
     .whereIn('type', [
       transaction_types.DRAFT,
       transaction_types.PRACTICE_ADD,
       transaction_types.ROSTER_DEACTIVATE
     ])
-    .where('timestamp', '>=', sanctuary_period)
+    .where('occurred_at', '>=', sanctuary_period)
     .where('lid', league_id)
 
   const exclude_pids = transactions.map((t) => t.pid)

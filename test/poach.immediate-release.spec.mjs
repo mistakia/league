@@ -85,7 +85,7 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
 
       // Check timestamps are within 1 second
       const time_difference = Math.abs(
-        release_transaction.timestamp - poach_transaction.timestamp
+        (release_transaction.occurred_at - poach_transaction.occurred_at) / 1000
       )
       expect(time_difference).to.be.lessThan(1)
 

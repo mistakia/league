@@ -31,7 +31,7 @@ const map_state_to_props = createSelector(
         teams[transaction.tid] = transaction
       }
       if (
-        !max_transaction.timestamp ||
+        !max_transaction.occurred_at ||
         transaction.player_salary > max_transaction.player_salary
       ) {
         max_transaction = transaction

@@ -12,6 +12,7 @@ import {
 } from '#constants'
 import { selectPlayer } from './utils/index.mjs'
 import get_super_priority_status from '#libs-server/get-super-priority-status.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
@@ -34,7 +35,7 @@ const insert_poach_history = async ({
       type: transaction_types.PRACTICE_ADD,
       player_salary: 0,
       season_year: current_season.year,
-      timestamp: poach_timestamp - 24 * 60 * 60,
+      occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
       week: 0,
       userid: original_tid
     },
@@ -45,7 +46,7 @@ const insert_poach_history = async ({
       type: transaction_types.POACHED,
       player_salary: 0,
       season_year: current_season.year,
-      timestamp: poach_timestamp,
+      occurred_at: epoch_to_timestamptz(poach_timestamp),
       week: 0,
       userid: poaching_tid
     },
@@ -56,7 +57,7 @@ const insert_poach_history = async ({
       type: transaction_types.ROSTER_RELEASE,
       player_salary: 0,
       season_year: current_season.year,
-      timestamp: release_timestamp,
+      occurred_at: epoch_to_timestamptz(release_timestamp),
       week: 0,
       userid: poaching_tid
     }
@@ -76,7 +77,7 @@ const insert_extension = async ({
     type: transaction_types.EXTENSION,
     player_salary: 0,
     season_year: current_season.year,
-    timestamp,
+    occurred_at: epoch_to_timestamptz(timestamp),
     week: 0,
     userid: poaching_tid
   })
@@ -225,7 +226,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         type: transaction_types.PRACTICE_ADD,
         player_salary: 0,
         season_year: current_season.year,
-        timestamp: poach_timestamp - 24 * 60 * 60,
+        occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
         week: 0,
         userid: 1
       },
@@ -236,7 +237,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         type: transaction_types.POACHED,
         player_salary: 0,
         season_year: null,
-        timestamp: poach_timestamp,
+        occurred_at: epoch_to_timestamptz(poach_timestamp),
         week: 0,
         userid: 2
       },
@@ -247,7 +248,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         type: transaction_types.ROSTER_RELEASE,
         player_salary: 0,
         season_year: current_season.year,
-        timestamp: release_timestamp,
+        occurred_at: epoch_to_timestamptz(release_timestamp),
         week: 0,
         userid: 2
       }
@@ -294,7 +295,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         type: transaction_types.PRACTICE_ADD,
         player_salary: 0,
         season_year: prior_year,
-        timestamp: poach_timestamp - 24 * 60 * 60,
+        occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
         week: 0,
         userid: 1
       },
@@ -305,7 +306,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         type: transaction_types.POACHED,
         player_salary: 0,
         season_year: prior_year,
-        timestamp: poach_timestamp,
+        occurred_at: epoch_to_timestamptz(poach_timestamp),
         week: 0,
         userid: 2
       },
@@ -316,7 +317,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         type: transaction_types.EXTENSION,
         player_salary: 0,
         season_year: prior_year,
-        timestamp: extension_timestamp,
+        occurred_at: epoch_to_timestamptz(extension_timestamp),
         week: 0,
         userid: 2
       },
@@ -327,7 +328,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         type: transaction_types.ROSTER_RELEASE,
         player_salary: 0,
         season_year: current_season.year,
-        timestamp: release_timestamp,
+        occurred_at: epoch_to_timestamptz(release_timestamp),
         week: 0,
         userid: 2
       }

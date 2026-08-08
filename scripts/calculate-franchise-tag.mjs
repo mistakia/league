@@ -38,7 +38,7 @@ const run = async ({ year = current_season.year, dry_run = false } = {}) => {
         'rosters_players.*',
         'transactions.type',
         'transactions.player_salary',
-        'transactions.timestamp',
+        'transactions.occurred_at',
         'transactions.season_year'
       )
       .leftJoin('transactions', function () {

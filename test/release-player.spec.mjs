@@ -441,7 +441,7 @@ describe('CLI release-player script', function () {
           lid: 1,
           type: transaction_types.ROSTER_RELEASE
         })
-        .orderBy('timestamp', 'desc')
+        .orderBy('occurred_at', 'desc')
         .first()
 
       expect(transaction).to.exist

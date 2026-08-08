@@ -50,8 +50,10 @@ export default async function generate_league_rosters({
       ),
       salary_basis: salary_basis.frontmatter_value,
       salary_year: year,
+      // seasons.ext_date is timestamptz, so it is already an instant; Number()
+      // on it would have yielded milliseconds and landed in the year 55000.
       extension_deadline: league.ext_date
-        ? new Date(Number(league.ext_date) * 1000).toISOString()
+        ? new Date(league.ext_date).toISOString()
         : null
     },
     related: {

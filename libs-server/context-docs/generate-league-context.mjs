@@ -1,4 +1,5 @@
 import { current_season, transaction_type_display_names } from '#constants'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
 import getLeague from '../get-league.mjs'
 import get_team_managers from './get-team-managers.mjs'
@@ -88,7 +89,7 @@ export default async function generate_league_context({
 
   const recent_transactions = await db('transactions')
     .where({ lid, season_year: year })
-    .orderBy('timestamp', 'desc')
+    .orderBy('occurred_at', 'desc')
     .orderBy('uid', 'desc')
     .limit(10)
   const transaction_players = await get_players({
@@ -171,7 +172,7 @@ export default async function generate_league_context({
       ? markdown_table(
           ['Date', 'Team', 'Action', 'Player', 'Amount'],
           recent_transactions.map((t) => [
-            format_date_et(t.timestamp),
+            format_date_et(timestamptz_to_epoch(t.occurred_at)),
             team_name_by_tid.get(t.tid) || `Team ${t.tid}`,
             transaction_type_display_names[t.type] || `Type ${t.type}`,
             t.pid ? transaction_players[t.pid]?.name || t.pid : '—',

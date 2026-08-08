@@ -1,5 +1,6 @@
 import get_active_roster_limit from '#libs-shared/get-active-roster-limit.mjs'
 import get_extension_amount from '#libs-shared/get-extension-amount.mjs'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 import { player_tag_types, roster_slot_types } from '#constants'
 
 // Coverage at or above this reads from more than one source, so adjacent rank
@@ -205,10 +206,14 @@ export const passes_consecutive_year_check = ({
  */
 export const resolve_rookie_class_year = ({ season_rows, now_unix }) => {
   const completed = season_rows.filter((row) => {
+    // Both are `seasons` timestamptz columns; now_unix is epoch seconds.
     if (row.rookie_draft_completed_at) {
-      return row.rookie_draft_completed_at <= now_unix
+      return timestamptz_to_epoch(row.rookie_draft_completed_at) <= now_unix
     }
-    return Boolean(row.draft_start) && row.draft_start < now_unix
+    return (
+      Boolean(row.draft_start) &&
+      timestamptz_to_epoch(row.draft_start) < now_unix
+    )
   })
 
   if (!completed.length) return null
@@ -1156,7 +1161,10 @@ const DAY_SECONDS = 24 * 60 * 60
  * available during the extension window when managers are planning.
  */
 export const build_rfa_schedule = ({ season, teams }) => {
-  const start = season.restricted_free_agency_period_start
+  // timestamptz column; the day-stepping below is epoch seconds. Left as a Date
+  // it would string-concatenate rather than add, and Date.toISOString would
+  // throw RangeError on the result.
+  const start = timestamptz_to_epoch(season.restricted_free_agency_period_start)
   if (!start) return []
 
   const sorted = [...teams].sort(
@@ -1202,7 +1210,9 @@ const CALENDAR_EVENTS = [
  */
 export const build_calendar_freshness = ({ season, now_unix }) => {
   const calendar = CALENDAR_EVENTS.map(([label, field]) => {
-    const at = season[field]
+    // Every field in CALENDAR_EVENTS is a `seasons` timestamptz column, so it
+    // arrives as a Date; the arithmetic below is epoch seconds.
+    const at = timestamptz_to_epoch(season[field])
     if (!at) return null
     return {
       label,
@@ -1367,7 +1377,7 @@ export const build_considerations = ({
   if (rfa_window && rfa_window.windows.length) {
     const period_open =
       season.restricted_free_agency_period_end &&
-      now_unix <= season.restricted_free_agency_period_end
+      now_unix <= timestamptz_to_epoch(season.restricted_free_agency_period_end)
     if (period_open) {
       fired.push({
         rule: 'nomination_windows',

@@ -623,7 +623,7 @@ router.post(
       const league = await getLeague({ lid: leagueId })
 
       // make sure trade deadline has not passed
-      const deadline = dayjs.unix(league.tddate)
+      const deadline = dayjs(league.tddate)
       if (dayjs().isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
       }
@@ -918,6 +918,13 @@ router.post(
             )
           })
 
+        // ONE instant for every row this acceptance writes. These used to share
+        // an epoch SECOND, so `uid` broke the tie and insertion order decided
+        // which row read as latest. timestamptz has millisecond resolution, so
+        // a per-row `new Date()` would order them by construction time instead
+        // and silently change which transaction is "last" for a player.
+        const accepted_at = new Date()
+
         // insert transactions
         const insertTransactions = []
         for (const pid of acceptingTeamPlayers) {
@@ -931,7 +938,7 @@ router.post(
               .player_salary,
             week: current_season.week,
             season_year: current_season.year,
-            timestamp: Math.round(Date.now() / 1000)
+            occurred_at: accepted_at
           })
         }
         for (const pid of proposingTeamPlayers) {
@@ -945,7 +952,7 @@ router.post(
               .player_salary,
             week: current_season.week,
             season_year: current_season.year,
-            timestamp: Math.round(Date.now() / 1000)
+            occurred_at: accepted_at
           })
         }
 
@@ -971,7 +978,7 @@ router.post(
               player_salary: 0,
               week: current_season.week,
               season_year: current_season.year,
-              timestamp: Math.round(Date.now() / 1000)
+              occurred_at: accepted_at
             })
           }
 
@@ -985,7 +992,7 @@ router.post(
               player_salary: 0,
               week: current_season.week,
               season_year: current_season.year,
-              timestamp: Math.round(Date.now() / 1000)
+              occurred_at: accepted_at
             })
           }
 
@@ -1674,7 +1681,9 @@ router.post(
           player_salary: value_by_pid.get(row.pid) ?? 0,
           week: current_season.week,
           season_year: current_season.year,
-          timestamp: vetoed_at
+          // trades.vetoed above is still epoch seconds; transactions.occurred_at
+          // is timestamptz, so the local stays an integer and converts here.
+          occurred_at: new Date(vetoed_at * 1000)
         }))
 
         for (const row of release_rows) {
@@ -1687,7 +1696,7 @@ router.post(
             player_salary: value_by_pid.get(row.pid) ?? 0,
             week: current_season.week,
             season_year: current_season.year,
-            timestamp: vetoed_at
+            occurred_at: new Date(vetoed_at * 1000)
           })
         }
 

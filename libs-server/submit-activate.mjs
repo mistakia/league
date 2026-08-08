@@ -49,7 +49,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
       lid: leagueId,
       tid
     })
-    .orderBy('transactions.timestamp', 'desc')
+    .orderBy('transactions.occurred_at', 'desc')
   const player_row = player_rows[0]
 
   // make sure team has space on active roster
@@ -71,7 +71,9 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     player_salary: player_row.player_salary,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp
+    // transactions.occurred_at is timestamptz; poaches.processed below is still
+    // epoch seconds, so the local stays an integer and converts here only.
+    occurred_at: new Date(timestamp * 1000)
   }
   await db('transactions').insert(transaction)
 

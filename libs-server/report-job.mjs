@@ -135,7 +135,7 @@ export default async function report_job({
     job_success = false
   }
 
-  const job_report_timestamp = Math.round(Date.now() / 1000)
+  const job_report_timestamp = new Date()
 
   // The jobs-table row is local audit bookkeeping. Retry it through a fresh
   // pooled connection on a transient blip, but if it still fails, DO NOT throw:
@@ -148,7 +148,7 @@ export default async function report_job({
         type: job_type,
         is_successful: job_success,
         reason: job_reason,
-        timestamp: job_report_timestamp
+        run_at: job_report_timestamp
       })
     )
   } catch (err) {

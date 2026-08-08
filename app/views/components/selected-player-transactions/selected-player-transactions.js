@@ -96,7 +96,7 @@ export default function SelectedPlayerTransactions({
             color: '#666'
           }}
         >
-          <Timestamp timestamp={transaction.timestamp} />
+          <Timestamp timestamp={transaction.occurred_at} />
         </TableCell>
       </TableRow>
     )
@@ -171,7 +171,7 @@ export default function SelectedPlayerTransactions({
                 <TableCell variant='head'>Max Salary</TableCell>
                 <TableCell>${maxTransaction.player_salary}</TableCell>
                 <TableCell>
-                  <Timestamp timestamp={maxTransaction.timestamp} />
+                  <Timestamp timestamp={maxTransaction.occurred_at} />
                 </TableCell>
               </TableRow>
             </TableBody>

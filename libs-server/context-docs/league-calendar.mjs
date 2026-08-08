@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 
 import get_free_agent_period from '#libs-shared/get-free-agent-period.mjs'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
 // Shared league-calendar derivation used by both the schedule doc (full
 // calendar) and the league index (current phase + a few upcoming dates). The
@@ -39,13 +40,21 @@ export const league_calendar_events = [
 export function build_league_calendar({ league, now_unix }) {
   const now = now_unix || dayjs().unix()
 
+  // Every field in the event set is a `seasons` timestamptz, so each arrives as
+  // a Date (server) or an ISO string (once through JSON). The internals below
+  // stay epoch seconds because `now_unix` is the caller's contract, so the
+  // conversion happens once, here, at the read boundary. `Number(a Date)` would
+  // yield milliseconds and read every event as upcoming forever.
   return league_calendar_events
     .filter((event) => league[event.field])
-    .map((event) => ({
-      label: event.label,
-      date_unix: Number(league[event.field]),
-      status: Number(league[event.field]) < now ? 'past' : 'upcoming'
-    }))
+    .map((event) => {
+      const date_unix = timestamptz_to_epoch(league[event.field])
+      return {
+        label: event.label,
+        date_unix,
+        status: date_unix < now ? 'past' : 'upcoming'
+      }
+    })
     .sort((a, b) => a.date_unix - b.date_unix)
 }
 
@@ -71,11 +80,23 @@ export function derive_playoff_weeks({ league }) {
 export function resolve_current_phase({ league, now_unix }) {
   const now = now_unix || dayjs().unix()
 
-  if (league.season_finalized_at && now > league.season_finalized_at) {
+  // Same read boundary as build_league_calendar: these are timestamptz columns
+  // and every comparison below is against epoch seconds.
+  const season_finalized_at = timestamptz_to_epoch(league.season_finalized_at)
+  const ext_date = timestamptz_to_epoch(league.ext_date)
+  const draft_start = timestamptz_to_epoch(league.draft_start)
+  const restricted_free_agency_period_start = timestamptz_to_epoch(
+    league.restricted_free_agency_period_start
+  )
+  const restricted_free_agency_period_end = timestamptz_to_epoch(
+    league.restricted_free_agency_period_end
+  )
+
+  if (season_finalized_at && now > season_finalized_at) {
     return 'Offseason (season finalized)'
   }
 
-  if (league.ext_date && now < league.ext_date) {
+  if (ext_date && now < ext_date) {
     return 'Extension Window'
   }
 
@@ -104,20 +125,15 @@ export function resolve_current_phase({ league, now_unix }) {
   }
 
   if (
-    league.restricted_free_agency_period_start &&
-    league.restricted_free_agency_period_end &&
-    now >= league.restricted_free_agency_period_start &&
-    now <= league.restricted_free_agency_period_end
+    restricted_free_agency_period_start &&
+    restricted_free_agency_period_end &&
+    now >= restricted_free_agency_period_start &&
+    now <= restricted_free_agency_period_end
   ) {
     return 'Restricted Free Agency'
   }
 
-  if (
-    league.draft_start &&
-    now >= league.draft_start &&
-    league.ext_date &&
-    now < league.ext_date
-  ) {
+  if (draft_start && now >= draft_start && ext_date && now < ext_date) {
     return 'Rookie Draft'
   }
 

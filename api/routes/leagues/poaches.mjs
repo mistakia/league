@@ -65,7 +65,7 @@ router.post('/?', async (req, res) => {
         pid,
         lid: leagueId
       })
-      .orderBy('timestamp', 'desc')
+      .orderBy('occurred_at', 'desc')
       .orderBy('uid', 'desc')
       .limit(1)
     const tran = transactions[0]
@@ -75,7 +75,7 @@ router.post('/?', async (req, res) => {
       (tran.type === transaction_types.ROSTER_DEACTIVATE ||
         tran.type === transaction_types.DRAFT ||
         tran.type === transaction_types.PRACTICE_ADD) &&
-      dayjs().isBefore(dayjs.unix(tran.timestamp).add('24', 'hours'))
+      dayjs().isBefore(dayjs(tran.occurred_at).add('24', 'hours'))
     ) {
       return res.status(400).send({ error: 'Player on Sanctuary Period' })
     }
@@ -101,7 +101,7 @@ router.post('/?', async (req, res) => {
       (tran.type === transaction_types.ROSTER_DEACTIVATE ||
         tran.type === transaction_types.DRAFT ||
         tran.type === transaction_types.PRACTICE_ADD) &&
-      dayjs().isBefore(dayjs.unix(tran.timestamp).add('24', 'hours'))
+      dayjs().isBefore(dayjs(tran.occurred_at).add('24', 'hours'))
     ) {
       return res
         .status(400)
@@ -240,7 +240,7 @@ router.put('/:poachId', async (req, res) => {
     // verify team has salary space during offseason
     const transactions = await db('transactions')
       .where({ pid: poach_player_row.pid, lid: leagueId })
-      .orderBy('timestamp', 'desc')
+      .orderBy('occurred_at', 'desc')
       .orderBy('uid', 'desc')
       .limit(1)
     const tran = transactions[0]

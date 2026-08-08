@@ -1,5 +1,7 @@
 import dayjs from 'dayjs'
 
+import timestamptz_to_epoch from './timestamptz-to-epoch.mjs'
+
 import {
   get_restricted_free_agency_window_config,
   get_restricted_free_agency_window_start,
@@ -40,13 +42,15 @@ const get_restricted_free_agency_nomination_info = ({
     return null
   }
 
-  const period_start = Number(league.restricted_free_agency_period_start)
+  const period_start = timestamptz_to_epoch(
+    league.restricted_free_agency_period_start
+  )
   // timestamptz, so parse rather than coerce — Number(Date) yields milliseconds
   const first_window_at = dayjs(
     league.restricted_free_agency_first_window_at
   ).unix()
   const period_end =
-    Number(league.restricted_free_agency_period_end) ||
+    timestamptz_to_epoch(league.restricted_free_agency_period_end) ||
     first_window_at + 30 * 24 * 60 * 60
 
   if (current_timestamp > period_end) {

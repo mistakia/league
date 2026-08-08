@@ -2111,7 +2111,7 @@ ALTER SEQUENCE public.composite_market_value_daily_cmv_row_id_seq OWNED BY publi
 CREATE TABLE public.config (
     key character varying(255) NOT NULL,
     config_value jsonb,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -2155,7 +2155,7 @@ CREATE TABLE public.draft (
     original_team_id integer NOT NULL,
     lid integer NOT NULL,
     season_year smallint,
-    selection_timestamp integer,
+    selection_timestamp timestamp with time zone,
     expired_at timestamp with time zone,
     CONSTRAINT draft_not_both_selected_and_expired CHECK (((pid IS NULL) OR (expired_at IS NULL)))
 );
@@ -3952,7 +3952,7 @@ CREATE TABLE public.jobs (
     type smallint NOT NULL,
     is_successful boolean NOT NULL,
     reason text,
-    "timestamp" integer NOT NULL
+    run_at timestamp with time zone NOT NULL
 );
 
 
@@ -4500,7 +4500,7 @@ CREATE TABLE public.league_team_daily_values (
     lid integer NOT NULL,
     tid integer NOT NULL,
     date date NOT NULL,
-    "timestamp" bigint NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     ktc_value integer,
     ktc_share numeric(6,5)
 );
@@ -4520,7 +4520,7 @@ CREATE TABLE public.league_team_forecast (
     division_odds numeric(5,4) NOT NULL,
     bye_odds numeric(5,4) NOT NULL,
     championship_odds numeric(5,4) NOT NULL,
-    "timestamp" integer NOT NULL,
+    generated_at timestamp with time zone NOT NULL,
     playoff_odds_with_win numeric(5,4),
     division_odds_with_win numeric(5,4),
     bye_odds_with_win numeric(5,4),
@@ -4742,8 +4742,8 @@ CREATE TABLE public.leagues (
     groupme_id character varying(26),
     discord_webhook_url character varying(255),
     is_hosted boolean DEFAULT false,
-    processed_at integer,
-    archived_at bigint,
+    processed_at timestamp with time zone,
+    archived_at timestamp with time zone,
     espn_id bigint,
     sleeper_id bigint,
     mfl_id bigint,
@@ -4797,7 +4797,7 @@ CREATE TABLE public.matchups (
     away_projection numeric(5,2),
     home_win_probability numeric(5,4),
     away_win_probability numeric(5,4),
-    simulation_timestamp timestamp without time zone
+    simulation_timestamp timestamp with time zone
 );
 
 
@@ -26241,7 +26241,7 @@ CREATE TABLE public.roster_asset_transformation (
     lid integer NOT NULL,
     transaction_id integer,
     transformation_type smallint NOT NULL,
-    occurred_at timestamp without time zone NOT NULL,
+    occurred_at timestamp with time zone NOT NULL,
     source_holding_id bigint,
     target_holding_id bigint,
     source_share numeric(4,3),
@@ -26429,19 +26429,19 @@ CREATE TABLE public.scoring_format_player_seasonlogs (
 CREATE TABLE public.seasons (
     lid integer NOT NULL,
     season_year smallint NOT NULL,
-    season_started_at bigint,
+    season_started_at timestamp with time zone,
     franchise_tag_salary_qb integer,
     franchise_tag_salary_rb integer,
     franchise_tag_salary_wr integer,
     franchise_tag_salary_te integer,
-    restricted_free_agency_period_start bigint,
-    restricted_free_agency_period_end bigint,
-    ext_date bigint,
-    draft_start bigint,
-    free_agency_period_start bigint,
-    free_agency_period_end bigint,
-    free_agency_live_auction_start bigint,
-    tddate bigint,
+    restricted_free_agency_period_start timestamp with time zone,
+    restricted_free_agency_period_end timestamp with time zone,
+    ext_date timestamp with time zone,
+    draft_start timestamp with time zone,
+    free_agency_period_start timestamp with time zone,
+    free_agency_period_end timestamp with time zone,
+    free_agency_live_auction_start timestamp with time zone,
+    tddate timestamp with time zone,
     draft_type character varying(10),
     draft_hour_min smallint,
     draft_hour_max smallint,
@@ -26456,12 +26456,12 @@ CREATE TABLE public.seasons (
     rookie_tag_limit smallint DEFAULT '1'::smallint NOT NULL,
     restricted_free_agency_tag_limit smallint DEFAULT '2'::smallint NOT NULL,
     season_due_amount bigint,
-    free_agency_live_auction_end bigint,
+    free_agency_live_auction_end timestamp with time zone,
     wildcard_round smallint,
     championship_round integer[],
-    rookie_draft_completed_at bigint,
+    rookie_draft_completed_at timestamp with time zone,
     is_free_agency_auction_slow_mode boolean DEFAULT false NOT NULL,
-    season_finalized_at bigint,
+    season_finalized_at timestamp with time zone,
     scoring_format_id text NOT NULL,
     league_format_id text NOT NULL,
     restricted_free_agency_first_window_at timestamp with time zone,
@@ -26679,10 +26679,10 @@ CREATE TABLE public.super_priority (
     original_tid integer NOT NULL,
     poaching_tid integer NOT NULL,
     lid integer NOT NULL,
-    poach_timestamp integer NOT NULL,
+    poach_timestamp timestamp with time zone NOT NULL,
     eligible smallint DEFAULT 1 NOT NULL,
     claimed smallint DEFAULT 0 NOT NULL,
-    claimed_at integer,
+    claimed_at timestamp with time zone,
     requires_waiver smallint DEFAULT 0 NOT NULL
 );
 
@@ -26857,7 +26857,7 @@ CREATE TABLE public.transactions (
     player_salary integer NOT NULL,
     week smallint NOT NULL,
     season_year smallint,
-    "timestamp" integer NOT NULL,
+    occurred_at timestamp with time zone NOT NULL,
     waiverid integer
 );
 

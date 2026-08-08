@@ -90,7 +90,7 @@ const createTransaction = async ({ roster_player, tid, league }) => {
     player_salary: extensionValue,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp: league.ext_date
+    occurred_at: league.ext_date
   }
 }
 

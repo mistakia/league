@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 
 import db from '#db'
-import { create_default_league } from '#libs-shared'
+import { create_default_league, epoch_to_timestamptz } from '#libs-shared'
 import {
   find_or_create_scoring_format,
   find_or_create_league_format
@@ -78,22 +78,28 @@ export default async function ({ lid, commishid, ...params } = {}) {
     franchise_tag_salary_wr: league_params.franchise_tag_salary_wr,
     franchise_tag_salary_te: league_params.franchise_tag_salary_te,
 
-    restricted_free_agency_period_start:
-      league_params.restricted_free_agency_period_start,
-    restricted_free_agency_period_end:
-      league_params.restricted_free_agency_period_end,
+    // The seasons calendar instants are timestamptz; league_params carries them
+    // as epoch seconds, which is the shape the create-league API accepts and
+    // what create_default_league produces.
+    restricted_free_agency_period_start: epoch_to_timestamptz(
+      league_params.restricted_free_agency_period_start
+    ),
+    restricted_free_agency_period_end: epoch_to_timestamptz(
+      league_params.restricted_free_agency_period_end
+    ),
 
-    ext_date: league_params.ext_date,
+    ext_date: epoch_to_timestamptz(league_params.ext_date),
 
-    draft_start: league_params.draft_start,
+    draft_start: epoch_to_timestamptz(league_params.draft_start),
     draft_type: league_params.draft_type,
     draft_pick_interval: league_params.draft_pick_interval,
     draft_hour_min: league_params.draft_hour_min,
     draft_hour_max: league_params.draft_hour_max,
 
-    free_agency_live_auction_start:
-      league_params.free_agency_live_auction_start,
-    tddate: league_params.tddate
+    free_agency_live_auction_start: epoch_to_timestamptz(
+      league_params.free_agency_live_auction_start
+    ),
+    tddate: epoch_to_timestamptz(league_params.tddate)
   })
 
   return leagueId

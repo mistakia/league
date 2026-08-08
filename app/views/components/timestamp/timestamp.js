@@ -11,7 +11,9 @@ export default class Timestamp extends React.Component {
   render = () => {
     const { timestamp } = this.props
 
-    const m = dayjs.unix(timestamp)
+    // Both callers pass transactions.occurred_at, which is timestamptz and so
+    // reaches the client as an ISO string rather than epoch seconds.
+    const m = dayjs(timestamp)
 
     return (
       <div className='timestamp'>
@@ -23,5 +25,5 @@ export default class Timestamp extends React.Component {
 }
 
 Timestamp.propTypes = {
-  timestamp: PropTypes.number
+  timestamp: PropTypes.string
 }
