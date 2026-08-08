@@ -47,6 +47,7 @@ const repo_root = path.join(__dirname, '..', '..')
 // db/schema.postgres.sql below, so a name that is later re-created fails loudly
 // rather than silently checking nothing.
 const DROPPED_TABLES = [
+  'external_league_import_job_history',
   'keeptradecut_rankings',
   'personnel_count_discrepancies',
   'pff_game_id_map',

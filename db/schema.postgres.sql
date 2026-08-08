@@ -365,9 +365,6 @@ DROP INDEX IF EXISTS public.idx_external_league_import_jobs_queued_at;
 DROP INDEX IF EXISTS public.idx_external_league_import_jobs_lid;
 DROP INDEX IF EXISTS public.idx_external_league_import_jobs_connection_id;
 DROP INDEX IF EXISTS public.idx_external_league_import_jobs_active;
-DROP INDEX IF EXISTS public.idx_external_league_import_job_history_lid;
-DROP INDEX IF EXISTS public.idx_external_league_import_job_history_connection_id;
-DROP INDEX IF EXISTS public.idx_external_league_import_job_history_archived_at;
 DROP INDEX IF EXISTS public.idx_external_league_connections_status;
 DROP INDEX IF EXISTS public.idx_external_league_connections_platform;
 DROP INDEX IF EXISTS public.idx_external_league_connections_lid;
@@ -625,7 +622,6 @@ ALTER TABLE IF EXISTS ONLY public.external_league_trades DROP CONSTRAINT IF EXIS
 ALTER TABLE IF EXISTS ONLY public.external_league_trade_legs DROP CONSTRAINT IF EXISTS external_league_trade_legs_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_memberships DROP CONSTRAINT IF EXISTS external_league_memberships_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_pkey;
-ALTER TABLE IF EXISTS ONLY public.external_league_import_job_history DROP CONSTRAINT IF EXISTS external_league_import_job_history_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_pkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_lid_platform_external_league_id_key;
 ALTER TABLE IF EXISTS ONLY public.espn_team_win_rates_index DROP CONSTRAINT IF EXISTS espn_team_win_rates_index_pkey;
@@ -972,7 +968,6 @@ DROP TABLE IF EXISTS public.external_league_trades;
 DROP TABLE IF EXISTS public.external_league_trade_legs;
 DROP TABLE IF EXISTS public.external_league_memberships;
 DROP TABLE IF EXISTS public.external_league_import_jobs;
-DROP TABLE IF EXISTS public.external_league_import_job_history;
 DROP TABLE IF EXISTS public.external_league_connections;
 DROP TABLE IF EXISTS public.espn_team_win_rates_index;
 DROP TABLE IF EXISTS public.espn_team_win_rates_history;
@@ -1008,7 +1003,6 @@ DROP FUNCTION IF EXISTS public.get_next_queued_job();
 DROP FUNCTION IF EXISTS public.complete_job(p_job_id uuid, p_success boolean, p_results jsonb, p_error_message text, p_error_context jsonb, p_stats_players_mapped integer, p_stats_players_failed integer, p_stats_rosters_updated integer, p_stats_transactions_imported integer, p_stats_transactions_failed integer);
 DROP FUNCTION IF EXISTS public.cmv_derive_format_category(sqb smallint, sqbrbwrte smallint, rec numeric);
 DROP FUNCTION IF EXISTS public.cmv_classify_league_format();
-DROP FUNCTION IF EXISTS public.archive_completed_import_jobs();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
 DROP TYPE IF EXISTS public.team_unit;
@@ -1598,61 +1592,6 @@ CREATE TYPE public.wager_status AS ENUM (
     'CANCELLED',
     'CASHED_OUT'
 );
-
-
---
--- Name: archive_completed_import_jobs(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.archive_completed_import_jobs() RETURNS integer
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-  archived_count INTEGER := 0;
-  job_record RECORD;
-BEGIN
-  -- Archive jobs older than 30 days that are completed or failed
-  FOR job_record IN
-    SELECT * FROM external_league_import_jobs
-    WHERE status IN ('completed', 'failed', 'cancelled')
-      AND completed_at < NOW() - INTERVAL '30 days'
-  LOOP
-    -- Insert into history table
-    INSERT INTO external_league_import_job_history (
-      job_id, connection_id, lid, job_type, status,
-      queued_at, started_at, completed_at,
-      duration_seconds,
-      is_successful, players_mapped, rosters_updated, transactions_imported,
-      error_summary, initiated_by
-    ) VALUES (
-      job_record.job_id, job_record.connection_id, job_record.lid,
-      job_record.job_type, job_record.status,
-      job_record.queued_at, job_record.started_at, job_record.completed_at,
-      CASE
-        WHEN job_record.started_at IS NOT NULL AND job_record.completed_at IS NOT NULL
-        THEN EXTRACT(EPOCH FROM (job_record.completed_at - job_record.started_at))::INTEGER
-        ELSE NULL
-      END,
-      job_record.status = 'completed',
-      job_record.players_mapped, job_record.rosters_updated, job_record.transactions_imported,
-      job_record.error_message, job_record.initiated_by
-    );
-
-    -- Delete from main table
-    DELETE FROM external_league_import_jobs WHERE job_id = job_record.job_id;
-    archived_count := archived_count + 1;
-  END LOOP;
-
-  RETURN archived_count;
-END;
-$$;
-
-
---
--- Name: FUNCTION archive_completed_import_jobs(); Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON FUNCTION public.archive_completed_import_jobs() IS 'Archives completed jobs older than 30 days to history table';
 
 
 --
@@ -2935,37 +2874,6 @@ COMMENT ON COLUMN public.external_league_connections.is_auto_sync_enabled IS 'Wh
 --
 
 COMMENT ON COLUMN public.external_league_connections.sync_components IS 'JSON configuration of which components to sync';
-
-
---
--- Name: external_league_import_job_history; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.external_league_import_job_history (
-    job_id uuid NOT NULL,
-    connection_id uuid NOT NULL,
-    lid bigint NOT NULL,
-    job_type character varying(50) NOT NULL,
-    status character varying(50) NOT NULL,
-    queued_at timestamp with time zone NOT NULL,
-    started_at timestamp with time zone,
-    completed_at timestamp with time zone,
-    duration_seconds integer,
-    is_successful boolean NOT NULL,
-    players_mapped integer DEFAULT 0,
-    rosters_updated integer DEFAULT 0,
-    transactions_imported integer DEFAULT 0,
-    error_summary text,
-    initiated_by bigint,
-    archived_at timestamp with time zone DEFAULT now() NOT NULL
-);
-
-
---
--- Name: TABLE external_league_import_job_history; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON TABLE public.external_league_import_job_history IS 'Historical records of completed import jobs';
 
 
 --
@@ -28342,14 +28250,6 @@ ALTER TABLE ONLY public.external_league_connections
 
 
 --
--- Name: external_league_import_job_history external_league_import_job_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.external_league_import_job_history
-    ADD CONSTRAINT external_league_import_job_history_pkey PRIMARY KEY (job_id);
-
-
---
 -- Name: external_league_import_jobs external_league_import_jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -30551,27 +30451,6 @@ CREATE INDEX idx_external_league_connections_platform ON public.external_league_
 --
 
 CREATE INDEX idx_external_league_connections_status ON public.external_league_connections USING btree (status);
-
-
---
--- Name: idx_external_league_import_job_history_archived_at; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_external_league_import_job_history_archived_at ON public.external_league_import_job_history USING btree (archived_at);
-
-
---
--- Name: idx_external_league_import_job_history_connection_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_external_league_import_job_history_connection_id ON public.external_league_import_job_history USING btree (connection_id);
-
-
---
--- Name: idx_external_league_import_job_history_lid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_external_league_import_job_history_lid ON public.external_league_import_job_history USING btree (lid);
 
 
 --
@@ -57611,13 +57490,6 @@ GRANT SELECT ON TABLE public.espn_team_win_rates_index TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.external_league_connections TO league_reader;
-
-
---
--- Name: TABLE external_league_import_job_history; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON TABLE public.external_league_import_job_history TO league_reader;
 
 
 --

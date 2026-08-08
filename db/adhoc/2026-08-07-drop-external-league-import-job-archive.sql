@@ -1,0 +1,58 @@
+-- STATUS: APPLIED 2026-08-08 against league_production
+--
+-- Drop external_league_import_job_history and archive_completed_import_jobs().
+--
+-- The table is a job log squatting on the temporal-feed _history suffix, which
+-- the schema standard reserves for the append-only side of a _history/_index
+-- pair. It is one of the three structural residuals the conformance audit
+-- cannot see -- a column parser has no column to flag on a table-shape defect --
+-- held by user:task/league/close-structural-time-series-residuals.md.
+--
+-- Dropped rather than renamed. The task and the parent plan both scheduled a
+-- RENAME off the suffix, each calling it the cheapest change in the item. A
+-- drop is cheaper and strictly better, because the archive is not merely unused
+-- but semantically WRONG against two live consumers:
+--
+--   api/routes/leagues/external.mjs:584-607 reads the user-facing job list from
+--   external_league_import_jobs only, with no fallback read of this table. The
+--   archive function DELETEs from the jobs table, so a user's own import
+--   history would silently vanish at 30 days.
+--
+--   api/sockets/external-league-import.mjs:287-299 computes per-connection
+--   LIFETIME counters -- COUNT(*), COUNT(*) FILTER (WHERE status = ...), and
+--   MAX(completed_at) as last_completed_sync -- from the jobs table alone.
+--   Archiving resets the totals and can move last_completed_sync backwards.
+--
+-- So the archive could never have run without breaking both. It never did: the
+-- table, external_league_import_jobs, and external_league_connections all hold
+-- zero rows, and the function has no caller in any code path or crontab. Both
+-- objects were born dead in 855a4cdfd (2025-12-11).
+--
+-- Retention needs no second table. idx_external_league_import_jobs_active is
+-- already a partial index -- btree (status, queued_at) WHERE status IN
+-- ('queued','running') -- so the queue hot path does not degrade with finished
+-- jobs retained. If retention is ever needed it is about PAYLOAD, not rows: the
+-- growth column is results (jsonb), which embeds the whole fetched league
+-- payload, and the right mechanism is to null that column past a horizon while
+-- keeping the row for the two lifetime consumers above.
+--
+-- FUNCTION FIRST, THEN TABLE. A PL/pgSQL body is stored as text, so DROP TABLE
+-- neither fails on nor rewrites it -- dropping the table alone would leave
+-- archive_completed_import_jobs() compiling fine and throwing "relation ... does
+-- not exist" only at call time, invisible to every repo grep. pg_depend
+-- confirms no catalog link between the two, so the ordering is ours to enforce.
+--
+-- No foreign key in either direction (pg_constraint shows only the table's own
+-- pkey), so no CASCADE is needed. No view, matview, trigger or event trigger
+-- names either object.
+--
+-- No BEGIN/COMMIT: db-exec.sh already runs this file under --single-transaction
+-- with ON_ERROR_STOP=1. A COMMIT here would end the outer transaction early and
+-- every statement after it would lose its rollback.
+--
+-- No non-blocking index build is needed here; both statements are catalog-only
+-- and the file must stay atomic.
+
+DROP FUNCTION IF EXISTS public.archive_completed_import_jobs();
+
+DROP TABLE IF EXISTS public.external_league_import_job_history;
