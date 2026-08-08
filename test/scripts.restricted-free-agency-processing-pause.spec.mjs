@@ -46,6 +46,8 @@ describe('SCRIPTS - restricted free agency processing pause', function () {
     this.timeout(60 * 1000)
     await league(knex)
 
+    seeded_pids = []
+
     const tran_date = regular_season_start.subtract('3', 'month').unix()
 
     await knex('seasons')
@@ -75,9 +77,17 @@ describe('SCRIPTS - restricted free agency processing pause', function () {
     )
   })
 
+  // `selectPlayer` draws at random from a pool of about 20 eligible backs, so
+  // two seeds in one test can land on the SAME player -- which made the
+  // ordering assertions below compare a pid against itself and fail roughly
+  // once in twenty runs. Every auction a test seeds must be a distinct player,
+  // so the pids seeded so far are excluded from each subsequent draw.
+  let seeded_pids = []
+
   // Seed one auction that is already past its processing time.
   const seed_due_auction = async ({ team_id, bid_amount, announced_ago }) => {
-    const player = await selectPlayer()
+    const player = await selectPlayer({ exclude_pids: seeded_pids })
+    seeded_pids.push(player.pid)
 
     await addPlayer({
       leagueId,
