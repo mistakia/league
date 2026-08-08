@@ -215,8 +215,6 @@ const run = async ({ file_path, type = 'user' } = {}) => {
 
     await db('users').update('phone', null)
     await db('leagues').update({
-      groupme_token: null,
-      groupme_id: null,
       discord_webhook_url: null
     })
   } finally {

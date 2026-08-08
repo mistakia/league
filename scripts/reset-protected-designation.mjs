@@ -98,8 +98,8 @@ const reset_league = async ({ lid, dry_run = false }) => {
   return updated
 }
 
-// Announce the expiry to the league's Discord/GroupMe channel, at most once per
-// league per ext_date.
+// Announce the expiry to the league's Discord channel, at most once per league
+// per ext_date.
 //
 // The marker is CLAIMED before the send, inverting the order used by
 // process-extensions.mjs and announce-free-agency-period-start.mjs. Those check

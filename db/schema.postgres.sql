@@ -88,7 +88,7 @@ DROP INDEX IF EXISTS public.play_changelog_natural_key;
 DROP INDEX IF EXISTS public.pff_unresolved_players_season_year_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_season_year_facet_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_pid_season_year_idx;
-DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_franchise_season_year_facet_idx;
+DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_pff_team_season_year_facet_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_gamelogs_pid_esbid_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_gamelogs_esbid_facet_idx;
 DROP INDEX IF EXISTS public.ngs_prospect_scores_history_pid_idx;
@@ -4595,8 +4595,6 @@ CREATE TABLE public.leagues (
     uid bigint NOT NULL,
     commishid integer NOT NULL,
     name character varying(50) NOT NULL,
-    groupme_token character varying(45),
-    groupme_id character varying(26),
     discord_webhook_url character varying(255),
     is_hosted boolean DEFAULT false,
     processed_at timestamp with time zone,
@@ -18805,7 +18803,7 @@ CREATE TABLE public.pff_player_facet_gamelogs (
     facet character varying(64) NOT NULL,
     pff_game_id bigint,
     pff_player_id integer,
-    franchise_id smallint,
+    pff_team_id smallint,
     nfl_team character varying(3),
     player_position character varying(5),
     facet_payload jsonb NOT NULL,
@@ -18842,7 +18840,7 @@ CREATE TABLE public.pff_player_facet_seasonlogs (
     season_year smallint NOT NULL,
     facet character varying(64) NOT NULL,
     pff_player_id integer,
-    franchise_id smallint,
+    pff_team_id smallint,
     nfl_team character varying(3),
     player_position character varying(5),
     facet_payload jsonb NOT NULL,
@@ -18894,7 +18892,7 @@ CREATE TABLE public.pff_player_seasonlogs (
     unit character varying(20),
     pass_block numeric(4,1),
     run_block_snaps smallint,
-    draft_franchise_id smallint,
+    draft_pff_team_id smallint,
     draft_league character varying(10),
     draft_round smallint,
     draft_season smallint,
@@ -18984,7 +18982,7 @@ CREATE TABLE public.pff_team_gamelogs (
     nfl_team character varying(3) NOT NULL,
     season_year smallint NOT NULL,
     week smallint NOT NULL,
-    franchise_id smallint,
+    pff_team_id smallint,
     team_name character varying(50),
     points_scored integer,
     points_allowed integer,
@@ -19025,7 +19023,7 @@ CREATE TABLE public.pff_team_seasonlogs (
     uid integer DEFAULT nextval('public.pff_team_seasonlogs_uid_seq'::regclass) NOT NULL,
     nfl_team character varying(3) NOT NULL,
     season_year smallint NOT NULL,
-    franchise_id smallint,
+    pff_team_id smallint,
     team_name character varying(50),
     win_count smallint,
     loss_count smallint,
@@ -42548,10 +42546,10 @@ CREATE INDEX pff_player_facet_gamelogs_pid_esbid_idx ON public.pff_player_facet_
 
 
 --
--- Name: pff_player_facet_seasonlogs_franchise_season_year_facet_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: pff_player_facet_seasonlogs_pff_team_season_year_facet_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX pff_player_facet_seasonlogs_franchise_season_year_facet_idx ON public.pff_player_facet_seasonlogs USING btree (franchise_id, season_year, facet);
+CREATE INDEX pff_player_facet_seasonlogs_pff_team_season_year_facet_idx ON public.pff_player_facet_seasonlogs USING btree (pff_team_id, season_year, facet);
 
 
 --
