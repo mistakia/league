@@ -72,7 +72,7 @@ const format = (item) => {
 
     ...(item.venue && {
       stadium_name: item.venue.name,
-      stad_nfl_id: item.venue.id
+      nfl_stadium_id: item.venue.id
     })
   }
 }
@@ -148,11 +148,30 @@ const run = async ({
   }
 
   const inserts = []
+  const stadiums_by_id = new Map()
   for (const game of data.games) {
     inserts.push(format(game))
+
+    if (game.venue && game.venue.id) {
+      stadiums_by_id.set(game.venue.id, {
+        nfl_stadium_id: game.venue.id,
+        stadium_name: game.venue.name
+      })
+    }
   }
 
   result.games_processed = inserts.length
+
+  // The nfl_stadium dimension must be current before the games referencing it
+  // land -- nfl_games.nfl_stadium_id carries a foreign key onto it, and the NFL
+  // adds venues most seasons (new builds, international games), so a first game
+  // at an unseen venue would otherwise fail the whole week's import.
+  if (stadiums_by_id.size) {
+    await db('nfl_stadium')
+      .insert(Array.from(stadiums_by_id.values()))
+      .onConflict('nfl_stadium_id')
+      .merge()
+  }
 
   if (inserts.length) {
     // TODO not sure which unique key should be used here

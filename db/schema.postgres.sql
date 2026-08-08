@@ -32,6 +32,7 @@ ALTER TABLE IF EXISTS ONLY public.player_adp_index DROP CONSTRAINT IF EXISTS pla
 ALTER TABLE IF EXISTS ONLY public.player_adp_history DROP CONSTRAINT IF EXISTS player_adp_history_adp_format_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_fkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_games DROP CONSTRAINT IF EXISTS nfl_games_nfl_stadium_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_off_play_caller_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_head_coach_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_def_play_caller_id_fkey;
@@ -557,6 +558,7 @@ ALTER TABLE IF EXISTS ONLY public.pff_player_facet_gamelogs DROP CONSTRAINT IF E
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_observed_at_key;
 ALTER TABLE IF EXISTS ONLY public.nfl_team_gamelogs DROP CONSTRAINT IF EXISTS nfl_team_gamelogs_esbid_nfl_team_season_year_unique;
+ALTER TABLE IF EXISTS ONLY public.nfl_stadium DROP CONSTRAINT IF EXISTS nfl_stadium_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_rusher DROP CONSTRAINT IF EXISTS nfl_plays_rusher_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_receiver DROP CONSTRAINT IF EXISTS nfl_plays_receiver_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_player DROP CONSTRAINT IF EXISTS nfl_plays_player_pkey;
@@ -829,6 +831,7 @@ DROP TABLE IF EXISTS public.ngs_prospect_scores_history;
 DROP MATERIALIZED VIEW IF EXISTS public.nfl_year_week_timestamp;
 DROP TABLE IF EXISTS public.nfl_team_seasonlogs;
 DROP TABLE IF EXISTS public.nfl_team_gamelogs;
+DROP TABLE IF EXISTS public.nfl_stadium;
 DROP TABLE IF EXISTS public.nfl_snaps_year_default;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2026;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2025;
@@ -4773,8 +4776,8 @@ CREATE TABLE public.nfl_games (
     home_score integer DEFAULT 0,
     away_score integer DEFAULT 0,
     stadium_name character varying(45),
-    stad_nfl_id character varying(36),
-    ngs_site_id integer,
+    nfl_stadium_id character varying(36),
+    ngs_stadium_id integer,
     game_clock character varying(10),
     status character varying(20),
     away_rest integer,
@@ -5229,7 +5232,6 @@ CREATE TABLE public.nfl_plays (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -6754,7 +6756,6 @@ CREATE TABLE public.nfl_plays_year_2000 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -7188,7 +7189,6 @@ CREATE TABLE public.nfl_plays_year_2001 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -7622,7 +7622,6 @@ CREATE TABLE public.nfl_plays_year_2002 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -8056,7 +8055,6 @@ CREATE TABLE public.nfl_plays_year_2003 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -8490,7 +8488,6 @@ CREATE TABLE public.nfl_plays_year_2004 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -8924,7 +8921,6 @@ CREATE TABLE public.nfl_plays_year_2005 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -9358,7 +9354,6 @@ CREATE TABLE public.nfl_plays_year_2006 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -9792,7 +9787,6 @@ CREATE TABLE public.nfl_plays_year_2007 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -10226,7 +10220,6 @@ CREATE TABLE public.nfl_plays_year_2008 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -10660,7 +10653,6 @@ CREATE TABLE public.nfl_plays_year_2009 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -11094,7 +11086,6 @@ CREATE TABLE public.nfl_plays_year_2010 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -11528,7 +11519,6 @@ CREATE TABLE public.nfl_plays_year_2011 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -11962,7 +11952,6 @@ CREATE TABLE public.nfl_plays_year_2012 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -12396,7 +12385,6 @@ CREATE TABLE public.nfl_plays_year_2013 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -12830,7 +12818,6 @@ CREATE TABLE public.nfl_plays_year_2014 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -13264,7 +13251,6 @@ CREATE TABLE public.nfl_plays_year_2015 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -13698,7 +13684,6 @@ CREATE TABLE public.nfl_plays_year_2016 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -14132,7 +14117,6 @@ CREATE TABLE public.nfl_plays_year_2017 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -14566,7 +14550,6 @@ CREATE TABLE public.nfl_plays_year_2018 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -15000,7 +14983,6 @@ CREATE TABLE public.nfl_plays_year_2019 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -15434,7 +15416,6 @@ CREATE TABLE public.nfl_plays_year_2020 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -15868,7 +15849,6 @@ CREATE TABLE public.nfl_plays_year_2021 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -16302,7 +16282,6 @@ CREATE TABLE public.nfl_plays_year_2022 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -16736,7 +16715,6 @@ CREATE TABLE public.nfl_plays_year_2023 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -17170,7 +17148,6 @@ CREATE TABLE public.nfl_plays_year_2024 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -17604,7 +17581,6 @@ CREATE TABLE public.nfl_plays_year_2025 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -18038,7 +18014,6 @@ CREATE TABLE public.nfl_plays_year_2026 (
     sportradar_game_id character varying,
     sportradar_play_id character varying,
     sportradar_drive_id character varying,
-    sportradar_event_id character varying,
     sportradar_play_type character varying,
     wall_clock timestamp with time zone,
     kicker_pid character varying(25),
@@ -18493,6 +18468,16 @@ CREATE TABLE public.nfl_snaps_year_default (
     play_id integer NOT NULL,
     gsis_it_id integer NOT NULL,
     season_year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_stadium; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_stadium (
+    nfl_stadium_id character varying(36) NOT NULL,
+    stadium_name character varying(45)
 );
 
 
@@ -28714,6 +28699,14 @@ ALTER TABLE ONLY public.nfl_plays_receiver
 
 ALTER TABLE ONLY public.nfl_plays_rusher
     ADD CONSTRAINT nfl_plays_rusher_pkey PRIMARY KEY (esbid, play_id, season_year, gsis_it_id);
+
+
+--
+-- Name: nfl_stadium nfl_stadium_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_stadium
+    ADD CONSTRAINT nfl_stadium_pkey PRIMARY KEY (nfl_stadium_id);
 
 
 --
@@ -57153,6 +57146,14 @@ ALTER TABLE ONLY public.nfl_game_coaches
 
 
 --
+-- Name: nfl_games nfl_games_nfl_stadium_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_games
+    ADD CONSTRAINT nfl_games_nfl_stadium_id_fkey FOREIGN KEY (nfl_stadium_id) REFERENCES public.nfl_stadium(nfl_stadium_id);
+
+
+--
 -- Name: ngs_prospect_scores_history ngs_prospect_scores_history_pid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -58417,6 +58418,13 @@ GRANT SELECT ON TABLE public.nfl_snaps_year_2026 TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.nfl_snaps_year_default TO league_reader;
+
+
+--
+-- Name: TABLE nfl_stadium; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.nfl_stadium TO league_reader;
 
 
 --
