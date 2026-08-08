@@ -407,6 +407,14 @@
       "column": "email",
       "kind": "not_a_column",
       "reason": "The league repo's own JS config object, read at libs-server/send-email.mjs module load (`config.email` gates whether the Resend client is built at all). `config` is a real league table, so this cannot be filtered by name -- same collision as config.databases and config.degraded above. Arrived with c6443c4c3, which documented why config-test.json enables mail."
+    },
+    {
+      "gate": 1,
+      "path": "league/CLAUDE.md",
+      "table": "transactions",
+      "column": "timestamp",
+      "kind": "history",
+      "reason": "Past-tense record, not live instruction. The sentence says a stale transactions.timestamp inside a concat_ws survived every gate, which is an accurate account of the defect 34a7a40f5 repaired -- the column is occurred_at now and the passage is the incident note explaining why gate 3 grew a .raw() transport. Naming the pre-rename spelling is the whole point of the sentence; rewriting it to occurred_at would make the paragraph describe a defect that could not have happened. Adjudicated 2026-08-08."
     }
   ]
 }
