@@ -2111,7 +2111,7 @@ ALTER SEQUENCE public.composite_market_value_daily_cmv_row_id_seq OWNED BY publi
 CREATE TABLE public.config (
     key character varying(255) NOT NULL,
     config_value jsonb,
-    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -2155,7 +2155,7 @@ CREATE TABLE public.draft (
     original_team_id integer NOT NULL,
     lid integer NOT NULL,
     season_year smallint,
-    selection_timestamp integer,
+    selection_timestamp timestamp with time zone,
     expired_at timestamp with time zone,
     CONSTRAINT draft_not_both_selected_and_expired CHECK (((pid IS NULL) OR (expired_at IS NULL)))
 );
@@ -3952,7 +3952,7 @@ CREATE TABLE public.jobs (
     type smallint NOT NULL,
     is_successful boolean NOT NULL,
     reason text,
-    "timestamp" integer NOT NULL
+    run_at timestamp with time zone NOT NULL
 );
 
 
@@ -4500,7 +4500,7 @@ CREATE TABLE public.league_team_daily_values (
     lid integer NOT NULL,
     tid integer NOT NULL,
     date date NOT NULL,
-    "timestamp" bigint NOT NULL,
+    observed_at timestamp with time zone NOT NULL,
     ktc_value integer,
     ktc_share numeric(6,5)
 );
@@ -4520,7 +4520,7 @@ CREATE TABLE public.league_team_forecast (
     division_odds numeric(5,4) NOT NULL,
     bye_odds numeric(5,4) NOT NULL,
     championship_odds numeric(5,4) NOT NULL,
-    "timestamp" integer NOT NULL,
+    generated_at timestamp with time zone NOT NULL,
     playoff_odds_with_win numeric(5,4),
     division_odds_with_win numeric(5,4),
     bye_odds_with_win numeric(5,4),
@@ -4742,8 +4742,8 @@ CREATE TABLE public.leagues (
     groupme_id character varying(26),
     discord_webhook_url character varying(255),
     is_hosted boolean DEFAULT false,
-    processed_at integer,
-    archived_at bigint,
+    processed_at timestamp with time zone,
+    archived_at timestamp with time zone,
     espn_id bigint,
     sleeper_id bigint,
     mfl_id bigint,
@@ -4797,7 +4797,7 @@ CREATE TABLE public.matchups (
     away_projection numeric(5,2),
     home_win_probability numeric(5,4),
     away_win_probability numeric(5,4),
-    simulation_timestamp timestamp without time zone
+    simulation_timestamp timestamp with time zone
 );
 
 
@@ -4845,10 +4845,10 @@ CREATE TABLE public.nfl_draft_rankings_history (
     season_year smallint NOT NULL,
     overall_rank integer,
     position_rank integer,
-    "position" character varying(4),
+    player_position character varying(4),
     observed_at timestamp with time zone NOT NULL,
     draft_ranking_type public.draft_ranking_type DEFAULT 'BIG_BOARD'::public.draft_ranking_type NOT NULL,
-    CONSTRAINT nfl_draft_rankings_history_position_vocabulary CHECK ((("position" IS NULL) OR (("position")::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT nfl_draft_rankings_history_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
 
@@ -4862,10 +4862,10 @@ CREATE TABLE public.nfl_draft_rankings_index (
     season_year smallint NOT NULL,
     overall_rank integer,
     position_rank integer,
-    "position" character varying(4),
+    player_position character varying(4),
     observed_at timestamp with time zone NOT NULL,
     draft_ranking_type public.draft_ranking_type DEFAULT 'BIG_BOARD'::public.draft_ranking_type NOT NULL,
-    CONSTRAINT nfl_draft_rankings_index_position_vocabulary CHECK ((("position" IS NULL) OR (("position")::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT nfl_draft_rankings_index_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
 
@@ -18950,7 +18950,7 @@ CREATE TABLE public.pff_player_facet_gamelogs (
     pff_id integer,
     franchise_id smallint,
     nfl_team character varying(3),
-    "position" character varying(5),
+    player_position character varying(5),
     facet_payload jsonb NOT NULL,
     snap_count integer,
     pff_grade numeric(5,2),
@@ -18972,7 +18972,7 @@ CREATE TABLE public.pff_player_facet_gamelogs (
     routes integer,
     targets_per_route numeric(6,3),
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT pff_player_facet_gamelogs_position_vocabulary CHECK ((("position" IS NULL) OR (("position")::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT pff_player_facet_gamelogs_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
 
@@ -18987,7 +18987,7 @@ CREATE TABLE public.pff_player_facet_seasonlogs (
     pff_id integer,
     franchise_id smallint,
     nfl_team character varying(3),
-    "position" character varying(5),
+    player_position character varying(5),
     facet_payload jsonb NOT NULL,
     snap_count integer,
     pff_grade numeric(5,2),
@@ -19009,7 +19009,7 @@ CREATE TABLE public.pff_player_facet_seasonlogs (
     routes integer,
     targets_per_route numeric(6,3),
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT pff_player_facet_seasonlogs_position_vocabulary CHECK ((("position" IS NULL) OR (("position")::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT pff_player_facet_seasonlogs_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
 
@@ -19044,7 +19044,7 @@ CREATE TABLE public.pff_player_seasonlogs (
     draft_selection smallint,
     draft_type character varying(20),
     offense_ranked smallint,
-    "position" character varying(5),
+    player_position character varying(5),
     defense_snaps smallint,
     pass_snaps smallint,
     name character varying(100),
@@ -19071,7 +19071,7 @@ CREATE TABLE public.pff_player_seasonlogs (
     overall_snaps smallint,
     offense_rank smallint,
     CONSTRAINT pff_player_seasonlogs_grade_position_vocabulary CHECK (((grade_position IS NULL) OR ((grade_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[])))),
-    CONSTRAINT pff_player_seasonlogs_position_vocabulary CHECK ((("position" IS NULL) OR (("position")::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT pff_player_seasonlogs_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
 
@@ -19201,7 +19201,7 @@ CREATE TABLE public.pff_unresolved_players (
     season_year smallint NOT NULL,
     facet character varying(64) NOT NULL,
     name character varying(100),
-    "position" character varying(5),
+    pff_position character varying(5),
     pff_nfl_team character varying(8),
     nfl_team character varying(3),
     source_file character varying(255),
@@ -20313,7 +20313,7 @@ CREATE TABLE public.player_college_seasonlogs (
 CREATE TABLE public.player_contracts (
     pid character varying(25) NOT NULL,
     season_year character varying(5) NOT NULL,
-    team character varying(3),
+    nfl_team character varying(3),
     base_salary numeric(10,3),
     prorated_bonus numeric(10,5),
     roster_bonus numeric(10,6),
@@ -20350,10 +20350,10 @@ COMMENT ON COLUMN public.player_contracts.season_year IS 'Contract year or "Tota
 
 
 --
--- Name: COLUMN player_contracts.team; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_contracts.nfl_team; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_contracts.team IS 'Team abbreviation';
+COMMENT ON COLUMN public.player_contracts.nfl_team IS 'Team abbreviation';
 
 
 --
@@ -26241,7 +26241,7 @@ CREATE TABLE public.roster_asset_transformation (
     lid integer NOT NULL,
     transaction_id integer,
     transformation_type smallint NOT NULL,
-    occurred_at timestamp without time zone NOT NULL,
+    occurred_at timestamp with time zone NOT NULL,
     source_holding_id bigint,
     target_holding_id bigint,
     source_share numeric(4,3),
@@ -26429,19 +26429,19 @@ CREATE TABLE public.scoring_format_player_seasonlogs (
 CREATE TABLE public.seasons (
     lid integer NOT NULL,
     season_year smallint NOT NULL,
-    season_started_at bigint,
+    season_started_at timestamp with time zone,
     franchise_tag_salary_qb integer,
     franchise_tag_salary_rb integer,
     franchise_tag_salary_wr integer,
     franchise_tag_salary_te integer,
-    restricted_free_agency_period_start bigint,
-    restricted_free_agency_period_end bigint,
-    ext_date bigint,
-    draft_start bigint,
-    free_agency_period_start bigint,
-    free_agency_period_end bigint,
-    free_agency_live_auction_start bigint,
-    tddate bigint,
+    restricted_free_agency_period_start timestamp with time zone,
+    restricted_free_agency_period_end timestamp with time zone,
+    ext_date timestamp with time zone,
+    draft_start timestamp with time zone,
+    free_agency_period_start timestamp with time zone,
+    free_agency_period_end timestamp with time zone,
+    free_agency_live_auction_start timestamp with time zone,
+    tddate timestamp with time zone,
     draft_type character varying(10),
     draft_hour_min smallint,
     draft_hour_max smallint,
@@ -26456,12 +26456,12 @@ CREATE TABLE public.seasons (
     rookie_tag_limit smallint DEFAULT '1'::smallint NOT NULL,
     restricted_free_agency_tag_limit smallint DEFAULT '2'::smallint NOT NULL,
     season_due_amount bigint,
-    free_agency_live_auction_end bigint,
+    free_agency_live_auction_end timestamp with time zone,
     wildcard_round smallint,
     championship_round integer[],
-    rookie_draft_completed_at bigint,
+    rookie_draft_completed_at timestamp with time zone,
     is_free_agency_auction_slow_mode boolean DEFAULT false NOT NULL,
-    season_finalized_at bigint,
+    season_finalized_at timestamp with time zone,
     scoring_format_id text NOT NULL,
     league_format_id text NOT NULL,
     restricted_free_agency_first_window_at timestamp with time zone,
@@ -26679,10 +26679,10 @@ CREATE TABLE public.super_priority (
     original_tid integer NOT NULL,
     poaching_tid integer NOT NULL,
     lid integer NOT NULL,
-    poach_timestamp integer NOT NULL,
+    poach_timestamp timestamp with time zone NOT NULL,
     eligible smallint DEFAULT 1 NOT NULL,
     claimed smallint DEFAULT 0 NOT NULL,
-    claimed_at integer,
+    claimed_at timestamp with time zone,
     requires_waiver smallint DEFAULT 0 NOT NULL
 );
 
@@ -26857,7 +26857,7 @@ CREATE TABLE public.transactions (
     player_salary integer NOT NULL,
     week smallint NOT NULL,
     season_year smallint,
-    "timestamp" integer NOT NULL,
+    occurred_at timestamp with time zone NOT NULL,
     waiverid integer
 );
 

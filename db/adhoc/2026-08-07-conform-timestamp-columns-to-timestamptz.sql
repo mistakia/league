@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-08 against league_production
 --
 -- Conform 24 time-bearing columns across 11 league tables to timestamptz,
 -- renaming the four spelled `timestamp` off the reserved word in the same pass.
