@@ -1,0 +1,8 @@
+[
+  {
+    "path": "libs-server/create-league.mjs",
+    "column": "free_agency_live_auction_start",
+    "kind": "retyped_read_in_epoch_arithmetic",
+    "reason": "Not a column read. `league_params` is the caller's INPUT bag, which takes epoch seconds by contract -- every test fixture and the league-create route pass epoch -- and this file converts at the write boundary with `epoch_to_timestamptz` on all six temporal params (lines 84-102). So the `dayjs.unix()` at line 19 is reading the parameter in its declared unit to enforce the Article XII §2 auction window, not reading the retyped column. This is the gate's known limit: a property read cannot distinguish a database row from a params object whose keys are named after columns. Re-verified 2026-08-08 against the conversion at line 99."
+  }
+]

@@ -178,6 +178,14 @@ const GATES = [
       'alias-backs whose target is a column the table LOST — the class both other rename gates are structurally blind to'
   },
   {
+    id: 'retyped-column-arithmetic',
+    command: ['db/gates/check-retyped-column-arithmetic.mjs'],
+    requires: 'base-ref',
+    negative_control: true,
+    oracle:
+      'columns whose TYPE moved numeric -> temporal vs code still treating them as epoch seconds — the class every name-resolving gate here is structurally blind to'
+  },
+  {
     id: 'data-view-sql-validity',
     command: ['db/gates/check-data-view-sql-validity.mjs'],
     requires: 'test-container',
