@@ -44,6 +44,13 @@ jobs:
       - name: Test collection guard
         run: yarn check:test-collection
 
+      # Fails when a non-production config names league_production or a remote
+      # host, or when a destructive entrypoint stops consulting the target
+      # guard. Static, needs no database, and cannot go red on a sibling's
+      # in-flight migration, so it runs first and costs a second.
+      - name: Destructive database guard
+        run: node db/gates/check-destructive-db-guard.mjs
+
       # Fails when a floating surface sets a global-layer z-index as a bare
       # number instead of taking it from the scale in app/styles/variables.styl.
       # Runs here for the same reason as the guard above — it is a static read

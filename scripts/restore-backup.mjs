@@ -9,6 +9,7 @@ import { createReadStream, createWriteStream, existsSync } from 'fs'
 import readline from 'readline'
 
 import { is_main } from '#libs-server'
+import { assert_destructive_target_values_allowed } from '#db/guard-destructive-target.mjs'
 
 // Increase maxBuffer size to handle larger outputs
 const exec = (cmd, options = {}) =>
@@ -717,6 +718,20 @@ const main = async () => {
       return
     }
 
+    // Every path below this point is destructive against --db: --drop drops and
+    // recreates it, --truncate empties the dumped tables, --full pg_restores a
+    // whole-DB dump over it, and the plain path imports a backup on top. This
+    // script builds command lines rather than holding a pool, so the target is
+    // its own arguments plus PGHOST -- guarded on values, before any of them
+    // run, so a refusal costs nothing and a typo in --db cannot reach psql.
+    assert_destructive_target_values_allowed({
+      host: process.env.PGHOST || '127.0.0.1',
+      port: process.env.PGPORT,
+      database: db_name,
+      user: db_user,
+      operation: `restore-backup into "${db_name}"`
+    })
+
     const options = {
       drop: argv.drop,
       data_only: argv.data_only,
@@ -754,7 +769,10 @@ const main = async () => {
     console.error(`Error: ${error.message}`)
   }
 
-  process.exit()
+  // A bare process.exit() is exit 0, so every failure here -- the target guard's
+  // refusal included -- reported success to whatever invoked it. A guard whose
+  // refusal exits 0 is not a guard.
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

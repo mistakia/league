@@ -19,11 +19,11 @@
   "postgres": {
     "client": "pg",
     "connection": {
-      "host": "38.242.199.45",
+      "host": "127.0.0.1",
       "port": 5432,
-      "user": "league_writer",
+      "user": "league_development",
       "password": "",
-      "database": "league_production"
+      "database": "league_development"
     },
     "pool": {
       "min": 2,

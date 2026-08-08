@@ -115,6 +115,14 @@ const USER_BASE_ROOTS = [
  */
 const GATES = [
   {
+    id: 'destructive-db-guard',
+    command: ['db/gates/check-destructive-db-guard.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'non-production configs must not name league_production or a remote host, and every destructive entrypoint must import the target guard'
+  },
+  {
     id: 'schema-conformance-ratchet',
     command: ['db/gates/check-schema-conformance-ratchet.mjs'],
     requires: 'none',

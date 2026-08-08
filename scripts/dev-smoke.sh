@@ -44,10 +44,17 @@ else
   echo "[dev-smoke] Reusing existing tunnel on localhost:${TUNNEL_PORT}"
 fi
 
-# The API runs in development mode (plain HTTP on :8082, no prod TLS certs) and
-# config-development already targets league_production / league_writer -- only its
-# secrets are blank locally (dev config ships blank by design). We fill exactly two
-# things without persisting any real secret:
+# The API runs in development mode (plain HTTP on :8082, no prod TLS certs).
+#
+# This script is the ONE consumer that deliberately points a non-production
+# NODE_ENV at the production database, and it is safe only because the session is
+# opened read-only (PGOPTIONS below). config-development used to name
+# league_production / league_writer outright, which made that targeting ambient
+# on every checkout rather than a property of this script -- so the tracked dev
+# config now names a local database and the production target is stated HERE, as
+# explicit LEAGUE_DB_* overrides, at the one place that means it.
+#
+# We fill exactly two things without persisting any real secret:
 #   1) jwt.secret: a throwaway value. The local API both issues and verifies its
 #      own tokens, so it only needs to be internally consistent, never prod's real
 #      secret. Patched into the tracked dev config transiently, restored on exit.
@@ -70,6 +77,10 @@ export NODE_ENV=development
 export NC_DEV_API_HOST=127.0.0.1
 export LEAGUE_DB_HOST=127.0.0.1
 export LEAGUE_DB_PORT="$TUNNEL_PORT"
+# The tracked dev config names a local database; this smoke wants production
+# through the read-only tunnel, so it says so explicitly.
+export LEAGUE_DB_DATABASE=league_production
+export LEAGUE_DB_USER=league_writer
 export LEAGUE_DB_PASSWORD="$(NODE_ENV=production node -e 'import("#config").then(c=>process.stdout.write(String(c.default.postgres.connection.password)))')"
 export PGOPTIONS='-c default_transaction_read_only=on'
 [ -n "$LEAGUE_DB_PASSWORD" ] || { echo "[dev-smoke] ERROR: could not derive the production DB password from config-production (age key present?)."; exit 1; }
