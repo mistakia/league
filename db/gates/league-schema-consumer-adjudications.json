@@ -415,6 +415,14 @@
       "column": "timestamp",
       "kind": "history",
       "reason": "Past-tense record, not live instruction. The sentence says a stale transactions.timestamp inside a concat_ws survived every gate, which is an accurate account of the defect 34a7a40f5 repaired -- the column is occurred_at now and the passage is the incident note explaining why gate 3 grew a .raw() transport. Naming the pre-rename spelling is the whole point of the sentence; rewriting it to occurred_at would make the paragraph describe a defect that could not have happened. Adjudicated 2026-08-08."
+    },
+    {
+      "gate": 1,
+      "path": "league/league-backup-system.md",
+      "table": "users",
+      "column": "phone",
+      "kind": "history",
+      "reason": "Accurate history, and the absent column is the point of the sentence. users.phone was dropped 2026-01-12 in adbce55ca; the passage records that scripts/import-database-backup.mjs nulled it as the FIRST statement of its post-restore secret scrub, so every run raised 42703 and aborted before reaching leagues.discord_webhook_url -- seven months of scrubbing nothing while reading as the safe dev-restore path. That is why the script was deleted (369413b61) rather than repaired. Naming the live column instead would destroy the explanation."
     }
   ]
 }
