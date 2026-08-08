@@ -14,6 +14,7 @@ import {
 } from '#libs-server'
 import { getDraftWindow } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('notifications-draft')
@@ -22,7 +23,11 @@ debug.enable('notifications-draft')
 const NOTIFICATION_TYPE_DRAFT_PICK_ON_CLOCK = 'draft_pick_on_clock'
 
 const run = async () => {
-  const now = dayjs().unix()
+  // One instant read two ways: draft_start and draft.selection_timestamp are
+  // timestamptz as of the 2026-08-07 conformance pass, so the SQL comparison
+  // takes the Date while the window math below stays epoch seconds.
+  const now_instant = new Date()
+  const now = timestamptz_to_epoch(now_instant)
 
   // Leagues whose draft has started (draft_start in the past). draft_start
   // lives on the seasons row, so a single left join carries it.
@@ -36,7 +41,7 @@ const run = async () => {
       )
     })
     .whereNotNull('draft_start')
-    .where('draft_start', '<', now)
+    .where('draft_start', '<', now_instant)
 
   const due_announcements = []
 
@@ -65,7 +70,7 @@ const run = async () => {
     // The window opens the instant the previous pick is made (draft_start for
     // pick 1), per Article XI Section 8. That timestamp is the true on-clock
     // time and doubles as the stable, unique idempotency key for this pick.
-    let on_clock_at = draft_start
+    let on_clock_at = timestamptz_to_epoch(draft_start)
     if (frontier.pick > 1) {
       const previous = await db('draft')
         .where({
@@ -74,7 +79,8 @@ const run = async () => {
           pick: frontier.pick - 1
         })
         .first()
-      on_clock_at = previous?.selection_timestamp || draft_start
+      on_clock_at =
+        timestamptz_to_epoch(previous?.selection_timestamp) ?? on_clock_at
     }
 
     if (on_clock_at > now) continue // window has not opened yet

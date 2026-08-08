@@ -52,7 +52,9 @@ const format_timestamptz_et = (value) =>
  * Leagues whose restricted free agency period is currently open.
  */
 const get_active_leagues = async () => {
-  const current_timestamp = Math.round(Date.now() / 1000)
+  // The period bounds are timestamptz as of the 2026-08-07 conformance pass, so
+  // the comparison value is an instant rather than epoch seconds.
+  const now_instant = new Date()
 
   const active_leagues = await db('seasons')
     .select('seasons.*', 'leagues.name as name')
@@ -60,8 +62,8 @@ const get_active_leagues = async () => {
     .where({ 'seasons.season_year': current_season.year })
     .whereNotNull('restricted_free_agency_period_start')
     .whereNotNull('restricted_free_agency_first_window_at')
-    .where('restricted_free_agency_period_start', '<=', current_timestamp)
-    .where('restricted_free_agency_period_end', '>=', current_timestamp)
+    .where('restricted_free_agency_period_start', '<=', now_instant)
+    .where('restricted_free_agency_period_end', '>=', now_instant)
 
   log(`Found ${active_leagues.length} active leagues in RFA period`)
 
@@ -107,7 +109,7 @@ const announce_restricted_free_agent = async ({
     timestamptz_to_epoch(league.restricted_free_agency_period_end)
   ) {
     throw new Error(
-      `The restricted free agency period ended on ${format_et(
+      `The restricted free agency period ended on ${format_timestamptz_et(
         league.restricted_free_agency_period_end
       )}`
     )
