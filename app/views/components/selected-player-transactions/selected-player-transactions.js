@@ -25,7 +25,7 @@ export default function SelectedPlayerTransactions({
   draft_transaction,
   extension_salaries,
   extensions,
-  value,
+  player_salary,
   loadingTransactions
 }) {
   const pid = player_map.get('pid')
@@ -116,7 +116,7 @@ export default function SelectedPlayerTransactions({
                 </TableRow>
                 <TableRow>
                   <TableCell variant='head'>Current Salary</TableCell>
-                  <TableCell colSpan={2}>${value}</TableCell>
+                  <TableCell colSpan={2}>${player_salary}</TableCell>
                 </TableRow>
                 {extension_salaries.map((item, index) => (
                   <TableRow key={index}>
@@ -203,6 +203,6 @@ SelectedPlayerTransactions.propTypes = {
   draft_transaction: PropTypes.object,
   extension_salaries: PropTypes.array,
   extensions: PropTypes.number,
-  value: PropTypes.number,
+  player_salary: PropTypes.number,
   loadingTransactions: PropTypes.bool
 }
