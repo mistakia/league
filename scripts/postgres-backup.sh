@@ -140,15 +140,24 @@ else
     # inside a .tar.gz so the dev consumer (restore-backup.mjs) keeps working
     # unchanged.
     #
-    # NOTE: this slice ships production secrets in the clear -- users.email,
-    # users.password (bcrypt), users.invite_code, invite_codes.code,
-    # leagues.discord_webhook_url, and placed_wagers book ids and amounts.
-    # Nothing scrubs it. import-database-backup.mjs carried a hardcoded
-    # column-name scrub until 2026-08-08, but its first statement named
-    # users.phone, a column dropped 2026-01-12 (adbce55ca), so every run raised
-    # 42703 and scrubbed nothing for seven months; the script was deleted rather
-    # than repaired. A real fix scrubs HERE, at dump time, deny-by-default, so
-    # secrets never leave this host.
+    # NOTE: this dump is COMPLETE and unscrubbed by design -- it carries
+    # users.email, users.password (bcrypt), users.invite_code, invite_codes.code,
+    # leagues.discord_webhook_url, and placed_wagers book ids and amounts. That
+    # is correct for a DR artifact: this is the irreplaceable slice, so a
+    # restore has to reproduce those values exactly. Do NOT scrub here -- a
+    # scrubbed backup cannot restore the users, invite codes, webhooks or wagers
+    # it redacted, which turns the backup into a non-backup. Protect it with
+    # access control and encryption at rest instead.
+    #
+    # The exposure is on the path to DEV, not on the path to the backup: this
+    # same artifact is what restore-backup.mjs pulls onto a dev machine, so
+    # production secrets land on a dev disk. The fix is a SEPARATE dev fixture
+    # derived from this dump on a trusted host and scrubbed there, with only
+    # that derived artifact reaching dev. import-database-backup.mjs restored
+    # and then scrubbed in place until 2026-08-08, but its first statement
+    # named users.phone -- a column dropped 2026-01-12 (adbce55ca) -- so every
+    # run raised 42703 and scrubbed nothing for seven months. It was deleted
+    # rather than repaired; the derived-fixture split replaces it.
     sql_file="$file_name-$backup_type.sql"
     output_file="$file_name-$backup_type.tar.gz"
     dump_tables "$db_user_tables"
