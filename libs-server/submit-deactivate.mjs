@@ -27,7 +27,7 @@ export default async function ({
     throw new Error('invalid leagueId')
   }
 
-  const timestamp = Math.round(Date.now() / 1000)
+  const occurred_at = new Date()
 
   let roster = existing_roster
   if (!roster) {
@@ -161,7 +161,7 @@ export default async function ({
     player_salary: lastTransaction.player_salary,
     week: current_season.week,
     season_year: current_season.year,
-    occurred_at: new Date(timestamp * 1000)
+    occurred_at
   }
   await db('transactions').insert(transaction)
 

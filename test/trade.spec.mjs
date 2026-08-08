@@ -19,7 +19,6 @@ import {
   checkLastTransaction,
   error
 } from './utils/index.mjs'
-import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 
@@ -326,7 +325,11 @@ describe('API /trades', function () {
         player_salary: 0,
         week: current_season.week,
         season_year: current_season.year,
-        occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000))
+        // This activation must read as EARLIER than the trade and deactivate
+        // the test performs next. Rounding to an epoch second can round UP,
+        // putting the fixture up to half a second in the future and making it
+        // the last transaction.
+        occurred_at: new Date()
       })
 
       const player2 = await selectPlayer({

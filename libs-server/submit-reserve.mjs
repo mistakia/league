@@ -357,7 +357,12 @@ export default async function ({
     pid: reserve_pid
   })
 
-  const timestamp = Math.round(Date.now() / 1000)
+  // transactions.occurred_at is timestamptz and takes the instant directly.
+  // Rounding it through epoch seconds moves it up to half a second in either
+  // direction, which reorders it against a neighbouring transaction stamped
+  // from an unrounded clock. poaches.processed below is still epoch seconds.
+  const occurred_at = new Date()
+  const timestamp = Math.round(occurred_at.getTime() / 1000)
 
   // read before either insert -- the activation row would otherwise become the
   // last transaction and feed its own salary back into the reserve row
@@ -380,9 +385,7 @@ export default async function ({
       player_salary,
       week: current_season.week,
       season_year: current_season.year,
-      // poaches.processed below still takes epoch seconds, so the local stays
-      // an integer and transactions.occurred_at converts here.
-      occurred_at: new Date(timestamp * 1000)
+      occurred_at
     }
     await db('transactions').insert(activate_transaction)
 
@@ -410,7 +413,7 @@ export default async function ({
     player_salary,
     week: current_season.week,
     season_year: current_season.year,
-    occurred_at: new Date(timestamp * 1000)
+    occurred_at
   }
   await db('transactions').insert(transaction)
 

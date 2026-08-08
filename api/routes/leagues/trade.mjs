@@ -1531,7 +1531,13 @@ router.post(
           .send({ error: 'trade is no longer open and can not be vetoed' })
       }
 
-      const vetoed_at = Math.round(Date.now() / 1000)
+      // ONE instant for every reversal row, at the resolution the column has.
+      // transactions.occurred_at is timestamptz, so rounding through epoch
+      // seconds would move these rows up to half a second in either direction
+      // and reorder them against the TRADE rows they reverse. trades.vetoed is
+      // still epoch seconds and takes the rounded integer.
+      const vetoed_occurred_at = new Date()
+      const vetoed_at = Math.round(vetoed_occurred_at.getTime() / 1000)
 
       // A trade that was never accepted moved nothing, so vetoing it is just a
       // status change. Only an accepted trade needs reversing.
@@ -1681,9 +1687,7 @@ router.post(
           player_salary: value_by_pid.get(row.pid) ?? 0,
           week: current_season.week,
           season_year: current_season.year,
-          // trades.vetoed above is still epoch seconds; transactions.occurred_at
-          // is timestamptz, so the local stays an integer and converts here.
-          occurred_at: new Date(vetoed_at * 1000)
+          occurred_at: vetoed_occurred_at
         }))
 
         for (const row of release_rows) {
@@ -1696,7 +1700,7 @@ router.post(
             player_salary: value_by_pid.get(row.pid) ?? 0,
             week: current_season.week,
             season_year: current_season.year,
-            occurred_at: new Date(vetoed_at * 1000)
+            occurred_at: vetoed_occurred_at
           })
         }
 
