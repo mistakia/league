@@ -88,29 +88,34 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: User ID who proposed the trade
  *           example: 5
- *         proposed:
- *           type: integer
- *           description: Unix timestamp when trade was proposed
- *           example: 1698765432
+ *         offered:
+ *           type: string
+ *           format: date-time
+ *           description: ISO-8601 timestamp when trade was offered
+ *           example: '2026-08-08T12:30:32.000Z'
  *         accepted:
- *           type: integer
+ *           type: string
+ *           format: date-time
  *           nullable: true
- *           description: Unix timestamp when trade was accepted
+ *           description: ISO-8601 timestamp when trade was accepted
  *           example: null
  *         rejected:
- *           type: integer
+ *           type: string
+ *           format: date-time
  *           nullable: true
- *           description: Unix timestamp when trade was rejected
+ *           description: ISO-8601 timestamp when trade was rejected
  *           example: null
  *         cancelled:
- *           type: integer
+ *           type: string
+ *           format: date-time
  *           nullable: true
- *           description: Unix timestamp when trade was cancelled
+ *           description: ISO-8601 timestamp when trade was cancelled
  *           example: null
  *         vetoed:
- *           type: integer
+ *           type: string
+ *           format: date-time
  *           nullable: true
- *           description: Unix timestamp when trade was vetoed
+ *           description: ISO-8601 timestamp when trade was vetoed
  *           example: null
  *         proposingTeamPlayers:
  *           type: array
@@ -299,7 +304,7 @@ export const get_trade = async (req, res) => {
  *                   propose_tid: 13
  *                   accept_tid: 14
  *                   userid: 5
- *                   proposed: 1698765432
+ *                   offered: '2026-08-08T12:30:32.000Z'
  *                   accepted: null
  *                   rejected: null
  *                   cancelled: null
@@ -428,7 +433,7 @@ router.get('/?', get_trade)
  *                   propose_tid: 13
  *                   accept_tid: 14
  *                   userid: 5
- *                   proposed: 1698765432
+ *                   offered: '2026-08-08T12:30:32.000Z'
  *                   accepted: 1698765500
  *                   rejected: null
  *                   cancelled: null
@@ -837,7 +842,7 @@ router.post(
         // clear any existing poaching claims
         if (activePoaches.length) {
           await trx('poaches')
-            .update('processed', Math.round(Date.now() / 1000))
+            .update('processed', new Date())
             .update('reason', 'Player traded')
             .update('is_successful', 0)
             .where('lid', leagueId)
@@ -863,7 +868,7 @@ router.post(
 
         await trx('trades')
           .where({ uid: tradeId })
-          .update({ accepted: Math.round(Date.now() / 1000) })
+          .update({ accepted: new Date() })
 
         // Update slot assignments if accepting team made any overrides
         if (Object.keys(accepting_team_slot_overrides).length > 0) {
@@ -1049,7 +1054,7 @@ router.post(
           const tradeids = pickTradeRows.map((t) => t.uid)
           await trx('trades')
             .whereIn('uid', tradeids)
-            .update({ cancelled: Math.round(Date.now() / 1000) })
+            .update({ cancelled: new Date() })
         }
 
         // cancel other trades that include any players in this trade
@@ -1070,7 +1075,7 @@ router.post(
 
         // cancel any restricted free agency bids
         await trx('restricted_free_agency_bids')
-          .update('cancelled', Math.round(Date.now() / 1000))
+          .update('cancelled', new Date())
           .whereIn('pid', all_pids)
           .whereNull('cancelled')
           .whereNull('processed')
@@ -1083,7 +1088,7 @@ router.post(
           const tradeids = playerTradeRows.map((t) => t.uid)
           await trx('trades')
             .whereIn('uid', tradeids)
-            .update({ cancelled: Math.round(Date.now() / 1000) })
+            .update({ cancelled: new Date() })
         }
       }) // Close transaction
 
@@ -1283,7 +1288,7 @@ router.post(
 
       await db('trades')
         .where({ uid: tradeId })
-        .update({ rejected: Math.round(Date.now() / 1000) })
+        .update({ rejected: new Date() })
 
       next()
     } catch (error) {
@@ -1407,7 +1412,7 @@ router.post(
 
       await db('trades')
         .where({ uid: tradeId })
-        .update({ cancelled: Math.round(Date.now() / 1000) })
+        .update({ cancelled: new Date() })
 
       next()
     } catch (error) {
@@ -1531,20 +1536,19 @@ router.post(
           .send({ error: 'trade is no longer open and can not be vetoed' })
       }
 
-      // ONE instant for every reversal row, at the resolution the column has.
-      // transactions.occurred_at is timestamptz, so rounding through epoch
-      // seconds would move these rows up to half a second in either direction
-      // and reorder them against the TRADE rows they reverse. trades.vetoed is
-      // still epoch seconds and takes the rounded integer.
+      // ONE instant for every row this veto writes. trades.vetoed and
+      // transactions.occurred_at are both timestamptz, so the same Date binds to
+      // both and the reversal rows cannot reorder against the TRADE rows they
+      // reverse. Rounding through epoch seconds is what would move them up to
+      // half a second in either direction.
       const vetoed_occurred_at = new Date()
-      const vetoed_at = Math.round(vetoed_occurred_at.getTime() / 1000)
 
       // A trade that was never accepted moved nothing, so vetoing it is just a
       // status change. Only an accepted trade needs reversing.
       if (!trade.accepted) {
         await db('trades')
           .where({ uid: tradeId, lid: leagueId })
-          .update({ vetoed: vetoed_at })
+          .update({ vetoed: vetoed_occurred_at })
 
         await sendNotifications({
           league,
@@ -1673,7 +1677,7 @@ router.post(
       await db.transaction(async (trx) => {
         await trx('trades')
           .where({ uid: tradeId, lid: leagueId })
-          .update({ vetoed: vetoed_at })
+          .update({ vetoed: vetoed_occurred_at })
 
         // Append compensating transactions rather than deleting the originals:
         // the ledger is the history, and it should read "moved, then moved

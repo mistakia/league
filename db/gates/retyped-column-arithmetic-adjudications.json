@@ -10,5 +10,11 @@
     "column": "poach_timestamp",
     "kind": "retyped_read_in_epoch_arithmetic",
     "reason": "Not a column read, and the arithmetic is correct. `result.poach_timestamp` comes from `test/utils/setup-super-priority.mjs`, which computes it as epoch seconds (`currentTimestamp - weeks_ago * 7 * 24 * 60 * 60`, line 22) and returns that number (line 152); the fixture converts at every write with `epoch_to_timestamptz`. So `poach_timestamp +/- N` is arithmetic on epoch seconds in their declared unit, wrapped in the converter before it reaches the retyped column. Same by-contract shape as create-league.mjs and the same known limit: a property read cannot tell a database row from an object whose keys are named after columns. This is the whole of what the 2026-08-07 sweep's unscanned `test/` root held for this class -- re-derived mechanically 2026-08-08 rather than trusted, `private/` alongside it with zero findings."
+  },
+  {
+    "path": "private/scripts/import-combination-odds.mjs",
+    "column": "processed",
+    "kind": "retyped_read_in_epoch_arithmetic",
+    "reason": "Not a column read. `stats.processed` is a local counter: declared `processed: 0` in the `stats` object literal at line 437, incremented at line 462, and compared `> 0` at line 502 as the run's own success oracle. This file issues no query against any table carrying a retyped column -- a grep for db('poaches'|'waivers'|'trades'|'rosters'|'restricted_free_agency_bids'|'nfl_plays'|'nfl_plays_current_week') returns nothing -- so `processed` here can never hold a value read from `poaches.processed` or `waivers.processed`. Third instance of the gate's one known limit and the first outside a by-contract input bag: a property read cannot tell a database row from any object whose key happens to match a retyped column name, and `processed` is an ordinary English word for a counter. Verified 2026-08-08 while sweeping the timestamptz lifecycle cluster."
   }
 ]

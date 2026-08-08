@@ -852,14 +852,14 @@ const build_event_stream = async ({ lid }) => {
   for (const r of rfa) {
     if (r.tid === r.original_team_id) continue
     events.push({
-      sort_ts: r.processed,
+      sort_ts: timestamptz_to_epoch(r.processed),
       sort_priority: 2,
       kind: 'rfa_cross_team_win',
       player_id: r.pid,
       from_tid: r.original_team_id,
       to_tid: r.tid,
       bid: r.bid_amount,
-      occurred_at: new Date(r.processed * 1000),
+      occurred_at: r.processed,
       year: r.season_year,
       transaction_id: cross_team_rfa_transaction_id_by_key.get(
         `${r.tid}__${r.pid}__${r.season_year}`
@@ -965,11 +965,11 @@ const build_event_stream = async ({ lid }) => {
             ? 'pick_chain_gap_before_first_trade'
             : 'pick_chain_gap_mid_chain'
         events.push({
-          sort_ts: trade.accepted,
+          sort_ts: timestamptz_to_epoch(trade.accepted),
           sort_priority: 5,
           kind: 'coverage_warning',
           label: gap_label,
-          occurred_at: new Date(trade.accepted * 1000)
+          occurred_at: trade.accepted
         })
       }
       const to_tid =
@@ -990,11 +990,11 @@ const build_event_stream = async ({ lid }) => {
     if (current !== meta.tid) {
       const last_trade = trade_by_id.get(tradeids[tradeids.length - 1])
       events.push({
-        sort_ts: last_trade.accepted,
+        sort_ts: timestamptz_to_epoch(last_trade.accepted),
         sort_priority: 5,
         kind: 'coverage_warning',
         label: 'pick_chain_end_state_mismatch',
-        occurred_at: new Date(last_trade.accepted * 1000)
+        occurred_at: last_trade.accepted
       })
     }
   }
@@ -1017,11 +1017,11 @@ const build_event_stream = async ({ lid }) => {
         // skip the leg and surface as a coverage warning rather than emit a
         // holding with NULL pick_year/round/otid.
         events.push({
-          sort_ts: trade.accepted,
+          sort_ts: timestamptz_to_epoch(trade.accepted),
           sort_priority: 5,
           kind: 'coverage_warning',
           label: 'trade_pick_meta_missing',
-          occurred_at: new Date(trade.accepted * 1000)
+          occurred_at: trade.accepted
         })
         continue
       }
@@ -1038,10 +1038,10 @@ const build_event_stream = async ({ lid }) => {
       })
     }
     events.push({
-      sort_ts: trade.accepted,
+      sort_ts: timestamptz_to_epoch(trade.accepted),
       sort_priority: 3,
       kind: 'trade',
-      occurred_at: new Date(trade.accepted * 1000),
+      occurred_at: trade.accepted,
       year: trade.season_year,
       trade_uid: trade.uid,
       propose_tid: trade.propose_tid,
@@ -1085,8 +1085,14 @@ const build_event_stream = async ({ lid }) => {
   for (const pick of all_picks) {
     let endow_date = endowment_by_year.get(pick.season_year)
     const earliest_trade = earliest_trade_by_pickid.get(pick.uid)
-    if (earliest_trade && earliest_trade * 1000 < endow_date.getTime()) {
-      endow_date = new Date(earliest_trade * 1000 - 60_000)
+    // `earliest_trade` is `trades.accepted`, which is timestamptz -- so it is a
+    // Date and `earliest_trade * 1000` is NaN-adjacent nonsense (milliseconds
+    // times a thousand). The comparison then never fires, the pre-trade
+    // ownership window is never synthesized, and every pick traded before its
+    // default endowment loses its first leg. Silent: no throw, just a wrong
+    // lineage graph.
+    if (earliest_trade && earliest_trade.getTime() < endow_date.getTime()) {
+      endow_date = new Date(earliest_trade.getTime() - 60_000)
     }
     // `draft.original_team_id` is the standings-allocated owner. trade.mjs's accept
     // handler only mutates `draft.tid` (the eventual draft-time owner), so

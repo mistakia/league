@@ -25,6 +25,7 @@ ALTER TABLE public.waivers ALTER COLUMN cancelled TYPE integer USING extract(epo
 ALTER TABLE public.waivers ALTER COLUMN processed TYPE integer USING extract(epoch FROM processed)::integer;
 ALTER TABLE public.waivers ALTER COLUMN submitted TYPE integer USING extract(epoch FROM submitted)::integer;
 
+ALTER TABLE public.trades ALTER COLUMN vetoed TYPE integer USING extract(epoch FROM vetoed)::integer;
 ALTER TABLE public.trades ALTER COLUMN rejected TYPE integer USING extract(epoch FROM rejected)::integer;
 ALTER TABLE public.trades ALTER COLUMN cancelled TYPE integer USING extract(epoch FROM cancelled)::integer;
 ALTER TABLE public.trades ALTER COLUMN accepted TYPE integer USING extract(epoch FROM accepted)::integer;

@@ -143,7 +143,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
                 </div>
                 <div className='timeline-content'>
                   <div className='timeline-date'>
-                    {new Date(item.date * 1000).toLocaleDateString()}
+                    {new Date(item.date).toLocaleDateString()}
                   </div>
                   <div className='timeline-team'>
                     <TeamName tid={item.tid} />

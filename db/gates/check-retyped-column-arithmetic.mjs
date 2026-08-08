@@ -148,10 +148,27 @@ const TEMPORAL_TYPE_RE = /^(timestamp|timestamptz|date|time)\b/
 // schema
 // ---------------------------------------------------------------------------
 
+// The block terminator is `\n)` and NOT `\n);`, because a PARTITIONED table
+// ends `)\nPARTITION BY RANGE (...);`. Anchoring on the semicolon makes the
+// non-greedy body run PAST such a table into the next one, so the partitioned
+// table absorbs its neighbour's columns and the neighbour is never registered
+// at all. On this schema that hid SIX tables -- `nfl_plays_current_week`,
+// `historical_injury_index_2009`, `nfl_snaps_year_2000`, `player_gamelogs_default`,
+// `projections_history_default`, `projections_index_default` -- each of them the
+// table declared immediately after a partitioned parent.
+//
+// That is not a cosmetic gap for this gate: `nfl_plays_current_week.updated` is
+// a RETYPE SUBJECT of the 2026-08-08 timestamptz cluster, so the gate silently
+// dropped one of the fifteen columns it was pointed at and could not have
+// reported a consumer of it. `check-rename-alias-residue` had the identical
+// defect and CLAUDE.md records it as "a partition-terminator miss that hid six
+// tables"; it recurred here because the terminator was re-typed from memory
+// rather than derived. `assert_table_coverage` below is what keeps it from
+// recurring a third time silently.
 const parse_schema_types = (sql) => {
   const tables = new Map()
   const table_re =
-    /CREATE TABLE (?:IF NOT EXISTS )?(?:public\.)?"?([a-z0-9_]+)"?\s*\(([\s\S]*?)\n\);/gi
+    /CREATE TABLE (?:IF NOT EXISTS )?(?:public\.)?"?([a-z0-9_]+)"?\s*\(([\s\S]*?)\n\)/gi
   let match
   while ((match = table_re.exec(sql))) {
     const columns = new Map()
@@ -179,6 +196,32 @@ const parse_schema_types = (sql) => {
     tables.set(match[1], columns)
   }
   return tables
+}
+
+// Every `CREATE TABLE` statement must survive into the parsed map. Anchored on
+// the statement HEADER, which is a different derivation from the one it checks
+// -- a coverage assertion sharing its subject's parse would agree with it by
+// construction and could only ever report zero.
+const assert_table_coverage = (sql, tables, revision_label) => {
+  const declared = [
+    ...sql.matchAll(
+      /^CREATE TABLE (?:IF NOT EXISTS )?(?:public\.)?"?([a-z0-9_]+)"?\s*\($/gim
+    )
+  ].map((match) => match[1])
+  const missing = declared.filter((table) => !tables.has(table))
+  if (!missing.length) return
+
+  console.error(
+    `TOOLING ERROR: ${missing.length} of ${declared.length} tables in ${revision_label} ` +
+      'did not survive schema parsing, so this gate could not have reported a retype on ' +
+      'any of them:'
+  )
+  for (const table of missing) console.error(`  ${table}`)
+  console.error(
+    'The usual cause is a table-block terminator the parser does not recognise; a ' +
+      'PARTITIONED table ends `)\\nPARTITION BY ...` rather than `);`.'
+  )
+  process.exit(2)
 }
 
 // A column is RETYPED when it exists under the same name on the same table in
@@ -557,7 +600,23 @@ const load_adjudications = () => {
 // the column plus the family is specific enough that a genuinely new site in the
 // same file is still reported -- it is a different family or a different column,
 // or it is the same claim about the same value.
-const apply_adjudications = (findings, adjudications) => {
+// STALENESS IS ONLY MEANINGFUL FOR AN ENTRY THIS RUN COULD HAVE EXERCISED, and
+// that qualifier is load-bearing rather than pedantic. An entry's column enters
+// the subject set only when THIS run's `--base` spans the window that retyped
+// it, so a narrower base ref leaves earlier entries matching nothing — and
+// reporting those as stale says "the site is gone, delete the entry" about
+// suppressions that are live and correct for another window. Acting on it
+// deletes load-bearing entries and reopens their findings on the next wide run.
+// `check-rename-alias-residue` had exactly this defect (its 15 entries all read
+// stale under a narrow base ref while every site was live) and CLAUDE.md
+// records the fix as a NOT EXERCISED bucket; this is that fix, here.
+const apply_adjudications = (findings, adjudications, retyped) => {
+  const in_subject_set = new Set(
+    retyped.map((entry) => `${entry.table}.${entry.column}`)
+  )
+  const exercisable = (entry) =>
+    retyped.some((subject) => subject.column === entry.column)
+
   const used = new Set()
   const kept = []
   for (const finding of findings) {
@@ -573,8 +632,11 @@ const apply_adjudications = (findings, adjudications) => {
     }
     kept.push(finding)
   }
-  const stale = adjudications.filter((entry, index) => !used.has(index))
-  return { kept, stale }
+
+  const unused = adjudications.filter((entry, index) => !used.has(index))
+  const stale = unused.filter(exercisable)
+  const not_exercised = unused.filter((entry) => !exercisable(entry))
+  return { kept, stale, not_exercised, in_subject_set }
 }
 
 // ---------------------------------------------------------------------------
@@ -772,6 +834,17 @@ const main = async () => {
   const head_schema = fs.readFileSync(schema_file, 'utf8')
   const base_tables = parse_schema_types(base_schema)
   const head_tables = parse_schema_types(head_schema)
+
+  // A table the parser drops is a table this gate cannot report a retype on,
+  // and the drop is otherwise SILENT -- the subject list is simply shorter and
+  // there is nothing in the output to compare it against. Assert the denominator
+  // rather than trusting the parse: every `CREATE TABLE` statement in each
+  // revision must appear in that revision's parsed map. This is exit 2 (tooling
+  // error) rather than a finding, because an unparsed table means the run did
+  // not ask the question, which is not the same as answering it no.
+  assert_table_coverage(base_schema, base_tables, options.base)
+  assert_table_coverage(head_schema, head_tables, 'the working tree')
+
   const retyped = derive_retyped_columns(base_tables, head_tables)
 
   console.log(`SUBJECT (derived from the schema diff against ${options.base})`)
@@ -838,10 +911,11 @@ const main = async () => {
   }
 
   const adjudications = load_adjudications()
-  const { kept: findings, stale } = apply_adjudications(
-    raw_findings,
-    adjudications
-  )
+  const {
+    kept: findings,
+    stale,
+    not_exercised
+  } = apply_adjudications(raw_findings, adjudications, retyped)
 
   console.log('')
   console.log('COVERAGE (measured, not assumed)')
@@ -893,6 +967,17 @@ const main = async () => {
     for (const entry of stale) {
       console.log(`  ${entry.path}  ${entry.column}  ${entry.kind}`)
     }
+  }
+
+  // Printed even when empty, so "nothing was declined" is a statement the run
+  // makes rather than one a reader infers from an absence.
+  console.log('')
+  console.log(
+    `NOT EXERCISED (${not_exercised.length}) — column outside this run's retyped set, ` +
+      'so this base ref cannot say whether the entry is still needed'
+  )
+  for (const entry of not_exercised) {
+    console.log(`  ${entry.path}  ${entry.column}  ${entry.kind}`)
   }
 
   const control_ok = run_negative_controls({ retyped_names, corpus_read_site })

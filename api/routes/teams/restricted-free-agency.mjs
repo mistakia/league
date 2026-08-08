@@ -509,7 +509,7 @@ router.post('/?', async (req, res) => {
             await trx('restricted_free_agency_bids')
               .whereIn('uid', removed_bid_ids)
               .update({
-                cancelled: Math.round(Date.now() / 1000)
+                cancelled: new Date()
               })
 
             for (const removed_bid_id of removed_bid_ids) {
@@ -581,7 +581,7 @@ router.post('/?', async (req, res) => {
       userid: req.auth.userId,
       lid: leagueId,
       pid,
-      submitted: Math.round(Date.now() / 1000),
+      submitted: new Date(),
       season_year: current_season.year,
       bid_amount: bid,
       nomination_id
@@ -794,7 +794,7 @@ router.delete('/?', async (req, res) => {
     }
 
     // cancel bid
-    const cancelled = Math.round(Date.now() / 1000)
+    const cancelled = new Date()
     await db.transaction(async (trx) => {
       await trx('restricted_free_agency_bids')
         .update('cancelled', cancelled)

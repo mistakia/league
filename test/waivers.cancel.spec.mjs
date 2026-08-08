@@ -107,7 +107,7 @@ describe('API /waivers - cancel', function () {
     cancel_result.uid.should.equal(waiverId)
     cancel_result.tid.should.equal(teamId)
     cancel_result.lid.should.equal(leagueId)
-    cancel_result.cancelled.should.equal(Math.round(Date.now() / 1000))
+    new Date(cancel_result.cancelled).getTime().should.equal(Date.now())
   })
 
   it('resubmit & cancel poach waiver', async () => {
@@ -133,7 +133,7 @@ describe('API /waivers - cancel', function () {
     cancel_result.uid.should.equal(waiver.uid)
     cancel_result.tid.should.equal(teamId)
     cancel_result.lid.should.equal(leagueId)
-    cancel_result.cancelled.should.equal(Math.round(Date.now() / 1000))
+    new Date(cancel_result.cancelled).getTime().should.equal(Date.now())
   })
 
   it('cancel free agency waiver', async () => {})

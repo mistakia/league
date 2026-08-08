@@ -98,7 +98,7 @@ const router = express.Router()
  *                         description: 'User ID making the poach'
  *                       submitted:
  *                         type: integer
- *                         description: 'Unix timestamp when poach was submitted'
+ *                         description: 'ISO-8601 timestamp when poach was submitted'
  *                       release:
  *                         type: array
  *                         items:

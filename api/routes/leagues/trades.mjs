@@ -85,7 +85,7 @@ const router = express.Router({ mergeParams: true })
  *           propose_tid: 13
  *           accept_tid: 14
  *           userid: 5
- *           proposed: 1698765432
+ *           offered: '2026-08-08T12:30:32.000Z'
  *           accepted: null
  *           rejected: null
  *           cancelled: null
@@ -163,7 +163,7 @@ const router = express.Router({ mergeParams: true })
  *                     propose_tid: 13
  *                     accept_tid: 14
  *                     userid: 5
- *                     proposed: 1698765432
+ *                     offered: '2026-08-08T12:30:32.000Z'
  *                     accepted: null
  *                     rejected: null
  *                     cancelled: null
@@ -223,7 +223,7 @@ router.get('/?', async (req, res) => {
       if (!Number.isFinite(window_hours) || window_hours <= 0) {
         return res.send([])
       }
-      const opened_after = Math.round(Date.now() / 1000) - window_hours * 3600
+      const opened_after = new Date(Date.now() - window_hours * 3600 * 1000)
       query
         .whereNotNull('accepted')
         .whereNull('vetoed')
@@ -399,7 +399,7 @@ router.get('/?', async (req, res) => {
  *                   propose_tid: 13
  *                   accept_tid: 14
  *                   userid: 5
- *                   proposed: 1698765432
+ *                   offered: '2026-08-08T12:30:32.000Z'
  *                   accepted: null
  *                   rejected: null
  *                   cancelled: null
@@ -813,7 +813,7 @@ router.post(
             userid: req.auth.userId,
             season_year: current_season.year,
             lid: leagueId,
-            offered: Math.round(Date.now() / 1000)
+            offered: new Date()
           })
           .returning('uid')
         const trade_uid = result[0].uid

@@ -325,7 +325,7 @@ router.post('/:poachId/process', async (req, res) => {
       )
     }
 
-    const timestamp = Math.round(Date.now() / 1000)
+    const timestamp = new Date()
     await db('poaches')
       .update('processed', timestamp)
       .update('reason', error ? error.message : null) // TODO - add error codes

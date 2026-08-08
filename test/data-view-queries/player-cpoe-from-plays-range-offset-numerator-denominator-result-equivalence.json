@@ -17,9 +17,9 @@
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-CPOE-000899', 'Test', 'Cpoe', 'T.Cpoe', 'Test Cpoe', 'MLB', 'MLB', '2000-01-01', 2020)",
-      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, passer_pid, completion_percentage_over_expected) VALUES (990001, 1, 2024, 1, 0, 'REG', 'PASS', 'TEST-CPOE-000899', 2.0)",
-      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, passer_pid, completion_percentage_over_expected) VALUES (990001, 2, 2024, 1, 0, 'REG', 'PASS', 'TEST-CPOE-000899', 4.0)",
-      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, passer_pid, completion_percentage_over_expected) VALUES (990002, 1, 2025, 1, 0, 'REG', 'PASS', 'TEST-CPOE-000899', 6.0)"
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, passer_pid, completion_percentage_over_expected) VALUES (990001, 1, 2024, 1,to_timestamp(0), 'REG', 'PASS', 'TEST-CPOE-000899', 2.0)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, passer_pid, completion_percentage_over_expected) VALUES (990001, 2, 2024, 1,to_timestamp(0), 'REG', 'PASS', 'TEST-CPOE-000899', 4.0)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, passer_pid, completion_percentage_over_expected) VALUES (990002, 1, 2025, 1,to_timestamp(0), 'REG', 'PASS', 'TEST-CPOE-000899', 6.0)"
     ],
     "reference_sql": "SELECT SUM(completion_percentage_over_expected) / NULLIF(SUM(CASE WHEN completion_percentage_over_expected IS NOT NULL THEN 1 ELSE 0 END), 0) AS pass_comp_pct_over_expected_from_plays_0 FROM nfl_plays WHERE passer_pid = 'TEST-CPOE-000899' AND season_year IN (2024, 2025) AND season_type = 'REG' AND play_type <> 'NOPL'",
     "compare_columns": ["pass_comp_pct_over_expected_from_plays_0"]

@@ -26,7 +26,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 const run = async ({ daily = false } = {}) => {
-  const timestamp = Math.round(Date.now() / 1000)
+  const timestamp = new Date()
 
   // Check if it's the first 24 hours of the regular season
   const is_first_24_hours_of_regular_season = current_season.now.isBetween(

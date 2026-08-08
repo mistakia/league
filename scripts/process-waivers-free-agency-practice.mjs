@@ -27,7 +27,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 const process_practice_waivers = async ({ daily = false, wid = null } = {}) => {
-  const timestamp = Math.round(Date.now() / 1000)
+  const timestamp = new Date()
 
   // Handle specific waiver processing
   if (wid) {

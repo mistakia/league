@@ -52,7 +52,7 @@ describe('SOCKET /scoreboard postseason poll query', function () {
       it('returns current POST-week plays', async function () {
         const plays = await build_scoreboard_current_plays_query({
           db: knex,
-          updated: 0
+          updated: new Date(0)
         })
         expect(plays.length).to.be.greaterThan(0)
         for (const play of plays) {
@@ -70,7 +70,7 @@ describe('SOCKET /scoreboard postseason poll query', function () {
         })
         const plays = await build_scoreboard_current_plays_query({
           db: knex,
-          updated: 0
+          updated: new Date(0)
         })
         for (const play of plays) {
           expect(play.week).to.equal(current_season.nfl_seas_week)

@@ -68,7 +68,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: saturday_6pm.subtract('3', 'days').unix()
+        submitted: saturday_6pm.subtract('3', 'days').toDate()
       })
 
       MockDate.set(saturday_6pm.toISOString())
@@ -110,7 +110,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: sunday_2pm.subtract('3', 'days').unix()
+        submitted: sunday_2pm.subtract('3', 'days').toDate()
       })
 
       MockDate.set(sunday_2pm.toISOString())
@@ -151,7 +151,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: monday_9am.subtract('3', 'days').unix()
+        submitted: monday_9am.subtract('3', 'days').toDate()
       })
 
       MockDate.set(monday_9am.toISOString())
@@ -194,7 +194,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: tuesday_2pm.subtract('3', 'days').unix()
+        submitted: tuesday_2pm.subtract('3', 'days').toDate()
       })
 
       MockDate.set(tuesday_2pm.toISOString())
@@ -236,7 +236,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: tuesday_3pm.subtract('3', 'days').unix()
+        submitted: tuesday_3pm.subtract('3', 'days').toDate()
       })
 
       MockDate.set(tuesday_3pm.toISOString())
@@ -283,7 +283,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: wednesday_noon.subtract('3', 'days').unix()
+        submitted: wednesday_noon.subtract('3', 'days').toDate()
       })
 
       MockDate.set(wednesday_noon.toISOString())
@@ -327,7 +327,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: thursday_noon.subtract('3', 'days').unix()
+        submitted: thursday_noon.subtract('3', 'days').toDate()
       })
 
       MockDate.set(thursday_noon.toISOString())
@@ -368,7 +368,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: friday_noon.subtract('3', 'days').unix()
+        submitted: friday_noon.subtract('3', 'days').toDate()
       })
 
       MockDate.set(friday_noon.toISOString())
@@ -409,7 +409,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: saturday_5pm.subtract('3', 'days').unix()
+        submitted: saturday_5pm.subtract('3', 'days').toDate()
       })
 
       MockDate.set(saturday_5pm.toISOString())

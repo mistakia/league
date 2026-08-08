@@ -80,13 +80,14 @@ async function sort_bids_by_waiver_order(bids) {
  * @param {Object} params.winning_bid - The bid that signed the player
  * @param {number} params.lid - League id
  * @param {number} params.original_team_id - Team holding the player's rights
- * @param {number} params.timestamp - Processing timestamp
+ * @param {Date} params.processed_at - Processing instant, bound to the
+ *   timestamptz `processed` column
  */
 async function settle_losing_bids({
   winning_bid,
   lid,
   original_team_id,
-  timestamp
+  processed_at
 }) {
   const losing_bids = await db('restricted_free_agency_bids')
     .where({
@@ -107,7 +108,7 @@ async function settle_losing_bids({
 
     await db.transaction(async (trx) => {
       await trx('restricted_free_agency_bids')
-        .update({ is_successful: 0, outcome, processed: timestamp })
+        .update({ is_successful: 0, outcome, processed: processed_at })
         .where('uid', losing_bid.uid)
 
       await record_restricted_free_agency_bid_change({
@@ -431,14 +432,14 @@ const run = async ({ dry_run = false } = {}) => {
           if (!dry_run) {
             await processRestrictedFreeAgencyBid({
               ...winning_bid,
-              processed: timestamp
+              processed: processing_instant
             })
 
             await settle_losing_bids({
               winning_bid,
               lid,
               original_team_id,
-              timestamp
+              processed_at: processing_instant
             })
           }
         } else {
@@ -457,7 +458,7 @@ const run = async ({ dry_run = false } = {}) => {
           if (!dry_run) {
             await processRestrictedFreeAgencyBid({
               ...winning_bid,
-              processed: timestamp
+              processed: processing_instant
             })
             // Reset waiver order for the winning team
             await resetWaiverOrder({ leagueId: lid, teamId: winning_bid.tid })
@@ -468,7 +469,7 @@ const run = async ({ dry_run = false } = {}) => {
               winning_bid,
               lid,
               original_team_id,
-              timestamp
+              processed_at: processing_instant
             })
           }
         }
@@ -503,7 +504,7 @@ const run = async ({ dry_run = false } = {}) => {
               is_successful: false,
               outcome: resolve_restricted_free_agency_bid_error_outcome(error),
               outcome_detail: error.message,
-              processed: timestamp
+              processed: processing_instant
             })
             .where('uid', winning_bid.uid)
             .whereNull('processed')

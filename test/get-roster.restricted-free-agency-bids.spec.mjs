@@ -116,7 +116,7 @@ describe('LIBS-SERVER getRoster - restricted free agency bids', function () {
       pid: player.pid,
       bid: 0,
       is_successful: false,
-      processed: Math.round(Date.now() / 1000)
+      processed: new Date()
     })
 
     const roster_player = await get_roster_player(player.pid)
@@ -131,7 +131,7 @@ describe('LIBS-SERVER getRoster - restricted free agency bids', function () {
       pid: player.pid,
       bid: 14,
       is_successful: true,
-      processed: Math.round(Date.now() / 1000)
+      processed: new Date()
     })
 
     const roster_player = await get_roster_player(player.pid)
@@ -143,7 +143,7 @@ describe('LIBS-SERVER getRoster - restricted free agency bids', function () {
     await insert_bid({
       pid: player.pid,
       bid: 19,
-      cancelled: Math.round(Date.now() / 1000)
+      cancelled: new Date()
     })
 
     const roster_player = await get_roster_player(player.pid)

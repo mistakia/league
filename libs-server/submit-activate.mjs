@@ -16,12 +16,12 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     throw new Error('invalid leagueId')
   }
 
-  // transactions.occurred_at is timestamptz and takes the instant directly.
-  // Rounding it through epoch seconds moves it up to half a second in either
-  // direction, which reorders it against a neighbouring transaction stamped
-  // from an unrounded clock. poaches.processed below is still epoch seconds.
+  // transactions.occurred_at and poaches.processed are both timestamptz and
+  // take the instant directly.
+  // Rounding either through epoch seconds would move it up to half a second in
+  // either direction, reordering it against a neighbouring transaction stamped
+  // from an unrounded clock.
   const occurred_at = new Date()
-  const timestamp = Math.round(occurred_at.getTime() / 1000)
 
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
@@ -84,7 +84,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
   await db('poaches')
     .update({
       is_successful: 0,
-      processed: timestamp,
+      processed: occurred_at,
       reason: 'player is not on a practice squad' // TODO use constant
     })
     .where({

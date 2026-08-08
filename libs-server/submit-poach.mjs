@@ -134,7 +134,7 @@ export default async function ({
     }
   }
 
-  const submitted = Math.round(Date.now() / 1000)
+  const submitted = new Date()
   const data = {
     userid: userId,
     tid: teamId,

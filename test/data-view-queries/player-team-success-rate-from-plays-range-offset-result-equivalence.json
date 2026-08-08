@@ -21,10 +21,10 @@
       "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team) VALUES (990302, 2025, 1, 'REG', 'ZZ', 'OP')",
       "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year, rushing_first_downs, receiving_first_downs, rushing_yards_excluding_kneels) VALUES (990301, 'TEST-TMSR-000922', 'OP', 'ZZ', 'MLB', 2024, 0, 0, 0)",
       "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year, rushing_first_downs, receiving_first_downs, rushing_yards_excluding_kneels) VALUES (990302, 'TEST-TMSR-000922', 'OP', 'ZZ', 'MLB', 2025, 0, 0, 0)",
-      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (990301,1,2024,1,0,'REG','PASS','ZZ',true)",
-      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (990301,2,2024,1,0,'REG','PASS','ZZ',true)",
-      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (990301,3,2024,1,0,'REG','RUSH','ZZ',false)",
-      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (990302,1,2025,1,0,'REG','PASS','ZZ',true)"
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (990301,1,2024,1,to_timestamp(0),'REG','PASS','ZZ',true)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (990301,2,2024,1,to_timestamp(0),'REG','PASS','ZZ',true)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (990301,3,2024,1,to_timestamp(0),'REG','RUSH','ZZ',false)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (990302,1,2025,1,to_timestamp(0),'REG','PASS','ZZ',true)"
     ],
     "reference_sql": "SELECT SUM(CASE WHEN is_successful_play THEN 1 ELSE 0 END)::numeric / NULLIF(COUNT(*),0) AS team_success_rate_from_plays_0 FROM nfl_plays WHERE offense_nfl_team='ZZ' AND season_year IN (2024,2025) AND season_type='REG' AND play_type <> 'NOPL'",
     "compare_columns": ["team_success_rate_from_plays_0"]

@@ -1,11 +1,29 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-08 against league_production
 --
--- Retype the thirteen integer-epoch transaction lifecycle stamps to timestamptz.
--- Takes the conformance audit 16 -> 3.
+-- Retype the fourteen integer-epoch transaction lifecycle stamps to timestamptz.
 --
--- NOT APPLIED. This file is authored, rehearsed and consumer-inventoried, and it
--- is held on the SPA-visible apply window described at the bottom. Read that
--- section before running it.
+-- trades.vetoed IS THE FOURTEENTH AND THE AUDIT CANNOT SEE IT. The audit's
+-- known_time_columns set is hand-maintained and held exactly the fifteen columns
+-- the value-based sweep decoded; vetoed is 0 non-null across all 303 rows, so
+-- that sweep had nothing to decode and the column was never listed. It is
+-- integer epoch of the same class as the four trades columns beside it, and it
+-- is included here on the operator's ruling of 2026-08-08 rather than left to
+-- split an obvious sibling set. It is added to known_time_columns in the same
+-- commit so a future regression is visible to the audit.
+--
+-- Its two WRITERS are the reason this is not free, and both are the
+-- insert-payload class the gate structurally cannot see:
+--   api/routes/leagues/trade.mjs:1547  unaccepted-trade veto path
+--   api/routes/leagues/trade.mjs:1676  accepted-trade reversal path
+-- Both bound Math.round(vetoed_occurred_at.getTime() / 1000); both now bind the
+-- Date the reversal transactions already use, so commissioner veto keeps working
+-- across the apply. Every read of vetoed is a null check or a truthiness test
+-- and needed no change.
+--
+-- APPLIED 2026-08-08 in one window with the companion play-mtime file, on the
+-- operator's ruling. Instant: fourteen columns over 11,855 rows, 2 seconds wall.
+-- The SPA-visible window described at the bottom was closed by deploying the
+-- frontend in the same window rather than at cluster end.
 --
 -- A PURE RETYPE IS SUFFICIENT -- NO RENAME IS NEEDED, and that was verified
 -- rather than assumed. The prior timestamp clusters renamed as they retyped
@@ -67,8 +85,8 @@
 --    `if (poach.processed)`) are NOT defects: an ISO string and an integer are
 --    both truthy and null is falsy either way.
 --
--- THE APPLY WINDOW IS USER-FACING, which is why this file is held rather than
--- run. Between the DDL and the frontend deploy, a logged-in user gets a broken
+-- THE APPLY WINDOW IS USER-FACING, which is why this file was held until a
+-- deploy window. Between the DDL and the frontend deploy, a logged-in user gets a broken
 -- poach-notice processing time, an unsorted trade history and wrong draft-pick
 -- sheet dates. The no-shims ruling forbids aliasing the columns back on the
 -- wire, so the remedy is the frontend fix plus sequencing
@@ -85,6 +103,7 @@ ALTER TABLE public.trades ALTER COLUMN offered TYPE timestamptz USING to_timesta
 ALTER TABLE public.trades ALTER COLUMN accepted TYPE timestamptz USING to_timestamp(accepted);
 ALTER TABLE public.trades ALTER COLUMN cancelled TYPE timestamptz USING to_timestamp(cancelled);
 ALTER TABLE public.trades ALTER COLUMN rejected TYPE timestamptz USING to_timestamp(rejected);
+ALTER TABLE public.trades ALTER COLUMN vetoed TYPE timestamptz USING to_timestamp(vetoed);
 
 ALTER TABLE public.waivers ALTER COLUMN submitted TYPE timestamptz USING to_timestamp(submitted);
 ALTER TABLE public.waivers ALTER COLUMN processed TYPE timestamptz USING to_timestamp(processed);

@@ -52,7 +52,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         lid,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE
       })
@@ -73,7 +73,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].is_successful).to.equal(true)
       expect(waivers[0].reason).to.equal(null)
-      expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waivers[0].processed.getTime()).to.equal(Date.now())
       expect(waivers[0].cancelled).to.equal(null)
 
       // check team waiver order
@@ -148,7 +148,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         lid,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE
       })

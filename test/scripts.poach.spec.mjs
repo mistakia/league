@@ -58,10 +58,10 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         is_successful: 1,
-        processed: Math.round(Date.now() / 1000),
+        processed: new Date(),
         type: waiver_types.POACH
       })
 
@@ -71,7 +71,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: Math.round(Date.now() / 1000)
+        submitted: new Date()
       })
 
       MockDate.set(
@@ -109,7 +109,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
       expect(poaches[0].is_successful).to.equal(true)
-      expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
+      expect(poaches[0].processed.getTime()).to.equal(Date.now())
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].pid).to.equal(player.pid)
 
@@ -141,10 +141,10 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player1.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         is_successful: 1,
-        processed: Math.round(Date.now() / 1000),
+        processed: new Date(),
         type: waiver_types.POACH
       })
 
@@ -154,7 +154,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player1.pid,
         player_tid: 1,
-        submitted: Math.round(Date.now() / 1000)
+        submitted: new Date()
       })
 
       MockDate.set(
@@ -183,10 +183,10 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player2.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         is_successful: 1,
-        processed: Math.round(Date.now() / 1000),
+        processed: new Date(),
         type: waiver_types.POACH
       })
 
@@ -196,7 +196,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player2.pid,
         player_tid: 3,
-        submitted: Math.round(Date.now() / 1000)
+        submitted: new Date()
       })
 
       MockDate.set(
@@ -248,7 +248,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const poach2 = poaches.find((p) => p.tid === 4)
       expect(poaches.length).to.equal(2)
       expect(poach1.is_successful).to.equal(true)
-      expect(poach1.processed).to.equal(Math.round(Date.now() / 1000))
+      expect(poach1.processed.getTime()).to.equal(Date.now())
       expect(poach1.reason).to.equal(null)
       expect(poach1.pid).to.equal(player1.pid)
 
@@ -277,10 +277,10 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         is_successful: 1,
-        processed: Math.round(Date.now() / 1000),
+        processed: new Date(),
         type: waiver_types.POACH
       })
 
@@ -290,7 +290,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: Math.round(Date.now() / 1000)
+        submitted: new Date()
       })
 
       let error
@@ -355,10 +355,10 @@ describe('SCRIPTS /waivers - poach', function () {
           lid: 1,
           pid: player.pid,
           priority_order: 9999,
-          submitted: Math.round(Date.now() / 1000),
+          submitted: new Date(),
           bid_amount: 0,
           is_successful: 1,
-          processed: Math.round(Date.now() / 1000),
+          processed: new Date(),
           type: waiver_types.POACH
         })
         .returning('uid')
@@ -375,7 +375,7 @@ describe('SCRIPTS /waivers - poach', function () {
           lid: 1,
           pid: player.pid,
           player_tid: 1,
-          submitted: Math.round(Date.now() / 1000)
+          submitted: new Date()
         })
         .returning('uid')
 
@@ -419,7 +419,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
       expect(poaches[0].is_successful).to.equal(true)
-      expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
+      expect(poaches[0].processed.getTime()).to.equal(Date.now())
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].pid).to.equal(player.pid)
     })
@@ -451,10 +451,10 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         is_successful: 1,
-        processed: Math.round(Date.now() / 1000),
+        processed: new Date(),
         type: waiver_types.POACH
       })
 
@@ -464,7 +464,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         player_tid: 1,
-        submitted: Math.round(Date.now() / 1000)
+        submitted: new Date()
       })
 
       await knex('rosters_players')
@@ -520,7 +520,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
       expect(poaches[0].is_successful).to.equal(false)
-      expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
+      expect(poaches[0].processed.getTime()).to.equal(Date.now())
       expect(poaches[0].reason).to.equal('player is not on a practice squad')
       expect(poaches[0].pid).to.equal(player.pid)
     })

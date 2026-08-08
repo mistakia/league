@@ -56,7 +56,7 @@ describe('LIBS-SERVER get_top_practice_squad_waiver postseason', function () {
           lid,
           pid: player.pid,
           priority_order: 9999,
-          submitted: Math.round(Date.now() / 1000),
+          submitted: new Date(),
           bid_amount: 0,
           type: waiver_types.FREE_AGENCY_PRACTICE
         })
@@ -108,7 +108,7 @@ describe('LIBS-SERVER get_top_practice_squad_waiver postseason', function () {
         lid,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE
       })

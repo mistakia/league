@@ -198,14 +198,16 @@ describe('SCRIPTS - restricted free agency bids', function () {
       await processRestrictedFreeAgencyBid({
         ...bid_row,
         original_team_id: team_id,
-        processed
+        // `restricted_free_agency_bids.processed` is timestamptz; the epoch
+        // above still feeds `announced_at`, which is not.
+        processed: epoch_to_timestamptz(processed)
       })
 
       const bid_after = await knex('restricted_free_agency_bids')
         .where('uid', bid_row.uid)
         .first()
       expect(bid_after.is_successful).to.equal(true)
-      expect(bid_after.processed).to.equal(processed)
+      expect(bid_after.processed.getTime()).to.equal(processed * 1000)
       expect(bid_after.outcome).to.equal(
         restricted_free_agency_bid_outcomes.WON
       )

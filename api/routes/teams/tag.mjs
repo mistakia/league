@@ -203,7 +203,7 @@ router.post('/?', async (req, res) => {
     }
 
     // cancel existing restricted free agency bids
-    const timestamp = Math.round(Date.now() / 1000)
+    const timestamp = new Date()
     await db('restricted_free_agency_bids')
       .update('cancelled', timestamp)
       .where({

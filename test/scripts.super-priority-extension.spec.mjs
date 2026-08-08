@@ -281,7 +281,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
       lid: 1,
       week: 1,
       season_year: prior_year,
-      last_updated: now
+      last_updated: epoch_to_timestamptz(now)
     })
     const prior_rosters = await knex('rosters')
       .where({ tid: 2, lid: 1, week: 1, season_year: prior_year })

@@ -99,7 +99,7 @@ describe('role-union per-game grain stage', () => {
       season_year: 2024,
       week: esbid === GAME_ONE ? 1 : 2,
       season_type: 'REG',
-      updated: 0,
+      updated: new Date(0),
       play_type: 'PASS',
       ...fields
     })

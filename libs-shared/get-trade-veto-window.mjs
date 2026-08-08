@@ -7,6 +7,8 @@
  * libs-server/get-trade-veto-window.mjs.
  */
 
+import timestamptz_to_epoch from './timestamptz-to-epoch.mjs'
+
 const get_window_hours = (league) => {
   const hours = Number(league?.trade_veto_window_hours)
   return Number.isFinite(hours) && hours > 0 ? hours : 0
@@ -19,7 +21,12 @@ const get_window_hours = (league) => {
 export const get_trade_veto_deadline = ({ trade, league }) => {
   const hours = get_window_hours(league)
   if (!hours || !trade?.accepted) return null
-  return Number(trade.accepted) + hours * 3600
+  // `trades.accepted` is timestamptz, so `Number()` of it would yield
+  // MILLISECONDS and push every deadline ~1000x into the future without
+  // throwing. This helper is isomorphic: the server reads a Date from node-pg
+  // and the client reads the ISO string it became over JSON, and
+  // timestamptz_to_epoch accepts either.
+  return timestamptz_to_epoch(trade.accepted) + hours * 3600
 }
 
 export const is_trade_within_veto_window = ({ trade, league, now }) => {
