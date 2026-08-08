@@ -27,7 +27,7 @@
   "adjudications": [
     {
       "gate": 1,
-      "path": "crontab-main/league-imports.cron",
+      "path": "server/crontab-main/league-imports.cron",
       "table": "player_changelog",
       "column": "nfl_status",
       "kind": "not_a_column",
@@ -35,7 +35,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "config",
       "column": "databases",
       "kind": "not_a_column",
@@ -43,7 +43,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "teams",
       "column": "restricted",
       "kind": "not_a_column",
@@ -51,7 +51,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "prop_market_selections_index",
       "column": "esbid",
       "kind": "history",
@@ -59,7 +59,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "league_format_player_seasonlogs",
       "column": "year",
       "kind": "history",
@@ -67,7 +67,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "scoring_format_player_seasonlogs",
       "column": "year",
       "kind": "history",
@@ -75,7 +75,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "player_seasonlogs",
       "column": "year",
       "kind": "history",
@@ -83,7 +83,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "nfl_games",
       "column": "start_time",
       "kind": "history",
@@ -91,7 +91,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "nfl_games",
       "column": "year",
       "kind": "history",
@@ -99,7 +99,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "nfl_plays",
       "column": "year",
       "kind": "history",
@@ -107,7 +107,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "leagues",
       "column": "hosted",
       "kind": "history",
@@ -115,7 +115,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "player",
       "column": "pff_id",
       "kind": "history",
@@ -123,7 +123,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "player",
       "column": "formatted",
       "kind": "history",
@@ -131,7 +131,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "practice",
       "column": "seas_type",
       "kind": "history",
@@ -139,7 +139,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "prop_markets_index",
       "column": "year",
       "kind": "history",
@@ -147,7 +147,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "league_player_season_projection_values",
       "column": "year",
       "kind": "history",
@@ -155,7 +155,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "scoring_format_player_projection_points",
       "column": "total",
       "kind": "history",
@@ -163,7 +163,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "restricted_free_agency_bids",
       "column": "announced",
       "kind": "history",
@@ -171,7 +171,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "restricted_free_agency_bids",
       "column": "reason",
       "kind": "history",
@@ -362,7 +362,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "teams",
       "column": "year",
       "kind": "history",
@@ -370,7 +370,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "nfl_team_seasonlogs",
       "column": "year",
       "kind": "history",
@@ -378,7 +378,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "league_scoring_formats",
       "column": "scoring_format_id",
       "kind": "history",
@@ -386,7 +386,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "users",
       "column": "reset_token",
       "kind": "history",
@@ -394,7 +394,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "config",
       "column": "degraded",
       "kind": "not_a_column",
@@ -402,7 +402,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "config",
       "column": "email",
       "kind": "not_a_column",
@@ -410,7 +410,7 @@
     },
     {
       "gate": 1,
-      "path": "league/CLAUDE.md",
+      "path": "CLAUDE.md",
       "table": "transactions",
       "column": "timestamp",
       "kind": "history",
