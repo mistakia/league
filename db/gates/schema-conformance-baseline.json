@@ -1,7 +1,7 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-08T04:08:43.591Z",
-  "count": 39,
+  "generated_at": "2026-08-08T15:54:24.052Z",
+  "count": 45,
   "violations": [
     {
       "table": "footballoutsiders",
@@ -130,73 +130,103 @@
     },
     {
       "table": "leagues",
-      "column": "espn_id",
+      "column": "groupme_id",
       "rule": "external_id"
     },
     {
-      "table": "leagues",
-      "column": "fleaflicker_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "leagues",
-      "column": "mfl_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "leagues",
-      "column": "sleeper_id",
-      "rule": "external_id"
+      "table": "nfl_plays_current_week",
+      "column": "updated",
+      "rule": "timestamp_type"
     },
     {
       "table": "nfl_plays",
-      "column": "fumble_forced_1_sportradar_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "fumble_recovered_1_sportradar_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "penalty_player_sportradar_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "sack_player_1_sportradar_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "sack_player_2_sportradar_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "tackle_for_loss_1_sportradar_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "tackle_for_loss_2_sportradar_id",
-      "rule": "external_id"
+      "column": "updated",
+      "rule": "timestamp_type"
     },
     {
       "table": "pff_player_facet_gamelogs",
-      "column": "pff_id",
+      "column": "franchise_id",
       "rule": "external_id"
     },
     {
       "table": "pff_player_facet_seasonlogs",
-      "column": "pff_id",
+      "column": "franchise_id",
       "rule": "external_id"
     },
     {
-      "table": "pff_player_seasonlogs",
-      "column": "pff_id",
+      "table": "pff_team_gamelogs",
+      "column": "franchise_id",
       "rule": "external_id"
+    },
+    {
+      "table": "pff_team_seasonlogs",
+      "column": "franchise_id",
+      "rule": "external_id"
+    },
+    {
+      "table": "poaches",
+      "column": "processed",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "poaches",
+      "column": "submitted",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "cancelled",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "processed",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "submitted",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "rosters",
+      "column": "last_updated",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "trades",
+      "column": "accepted",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "trades",
+      "column": "cancelled",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "trades",
+      "column": "offered",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "trades",
+      "column": "rejected",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "waivers",
+      "column": "cancelled",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "waivers",
+      "column": "processed",
+      "rule": "timestamp_type"
+    },
+    {
+      "table": "waivers",
+      "column": "submitted",
+      "rule": "timestamp_type"
     }
   ]
 }
