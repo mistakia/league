@@ -113,7 +113,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 1,
-        submitted: now - 3600, // 1 hour ago
+        submitted: epoch_to_timestamptz(now - 3600), // 1 hour ago
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE
       })
@@ -125,7 +125,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: now - 1800, // 30 minutes ago (later than regular waiver)
+        submitted: epoch_to_timestamptz(now - 1800), // 30 minutes ago (later than regular waiver)
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE,
         super_priority: 1
@@ -146,14 +146,14 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(super_priority_waiver.is_successful).to.equal(true)
-      expect(super_priority_waiver.processed).to.be.greaterThan(0)
+      expect(super_priority_waiver.processed).to.be.greaterThan(new Date(0))
 
       // Check that regular waiver was processed but unsuccessful
       const regular_waiver = await knex('waivers')
         .where({ tid: 3, pid: player.pid })
         .first()
 
-      expect(regular_waiver.processed).to.be.greaterThan(0)
+      expect(regular_waiver.processed).to.be.greaterThan(new Date(0))
       expect(regular_waiver.is_successful).to.equal(false)
       expect(regular_waiver.reason).to.include('already claimed')
 
@@ -193,7 +193,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 1,
-        submitted: now - 3600,
+        submitted: epoch_to_timestamptz(now - 3600),
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE
       })
@@ -213,7 +213,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(waiver.is_successful).to.equal(true)
-      expect(waiver.processed).to.be.greaterThan(0)
+      expect(waiver.processed).to.be.greaterThan(new Date(0))
     })
 
     it('should validate super priority eligibility during processing', async () => {
@@ -231,7 +231,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: now - 1800,
+        submitted: epoch_to_timestamptz(now - 1800),
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE,
         super_priority: 1
@@ -305,7 +305,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 10,
-        submitted: current_timestamp - 3600, // 1 hour ago
+        submitted: epoch_to_timestamptz(current_timestamp - 3600), // 1 hour ago
         bid_amount: 50,
         type: waiver_types.FREE_AGENCY // Active roster waiver
       })
@@ -317,7 +317,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: current_timestamp - 1800, // 30 minutes ago (later than active roster waiver)
+        submitted: epoch_to_timestamptz(current_timestamp - 1800), // 30 minutes ago (later than active roster waiver)
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE,
         super_priority: 1
@@ -362,7 +362,9 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .where({ tid: 4, pid: player.pid, type: waiver_types.FREE_AGENCY })
         .first()
 
-      expect(active_roster_waiver_final.processed).to.be.greaterThan(0)
+      expect(active_roster_waiver_final.processed).to.be.greaterThan(
+        new Date(0)
+      )
       expect(active_roster_waiver_final.is_successful).to.equal(true)
 
       // Verify player is on team 4 active roster (bench slot)
@@ -393,7 +395,9 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .where({ tid: 1, pid: player.pid, super_priority: 1 })
         .first()
 
-      expect(super_priority_waiver_final.processed).to.be.greaterThan(0)
+      expect(super_priority_waiver_final.processed).to.be.greaterThan(
+        new Date(0)
+      )
       expect(super_priority_waiver_final.is_successful).to.equal(false)
       expect(super_priority_waiver_final.reason).to.include('already claimed')
 
@@ -427,7 +431,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: now - 1800,
+        submitted: epoch_to_timestamptz(now - 1800),
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE,
         super_priority: 1
@@ -447,7 +451,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .where({ tid: 1, pid: player.pid, super_priority: 1 })
         .first()
 
-      expect(super_priority_waiver.processed).to.be.greaterThan(0)
+      expect(super_priority_waiver.processed).to.be.greaterThan(new Date(0))
       expect(super_priority_waiver.is_successful).to.equal(true)
 
       // Verify super priority transaction was created
@@ -493,7 +497,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: now - 1800,
+        submitted: epoch_to_timestamptz(now - 1800),
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY_PRACTICE,
         super_priority: 1
@@ -513,7 +517,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .where({ tid: 1, pid: player.pid, super_priority: 1 })
         .first()
 
-      expect(super_priority_waiver.processed).to.be.greaterThan(0)
+      expect(super_priority_waiver.processed).to.be.greaterThan(new Date(0))
       expect(super_priority_waiver.is_successful).to.equal(false)
       expect(super_priority_waiver.reason).to.include(
         'super priority not available'

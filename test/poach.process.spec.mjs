@@ -57,7 +57,7 @@ describe('API /poaches - process', function () {
         player_tid: teamId,
         lid: leagueId,
         is_successful: null,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         reason: null,
         processed: null
       }

@@ -214,8 +214,8 @@ const seed_trade = async () => {
     lid: LID,
     userid: 1,
     season_year: current_season.year,
-    offered: Math.round(traded_at.getTime() / 1000) - 3600,
-    accepted: Math.round(traded_at.getTime() / 1000)
+    offered: new Date(traded_at.getTime() - 3600 * 1000),
+    accepted: traded_at
   })
 
   await knex('keeptradecut_valuations').insert({

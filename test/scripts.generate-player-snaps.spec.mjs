@@ -72,7 +72,7 @@ describe('SCRIPTS generate-player-snaps', function () {
     play_id,
     season_year,
     week,
-    updated: 1,
+    updated: new Date(1000),
     offense_nfl_team,
     defense_nfl_team,
     play_type,

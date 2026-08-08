@@ -722,7 +722,7 @@ router.post('/?', async (req, res) => {
       const tradeids = trades.map((t) => t.uid)
       await db('trades')
         .whereIn('uid', tradeids)
-        .update({ cancelled: Math.round(Date.now() / 1000) })
+        .update({ cancelled: new Date() })
     }
 
     const data = { uid: pickId, pid, lid, tid: teamId }

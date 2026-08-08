@@ -91,7 +91,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -135,7 +135,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -181,7 +181,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -209,7 +209,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].is_successful).to.equal(true)
       expect(waivers[0].reason).to.equal(null)
-      expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waivers[0].processed.getTime()).to.equal(Date.now())
       expect(waivers[0].cancelled).to.equal(null)
 
       // check team waiver order
@@ -235,7 +235,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poaches[0].tid).to.equal(2)
       expect(poaches[0].lid).to.equal(1)
       expect(poaches[0].is_successful).to.equal(null)
-      expect(poaches[0].submitted).to.equal(Math.round(Date.now() / 1000))
+      expect(poaches[0].submitted.getTime()).to.equal(Date.now())
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].processed).to.equal(null)
     })
@@ -260,7 +260,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -288,7 +288,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].is_successful).to.equal(true)
       expect(waivers[0].reason).to.equal(null)
-      expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waivers[0].processed.getTime()).to.equal(Date.now())
       expect(waivers[0].cancelled).to.equal(null)
 
       // check team waiver order
@@ -314,7 +314,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poaches[0].tid).to.equal(2)
       expect(poaches[0].lid).to.equal(1)
       expect(poaches[0].is_successful).to.equal(null)
-      expect(poaches[0].submitted).to.equal(Math.round(Date.now() / 1000))
+      expect(poaches[0].submitted.getTime()).to.equal(Date.now())
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].processed).to.equal(null)
     })
@@ -340,7 +340,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -352,7 +352,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -382,13 +382,13 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(waiver1.pid).to.equal(player.pid)
       expect(waiver1.is_successful).to.equal(true)
       expect(waiver1.reason).to.equal(null)
-      expect(waiver1.processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waiver1.processed.getTime()).to.equal(Date.now())
       expect(waiver1.cancelled).to.equal(null)
 
       expect(waiver2.pid).to.equal(player.pid)
       expect(waiver2.is_successful).to.equal(false)
       expect(waiver2.reason).to.equal('player has existing poaching claim')
-      expect(waiver2.processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waiver2.processed.getTime()).to.equal(Date.now())
       expect(waiver2.cancelled).to.equal(null)
 
       // check team waiver order
@@ -414,7 +414,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poaches[0].tid).to.equal(2)
       expect(poaches[0].lid).to.equal(1)
       expect(poaches[0].is_successful).to.equal(null)
-      expect(poaches[0].submitted).to.equal(Math.round(Date.now() / 1000))
+      expect(poaches[0].submitted.getTime()).to.equal(Date.now())
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].processed).to.equal(null)
     })
@@ -454,7 +454,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player1.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -466,7 +466,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player2.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -496,13 +496,13 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(waiver1.pid).to.equal(player1.pid)
       expect(waiver1.is_successful).to.equal(true)
       expect(waiver1.reason).to.equal(null)
-      expect(waiver1.processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waiver1.processed.getTime()).to.equal(Date.now())
       expect(waiver1.cancelled).to.equal(null)
 
       expect(waiver2.pid).to.equal(player2.pid)
       expect(waiver2.reason).to.equal(null)
       expect(waiver2.is_successful).to.equal(true)
-      expect(waiver2.processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waiver2.processed.getTime()).to.equal(Date.now())
       expect(waiver2.cancelled).to.equal(null)
 
       // check team waiver order
@@ -530,7 +530,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poach1.tid).to.equal(2)
       expect(poach1.lid).to.equal(1)
       expect(poach1.is_successful).to.equal(null)
-      expect(poach1.submitted).to.equal(Math.round(Date.now() / 1000))
+      expect(poach1.submitted.getTime()).to.equal(Date.now())
       expect(poach1.reason).to.equal(null)
       expect(poach1.processed).to.equal(null)
 
@@ -540,7 +540,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poach2.tid).to.equal(4)
       expect(poach2.lid).to.equal(1)
       expect(poach2.is_successful).to.equal(null)
-      expect(poach2.submitted).to.equal(Math.round(Date.now() / 1000))
+      expect(poach2.submitted.getTime()).to.equal(Date.now())
       expect(poach2.reason).to.equal(null)
       expect(poach2.processed).to.equal(null)
     })
@@ -580,7 +580,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player1.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -592,7 +592,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player2.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -604,7 +604,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player1.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -635,19 +635,19 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(waiver1.pid).to.equal(player1.pid)
       expect(waiver1.is_successful).to.equal(true)
       expect(waiver1.reason).to.equal(null)
-      expect(waiver1.processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waiver1.processed.getTime()).to.equal(Date.now())
       expect(waiver1.cancelled).to.equal(null)
 
       expect(waiver2.pid).to.equal(player2.pid)
       expect(waiver2.is_successful).to.equal(true)
       expect(waiver2.reason).to.equal(null)
-      expect(waiver2.processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waiver2.processed.getTime()).to.equal(Date.now())
       expect(waiver2.cancelled).to.equal(null)
 
       expect(waiver3.pid).to.equal(player1.pid)
       expect(waiver3.is_successful).to.equal(false)
       expect(waiver3.reason).to.equal('player has existing poaching claim')
-      expect(waiver3.processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waiver3.processed.getTime()).to.equal(Date.now())
       expect(waiver3.cancelled).to.equal(null)
 
       // check team waiver order
@@ -677,7 +677,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poach1.tid).to.equal(2)
       expect(poach1.lid).to.equal(1)
       expect(poach1.is_successful).to.equal(null)
-      expect(poach1.submitted).to.equal(Math.round(Date.now() / 1000))
+      expect(poach1.submitted.getTime()).to.equal(Date.now())
       expect(poach1.reason).to.equal(null)
       expect(poach1.processed).to.equal(null)
 
@@ -687,7 +687,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poach2.tid).to.equal(4)
       expect(poach2.lid).to.equal(1)
       expect(poach2.is_successful).to.equal(null)
-      expect(poach2.submitted).to.equal(Math.round(Date.now() / 1000))
+      expect(poach2.submitted.getTime()).to.equal(Date.now())
       expect(poach2.reason).to.equal(null)
       expect(poach2.processed).to.equal(null)
     })
@@ -720,7 +720,7 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 0,
         type: waiver_types.POACH
       })
@@ -766,7 +766,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(waivers[0].reason).to.equal(
         'player is not in an unprotected practice squad slot'
       )
-      expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waivers[0].processed.getTime()).to.equal(Date.now())
       expect(waivers[0].cancelled).to.equal(null)
 
       // check team waiver order

@@ -19,9 +19,9 @@
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-PTSR-000916', 'Test', 'Ptsr', 'T.Ptsr', 'Test Ptsr', 'MLB', 'MLB', '2000-01-01', 2020, 'ZZ')",
       "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team) VALUES (991001, 2023, 1, 'REG', 'ZZ', 'OP')",
       "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year, rushing_first_downs, receiving_first_downs, rushing_yards_excluding_kneels) VALUES (991001, 'TEST-PTSR-000916', 'OP', 'ZZ', 'MLB', 2023, 0, 0, 0)",
-      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (991001,1,2023,1,0,'REG','PASS','ZZ',true)",
-      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (991001,2,2023,1,0,'REG','PASS','ZZ',true)",
-      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (991001,3,2023,1,0,'REG','RUSH','ZZ',false)"
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (991001,1,2023,1,to_timestamp(0),'REG','PASS','ZZ',true)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (991001,2,2023,1,to_timestamp(0),'REG','PASS','ZZ',true)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, is_successful_play) VALUES (991001,3,2023,1,to_timestamp(0),'REG','RUSH','ZZ',false)"
     ],
     "reference_sql": "SELECT SUM(CASE WHEN is_successful_play THEN 1 ELSE 0 END)::numeric / NULLIF(COUNT(*),0) AS team_success_rate_from_plays_0 FROM nfl_plays WHERE offense_nfl_team='ZZ' AND season_year IN (2023) AND season_type='REG' AND play_type <> 'NOPL'",
     "compare_columns": ["team_success_rate_from_plays_0"]

@@ -15,7 +15,10 @@ export default function WaiverTypeFilter({ processing_times, processed }) {
   const unique_dates = new Set(processing_times.valueSeq())
 
   for (const date of unique_dates) {
-    const label = dayjs.unix(date).format('ddd, MMM D h:mm YYYY')
+    // `waivers.processed` is timestamptz, so this is an ISO string rather than
+    // epoch seconds and `dayjs.unix()` of one is Invalid Date -- every option in
+    // the processed-date filter would have rendered as "Invalid Date".
+    const label = dayjs(date).format('ddd, MMM D h:mm YYYY')
 
     state.values.push({
       value: date,

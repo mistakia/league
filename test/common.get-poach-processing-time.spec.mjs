@@ -20,11 +20,11 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
   it('should add 48 hours during offseason', () => {
     const offseason = current_season.regular_season_start.subtract('1', 'week')
     MockDate.set(offseason.toISOString())
-    const submitted = dayjs().unix()
+    const submitted = dayjs().toDate()
     const processing_time = getPoachProcessingTime(submitted)
 
     expect(processing_time.unix()).to.equal(
-      dayjs.unix(submitted).add('48', 'hours').unix()
+      dayjs(submitted).add('48', 'hours').unix()
     )
   })
 
@@ -33,11 +33,11 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
       .add('5', 'week')
       .day(3)
     MockDate.set(wednesday.toISOString())
-    const submitted = dayjs().unix()
+    const submitted = dayjs().toDate()
     const processing_time = getPoachProcessingTime(submitted)
 
     expect(processing_time.unix()).to.equal(
-      dayjs.unix(submitted).add('48', 'hours').unix()
+      dayjs(submitted).add('48', 'hours').unix()
     )
   })
 
@@ -47,7 +47,7 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
       .day(4)
       .hour(19)
     MockDate.set(thursday_after_6pm.toISOString())
-    const submitted = dayjs().unix()
+    const submitted = dayjs().toDate()
     const processing_time = getPoachProcessingTime(submitted)
 
     const next_tuesday_3pm = current_season.regular_season_start
@@ -63,7 +63,7 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
       .day(0)
       .hour(14)
     MockDate.set(sunday_before_3pm.toISOString())
-    const submitted = dayjs().unix()
+    const submitted = dayjs().toDate()
     const processing_time = getPoachProcessingTime(submitted)
 
     const next_tuesday_3pm = current_season.regular_season_start

@@ -121,7 +121,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
     pid,
     tid: super_priority_status.original_tid,
     lid,
-    submitted: Math.round(Date.now() / 1000),
+    submitted: new Date(),
     bid_amount: 0,
     priority_order: 0,
     type: waiver_types.FREE_AGENCY_PRACTICE,
@@ -140,9 +140,10 @@ export default async function ({
   // transactions.occurred_at is timestamptz and takes the instant directly.
   // Rounding it through epoch seconds moves it up to half a second in either
   // direction, which reorders it against a neighbouring transaction stamped
-  // from an unrounded clock. poaches.processed below is still epoch seconds.
+  // from an unrounded clock. `poaches.processed` is timestamptz as of the
+  // 2026-08-08 lifecycle retype and takes the same instant, so there is no
+  // longer an epoch-seconds consumer in this file.
   const occurred_at = new Date()
-  const timestamp = Math.round(occurred_at.getTime() / 1000)
   const data = []
 
   // verify player id
@@ -207,7 +208,10 @@ export default async function ({
 
     if (poaches.length) {
       const poach = poaches[0]
-      if (dayjs.unix(poach.processed).isAfter(current_season.offseason)) {
+      // `poaches.processed` is timestamptz, so `dayjs.unix()` of it would read
+      // the Date as epoch seconds and render a year-58,000 instant that passes
+      // isValid() -- silently making every poach look recent.
+      if (dayjs(poach.processed).isAfter(current_season.offseason)) {
         throw new Error('player was poached')
       }
     }
@@ -279,7 +283,7 @@ export default async function ({
     await db('poaches')
       .update({
         is_successful: 0,
-        processed: timestamp,
+        processed: occurred_at,
         reason: 'player is not on a practice squad' // TODO use constant
       })
       .where({
@@ -346,8 +350,7 @@ export default async function ({
   await handle_super_priority_on_release({
     pid: release_pid,
     releasing_tid: tid,
-    lid,
-    timestamp
+    lid
   })
 
   if (create_notification) {

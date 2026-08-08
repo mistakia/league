@@ -4,6 +4,7 @@ import {
   bid_change_types,
   bid_change_sources
 } from '#constants'
+import { epoch_to_timestamptz } from '#libs-shared'
 import { record_restricted_free_agency_bid_change } from '#libs-server/record-bid-change.mjs'
 
 // Seed a restricted free agency bid together with the nomination it belongs to.
@@ -98,9 +99,14 @@ export const insert_restricted_free_agency_bid = async ({
       lid,
       nomination_id,
       season_year: year,
-      submitted: Math.round(Date.now() / 1000),
-      processed,
-      cancelled,
+      submitted: new Date(),
+      // Callers pass these as epoch SECONDS, which is the vocabulary the rest
+      // of a fixture's arithmetic is written in (`processed - 100`). Converting
+      // here rather than at each call site is the same reason this builder
+      // exists at all: it makes the wrong shape unwritable instead of merely
+      // unwritten.
+      processed: epoch_to_timestamptz(processed),
+      cancelled: epoch_to_timestamptz(cancelled),
       is_successful,
       outcome
     })

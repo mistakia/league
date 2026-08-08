@@ -57,7 +57,7 @@ const router = express.Router({ mergeParams: true })
  *         schema:
  *           type: integer
  *         description: |
- *           Unix timestamp when waivers were processed.
+ *           ISO-8601 timestamp when waivers were processed.
  *           Used to get claims from a specific waiver period.
  *         example: 1698765432
  *       - name: type

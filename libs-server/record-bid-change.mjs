@@ -84,9 +84,6 @@ export default async function record_bid_change({
     conditional_release_player_ids = release_rows.map((row) => row.pid)
   }
 
-  const to_timestamptz = (epoch_seconds) =>
-    epoch_seconds ? db.raw('to_timestamp(?)', [epoch_seconds]) : null
-
   await db('bid_changelog').insert({
     bid_type,
     bid_id,
@@ -104,8 +101,13 @@ export default async function record_bid_change({
     // same fact as the actor of this change -- a cancellation does not touch it.
     // Both are recorded so neither has to be inferred from the other.
     bid_user_id: bid.userid ?? null,
-    cancelled_at: to_timestamptz(bid.cancelled),
-    processed_at: to_timestamptz(bid.processed),
+    // Bound directly: both bid tables' `cancelled`/`processed` are timestamptz
+    // as of the 2026-08-08 lifecycle retype, so the `to_timestamp()` wrapper
+    // that used to convert epoch seconds here is now a DOUBLE conversion --
+    // Postgres reads the instant as a float and rejects it with
+    // `invalid input syntax for type double precision: "58450-09-27..."`.
+    cancelled_at: bid.cancelled ?? null,
+    processed_at: bid.processed ?? null,
     is_successful: bid.is_successful ?? null,
     outcome: bid.outcome ?? null,
     outcome_detail: bid.outcome_detail ?? null,

@@ -505,7 +505,7 @@ describe('API /teams - release', function () {
         userid: 2,
         tid: 2,
         lid: leagueId,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         player_tid: teamId
       })
 

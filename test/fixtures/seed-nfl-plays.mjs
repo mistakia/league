@@ -12,7 +12,9 @@ const make_esbid = ({ year, seas_type, week, index }) => {
   )
 }
 
-const NOW = () => Math.round(Date.now() / 1000)
+// An instant, not epoch seconds: `nfl_plays.updated` and
+// `nfl_plays_current_week.updated` are timestamptz.
+const NOW = () => new Date()
 
 const build_play_row = ({ year, seas_type, week, esbid, play_id, off }) => ({
   esbid,

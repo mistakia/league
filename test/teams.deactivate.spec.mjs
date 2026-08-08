@@ -127,7 +127,7 @@ describe('API /teams - deactivate', function () {
         lid: leagueId,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: value,
         type: waiver_types.FREE_AGENCY
       })
@@ -437,7 +437,7 @@ describe('API /teams - deactivate', function () {
           lid: leagueId,
           pid: player.pid,
           priority_order: 9999,
-          submitted: timestamp,
+          submitted: epoch_to_timestamptz(timestamp),
           bid_amount: 1,
           type: waiver_types.FREE_AGENCY
         })
@@ -460,7 +460,7 @@ describe('API /teams - deactivate', function () {
         lid: leagueId,
         pid: player.pid,
         priority_order: 9999,
-        submitted: timestamp,
+        submitted: epoch_to_timestamptz(timestamp),
         bid_amount: 0,
         type: waiver_types.FREE_AGENCY
       })

@@ -78,7 +78,7 @@ export default async function (knex, league_params = {}) {
   const team_rows = []
   const roster_rows = []
   const users_teams_rows = []
-  const last_updated = Math.round(Date.now() / 1000)
+  const last_updated = new Date()
 
   for (let i = 1; i <= 12; i++) {
     team_rows.push({

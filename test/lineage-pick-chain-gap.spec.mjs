@@ -5,6 +5,7 @@ import MockDate from 'mockdate'
 import knex from '#db'
 import league from '#db/fixtures/league.mjs'
 import { current_season } from '#constants'
+import { epoch_to_timestamptz } from '#libs-shared'
 import walk_transactions from '#libs-server/roster-asset-lineage/walk-transactions.mjs'
 import { ASSET_TYPE } from '#libs-server/roster-asset-lineage/constants.mjs'
 
@@ -67,7 +68,8 @@ describe('LINEAGE - pick chain gap', function () {
       accept_tid,
       userid: 1,
       season_year: current_season.year,
-      offered: accepted - 1,
+      // `accepted` is a Date now, so `accepted - 1` would be milliseconds.
+      offered: new Date(accepted.getTime() - 1000),
       accepted
     })
     await knex('trades_picks').insert({
@@ -112,7 +114,7 @@ describe('LINEAGE - pick chain gap', function () {
       tradeid: 1,
       propose_tid: 1,
       accept_tid: 2,
-      accepted: now() - 7 * 24 * 60 * 60,
+      accepted: epoch_to_timestamptz(now() - 7 * 24 * 60 * 60),
       pickid: 1,
       recorded_tid: 1
     })
@@ -138,7 +140,7 @@ describe('LINEAGE - pick chain gap', function () {
       tradeid: 2,
       propose_tid: 4,
       accept_tid: 5,
-      accepted: now() - 7 * 24 * 60 * 60,
+      accepted: epoch_to_timestamptz(now() - 7 * 24 * 60 * 60),
       pickid: 2,
       recorded_tid: 4
     })
@@ -170,7 +172,7 @@ describe('LINEAGE - pick chain gap', function () {
       tradeid: 6,
       propose_tid: 3,
       accept_tid: 4,
-      accepted: now() - 7 * 24 * 60 * 60,
+      accepted: epoch_to_timestamptz(now() - 7 * 24 * 60 * 60),
       pickid: 5,
       recorded_tid: 3
     })
@@ -197,7 +199,7 @@ describe('LINEAGE - pick chain gap', function () {
       tradeid: 3,
       propose_tid: 6,
       accept_tid: 7,
-      accepted: now() - 14 * 24 * 60 * 60,
+      accepted: epoch_to_timestamptz(now() - 14 * 24 * 60 * 60),
       pickid: 3,
       recorded_tid: 6
     })
@@ -205,7 +207,7 @@ describe('LINEAGE - pick chain gap', function () {
       tradeid: 4,
       propose_tid: 8,
       accept_tid: 9,
-      accepted: now() - 7 * 24 * 60 * 60,
+      accepted: epoch_to_timestamptz(now() - 7 * 24 * 60 * 60),
       pickid: 3,
       recorded_tid: 8
     })
@@ -229,7 +231,7 @@ describe('LINEAGE - pick chain gap', function () {
       tradeid: 5,
       propose_tid: 1,
       accept_tid: 11,
-      accepted: now() - 7 * 24 * 60 * 60,
+      accepted: epoch_to_timestamptz(now() - 7 * 24 * 60 * 60),
       pickid: 4,
       recorded_tid: 12
     })

@@ -175,7 +175,10 @@ export default async function ({
     await trx('restricted_free_agency_nominations')
       .update({
         winning_bid_id: uid,
-        processed_at: trx.raw('to_timestamp(?)', [processed])
+        // `processed` is an INSTANT: it is bound unchanged to the timestamptz
+        // `restricted_free_agency_bids.processed` in the statement above, so
+        // wrapping it in `to_timestamp()` here would convert it twice.
+        processed_at: processed
       })
       .where({
         league_id: lid,

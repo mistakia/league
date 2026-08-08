@@ -357,12 +357,12 @@ export default async function ({
     pid: reserve_pid
   })
 
-  // transactions.occurred_at is timestamptz and takes the instant directly.
-  // Rounding it through epoch seconds moves it up to half a second in either
-  // direction, which reorders it against a neighbouring transaction stamped
-  // from an unrounded clock. poaches.processed below is still epoch seconds.
+  // transactions.occurred_at and poaches.processed are both timestamptz and
+  // take the instant directly.
+  // Rounding either through epoch seconds would move it up to half a second in
+  // either direction, reordering it against a neighbouring transaction stamped
+  // from an unrounded clock.
   const occurred_at = new Date()
-  const timestamp = Math.round(occurred_at.getTime() / 1000)
 
   // read before either insert -- the activation row would otherwise become the
   // last transaction and feed its own salary back into the reserve row
@@ -394,7 +394,7 @@ export default async function ({
     await db('poaches')
       .update({
         is_successful: 0,
-        processed: timestamp,
+        processed: occurred_at,
         reason: 'player is not on a practice squad' // TODO use constant
       })
       .where({

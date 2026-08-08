@@ -30,7 +30,7 @@ export default async function ({
       lid: leagueId,
       week: current_season.week,
       season_year: current_season.year,
-      last_updated: Math.round(Date.now() / 1000)
+      last_updated: new Date()
     })
     rosters = await db('rosters')
       .where({

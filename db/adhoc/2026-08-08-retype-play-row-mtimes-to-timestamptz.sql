@@ -1,0 +1,106 @@
+-- STATUS: APPLIED 2026-08-08 against league_production
+--
+-- Retype the two play-table row mtimes to timestamptz. Takes the conformance
+-- audit 3 -> 1, leaving only league_formats.cap, which belongs to
+-- user:task/league/separate-auction-economy-from-format-identity.md.
+--
+-- APPLIED 2026-08-08, sequenced AFTER
+-- 2026-08-08-retype-lifecycle-stamps-to-timestamptz.sql and in the SAME window
+-- rather than a later one, because nfl_plays_current_week.updated turned out to
+-- be SPA-visible (see the correction below) and app/core/selectors.js therefore
+-- carries both files' fixes in one commit. Rewrite took 2m20s.
+--
+-- WHY THIS IS ITS OWN APPLY, and it is not the reason the task predicted. The
+-- task expected to split the play tables off because they carry "a far larger
+-- consumer population". They carry NONE: running
+-- db/gates/check-retyped-column-arithmetic.mjs against a candidate schema with
+-- all fifteen retypes produces 13 findings and not one of them is on
+-- nfl_plays.updated or nfl_plays_current_week.updated. Every consumer finding is
+-- on the transaction lifecycle stamps in the companion file.
+--
+-- The real reason is LOCK DURATION. nfl_plays is 1,483,118 rows across 27
+-- partitions at 8,489 MB, and ALTER COLUMN TYPE rewrites the whole table under
+-- ACCESS EXCLUSIVE -- so this blocks every read of the schema's most heavily
+-- consumed table for the duration, including /api/plays and every data view that
+-- touches plays. The companion file's five tables total 11,855 rows and are
+-- effectively instant. Fusing them would have put a multi-minute exclusive lock
+-- inside a window that otherwise has none.
+--
+-- nfl_plays_current_week is only 5,969 rows / 8,848 kB and would be instant on
+-- its own, but it stays with nfl_plays rather than joining the companion file:
+-- both are written by the same statement region of
+-- scripts/import-plays-nfl-v1.mjs, so splitting them means editing and
+-- re-reviewing that file twice. Same fusion argument the nfl-games cluster used.
+--
+-- THE WRITERS ARE THE WHOLE CONSUMER RISK HERE, and they are invisible to the
+-- gate because an INSERT PAYLOAD is neither a predicate nor a read:
+--
+--   private/libs-server/ngs.mjs:217,251        const timestamp = Math.round(Date.now() / 1000)
+--                                              ... updated: timestamp
+--   scripts/import-plays-nfl-v1.mjs:374,403    const timestamp = Math.round(new Date() / 1000)
+--                                              ... updated: timestamp
+--
+-- Both must move to a Date in the same commit as this apply. The failure is LOUD
+-- rather than silent, verified empirically on a scratch database rather than
+-- reasoned about: `INSERT INTO t (updated) VALUES (1786220000)` against a
+-- timestamptz column raises `column "updated" is of type timestamp with time
+-- zone but expression is of type integer`. So an unfixed writer does not corrupt
+-- data, it stops the plays import outright.
+--
+-- Deploy urgency is therefore high for worker-1 specifically, but the window is
+-- bounded by the offseason, and that WAS confirmed at apply time rather than
+-- inherited from this header: the nearest game was the Hall of Fame preseason
+-- opener (esbid 2026080651, CAR at ARI) two days earlier on 2026-08-06, nothing
+-- was scheduled within the next four days, import-live-plays-worker on
+-- digitalocean-0 was online but idle at 0% CPU, and pg_stat_activity showed zero
+-- non-idle backends on league_production. Note "no game is in progress in
+-- August" is NOT true on its face -- preseason starts in early August, so this
+-- check has to be run rather than reasoned from the month.
+--
+-- CORRECTION 2026-08-08: THIS COLUMN *IS* SPA-VISIBLE. The line that stood here
+-- claimed it was not, on the grounds that nothing in app/ reads either row
+-- mtime. That is wrong, and it was caught by an executed test rather than by
+-- reading: `app/core/selectors.js` getScoreboardUpdated does
+-- `plays.maxBy((x) => x.updated)` and returns `play.updated`, the scoreboard
+-- saga sends that to the socket, and `api/sockets/scoreboard.mjs:14` binds it
+-- straight into `.where('updated', '>', ?)` against
+-- `nfl_plays_current_week.updated`. The SPA both READS this column and sends it
+-- back as a QUERY BOUND.
+--
+-- The live defect was the fallback: with no plays loaded the selector returned
+-- `0`, which becomes `where updated > 0` against timestamptz and Postgres
+-- rejects it with `date/time field value out of range: "0"`. That fallback
+-- fires on the FIRST register of every scoreboard session, so it breaks the
+-- live scoreboard for every user rather than degrading quietly. Fixed in the
+-- same commit as this apply; the selector now falls back to
+-- `new Date(0).toISOString()`.
+--
+-- Sequencing consequence: this file needs the FRONTEND deployed with it, exactly
+-- like the lifecycle file, not the backend-only deploy this header assumed.
+--
+-- DDL rehearsed on a scratch database loaded from the committed schema: applies
+-- at exit 0 in one transaction, and the rename cascades to all 27 nfl_plays
+-- partitions.
+--
+-- No BEGIN/COMMIT here -- db-exec.sh runs this under --single-transaction.
+--
+-- THE SERVER'S statement_timeout IS 40s AND THIS REWRITE DOES NOT FIT IN IT.
+-- Measured 2026-08-08: the first apply attempt died at 42s wall on `canceling
+-- statement due to statement timeout` and rolled back whole, leaving both
+-- columns integer -- clean, but it is a failure mode the rehearsal could not
+-- show, because the scratch database holds the SCHEMA and none of the 1,483,118
+-- rows. 40s is `statement_timeout` in the server's postgresql.conf (boot_val 0,
+-- reset_val 40000, source "configuration file"); there is no role-level or
+-- database-level override, and db-exec.sh passes no PGOPTIONS. So the override
+-- has to be in the file. It is transaction-local under --single-transaction and
+-- reverts when the transaction ends.
+--
+-- lock_timeout is set rather than left at 0 on purpose: once this statement is
+-- QUEUED for ACCESS EXCLUSIVE it blocks every new reader behind it, so waiting
+-- forever is worse than failing. 30s to acquire, unlimited to execute.
+
+SET lock_timeout = '30s';
+SET statement_timeout = 0;
+
+ALTER TABLE public.nfl_plays ALTER COLUMN updated TYPE timestamptz USING to_timestamp(updated);
+ALTER TABLE public.nfl_plays_current_week ALTER COLUMN updated TYPE timestamptz USING to_timestamp(updated);

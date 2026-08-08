@@ -44,7 +44,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         lid: leagueId,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: value,
         type: waiver_types.FREE_AGENCY
       })
@@ -64,7 +64,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].is_successful).to.equal(true)
       expect(waivers[0].reason).to.equal(null)
-      expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waivers[0].processed.getTime()).to.equal(Date.now())
       expect(waivers[0].cancelled).to.equal(null)
 
       // check team waiver order
@@ -115,7 +115,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         lid: leagueId,
         pid: player1.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: value1,
         type: waiver_types.FREE_AGENCY
       })
@@ -126,7 +126,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         lid: leagueId,
         pid: player1.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 80,
         type: waiver_types.FREE_AGENCY
       })
@@ -140,7 +140,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         lid: leagueId,
         pid: player2.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: value2,
         type: waiver_types.FREE_AGENCY
       })
@@ -154,7 +154,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         lid: leagueId,
         pid: player3.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: 30,
         type: waiver_types.FREE_AGENCY
       })
@@ -164,7 +164,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         lid: leagueId,
         pid: player3.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: value3,
         type: waiver_types.FREE_AGENCY
       })
@@ -178,7 +178,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         lid: leagueId,
         pid: player4.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: value4,
         type: waiver_types.FREE_AGENCY
       })
@@ -188,7 +188,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         lid: leagueId,
         pid: player4.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: value4,
         type: waiver_types.FREE_AGENCY
       })
@@ -208,7 +208,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(waivers[0].pid).to.equal(player1.pid)
       expect(waivers[0].is_successful).to.equal(true)
       expect(waivers[0].reason).to.equal(null)
-      expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
+      expect(waivers[0].processed.getTime()).to.equal(Date.now())
       expect(waivers[0].cancelled).to.equal(null)
 
       expect(waivers[1].is_successful).to.equal(false)
@@ -326,7 +326,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         lid: leagueId,
         pid: player.pid,
         priority_order: 9999,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         bid_amount: value,
         type: waiver_types.FREE_AGENCY
       })

@@ -9,8 +9,13 @@ export default async function ({ lid, year = null }) {
     .select(
       'restricted_free_agency_bids.*',
       'restricted_free_agency_nominations.original_team_id',
+      // `processed` is timestamptz, so it goes straight to TO_CHAR. The
+      // TO_TIMESTAMP wrapper that converted it from epoch seconds now has no
+      // matching signature at all -- `function to_timestamp(timestamp with
+      // time zone) does not exist` -- which fails the whole statement rather
+      // than just this projection.
       db.raw(
-        "TO_CHAR(TO_TIMESTAMP(restricted_free_agency_bids.processed), 'YYYY-MM-DD') AS date"
+        "TO_CHAR(restricted_free_agency_bids.processed, 'YYYY-MM-DD') AS date"
       )
     )
     .leftJoin(

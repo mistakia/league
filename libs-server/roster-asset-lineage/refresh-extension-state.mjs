@@ -80,7 +80,11 @@ const refresh_extension_state = async ({
   for (const r of rfa_wins) {
     if (r.tid === r.original_team_id) continue
     reset_events.push({
-      ts: r.processed,
+      // `restricted_free_agency_bids.processed` is timestamptz now, and this
+      // stream is merged with `occurred_at`-derived epoch seconds below --
+      // sorted numerically and compared against `tran_ts`. A raw Date here mixes
+      // milliseconds into seconds and silently misorders every reset.
+      ts: timestamptz_to_epoch(r.processed),
       tid: r.original_team_id,
       pid: r.pid,
       event: LAST_RESET_EVENT.RFA_WIN
@@ -117,9 +121,9 @@ const refresh_extension_state = async ({
   let ri = 0
   for (const tran of transactions) {
     if (!tran.pid) continue
-    // The reset stream carries epoch seconds because its other source,
-    // restricted_free_agency_bids.processed, is still an epoch integer. Merging
-    // a Date into it would compare milliseconds against seconds.
+    // The reset stream is epoch seconds throughout: both sources are
+    // timestamptz and both are converted at the push sites above. Merging a
+    // raw Date into it would compare milliseconds against seconds.
     const tran_ts = timestamptz_to_epoch(tran.occurred_at)
     while (ri < reset_events.length && reset_events[ri].ts <= tran_ts) {
       apply_reset(reset_events[ri])

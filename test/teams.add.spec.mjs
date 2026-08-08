@@ -322,7 +322,7 @@ describe('API /teams - add', function () {
         pid: player.pid,
         tid: 2,
         lid: 1,
-        submitted: Math.round(Date.now() / 1000),
+        submitted: new Date(),
         priority_order: 9999,
         type: waiver_types.FREE_AGENCY
       })

@@ -371,7 +371,7 @@ const importPlaysForWeek = async ({
 
     if (!data.data) continue
 
-    const timestamp = Math.round(new Date() / 1000)
+    const timestamp = new Date()
 
     const play_inserts = []
     let play_stat_inserts = []

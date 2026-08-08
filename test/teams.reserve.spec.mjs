@@ -1024,7 +1024,7 @@ describe('API /teams - reserve', function () {
         lid: leagueId,
         pid: player.pid,
         player_tid: teamId,
-        submitted: Math.round(Date.now() / 1000)
+        submitted: new Date()
       })
 
       await knex('player')
@@ -1100,7 +1100,7 @@ describe('API /teams - reserve', function () {
         lid: leagueId,
         pid: player.pid,
         player_tid: teamId,
-        submitted: Math.round(Date.now() / 1000)
+        submitted: new Date()
       })
 
       await knex('player')

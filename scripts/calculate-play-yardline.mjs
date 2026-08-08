@@ -7,7 +7,7 @@ const log = debug('calculate-play-yardline')
 debug.enable('calculate-play-yardline')
 
 const calculate_play_yardline = async () => {
-  const timestamp = Math.round(new Date() / 1000)
+  const timestamp = new Date()
   const plays = await db('nfl_plays')
     .select(
       'play_id',

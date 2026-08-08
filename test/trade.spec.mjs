@@ -309,7 +309,7 @@ describe('API /trades', function () {
         lid: 1,
         pid: player1.pid,
         player_tid: teamId,
-        submitted: Math.round(Date.now() / 1000)
+        submitted: new Date()
       })
 
       // active player
@@ -737,7 +737,7 @@ describe('API /trades', function () {
         lid: 1,
         pid: player1.pid,
         player_tid: teamId,
-        submitted: Math.round(Date.now() / 1000)
+        submitted: new Date()
       })
 
       const player2 = await selectPlayer({ rookie: true })

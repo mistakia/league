@@ -85,7 +85,7 @@ describe('API /teams - restricted free agency', function () {
       res.body.tid.should.equal(teamId)
       res.body.userid.should.equal(userId)
       res.body.pid.should.equal(player.pid)
-      res.body.submitted.should.equal(Math.round(Date.now() / 1000))
+      new Date(res.body.submitted).getTime().should.equal(Date.now())
       res.body.bid_amount.should.equal(bid)
       res.body.season_year.should.equal(current_season.year)
       res.body.original_team_id.should.equal(teamId)
@@ -109,7 +109,7 @@ describe('API /teams - restricted free agency', function () {
       query1[0].lid.should.equal(leagueId)
       expect(query1[0].is_successful).to.equal(null)
       expect(query1[0].outcome).to.equal(null)
-      expect(query1[0].submitted).to.equal(Math.round(Date.now() / 1000))
+      expect(query1[0].submitted.getTime()).to.equal(Date.now())
       expect(query1[0].processed).to.equal(null)
       expect(query1[0].cancelled).to.equal(null)
 
@@ -177,7 +177,7 @@ describe('API /teams - restricted free agency', function () {
       res2.body.userid.should.equal(userId)
       res2.body.pid.should.equal(player.pid)
       res2.body.season_year.should.equal(current_season.year)
-      res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
+      new Date(res2.body.submitted).getTime().should.equal(Date.now())
       res2.body.bid_amount.should.equal(bid)
       res2.body.original_team_id.should.equal(playerTid)
       res2.body.release.length.should.equal(0)
@@ -261,7 +261,7 @@ describe('API /teams - restricted free agency', function () {
       res2.body.userid.should.equal(userId)
       res2.body.season_year.should.equal(current_season.year)
       res2.body.pid.should.equal(tagPlayer.pid)
-      res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
+      new Date(res2.body.submitted).getTime().should.equal(Date.now())
       res2.body.bid_amount.should.equal(bid)
       res2.body.original_team_id.should.equal(teamId)
       res2.body.release.length.should.equal(1)
@@ -356,7 +356,7 @@ describe('API /teams - restricted free agency', function () {
           lid: league_id,
           season_year: current_season.year
         })
-        .update({ processed: Math.round(Date.now() / 1000) })
+        .update({ processed: new Date() })
 
       // Attempt to create a competing bid
       const competing_bid_res = await chai_request
@@ -671,7 +671,7 @@ describe('API /teams - restricted free agency', function () {
       // Simulate processing the bid
       await knex('restricted_free_agency_bids')
         .where({ pid: player.pid })
-        .update({ processed: Math.floor(Date.now() / 1000) })
+        .update({ processed: new Date() })
 
       // Attempt to nominate the processed bid
       const request = chai_request
@@ -731,7 +731,7 @@ describe('API /teams - restricted free agency', function () {
       // Simulate processing the bid
       await knex('restricted_free_agency_bids')
         .where({ pid: player.pid })
-        .update({ processed: Math.floor(Date.now() / 1000) })
+        .update({ processed: new Date() })
 
       // Attempt to remove nomination for the processed bid
       const request = chai_request
@@ -1261,7 +1261,7 @@ describe('API /teams - restricted free agency', function () {
       // Simulate processing the bid
       await knex('restricted_free_agency_bids')
         .where({ pid: player.pid })
-        .update({ processed: Math.floor(Date.now() / 1000) })
+        .update({ processed: new Date() })
 
       // Attempt to delete the processed bid
       const request = chai_request
@@ -1357,7 +1357,7 @@ describe('API /teams - restricted free agency', function () {
       // Simulate processing the bid
       await knex('restricted_free_agency_bids')
         .where({ pid: player.pid })
-        .update({ processed: Math.floor(Date.now() / 1000) })
+        .update({ processed: new Date() })
 
       // Attempt to update the processed bid
       const request = chai_request

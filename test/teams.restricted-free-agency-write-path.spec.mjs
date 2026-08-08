@@ -99,7 +99,7 @@ describe('API /teams - restricted free agency write path', function () {
         lid: 1,
         tid: 1,
         bid_amount: 3,
-        processed: Math.round(Date.now() / 1000),
+        processed: new Date(),
         is_successful: false,
         year: current_season.year
       })
@@ -123,7 +123,7 @@ describe('API /teams - restricted free agency write path', function () {
         lid: 1,
         tid: 1,
         bid_amount: 3,
-        processed: Math.round(Date.now() / 1000),
+        processed: new Date(),
         is_successful: false,
         year: current_season.year
       })

@@ -2409,7 +2409,13 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
 
 export const getScoreboardUpdated = createSelector(get_plays, (plays) => {
   const play = plays.maxBy((x) => x.updated)
-  return play ? play.updated : 0
+  // This value is sent to the scoreboard socket and bound straight into
+  // `where('updated', '>', ?)` against `nfl_plays_current_week.updated`, which
+  // is timestamptz. The old `0` fallback made that bound `> 0`, which Postgres
+  // rejects with `date/time field value out of range: "0"` -- and it is the
+  // fallback that fires on the FIRST register of every session, before any play
+  // has loaded, so it would have broken the live scoreboard for every user.
+  return play ? play.updated : new Date(0).toISOString()
 })
 
 export function getStartersByMatchupId(state, { mid }) {
@@ -3038,7 +3044,10 @@ export const getTeamEvents = createSelector(
     const events = []
 
     for (const poach of activePoaches.valueSeq()) {
-      const date = dayjs.unix(poach.submitted).add('48', 'hours')
+      // `poaches.submitted` is timestamptz, so it arrives here as an ISO string
+      // rather than epoch seconds; `dayjs.unix()` of one is Invalid Date, which
+      // renders as a blank expiry rather than throwing.
+      const date = dayjs(poach.submitted).add('48', 'hours')
       events.push({
         detail: 'Poaching Claim Expires',
         date
@@ -3379,7 +3388,10 @@ export const get_veto_candidate_trades = createSelector(
     trade_state.items
       .filter((trade) => Boolean(trade.accepted) && !trade.vetoed)
       .toList()
-      .sort((a, b) => b.accepted - a.accepted)
+      // `trades.accepted` is timestamptz, so these are ISO strings and the
+      // subtraction would be NaN -- which `sort` reads as "equal", leaving the
+      // veto list silently in arrival order rather than newest-first.
+      .sort((a, b) => new Date(b.accepted) - new Date(a.accepted))
 )
 
 export const get_current_trade_players = createSelector(

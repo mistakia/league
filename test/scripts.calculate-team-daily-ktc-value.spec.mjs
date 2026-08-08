@@ -131,8 +131,8 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
         lid,
         userid: 1,
         season_year: year,
-        offered: local_noon(day_two),
-        accepted: local_noon(day_two)
+        offered: epoch_to_timestamptz(local_noon(day_two)),
+        accepted: epoch_to_timestamptz(local_noon(day_two))
       })
       await knex('trades_players').insert({
         tradeid: 1,

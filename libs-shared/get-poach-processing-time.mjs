@@ -5,8 +5,14 @@ import get_next_tuesday_3pm from './get-next-tuesday-3pm.mjs'
 
 dayjs.extend(isBetween)
 
+// `submitted` is an INSTANT, not epoch seconds: `poaches.submitted` became
+// timestamptz in the 2026-08-08 lifecycle retype. Both callers now agree on
+// that -- submit-poach.mjs passes the Date it writes, and poach-notice.js
+// passes the column as the ISO string it became over JSON, and dayjs parses
+// either. The previous `dayjs.unix()` would have read a Date as epoch seconds
+// and rendered a year-58,000 processing time that passes isValid().
 export default function (submitted) {
-  const submitted_timestamp = dayjs.unix(submitted)
+  const submitted_timestamp = dayjs(submitted)
   if (current_season.isOffseason) {
     return submitted_timestamp.add('48', 'hours')
   }

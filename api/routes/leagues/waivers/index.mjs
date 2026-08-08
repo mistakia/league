@@ -627,7 +627,7 @@ router.post('/?', async (req, res) => {
       lid: leagueId,
       pid,
       priority_order: 9999,
-      submitted: Math.round(Date.now() / 1000),
+      submitted: new Date(),
       bid_amount: bid,
       type,
       super_priority: super_priority ? 1 : 0
@@ -1028,7 +1028,7 @@ router.post('/:waiverId/cancel', async (req, res) => {
       return res.status(400).send({ error: 'invalid waiverId' })
     }
 
-    const cancelled = Math.round(Date.now() / 1000)
+    const cancelled = new Date()
     await db('waivers').update('cancelled', cancelled).where('uid', waiverId)
 
     res.send({

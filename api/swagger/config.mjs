@@ -842,9 +842,10 @@ const options = {
               example: 12345
             },
             processed: {
-              type: 'integer',
-              description: 'Unix timestamp when the waiver was processed',
-              example: 1640995200
+              type: 'string',
+              format: 'date-time',
+              description: 'ISO-8601 timestamp when the waiver was processed',
+              example: '2026-08-08T17:00:00.000Z'
             },
             release: {
               type: 'array',
@@ -947,9 +948,10 @@ const options = {
               example: 9999
             },
             submitted: {
-              type: 'integer',
-              description: 'Unix timestamp when claim was submitted',
-              example: 1640995200
+              type: 'string',
+              format: 'date-time',
+              description: 'ISO-8601 timestamp when claim was submitted',
+              example: '2026-08-08T17:00:00.000Z'
             },
             bid_amount: {
               type: 'integer',
@@ -979,17 +981,19 @@ const options = {
               example: 'exceeds roster limits'
             },
             processed: {
-              type: 'integer',
+              type: 'string',
+              format: 'date-time',
               nullable: true,
               description:
-                'Unix timestamp when the claim was processed; null while pending',
-              example: 1766606404
+                'ISO-8601 timestamp when the claim was processed; null while pending',
+              example: '2026-08-08T17:00:00.000Z'
             },
             cancelled: {
-              type: 'integer',
+              type: 'string',
+              format: 'date-time',
               nullable: true,
               description:
-                'Unix timestamp when the claim was cancelled, otherwise null',
+                'ISO-8601 timestamp when the claim was cancelled, otherwise null',
               example: null
             }
           },
@@ -1148,9 +1152,10 @@ const options = {
               example: 2
             },
             cancelled: {
-              type: 'integer',
-              description: 'Unix timestamp when claim was cancelled',
-              example: 1640995200
+              type: 'string',
+              format: 'date-time',
+              description: 'ISO-8601 timestamp when claim was cancelled',
+              example: '2026-08-08T17:00:00.000Z'
             }
           },
           required: ['uid', 'tid', 'lid', 'cancelled']
@@ -3354,7 +3359,7 @@ const options = {
               propose_tid: 13,
               accept_tid: 14,
               userid: 5,
-              proposed: 1698765432,
+              offered: '2026-08-08T12:30:32.000Z',
               accepted: null,
               rejected: null,
               cancelled: null,
@@ -3396,33 +3401,38 @@ const options = {
               description: 'User ID who proposed the trade',
               example: 5
             },
-            proposed: {
-              type: 'integer',
-              description: 'Unix timestamp when trade was proposed',
-              example: 1698765432
+            offered: {
+              type: 'string',
+              format: 'date-time',
+              description: 'ISO-8601 timestamp when trade was offered',
+              example: '2026-08-08T12:30:32.000Z'
             },
             accepted: {
-              type: 'integer',
+              type: 'string',
+              format: 'date-time',
               nullable: true,
-              description: 'Unix timestamp when trade was accepted',
+              description: 'ISO-8601 timestamp when trade was accepted',
               example: null
             },
             rejected: {
-              type: 'integer',
+              type: 'string',
+              format: 'date-time',
               nullable: true,
-              description: 'Unix timestamp when trade was rejected',
+              description: 'ISO-8601 timestamp when trade was rejected',
               example: null
             },
             cancelled: {
-              type: 'integer',
+              type: 'string',
+              format: 'date-time',
               nullable: true,
-              description: 'Unix timestamp when trade was cancelled',
+              description: 'ISO-8601 timestamp when trade was cancelled',
               example: null
             },
             vetoed: {
-              type: 'integer',
+              type: 'string',
+              format: 'date-time',
               nullable: true,
-              description: 'Unix timestamp when trade was vetoed',
+              description: 'ISO-8601 timestamp when trade was vetoed',
               example: null
             },
             proposingTeamPlayers: {

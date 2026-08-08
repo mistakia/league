@@ -18,10 +18,14 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 const run = async () => {
-  const timestamp = Math.round(Date.now() / 1000)
+  const timestamp = new Date()
 
   const { now } = current_season
-  const cutoff = dayjs().subtract('48', 'hours').unix()
+  // `poaches.submitted` is timestamptz, so this bound is an instant rather than
+  // epoch seconds. Binding `.unix()` here is rejected by Postgres outright --
+  // and this script is the whole poach-processing path, so a rejected bind is a
+  // stopped pipeline rather than a wrong answer.
+  const cutoff = dayjs().subtract('48', 'hours').toDate()
   const claims = await db('poaches')
     .where('submitted', '<', cutoff)
     .whereNull('processed')

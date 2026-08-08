@@ -508,6 +508,10 @@ const known_time_columns = new Set([
   'trades.cancelled',
   'trades.offered',
   'trades.rejected',
+  // Added by hand rather than by the value sweep: 0 non-null of 303 rows, so
+  // pg_stats had no histogram bound to decode. Same class as the four trades
+  // columns above it.
+  'trades.vetoed',
   'waivers.cancelled',
   'waivers.processed',
   'waivers.submitted'
@@ -704,7 +708,6 @@ const external_vendor_tokens = [
   'nffc',
   'fantrax',
   'fleaflicker',
-  'groupme',
   'rtsports',
   'draftkings',
   'fanduel',
