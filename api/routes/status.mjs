@@ -26,10 +26,11 @@ const router = express.Router()
  *           type: boolean
  *           description: Whether the job execution was successful
  *           example: true
- *         timestamp:
- *           type: integer
- *           description: Unix timestamp of when the job was executed
- *           example: 1640995200
+ *         run_at:
+ *           type: string
+ *           format: date-time
+ *           description: When the job was executed
+ *           example: "2024-01-15T10:30:00Z"
  *         reason:
  *           type: string
  *           nullable: true
@@ -39,7 +40,7 @@ const router = express.Router()
  *         - id
  *         - type
  *         - is_successful
- *         - timestamp
+ *         - run_at
  *
  *     SystemHealthError:
  *       type: object

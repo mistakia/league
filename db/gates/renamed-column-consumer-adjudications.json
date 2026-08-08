@@ -1299,6 +1299,55 @@
       ],
       "verdict": "already-swept",
       "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
+      "table": "transactions",
+      "column": "timestamp",
+      "sites": [
+        "api/routes/leagues/poaches.mjs",
+        "api/routes/leagues/transactions.mjs",
+        "api/routes/leagues/waivers/index.mjs",
+        "api/routes/teams/lineups.mjs",
+        "api/sockets/auction.mjs",
+        "libs-server/context-docs/generate-league-context.mjs",
+        "libs-server/context-docs/generate-team-context.mjs",
+        "libs-server/data-views-column-definitions/player-extended-salary-column-definitions.mjs",
+        "libs-server/get-acquisition-transaction.mjs",
+        "libs-server/get-last-transaction.mjs",
+        "libs-server/get-roster.mjs",
+        "libs-server/get-super-priority-status.mjs",
+        "libs-server/get-top-free-agency-waiver.mjs",
+        "libs-server/get-top-poaching-waiver.mjs",
+        "libs-server/get-top-practice-squad-waiver.mjs",
+        "libs-server/get-transactions-since-acquisition.mjs",
+        "libs-server/get-transactions-since-free-agent.mjs",
+        "libs-server/is-player-on-waivers.mjs",
+        "libs-server/process-release.mjs",
+        "libs-server/process-super-priority.mjs",
+        "libs-server/submit-poach.mjs",
+        "libs-server/validate-franchise-tag.mjs",
+        "scripts/check-restricted-free-agency-salary-cap-violations.mjs",
+        "scripts/generate-league-player-seasonlogs.mjs",
+        "scripts/generate-tag-board.mjs",
+        "scripts/populate-super-priority-table.mjs",
+        "scripts/process-waivers-free-agency-practice.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to occurred_at by the timestamptz conform. Every server-side read of the bare old name was opened and resolves to an unrelated object: libs-server/external-fantasy-leagues/mappers/player-id-mapper.mjs:66,232,252,274 is an in-memory cache entry aged against Date.now(), libs-shared/data-view-storage/storage.mjs:160 is a browser localStorage snapshot record, and the libs-server/draftkings and process-restricted-free-agency-bids hits are JSDoc @param lines. get-roster.mjs is wholesale but reads only .pid off the transactions rows. The SPA sites are the documented global-list artifact rather than a measurement; the two that touch a real row are app/core/rosters/sagas.js:551 (rosterPlayer.timestamp, where rosters_players has never carried a timestamp column, so it predates this cluster) and app/core/selectors.js:2733 (game.timestamp on nfl_games, renamed to kickoff_at by b09fdbce3 -- a pre-existing live defect recorded on the task, needing its own fix)."
+    },
+    {
+      "table": "jobs",
+      "column": "timestamp",
+      "sites": ["libs-server/report-job.mjs"],
+      "verdict": "already-swept",
+      "reason": "report-job.mjs writes run_at; the only wholesale reader is libs-server/get-jobs.mjs, whose consumer api/routes/status.mjs echoes the row and whose BackgroundJob swagger schema was repointed to run_at in this same commit."
+    },
+    {
+      "table": "league_team_daily_values",
+      "column": "timestamp",
+      "sites": ["api/routes/leagues/team-daily-values.mjs"],
+      "verdict": "already-swept",
+      "reason": "The route echoes observed_at wholesale and app/core/league-team-daily-values/reducer.js:29 maps it to a millisecond `timestamp` store key by construction, which is what keeps app/core/selectors.js:2864,2867 correct -- those read the store shape, not the column."
     }
   ]
 }

@@ -1899,8 +1899,11 @@ const options = {
                   description: 'Season year',
                   example: 2024
                 },
-                timestamp: {
-                  $ref: '#/components/schemas/UnixTimestamp'
+                occurred_at: {
+                  type: 'string',
+                  format: 'date-time',
+                  description: 'When the transaction occurred',
+                  example: '2024-10-22T14:22:00Z'
                 },
                 waiverid: {
                   type: 'integer',
@@ -1917,7 +1920,7 @@ const options = {
                 'player_salary',
                 'week',
                 'season_year',
-                'timestamp',
+                'occurred_at',
                 'waiverid'
               ]
             }
@@ -3022,10 +3025,11 @@ const options = {
               description: 'Whether the job execution was successful',
               example: true
             },
-            timestamp: {
-              type: 'integer',
-              description: 'Unix timestamp of when the job was executed',
-              example: 1640995200
+            run_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'When the job was executed',
+              example: '2024-01-15T10:30:00Z'
             },
             reason: {
               type: 'string',
@@ -3035,7 +3039,7 @@ const options = {
               example: 'Database connection timeout'
             }
           },
-          required: ['id', 'type', 'is_successful', 'timestamp']
+          required: ['id', 'type', 'is_successful', 'run_at']
         },
         SystemHealthError: {
           type: 'object',
