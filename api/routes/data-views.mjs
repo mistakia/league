@@ -962,7 +962,19 @@ router.delete('/:view_id', async (req, res) => {
 router.post('/search/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
-    const { where, columns, sort, offset, prefix_columns, row_axes } = req.body
+    // Every key the client sends has to be named here AND forwarded to
+    // `get_data_view_results` below -- an omitted one silently takes that
+    // function's default rather than failing. `row_grain` was missing from both
+    // lists, so a team-grain request was answered at player grain.
+    const {
+      where,
+      columns,
+      sort,
+      offset,
+      prefix_columns,
+      row_axes,
+      row_grain
+    } = req.body
 
     // This route sits ahead of the blanket auth guard and stays open to
     // anonymous callers; the viewer is read only so a viewer-scoped column can
@@ -976,6 +988,7 @@ router.post('/search/?', async (req, res) => {
       offset,
       prefix_columns,
       row_axes,
+      row_grain,
       user_id
     })}`
     const cached_result = await redis_cache.get(cache_key)
@@ -998,6 +1011,7 @@ router.post('/search/?', async (req, res) => {
         offset,
         prefix_columns,
         row_axes,
+        row_grain,
         user_id
       })
 
@@ -1282,6 +1296,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
       offset: table_state.offset,
       prefix_columns: table_state.prefix_columns,
       row_axes: table_state.row_axes,
+      row_grain: table_state.row_grain,
       user_id
     })}`
 
@@ -1305,6 +1320,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         offset: table_state.offset,
         prefix_columns: table_state.prefix_columns,
         row_axes: table_state.row_axes,
+        row_grain: table_state.row_grain,
         limit,
         user_id
       })

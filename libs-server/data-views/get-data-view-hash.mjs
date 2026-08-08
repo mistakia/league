@@ -11,6 +11,7 @@ import { table_state_is_viewer_scoped } from '#libs-server/data-views/viewer-sco
 // A missing argument has to be loud; pass an explicit `null` for anonymous.
 export default function get_data_view_hash({
   row_axes = [],
+  row_grain = [],
   where = [],
   columns = [],
   prefix_columns = [],
@@ -36,6 +37,18 @@ export default function get_data_view_hash({
     ? user_id
     : null
 
+  // The row grain decides the SUBJECT of every row, so two table states that
+  // differ only in it describe entirely different result sets -- one row per
+  // player against one row per team. Omitting it here collided those two onto
+  // one key: a team-grain view served the player-grain rows another caller had
+  // written, ~500 players each repeating their team's numbers.
+  //
+  // `get_data_view_results` defaults an absent grain to player, so an absent
+  // grain, `[]` and `['player']` are the same request and must hash alike.
+  // Player grain is folded into the empty case for that reason, which also
+  // keeps every existing player-grain key valid.
+  const row_grain_id = row_grain[0] || 'player'
+
   return get_table_hash(
     JSON.stringify({
       row_axes,
@@ -45,6 +58,7 @@ export default function get_data_view_hash({
       sort,
       offset,
       limit,
+      ...(row_grain_id === 'player' ? {} : { row_grain: [row_grain_id] }),
       ...(viewer === null ? {} : { viewer })
     })
   )

@@ -2797,6 +2797,15 @@ const options = {
               description: 'Row axis configurations for data grouping',
               example: ['week', 'team']
             },
+            row_grain: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description:
+                'Subject of each row. Defaults to player when absent.',
+              example: ['team']
+            },
             prefix_columns: {
               type: 'array',
               items: {
@@ -2966,6 +2975,15 @@ const options = {
                 type: 'string'
               },
               description: 'Row axis configurations for data grouping'
+            },
+            row_grain: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description:
+                'Subject of each row. Defaults to player when absent.',
+              example: ['team']
             }
           },
           required: ['columns']
