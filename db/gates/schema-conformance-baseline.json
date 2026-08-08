@@ -1,7 +1,7 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-08T20:15:20.603Z",
-  "count": 21,
+  "generated_at": "2026-08-08T20:30:06.256Z",
+  "count": 16,
   "violations": [
     {
       "table": "league_formats",
@@ -14,34 +14,9 @@
       "rule": "timestamp_type"
     },
     {
-      "table": "nfl_plays_passer",
-      "column": "gsis_it_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "gsis_it_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays_receiver",
-      "column": "gsis_it_id",
-      "rule": "external_id"
-    },
-    {
-      "table": "nfl_plays_rusher",
-      "column": "gsis_it_id",
-      "rule": "external_id"
-    },
-    {
       "table": "nfl_plays",
       "column": "updated",
       "rule": "timestamp_type"
-    },
-    {
-      "table": "nfl_snaps",
-      "column": "gsis_it_id",
-      "rule": "external_id"
     },
     {
       "table": "poaches",
