@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-08 against league_production
 --
 -- Conform external-id columns to the {system}_{entitytype}_id standard.
 --

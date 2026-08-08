@@ -78,15 +78,15 @@ const run = async () => {
 
     if (!current_season.now.isAfter(draftEnd)) continue // still open
 
-    const { timestamp, expired_count } = await close_rookie_draft({
+    const { completed_at, expired_count } = await close_rookie_draft({
       lid,
       year,
-      completed_at: draftEnd.unix()
+      completed_at: draftEnd.toDate()
     })
 
     if (expired_count) {
       log(
-        `league ${lid} year ${year}: expired ${expired_count} unused pick(s) at ${timestamp}`
+        `league ${lid} year ${year}: expired ${expired_count} unused pick(s) at ${completed_at.toISOString()}`
       )
       closed.push({ lid, year, expired_count })
     }

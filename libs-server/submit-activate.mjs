@@ -16,7 +16,12 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     throw new Error('invalid leagueId')
   }
 
-  const timestamp = Math.round(Date.now() / 1000)
+  // transactions.occurred_at is timestamptz and takes the instant directly.
+  // Rounding it through epoch seconds moves it up to half a second in either
+  // direction, which reorders it against a neighbouring transaction stamped
+  // from an unrounded clock. poaches.processed below is still epoch seconds.
+  const occurred_at = new Date()
+  const timestamp = Math.round(occurred_at.getTime() / 1000)
 
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
@@ -49,7 +54,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
       lid: leagueId,
       tid
     })
-    .orderBy('transactions.timestamp', 'desc')
+    .orderBy('transactions.occurred_at', 'desc')
   const player_row = player_rows[0]
 
   // make sure team has space on active roster
@@ -71,7 +76,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     player_salary: player_row.player_salary,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp
+    occurred_at
   }
   await db('transactions').insert(transaction)
 

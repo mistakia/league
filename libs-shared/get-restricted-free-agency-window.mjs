@@ -2,6 +2,8 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 
+import timestamptz_to_epoch from './timestamptz-to-epoch.mjs'
+
 import {
   league_default_rfa_window_hours,
   league_default_rfa_processing_lead_hours
@@ -153,7 +155,9 @@ export const get_restricted_free_agency_nominating_team_index = ({
  * Total number of windows in the period — one per nomination opportunity.
  */
 export const get_restricted_free_agency_window_count = ({ league }) => {
-  const period_end = Number(league.restricted_free_agency_period_end)
+  const period_end = timestamptz_to_epoch(
+    league.restricted_free_agency_period_end
+  )
   if (!period_end) return 0
 
   return (

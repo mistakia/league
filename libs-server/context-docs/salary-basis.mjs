@@ -1,4 +1,5 @@
 import is_before_extension_deadline from '#libs-shared/is-before-extension-deadline.mjs'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
 import { format_date_et } from './markdown.mjs'
 
@@ -13,7 +14,7 @@ import { format_date_et } from './markdown.mjs'
 export function resolve_salary_basis({ league, year }) {
   const before_deadline = is_before_extension_deadline({ league })
   const deadline = league.ext_date
-    ? format_date_et(league.ext_date)
+    ? format_date_et(timestamptz_to_epoch(league.ext_date))
     : 'not configured'
 
   return {

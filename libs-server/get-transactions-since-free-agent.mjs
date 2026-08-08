@@ -16,7 +16,7 @@ async function getTransactionsSinceFreeAgent({
       lid,
       pid
     })
-    .orderBy('timestamp', 'desc')
+    .orderBy('occurred_at', 'desc')
     .orderBy('uid', 'desc')
 
   const types = [

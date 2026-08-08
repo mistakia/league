@@ -2,6 +2,8 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 
+import timestamptz_to_epoch from './timestamptz-to-epoch.mjs'
+
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
@@ -48,8 +50,16 @@ const HOURS_PER_DAY = 24
  * @param {number} [args.cadence_interval=1] - Units of `cadence_unit` between consecutive windows.
  * @param {number} [args.daily_window_start_hour=11] - First hour of the day a window may open (inclusive).
  * @param {number} [args.daily_window_end_hour=16] - Hour of the day windows stop opening (EXCLUSIVE).
+ * `last_consecutive_pick.selection_timestamp` is timestamptz as of the
+ * 2026-08-07 conformance pass (`draft.selection_timestamp`) and is always
+ * DB-sourced, so it is taken as an instant here rather than converted at each
+ * caller — the same rule `getDraftDates` states for `last_selection_timestamp`.
+ * `draft_start_timestamp` stays epoch seconds because this function does
+ * arithmetic on it. Passing epoch seconds for the selection throws rather than
+ * silently reading as 1970, which is the failure this convention exists to end.
+ *
  * @param {Object} [args.last_consecutive_pick] - `{ pick, selection_timestamp }` of the last
- *   pick made with no gap behind it. Omit pre-draft.
+ *   pick made with no gap behind it, the selection being a `Date` or ISO string. Omit pre-draft.
  *
  * @returns {import('dayjs').Dayjs} The moment the pick's window opens.
  *
@@ -68,7 +78,7 @@ const HOURS_PER_DAY = 24
  * getDraftWindow({
  *   draft_start_timestamp: 1787371200,
  *   pick_number: 9,
- *   last_consecutive_pick: { pick: 8, selection_timestamp: 1787400000 }
+ *   last_consecutive_pick: { pick: 8, selection_timestamp: '2026-08-25T18:40:00Z' }
  * })
  *
  * @example
@@ -139,7 +149,9 @@ function resolve_reference({
 
     if (picks_ahead > 0) {
       return {
-        reference_timestamp: last_consecutive_pick.selection_timestamp,
+        reference_timestamp: timestamptz_to_epoch(
+          last_consecutive_pick.selection_timestamp
+        ),
         step_count: picks_ahead - 1
       }
     }

@@ -51,7 +51,7 @@ export default async function ({
     player_salary: value,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp: Math.round(Date.now() / 1000),
+    occurred_at: new Date(),
     waiverid
   })
 

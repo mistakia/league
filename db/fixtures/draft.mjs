@@ -38,7 +38,8 @@ export default async function (knex) {
 
   const roster_player_rows = []
   const transaction_rows = []
-  const timestamp = Math.round(Date.now() / 1000)
+  // transactions.occurred_at is timestamptz.
+  const occurred_at = new Date()
 
   let i = 0
   while (!teams[i].r.isFull) {
@@ -93,7 +94,7 @@ export default async function (knex) {
         player_salary,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp
+        occurred_at
       })
     }
 

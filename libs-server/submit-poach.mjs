@@ -105,7 +105,7 @@ export default async function ({
   // verify team has enough cap if during the offseason
   const transactions = await db('transactions')
     .where({ pid, lid: leagueId })
-    .orderBy('timestamp', 'desc')
+    .orderBy('occurred_at', 'desc')
     .orderBy('uid', 'desc')
     .limit(1)
   const tran = transactions[0]

@@ -14,6 +14,7 @@ import {
   throw_if_shortfall
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
 const log = debug('reset-protected-designation')
 debug.enable('reset-protected-designation')
@@ -203,7 +204,10 @@ const reset_protected_designations_for_due_leagues = async ({
   const due_leagues = []
   const announce_failures = []
 
-  for (const { lid, ext_date } of eligible) {
+  // seasons.ext_date is timestamptz; `now` and league_notifications'
+  // event_timestamp contract downstream are both epoch seconds.
+  for (const { lid, ext_date: ext_date_at } of eligible) {
+    const ext_date = timestamptz_to_epoch(ext_date_at)
     if (now < ext_date) {
       log(
         `league ${lid}: ext_date ${ext_date} not yet reached (now=${now}); skipping`

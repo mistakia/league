@@ -27,7 +27,7 @@ export default async function ({
     throw new Error('invalid leagueId')
   }
 
-  const timestamp = Math.round(Date.now() / 1000)
+  const occurred_at = new Date()
 
   let roster = existing_roster
   if (!roster) {
@@ -63,14 +63,14 @@ export default async function ({
     pid: deactivate_pid
   })
   const sortedTransactions = transactionsSinceAcquisition.sort(
-    (a, b) => a.timestamp - b.timestamp
+    (a, b) => new Date(a.occurred_at) - new Date(b.occurred_at)
   )
   const lastTransaction = sortedTransactions[sortedTransactions.length - 1]
   const firstTransaction = sortedTransactions[0]
   const isActive = Boolean(roster.active.find((p) => p.pid === deactivate_pid))
 
   // make sure player has not been on the active roster for more than 48 hours
-  const cutoff = dayjs.unix(lastTransaction.timestamp).add('48', 'hours')
+  const cutoff = dayjs(lastTransaction.occurred_at).add('48', 'hours')
   if (isActive && dayjs().isAfter(cutoff)) {
     throw new Error('player has exceeded 48 hours on active roster')
   }
@@ -161,7 +161,7 @@ export default async function ({
     player_salary: lastTransaction.player_salary,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp
+    occurred_at
   }
   await db('transactions').insert(transaction)
 

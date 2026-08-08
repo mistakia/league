@@ -17,5 +17,5 @@ export default function is_before_extension_deadline({ league }) {
     return !current_season.isRegularSeason
   }
 
-  return current_season.now.isBefore(dayjs.unix(league.ext_date))
+  return current_season.now.isBefore(dayjs(league.ext_date))
 }

@@ -608,7 +608,7 @@ router.post(
       }
 
       // make sure trade deadline has not passed
-      const deadline = dayjs.unix(league.tddate)
+      const deadline = dayjs(league.tddate)
       if (now.isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
       }

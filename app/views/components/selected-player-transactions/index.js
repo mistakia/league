@@ -31,7 +31,7 @@ const map_state_to_props = createSelector(
         teams[transaction.tid] = transaction
       }
       if (
-        !max_transaction.timestamp ||
+        !max_transaction.occurred_at ||
         transaction.player_salary > max_transaction.player_salary
       ) {
         max_transaction = transaction
@@ -57,7 +57,7 @@ const map_state_to_props = createSelector(
         })
       : player_salary
     extension_salaries.push({
-      year: current_season.year,
+      season_year: current_season.year,
       extended_salary
     })
 
@@ -72,7 +72,7 @@ const map_state_to_props = createSelector(
       })
       year += 1
       extension_salaries.push({
-        year,
+        season_year: year,
         extended_salary: salary
       })
     }

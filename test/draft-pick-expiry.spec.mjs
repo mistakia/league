@@ -39,7 +39,9 @@ describe('draft pick expiry', function () {
     it('expires unused picks and records the completion timestamp', async () => {
       const lid = 1
       const year = current_season.year
-      const completed_at = regular_season_start.subtract('1', 'week').unix()
+      // close_rookie_draft is Dates end to end: both seasons.rookie_draft_completed_at
+      // and draft.expired_at are timestamptz.
+      const completed_at = regular_season_start.subtract('1', 'week').toDate()
 
       const before_count = await knex('draft')
         .where({ lid, season_year: year })
@@ -49,13 +51,14 @@ describe('draft pick expiry', function () {
 
       expect(Number(before_count.count)).to.be.above(0)
 
-      const { timestamp, expired_count } = await close_rookie_draft({
-        lid,
-        year,
-        completed_at
-      })
+      const { completed_at: recorded_at, expired_count } =
+        await close_rookie_draft({
+          lid,
+          year,
+          completed_at
+        })
 
-      expect(timestamp).to.equal(completed_at)
+      expect(recorded_at.getTime()).to.equal(completed_at.getTime())
       expect(expired_count).to.equal(Number(before_count.count))
 
       const after_count = await knex('draft')
@@ -69,23 +72,26 @@ describe('draft pick expiry', function () {
       const season = await knex('seasons')
         .where({ lid, season_year: year })
         .first()
-      expect(Number(season.rookie_draft_completed_at)).to.equal(completed_at)
+      expect(season.rookie_draft_completed_at.getTime()).to.equal(
+        completed_at.getTime()
+      )
     })
 
     it('is idempotent and does not move the original timestamp', async () => {
       const lid = 1
       const year = current_season.year
-      const later = regular_season_start.add('1', 'week').unix()
+      const later = regular_season_start.add('1', 'week').toDate()
 
-      const { timestamp, expired_count } = await close_rookie_draft({
-        lid,
-        year,
-        completed_at: later
-      })
+      const { completed_at: recorded_at, expired_count } =
+        await close_rookie_draft({
+          lid,
+          year,
+          completed_at: later
+        })
 
       // The league-year is already closed, so the supplied timestamp is
       // ignored rather than overwriting the recorded one.
-      expect(timestamp).to.not.equal(later)
+      expect(recorded_at.getTime()).to.not.equal(later.getTime())
       expect(expired_count).to.equal(0)
     })
 

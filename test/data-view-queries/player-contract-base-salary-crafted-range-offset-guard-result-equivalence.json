@@ -24,7 +24,7 @@
   "result_equivalence": {
     "seed": [
       "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-CTRX-000900', 'Test', 'Ctrx', 'T.Ctrx', 'Test Ctrx', 'MLB', 'MLB', '2000-01-01', 2020)",
-      "INSERT INTO player_contracts (pid, season_year, team, base_salary) VALUES ('TEST-CTRX-000900', '2024', 'KC', 5000.000)"
+      "INSERT INTO player_contracts (pid, season_year, nfl_team, base_salary) VALUES ('TEST-CTRX-000900', '2024', 'KC', 5000.000)"
     ],
     "reference_sql": "SELECT base_salary AS base_salary_0 FROM player_contracts WHERE pid = 'TEST-CTRX-000900' AND season_year = '2024'",
     "compare_columns": ["base_salary_0"]

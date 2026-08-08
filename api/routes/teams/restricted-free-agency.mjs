@@ -372,7 +372,7 @@ router.post('/?', async (req, res) => {
       if (
         league.restricted_free_agency_period_end &&
         current_season.now.isAfter(
-          dayjs.unix(league.restricted_free_agency_period_end)
+          dayjs(league.restricted_free_agency_period_end)
         )
       ) {
         return res
@@ -741,7 +741,7 @@ router.delete('/?', async (req, res) => {
     if (
       league.restricted_free_agency_period_end &&
       current_season.now.isAfter(
-        dayjs.unix(league.restricted_free_agency_period_end)
+        dayjs(league.restricted_free_agency_period_end)
       )
     ) {
       return res

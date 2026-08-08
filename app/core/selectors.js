@@ -465,13 +465,15 @@ export const get_rookie_draft_end = createSelector(
     // Prioritize explicit completion timestamp when available
     const rookie_draft_completed_at = current_league.rookie_draft_completed_at
     if (rookie_draft_completed_at) {
-      return dayjs.unix(rookie_draft_completed_at).tz('America/New_York')
+      return dayjs(rookie_draft_completed_at).tz('America/New_York')
     }
 
     // Fallback to existing calculation logic
     if (last_pick.selection_timestamp) {
-      return dayjs
-        .unix(last_pick.selection_timestamp)
+      // timestamptz as of the 2026-08-07 conformance pass, so it arrives as an
+      // ISO string through JSON; dayjs.unix() on one yields an Invalid Date,
+      // which silently made every downstream draft-end comparison false.
+      return dayjs(last_pick.selection_timestamp)
         .tz('America/New_York')
         .endOf('day')
     }
@@ -607,7 +609,7 @@ export const is_before_extension_deadline = createSelector(
       return true
     }
 
-    const deadline = dayjs.unix(ext_date)
+    const deadline = dayjs(ext_date)
     return current_season.now.isBefore(deadline)
   }
 )
@@ -624,7 +626,7 @@ export const is_before_restricted_free_agency_start = createSelector(
       return false
     }
 
-    const deadline = dayjs.unix(restricted_free_agency_period_start)
+    const deadline = dayjs(restricted_free_agency_period_start)
     return current_season.now.isBefore(deadline)
   }
 )
@@ -641,7 +643,7 @@ export const is_before_restricted_free_agency_end = createSelector(
       return false
     }
 
-    const deadline = dayjs.unix(restricted_free_agency_period_end)
+    const deadline = dayjs(restricted_free_agency_period_end)
     return current_season.now.isBefore(deadline)
   }
 )
@@ -662,7 +664,7 @@ export const get_league_events = createSelector(
     const now = dayjs()
 
     if (league.ext_date) {
-      const ext_date = dayjs.unix(league.ext_date)
+      const ext_date = dayjs(league.ext_date)
       if (now.isBefore(ext_date)) {
         events.push({
           detail: 'Extension Deadline',
@@ -672,7 +674,7 @@ export const get_league_events = createSelector(
     }
 
     if (league.restricted_free_agency_period_start) {
-      const restricted_free_agency_period_start = dayjs.unix(
+      const restricted_free_agency_period_start = dayjs(
         league.restricted_free_agency_period_start
       )
       if (now.isBefore(restricted_free_agency_period_start)) {
@@ -684,7 +686,7 @@ export const get_league_events = createSelector(
     }
 
     if (league.restricted_free_agency_period_end) {
-      const restricted_free_agency_period_end = dayjs.unix(
+      const restricted_free_agency_period_end = dayjs(
         league.restricted_free_agency_period_end
       )
       if (now.isBefore(restricted_free_agency_period_end)) {
@@ -696,7 +698,7 @@ export const get_league_events = createSelector(
     }
 
     if (league.draft_start) {
-      const draft_start = dayjs.unix(league.draft_start)
+      const draft_start = dayjs(league.draft_start)
       if (now.isBefore(draft_start)) {
         events.push({
           detail: 'Rookie Draft Begins',
@@ -768,7 +770,7 @@ export const get_league_events = createSelector(
 
     if (league.free_agency_live_auction_start) {
       const faPeriod = get_free_agent_period(league)
-      const date = dayjs.unix(league.free_agency_live_auction_start)
+      const date = dayjs(league.free_agency_live_auction_start)
       if (now.isBefore(date)) {
         if (now.isBefore(faPeriod.start)) {
           events.push({
@@ -815,7 +817,7 @@ export const get_league_events = createSelector(
     }
 
     if (league.tddate) {
-      const date = dayjs.unix(league.tddate)
+      const date = dayjs(league.tddate)
       if (now.isBefore(date)) {
         events.push({
           detail: 'Trade Deadline',
@@ -1360,12 +1362,11 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
         const roster_info = getRosterInfoForPlayerId(state, {
           pid: playerId
         })
-        const sanctuary_end = dayjs
-          .unix(roster_info.timestamp)
-          .add('24', 'hours')
-        const waiver_period_end = dayjs
-          .unix(roster_info.timestamp)
-          .add('24', 'hours')
+        const sanctuary_end = dayjs(roster_info.occurred_at).add('24', 'hours')
+        const waiver_period_end = dayjs(roster_info.occurred_at).add(
+          '24',
+          'hours'
+        )
 
         // check if player has existing poaching claim and is after sanctuary period
         const league_poaches = get_poaches_for_current_league(state)
@@ -1456,7 +1457,7 @@ export function isPlayerPracticeSquadEligible(
   }
 
   // not eligible if player has been on active roster for more than 48 hours
-  const cutoff = dayjs.unix(rosterPlayer.timestamp).add('48', 'hours')
+  const cutoff = dayjs(rosterPlayer.occurred_at).add('48', 'hours')
   if (isSlotActive(rosterPlayer.slot) && dayjs().isAfter(cutoff)) {
     return false
   }
@@ -3845,7 +3846,7 @@ export function getReserveTransactionsByPlayerId(state, { pid }) {
   return get_transactions(state)
     .get('reserve')
     .filter((t) => t.pid === pid)
-    .sort((a, b) => b.timestamp - a.timestamp)
+    .sort((a, b) => new Date(b.occurred_at) - new Date(a.occurred_at))
 }
 
 export function get_waiver_by_id(state, { waiverId }) {

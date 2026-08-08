@@ -28,11 +28,17 @@ const season = {
   franchise_tag_limit: 1,
   rookie_tag_limit: 1,
   restricted_free_agency_tag_limit: 2,
-  ext_date: 1785470399,
-  restricted_free_agency_period_start: 1785556800,
-  restricted_free_agency_period_end: 1787371199,
-  draft_start: 1787371200
+  // These stand in for `seasons` timestamptz columns, so the fixture carries
+  // Dates exactly as node-pg would hand them back.
+  ext_date: new Date(1785470399 * 1000),
+  restricted_free_agency_period_start: new Date(1785556800 * 1000),
+  restricted_free_agency_period_end: new Date(1787371199 * 1000),
+  draft_start: new Date(1787371200 * 1000)
 }
+
+// `season` carries Dates (the columns are timestamptz); the build_tag_board
+// contract is still epoch seconds for `now_unix`.
+const ext_date_unix = Math.round(season.ext_date.getTime() / 1000)
 
 // 9 starters + 7 bench = an active roster limit of 16.
 const league_format = {
@@ -343,7 +349,7 @@ describe('tag board', function () {
             { tid: 2, pid: 'B1', value: 10 }
           ],
           extensions_processed: true,
-          now_unix: season.ext_date
+          now_unix: ext_date_unix
         })
       )
 
@@ -369,7 +375,7 @@ describe('tag board', function () {
             { tid: 2, pid: 'B1', value: 10 }
           ],
           extensions_processed: false,
-          now_unix: season.ext_date + 1
+          now_unix: ext_date_unix + 1
         })
       )
 
@@ -645,18 +651,18 @@ describe('tag board', function () {
         {
           season_year: 2024,
           rookie_draft_completed_at: null,
-          draft_start: 1721707200
+          draft_start: new Date(1721707200 * 1000)
         },
         {
           season_year: 2025,
-          rookie_draft_completed_at: 1755187200,
-          draft_start: 1752552000
+          rookie_draft_completed_at: new Date(1755187200 * 1000),
+          draft_start: new Date(1752552000 * 1000)
         },
         // 2026's draft has not run yet.
         {
           season_year: 2026,
           rookie_draft_completed_at: null,
-          draft_start: 1787371200
+          draft_start: new Date(1787371200 * 1000)
         }
       ]
       resolve_rookie_class_year({ season_rows, now_unix }).should.equal(2025)
@@ -667,12 +673,12 @@ describe('tag board', function () {
         {
           season_year: 2023,
           rookie_draft_completed_at: null,
-          draft_start: 1687147200
+          draft_start: new Date(1687147200 * 1000)
         },
         {
           season_year: 2024,
           rookie_draft_completed_at: null,
-          draft_start: 1721707200
+          draft_start: new Date(1721707200 * 1000)
         }
       ]
       resolve_rookie_class_year({ season_rows, now_unix }).should.equal(2024)
@@ -1485,7 +1491,9 @@ describe('tag board', function () {
       schedule[0].windows.should.have.length(2)
 
       const day = 24 * 60 * 60
-      const start = season.restricted_free_agency_period_start
+      const start = Math.round(
+        season.restricted_free_agency_period_start.getTime() / 1000
+      )
       schedule[0].windows[0].at_iso.should.equal(
         new Date(start * 1000).toISOString()
       )
@@ -1515,9 +1523,7 @@ describe('tag board', function () {
         new Date(now_unix * 1000).toISOString()
       )
       freshness.next_deadline.field.should.equal('ext_date')
-      freshness.next_deadline.at_iso.should.equal(
-        new Date(season.ext_date * 1000).toISOString()
-      )
+      freshness.next_deadline.at_iso.should.equal(season.ext_date.toISOString())
     })
   })
 

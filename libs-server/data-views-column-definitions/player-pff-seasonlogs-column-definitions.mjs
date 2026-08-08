@@ -118,7 +118,11 @@ const PFF_PLAYER_RANGE_OFFSET_AGGREGATE = {
 // varchar metadata: neither SUM nor AVG is defined for text. A multi-year window
 // renders the most-recent season's value (ORDER BY year DESC LIMIT 1) rather
 // than an aggregate.
-const PFF_PLAYER_TEXT_COLUMNS = new Set(['grade_position', 'position', 'unit'])
+const PFF_PLAYER_TEXT_COLUMNS = new Set([
+  'grade_position',
+  'player_position',
+  'unit'
+])
 
 const create_field_from_pff_player_seasonlogs = (column_name) => {
   const field = {
@@ -181,7 +185,8 @@ export default {
     create_field_from_pff_player_seasonlogs('run_block_snaps'),
   player_pff_offense_ranked:
     create_field_from_pff_player_seasonlogs('offense_ranked'),
-  player_pff_position: create_field_from_pff_player_seasonlogs('position'),
+  player_pff_position:
+    create_field_from_pff_player_seasonlogs('player_position'),
   player_pff_defense_snaps:
     create_field_from_pff_player_seasonlogs('defense_snaps'),
   player_pff_pass_snaps: create_field_from_pff_player_seasonlogs('pass_snaps'),

@@ -46,7 +46,7 @@ const initialize_cli = () =>
 // for the watermark it replaces -- completeness costs 20ms per poll.
 const fingerprint_sql = `
 SELECT md5(concat_ws('|',
-  (SELECT md5(string_agg(concat_ws(':', uid, tid, pid, type, player_salary, season_year, timestamp), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', uid, tid, pid, type, player_salary, season_year, occurred_at), ',' ORDER BY uid))
      FROM transactions WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', uid, propose_tid, accept_tid, season_year, offered, accepted, cancelled, rejected, vetoed), ',' ORDER BY uid))
      FROM trades WHERE lid = ?),

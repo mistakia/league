@@ -68,7 +68,7 @@ describe('build_roster_players_query', () => {
 
   it('orders so the newest transaction per player wins the uniqBy', () => {
     expect(sql).to.include(
-      'order by "transactions"."timestamp" desc, "transactions"."uid" desc'
+      'order by "transactions"."occurred_at" desc, "transactions"."uid" desc'
     )
   })
 })

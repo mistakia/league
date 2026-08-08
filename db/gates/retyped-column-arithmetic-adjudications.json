@@ -1,0 +1,14 @@
+[
+  {
+    "path": "libs-server/create-league.mjs",
+    "column": "free_agency_live_auction_start",
+    "kind": "retyped_read_in_epoch_arithmetic",
+    "reason": "Not a column read. `league_params` is the caller's INPUT bag, which takes epoch seconds by contract -- every test fixture and the league-create route pass epoch -- and this file converts at the write boundary with `epoch_to_timestamptz` on all six temporal params (lines 84-102). So the `dayjs.unix()` at line 19 reads the parameter in its declared unit to enforce the Article XII section 2 auction window, not the retyped column. Re-verified 2026-08-08 against the conversion at line 99."
+  },
+  {
+    "path": "test/api.super-priority.spec.mjs",
+    "column": "poach_timestamp",
+    "kind": "retyped_read_in_epoch_arithmetic",
+    "reason": "Not a column read, and the arithmetic is correct. `result.poach_timestamp` comes from `test/utils/setup-super-priority.mjs`, which computes it as epoch seconds (`currentTimestamp - weeks_ago * 7 * 24 * 60 * 60`, line 22) and returns that number (line 152); the fixture converts at every write with `epoch_to_timestamptz`. So `poach_timestamp +/- N` is arithmetic on epoch seconds in their declared unit, wrapped in the converter before it reaches the retyped column. Same by-contract shape as create-league.mjs and the same known limit: a property read cannot tell a database row from an object whose keys are named after columns. This is the whole of what the 2026-08-07 sweep's unscanned `test/` root held for this class -- re-derived mechanically 2026-08-08 rather than trusted, `private/` alongside it with zero findings."
+  }
+]

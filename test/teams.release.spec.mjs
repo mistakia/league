@@ -82,7 +82,11 @@ describe('API /teams - release', function () {
       res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.player_salary.should.equal(0)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // occurred_at is timestamptz, so it serializes as an ISO string; compare
+      // to the second rather than to an epoch integer.
+      Math.round(
+        new Date(res.body.transaction.occurred_at).getTime() / 1000
+      ).should.equal(Math.round(Date.now() / 1000))
 
       const rosterRow = await getRoster({ tid: teamId })
       expect(rosterRow.players.length).to.equal(0)
@@ -136,7 +140,11 @@ describe('API /teams - release', function () {
       res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.player_salary.should.equal(0)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // occurred_at is timestamptz, so it serializes as an ISO string; compare
+      // to the second rather than to an epoch integer.
+      Math.round(
+        new Date(res.body.transaction.occurred_at).getTime() / 1000
+      ).should.equal(Math.round(Date.now() / 1000))
 
       const rosterRow = await getRoster({ tid: teamId })
       expect(rosterRow.players.length).to.equal(0)
@@ -190,7 +198,11 @@ describe('API /teams - release', function () {
       res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.player_salary.should.equal(0)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // occurred_at is timestamptz, so it serializes as an ISO string; compare
+      // to the second rather than to an epoch integer.
+      Math.round(
+        new Date(res.body.transaction.occurred_at).getTime() / 1000
+      ).should.equal(Math.round(Date.now() / 1000))
 
       const rosterRow = await getRoster({ tid: teamId })
       expect(rosterRow.players.length).to.equal(0)
@@ -244,7 +256,11 @@ describe('API /teams - release', function () {
       res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.player_salary.should.equal(0)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // occurred_at is timestamptz, so it serializes as an ISO string; compare
+      // to the second rather than to an epoch integer.
+      Math.round(
+        new Date(res.body.transaction.occurred_at).getTime() / 1000
+      ).should.equal(Math.round(Date.now() / 1000))
 
       const rosterRow = await getRoster({ tid: teamId })
       expect(rosterRow.players.length).to.equal(0)
@@ -298,7 +314,11 @@ describe('API /teams - release', function () {
       res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.player_salary.should.equal(0)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // occurred_at is timestamptz, so it serializes as an ISO string; compare
+      // to the second rather than to an epoch integer.
+      Math.round(
+        new Date(res.body.transaction.occurred_at).getTime() / 1000
+      ).should.equal(Math.round(Date.now() / 1000))
 
       const rosterRow = await getRoster({ tid: teamId })
       expect(rosterRow.players.length).to.equal(0)
@@ -352,7 +372,11 @@ describe('API /teams - release', function () {
       res.body.transaction.pid.should.equal(player.pid)
       res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.player_salary.should.equal(0)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // occurred_at is timestamptz, so it serializes as an ISO string; compare
+      // to the second rather than to an epoch integer.
+      Math.round(
+        new Date(res.body.transaction.occurred_at).getTime() / 1000
+      ).should.equal(Math.round(Date.now() / 1000))
 
       const rosterRow = await getRoster({ tid: teamId })
       expect(rosterRow.players.length).to.equal(0)

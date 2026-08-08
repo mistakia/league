@@ -181,7 +181,23 @@ const DEFAULT_ROOTS = [
   'docs',
   'api/swagger',
   'server/crontab-main',
-  'server/crontab-worker-1'
+  'server/crontab-worker-1',
+  // This repository's own executable SQL, gate 3 only. These are DEFAULT rather
+  // than arguments because they are inside the checkout: the roots are a
+  // parameter of the run only for the corpus that lives outside it. `prose` is
+  // empty, so gate 1's prose derivation never sees them — the same measured
+  // split that keeps user-base `.mjs` out of it.
+  {
+    path: 'scripts',
+    extensions: new Set(['.mjs']),
+    prose_extensions: new Set()
+  },
+  {
+    path: 'libs-server',
+    extensions: new Set(['.mjs']),
+    prose_extensions: new Set()
+  },
+  { path: 'jobs', extensions: new Set(['.mjs']), prose_extensions: new Set() }
 ]
 
 // `.sh` and `.mjs` are here for GATE 3. A shell script holding SQL in a bash
@@ -1402,6 +1418,154 @@ const collect_api_query_sql_blocks = (
   return { statements, uncovered, database_scoped, coverage }
 }
 
+// ---------------------------------------------------------------------------
+// gate 3, third transport: SQL handed to `<binding>.raw()` in this checkout
+// ---------------------------------------------------------------------------
+
+// WHY THIS TRANSPORT EXISTS. Gate 3's first two transports reach OUTSIDE this
+// checkout, and that asymmetry left this repository's own hand-written SQL in no
+// gate at all. `check-knex-column-resolution` parses knex BUILDERS and gate 1
+// reads `'table.column'` literals; a bare column inside a `concat_ws` in a
+// template literal is neither, so `refresh-roster-asset-lineage.mjs`'s
+// fingerprint kept naming `transactions.timestamp` after the 2026-08-07 conform
+// renamed it to `occurred_at` and no gate could see it (fixed in `34a7a40f5`).
+// EXPLAIN resolves that shape for free, exactly as it does for a bash variable.
+//
+// THE BINDING READS AN IMPORT, NOT A PATH. A file that imports `#db` is talking
+// to the league database -- that is the transport stating its target, the same
+// rule as `psql -d` and `/api/db/<database>/query`, and it reads no FILENAME. It
+// is also why this needs no root allowlist to keep user-base `.mjs` out of it:
+// `cli/content/refresh-player-snapshot.mjs` reaches league over the API endpoint
+// and imports no `#db`, so it cannot be swept in here by accident. A file that
+// yields SQL with no `#db` import goes to UNRESOLVED and is printed --
+// `libs-server/view-organization/toggle-favorite.mjs` is the standing example,
+// taking its `db` as a function parameter.
+//
+// WHAT IS EXTRACTED, measured rather than assumed. Of 378 `.raw(` call sites in
+// `scripts`, `libs-server` and `jobs`, only 21 hand a literal that is a complete
+// statement; the rest are expression FRAGMENTS (`count(*) as count`,
+// `total_checks + 1`) which are not EXPLAINable on their own and are counted, not
+// judged. A further 15 statements live in module-level template constants
+// (`const fingerprint_sql = ...`), which is the shape the lineage defect had, so
+// those are read too. Sizing a second oracle for the 357 fragments would have
+// been sizing the fix to an assumed surface -- the fragments have no FROM clause,
+// so no oracle can bind their columns to a table without inventing one.
+const DB_RAW_CALL_RE = /\b([A-Za-z_$][A-Za-z0-9_$]*)\.raw\(/g
+
+// A `const NAME = ` whose value opens a template or quoted literal, at any
+// indentation. Restricting this to column 0 was the first draft and it cost 13 of
+// the 15 real SQL constants in the corpus -- `export-weekly-market-review.mjs`
+// and `update-market-settlement-status.mjs` declare theirs inside a function.
+// The worry that drove the restriction (a log-line template being read as SQL)
+// is already carried by `EXPLAINABLE_RE`, which a log line cannot pass: nothing
+// but a statement opens on SELECT/WITH/INSERT/UPDATE/DELETE.
+const MODULE_CONSTANT_RE =
+  /(?:^|\n)[ \t]*(?:const|let|var)[ \t]+([A-Za-z_$][A-Za-z0-9_$]*)[ \t]*=[ \t]*(?=['"`])/g
+
+// `import db from '#db'` in any of its spellings. The default binding is what
+// `.raw()` is called on; a named-only import (`import { x } from '#db'`) does not
+// bind the knex instance and so does not bind the file.
+const DB_IMPORT_RE =
+  /import[ \t]+([A-Za-z_$][A-Za-z0-9_$]*)[ \t]*(?:,[^\n]*)?from[ \t]*['"]#db['"]/
+
+const collect_db_raw_sql_blocks = (
+  corpus,
+  read_file = (file) => fs.readFileSync(file, 'utf8')
+) => {
+  const statements = []
+  const uncovered = []
+  const unresolved = []
+  const coverage = {
+    javascript_files: 0,
+    raw_call_sites: 0,
+    raw_literals_read: 0,
+    module_constants_read: 0,
+    files_bound_to_league: 0,
+    files_unresolved: 0
+  }
+
+  for (const entry of corpus) {
+    if (path.extname(entry.file) !== '.mjs') continue
+    if (entry.prose !== false) continue
+    const source = read_file(entry.file)
+    // An `/api/db/<database>/query` caller is the OTHER transport's file and it
+    // binds per call site; reading it here too would double-report its SQL under
+    // a file-scoped binding it does not have.
+    if (API_QUERY_ENDPOINT_RE.test(source)) {
+      API_QUERY_ENDPOINT_RE.lastIndex = 0
+      continue
+    }
+    coverage.javascript_files += 1
+    const relative = display_path(entry)
+
+    // Extraction first, binding second — same order as the shell transport, so a
+    // file carrying no SQL never reaches the resolver and cannot fill a bucket.
+    const extracted = []
+    const extracted_uncovered = []
+    const take = (body, index, shape) =>
+      push_extracted_statements({
+        body,
+        line: source.slice(0, index).split('\n').length,
+        relative,
+        shape,
+        database: null,
+        statements: extracted,
+        uncovered: extracted_uncovered
+      })
+
+    DB_RAW_CALL_RE.lastIndex = 0
+    let match
+    while ((match = DB_RAW_CALL_RE.exec(source))) {
+      coverage.raw_call_sites += 1
+      let cursor = match.index + match[0].length
+      while (/[\s]/.test(source[cursor] || '')) cursor++
+      const literal = read_javascript_string_literal(source, cursor)
+      if (!literal) continue
+      coverage.raw_literals_read += 1
+      // A fragment is not a defect and not a statement; `push_extracted_statements`
+      // would file it as uncovered noise, 300-odd entries deep, drowning the
+      // bucket that has to stay readable. Fragments are counted in
+      // `raw_literals_read` minus what reaches the oracle.
+      if (!EXPLAINABLE_RE.test(strip_leading_comments(literal.value))) continue
+      take(literal.value, match.index, `${match[1]}.raw()`)
+    }
+
+    MODULE_CONSTANT_RE.lastIndex = 0
+    while ((match = MODULE_CONSTANT_RE.exec(source))) {
+      const literal = read_javascript_string_literal(
+        source,
+        match.index + match[0].length
+      )
+      if (!literal) continue
+      if (!EXPLAINABLE_RE.test(strip_leading_comments(literal.value))) continue
+      coverage.module_constants_read += 1
+      take(literal.value, match.index, `const ${match[1]}`)
+    }
+
+    if (!extracted.length && !extracted_uncovered.length) continue
+
+    const import_match = DB_IMPORT_RE.exec(source)
+    const sites = [...extracted, ...extracted_uncovered]
+    if (!import_match) {
+      coverage.files_unresolved += 1
+      for (const site of sites)
+        unresolved.push({
+          path: site.path,
+          line: site.line,
+          reason:
+            'file hands SQL to `.raw()` but imports no `#db`; its database is not derivable'
+        })
+      continue
+    }
+    coverage.files_bound_to_league += 1
+    for (const site of extracted)
+      statements.push({ ...site, database: 'league_production' })
+    uncovered.push(...extracted_uncovered)
+  }
+
+  return { statements, uncovered, unresolved, coverage }
+}
+
 // knex formats a query error as `${sql} - ${message}`, so on a multi-line
 // documented query the naive `message.split('\n')[0]` is the first line of the
 // SELECT and the actual Postgres error is nowhere in the finding. Read the driver
@@ -1572,7 +1736,8 @@ const run_negative_control = async ({
   views,
   db,
   statements,
-  shell_statements = []
+  shell_statements = [],
+  db_raw_statements = []
 }) => {
   const cases = []
 
@@ -2048,6 +2213,145 @@ const run_negative_control = async ({
     ])
   }
 
+  // 12. The `.raw()` transport, same discriminator a third time. The pair here is
+  //     an `#db` import against no `#db` import, because that is what binds this
+  //     transport -- identical SQL, identical shape, one bound to league and one
+  //     landing in UNRESOLVED. A gate reporting both would be judging any repo's
+  //     JavaScript against the league schema; a gate reporting neither has stopped
+  //     extracting.
+  if (db) {
+    const synthetic_path = path.join(repo_root, '__negative_control_raw__.mjs')
+    const script = (import_line) =>
+      [
+        import_line,
+        '',
+        'const run = async () =>',
+        '  db.raw(`',
+        '    SELECT p.negative_control_absent',
+        '      FROM player p',
+        '  `)'
+      ].join('\n')
+    const extract = (import_line) =>
+      collect_db_raw_sql_blocks(
+        [
+          {
+            file: synthetic_path,
+            root: '.',
+            absolute_root: repo_root,
+            prose: false
+          }
+        ],
+        () => script(import_line)
+      )
+
+    const bound_run = extract("import db from '#db'")
+    let bound_reported = false
+    if (bound_run.statements.length === 1) {
+      const result = await explain_statements({
+        db,
+        statements: bound_run.statements,
+        adjudications: [],
+        gate: 3
+      })
+      bound_reported =
+        result.findings.length === 1 && result.findings[0].code === '42703'
+    }
+    cases.push([
+      'gate 3 reports a `#db`-importing script whose .raw() names a column the table does not have',
+      bound_reported
+    ])
+
+    const unbound_run = extract("import something from '#libs-server'")
+    cases.push([
+      'gate 3 stays SILENT on the identical .raw() with no `#db` import, and buckets it UNRESOLVED',
+      unbound_run.statements.length === 0 && unbound_run.unresolved.length === 1
+    ])
+  }
+
+  // 13. Both directions of the .raw() extraction on one input. The over-eager
+  //     direction is the one that fails toward success: 357 of this repo's 378
+  //     `.raw()` arguments are expression FRAGMENTS with no FROM clause, so an
+  //     extractor that took them would hand EXPLAIN 357 syntax errors and bury
+  //     the uncovered bucket that has to stay readable. The declined lines are
+  //     the real shapes -- a `concat_ws` fragment, a counter expression, and a
+  //     template that is a log line rather than SQL.
+  {
+    const synthetic_path = path.join(
+      repo_root,
+      '__negative_control_raw_shapes__.mjs'
+    )
+    const source = [
+      "import db from '#db'",
+      '',
+      'const fingerprint_sql = `',
+      "SELECT md5(concat_ws(':', uid, tid, pid)) FROM transactions WHERE lid = ?",
+      '`',
+      '',
+      "const counter = db.raw('total_checks + 1')",
+      'const projection = db.raw("concat_ws(\':\', uid, tid)")',
+      'const message = `processed the rows and reported them`',
+      '',
+      'const run = async () => db.raw(fingerprint_sql, [1])'
+    ].join('\n')
+    const run = collect_db_raw_sql_blocks(
+      [
+        {
+          file: synthetic_path,
+          root: '.',
+          absolute_root: repo_root,
+          prose: false
+        }
+      ],
+      () => source
+    )
+    // The constant is the shape the lineage fingerprint had, and reading it is
+    // the whole reason this transport exists: the defect it was written for was a
+    // stale bare column inside a `concat_ws`, in a template literal, which no
+    // other gate here can resolve.
+    const took_the_constant = run.statements.some((statement) =>
+      /FROM transactions/i.test(statement.sql)
+    )
+    const declined_the_fragments = !run.statements.some((statement) =>
+      /total_checks|processed the rows/i.test(statement.sql)
+    )
+    cases.push([
+      'gate 3 reads a template-literal SQL constant and declines a .raw() expression fragment',
+      took_the_constant && declined_the_fragments
+    ])
+  }
+
+  // 14. An EXPLAIN that must fail, on a REAL extracted `.raw()` statement. Scoped
+  //     to this transport on purpose: case 8 iterates the MERGED executable list,
+  //     so it still passes on a shell statement when the `.raw()` extraction has
+  //     gone blind. This one reports STAYED GREEN in that case, which is the
+  //     signal, and it is why there is no minimum-sites constant here either.
+  if (db) {
+    let reported = false
+    let victim = null
+    for (const statement of db_raw_statements) {
+      try {
+        await db.raw(`EXPLAIN ${statement.sql}`)
+      } catch {
+        continue
+      }
+      victim = statement
+      const mutated = mutate_first_relation_reference(statement.sql)
+      if (!mutated) continue
+      try {
+        await db.raw(`EXPLAIN ${mutated}`)
+      } catch (error) {
+        reported = error.code === '42P01'
+      }
+      break
+    }
+    cases.push([
+      victim
+        ? `gate 3 reports a .raw() statement pointed at a table that does not exist (${victim.path}:${victim.line})`
+        : 'gate 3 reports a .raw() statement pointed at a table that does not exist -- NO .raw() SQL IN CORPUS',
+      reported
+    ])
+  }
+
   console.log('')
   console.log('NEGATIVE CONTROL')
   let ok = true
@@ -2165,17 +2469,19 @@ const main = async () => {
   const blocks = collect_sql_blocks(corpus)
   const shell_blocks = collect_shell_sql_blocks(corpus)
   const api_blocks = collect_api_query_sql_blocks(corpus)
-  // Both gate-3 transports feed one oracle, so their league-bound statements are
-  // one list from here on.
+  const db_raw_blocks = collect_db_raw_sql_blocks(corpus)
+  // All three gate-3 transports feed one oracle, so their league-bound statements
+  // are one list from here on.
   const executable_statements = [
     ...shell_blocks.statements,
-    ...api_blocks.statements
+    ...api_blocks.statements,
+    ...db_raw_blocks.statements
   ]
   const database_scoped = [
     ...shell_blocks.database_scoped,
     ...api_blocks.database_scoped
   ]
-  const unresolved = [...shell_blocks.unresolved]
+  const unresolved = [...shell_blocks.unresolved, ...db_raw_blocks.unresolved]
 
   // Gates 2 and 3 share one scratch database: same oracle, same schema, and
   // provisioning it twice would double the only slow step in the run.
@@ -2257,6 +2563,18 @@ const main = async () => {
       `, ${api_blocks.coverage.sql_arguments_read} sql arguments read`
   )
   console.log(
+    `  gate 3: in-repo .mjs read               ${db_raw_blocks.coverage.javascript_files}`
+  )
+  console.log(
+    `  gate 3: .raw() sites                    ${db_raw_blocks.coverage.raw_call_sites}` +
+      ` — ${db_raw_blocks.coverage.raw_literals_read} literal args read` +
+      `, ${db_raw_blocks.coverage.module_constants_read} module SQL constants`
+  )
+  console.log(
+    `  gate 3: .raw()-bearing files bound      ${db_raw_blocks.coverage.files_bound_to_league} league` +
+      `, ${db_raw_blocks.coverage.files_unresolved} unresolved (no \`#db\` import)`
+  )
+  console.log(
     `  gate 3: statements EXPLAINed            ${options.gates.includes(3) ? gate_3.explained : 'not run'} of ${executable_statements.length} extracted`
   )
   const uncovered = [
@@ -2264,6 +2582,7 @@ const main = async () => {
     ...gate_2.uncovered,
     ...shell_blocks.uncovered,
     ...api_blocks.uncovered,
+    ...db_raw_blocks.uncovered,
     ...gate_3.uncovered
   ]
   console.log(
@@ -2382,7 +2701,8 @@ const main = async () => {
     views,
     db: provisioned ? provisioned.db : null,
     statements: blocks.statements,
-    shell_statements: executable_statements
+    shell_statements: executable_statements,
+    db_raw_statements: db_raw_blocks.statements
   })
 
   if (provisioned) {

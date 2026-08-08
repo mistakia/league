@@ -325,7 +325,11 @@ describe('API /trades', function () {
         player_salary: 0,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: Math.round(Date.now() / 1000)
+        // This activation must read as EARLIER than the trade and deactivate
+        // the test performs next. Rounding to an epoch second can round UP,
+        // putting the fixture up to half a second in the future and making it
+        // the last transaction.
+        occurred_at: new Date()
       })
 
       const player2 = await selectPlayer({
@@ -458,10 +462,9 @@ describe('API /trades', function () {
       // assertion reads the clock after the response, so an exact equality
       // fails whenever a second boundary falls between the two. Reproduced
       // once in 30 isolated runs of this file.
-      expect(res.body.transaction.timestamp).to.be.closeTo(
-        Math.round(Date.now() / 1000),
-        2
-      )
+      expect(
+        Math.round(new Date(res.body.transaction.occurred_at).getTime() / 1000)
+      ).to.be.closeTo(Math.round(Date.now() / 1000), 2)
 
       // verify poach is cancelled
       const poaches = await knex('poaches')

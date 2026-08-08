@@ -623,7 +623,7 @@ router.post(
       const league = await getLeague({ lid: leagueId })
 
       // make sure trade deadline has not passed
-      const deadline = dayjs.unix(league.tddate)
+      const deadline = dayjs(league.tddate)
       if (dayjs().isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
       }
@@ -918,6 +918,13 @@ router.post(
             )
           })
 
+        // ONE instant for every row this acceptance writes. These used to share
+        // an epoch SECOND, so `uid` broke the tie and insertion order decided
+        // which row read as latest. timestamptz has millisecond resolution, so
+        // a per-row `new Date()` would order them by construction time instead
+        // and silently change which transaction is "last" for a player.
+        const accepted_at = new Date()
+
         // insert transactions
         const insertTransactions = []
         for (const pid of acceptingTeamPlayers) {
@@ -931,7 +938,7 @@ router.post(
               .player_salary,
             week: current_season.week,
             season_year: current_season.year,
-            timestamp: Math.round(Date.now() / 1000)
+            occurred_at: accepted_at
           })
         }
         for (const pid of proposingTeamPlayers) {
@@ -945,7 +952,7 @@ router.post(
               .player_salary,
             week: current_season.week,
             season_year: current_season.year,
-            timestamp: Math.round(Date.now() / 1000)
+            occurred_at: accepted_at
           })
         }
 
@@ -971,7 +978,7 @@ router.post(
               player_salary: 0,
               week: current_season.week,
               season_year: current_season.year,
-              timestamp: Math.round(Date.now() / 1000)
+              occurred_at: accepted_at
             })
           }
 
@@ -985,7 +992,7 @@ router.post(
               player_salary: 0,
               week: current_season.week,
               season_year: current_season.year,
-              timestamp: Math.round(Date.now() / 1000)
+              occurred_at: accepted_at
             })
           }
 
@@ -1524,7 +1531,13 @@ router.post(
           .send({ error: 'trade is no longer open and can not be vetoed' })
       }
 
-      const vetoed_at = Math.round(Date.now() / 1000)
+      // ONE instant for every reversal row, at the resolution the column has.
+      // transactions.occurred_at is timestamptz, so rounding through epoch
+      // seconds would move these rows up to half a second in either direction
+      // and reorder them against the TRADE rows they reverse. trades.vetoed is
+      // still epoch seconds and takes the rounded integer.
+      const vetoed_occurred_at = new Date()
+      const vetoed_at = Math.round(vetoed_occurred_at.getTime() / 1000)
 
       // A trade that was never accepted moved nothing, so vetoing it is just a
       // status change. Only an accepted trade needs reversing.
@@ -1674,7 +1687,7 @@ router.post(
           player_salary: value_by_pid.get(row.pid) ?? 0,
           week: current_season.week,
           season_year: current_season.year,
-          timestamp: vetoed_at
+          occurred_at: vetoed_occurred_at
         }))
 
         for (const row of release_rows) {
@@ -1687,7 +1700,7 @@ router.post(
             player_salary: value_by_pid.get(row.pid) ?? 0,
             week: current_season.week,
             season_year: current_season.year,
-            timestamp: vetoed_at
+            occurred_at: vetoed_occurred_at
           })
         }
 

@@ -7,6 +7,7 @@ import timezone from 'dayjs/plugin/timezone.js'
 
 import { getDraftWindow } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
+import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -232,9 +233,11 @@ describe('LIBS-SHARED getDraftWindow', function () {
   })
 
   describe('mid-draft, measured from the last consecutive pick', function () {
+    // draft.selection_timestamp is timestamptz, so the calculator takes the
+    // instant rather than epoch seconds.
     const last_consecutive_pick = {
       pick: 29,
-      selection_timestamp: eastern('2026-08-25 14:37').unix()
+      selection_timestamp: eastern('2026-08-25 14:37').toDate()
     }
     const mid_draft = { ...hourly_9_to_22, last_consecutive_pick }
 
@@ -264,8 +267,25 @@ describe('LIBS-SHARED getDraftWindow', function () {
       // so making a pick pushed the next team's window HOURS INTO THE FUTURE
       // instead of opening it. Deep in the draft the error approached two days.
       expect(getDraftWindow({ ...mid_draft, pick_number: 30 }).unix()).to.equal(
-        last_consecutive_pick.selection_timestamp
+        timestamptz_to_epoch(last_consecutive_pick.selection_timestamp)
       )
+    })
+
+    it('refuses epoch seconds for the selection rather than reading them as 1970', () => {
+      // The 2026-08-07 conformance pass retyped draft.selection_timestamp to
+      // timestamptz. A caller still passing epoch seconds must fail loudly:
+      // dayjs.unix() on a Date is the silent class this convention exists to
+      // end, and it renders as a year-58,000 window instead of throwing.
+      expect(() =>
+        getDraftWindow({
+          ...hourly_9_to_22,
+          pick_number: 30,
+          last_consecutive_pick: {
+            pick: 29,
+            selection_timestamp: eastern('2026-08-25 14:37').unix()
+          }
+        })
+      ).to.throw(/expected a Date or an ISO string/)
     })
 
     it('skips the overnight gap', () => {
@@ -273,7 +293,7 @@ describe('LIBS-SHARED getDraftWindow', function () {
         ...hourly_9_to_22,
         last_consecutive_pick: {
           pick: 29,
-          selection_timestamp: eastern('2026-08-25 21:30').unix()
+          selection_timestamp: eastern('2026-08-25 21:30').toDate()
         }
       }
       expect(
@@ -341,8 +361,11 @@ describe('LIBS-SHARED getDraftWindow', function () {
   })
 
   describe('get_draft_window_config', function () {
+    // seasons.draft_start is timestamptz, so a real row carries a Date here;
+    // get_draft_window_config is the boundary that turns it back into the epoch
+    // seconds getDraftWindow does arithmetic on.
     const season_row = {
-      draft_start: draft_start_timestamp,
+      draft_start: new Date(draft_start_timestamp * 1000),
       draft_type: 'hour',
       draft_pick_interval: 1,
       draft_hour_min: 9,

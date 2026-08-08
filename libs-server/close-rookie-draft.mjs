@@ -30,20 +30,21 @@ if (!process.env.DEBUG) {
  * @param {Object} args
  * @param {number} args.lid - League id.
  * @param {number} args.year - Draft year to close.
- * @param {number} [args.completed_at] - Unix seconds the draft closed. Ignored
- *   when the league-year already has a completion timestamp. Required when it
- *   does not.
- * @returns {Promise<{ timestamp: number, expired_count: number }>} `timestamp`
- *   is unix seconds, matching `seasons.rookie_draft_completed_at`. Note
- *   `draft.expired_at` is timestamptz and is written as a Date.
+ * @param {Date} [args.completed_at] - When the draft closed. Ignored when the
+ *   league-year already has a completion timestamp. Required when it does not.
+ * @returns {Promise<{ completed_at: Date, expired_count: number }>} Both
+ *   `seasons.rookie_draft_completed_at` and `draft.expired_at` are timestamptz
+ *   as of the 2026-08-07 conformance pass, so this is a Date throughout. It
+ *   used to return unix seconds and coerce the column with `Number()`, which
+ *   would now yield milliseconds.
  */
 export default async function close_rookie_draft({ lid, year, completed_at }) {
   const season = await db('seasons').where({ lid, season_year: year }).first()
 
   const existing = season?.rookie_draft_completed_at
-  const timestamp = existing ? Number(existing) : completed_at
+  const closed_at = existing || completed_at
 
-  if (!timestamp) {
+  if (!closed_at) {
     throw new Error(
       `unable to close rookie draft for league ${lid} year ${year}: no completion timestamp recorded and none supplied`
     )
@@ -55,21 +56,21 @@ export default async function close_rookie_draft({ lid, year, completed_at }) {
     if (!existing) {
       await trx('seasons')
         .where({ lid, season_year: year })
-        .update({ rookie_draft_completed_at: timestamp })
+        .update({ rookie_draft_completed_at: closed_at })
     }
 
     expired_count = await trx('draft')
       .where({ lid, season_year: year })
       .whereNull('pid')
       .whereNull('expired_at')
-      .update({ expired_at: new Date(timestamp * 1000) })
+      .update({ expired_at: closed_at })
   })
 
   if (!existing || expired_count) {
     log(
-      `closed rookie draft for league ${lid} year ${year} at ${timestamp}, expired ${expired_count} unused pick(s)`
+      `closed rookie draft for league ${lid} year ${year} at ${closed_at.toISOString()}, expired ${expired_count} unused pick(s)`
     )
   }
 
-  return { timestamp, expired_count }
+  return { completed_at: closed_at, expired_count }
 }

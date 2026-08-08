@@ -32,7 +32,8 @@ const StatusItem = ({ status_item, index }) => {
     <ErrorIcon style={{ color: red[500] }} />
   )
 
-  const time = dayjs.unix(status_item.timestamp)
+  // jobs.run_at is timestamptz, so this arrives as an ISO string.
+  const time = dayjs(status_item.run_at)
   const max_message_length = 150
   const message = status_item.reason || 'Operational'
   const truncated_message =

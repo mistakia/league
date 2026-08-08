@@ -337,7 +337,7 @@ describe('API /teams - lineups', function () {
         .update({
           free_agency_period_start: regular_season_start
             .subtract('6', 'days')
-            .unix()
+            .toDate()
         })
 
       MockDate.set(regular_season_start.add('6', 'week').toISOString())

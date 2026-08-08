@@ -46,7 +46,7 @@ export const build_roster_players_query = ({
     // column at all, and the Roster constructor reads the joined transaction's
     // `player_salary` under that same name.
     .select('*', 'player_position as pos', 'roster_id as rid')
-    .orderBy('transactions.timestamp', 'desc')
+    .orderBy('transactions.occurred_at', 'desc')
     .orderBy('transactions.uid', 'desc')
 
 export default async function ({

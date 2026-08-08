@@ -22,6 +22,7 @@ import {
   invalid,
   error
 } from './utils/index.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 
@@ -81,7 +82,11 @@ describe('API /teams - activate', function () {
       res.body.transaction.type.should.equal(transaction_types.ROSTER_ACTIVATE)
       res.body.transaction.player_salary.should.equal(value)
       res.body.transaction.season_year.should.equal(current_season.year)
-      res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
+      // occurred_at is timestamptz, so it serializes as an ISO string; compare
+      // to the second rather than to an epoch integer.
+      Math.round(
+        new Date(res.body.transaction.occurred_at).getTime() / 1000
+      ).should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({
@@ -197,7 +202,7 @@ describe('API /teams - activate', function () {
           season_year: current_season.year
         })
         .whereIn('pid', [activate_player.pid, deactivate_player.pid])
-        .orderBy('timestamp', 'desc')
+        .orderBy('occurred_at', 'desc')
 
       const activate_transaction = transactions.find(
         (t) =>
@@ -417,7 +422,7 @@ describe('API /teams - activate', function () {
         player_salary: 2,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: Math.round(Date.now() / 1000) - 10
+        occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 10)
       })
 
       await addPlayer({
@@ -488,7 +493,9 @@ describe('API /teams - activate', function () {
         player_salary: 1,
         week: current_season.week,
         season_year: current_season.year,
-        timestamp: Math.round(Date.now() / 1000) - 60 * 60 * 49 // 49 hours ago
+        occurred_at: epoch_to_timestamptz(
+          Math.round(Date.now() / 1000) - 60 * 60 * 49
+        ) // 49 hours ago
       })
 
       await knex('rosters_players').insert({

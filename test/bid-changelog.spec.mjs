@@ -17,6 +17,7 @@ import record_bid_change from '#libs-server/record-bid-change.mjs'
 import run_restricted_free_agency_settlement from '#scripts/process-restricted-free-agency-bids.mjs'
 import { user1, user2 } from './fixtures/token.mjs'
 import { selectPlayer, addPlayer } from './utils/index.mjs'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 
@@ -317,10 +318,10 @@ describe('bid changelog', function () {
     await knex('seasons')
       .update({
         season_year: current_season.year,
-        restricted_free_agency_period_start: period_start,
+        restricted_free_agency_period_start: epoch_to_timestamptz(period_start),
         restricted_free_agency_period_end: regular_season_start
           .subtract('1', 'month')
-          .unix(),
+          .toDate(),
         restricted_free_agency_first_window_at: new Date(period_start * 1000),
         restricted_free_agency_window_hours: 24,
         restricted_free_agency_processing_lead_hours: 3

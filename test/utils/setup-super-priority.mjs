@@ -5,6 +5,7 @@ import {
   transaction_types,
   player_tag_types
 } from '#constants'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 export default async function setupSuperPriority({
   player,
@@ -33,7 +34,7 @@ export default async function setupSuperPriority({
       player_salary: 0,
       week: current_season.week,
       season_year: current_season.year,
-      timestamp: previousReleaseTimestamp
+      occurred_at: epoch_to_timestamptz(previousReleaseTimestamp)
     })
   }
 
@@ -58,7 +59,7 @@ export default async function setupSuperPriority({
     player_salary: 0,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp: originalAddTimestamp
+    occurred_at: epoch_to_timestamptz(originalAddTimestamp)
   })
 
   // Insert roster entry
@@ -84,7 +85,7 @@ export default async function setupSuperPriority({
     player_salary: 0,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp: poachTimestamp
+    occurred_at: epoch_to_timestamptz(poachTimestamp)
   })
 
   // Step 3: Remove player from original team's roster (simulate poach effect)
@@ -134,7 +135,7 @@ export default async function setupSuperPriority({
       player_salary: 0,
       week: current_season.week,
       season_year: current_season.year,
-      timestamp: releaseTimestamp
+      occurred_at: epoch_to_timestamptz(releaseTimestamp)
     })
 
     // Remove from roster

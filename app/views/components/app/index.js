@@ -21,7 +21,7 @@ const map_state_to_props = createSelector(
     const faPeriod = get_free_agent_period(league)
     const now = dayjs()
     const free_agency_live_auction_start = league.free_agency_live_auction_start
-      ? dayjs.unix(league.free_agency_live_auction_start)
+      ? dayjs(league.free_agency_live_auction_start)
       : null
     const auction_is_ended = now.isAfter(faPeriod.end)
     const auction_is_started =

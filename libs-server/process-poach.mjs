@@ -123,7 +123,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     player_salary: playerPoachValue,
     week: current_season.week,
     season_year: current_season.year,
-    timestamp: Math.round(Date.now() / 1000)
+    occurred_at: new Date()
   }
   await db('transactions').insert(transaction)
 

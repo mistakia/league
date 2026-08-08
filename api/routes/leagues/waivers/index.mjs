@@ -373,7 +373,7 @@ router.post('/?', async (req, res) => {
     const transactions = await db('transactions')
       .where('pid', pid)
       .where({ lid: leagueId })
-      .orderBy('timestamp', 'desc')
+      .orderBy('occurred_at', 'desc')
       .orderBy('uid', 'desc')
 
     if (
@@ -544,10 +544,10 @@ router.post('/?', async (req, res) => {
       if (
         !is_sanctuary_period &&
         (dayjs().isAfter(
-          dayjs.unix(transactions[0].timestamp).add('48', 'hours')
+          dayjs(transactions[0].occurred_at).add('48', 'hours')
         ) ||
           dayjs().isBefore(
-            dayjs.unix(transactions[0].timestamp).add('24', 'hours')
+            dayjs(transactions[0].occurred_at).add('24', 'hours')
           ))
       ) {
         return res.status(400).send({ error: 'player is not on waivers' })

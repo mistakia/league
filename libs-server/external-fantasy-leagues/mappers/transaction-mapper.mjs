@@ -1,6 +1,7 @@
 import debug from 'debug'
 
 import { transaction_types, current_season } from '#constants'
+import { epoch_to_timestamptz } from '#libs-shared'
 
 const log = debug('external:transaction-mapper')
 
@@ -103,7 +104,7 @@ export default class TransactionMapper {
     }
 
     // Standard transaction fields
-    this.required_fields = ['pid', 'type', 'timestamp', 'tid', 'lid']
+    this.required_fields = ['pid', 'type', 'occurred_at', 'tid', 'lid']
     this.optional_fields = [
       'userid',
       'player_salary',
@@ -141,7 +142,12 @@ export default class TransactionMapper {
         lid: context.league_id,
         season_year: context.year || current_season.year,
         week: context.week || this.extract_week(external_transaction),
-        timestamp: this.extract_timestamp(external_transaction)
+        // extract_timestamp parses the platform's wire format and stays epoch
+        // seconds; transactions.occurred_at is timestamptz, so it converts here
+        // at the payload boundary.
+        occurred_at: epoch_to_timestamptz(
+          this.extract_timestamp(external_transaction)
+        )
       }
 
       const candidates =
@@ -601,9 +607,9 @@ export default class TransactionMapper {
     }
 
     // Validate timestamp is reasonable
-    if (transaction.timestamp < 1000000000) {
+    if (transaction.occurred_at.getTime() < 1000000000 * 1000) {
       // Before 2001
-      log(`Invalid timestamp: ${transaction.timestamp}`)
+      log(`Invalid timestamp: ${transaction.occurred_at}`)
       return false
     }
 

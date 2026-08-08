@@ -21,7 +21,12 @@ export function league_team_daily_values_reducer(
             list.push({
               ktc_value: i.ktc_value,
               ktc_share: i.ktc_share,
-              timestamp: i.timestamp
+              // league_team_daily_values.observed_at is timestamptz and arrives
+              // as an ISO string. Every consumer of this field -- both charts'
+              // x-axis and the delta cutoffs in selectors -- works in epoch
+              // MILLISECONDS, which is what this column held before the retype,
+              // so the conversion lands once here at the read boundary.
+              timestamp: new Date(i.observed_at).getTime()
             })
           )
         })

@@ -25,8 +25,15 @@ const WAIVER_HOURS_AFTER_COMPLETION = 24
  * @param {number} [args.cadence_interval] - Units of `cadence_unit` between consecutive windows.
  * @param {number} [args.daily_window_start_hour] - First hour a window may open (inclusive).
  * @param {number} [args.daily_window_end_hour] - Hour windows stop opening (exclusive).
- * @param {number} [args.last_selection_timestamp] - Selection time of the final pick, once made.
- * @param {number} [args.rookie_draft_completed_at] - Explicit completion timestamp, if recorded.
+ * `last_selection_timestamp` and `rookie_draft_completed_at` are timestamptz as
+ * of the 2026-08-07 conformance pass (`draft.selection_timestamp` and
+ * `seasons.rookie_draft_completed_at`). Both are always DB-sourced, so they are
+ * taken as instants here rather than converted at each of the eleven callers.
+ * `draft_start_timestamp` stays epoch seconds because getDraftWindow does
+ * arithmetic on it.
+ *
+ * @param {Date|string} [args.last_selection_timestamp] - Selection time of the final pick, once made.
+ * @param {Date|string} [args.rookie_draft_completed_at] - Explicit completion timestamp, if recorded.
  *
  * @returns {{ draftEnd: import('dayjs').Dayjs, waiverEnd: import('dayjs').Dayjs }}
  */
@@ -43,7 +50,7 @@ export default function getDraftDates({
   // An explicit completion timestamp is authoritative — it records that the
   // draft actually ended, rather than projecting when it would have.
   if (rookie_draft_completed_at) {
-    const draftEnd = dayjs.unix(rookie_draft_completed_at).tz(DRAFT_TIMEZONE)
+    const draftEnd = dayjs(rookie_draft_completed_at).tz(DRAFT_TIMEZONE)
     const waiverEnd = draftEnd
       .add(WAIVER_HOURS_AFTER_COMPLETION, 'hours')
       .endOf('day')
@@ -58,7 +65,7 @@ export default function getDraftDates({
   const window_after_last_pick = has_picks ? total_picks + 1 : 1
 
   const final_window = last_selection_timestamp
-    ? dayjs.unix(last_selection_timestamp).tz(DRAFT_TIMEZONE)
+    ? dayjs(last_selection_timestamp).tz(DRAFT_TIMEZONE)
     : getDraftWindow({
         draft_start_timestamp,
         pick_number: window_after_last_pick,
