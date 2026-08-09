@@ -32,17 +32,26 @@ const at_large_comparators = {
  *
  *   1. Byes. Take the candidate pool (the whole league, or one winner per
  *      division), rank it by the configured ladder, and take the top bye_count.
- *   2. Berths. When has_division_winner_berths is set, every division winner
- *      without a bye takes one of the remaining places. The rest go to the best
- *      of the field on the at-large ladder, which is its own configured metric.
- *      The whole field is then ordered on the standings ladder, so the
- *      guarantee admits a winner without promoting them past a better team.
+ *   2. Berths, filled in three steps. When has_division_winner_berths is set,
+ *      every division winner without a bye takes one of the remaining places.
+ *      Then head_to_head_berth_count places go to the best of what is left on
+ *      the standings ladder. Whatever remains goes to the best of the field on
+ *      the at-large ladder, which is its own configured metric. The whole field
+ *      is then ordered on the standings ladder, so neither the guarantee nor
+ *      the record step promotes a team past a better one.
+ *
+ * The record step exists because a division-winner guarantee selects nobody in
+ * a league with no divisions, which would drop a claim on record entirely and
+ * send every place below the byes to the at-large metric. A league that wants
+ * record to qualify a team at every size sets head_to_head_berth_count, and one
+ * whose divisions already carry that claim leaves it at zero.
  *
  * Three ladders are in play and they are deliberately different, because they
  * answer different questions:
  *
- *   - ordering the standings, and with it deciding a division title:
- *     compare_playoff_seed -- head-to-head, then All Play, then points for
+ *   - ordering the standings, deciding a division title, and taking a record
+ *     berth: compare_playoff_seed -- head-to-head, then All Play, then points
+ *     for
  *   - ranking the bye candidates: bye_selection_method
  *   - taking an at-large berth: at_large_selection_method
  *
@@ -55,6 +64,9 @@ const at_large_comparators = {
  * @param {string} [params.bye_selection_method] - 'head_to_head' or 'all_play'
  * @param {boolean} [params.has_division_winner_berths] - guarantee every
  *   division winner a place in the field
+ * @param {number} [params.head_to_head_berth_count] - how many places below the
+ *   byes go to the best remaining teams on the standings ladder before the
+ *   at-large ladder fills the rest
  * @returns {{ seeded_tids: Array, playoff_tids: Array, bye_tids: Array, wildcard_tids: Array }}
  */
 const get_playoff_seeding = ({
@@ -64,7 +76,8 @@ const get_playoff_seeding = ({
   bye_candidate_pool = 'league',
   bye_selection_method = 'head_to_head',
   at_large_selection_method = 'head_to_head',
-  has_division_winner_berths = false
+  has_division_winner_berths = false,
+  head_to_head_berth_count = 0
 }) => {
   if (!Number.isInteger(playoff_team_count) || playoff_team_count < 1) {
     throw new Error(
@@ -97,6 +110,16 @@ const get_playoff_seeding = ({
   if (!AT_LARGE_SELECTION_METHODS.includes(at_large_selection_method)) {
     throw new Error(
       `at_large_selection_method must be one of ${AT_LARGE_SELECTION_METHODS.join(', ')}, got ${at_large_selection_method}`
+    )
+  }
+
+  if (
+    !Number.isInteger(head_to_head_berth_count) ||
+    head_to_head_berth_count < 0 ||
+    head_to_head_berth_count > playoff_team_count - bye_count
+  ) {
+    throw new Error(
+      `head_to_head_berth_count must be between 0 and the ${playoff_team_count - bye_count} place(s) below the byes, got ${head_to_head_berth_count}`
     )
   }
 
@@ -157,14 +180,31 @@ const get_playoff_seeding = ({
     )
   }
 
+  if (guaranteed.length + head_to_head_berth_count > remaining_berths) {
+    throw new Error(
+      `${guaranteed.length} division winner berth(s) plus ${head_to_head_berth_count} record berth(s) exceed the ${remaining_berths} place(s) remaining after byes`
+    )
+  }
+
   const guaranteed_tids = new Set(guaranteed.map((team) => team.tid))
-  const at_large_candidates = remaining
-    .filter((team) => !guaranteed_tids.has(team.tid))
+
+  // `remaining` is already in standings-ladder order, so the record berths are
+  // simply the front of what the guarantee did not take.
+  const contenders = remaining.filter((team) => !guaranteed_tids.has(team.tid))
+  const record_berths = contenders.slice(0, head_to_head_berth_count)
+  const record_tids = new Set(record_berths.map((team) => team.tid))
+
+  const at_large_candidates = contenders
+    .filter((team) => !record_tids.has(team.tid))
     .sort(compare_at_large)
+
+  const at_large_berths =
+    remaining_berths - guaranteed.length - record_berths.length
 
   const field = [
     ...guaranteed,
-    ...at_large_candidates.slice(0, remaining_berths - guaranteed.length)
+    ...record_berths,
+    ...at_large_candidates.slice(0, at_large_berths)
   ].sort(compare_playoff_seed)
 
   const field_tid_set = new Set(field.map((team) => team.tid))

@@ -26318,13 +26318,15 @@ CREATE TABLE public.seasons (
     restricted_free_agency_processing_paused_until timestamp with time zone,
     restricted_free_agency_processing_paused_reason text,
     restricted_free_agency_processing_paused_at timestamp with time zone,
+    head_to_head_berth_count smallint DEFAULT 0 NOT NULL,
     CONSTRAINT rfa_processing_pause_states_a_reason CHECK ((((restricted_free_agency_processing_paused_at IS NULL) AND (restricted_free_agency_processing_paused_reason IS NULL) AND (restricted_free_agency_processing_paused_until IS NULL)) OR ((restricted_free_agency_processing_paused_at IS NOT NULL) AND (restricted_free_agency_processing_paused_reason IS NOT NULL)))),
     CONSTRAINT rfa_processing_precedes_announcement CHECK (((restricted_free_agency_processing_lead_hours >= 1) AND (restricted_free_agency_processing_lead_hours < restricted_free_agency_window_hours))),
     CONSTRAINT rfa_window_divides_day CHECK ((restricted_free_agency_window_hours = ANY (ARRAY[1, 2, 3, 4, 6, 8, 12, 24]))),
     CONSTRAINT seasons_at_large_selection_method_known CHECK ((at_large_selection_method = ANY (ARRAY['head_to_head'::text, 'all_play'::text, 'points_for'::text]))),
     CONSTRAINT seasons_bye_candidate_pool_known CHECK ((bye_candidate_pool = ANY (ARRAY['league'::text, 'division_winners'::text]))),
     CONSTRAINT seasons_bye_count_within_playoff_field CHECK (((bye_count >= 0) AND (bye_count <= playoff_team_count))),
-    CONSTRAINT seasons_bye_selection_method_known CHECK ((bye_selection_method = ANY (ARRAY['head_to_head'::text, 'all_play'::text])))
+    CONSTRAINT seasons_bye_selection_method_known CHECK ((bye_selection_method = ANY (ARRAY['head_to_head'::text, 'all_play'::text]))),
+    CONSTRAINT seasons_head_to_head_berth_count_within_field CHECK (((head_to_head_berth_count >= 0) AND (head_to_head_berth_count <= (playoff_team_count - bye_count))))
 );
 
 
@@ -26382,6 +26384,13 @@ COMMENT ON COLUMN public.seasons.restricted_free_agency_processing_paused_reason
 --
 
 COMMENT ON COLUMN public.seasons.restricted_free_agency_processing_paused_at IS 'When the current hold on restricted free agency bid processing began. Set means processing is held for this league-season; null means it is running. The processing job still runs and still reports success while held.';
+
+
+--
+-- Name: COLUMN seasons.head_to_head_berth_count; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.seasons.head_to_head_berth_count IS 'How many places below the byes go to the best remaining teams on the standings ladder before the at-large ladder fills the rest.';
 
 
 --

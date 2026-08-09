@@ -245,6 +245,112 @@ describe('playoff format and division schedule', function () {
       expect(result.wildcard_tids).to.have.members([1, 2, 11, 12])
     })
 
+    // The ten-team shape after Amendment XL: no divisions, byes on All Play,
+    // then two places on record before points for fills the last two.
+    it('fills record berths before the at-large ladder', function () {
+      const ten = Array.from({ length: 10 }, (unused, i) =>
+        team(i + 1, null, {
+          regular_season_wins: 12 - i,
+          regular_season_losses: i,
+          // All play runs opposite to record, so tids 9 and 10 take the byes
+          // despite having the two worst records.
+          all_play_wins: 10 * (i + 1),
+          all_play_losses: 110 - 10 * (i + 1),
+          // tids 7 and 8 score far more than anyone left after the byes.
+          points_for: i + 1 >= 7 && i + 1 <= 8 ? 2000 : 100
+        })
+      )
+
+      const result = get_playoff_seeding({
+        teams: ten,
+        playoff_team_count: 6,
+        bye_count: 2,
+        bye_candidate_pool: 'league',
+        bye_selection_method: 'all_play',
+        at_large_selection_method: 'points_for',
+        head_to_head_berth_count: 2
+      })
+
+      expect(result.bye_tids).to.eql([10, 9])
+      // tids 1 and 2 take the record berths and 7 and 8 the at-large places.
+      // With head_to_head_berth_count at 0 the whole field below the byes goes
+      // on points for and this is [5, 6, 7, 8] instead, so nothing but the
+      // record step produces tids 1 and 2 here.
+      expect(result.wildcard_tids).to.eql([1, 2, 7, 8])
+      expect(result.playoff_tids).to.eql([10, 9, 1, 2, 7, 8])
+    })
+
+    it('takes record berths after the division winner guarantee', function () {
+      const teams = [
+        team(1, 1, {
+          regular_season_wins: 12,
+          regular_season_losses: 2,
+          points_for: 100
+        }),
+        team(2, 1, {
+          regular_season_wins: 11,
+          regular_season_losses: 3,
+          points_for: 100
+        }),
+        team(3, 1, {
+          regular_season_wins: 10,
+          regular_season_losses: 4,
+          points_for: 100
+        }),
+        team(4, 2, {
+          regular_season_wins: 4,
+          regular_season_losses: 10,
+          points_for: 100
+        }),
+        team(5, 2, {
+          regular_season_wins: 3,
+          regular_season_losses: 11,
+          points_for: 1500
+        }),
+        team(6, 2, {
+          regular_season_wins: 2,
+          regular_season_losses: 12,
+          points_for: 2000
+        })
+      ]
+
+      const result = get_playoff_seeding({
+        teams,
+        playoff_team_count: 4,
+        bye_count: 0,
+        at_large_selection_method: 'points_for',
+        has_division_winner_berths: true,
+        head_to_head_berth_count: 1
+      })
+
+      // tids 1 and 4 are berthed as division winners, tid 2 takes the single
+      // record berth, and only the last place goes on points for -- to tid 6.
+      // Without the record step the two highest scorers (6 and 5) take both
+      // remaining places and tid 2 misses.
+      expect(result.playoff_tids).to.eql([1, 2, 4, 6])
+    })
+
+    it('rejects more record berths than places below the byes', function () {
+      expect(() =>
+        get_playoff_seeding({
+          teams: twelve,
+          playoff_team_count: 6,
+          bye_count: 2,
+          head_to_head_berth_count: 5
+        })
+      ).to.throw(/head_to_head_berth_count/)
+
+      expect(() =>
+        get_playoff_seeding({
+          teams: twelve,
+          playoff_team_count: 6,
+          bye_count: 2,
+          has_division_winner_berths: true,
+          head_to_head_berth_count: 4
+        })
+      ).to.throw(/record berth/)
+    })
+
     it('leaves the at-large ladder off the seed order', function () {
       const teams = all_play_inverted.map((t) =>
         team(t.tid, 1, {

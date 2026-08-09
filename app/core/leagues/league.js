@@ -60,6 +60,7 @@ export const League = new Record({
   bye_selection_method: null,
   at_large_selection_method: null,
   has_division_winner_berths: null,
+  head_to_head_berth_count: null,
 
   ...scoring_column_declarations,
 
@@ -169,6 +170,7 @@ export function createLeague(league_data = {}) {
     bye_selection_method,
     at_large_selection_method,
     has_division_winner_berths,
+    head_to_head_berth_count,
 
     franchise_tag_limit,
     rookie_tag_limit,
@@ -273,6 +275,7 @@ export function createLeague(league_data = {}) {
     bye_selection_method,
     at_large_selection_method,
     has_division_winner_berths,
+    head_to_head_berth_count,
 
     ...pick_scoring_columns(league_data),
 

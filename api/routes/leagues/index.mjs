@@ -228,10 +228,18 @@ router.put('/:leagueId', async (req, res) => {
     // invalid pair would otherwise reach Postgres as a 500. playoff_team_count
     // is checked for a positive value here too: zero satisfies the CHECK but
     // throws in get_playoff_seeding on the next standings run.
-    if (field === 'playoff_team_count' || field === 'bye_count') {
+    if (
+      field === 'playoff_team_count' ||
+      field === 'bye_count' ||
+      field === 'head_to_head_berth_count'
+    ) {
       const playoff_team_count =
         field === 'playoff_team_count' ? value : league.playoff_team_count
       const bye_count = field === 'bye_count' ? value : league.bye_count
+      const head_to_head_berth_count =
+        field === 'head_to_head_berth_count'
+          ? value
+          : league.head_to_head_berth_count
 
       if (playoff_team_count < 1) {
         return res
@@ -254,6 +262,23 @@ router.put('/:leagueId', async (req, res) => {
         return res.status(400).send({
           error:
             'playoff_team_count minus bye_count must be even so the wildcard round can pair off'
+        })
+      }
+
+      // Record berths come out of the places below the byes, so lowering the
+      // field size can invalidate a count that was fine when it was set. Both
+      // directions are checked here because get_playoff_seeding throws on the
+      // pair and a throw in the standings run is a blanked page.
+      if (head_to_head_berth_count < 0) {
+        return res
+          .status(400)
+          .send({ error: 'head_to_head_berth_count must not be negative' })
+      }
+
+      if (head_to_head_berth_count > playoff_team_count - bye_count) {
+        return res.status(400).send({
+          error:
+            'head_to_head_berth_count must not exceed playoff_team_count minus bye_count'
         })
       }
     }

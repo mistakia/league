@@ -240,7 +240,8 @@ export const season_fields = [
   'bye_candidate_pool',
   'bye_selection_method',
   'at_large_selection_method',
-  'has_division_winner_berths'
+  'has_division_winner_berths',
+  'head_to_head_berth_count'
 ]
 
 // All updatable league settings fields

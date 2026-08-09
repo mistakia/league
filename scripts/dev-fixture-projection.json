@@ -342,6 +342,7 @@
       "bye_selection_method": "keep",
       "at_large_selection_method": "keep",
       "has_division_winner_berths": "keep",
+      "head_to_head_berth_count": "keep",
       "trade_veto_window_hours": "keep",
       "draft_pick_interval": "keep",
       "restricted_free_agency_processing_paused_until": "keep",

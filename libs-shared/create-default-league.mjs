@@ -18,6 +18,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     bye_selection_method: 'head_to_head',
     at_large_selection_method: 'head_to_head',
     has_division_winner_berths: false,
+    head_to_head_berth_count: 0,
     starter_slots_qb: 1,
     starter_slots_rb: 2,
     starter_slots_wr: 2,

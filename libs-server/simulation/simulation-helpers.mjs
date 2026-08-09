@@ -42,7 +42,8 @@ export async function load_simulation_context({ league_id, year }) {
       bye_candidate_pool: season.bye_candidate_pool,
       bye_selection_method: season.bye_selection_method,
       at_large_selection_method: season.at_large_selection_method,
-      has_division_winner_berths: season.has_division_winner_berths
+      has_division_winner_berths: season.has_division_winner_berths,
+      head_to_head_berth_count: season.head_to_head_berth_count
     }
   }
 }
