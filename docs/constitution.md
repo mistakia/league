@@ -731,11 +731,17 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 3.  Four (4) Teams will be admitted to the WILDCARD ROUND, after the two (2) Teams admitted directly to the CHAMPIONSHIP under [Article XVII, Section 3](#article-xvii). They shall be, in order:
 
-    1.  every Division winner not admitted directly to the CHAMPIONSHIP; and then
+    1.  every Division winner not admitted directly to the CHAMPIONSHIP;
 
-    2.  the Teams with the highest Total Points For (PF) over the Qualifying Season among those remaining, until four (4) Teams have been admitted.
+    2.  where the LEAGUE has no Divisions, the two (2) Teams with the highest Head-to-Head record over the Qualifying Season among those remaining; and then
 
-4.  In the event that any Teams should be tied in respect of Total Points For (PF), the tie breaker shall be the higher All Play win percentage over the Qualifying Season.
+    3.  the Teams with the highest Total Points For (PF) over the Qualifying Season among those remaining, until four (4) Teams have been admitted.
+
+4.  Ties in the measures by which Teams are admitted shall be broken as follows:
+
+    1.  In the event that any Teams should be tied in respect of Head-to-Head record, the tie breaker shall be the higher All Play win percentage over the Qualifying Season, and if still tied, the higher Total Points For (PF) over the Qualifying Season.
+
+    2.  In the event that any Teams should be tied in respect of Total Points For (PF), the tie breaker shall be the higher All Play win percentage over the Qualifying Season.
 
 ### Tiebreakers.
 
