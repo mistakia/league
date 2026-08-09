@@ -133,7 +133,17 @@ const main = async () => {
   process.exit(0)
 }
 
-if (is_main(import.meta.url)) {
+// The PM2_HOME clause is not belt-and-braces -- it is the only thing that
+// starts this worker under pm2. In fork mode pm2 execs its own
+// ProcessContainerFork.js and leaves process.argv[1] pointing at THAT, so
+// is_main is verbatim-false for every pm2-managed script here; /proc/<pid>/cmdline
+// still shows this file, which is what makes the argv check look like it passes.
+// Measured on the league host 2026-08-09: argv[1] is
+// /root/.nvm/versions/node/v22.22.1/lib/node_modules/pm2/lib/ProcessContainerFork.js.
+// Without it main() never runs, the knex pool's reap interval holds the event
+// loop open, and pm2 reports a healthy `online` process that does nothing and
+// logs nothing. Both live-import workers carry the same clause.
+if (is_main(import.meta.url) || process.env.PM2_HOME) {
   main()
 }
 
