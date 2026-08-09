@@ -306,6 +306,44 @@ describe('SEASONS head_to_head_berth_count', function () {
       expect(league.head_to_head_berth_count).to.equal(2)
     })
 
+    // A value the route lets through unvalidated does not fail the request --
+    // it reaches Postgres, and the smallint cast or the CHECK answers as a 500.
+    // Worse for a fractional value, which casts cleanly and stores a count
+    // get_playoff_seeding then throws on, inside mapStateToProps.
+    it('rejects a non-numeric count', async () => {
+      const res = await put('head_to_head_berth_count', 'x')
+
+      res.should.have.status(400)
+      expect(res.body.error).to.equal('invalid value')
+
+      const league = await getLeague({ lid: 1 })
+      expect(league.head_to_head_berth_count).to.equal(2)
+    })
+
+    it('rejects a fractional count', async () => {
+      const res = await put('head_to_head_berth_count', 1.5)
+
+      res.should.have.status(400)
+      expect(res.body.error).to.match(/head_to_head_berth_count/)
+      expect(res.body.error).to.match(/whole number/)
+
+      const league = await getLeague({ lid: 1 })
+      expect(league.head_to_head_berth_count).to.equal(2)
+    })
+
+    // The same guard covers the two columns the count is bounded against,
+    // because get_playoff_seeding throws on a non-integer in all three.
+    it('rejects a fractional bye_count', async () => {
+      const res = await put('bye_count', 1.5)
+
+      res.should.have.status(400)
+      expect(res.body.error).to.match(/bye_count/)
+      expect(res.body.error).to.match(/whole number/)
+
+      const league = await getLeague({ lid: 1 })
+      expect(league.bye_count).to.equal(2)
+    })
+
     it('re-checks the stored count when playoff_team_count shrinks', async () => {
       // 2 record berths are fine in a 6-team field with 2 byes and unusable in
       // a 2-team field with 2 byes, so lowering the field size has to be

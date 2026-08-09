@@ -276,6 +276,7 @@ export const integer_fields = [
   'starting_faab_budget',
   'playoff_team_count',
   'bye_count',
+  'head_to_head_berth_count',
   'cap',
   'num_teams',
   'min_bid',

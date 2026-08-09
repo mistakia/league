@@ -233,6 +233,19 @@ router.put('/:leagueId', async (req, res) => {
       field === 'bye_count' ||
       field === 'head_to_head_berth_count'
     ) {
+      // get_playoff_seeding requires an integer on all three of these and
+      // throws otherwise, and that throw runs inside mapStateToProps -- so a
+      // fractional value accepted here blanks the standings page and the league
+      // home dashboard rather than failing the write that caused it. The
+      // integer_fields guard above only rejects a value isNaN says is not a
+      // number, which 2.5 passes, so this is a separate check rather than a
+      // restatement of one.
+      if (!Number.isInteger(value)) {
+        return res
+          .status(400)
+          .send({ error: `${field} must be a whole number` })
+      }
+
       const playoff_team_count =
         field === 'playoff_team_count' ? value : league.playoff_team_count
       const bye_count = field === 'bye_count' ? value : league.bye_count
