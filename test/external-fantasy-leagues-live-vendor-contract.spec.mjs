@@ -6,9 +6,18 @@ import { fetch_external_league_data } from '#libs-server/external-fantasy-league
 // These two tests fetch from the live Sleeper and ESPN APIs, so they assert
 // against vendor contracts rather than against this repo. That makes them
 // useful (they catch upstream shape drift that no fixture can) and unfit to
-// gate CI: a slow or unreachable vendor blows the mocha budget and fails
-// master on a commit that had nothing to do with it -- signals #123521,
-// #123734 and #123790 were all this, on three unrelated commits.
+// gate CI: a vendor that is slow, down, or geo/DNS-blocked fails master on a
+// commit that had nothing to do with it -- signals #123521, #123734 and
+// #123790 were all this, on three unrelated commits, each a 45s timeout on
+// the sleeper test.
+//
+// Those three had a second cause that IS fixed: 32019f35f dropped node-fetch
+// without replacing its `timeout` option, which native fetch ignores, so the
+// adapters had no request deadline at all and a hung connection ran past
+// mocha's budget. 61d0eed61 added a per-attempt AbortSignal deadline. So the
+// failure mode here today is a prompt red rather than a hung run -- but it is
+// still a red owned by a vendor rather than by the commit under test, which is
+// the reason this file stays out of the gate.
 //
 // This file is therefore EXCLUDED from `yarn test` and CI via `ignore` in
 // .mocharc.yml, and run on its own:

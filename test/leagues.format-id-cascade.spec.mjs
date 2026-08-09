@@ -45,8 +45,21 @@ describe('API /leagues - format-id cascade', function () {
     }
   })
 
+  // A run-scoped count rather than an absolute one: test/global.mjs drops
+  // tables once per RUN, not per spec file, so an earlier spec's failed job
+  // would make an absolute assertion wrong for reasons that have nothing to do
+  // with this route.
+  const count_failed_projection_jobs = async () => {
+    const row = await knex('jobs')
+      .where({ type: job_types.PROCESS_PROJECTIONS, is_successful: false })
+      .count('* as n')
+      .first()
+    return Number(row.n)
+  }
+
   it('scoring format change updates seasons.scoring_format_id and runs cascade', async () => {
     const lid = 1
+    const failed_jobs_before = await count_failed_projection_jobs()
     const before_season = await knex('seasons')
       .where({ lid, season_year: current_season.year })
       .first()
@@ -67,10 +80,9 @@ describe('API /leagues - format-id cascade', function () {
       before_season.scoring_format_id
     )
 
-    // Cascade target table is scoped to (new_id, current_season.year).
-    // With no projections_index rows in the test seed the processor is a
-    // no-op, but it must have completed without throwing -- which the 200
-    // response and a successful DELETE-then-INSERT scope guarantee.
+    // Cascade target table is scoped to (new_id, current_season.year). No seed
+    // inserts projections_index rows, so the processor is a no-op and the slice
+    // is empty -- an exact count, not a shape check.
     const projection_rows = await knex(
       'scoring_format_player_projection_points'
     )
@@ -80,7 +92,14 @@ describe('API /leagues - format-id cascade', function () {
       })
       .count('* as n')
       .first()
-    expect(Number(projection_rows.n)).to.be.a('number')
+    expect(Number(projection_rows.n)).to.equal(0)
+
+    // The cascade must have completed WITHOUT throwing, and the 200 response is
+    // not evidence of that: the route catches a cascade failure and still
+    // answers 200, which the third test in this file pins. The only oracle that
+    // separates the two is the absence of a new failed `jobs` row.
+    const failed_jobs_after = await count_failed_projection_jobs()
+    expect(failed_jobs_after).to.equal(failed_jobs_before)
 
     // DB dedup oracle: a second PUT with the same target value resolves to
     // the same scoring_format_id (the unique config tuple is a stable key).
@@ -114,6 +133,7 @@ describe('API /leagues - format-id cascade', function () {
 
   it('league format change updates seasons.league_format_id and runs cascade', async () => {
     const lid = 1
+    const failed_jobs_before = await count_failed_projection_jobs()
     const before_season = await knex('seasons')
       .where({ lid, season_year: current_season.year })
       .first()
@@ -141,7 +161,11 @@ describe('API /leagues - format-id cascade', function () {
       })
       .count('* as n')
       .first()
-    expect(Number(projection_rows.n)).to.be.a('number')
+    expect(Number(projection_rows.n)).to.equal(0)
+
+    // Same oracle as above: a 200 does not mean the cascade succeeded.
+    const failed_jobs_after = await count_failed_projection_jobs()
+    expect(failed_jobs_after).to.equal(failed_jobs_before)
   })
 
   // Cascade failure path. The processor runs for REAL rather than being
