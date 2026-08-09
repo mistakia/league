@@ -44,3 +44,10 @@ timeout: 10000
 # file behind it, so this cannot recur silently.
 ignore:
   - 'test/importer-espn.spec.mjs'
+  # Fetches the live Sleeper and ESPN APIs. These two tests sat inside
+  # test/external-fantasy-leagues-canonical-format-adapters.spec.mjs behind an
+  # env-gated `this.skip()`, which made the release gate report two pending
+  # tests forever; they were split into their own file on 2026-08-09 so that
+  # file's 16 offline fixture tests stay in CI. `yarn test:external-league-live`
+  # runs them.
+  - 'test/external-fantasy-leagues-live-vendor-contract.spec.mjs'

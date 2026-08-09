@@ -49,6 +49,10 @@ const INTENTIONALLY_UNCOLLECTED = new Map([
   [
     'test/importer-espn.spec.mjs',
     'excluded from `yarn test` and CI — hits the live ESPN API'
+  ],
+  [
+    'test/external-fantasy-leagues-live-vendor-contract.spec.mjs',
+    'excluded from `yarn test` and CI — hits the live Sleeper and ESPN APIs; run it with `yarn test:external-league-live`'
   ]
 ])
 
