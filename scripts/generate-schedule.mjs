@@ -11,9 +11,12 @@ const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
 }
 
-const run = async ({ lid, random_seed }) => {
+const run = async ({ lid, team_order }) => {
   log(`generating schedule for league: ${lid}`)
-  await generateSchedule({ lid, random_seed })
+  log(`drawn team order: ${team_order.join(',')}`)
+  const inserts = await generateSchedule({ lid, team_order })
+  log(`wrote ${inserts.length} matchups`)
+  return inserts
 }
 
 const main = async () => {
@@ -21,16 +24,32 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     debug.enable('generate-schedule')
+
     const lid = argv.lid
     if (!lid) {
-      console.log('missing --lid')
-      return
+      throw new Error('missing --lid')
     }
 
-    const block_timestamp = argv.block_timestamp
-    const block_reward = argv.block_reward
-    const random_seed = block_timestamp + block_reward
-    await run({ lid, random_seed })
+    // The schedule is a published draw result, not a private roll. `--team_order`
+    // is the order the league's verifiable draw produced; the record for it lives
+    // in user-base under data/league/draws/.
+    if (!argv.team_order) {
+      throw new Error(
+        'missing --team_order (comma-separated team uids in drawn order)'
+      )
+    }
+
+    const team_order = String(argv.team_order)
+      .split(',')
+      .map((value) => Number(value.trim()))
+
+    if (team_order.some((uid) => !Number.isInteger(uid))) {
+      throw new Error(
+        `--team_order is not a list of integers: ${argv.team_order}`
+      )
+    }
+
+    await run({ lid, team_order })
   } catch (err) {
     error = err
     console.log(error)
@@ -41,7 +60,7 @@ const main = async () => {
     error
   })
 
-  process.exit()
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {

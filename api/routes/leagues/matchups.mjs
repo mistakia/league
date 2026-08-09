@@ -165,6 +165,23 @@ const router = express.Router({ mergeParams: true })
  *       - $ref: '#/components/parameters/leagueId'
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - team_order
+ *             properties:
+ *               team_order:
+ *                 type: array
+ *                 description: >-
+ *                   Team uids in the order the league's verifiable draw produced.
+ *                   The schedule is a deterministic function of this order, so the
+ *                   published draw record is what makes it auditable.
+ *                 items:
+ *                   type: integer
  *     responses:
  *       200:
  *         description: Schedule generated successfully
@@ -222,7 +239,21 @@ router.post('/?', async (req, res) => {
       return
     }
 
-    const data = await generateSchedule({ leagueId })
+    // The schedule is fully determined by the drawn team order, so the caller
+    // supplies it rather than the server rolling one privately. Note this route
+    // could not have worked before: it passed `leagueId` to a function that
+    // reads `lid`, so the teams query bound undefined.
+    const { team_order } = req.body
+    if (!Array.isArray(team_order) || !team_order.length) {
+      return res.status(400).send({
+        error: 'team_order is required -- the drawn order of team uids'
+      })
+    }
+
+    const data = await generateSchedule({
+      lid: Number(leagueId),
+      team_order: team_order.map(Number)
+    })
     res.send(data)
   } catch (error) {
     handle_error(error, logger, res)

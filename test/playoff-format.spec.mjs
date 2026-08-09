@@ -13,10 +13,13 @@ import generate_fantasy_league_schedule from '#libs-server/generate-fantasy-leag
 
 const expect = chai.expect
 
+// num_divisions of 0 means the league has no Divisions at all, which is what
+// Article V Section 13(a) prescribes at ten teams -- distinct from one Division
+// holding everybody, a structure the constitution does not describe.
 const make_teams = (num_teams, num_divisions) =>
   Array.from({ length: num_teams }, (unused, i) => ({
     uid: i + 1,
-    division: (i % num_divisions) + 1
+    division: num_divisions ? (i % num_divisions) + 1 : null
   }))
 
 const opponent_counts = (schedule, uid) => {
@@ -577,9 +580,9 @@ describe('playoff format and division schedule', function () {
   describe('generate_fantasy_league_schedule', function () {
     const num_weeks = current_season.regularSeasonFinalWeek
 
-    it('builds a full schedule for a 10-team single division', function () {
-      const teams = make_teams(10, 1)
-      const schedule = generate_fantasy_league_schedule(teams, 1234)
+    it('builds a full schedule for a 10-team league with no divisions', function () {
+      const teams = make_teams(10, 0)
+      const schedule = generate_fantasy_league_schedule(teams)
 
       expect(schedule.length).to.equal(num_weeks)
       for (const week of schedule) {
@@ -587,9 +590,9 @@ describe('playoff format and division schedule', function () {
       }
     })
 
-    it('has every 10-team single-division team play all nine opponents', function () {
-      const teams = make_teams(10, 1)
-      const schedule = generate_fantasy_league_schedule(teams, 1234)
+    it('has every 10-team undivided team play all nine opponents', function () {
+      const teams = make_teams(10, 0)
+      const schedule = generate_fantasy_league_schedule(teams)
 
       for (const { uid } of teams) {
         const counts = opponent_counts(schedule, uid)
@@ -605,7 +608,7 @@ describe('playoff format and division schedule', function () {
 
     it('builds a full schedule for 12 teams across four divisions', function () {
       const teams = make_teams(12, 4)
-      const schedule = generate_fantasy_league_schedule(teams, 1234)
+      const schedule = generate_fantasy_league_schedule(teams)
 
       expect(schedule.length).to.equal(num_weeks)
       for (const week of schedule) {
@@ -615,7 +618,7 @@ describe('playoff format and division schedule', function () {
 
     it('has each 4-division team play its divisional opponents twice', function () {
       const teams = make_teams(12, 4)
-      const schedule = generate_fantasy_league_schedule(teams, 1234)
+      const schedule = generate_fantasy_league_schedule(teams)
 
       for (const team of teams) {
         const counts = opponent_counts(schedule, team.uid)
@@ -629,9 +632,9 @@ describe('playoff format and division schedule', function () {
     })
 
     it('throws rather than returning an empty schedule for an unsupported count', function () {
-      const teams = make_teams(9, 3)
-      expect(() => generate_fantasy_league_schedule(teams, 1234)).to.throw(
-        /Unsupported number of divisions/
+      const teams = make_teams(12, 3)
+      expect(() => generate_fantasy_league_schedule(teams)).to.throw(
+        /unsupported division count/
       )
     })
   })

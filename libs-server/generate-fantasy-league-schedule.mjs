@@ -1,69 +1,35 @@
-import ed25519 from '@trashman/ed25519-blake2b'
-
 import { current_season } from '#constants'
 
-// fully random by @BetonMAN
-// random_seed = ethereum_block_timestsamp + ethereum_block_reward
-const shuffleArray = (arr, random_seed = Math.random() * 1000000) =>
-  arr
-    .map((a, index) => [
-      ed25519.hash(`${random_seed}${index}`).toString('hex'),
-      a
-    ])
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map((a) => a[1])
-
-const getInterSched = (div1, div2, divOffsets) => {
-  const divSize = div1.length
-  const weeks = Array.from({ length: divOffsets.length }, () => [])
-
-  for (let weekNum = 0; weekNum < divOffsets.length; weekNum++) {
-    const offset = divOffsets[weekNum]
-
-    for (let i = 0; i < divSize; i++) {
-      const n1 = i
-      const n2 = (i + offset) % divSize
-
-      weeks[weekNum].push({ home: div1[n1], away: div2[n2] })
-    }
-  }
-
-  return weeks
-}
-
-const getIntraSched = (div1, div2, divOffset = 1) => {
-  const divSize = div1.length
-  const weeks = Array.from({ length: divSize }, () => [])
-
-  for (let weekNum = 0; weekNum < divSize; weekNum++) {
-    for (let x1 = 0; x1 < divSize; x1++) {
-      let y1 = (weekNum - x1) % divSize
-      y1 = y1 < 0 ? divSize + y1 : y1 // handle negative index
-      const x2 = (x1 + divOffset) % divSize
-      let y2 = (weekNum - x1 + divOffset) % divSize
-      y2 = y2 < 0 ? divSize + y2 : y2 // handle negative index
-
-      if (x1 === y1) {
-        weeks[weekNum].push({ home: div1[x1], away: div2[x2] })
-      } else {
-        if (x1 > y1) {
-          weeks[weekNum].push({ home: div1[x1], away: div1[y1] })
-        }
-
-        if (x2 > y2) {
-          weeks[weekNum].push({ home: div2[x2], away: div2[y2] })
-        }
-      }
-    }
-  }
-
-  return weeks
-}
+// Build a Qualifying Season schedule from an ORDERED list of teams.
+//
+// This function contains no randomness. That is the point of it: the draw
+// happens outside, against a predetermined future Ethereum block, and its whole
+// output is the ORDER of the list handed in here. Anyone holding the published
+// block hash and the published input order can reproduce this schedule exactly,
+// which they could not do while the shuffle lived in here behind a private seed.
+//
+// Two structures are lawful, and they are the two Article V Section 13 prescribes:
+//
+//   NO DIVISIONS (ten teams). Every team plays every other once by the circle
+//   method -- nine weeks -- and the season is filled out by replaying the first
+//   weeks of that round robin. At fourteen weeks that replays five, so every
+//   team ends with nine opponents once and five of them twice, and the doubled
+//   pairing is symmetric because it is literally the same week again.
+//
+//   FOUR DIVISIONS (twelve teams). Retained for the twelve-team case Section
+//   13(b) prescribes. Note this construction predates Amendment XL and does not
+//   yet implement 13(f)'s twelve-team split (each divisional opponent twice,
+//   each of the nine others once, one of them twice); it needs rebuilding before
+//   the league next expands.
+//
+// A team's `division` is null when the league has no Divisions. Anything else --
+// two divisions, a mixed population, an odd team count -- throws rather than
+// emitting a partial season, because a schedule the constitution does not
+// describe is worse than no schedule.
 
 // Round-robin pairing by the circle method: one team is fixed and the rest
 // rotate, producing n-1 weeks in which every team plays every other exactly
-// once. Repeated back to back it yields a double round robin, which is what a
-// single-division league is truncated from.
+// once.
 const get_round_robin_sched = (teams) => {
   const rotation = [...teams]
   const weeks = []
@@ -90,154 +56,164 @@ const get_round_robin_sched = (teams) => {
   return weeks
 }
 
-// teams should be an array of objects with a uid and division property
-// num_divisions is derived from the teams' division values and must be 1, 2 or 4 --
-// those are the constructions implemented here. Any other count throws rather
-// than emitting a partial season.
-// teams in the same division should play each other exactly twice
-// teams in different divisions should play each other either once or twice
-// in a single division every team plays every other at least once, and the
-// remaining weeks repeat opponents in round-robin order
-// should return an array of 14 arrays of matchup objects with home and away properties
-// each week there should be teams.length / 2 matchups
+const get_inter_sched = (div1, div2, div_offsets) => {
+  const div_size = div1.length
+  const weeks = Array.from({ length: div_offsets.length }, () => [])
 
-const has_duplicate_consecutive_weeks = (schedule) => {
-  for (let i = 0; i < schedule.length - 1; i++) {
-    const week1 = schedule[i]
-    const week2 = schedule[i + 1]
+  for (let week_num = 0; week_num < div_offsets.length; week_num++) {
+    const offset = div_offsets[week_num]
 
-    if (week1.length !== week2.length) continue
-
-    const week1_matches = new Set(
-      week1.map((match) => `${match.home.uid}-${match.away.uid}`)
-    )
-    const week2_matches = new Set(
-      week2.map((match) => `${match.home.uid}-${match.away.uid}`)
-    )
-
-    if (
-      week1_matches.size === week2_matches.size &&
-      [...week1_matches].every((match) => week2_matches.has(match))
-    ) {
-      return true
+    for (let i = 0; i < div_size; i++) {
+      weeks[week_num].push({
+        home: div1[i],
+        away: div2[(i + offset) % div_size]
+      })
     }
   }
-  return false
+
+  return weeks
 }
 
-const generate_fantasy_league_schedule = (teams, random_seed) => {
+const get_intra_sched = (div1, div2, div_offset = 1) => {
+  const div_size = div1.length
+  const weeks = Array.from({ length: div_size }, () => [])
+
+  for (let week_num = 0; week_num < div_size; week_num++) {
+    for (let x1 = 0; x1 < div_size; x1++) {
+      let y1 = (week_num - x1) % div_size
+      y1 = y1 < 0 ? div_size + y1 : y1 // handle negative index
+      const x2 = (x1 + div_offset) % div_size
+      let y2 = (week_num - x1 + div_offset) % div_size
+      y2 = y2 < 0 ? div_size + y2 : y2 // handle negative index
+
+      if (x1 === y1) {
+        weeks[week_num].push({ home: div1[x1], away: div2[x2] })
+      } else {
+        if (x1 > y1) {
+          weeks[week_num].push({ home: div1[x1], away: div1[y1] })
+        }
+
+        if (x2 > y2) {
+          weeks[week_num].push({ home: div2[x2], away: div2[y2] })
+        }
+      }
+    }
+  }
+
+  return weeks
+}
+
+const group_by_division = (teams) => {
+  const undivided = teams.filter(
+    (team) => team.division === null || team.division === undefined
+  )
+
+  if (undivided.length === teams.length) return null
+
+  if (undivided.length) {
+    throw new Error(
+      `${undivided.length} of ${teams.length} teams carry no division; a league either ` +
+        'has Divisions or it does not'
+    )
+  }
+
+  const divisions = new Map()
+  for (const team of teams) {
+    if (!divisions.has(team.division)) divisions.set(team.division, [])
+    divisions.get(team.division).push(team)
+  }
+
+  return divisions
+}
+
+/**
+ * @param {Array} teams - ordered array of { uid, division }; the order is the
+ *   draw result and fully determines the schedule
+ * @returns {Array<Array<{ home: Object, away: Object }>>} one entry per
+ *   Qualifying Season week
+ */
+const generate_fantasy_league_schedule = (teams) => {
   const num_weeks = current_season.regularSeasonFinalWeek
 
-  const divisions = {}
-  for (const team of teams) {
-    if (!divisions[team.division]) divisions[team.division] = []
-    divisions[team.division].push(team)
+  if (teams.length % 2 !== 0) {
+    throw new Error(
+      `cannot schedule an odd number of teams (${teams.length}) -- a week would leave one unpaired`
+    )
   }
 
-  // shuffle each division
-  for (const div of Object.keys(divisions)) {
-    divisions[div] = shuffleArray(divisions[div], random_seed)
+  const divisions = group_by_division(teams)
+
+  if (divisions === null) {
+    // Replay the round robin from its start until the season is covered. Every
+    // team meets every other once before any opponent is repeated. The replay
+    // reverses home and away, so a pairing played twice is hosted once by each
+    // side -- and the round robin's own home/away split is not compounded.
+    const round_robin = get_round_robin_sched(teams)
+    const schedule = []
+    while (schedule.length < num_weeks) {
+      const lap = Math.floor(schedule.length / round_robin.length)
+      const week = round_robin[schedule.length % round_robin.length]
+      schedule.push(
+        lap % 2 === 0
+          ? week
+          : week.map((matchup) => ({ home: matchup.away, away: matchup.home }))
+      )
+    }
+    return schedule
   }
 
-  const num_divisions = Object.keys(divisions).length
-  const divKeys = Object.keys(divisions)
-  let schedule = []
-
-  if (num_divisions === 1) {
-    // Repeat the round robin until the season is covered, then truncate. Every
-    // team meets every other once before any opponent is repeated.
-    const round_robin = get_round_robin_sched(divisions[divKeys[0]])
-    while (schedule.length < num_weeks) {
-      schedule.push(round_robin[schedule.length % round_robin.length])
-    }
-  } else if (num_divisions === 2) {
-    const div1 = divisions[divKeys[0]]
-    const div2 = divisions[divKeys[1]]
-
-    // two sets of intra division matchups
-    const intraDiv1 = getIntraSched(div1, div2)
-    intraDiv1.forEach((week) => schedule.push(week))
-
-    const intraDiv2 = getIntraSched(div1, div2)
-    intraDiv2.forEach((week) => schedule.push(week))
-
-    // one set of inter division matchups
-    const interDiv = getInterSched(div1, div2, [2, 3, 4, 5, 1])
-    while (schedule.length < num_weeks) {
-      const week = interDiv.shift()
-      schedule.push(week)
-    }
-  } else if (num_divisions === 4) {
-    const div1 = divisions[divKeys[0]]
-    const div2 = divisions[divKeys[1]]
-    const div3 = divisions[divKeys[2]]
-    const div4 = divisions[divKeys[3]]
-
-    // two sets of intra division matchups for each division
-    const intraDiv1 = getIntraSched(div1, div2)
-    const intraDiv2 = getIntraSched(div3, div4)
-
-    for (let i = 0; i < intraDiv1.length; i++) {
-      const week = []
-      week.push(...intraDiv1[i])
-      week.push(...intraDiv2[i])
-      schedule.push(week)
-    }
-
-    const intraDiv3 = getIntraSched(div1, div3)
-    const intraDiv4 = getIntraSched(div2, div4)
-
-    for (let i = 0; i < intraDiv3.length; i++) {
-      const week = []
-      week.push(...intraDiv3[i])
-      week.push(...intraDiv4[i])
-      schedule.push(week)
-    }
-
-    // one set of inter division matchups for each division
-    const interDiv1 = getInterSched(div1, div2, [1, 2, 3])
-    const interDiv2 = getInterSched(div3, div4, [1, 2, 3])
-
-    for (let i = 0; i < interDiv1.length; i++) {
-      const week = []
-      week.push(...interDiv1[i])
-      week.push(...interDiv2[i])
-      schedule.push(week)
-    }
-
-    const interDiv3 = getInterSched(div1, div3, [1, 2, 3])
-    const interDiv4 = getInterSched(div2, div4, [1, 2, 3])
-
-    for (let i = 0; i < interDiv3.length; i++) {
-      const week = []
-      week.push(...interDiv3[i])
-      week.push(...interDiv4[i])
-      schedule.push(week)
-    }
-
-    const interDiv5 = getInterSched(div1, div4, [1, 2, 3])
-    const interDiv6 = getInterSched(div2, div3, [1, 2, 3])
-
-    while (schedule.length < num_weeks) {
-      const week = []
-      week.push(...interDiv5.shift())
-      week.push(...interDiv6.shift())
-      schedule.push(week)
-    }
-  } else {
-    throw new Error(`Unsupported number of divisions: ${num_divisions}`)
+  if (divisions.size !== 4) {
+    throw new Error(
+      `unsupported division count: ${divisions.size}. Article V Section 13 prescribes no ` +
+        'Divisions at ten teams and four at twelve; nothing else is scheduled here.'
+    )
   }
 
-  // Final shuffle to avoid consecutive duplicate weeks
-  let attempts = 0
-  const max_attempts = 10
+  const div_keys = [...divisions.keys()].sort((a, b) => a - b)
+  const [div1, div2, div3, div4] = div_keys.map((key) => divisions.get(key))
 
-  do {
-    schedule = shuffleArray(schedule, random_seed + attempts)
-    attempts++
-  } while (has_duplicate_consecutive_weeks(schedule) && attempts < max_attempts)
+  const sizes = new Set([div1.length, div2.length, div3.length, div4.length])
+  if (sizes.size !== 1) {
+    throw new Error(
+      `divisions are uneven (${div_keys.map((key) => divisions.get(key).length).join('/')})`
+    )
+  }
 
-  return schedule
+  const schedule = []
+
+  // two sets of intra division matchups for each division
+  const intra_div1 = get_intra_sched(div1, div2)
+  const intra_div2 = get_intra_sched(div3, div4)
+  for (let i = 0; i < intra_div1.length; i++) {
+    schedule.push([...intra_div1[i], ...intra_div2[i]])
+  }
+
+  const intra_div3 = get_intra_sched(div1, div3)
+  const intra_div4 = get_intra_sched(div2, div4)
+  for (let i = 0; i < intra_div3.length; i++) {
+    schedule.push([...intra_div3[i], ...intra_div4[i]])
+  }
+
+  // one set of inter division matchups for each division
+  const inter_div1 = get_inter_sched(div1, div2, [1, 2, 3])
+  const inter_div2 = get_inter_sched(div3, div4, [1, 2, 3])
+  for (let i = 0; i < inter_div1.length; i++) {
+    schedule.push([...inter_div1[i], ...inter_div2[i]])
+  }
+
+  const inter_div3 = get_inter_sched(div1, div3, [1, 2, 3])
+  const inter_div4 = get_inter_sched(div2, div4, [1, 2, 3])
+  for (let i = 0; i < inter_div3.length; i++) {
+    schedule.push([...inter_div3[i], ...inter_div4[i]])
+  }
+
+  const inter_div5 = get_inter_sched(div1, div4, [1, 2, 3])
+  const inter_div6 = get_inter_sched(div2, div3, [1, 2, 3])
+  while (schedule.length < num_weeks) {
+    schedule.push([...inter_div5.shift(), ...inter_div6.shift()])
+  }
+
+  return schedule.slice(0, num_weeks)
 }
 
 export default generate_fantasy_league_schedule
