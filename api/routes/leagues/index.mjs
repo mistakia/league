@@ -3,19 +3,14 @@ import express from 'express'
 import {
   getLeague,
   validators,
-  report_job,
-  report_error,
   find_or_create_scoring_format,
   find_or_create_league_format
 } from '#libs-server'
-import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   BYE_CANDIDATE_POOLS,
   BYE_SELECTION_METHODS,
   AT_LARGE_SELECTION_METHODS
 } from '#libs-shared/get-playoff-seeding.mjs'
-import process_projections_for_scoring_format from '#scripts/process-projections-for-scoring-format.mjs'
-import process_projections_for_league_format from '#scripts/process-projections-for-league-format.mjs'
 import {
   require_auth,
   validate_and_get_league,
@@ -317,23 +312,10 @@ router.put('/:leagueId', async (req, res) => {
         .update({ scoring_format_id })
         .where({ lid, season_year: current_season.year })
 
-      try {
-        await process_projections_for_scoring_format({
-          year: current_season.year,
-          scoring_format_id
-        })
-      } catch (err) {
-        const job_reason = `cascade_failed_scoring lid=${lid} year=${current_season.year} id=${scoring_format_id}`
-        await report_error({
-          job_type: job_types.PROCESS_PROJECTIONS,
-          error: err
-        })
-        await report_job({
-          job_type: job_types.PROCESS_PROJECTIONS,
-          job_success: false,
-          job_reason
-        })
-      }
+      // No cache rebuild here. The new id's projection slice is empty until it
+      // is derived, and refresh-projection-cache-worker derives it -- it finds
+      // the work by looking for an empty slice, so this route does not have to
+      // announce anything. See libs-server/projection-cache-staleness.mjs.
     } else if (league_format_fields.includes(field)) {
       const league_config = { ...league, [field]: value }
       const league_format_id = await find_or_create_league_format(
@@ -344,23 +326,7 @@ router.put('/:leagueId', async (req, res) => {
         .update({ league_format_id })
         .where({ lid, season_year: current_season.year })
 
-      try {
-        await process_projections_for_league_format({
-          year: current_season.year,
-          league_format_id
-        })
-      } catch (err) {
-        const job_reason = `cascade_failed_league lid=${lid} year=${current_season.year} id=${league_format_id}`
-        await report_error({
-          job_type: job_types.PROCESS_PROJECTIONS,
-          error: err
-        })
-        await report_job({
-          job_type: job_types.PROCESS_PROJECTIONS,
-          job_success: false,
-          job_reason
-        })
-      }
+      // Same as above: the worker derives the empty slice.
     }
 
     // TODO create changelog
