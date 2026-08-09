@@ -2,14 +2,20 @@
 # Source: league/server/crontab-main/league-backups.cron
 # Deploy: yarn load:crontab:main  (scope league-main -> league:~/crontab/league-backups.cron)
 #
-# League production Postgres backups — two year-round pipelines.
+# League production Postgres backups — three year-round pipelines, plus one
+# derived artifact that is not a backup at all.
 #
-#   full  — whole-DB pg_dump -Fd -j directory dump (ephemeral prop-pairing DATA
-#           excluded via --exclude-table-data), Tue + Fri. The restorability
-#           backbone; base-storage routes it to database-dumps/league-production/.
-#   user  — small, irreplaceable, fast-changing slice (plain-SQL .tar.gz): a
-#           dated daily time-series (7-day on-VPS window) plus a 15-min checkpoint
-#           (latest overwritten in place) for ≤15-min on-prem RPO.
+#   full    — whole-DB pg_dump -Fd -j directory dump (ephemeral prop-pairing DATA
+#             excluded via --exclude-table-data), Tue + Fri. The restorability
+#             backbone; base-storage routes it to database-dumps/league-production/.
+#   user    — small, irreplaceable, fast-changing slice (plain-SQL .tar.gz): a
+#             dated daily time-series (7-day on-VPS window) plus a 15-min checkpoint
+#             (latest overwritten in place) for ≤15-min on-prem RPO.
+#   globals — pg_dumpall --globals-only, sops/age-encrypted. The roles and their
+#             SCRAM verifiers, which pg_dump structurally cannot carry.
+#
+#   dev fixture — a SCRUBBED projection of the user slice, derived daily. Not a
+#             backup, not restorable, and the only artifact a dev machine may pull.
 #
 # No season gate, no table-subset jobs — every table has a ≤3-4-day whole-DB copy
 # year-round. The full's Tue+Fri schedule has a 4-day Fri→Tue gap, which would
@@ -41,6 +47,32 @@
 
 # User dump — 15-minute checkpoint (latest overwritten in place) year-round
 */15 * * * * job-wrapper.sh league-backup-user-checkpoint /bin/bash /root/league/scripts/postgres-backup.sh -n checkpoint >> /var/log/league/league-postgres-backup.log 2>&1
+
+# Scrubbed dev fixture — daily 00:23 UTC, latest overwritten in place.
+#
+# This is NOT a backup and has no recovery value: it is the only artifact a dev
+# machine is allowed to pull. The user dump above stays complete and unscrubbed
+# because it is the DR artifact for the irreplaceable slice — a scrubbed backup
+# cannot restore the users, invite codes, webhooks, wagers or vendor config it
+# redacted. So the scrub happens on the path to DEV, not on the path to the
+# backup, and it happens here, on the host that already holds the plaintext.
+#
+# The scrub is an explicit emitted-column projection over every column of every
+# dumped table (scripts/dev-fixture-projection.json); a column present in the
+# database but absent from the spec ABORTS the run with no artifact written.
+# That is what makes the schedule load-bearing rather than a convenience: a
+# migration that adds a column turns this job red the next morning instead of
+# quietly emitting an unadjudicated field. Running it by hand would defer that
+# alarm until someone remembered to pull a fixture.
+#
+# No time series and no retention prune: a fixture has no recovery value, so
+# depth is pure carrying cost. The deriver writes to a temp path and renames, so
+# the hourly base-storage pull can never read a half-written artifact — the same
+# atomicity the checkpoint above needed after the 2026-08-03 truncation.
+#
+# Minute 23 collides with nothing: the */15 checkpoint fires at :00/:15/:30/:45
+# and league-imports.cron's */10 poll at :00/:10/:20/:30/:40/:50.
+23 0 * * * job-wrapper.sh league-derive-dev-fixture /root/.nvm/versions/node/current/bin/node /root/league/scripts/derive-dev-fixture.mjs --name latest >> /var/log/league/league-postgres-backup.log 2>&1
 
 # Cluster globals — roles, their passwords, their per-role settings, their grants.
 # Daily, sops/age-encrypted, latest overwritten in place.
