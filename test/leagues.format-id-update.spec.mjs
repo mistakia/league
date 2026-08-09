@@ -8,9 +8,10 @@ import { current_season, external_data_sources } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   find_stale_scoring_format_ids,
-  find_stale_league_format_ids
-} from '#libs-server/projection-cache-staleness.mjs'
-import { refresh_projection_caches } from '#libs-server/refresh-projection-caches.mjs'
+  find_stale_league_format_ids,
+  refresh_projection_caches,
+  MAX_ATTEMPTS_PER_FORMAT
+} from '#libs-server/refresh-projection-caches.mjs'
 
 import league from '#db/fixtures/league.mjs'
 import { user1 } from './fixtures/token.mjs'
@@ -260,5 +261,75 @@ describe('API /leagues - format id update', function () {
       year: current_season.year
     })
     expect(stale_after).to.not.include(season.scoring_format_id)
+  })
+
+  // Mint a fresh id by changing a scoring field, so each attempts test gets its
+  // own empty slice. Source rows are already in projections_index by this point.
+  const mint_stale_scoring_format_id = async ({ value }) => {
+    const res = await chai_request
+      .execute(server)
+      .put('/api/leagues/1')
+      .set('Authorization', `Bearer ${user1}`)
+      .send({ field: 'receptions', value })
+    res.should.have.status(200)
+    const season = await knex('seasons')
+      .where({ lid: 1, season_year: current_season.year })
+      .first()
+    const stale = await find_stale_scoring_format_ids({
+      db: knex,
+      year: current_season.year
+    })
+    expect(stale).to.include(season.scoring_format_id)
+    return season.scoring_format_id
+  }
+
+  // The attempts counter is what stops a format that cannot be rebuilt from
+  // pinning the worker at its 20s active interval and writing a ledger failure
+  // row every pass. Both halves are asserted because either one alone passes
+  // over a deleted cap: the increment, and the skip once it is reached.
+  it('a pass records one attempt per format it tries', async () => {
+    const scoring_format_id = await mint_stale_scoring_format_id({ value: 1.6 })
+    const attempts_by_format_id = new Map()
+
+    const { rebuilt } = await refresh_projection_caches({
+      db: knex,
+      year: current_season.year,
+      attempts_by_format_id
+    })
+
+    expect(rebuilt).to.include(`scoring:${scoring_format_id}`)
+    expect(attempts_by_format_id.get(scoring_format_id)).to.equal(1)
+  })
+
+  it('a format at the attempt cap is skipped rather than retried', async () => {
+    const scoring_format_id = await mint_stale_scoring_format_id({ value: 1.8 })
+    const attempts_by_format_id = new Map([
+      [scoring_format_id, MAX_ATTEMPTS_PER_FORMAT]
+    ])
+
+    const { rebuilt, failures } = await refresh_projection_caches({
+      db: knex,
+      year: current_season.year,
+      attempts_by_format_id
+    })
+
+    expect(rebuilt).to.not.include(`scoring:${scoring_format_id}`)
+    expect(failures).to.deep.equal([])
+    // Not attempted at all, so the counter must not have moved.
+    expect(attempts_by_format_id.get(scoring_format_id)).to.equal(
+      MAX_ATTEMPTS_PER_FORMAT
+    )
+
+    // And the slice it would have filled is still empty.
+    const projection_rows = await knex(
+      'scoring_format_player_projection_points'
+    )
+      .where({
+        scoring_format_id,
+        season_year: current_season.year
+      })
+      .count('* as n')
+      .first()
+    expect(Number(projection_rows.n)).to.equal(0)
   })
 })

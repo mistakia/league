@@ -36,13 +36,6 @@ export {
   find_or_create_league_format
 } from './find-or-create-format.mjs'
 export { find_or_create_adp_format } from './find-or-create-adp-format.mjs'
-export {
-  find_stale_projection_formats,
-  find_stale_scoring_format_ids,
-  find_stale_league_format_ids,
-  has_projection_source_for_year,
-  is_league_projection_cache_stale
-} from './projection-cache-staleness.mjs'
 export { default as resetWaiverOrder } from './reset-waiver-order.mjs'
 export { default as getTopPoachingWaiver } from './get-top-poaching-waiver.mjs'
 export { default as getTopFreeAgencyWaiver } from './get-top-free-agency-waiver.mjs'

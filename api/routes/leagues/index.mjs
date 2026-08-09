@@ -315,7 +315,7 @@ router.put('/:leagueId', async (req, res) => {
       // No cache rebuild here. The new id's projection slice is empty until it
       // is derived, and refresh-projection-cache-worker derives it -- it finds
       // the work by looking for an empty slice, so this route does not have to
-      // announce anything. See libs-server/projection-cache-staleness.mjs.
+      // announce anything. See libs-server/refresh-projection-caches.mjs.
     } else if (league_format_fields.includes(field)) {
       const league_config = { ...league, [field]: value }
       const league_format_id = await find_or_create_league_format(
