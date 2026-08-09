@@ -6,15 +6,28 @@ import { refresh_projection_caches } from '#libs-server/refresh-projection-cache
 import { create_logger } from '#libs-shared/log.mjs'
 import { install_process_handlers } from '#libs-server/install-process-handlers.mjs'
 
-const log = debug('refresh-projection-cache-worker')
-
 // Same trap as the two live-import workers: an unconditional debug.enable()
 // here would switch OFF whatever namespaces DEBUG had turned on, because under
 // debug 4.4.3 a call made after the loggers exist can disable but not enable,
-// and ESM has already evaluated every import by this point.
+// and ESM has already evaluated every import by this point. Kept even though
+// this file no longer logs through `debug` itself, because the processors it
+// calls do.
 if (!process.env.DEBUG) {
   debug.enable('refresh-projection-cache-worker')
 }
+
+// Outcome lines go to the CONSOLE, not through `debug`. This worker's log IS
+// its audit trail -- it is the only record that a rebuild happened, since a
+// pass that changes nothing deliberately writes no ledger row -- and namespace
+// resolution is a runtime negotiation with the whole ESM import graph that an
+// audit trail must not depend on winning. Shipped 2026-08-09 with these lines
+// on `debug` and both pm2 log files sat at zero bytes over a healthy process:
+// alive, polling, and completely unobservable. `debug` stays for per-item
+// detail, where losing a line costs nothing.
+const outcome_log = (message) =>
+  console.log(`[refresh-projection-cache-worker] ${message}`)
+const outcome_error = (message) =>
+  console.error(`[refresh-projection-cache-worker] ${message}`)
 
 install_process_handlers({
   service_name: 'refresh-projection-cache-worker',
@@ -49,7 +62,7 @@ const state = { should_exit: false }
 
 const setup_signal_handlers = () => {
   const handle_signal = (signal) => {
-    log(`received ${signal}, shutting down after the current pass`)
+    outcome_log(`received ${signal}, shutting down after the current pass`)
     state.should_exit = true
   }
   process.on('SIGTERM', () => handle_signal('SIGTERM'))
@@ -65,7 +78,7 @@ const interruptible_wait = async (total_ms) => {
 
 const main = async () => {
   setup_signal_handlers()
-  log('refresh-projection-cache-worker started')
+  outcome_log('started')
 
   while (!state.should_exit) {
     let did_work = false
@@ -96,7 +109,7 @@ const main = async () => {
         })
       }
     } catch (err) {
-      log(`pass failed: ${err.message}`)
+      outcome_error(`pass failed: ${err.message}`)
       try {
         await report_run_outcome({
           source: RUN_SOURCE,
@@ -105,7 +118,7 @@ const main = async () => {
           exit_code: 1
         })
       } catch (report_err) {
-        log(`run report failed: ${report_err.message}`)
+        outcome_error(`run report failed: ${report_err.message}`)
       }
     }
 
@@ -115,7 +128,7 @@ const main = async () => {
     )
   }
 
-  log('refresh-projection-cache-worker stopped')
+  outcome_log('stopped')
   await db.destroy()
   process.exit(0)
 }

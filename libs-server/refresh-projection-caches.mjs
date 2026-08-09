@@ -1,11 +1,7 @@
-import debug from 'debug'
-
 import { current_season } from '#constants'
 import { find_stale_projection_formats } from './projection-cache-staleness.mjs'
 import { process_scoring_format_year } from '#scripts/process-projections-for-scoring-format.mjs'
 import process_projections_for_league_format from '#scripts/process-projections-for-league-format.mjs'
-
-const log = debug('refresh-projection-caches')
 
 const FORMAT_TIMEOUT_MS = 300_000
 
@@ -75,10 +71,14 @@ export const refresh_projection_caches = async ({
         `scoring_format=${scoring_format_id}`
       )
       rebuilt.push(`scoring:${scoring_format_id}`)
-      log(`rebuilt scoring_format=${scoring_format_id} year=${year}`)
+      console.log(
+        `[refresh-projection-caches] rebuilt scoring_format=${scoring_format_id} year=${year}`
+      )
     } catch (err) {
       failures.push(`scoring:${scoring_format_id}: ${err.message}`)
-      log(`scoring_format=${scoring_format_id} failed: ${err.message}`)
+      console.error(
+        `[refresh-projection-caches] scoring_format=${scoring_format_id} failed: ${err.message}`
+      )
     }
   }
 
@@ -93,10 +93,14 @@ export const refresh_projection_caches = async ({
         `league_format=${league_format_id}`
       )
       rebuilt.push(`league:${league_format_id}`)
-      log(`rebuilt league_format=${league_format_id} year=${year}`)
+      console.log(
+        `[refresh-projection-caches] rebuilt league_format=${league_format_id} year=${year}`
+      )
     } catch (err) {
       failures.push(`league:${league_format_id}: ${err.message}`)
-      log(`league_format=${league_format_id} failed: ${err.message}`)
+      console.error(
+        `[refresh-projection-caches] league_format=${league_format_id} failed: ${err.message}`
+      )
     }
   }
 
