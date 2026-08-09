@@ -44,6 +44,14 @@ This GENESIS LEAGUE (LEAGUE) Constitution constitutes an agreement among the LEA
 
 > “NFL Rookie Draft” shall mean the first day upon which the NFL Draft is held within a given season.
 
+“POST-SEASON” shall mean the WILDCARD ROUND and the CHAMPIONSHIP.
+
+“Qualifying Season” shall mean that portion of the Regular Season preceding the POST-SEASON.
+
+“Head-to-Head record” shall mean, over a stated period, a Team’s record of wins, losses and ties in the weekly matchups the LEAGUE schedule assigned to it in that period.
+
+“All Play win percentage” shall mean, over a stated period, the win percentage a Team would have recorded had it played every other Team in the LEAGUE in each week of that period. A tie shall count as one half (1/2) of a win.
+
 ### Pronouns.
 
 > Where the male pronoun is used herein, it shall be taken to apply also to any persons as the situation may warrant.
@@ -227,6 +235,36 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
 11. If at any time a new Manager joins the League in order to replace a Manager that left, each new Manager will take over the departing Team’s roster. If multiple teams are available, the person that was highest on the waiting list, or the first to say they want in AND hand over money if there is no current list, gets to pick which Manager-less team to choose first.
 
+### Team Names.
+
+12. Each Manager shall select a new name for his Team prior to the commencement of each Regular Season. A Manager may not retain the name used by his Team in a preceding season, except as provided in Section 13.
+
+### Reigning Champion Exemption.
+
+13. The Manager of the Team that became the CHAMPION in the immediately preceding season (the “Reigning Champion”) may elect to retain his existing Team name rather than rename his Team.
+
+    1.  This exemption may be invoked for a maximum of three (3) consecutive LEAGUE CHAMPIONSHIPS. Where a Manager becomes the CHAMPION in three (3) consecutive seasons and invokes this exemption in each of those seasons, the exemption expires, and that Manager shall rename his Team prior to the following season regardless of whether he becomes the CHAMPION in a fourth consecutive season.
+
+    2.  The count of consecutive LEAGUE CHAMPIONSHIPS resets to zero (0) for any Manager who does not become the CHAMPION in a given season. Where that Manager becomes the CHAMPION in a later, non-consecutive season, the exemption becomes available to him again for up to three (3) consecutive invocations.
+
+    3.  The exemption is optional. A Reigning Champion may instead elect to rename his Team under Section 12, which shall not affect his count of consecutive LEAGUE CHAMPIONSHIPS under this Section.
+
+### Deadline for Team Names.
+
+14. All Team names, or in the case of a Reigning Champion invoking the exemption under Section 13, confirmation that the existing name is retained, shall be finalized and recorded on the LEAGUE’s game service no later than 11:59 PM on the day before Opening Day.
+
+### Standards for Team Names.
+
+15. A Team name shall not:
+
+    1.  duplicate the name of another Manager’s Team from any prior season; or
+
+    2.  be a trivial variation of that Team’s immediately preceding name, such as the addition or removal of a single word or a single mark of punctuation, as determined in the sole discretion of the Commissioner or by simple majority vote of the Teams.
+
+### Enforcement of Team Names.
+
+16. A Manager who fails to submit a compliant Team name by the deadline in Section 14, and who is not exempt under Section 13, shall have his Team renamed by the CHAMPION of the preceding season, who may select a name of his choosing, including a name intended to embarrass the noncompliant Manager. A name assigned under this Section shall stand for the entire season and shall not be appealed.
+
 ## Article V
 
 **LEAGUE SETTINGS**
@@ -364,11 +402,19 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
 ### Divisions.
 
-13. Divisions shall be redrawn yearly. The draw process is as follows:
+13. Divisions shall be constituted and shall operate as follows:
 
-    1.  The teams shall be divided into five (5) pots based on a team’s power index (PI), which is calculated by combining the team’s normalized win percentage and points for (PF) per game from, at most, the previous two (2) years.
+    1.  Where the LEAGUE consists of ten (10) Teams, there shall be no Divisions. All ten (10) Teams shall compete in a single LEAGUE-wide standing.
 
-    2.  At random, one team will be selected from each pot to form a division.
+    2.  Where the LEAGUE consists of twelve (12) Teams, there shall be four (4) Divisions of three (3) Teams each.
+
+    3.  The LEAGUE shall not be constituted at any other number of Teams without a further amendment to this subsection prescribing the Division structure for that number.
+
+    4.  Where Divisions exist, they shall be redrawn yearly. The Teams shall be divided into three (3) pots of equal size by a Team’s power index (PI), the highest-ranked Teams forming the first pot and so on. A Team’s power index is the sum of its Head-to-Head win percentage and its Points For (PF) per game, each of those two (2) figures first min-max normalized across all Teams in the LEAGUE, and each computed over the Qualifying Seasons of the two (2) preceding years or, for a Team that has competed in fewer than two (2), over those it has. At random, one (1) Team shall be selected from each pot to form a Division.
+
+    5.  Where Divisions exist, Divisions govern the LEAGUE schedule, the recording of standings, the qualification of Division winners for the POST-SEASON under [Article XVI, Section 3](#article-xvi), and eligibility for direct admission to the CHAMPIONSHIP under [Article XVII, Section 3](#article-xvii). Divisional standing confers no other playoff berth and no tiebreaker preference. A Division winner is the Team in a Division with the highest Head-to-Head record over the Qualifying Season, counting every matchup it played and not only those against its Divisional opponents; in the event that any Teams should be tied in respect of Head-to-Head record, the tie breaker shall be the higher All Play win percentage over the Qualifying Season, and if still tied, the higher Total Points For (PF) over the Qualifying Season.
+
+    6.  The Qualifying Season shall be fourteen (14) weeks, and its schedule shall be drawn as follows. At ten (10) Teams, each Team plays each of the other nine (9) Teams once and five (5) of them a second time. At twelve (12) Teams, each Team plays each of its two (2) Divisional opponents twice, each of the nine (9) non-Divisional Teams once, and one (1) non-Divisional Team a second time.
 
 ### Lineups.
 
@@ -683,13 +729,17 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 ### Participation.
 
-3.  The team with the lowest All Play win percentage, among the two teams with the highest Head-to-Head record in that division, will be admitted along with two (2) at large teams with the highest Total Points For (PF) among teams who are not 1st or 2nd in their division.
+3.  Four (4) Teams will be admitted to the WILDCARD ROUND, after the two (2) Teams admitted directly to the CHAMPIONSHIP under [Article XVII, Section 3](#article-xvii). They shall be, in order:
 
-4.  In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
+    1.  every Division winner not admitted directly to the CHAMPIONSHIP; and then
+
+    2.  the Teams with the highest Total Points For (PF) over the Qualifying Season among those remaining, until four (4) Teams have been admitted.
+
+4.  In the event that any Teams should be tied in respect of Total Points For (PF), the tie breaker shall be the higher All Play win percentage over the Qualifying Season.
 
 ### Tiebreakers.
 
-5.  In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
+5.  In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) over the Qualifying Season.
 
 ## Article XVII
 
@@ -705,13 +755,17 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 ### Participation.
 
-3.  The team with the highest All Play win percentage, among the two teams with the highest Head-to-Head record in that division, will be admitted along with the two (2) WILDCARD ROUND winners.
+3.  Two (2) Teams will be admitted directly to the CHAMPIONSHIP, along with the two (2) WILDCARD ROUND winners. The two (2) Teams admitted directly shall be those with the highest All Play win percentage over the Qualifying Season, drawn from the following Teams:
 
-4.  In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the Total Points For (PF) during the LEAGUE regular season.
+    1.  Where the LEAGUE has no Divisions, from all Teams in the LEAGUE.
+
+    2.  Where the LEAGUE is organized into Divisions, from the Division winners only, as defined in [Article V, Section 13, Subsection (e)](#article-v).
+
+4.  In the event that any Teams should be tied in respect of All Play win percentage, the tie breaker shall be the higher Total Points For (PF) over the Qualifying Season.
 
 ### Tiebreakers.
 
-5.  In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) during the LEAGUE regular season.
+5.  In the event that any Teams should be tied in score, the tie breaker shall be the Team with the higher Total Points For (PF) over the Qualifying Season.
 
 ### Awards.
 
@@ -903,5 +957,7 @@ The current Buy-In rate, Buy-In due date, and Commissioner contact information a
 | XXXVI     | Poaching Compensatory Pick                                |            |            |
 | XXXVII    | Practice Squad Reserve Eligibility                        | 2025-07-25 | 2025       |
 | XXXVIII   | Offseason Injured Reserve Clarification                   | 2025-07-25 | 2025       |
+| XL        | Division Format                                           | 2026-08-02 | 2026-08-09 |
+| XLI       | Mandatory Annual Team Rebranding                          | 2026-08-07 | 2026-08-09 |
 
 Amendments are folded into the articles above as they are ratified; this appendix records the amendment history. Amendments VII and XXXVI were drafted but never ratified.
