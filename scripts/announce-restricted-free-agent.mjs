@@ -365,7 +365,10 @@ const process_all_leagues = async ({ dry_run = false } = {}) => {
 const main = async () => {
   let error
   const argv = initialize_cli()
-  const { lid, tid, window_index, dry_run = false } = argv
+  // yargs camel-case-expands `--dry-run` to the `dryRun` key (not `dry_run`),
+  // so without this, `--dry-run` silently ran the script live. Accept both.
+  const { lid, tid, window_index, dryRun } = argv
+  const dry_run = Boolean(argv.dry_run || dryRun)
 
   try {
     if (lid) {
