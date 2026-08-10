@@ -15,12 +15,9 @@
 
 .league__recent-transactions
   display grid
-  grid-template-columns 1fr
+  grid-template-columns repeat(auto-fit, minmax(280px, 1fr))
   gap 16px
   width 100%
-
-  @media (min-width: 768px)
-    grid-template-columns 1fr 1fr
 
 .transactions__section
   display flex
