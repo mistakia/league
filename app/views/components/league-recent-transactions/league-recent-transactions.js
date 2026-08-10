@@ -44,14 +44,18 @@ export default function LeagueRecentTransactions({ signings, releases }) {
 
   return (
     <div className='league__recent-transactions'>
-      <div className='transactions__section'>
-        <div className='transactions__section-title'>Signings</div>
-        <div className='transactions__section-body empty'>{signing_items}</div>
-      </div>
-      <div className='transactions__section'>
-        <div className='transactions__section-title'>Releases</div>
-        <div className='transactions__section-body empty'>{release_items}</div>
-      </div>
+      {signing_items.length > 0 && (
+        <div className='transactions__section'>
+          <div className='transactions__section-title'>Signings</div>
+          <div className='transactions__section-body'>{signing_items}</div>
+        </div>
+      )}
+      {release_items.length > 0 && (
+        <div className='transactions__section'>
+          <div className='transactions__section-title'>Releases</div>
+          <div className='transactions__section-body'>{release_items}</div>
+        </div>
+      )}
     </div>
   )
 }
