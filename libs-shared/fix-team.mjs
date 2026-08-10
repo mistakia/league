@@ -19,6 +19,7 @@ export default function (team) {
     case 'CARDINALS':
     case 'ARI':
     case 'ARZ':
+    case 'AZ':
     case 'ARI CARDINALS':
       return 'ARI'
 
