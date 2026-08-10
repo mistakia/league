@@ -9,7 +9,8 @@ import {
   get_restricted_free_agency_window_start,
   get_restricted_free_agency_window_index,
   get_restricted_free_agency_processing_time,
-  get_restricted_free_agency_nominating_team_index
+  get_restricted_free_agency_nominating_team_index,
+  get_restricted_free_agency_nomination_window
 } from '#libs-shared'
 
 dayjs.extend(utc)
@@ -249,6 +250,73 @@ describe('LIBS-SHARED restricted free agency windows', function () {
       )
 
       expect([...new Set(first_round)].length).to.equal(num_teams)
+    })
+  })
+
+  describe('team nomination window', function () {
+    const teams = [
+      { uid: 1, draft_order: 1 },
+      { uid: 2, draft_order: 2 }
+    ]
+
+    // Two teams, one 12-hour window each on the day; the highest draft order
+    // nominates first, so window 0 belongs to team 2 and window 1 to team 1
+    const league = {
+      restricted_free_agency_period_start: et_date('2026-08-01 17:00'),
+      restricted_free_agency_first_window_at: et_date('2026-08-01 17:00'),
+      restricted_free_agency_window_hours: 12,
+      restricted_free_agency_processing_lead_hours: 1,
+      num_teams: 2
+    }
+
+    const window_for = (team_id, current_timestamp) =>
+      get_restricted_free_agency_nomination_window({
+        league,
+        teams,
+        team_id,
+        current_timestamp
+      })
+
+    it('returns a team’s next future nomination window', () => {
+      // Mid-way through window 0 (team 2’s current window)
+      const current = et_unix('2026-08-01 23:00')
+      const team1 = window_for(1, current)
+      const team2 = window_for(2, current)
+
+      expect(team1.nominating_team.uid).to.equal(1)
+      expect(format_et(team1.announce_at)).to.equal('2026-08-02 05:00')
+
+      // Team 2’s own window 0 has already opened, so its next turn is next round
+      expect(team2.nominating_team.uid).to.equal(2)
+      expect(format_et(team2.announce_at)).to.equal('2026-08-02 17:00')
+    })
+
+    it('skips windows that have already opened', () => {
+      // Well into window 2; both teams’ next turns are the round after
+      const current = et_unix('2026-08-02 20:00')
+      expect(format_et(window_for(1, current).announce_at)).to.equal(
+        '2026-08-03 05:00'
+      )
+      expect(format_et(window_for(2, current).announce_at)).to.equal(
+        '2026-08-03 17:00'
+      )
+    })
+
+    it('returns null for a team with no future window', () => {
+      expect(window_for(999, et_unix('2026-08-01 23:00'))).to.equal(null)
+      // After the 30-day period ends the whole schedule is gone
+      expect(window_for(1, et_unix('2026-08-31 23:00'))).to.equal(null)
+    })
+
+    it('returns null when the schedule cannot be built', () => {
+      expect(
+        get_restricted_free_agency_nomination_window({
+          league: null,
+          teams,
+          team_id: 1,
+          current_timestamp: et_unix('2026-08-01 23:00')
+        })
+      ).to.equal(null)
     })
   })
 })

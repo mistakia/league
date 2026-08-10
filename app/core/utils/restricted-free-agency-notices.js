@@ -4,15 +4,7 @@ import { timeago } from './timeago'
 import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
 import { get_restricted_free_agency_nomination_info } from '@libs-shared'
-
-// Helper to convert teams Immutable.Map to array
-function teams_to_array(teams) {
-  if (!teams || typeof teams.toJS !== 'function') return []
-  return Object.values(teams.toJS()).map((team) => ({
-    uid: team.uid,
-    draft_order: team.draft_order
-  }))
-}
+import { teams_to_array } from './teams-to-array'
 
 // Pure function: returns array of Alert elements
 export function get_restricted_free_agency_notices({

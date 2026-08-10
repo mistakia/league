@@ -94,6 +94,7 @@ export { default as plays_view_fields_index } from './plays-view-fields-index.mj
 export { default as league_has_starting_position } from './league-has-starting-position.mjs'
 export { default as nfl_plays_team_column_params } from './nfl-plays-team-column-params.mjs'
 export { default as get_restricted_free_agency_nomination_info } from './get-restricted-free-agency-nomination-info.mjs'
+export { default as get_restricted_free_agency_nomination_window } from './get-restricted-free-agency-nomination-window.mjs'
 export {
   get_restricted_free_agency_window_config,
   get_restricted_free_agency_window_start,

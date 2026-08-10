@@ -5,17 +5,9 @@ import dayjs from 'dayjs'
 
 import { get_restricted_free_agency_nomination_info } from '@libs-shared'
 import TeamName from '@components/team-name'
-import { useClockSeconds, format_countdown } from '@core/utils'
+import { teams_to_array, useClockSeconds, format_countdown } from '@core/utils'
 
 import './restricted-free-agency-schedule.styl'
-
-function teams_to_array(teams) {
-  if (!teams || typeof teams.toJS !== 'function') return []
-  return Object.values(teams.toJS()).map((team) => ({
-    uid: team.uid,
-    draft_order: team.draft_order
-  }))
-}
 
 const format_window_full = (timestamp) =>
   dayjs.unix(timestamp).format('ddd MMM D, h:mm A')

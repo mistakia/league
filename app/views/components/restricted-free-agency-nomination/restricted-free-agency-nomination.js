@@ -3,19 +3,11 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import dayjs from 'dayjs'
 
-import { get_restricted_free_agency_nomination_info } from '@libs-shared'
+import { get_restricted_free_agency_nomination_window } from '@libs-shared'
 import PlayerName from '@components/player-name'
-import { useClockSeconds, format_countdown } from '@core/utils'
+import { teams_to_array, useClockSeconds, format_countdown } from '@core/utils'
 
 import './restricted-free-agency-nomination.styl'
-
-function teams_to_array(teams) {
-  if (!teams || typeof teams.toJS !== 'function') return []
-  return Object.values(teams.toJS()).map((team) => ({
-    uid: team.uid,
-    draft_order: team.draft_order
-  }))
-}
 
 const format_deadline = (timestamp) =>
   dayjs.unix(timestamp).format('ddd MMM D, h:mm A')
@@ -42,22 +34,19 @@ export default function RestrictedFreeAgencyNomination({
   const subject_tid = tid || team_id
   const is_own_team = subject_tid === team_id
 
-  const info = useMemo(() => {
-    if (!league?.restricted_free_agency_period_start || !teams || !teams.size) {
-      return null
-    }
-
+  const next_window = useMemo(() => {
     try {
-      return get_restricted_free_agency_nomination_info({
+      return get_restricted_free_agency_nomination_window({
         league,
         teams: teams_to_array(teams),
+        team_id: subject_tid,
         current_timestamp: now_minute * 60
       })
     } catch (error) {
       console.error('Error building RFA nomination status:', error)
       return null
     }
-  }, [league, teams, now_minute])
+  }, [league, teams, now_minute, subject_tid])
 
   // A team's own pending tags are private to it, so another team's nominee and
   // candidate count are simply not in the store — say only what is knowable
@@ -81,13 +70,6 @@ export default function RestrictedFreeAgencyNomination({
       candidate_count: held.size
     }
   }, [is_own_team, restricted_free_agency_players, subject_tid])
-
-  if (!info || !info.schedule.length) return null
-
-  const next_window = info.schedule.find(
-    (entry) =>
-      entry.nominating_team?.uid === subject_tid && entry.announce_at > now
-  )
 
   if (!next_window) return null
 

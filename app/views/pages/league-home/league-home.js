@@ -21,9 +21,11 @@ import { current_season, fantasy_positions, league_defaults } from '@constants'
 import {
   isReserveEligible,
   isReserveCovEligible,
-  get_free_agent_period
+  get_free_agent_period,
+  get_restricted_free_agency_nomination_window
 } from '@libs-shared'
 import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
+import { teams_to_array } from '@core/utils'
 import RestrictedFreeAgencySchedule from '@components/restricted-free-agency-schedule'
 import RestrictedFreeAgencyNomination from '@components/restricted-free-agency-nomination'
 
@@ -87,6 +89,21 @@ export default function LeagueHomePage({
       }),
     [league, teams, teamId, restricted_free_agency_players, is_team_manager]
   )
+
+  // The "Next nomination" card only exists while this team has a future
+  // nomination window; the schedule beside it spans the full row when it is
+  // gone, so the layout keys on the same predicate the card renders from
+  const has_rfa_nomination = useMemo(() => {
+    if (!is_before_restricted_free_agency_end) return false
+    return Boolean(
+      get_restricted_free_agency_nomination_window({
+        league,
+        teams: teams_to_array(teams),
+        team_id: teamId,
+        current_timestamp: Math.floor(Date.now() / 1000 / 60) * 60
+      })
+    )
+  }, [league, teams, teamId, is_before_restricted_free_agency_end])
 
   const notice_items = [...rfa_notices]
 
@@ -232,14 +249,16 @@ export default function LeagueHomePage({
           </Grid>
         ) : null}
         {is_before_restricted_free_agency_end && (
-          <Grid item xs={12} md={6}>
-            <RestrictedFreeAgencyNomination />
-          </Grid>
-        )}
-        {is_before_restricted_free_agency_end && (
-          <Grid item xs={12} md={6}>
-            <RestrictedFreeAgencySchedule />
-          </Grid>
+          <>
+            {has_rfa_nomination && (
+              <Grid item xs={12} md={6}>
+                <RestrictedFreeAgencyNomination />
+              </Grid>
+            )}
+            <Grid item xs={12} md={has_rfa_nomination ? 6 : 12}>
+              <RestrictedFreeAgencySchedule />
+            </Grid>
+          </>
         )}
         {active_free_agent_items.length > 0 && (
           <Grid item xs={12}>
@@ -314,10 +333,10 @@ export default function LeagueHomePage({
             />
           </Grid>
         )}
-        <Grid item xs={12} lg={6} className='league-positional-value'>
+        <Grid item xs={12} className='league-positional-value'>
           <DashboardLeaguePositionalValue tid={teamId} />
         </Grid>
-        <Grid item xs={12} lg={6} className='league-recent-transactions'>
+        <Grid item xs={12} className='league-recent-transactions'>
           <LeagueRecentTransactions />
         </Grid>
       </Grid>
