@@ -616,9 +616,11 @@ export default run
 const main = async () => {
   debug.enable('process-restricted-free-agency-bids')
   const argv = initialize_cli()
+  // yargs camel-case-expands `--dry-run` to the `dryRun` key (not `dry_run`),
+  // so without this, `--dry-run` silently ran the script live. Accept both.
+  const dry_run = argv.dry_run || argv.dryRun || false
   let error
   try {
-    const dry_run = argv.dry_run || false
     const result = await run({ dry_run })
     throw_if_shortfall(result?.shortfall)
   } catch (err) {
@@ -626,7 +628,7 @@ const main = async () => {
     log(error)
   }
 
-  if (!argv.dry_run) {
+  if (!dry_run) {
     await report_job({
       job_type: job_types.PROCESS_RESTRICTED_FREE_AGENCY_BIDS,
       error
