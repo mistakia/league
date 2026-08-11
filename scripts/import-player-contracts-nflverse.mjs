@@ -10,6 +10,8 @@
  *
  * Features:
  *   - Efficient in-memory player caching (all 27K+ players)
+ *   - Bounded-memory parquet reads: only the columns this import consumes are
+ *     read, and the nested season_history list is read one leaf at a time
  *   - Batch database operations for performance
  *   - No player changelog entries created
  *   - Handles both active and retired players
@@ -25,7 +27,18 @@ import { pipeline } from 'stream'
 import { promisify } from 'util'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import { asyncBufferFromFile, parquetRead } from 'hyparquet'
+import {
+  asyncBufferFromFile,
+  flatten,
+  parquetMetadataAsync,
+  parquetRead
+} from 'hyparquet'
+// Internal hyparquet modules, reached through its published ./src/*.js exports.
+// The public parquetRead API cannot select a single leaf of a nested column,
+// which this import needs in order to stay within its heap budget — see
+// read_season_history_leaf below.
+import { parquetPlan } from 'hyparquet/src/plan.js'
+import { readRowGroup } from 'hyparquet/src/rowgroup.js'
 
 import db from '#db'
 import { fixTeam } from '#libs-shared'
@@ -58,6 +71,51 @@ const PLAYER_CACHE_OPTIONS = {
   include_otc_id_index: true,
   include_name_draft_index: true
 }
+
+// Nested list column holding the year-by-year contract breakdown.
+//
+// Schema regression, 2026-08-10: nflverse renamed this column from `cols` to
+// `season_history`, added a parallel `contract_history` list this import does
+// not use, and began emitting the cross product of each player's seasons and
+// contracts — every season now repeats once per contract the player has ever
+// signed, padding unpaired elements with nulls. Element count went from ~311K
+// to ~3.2M and the file from ~6.7MB to ~20MB overnight, and both lists now
+// carry identical counts. Reading the column the obvious way costs ~10GB of heap,
+// which is what OOM'd this import, so the reader below is deliberately
+// leaf-at-a-time and collapses the cross product before assembling records.
+const SEASON_HISTORY_COLUMN = 'season_history'
+const SEASON_HISTORY_FIELDS = [
+  'year',
+  'team',
+  'base_salary',
+  'prorated_bonus',
+  'option_bonus',
+  'roster_bonus',
+  'guaranteed_salary',
+  'cap_number',
+  'cap_percent',
+  'cash_paid',
+  'workout_bonus',
+  'per_game_roster_bonus',
+  'other_bonus'
+]
+
+// Top-level scalar columns this import consumes. Everything else in the file —
+// bio fields, player_page, and the `contract_history` list — is left unread.
+const CONTRACT_SCALAR_COLUMNS = [
+  'player',
+  'draft_year',
+  'otc_id',
+  'year_signed',
+  'years',
+  'value',
+  'apy',
+  'guaranteed',
+  'apy_cap_pct',
+  'inflated_value',
+  'inflated_apy',
+  'inflated_guaranteed'
+]
 
 // Player table fields that must be included in INSERT operations (NOT NULL constraints)
 const REQUIRED_PLAYER_FIELDS = [
@@ -235,85 +293,244 @@ const save_contract_data = async ({ player_updates, contract_rows }) => {
 }
 
 /**
- * Processes contract data from parquet file and saves to database
+ * Reads the top-level scalar contract columns, one object per parquet row
  */
-const process_contract_data = (parquet_file) =>
-  new Promise((resolve, reject) => {
-    parquetRead({
-      file: parquet_file,
-      rowFormat: 'object',
-      onComplete: async (data) => {
-        try {
-          const player_updates = []
-          const contract_rows = []
+const read_contract_scalars = async ({ file, metadata }) => {
+  let rows = []
+  await parquetRead({
+    file,
+    metadata,
+    rowFormat: 'object',
+    columns: CONTRACT_SCALAR_COLUMNS,
+    onComplete: (data) => {
+      rows = data
+    }
+  })
+  return rows
+}
 
-          log(`processing ${data.length} contract records`)
+/**
+ * Collects the primitives inside one row's nested leaf value
+ * Nulls are kept: they are real elements and dropping them would misalign
+ * this leaf against the others.
+ */
+const collect_leaf_values = (value, output) => {
+  if (Array.isArray(value)) {
+    for (const item of value) collect_leaf_values(item, output)
+  } else {
+    output.push(value)
+  }
+  return output
+}
 
-          // Transform raw contract data into database format
-          for (const row of data) {
-            const player = find_player_from_contract_data({ row })
-            if (!player) continue
+/**
+ * Flattens one row's nested season_history leaf value into its elements
+ * A row with no list at all contributes no elements.
+ */
+const flatten_leaf_row = (row_value) =>
+  row_value === null || row_value === undefined
+    ? []
+    : collect_leaf_values(row_value, [])
 
-            // Build player update with required fields + contract summary
-            const update = {
-              pid: player.pid,
-              contract_summary: format_contract_summary(row)
-            }
-            REQUIRED_PLAYER_FIELDS.forEach((field) => {
-              update[field] = player[field]
-            })
-            player_updates.push(update)
+/**
+ * Reads a single leaf column of the season_history list
+ *
+ * hyparquet's `columns` option filters by top-level name only, so asking for
+ * `season_history` materializes all 13 leaves and every list element as a JS
+ * object at once — about 10GB of heap on the current nflverse schema. Planning
+ * the read here and handing readRowGroup one leaf chunk keeps a single column
+ * in memory at a time instead.
+ */
+const read_season_history_leaf = async ({
+  file,
+  metadata,
+  plan,
+  group_plan,
+  field
+}) => {
+  const path_in_schema = [SEASON_HISTORY_COLUMN, 'list', 'element', field].join(
+    '.'
+  )
+  const chunks = group_plan.chunks.filter(
+    (chunk) => chunk.columnMetadata.path_in_schema.join('.') === path_in_schema
+  )
+  if (chunks.length !== 1) {
+    throw new Error(
+      `expected one parquet column chunk for ${path_in_schema}, found ${chunks.length}`
+    )
+  }
 
-            // Add yearly contract details for player_contracts table
-            if (row.cols?.length) {
-              const yearly_details = row.cols.map((yearly_row) => ({
-                ...format_yearly_contract_detail(yearly_row),
-                pid: player.pid
-              }))
-              contract_rows.push(...yearly_details)
-            }
+  const { asyncColumns } = readRowGroup({ file, metadata }, plan, {
+    ...group_plan,
+    chunks
+  })
+  const { data } = await asyncColumns[0].data
+  return flatten(data)
+}
+
+/**
+ * Reads season_history into one detail record per (parquet row, season year)
+ *
+ * Each record carries its parquet row index so the caller can join it to that
+ * row's scalar contract fields. Within a row the last element for a given year
+ * wins, which collapses the upstream season x contract cross product without
+ * changing the last-wins dedup applied globally further down.
+ */
+const read_season_history_details = async ({ file, metadata }) => {
+  const plan = parquetPlan({ metadata, columns: [SEASON_HISTORY_COLUMN] })
+  const details = []
+
+  for (const group_plan of plan.groups) {
+    const read_leaf = (field) =>
+      read_season_history_leaf({ file, metadata, plan, group_plan, field })
+
+    // `year` is read first: it establishes the list boundaries and selects
+    // which elements survive, so every other leaf only needs those positions.
+    const group_start = details.length
+    const selected_indexes = []
+    const year_rows = await read_leaf('year')
+    let element_index = 0
+
+    for (let row = 0; row < year_rows.length; row++) {
+      const years = flatten_leaf_row(year_rows[row])
+      const last_index_by_year = new Map()
+      for (let i = 0; i < years.length; i++) {
+        // The cross product pads each row out to seasons x contracts, so
+        // unpaired elements carry a null year. They cannot become a
+        // player_contracts row — season_year is NOT NULL — and had no
+        // equivalent under the old schema, so they are dropped here.
+        if (years[i] === null || years[i] === undefined || years[i] === '') {
+          continue
+        }
+        last_index_by_year.set(years[i], element_index + i)
+      }
+
+      const picks = Array.from(last_index_by_year.values()).sort(
+        (a, b) => a - b
+      )
+      for (const index of picks) {
+        selected_indexes.push(index)
+        details.push({
+          row_index: group_plan.groupStart + row,
+          detail: { year: years[index - element_index] }
+        })
+      }
+      element_index += years.length
+    }
+
+    for (const field of SEASON_HISTORY_FIELDS) {
+      if (field === 'year') continue
+
+      const leaf_rows = await read_leaf(field)
+      let cursor = 0
+      let index = 0
+      for (
+        let row = 0;
+        row < leaf_rows.length && cursor < selected_indexes.length;
+        row++
+      ) {
+        for (const value of flatten_leaf_row(leaf_rows[row])) {
+          if (selected_indexes[cursor] === index) {
+            details[group_start + cursor].detail[field] = value
+            cursor++
           }
-
-          log(
-            `matched ${player_updates.length} players with ${contract_rows.length} yearly details`
-          )
-
-          // Deduplicate by pid (keep last occurrence for each player)
-          const unique_player_updates = deduplicate_by_key(
-            player_updates,
-            (item) => item.pid
-          )
-
-          log(
-            `deduped to ${unique_player_updates.length} unique players (${player_updates.length - unique_player_updates.length} duplicates removed)`
-          )
-
-          // Deduplicate by [season_year, pid] composite key (keep last occurrence)
-          const unique_contract_rows = deduplicate_by_key(
-            contract_rows,
-            (row) => `${row.season_year}-${row.pid}`
-          )
-
-          log(
-            `deduped to ${unique_contract_rows.length} unique contract rows (${contract_rows.length - unique_contract_rows.length} duplicates removed)`
-          )
-
-          // Save all data to database
-          await save_contract_data({
-            player_updates: unique_player_updates,
-            contract_rows: unique_contract_rows
-          })
-
-          resolve({
-            players_updated: unique_player_updates.length,
-            contract_rows_saved: unique_contract_rows.length
-          })
-        } catch (error) {
-          reject(error)
+          index++
         }
       }
-    })
+
+      if (cursor !== selected_indexes.length) {
+        throw new Error(
+          `season_history leaf ${field} yielded ${cursor} of ${selected_indexes.length} selected elements`
+        )
+      }
+    }
+  }
+
+  return details
+}
+
+/**
+ * Processes contract data from parquet file and saves to database
+ */
+const process_contract_data = async (parquet_file) => {
+  const metadata = await parquetMetadataAsync(parquet_file)
+  const contract_records = await read_contract_scalars({
+    file: parquet_file,
+    metadata
   })
+
+  log(`processing ${contract_records.length} contract records`)
+
+  // Resolve each parquet row to a player before reading the yearly details, so
+  // details belonging to unmatched players can be dropped without formatting
+  const player_updates = []
+  const pid_by_row_index = new Array(contract_records.length).fill(null)
+
+  for (let row_index = 0; row_index < contract_records.length; row_index++) {
+    const row = contract_records[row_index]
+    const player = find_player_from_contract_data({ row })
+    if (!player) continue
+
+    pid_by_row_index[row_index] = player.pid
+
+    // Build player update with required fields + contract summary
+    const update = {
+      pid: player.pid,
+      contract_summary: format_contract_summary(row)
+    }
+    REQUIRED_PLAYER_FIELDS.forEach((field) => {
+      update[field] = player[field]
+    })
+    player_updates.push(update)
+  }
+
+  const season_history_details = await read_season_history_details({
+    file: parquet_file,
+    metadata
+  })
+
+  const contract_rows = []
+  for (const { row_index, detail } of season_history_details) {
+    const pid = pid_by_row_index[row_index]
+    if (!pid) continue
+    contract_rows.push({ ...format_yearly_contract_detail(detail), pid })
+  }
+
+  log(
+    `matched ${player_updates.length} players with ${contract_rows.length} yearly details`
+  )
+
+  // Deduplicate by pid (keep last occurrence for each player)
+  const unique_player_updates = deduplicate_by_key(
+    player_updates,
+    (item) => item.pid
+  )
+
+  log(
+    `deduped to ${unique_player_updates.length} unique players (${player_updates.length - unique_player_updates.length} duplicates removed)`
+  )
+
+  // Deduplicate by [season_year, pid] composite key (keep last occurrence)
+  const unique_contract_rows = deduplicate_by_key(
+    contract_rows,
+    (row) => `${row.season_year}-${row.pid}`
+  )
+
+  log(
+    `deduped to ${unique_contract_rows.length} unique contract rows (${contract_rows.length - unique_contract_rows.length} duplicates removed)`
+  )
+
+  // Save all data to database
+  await save_contract_data({
+    player_updates: unique_player_updates,
+    contract_rows: unique_contract_rows
+  })
+
+  return {
+    players_updated: unique_player_updates.length,
+    contract_rows_saved: unique_contract_rows.length
+  }
+}
 
 /**
  * Downloads the contracts parquet file if needed
