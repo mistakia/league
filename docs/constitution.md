@@ -965,5 +965,6 @@ The current Buy-In rate, Buy-In due date, and Commissioner contact information a
 | XXXVIII   | Offseason Injured Reserve Clarification                   | 2025-07-25 | 2025       |
 | XL        | Division Format                                           | 2026-08-02 | 2026-08-09 |
 | XLI       | Mandatory Annual Team Rebranding                          | 2026-08-07 | 2026-08-09 |
+| XLII      | Restricted Free Agency Reveal-and-Match                   |            |            |
 
 Amendments are folded into the articles above as they are ratified; this appendix records the amendment history. Amendments VII and XXXVI were drafted but never ratified.
