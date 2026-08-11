@@ -101,7 +101,9 @@ JOB_PROJECT=league
 0 12 * 1,2,9-12 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-sleeper.mjs >> /var/log/league/import-players-sleeper.log 2>&1
 
 ## At 3AM every day
-0 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-player-contracts-nflverse.mjs --force_download >> /var/log/league/import-player-contracts-nflverse.log 2>&1
+## --max-old-space-size=8192: the nflverse contracts parquet tripled to ~20MB (2026-08-10),
+## pushing player-cache preload over the default 4GB heap. Host has ~17.5GB headroom.
+0 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node --max-old-space-size=8192 /root/league/scripts/import-player-contracts-nflverse.mjs --force_download >> /var/log/league/import-player-contracts-nflverse.log 2>&1
 
 ## At 3:05 AM every day - nflverse player roster_status (before Sleeper 03:30 / NFL.com 03:30 so the later runs claim last-write on any disagreement; staggered 5min after contracts importer to avoid simultaneous parquet downloads)
 5 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nflverse.mjs >> /var/log/league/import-players-nflverse.log 2>&1
