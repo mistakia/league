@@ -348,13 +348,28 @@ describe('data-views team_attribution', () => {
       )
       const sql = query.toString()
       // the team_stats join attributes to current_nfl_team and NOT to
-      // player_year_teams.team -- the value is current-team volume. (The
-      // player_year_teams CTE may still be materialized as a dead LEFT JOIN in
-      // current-only mode because the counting-column join path applies the
-      // bridge ungated; that is a harmless perf wart tracked as a follow-up on
-      // extend-team-attribution-to-counting-columns, not a correctness issue.)
+      // player_year_teams.team -- the value is current-team volume. The
+      // counting-column join path gates the player_year->team_year bridge on
+      // team_attribution !== 'current' (mirroring the rate types), so the
+      // bridge is not even materialized in current-only mode.
       expect(sql).to.match(/"nfl_team" = "player"\."current_nfl_team"/)
       expect(sql).to.not.match(/"nfl_team" = "player_year_teams"\."team"/)
+      expect(sql).to.not.match(/"player_year_teams"/)
+    })
+
+    it('current multi-year no-split: skips the wrap, joins all volume on current_nfl_team', async () => {
+      const { query } = await get_data_view_results_query(
+        view([
+          counting_column({ year: [2023, 2024], team_attribution: 'current' })
+        ])
+      )
+      const sql = query.toString()
+      // The wrap (team-stats-from-plays-wrap.mjs) reattributes each year's
+      // volume to that year's team-of-record via player_year_teams. 'current'
+      // has nothing to reattribute (all volume -> current_nfl_team), so the
+      // wrap must be skipped -- otherwise the value is silently historical.
+      expect(sql).to.match(/"nfl_team" = "player"\."current_nfl_team"/)
+      expect(sql).to.not.match(/"player_year_teams"/)
     })
 
     it('cross-column non-leak: one historical + one current resolve to DIFFERENT teams', async () => {

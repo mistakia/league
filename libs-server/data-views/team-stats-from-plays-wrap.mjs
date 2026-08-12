@@ -13,6 +13,7 @@ import {
   resolve_effective_years,
   extract_matchup_opponent_type
 } from '#libs-server/data-views/wrap-predicates.mjs'
+import { get_team_attribution } from '#libs-server/data-views/resolve-team-join-target.mjs'
 
 export const requires_team_stats_wrap = ({
   query_context,
@@ -22,6 +23,13 @@ export const requires_team_stats_wrap = ({
   // `_player_team_stats` (the force_player_active variant) already keys on
   // pid via an internal player_gamelogs join -- no wrap needed.
   if (force_player_active) return false
+
+  // 'current' attribution attaches all volume to player.current_nfl_team
+  // regardless of year; the wrap's per-(pid, year) team reattribution is both
+  // wrong and wasteful for it. Skip -- the plain team-grain join then
+  // correlates on current_nfl_team via resolve_team_join_target. Mirrors the
+  // rate-type wrap gate in rate-type/per-team-play-wrap.mjs.
+  if (get_team_attribution(params) === 'current') return false
 
   const identity_id = query_context.identity_id
   if (!identity_id || !identity_id.startsWith('player')) return false
