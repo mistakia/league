@@ -381,7 +381,8 @@
       "accepted": "keep",
       "cancelled": "keep",
       "rejected": "keep",
-      "vetoed": "keep"
+      "vetoed": "keep",
+      "approved": "keep"
     },
     "trades_picks": {
       "tradeid": "keep",
