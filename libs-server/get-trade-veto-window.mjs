@@ -12,8 +12,11 @@ import {
  *
  * Derived from `trades` on every call rather than materialized onto the assets.
  * The trade row is already the source of truth for when the window opened
- * (`accepted`) and whether it is still open (`vetoed`), so a second copy could
- * only drift.
+ * (`accepted`), whether it is still open (`vetoed`), and whether the
+ * commissioner closed it early (`approved`), so a second copy could only drift.
+ *
+ * An approved trade is settled: the commissioner ended its window ahead of the
+ * clock, so its assets unlock here on the very next call with no cleanup step.
  */
 
 // The window arithmetic itself is shared with the client, which renders a
@@ -53,6 +56,7 @@ export const get_trade_protected_assets = async ({
     .where('lid', league.uid)
     .whereNotNull('accepted')
     .whereNull('vetoed')
+    .whereNull('approved')
     .where('accepted', '>', accepted_after)
 
   if (!open_trades.length) return empty

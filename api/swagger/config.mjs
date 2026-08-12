@@ -3453,6 +3453,14 @@ const options = {
               description: 'ISO-8601 timestamp when trade was vetoed',
               example: null
             },
+            approved: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+              description:
+                'ISO-8601 timestamp when the commissioner approved the trade, closing the veto window early',
+              example: null
+            },
             proposingTeamPlayers: {
               type: 'array',
               items: { type: 'string' },

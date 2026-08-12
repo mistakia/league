@@ -215,9 +215,9 @@ router.get('/?', async (req, res) => {
       })
     }
 
-    // Vetoable means accepted, not already vetoed, and still inside the
-    // league's veto window -- the same three conditions the veto route
-    // enforces, so nothing listed here is refused for being out of window.
+    // Vetoable means accepted, not already vetoed or approved, and still inside
+    // the league's veto window -- the same conditions the veto route enforces,
+    // so nothing listed here is refused for being out of window.
     if (want_vetoable) {
       const window_hours = Number(league.trade_veto_window_hours)
       if (!Number.isFinite(window_hours) || window_hours <= 0) {
@@ -227,6 +227,7 @@ router.get('/?', async (req, res) => {
       query
         .whereNotNull('accepted')
         .whereNull('vetoed')
+        .whereNull('approved')
         .where('accepted', '>', opened_after)
     }
 

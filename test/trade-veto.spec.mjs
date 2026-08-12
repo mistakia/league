@@ -92,6 +92,60 @@ const propose_and_accept_one_for_one = async () => {
   }
 }
 
+// A trade carrying a pick as well as players, so a reversal that commits when
+// it should have rolled back is visible in `draft.tid` too.
+const propose_and_accept_with_pick = async () => {
+  await draft_picks(knex)
+
+  const proposing_row = await get_roster_player({ tid: 1 })
+  const accepting_row = await get_roster_player({ tid: 2 })
+
+  const proposingTeamPlayers = [proposing_row.pid]
+  const acceptingTeamPlayers = [accepting_row.pid]
+
+  await knex('transactions')
+    .whereIn('pid', proposingTeamPlayers.concat(acceptingTeamPlayers))
+    .update('player_salary', 0)
+
+  const pick_rows = await knex('draft')
+    .where({ lid: 1, tid: 1, season_year: current_season.year + 1 })
+    .whereNull('pid')
+    .limit(1)
+  const pick = pick_rows[0]
+  should.exist(pick)
+
+  const propose_res = await chai_request
+    .execute(server)
+    .post('/api/leagues/1/trades')
+    .set('Authorization', `Bearer ${user1}`)
+    .send({
+      proposingTeamPlayers,
+      acceptingTeamPlayers,
+      proposingTeamPicks: [pick.uid],
+      acceptingTeamPicks: [],
+      proposing_team_slots: {
+        [acceptingTeamPlayers[0]]: roster_slot_types.BENCH
+      },
+      accepting_team_slots: {
+        [proposingTeamPlayers[0]]: roster_slot_types.BENCH
+      },
+      propose_tid: 1,
+      accept_tid: 2,
+      leagueId: 1
+    })
+  propose_res.should.have.status(200)
+
+  const tradeid = propose_res.body.uid
+
+  const accept_res = await chai_request
+    .execute(server)
+    .post(`/api/leagues/1/trades/${tradeid}/accept`)
+    .set('Authorization', `Bearer ${user2}`)
+  accept_res.should.have.status(200)
+
+  return { tradeid, pick, proposing_row, accepting_row }
+}
+
 describe('API /trades - veto', function () {
   before(async function () {
     this.timeout(60 * 1000)
@@ -413,5 +467,237 @@ describe('API /trades - veto', function () {
       .get('/api/leagues/1/trades')
       .set('Authorization', `Bearer ${user2}`)
     unscoped_res.should.have.status(401)
+  })
+
+  it('unlocks a traded player for release once the trade is approved', async () => {
+    const { tradeid, proposing_row } = await propose_and_accept_one_for_one()
+
+    // still frozen while the window is open and the trade unapproved
+    const frozen_res = await chai_request
+      .execute(server)
+      .post('/api/teams/2/release')
+      .set('Authorization', `Bearer ${user2}`)
+      .send({ pid: proposing_row.pid, teamId: 2, leagueId: 1 })
+    frozen_res.should.have.status(400)
+
+    const approve_res = await chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .set('Authorization', `Bearer ${user1}`)
+    approve_res.should.have.status(200)
+    should.exist(approve_res.body.approved)
+
+    const release_res = await chai_request
+      .execute(server)
+      .post('/api/teams/2/release')
+      .set('Authorization', `Bearer ${user2}`)
+      .send({ pid: proposing_row.pid, teamId: 2, leagueId: 1 })
+    release_res.should.have.status(200)
+  })
+
+  it('omits an approved trade from the vetoable list', async () => {
+    const { tradeid } = await propose_and_accept_one_for_one()
+
+    await chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    const res = await chai_request
+      .execute(server)
+      .get('/api/leagues/1/trades?vetoable=true')
+      .set('Authorization', `Bearer ${user1}`)
+    res.should.have.status(200)
+    res.body.length.should.equal(0)
+  })
+
+  it('refuses to veto a trade the commissioner approved', async () => {
+    const { tradeid } = await propose_and_accept_one_for_one()
+
+    await chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    const request = chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    await error(
+      request,
+      'trade has already been approved and can not be vetoed'
+    )
+  })
+
+  it('rolls the whole reversal back when an approval lands mid-veto', async () => {
+    const { tradeid, pick, proposing_row, accepting_row } =
+      await propose_and_accept_with_pick()
+
+    // The veto route reads the trade, finds it unapproved, and only then opens
+    // its transaction. Approving in that gap is the race the conditional write
+    // exists for -- everything after that write is part of the same
+    // transaction, so a guard that does not roll back would unwind a finalized
+    // trade while leaving `vetoed` NULL.
+    // knex defines `transaction` as a non-writable own property, so the
+    // interleave has to be installed and removed through defineProperty.
+    const original_descriptor = Object.getOwnPropertyDescriptor(
+      knex,
+      'transaction'
+    )
+    const original_transaction = knex.transaction.bind(knex)
+    const restore = () =>
+      Object.defineProperty(knex, 'transaction', original_descriptor)
+
+    let veto_res
+    try {
+      Object.defineProperty(knex, 'transaction', {
+        ...original_descriptor,
+        value: async (...args) => {
+          restore()
+          await knex('trades')
+            .where({ uid: tradeid })
+            .update({ approved: new Date() })
+          return original_transaction(...args)
+        }
+      })
+
+      veto_res = await chai_request
+        .execute(server)
+        .post(`/api/leagues/1/trades/${tradeid}/veto`)
+        .set('Authorization', `Bearer ${user1}`)
+    } finally {
+      restore()
+    }
+
+    veto_res.should.have.status(400)
+    veto_res.body.error.should.equal(
+      'trade was approved while this veto was in flight'
+    )
+
+    // the status code alone cannot tell a rollback from a committed reversal
+    const trade_row = await knex('trades').where({ uid: tradeid }).first()
+    should.not.exist(trade_row.vetoed)
+    should.exist(trade_row.approved)
+
+    const roster_rows = await knex('rosters_players').whereIn('pid', [
+      proposing_row.pid,
+      accepting_row.pid
+    ])
+    roster_rows.find((p) => p.pid === proposing_row.pid).tid.should.equal(2)
+    roster_rows.find((p) => p.pid === accepting_row.pid).tid.should.equal(1)
+
+    const reversal_transactions = await knex('transactions')
+      .whereIn('pid', [proposing_row.pid, accepting_row.pid])
+      .where({ type: transaction_types.TRADE_REVERSAL, lid: 1 })
+    reversal_transactions.length.should.equal(0)
+
+    // the accept links its own TRADE transactions here, so the assertion is
+    // that the rolled-back veto added nothing -- not that the table is empty
+    const linked_transactions = await knex('trades_transactions')
+      .where({ tradeid })
+      .join(
+        'transactions',
+        'trades_transactions.transactionid',
+        'transactions.uid'
+      )
+      .select('transactions.type')
+    linked_transactions.length.should.equal(2)
+    linked_transactions
+      .every(({ type }) => type === transaction_types.TRADE)
+      .should.equal(true)
+
+    const pick_row = await knex('draft').where({ uid: pick.uid }).first()
+    pick_row.tid.should.equal(2)
+  })
+
+  it('rejects an approval from anyone but the commissioner', async () => {
+    const { tradeid } = await propose_and_accept_one_for_one()
+
+    const res = await chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .set('Authorization', `Bearer ${user2}`)
+
+    res.should.have.status(401)
+    res.body.error.should.equal('only the commissioner can approve trades')
+  })
+
+  it('refuses to approve a trade that has not been accepted', async () => {
+    const proposing_row = await get_roster_player({ tid: 1 })
+
+    const propose_res = await chai_request
+      .execute(server)
+      .post('/api/leagues/1/trades')
+      .set('Authorization', `Bearer ${user1}`)
+      .send({
+        proposingTeamPlayers: [proposing_row.pid],
+        acceptingTeamPlayers: [],
+        proposing_team_slots: {},
+        accepting_team_slots: {
+          [proposing_row.pid]: roster_slot_types.BENCH
+        },
+        propose_tid: 1,
+        accept_tid: 2,
+        leagueId: 1
+      })
+    propose_res.should.have.status(200)
+
+    const request = chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${propose_res.body.uid}/approve`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    await error(request, 'trade has not been accepted and can not be approved')
+  })
+
+  it('rejects a second approval of the same trade', async () => {
+    const { tradeid } = await propose_and_accept_one_for_one()
+
+    await chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    const request = chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    await error(request, 'trade has already been approved')
+  })
+
+  it('refuses to approve a trade whose veto window has closed', async () => {
+    const { tradeid } = await propose_and_accept_one_for_one()
+
+    MockDate.set(Date.now() + 25 * 60 * 60 * 1000)
+
+    const request = chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    await error(
+      request,
+      'veto window has already closed; there is nothing to approve'
+    )
+  })
+
+  it('refuses to approve in a league that has veto disabled', async () => {
+    const { tradeid } = await propose_and_accept_one_for_one()
+
+    await knex('seasons')
+      .where({ lid: 1, season_year: current_season.year })
+      .update({ trade_veto_window_hours: 0 })
+
+    const request = chai_request
+      .execute(server)
+      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    await error(
+      request,
+      'veto is disabled for this league; there is no window to close'
+    )
   })
 })

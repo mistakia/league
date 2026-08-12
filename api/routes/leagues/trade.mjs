@@ -117,6 +117,14 @@ const router = express.Router({ mergeParams: true })
  *           nullable: true
  *           description: ISO-8601 timestamp when trade was vetoed
  *           example: null
+ *         approved:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *           description: >-
+ *             ISO-8601 timestamp when the commissioner approved the trade,
+ *             closing the veto window early
+ *           example: null
  *         proposingTeamPlayers:
  *           type: array
  *           items:
@@ -1535,6 +1543,14 @@ router.post(
           .status(400)
           .send({ error: 'trade is no longer open and can not be vetoed' })
       }
+      // Checked before the window check below, not after: the shared helper
+      // reports an approved trade as outside the window, so without this the
+      // refusal would read "veto window has closed" and misdescribe why.
+      if (trade.approved) {
+        return res.status(400).send({
+          error: 'trade has already been approved and can not be vetoed'
+        })
+      }
 
       // ONE instant for every row this veto writes. trades.vetoed and
       // transactions.occurred_at are both timestamptz, so the same Date binds to
@@ -1674,28 +1690,30 @@ router.post(
         })
       }
 
-      await db.transaction(async (trx) => {
-        await trx('trades')
-          .where({ uid: tradeId, lid: leagueId })
-          .update({ vetoed: vetoed_occurred_at })
+      try {
+        await db.transaction(async (trx) => {
+          const vetoed_count = await trx('trades')
+            .where({ uid: tradeId, lid: leagueId })
+            .whereNull('approved')
+            .update({ vetoed: vetoed_occurred_at })
 
-        // Append compensating transactions rather than deleting the originals:
-        // the ledger is the history, and it should read "moved, then moved
-        // back" instead of silently losing the fact the trade ever executed.
-        const reversal_transactions = trades_players_rows.map((row) => ({
-          userid: req.auth.userId,
-          tid: row.tid,
-          lid: leagueId,
-          pid: row.pid,
-          type: transaction_types.TRADE_REVERSAL,
-          player_salary: value_by_pid.get(row.pid) ?? 0,
-          week: current_season.week,
-          season_year: current_season.year,
-          occurred_at: vetoed_occurred_at
-        }))
+          // The read above and this write are not one statement, so an approve
+          // could have landed in between. Throw rather than return: every write
+          // below is part of the same transaction, and letting them commit with
+          // `vetoed` still NULL would unwind a finalized trade with no record of
+          // it. The throw is what rolls the whole reversal back.
+          if (!vetoed_count) {
+            const conflict = new Error(
+              'trade was approved while this veto was in flight'
+            )
+            conflict.is_veto_write_conflict = true
+            throw conflict
+          }
 
-        for (const row of release_rows) {
-          reversal_transactions.push({
+          // Append compensating transactions rather than deleting the originals:
+          // the ledger is the history, and it should read "moved, then moved
+          // back" instead of silently losing the fact the trade ever executed.
+          const reversal_transactions = trades_players_rows.map((row) => ({
             userid: req.auth.userId,
             tid: row.tid,
             lid: leagueId,
@@ -1705,38 +1723,57 @@ router.post(
             week: current_season.week,
             season_year: current_season.year,
             occurred_at: vetoed_occurred_at
-          })
+          }))
+
+          for (const row of release_rows) {
+            reversal_transactions.push({
+              userid: req.auth.userId,
+              tid: row.tid,
+              lid: leagueId,
+              pid: row.pid,
+              type: transaction_types.TRADE_REVERSAL,
+              player_salary: value_by_pid.get(row.pid) ?? 0,
+              week: current_season.week,
+              season_year: current_season.year,
+              occurred_at: vetoed_occurred_at
+            })
+          }
+
+          if (reversal_transactions.length) {
+            const transaction_ids = await trx('transactions')
+              .insert(reversal_transactions)
+              .returning('uid')
+            await trx('trades_transactions').insert(
+              transaction_ids.map((t) => ({
+                transactionid: t.uid,
+                tradeid: trade.uid
+              }))
+            )
+          }
+
+          await trx('rosters_players')
+            .del()
+            .where({ roster_id: proposing_roster.uid })
+          await trx('rosters_players').insert(proposing_roster.rosters_players)
+
+          await trx('rosters_players')
+            .del()
+            .where({ roster_id: accepting_roster.uid })
+          await trx('rosters_players').insert(accepting_roster.rosters_players)
+
+          // Return traded picks to the team that gave them up.
+          for (const pick of pick_rows) {
+            await trx('draft')
+              .update({ tid: pick.tid })
+              .where({ uid: pick.pickid })
+          }
+        })
+      } catch (error) {
+        if (error.is_veto_write_conflict) {
+          return res.status(400).send({ error: error.message })
         }
-
-        if (reversal_transactions.length) {
-          const transaction_ids = await trx('transactions')
-            .insert(reversal_transactions)
-            .returning('uid')
-          await trx('trades_transactions').insert(
-            transaction_ids.map((t) => ({
-              transactionid: t.uid,
-              tradeid: trade.uid
-            }))
-          )
-        }
-
-        await trx('rosters_players')
-          .del()
-          .where({ roster_id: proposing_roster.uid })
-        await trx('rosters_players').insert(proposing_roster.rosters_players)
-
-        await trx('rosters_players')
-          .del()
-          .where({ roster_id: accepting_roster.uid })
-        await trx('rosters_players').insert(accepting_roster.rosters_players)
-
-        // Return traded picks to the team that gave them up.
-        for (const pick of pick_rows) {
-          await trx('draft')
-            .update({ tid: pick.tid })
-            .where({ uid: pick.pickid })
-        }
-      })
+        throw error
+      }
 
       const message = `The commissioner has vetoed trade #${tradeId}. All players and picks have been returned.`
 
@@ -1744,6 +1781,181 @@ router.post(
         league,
         notifyLeague: true,
         message
+      })
+
+      next()
+    } catch (error) {
+      logger(error)
+      res.status(500).send({ error: error.toString() })
+    }
+  },
+  get_trade
+)
+
+/**
+ * @swagger
+ * /leagues/{leagueId}/trades/{tradeId}/approve:
+ *   post:
+ *     summary: Approve a trade, closing its veto window early
+ *     description: |
+ *       Closes an accepted trade's veto window ahead of the clock. Only the
+ *       league commissioner can approve trades.
+ *
+ *       **Key Features:**
+ *       - Marks the trade approved with a timestamp
+ *       - Immediately unlocks the traded players, picks, and released players
+ *       - Removes the trade from the commissioner's vetoable list
+ *       - Returns updated trade details
+ *
+ *       **Fantasy Football Context:**
+ *       - Puts the trade in the state an expired window would, on the
+ *         commissioner's say-so rather than the clock's
+ *       - The traded assets can be moved again right away
+ *       - Closes the in-app veto path only; the constitution's separate process
+ *         for overturning a commissioner decision is unaffected
+ *
+ *       **Access Control:**
+ *       - Must be the league commissioner
+ *       - Trade must be accepted, not vetoed, cancelled, rejected, or already
+ *         approved, and still inside its veto window
+ *     tags:
+ *       - Fantasy Leagues
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: tradeId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Trade ID to approve
+ *         example: 1234
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Trade approved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Trade'
+ *       400:
+ *         description: Trade can not be approved
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               invalid_trade:
+ *                 summary: Invalid trade ID
+ *                 value:
+ *                   error: "no valid trade with tradeid: 1234"
+ *               not_accepted:
+ *                 summary: Trade has not been accepted
+ *                 value:
+ *                   error: trade has not been accepted and can not be approved
+ *               already_approved:
+ *                 summary: Trade has already been approved
+ *                 value:
+ *                   error: trade has already been approved
+ *               window_closed:
+ *                 summary: Veto window has already closed
+ *                 value:
+ *                   error: veto window has already closed; there is nothing to approve
+ *               veto_disabled:
+ *                 summary: League has veto disabled
+ *                 value:
+ *                   error: veto is disabled for this league; there is no window to close
+ *       401:
+ *         description: Unauthorized - not commissioner
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               not_commissioner:
+ *                 summary: User is not league commissioner
+ *                 value:
+ *                   error: only the commissioner can approve trades
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.post(
+  '/approve',
+  async (req, res, next) => {
+    const { db, logger } = req.app.locals
+    try {
+      const { tradeId, leagueId } = req.params
+
+      const league = await getLeague({ lid: leagueId })
+      if (league.commishid !== req.auth.userId) {
+        return res
+          .status(401)
+          .send({ error: 'only the commissioner can approve trades' })
+      }
+
+      const trades = await db('trades').where({ uid: tradeId, lid: leagueId })
+      if (!trades.length) {
+        return res
+          .status(400)
+          .send({ error: `no valid trade with tradeid: ${tradeId}` })
+      }
+
+      const [trade] = trades
+      if (trade.vetoed) {
+        return res
+          .status(400)
+          .send({ error: 'trade has been vetoed and can not be approved' })
+      }
+      if (trade.cancelled || trade.rejected) {
+        return res
+          .status(400)
+          .send({ error: 'trade is no longer open and can not be approved' })
+      }
+      // Approving an unaccepted trade has no meaning: nothing has moved, so
+      // there is no window and nothing frozen to unlock.
+      if (!trade.accepted) {
+        return res.status(400).send({
+          error: 'trade has not been accepted and can not be approved'
+        })
+      }
+      if (trade.approved) {
+        return res
+          .status(400)
+          .send({ error: 'trade has already been approved' })
+      }
+
+      // Approving closes the window early, so there has to be a window left to
+      // close. A league with veto disabled has none at all, which is a
+      // different refusal than a window that ran out.
+      if (!is_trade_within_veto_window({ trade, league })) {
+        const deadline = get_trade_veto_deadline({ trade, league })
+        return res.status(400).send({
+          error: deadline
+            ? 'veto window has already closed; there is nothing to approve'
+            : 'veto is disabled for this league; there is no window to close'
+        })
+      }
+
+      // Conditional on the state the guards above read, so an approve or veto
+      // that landed in between wins outright instead of both writing. One
+      // statement, so a 0-row result needs no rollback -- nothing else has
+      // been written.
+      const approved_count = await db('trades')
+        .where({ uid: tradeId, lid: leagueId })
+        .whereNull('approved')
+        .whereNull('vetoed')
+        .update({ approved: new Date() })
+
+      if (!approved_count) {
+        return res
+          .status(400)
+          .send({ error: 'trade was already settled while this was in flight' })
+      }
+
+      await sendNotifications({
+        league,
+        notifyLeague: true,
+        message: `The commissioner has approved trade #${tradeId}. Its veto window is closed and its assets are unlocked.`
       })
 
       next()
