@@ -7,6 +7,7 @@ export const trade_actions = {
   ...create_api_action_types('POST_TRADE_ACCEPT'),
   ...create_api_action_types('POST_TRADE_REJECT'),
   ...create_api_action_types('POST_TRADE_VETO'),
+  ...create_api_action_types('POST_TRADE_APPROVE'),
   ...create_api_action_types('GET_TRADES'),
 
   SELECT_TRADE: 'SELECT_TRADE',
