@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 
-import { getDraftWindow } from '#libs-shared'
+import { getDraftWindow, getDraftDates } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
@@ -21,15 +21,28 @@ const DRAFT_TIMEZONE = 'America/New_York'
 // the suite happens to run at.
 const eastern = (date_string) => dayjs.tz(date_string, DRAFT_TIMEZONE)
 
-// Sat Aug 22 2026 00:00 ET — the real 2026 rookie draft start.
+// A fixed draft start for the pure-function assertions below. The live 2026
+// schedule is pinned separately under '2026 rookie draft projection'.
 const draft_start_timestamp = eastern('2026-08-22 00:00').unix()
 
-// The settings elected for the 2026 rookie draft.
+// A fixed hourly window fixture (09:00 through 21:00 ET), not the live 2026
+// setting.
 const hourly_9_to_22 = {
   draft_start_timestamp,
   cadence_unit: 'hour',
   daily_window_start_hour: 9,
   daily_window_end_hour: 22
+}
+
+// The settings elected for the 2026 rookie draft
+// (db/adhoc/2026-08-02-set-2026-draft-schedule.sql): hour cadence, four-hour
+// pick clock, 11am–11pm ET daily window, opening Wed Aug 12.
+const live_2026 = {
+  draft_start_timestamp: eastern('2026-08-12 00:00').unix(),
+  cadence_unit: 'hour',
+  cadence_interval: 4,
+  daily_window_start_hour: 11,
+  daily_window_end_hour: 23
 }
 
 const format = (window) => window.format('YYYY-MM-DD HH:mm')
@@ -329,64 +342,68 @@ describe('LIBS-SHARED getDraftWindow', function () {
     })
   })
 
-  describe('2026 rookie draft projection', function () {
-    it('opens all 58 windows before free agency opens Sep 2', () => {
-      // Worst case: nobody picks and every window opens on the cadence alone.
-      // [9, 22) is thirteen slots a day, so 58 picks span five calendar days.
+  describe('2026 rookie draft projection (live config)', function () {
+    // The 08-02 election: Aug 12 start, four-hour pick clock, 11am–11pm ET
+    // window — three slots a day, so 65 picks span Aug 12 through Sep 2.
+    it('opens the first and final windows on the elected cadence', () => {
+      expect(format(getDraftWindow({ ...live_2026, pick_number: 1 }))).to.equal(
+        '2026-08-12 11:00'
+      )
       expect(
-        format(getDraftWindow({ ...hourly_9_to_22, pick_number: 1 }))
-      ).to.equal('2026-08-22 09:00')
-
-      const final_window = getDraftWindow({
-        ...hourly_9_to_22,
-        pick_number: 58
-      })
-      expect(format(final_window)).to.equal('2026-08-26 14:00')
-      expect(final_window.isBefore(eastern('2026-09-02 00:00'))).to.equal(true)
+        format(getDraftWindow({ ...live_2026, pick_number: 58 }))
+      ).to.equal('2026-08-31 11:00')
+      expect(
+        format(getDraftWindow({ ...live_2026, pick_number: 65 }))
+      ).to.equal('2026-09-02 15:00')
     })
 
     it('orders every window strictly and inside the daily window', () => {
       let previous_window = null
 
-      for (let pick_number = 1; pick_number <= 58; pick_number++) {
-        const window = getDraftWindow({ ...hourly_9_to_22, pick_number })
-        expect(window.hour()).to.be.at.least(9)
-        expect(window.hour()).to.be.below(22)
+      for (let pick_number = 1; pick_number <= 65; pick_number++) {
+        const window = getDraftWindow({ ...live_2026, pick_number })
+        expect(window.hour()).to.be.at.least(11)
+        expect(window.hour()).to.be.below(23)
         if (previous_window) {
           expect(window.isAfter(previous_window)).to.equal(true)
         }
         previous_window = window
       }
     })
+
+    it('projects a hard end the day after the final window for a 65-pick board', () => {
+      const { draftEnd } = getDraftDates({ ...live_2026, total_picks: 65 })
+      expect(format(draftEnd)).to.equal('2026-09-02 23:59')
+    })
   })
 
   describe('get_draft_window_config', function () {
-    // seasons.draft_start is timestamptz, so a real row carries a Date here;
-    // get_draft_window_config is the boundary that turns it back into the epoch
-    // seconds getDraftWindow does arithmetic on.
+    // The live 2026 season row. seasons.draft_start is timestamptz, so a real
+    // row carries a Date here; get_draft_window_config is the boundary that
+    // turns it back into the epoch seconds getDraftWindow does arithmetic on.
     const season_row = {
-      draft_start: new Date(draft_start_timestamp * 1000),
+      draft_start: eastern('2026-08-12 00:00').toDate(),
       draft_type: 'hour',
-      draft_pick_interval: 1,
-      draft_hour_min: 9,
-      draft_hour_max: 22
+      draft_pick_interval: 4,
+      draft_hour_min: 11,
+      draft_hour_max: 23
     }
 
     it('maps the persisted season columns onto the window arguments', () => {
       expect(get_draft_window_config(season_row)).to.deep.equal({
-        draft_start_timestamp,
+        draft_start_timestamp: live_2026.draft_start_timestamp,
         cadence_unit: 'hour',
-        cadence_interval: 1,
-        daily_window_start_hour: 9,
-        daily_window_end_hour: 22
+        cadence_interval: 4,
+        daily_window_start_hour: 11,
+        daily_window_end_hour: 23
       })
     })
 
     it('passes draft_pick_interval through as cadence_interval', () => {
       expect(
-        get_draft_window_config({ ...season_row, draft_pick_interval: 4 })
+        get_draft_window_config({ ...season_row, draft_pick_interval: 2 })
           .cadence_interval
-      ).to.equal(4)
+      ).to.equal(2)
     })
 
     it('produces the 2026 windows when spread into getDraftWindow', () => {
@@ -394,10 +411,47 @@ describe('LIBS-SHARED getDraftWindow', function () {
         format(
           getDraftWindow({
             ...get_draft_window_config(season_row),
-            pick_number: 58
+            pick_number: 65
           })
         )
-      ).to.equal('2026-08-26 14:00')
+      ).to.equal('2026-09-02 15:00')
+    })
+  })
+
+  describe('draft end is anchored to the final pick', function () {
+    // getDraftDates treats a non-null last_selection_timestamp as
+    // authoritative and returns endOf('day') of it. The draft route and the
+    // expiry sweep therefore pass the FINAL pick's selection — null until the
+    // last pick is made — so a stalled draft keeps its projected cadence end.
+    // Passing the most recent selection by TIME instead collapses draftEnd to
+    // that pick's own day and closes a stalled draft the day after its last
+    // pick landed. These specs pin that distinction so the sweep cannot
+    // regress to the wrong anchor.
+    it('projects the cadence end while the final pick is unmade', () => {
+      const { draftEnd } = getDraftDates({
+        ...live_2026,
+        total_picks: 65,
+        last_selection_timestamp: null
+      })
+      expect(format(draftEnd)).to.equal('2026-09-02 23:59')
+    })
+
+    it('collapses to the day of a mid-draft selection when one is passed', () => {
+      const { draftEnd } = getDraftDates({
+        ...live_2026,
+        total_picks: 65,
+        last_selection_timestamp: '2026-08-12T11:56:24.804Z'
+      })
+      expect(format(draftEnd)).to.equal('2026-08-12 23:59')
+    })
+
+    it('returns the day of the final selection once the last pick is made', () => {
+      const { draftEnd } = getDraftDates({
+        ...live_2026,
+        total_picks: 65,
+        last_selection_timestamp: eastern('2026-09-02 15:00').toDate()
+      })
+      expect(format(draftEnd)).to.equal('2026-09-02 23:59')
     })
   })
 })
