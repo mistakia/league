@@ -26,7 +26,8 @@ const map_state_to_props = createSelector(
     isValid,
     isProposer: trade.propose_tid === app.teamId,
     is_commish,
-    veto_error: trade_state.vetoError
+    veto_error: trade_state.vetoError,
+    approve_error: trade_state.approveError
   })
 )
 
@@ -35,7 +36,8 @@ const map_dispatch_to_props = {
   accept: trade_actions.accept,
   reject: trade_actions.reject,
   cancel: trade_actions.cancel,
-  veto: trade_actions.veto
+  veto: trade_actions.veto,
+  approve: trade_actions.approve
 }
 
 export default connect(map_state_to_props, map_dispatch_to_props)(TradeAction)

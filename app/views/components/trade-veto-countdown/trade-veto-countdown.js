@@ -30,7 +30,7 @@ export default function TradeVetoCountdown({
   const now = useClockSeconds()
 
   const deadline = get_trade_veto_deadline({ trade, league })
-  if (!deadline || trade.vetoed || deadline <= now) {
+  if (!deadline || trade.vetoed || trade.approved || deadline <= now) {
     return null
   }
 

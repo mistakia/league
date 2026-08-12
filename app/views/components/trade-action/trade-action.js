@@ -13,12 +13,17 @@ export default class TradeAction extends React.Component {
   handleRejectClick = () => this.props.reject()
   handleCancelClick = () => this.props.cancel()
   handle_veto_click = () => this.props.veto()
+  handle_approve_click = () => this.props.approve()
 
-  // The endpoint can refuse a legitimate veto -- a traded player has locked
-  // into a scored lineup, or the receiving team has signed someone into the
-  // space the trade opened -- so its reason is rendered next to the button.
-  render_veto = () => {
-    const { league, trade, is_commish, veto_error } = this.props
+  // Both endpoints can refuse a legitimate request -- a traded player has
+  // locked into a scored lineup, the receiving team has signed someone into the
+  // space the trade opened, or the other action won a race -- so each reason is
+  // rendered next to its button.
+  //
+  // The whole block disappears once the trade is approved or the window runs
+  // out, since neither action is available outside it.
+  render_commish_actions = () => {
+    const { league, trade, is_commish, veto_error, approve_error } = this.props
 
     if (!is_commish || !is_trade_within_veto_window({ trade, league })) {
       return null
@@ -27,8 +32,10 @@ export default class TradeAction extends React.Component {
     return (
       <div className='trade__veto'>
         <Button onClick={this.handle_veto_click}>Veto Trade</Button>
+        <Button onClick={this.handle_approve_click}>Approve Trade</Button>
         <TradeVetoCountdown trade={trade} league={league} />
         {veto_error && <Alert severity='error'>{veto_error}</Alert>}
+        {approve_error && <Alert severity='error'>{approve_error}</Alert>}
       </div>
     )
   }
@@ -42,10 +49,13 @@ export default class TradeAction extends React.Component {
     } else if (trade.rejected) {
       return <Button disabled>Rejected</Button>
     } else if (trade.accepted) {
+      // An approved trade is settled, so it reads Approved rather than
+      // Accepted -- and the commissioner block below renders nothing for it,
+      // since the window it acts within is closed.
       return (
         <div>
-          <Button disabled>Accepted</Button>
-          {this.render_veto()}
+          <Button disabled>{trade.approved ? 'Approved' : 'Accepted'}</Button>
+          {this.render_commish_actions()}
         </div>
       )
     } else if (trade.vetoed) {
@@ -82,10 +92,12 @@ TradeAction.propTypes = {
   reject: PropTypes.func,
   cancel: PropTypes.func,
   veto: PropTypes.func,
+  approve: PropTypes.func,
   isValid: PropTypes.bool,
   isProposer: PropTypes.bool,
   is_commish: PropTypes.bool,
   veto_error: PropTypes.string,
+  approve_error: PropTypes.string,
   league: PropTypes.object,
   trade: ImmutablePropTypes.record
 }

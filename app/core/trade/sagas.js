@@ -16,6 +16,7 @@ import {
   api_post_cancel_trade,
   api_post_reject_trade,
   api_post_veto_trade,
+  api_post_approve_trade,
   api_get_trades
 } from '@core/api'
 import { get_default_trade_slot, Roster } from '@libs-shared'
@@ -159,6 +160,19 @@ export function* veto() {
   })
 }
 
+export function* approve() {
+  const { selectedTradeId } = yield select(get_trade)
+  const { leagueId } = yield select(get_app)
+  // Same as veto: a refusal here -- window closed, already approved -- is an
+  // expected answer, rendered next to the button rather than raised as a
+  // generic request failure.
+  yield call(api_post_approve_trade, {
+    leagueId,
+    tradeId: selectedTradeId,
+    ignore_error: true
+  })
+}
+
 export function* accept() {
   const { teamId, leagueId } = yield select(get_app)
   const { selectedTradeId } = yield select(get_trade)
@@ -219,6 +233,10 @@ export function* watch_veto_trade() {
   yield takeLatest(trade_actions.VETO_TRADE, veto)
 }
 
+export function* watch_approve_trade() {
+  yield takeLatest(trade_actions.APPROVE_TRADE, approve)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -230,5 +248,6 @@ export const trade_sagas = [
   fork(watchAcceptTrade),
   fork(watchRejectTrade),
   fork(watch_load_vetoable_trades),
-  fork(watch_veto_trade)
+  fork(watch_veto_trade),
+  fork(watch_approve_trade)
 ]

@@ -78,6 +78,13 @@ export const trade_actions = {
     type: trade_actions.VETO_TRADE
   }),
 
+  // Commissioner-only: closes the veto window early and unlocks the trade's
+  // assets, rather than waiting the window out.
+  APPROVE_TRADE: 'APPROVE_TRADE',
+  approve: () => ({
+    type: trade_actions.APPROVE_TRADE
+  }),
+
   TRADE_SET_RELEASE_PLAYERS: 'TRADE_SET_RELEASE_PLAYERS',
   set_release_players: (players) => ({
     type: trade_actions.TRADE_SET_RELEASE_PLAYERS,
@@ -157,3 +164,5 @@ export const post_trade_accept_actions = create_api_actions('POST_TRADE_ACCEPT')
 export const post_trade_cancel_actions = create_api_actions('POST_TRADE_CANCEL')
 export const post_trade_reject_actions = create_api_actions('POST_TRADE_REJECT')
 export const post_trade_veto_actions = create_api_actions('POST_TRADE_VETO')
+export const post_trade_approve_actions =
+  create_api_actions('POST_TRADE_APPROVE')

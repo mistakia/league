@@ -192,6 +192,11 @@ export const api = {
     const url = `${API_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/reject`
     return { url, ...POST(data) }
   },
+  post_approve_trade({ leagueId, tradeId }) {
+    const url = `${API_URL}/leagues/${leagueId}/trades/${tradeId}/approve`
+    return { url, opts: { method: 'POST' } }
+  },
+
   post_veto_trade({ leagueId, tradeId }) {
     const url = `${API_URL}/leagues/${leagueId}/trades/${tradeId}/veto`
     return { url, ...POST({}) }

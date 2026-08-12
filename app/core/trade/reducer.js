@@ -19,7 +19,8 @@ const initialState = new Record({
   proposingTeamSlots: new Map(), // Map of pid -> slot for players proposing team receives
   acceptingTeamSlots: new Map(), // Map of pid -> slot for players accepting team receives
   validationErrors: new Map(), // Map of team -> slot type -> error message
-  vetoError: null // the server's reason for refusing the last veto
+  vetoError: null, // the server's reason for refusing the last veto
+  approveError: null // the server's reason for refusing the last approval
 })
 
 // The failed action carries `err.toString()`, which prefixes the server's
@@ -27,7 +28,7 @@ const initialState = new Record({
 const read_error_message = (error) =>
   typeof error === 'string'
     ? error.replace(/^Error:\s*/, '')
-    : 'Veto request failed'
+    : 'Trade action failed'
 
 export function trade_reducer(state = initialState(), { payload, type }) {
   switch (type) {
@@ -80,10 +81,12 @@ export function trade_reducer(state = initialState(), { payload, type }) {
     case trade_actions.POST_TRADE_PROPOSE_FULFILLED:
     case trade_actions.POST_TRADE_REJECT_FULFILLED:
     case trade_actions.POST_TRADE_VETO_FULFILLED:
+    case trade_actions.POST_TRADE_APPROVE_FULFILLED:
       return state.merge({
         selectedTradeId: payload.data.uid,
         items: state.items.set(payload.data.uid, create_trade(payload.data)),
-        vetoError: null
+        vetoError: null,
+        approveError: null
       })
 
     case trade_actions.POST_TRADE_VETO_PENDING:
@@ -91,6 +94,12 @@ export function trade_reducer(state = initialState(), { payload, type }) {
 
     case trade_actions.POST_TRADE_VETO_FAILED:
       return state.merge({ vetoError: read_error_message(payload.error) })
+
+    case trade_actions.POST_TRADE_APPROVE_PENDING:
+      return state.merge({ approveError: null })
+
+    case trade_actions.POST_TRADE_APPROVE_FAILED:
+      return state.merge({ approveError: read_error_message(payload.error) })
 
     case trade_actions.GET_TRADES_FULFILLED:
       return state.withMutations((state) => {
@@ -110,7 +119,8 @@ export function trade_reducer(state = initialState(), { payload, type }) {
         proposingTeamSlots: new Map(),
         acceptingTeamSlots: new Map(),
         validationErrors: new Map(),
-        vetoError: null
+        vetoError: null,
+        approveError: null
       })
 
     case trade_actions.TRADE_SET_PROPOSING_TEAM_SLOT:

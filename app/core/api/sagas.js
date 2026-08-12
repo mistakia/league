@@ -82,6 +82,7 @@ import {
   post_trade_cancel_actions,
   post_trade_reject_actions,
   post_trade_veto_actions,
+  post_trade_approve_actions,
   get_trades_actions
 } from '@core/trade/actions'
 import { put_league_actions, get_league_actions } from '@core/leagues/actions'
@@ -369,6 +370,11 @@ export const api_post_veto_trade = fetch.bind(
   null,
   api.post_veto_trade,
   post_trade_veto_actions
+)
+export const api_post_approve_trade = fetch.bind(
+  null,
+  api.post_approve_trade,
+  post_trade_approve_actions
 )
 
 export const api_get_league = fetch.bind(
