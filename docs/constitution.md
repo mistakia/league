@@ -387,7 +387,7 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
 8.  Each Team is entitled to make an unlimited number of trades and/or add/drops each season.
 
-9.  Each trade, once submitted, shall be approved by the Commissioner within 24 hours and can be appealed following the process described in [Article III section 6](#article-iii).
+9.  Each trade, once submitted, shall be approved by the Commissioner within 24 hours and can be appealed following the process described in [Article III section 6](#article-iii). The Commissioner may approve a trade in the app, which closes its veto window early and immediately unlocks the traded players, picks and released players; the appeal process in Article III section 6 runs unchanged either way.
 
 ### Financial Matters.
 
