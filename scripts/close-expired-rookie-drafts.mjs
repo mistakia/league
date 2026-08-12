@@ -63,16 +63,19 @@ const run = async () => {
       .orderBy('pick', 'desc')
       .first()
 
-    const last_selection = await db('draft')
-      .where({ lid, season_year: year })
-      .whereNotNull('selection_timestamp')
-      .orderBy('selection_timestamp', 'desc')
-      .first()
-
     const { draftEnd } = getDraftDates({
       ...get_draft_window_config(league),
       total_picks: last_pick?.pick,
-      last_selection_timestamp: last_selection?.selection_timestamp ?? null,
+      // The draft end is the day the pick AFTER the last one would have
+      // opened, so it must be anchored to the highest-numbered pick — the
+      // same `last_selection_timestamp` the draft route passes. Anchoring to
+      // the most recent selection by TIME instead (the prior shape of this
+      // query) collapses the projection to that pick's own day, closing a
+      // stalled draft the day after its last pick landed and expiring every
+      // remaining pick — the live 2026 board would have been closed on Aug 12
+      // with 63 picks still unmade. Null until the final pick is made, so an
+      // in-flight draft keeps its projected cadence end.
+      last_selection_timestamp: last_pick?.selection_timestamp ?? null,
       rookie_draft_completed_at: season?.rookie_draft_completed_at ?? null
     })
 
