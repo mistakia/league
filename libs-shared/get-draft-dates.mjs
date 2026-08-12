@@ -20,7 +20,8 @@ const WAIVER_HOURS_AFTER_COMPLETION = 24
  *
  * @param {Object} args
  * @param {number} args.draft_start_timestamp - Unix timestamp (seconds) the draft opens.
- * @param {number} args.total_picks - Number of picks in the draft.
+ * @param {number} args.total_picks - Pick number of the final pick (the highest pick on
+ *   the board) — the pick after it opens the last window that sets the draft end.
  * @param {string} [args.cadence_unit] - 'hour' or 'day'; what one step is measured in.
  * @param {number} [args.cadence_interval] - Units of `cadence_unit` between consecutive windows.
  * @param {number} [args.daily_window_start_hour] - First hour a window may open (inclusive).

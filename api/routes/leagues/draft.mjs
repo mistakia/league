@@ -560,7 +560,7 @@ router.post('/?', async (req, res) => {
 
     const draft_dates = getDraftDates({
       ...get_draft_window_config(league),
-      total_picks: last_pick?.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
+      total_picks: last_pick?.pick, // highest pick number anchors the final window
       last_selection_timestamp: last_pick
         ? last_pick.selection_timestamp
         : null,
