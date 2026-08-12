@@ -380,9 +380,10 @@ export const is_free_agent_period = createSelector(
 
 export const getPicks = createSelector(
   get_draft_state,
+  get_current_league,
   (state) => state.get('app'),
-  (draft, app) => {
-    const { picks, draft_start, draft_type } = draft
+  (draft, league, app) => {
+    const { picks } = draft
     const { teamId } = app
     let previousSelected = true
     let previousActive = true
@@ -396,9 +397,9 @@ export const getPicks = createSelector(
           return p
         }
 
-        if (draft_start && draft_type) {
+        if (league.draft_start && league.draft_type) {
           p.draftWindow = getDraftWindow({
-            ...get_draft_window_config(draft),
+            ...get_draft_window_config(league),
             last_consecutive_pick,
             pick_number: p.pick
           })
@@ -536,7 +537,7 @@ export const get_rookie_draft_next_pick = createSelector(
       }
     }
 
-    const { draft_start, draft_type, picks } = draft
+    const { picks } = draft
     const { teamId } = app
     const team_picks = picks
       .filter((p) => p.tid === teamId)
@@ -545,9 +546,9 @@ export const get_rookie_draft_next_pick = createSelector(
     if (!pick) return null
 
     const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
-    if (draft_start && draft_type) {
+    if (league.draft_start && league.draft_type) {
       pick.draftWindow = getDraftWindow({
-        ...get_draft_window_config(draft),
+        ...get_draft_window_config(league),
         last_consecutive_pick,
         pick_number: pick.pick
       })

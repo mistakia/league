@@ -1,14 +1,8 @@
 import { List, Record, Map } from 'immutable'
 
 import { draft_actions } from './actions'
-import { app_actions } from '@core/app'
 
 const initialState = new Record({
-  draft_start: null,
-  draft_type: null,
-  draft_pick_interval: null,
-  draft_hour_min: null,
-  draft_hour_max: null,
   isPending: false,
   selected: null,
   drafted: new List(),
@@ -21,22 +15,6 @@ export function draft_reducer(state = initialState(), { payload, type }) {
   switch (type) {
     case draft_actions.DRAFT_SELECT_PLAYER:
       return state.merge({ selected: payload.pid })
-
-    case app_actions.AUTH_FULFILLED: {
-      if (!payload.data.leagues.length) {
-        return state
-      }
-
-      const league = payload.data.leagues[0]
-
-      return state.merge({
-        draft_start: league.draft_start,
-        draft_type: league.draft_type,
-        draft_pick_interval: league.draft_pick_interval,
-        draft_hour_min: league.draft_hour_min,
-        draft_hour_max: league.draft_hour_max
-      })
-    }
 
     case draft_actions.LOAD_DRAFT:
       return state.merge({ picks: new List() })
