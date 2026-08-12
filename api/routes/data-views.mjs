@@ -463,8 +463,9 @@ ${normalized_results.map((row) => `<tr>${fields.map((h) => `<td>${escape_html(ro
  *       queries with custom columns, filters, and sorting.
  *
  *       **Authentication required**: This endpoint requires a valid JWT token. There is no
- *       way to list another user's views — a view is shared by its `view_id` (or a short
- *       URL), both of which resolve without authentication.
+ *       way to list another user's views except for the admin account (`userId === 1`),
+ *       which may list every saved view for audit and triage — otherwise a view is shared
+ *       by its `view_id` (or a short URL), both of which resolve without authentication.
  *     tags:
  *       - Data Views
  *     security:
@@ -504,10 +505,20 @@ router.get('/?', async (req, res) => {
       return res.status(401).send({ error: 'invalid userId' })
     }
 
-    const views = await db('user_data_views')
+    // userId 1 is the admin account (the same check /data-views/debug and the
+    // cache routes use). The admin lists every saved view on the platform so
+    // the operator can audit, triage, and open any user's shared view.
+    // Non-admin callers stay owner-scoped: no filter parameter can widen the
+    // list, so enumeration stays closed to everyone else.
+    const views_query = db('user_data_views')
       .select('user_data_views.*', 'users.username as view_username')
       .leftJoin('users', 'user_data_views.user_id', 'users.id')
-      .where('user_data_views.user_id', req.auth.userId)
+
+    if (req.auth.userId !== 1) {
+      views_query.where('user_data_views.user_id', req.auth.userId)
+    }
+
+    const views = await views_query
 
     return res.status(200).send(views)
   } catch (error) {

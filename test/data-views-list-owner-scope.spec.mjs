@@ -23,12 +23,16 @@ async function get_token(email, password) {
 // GET /api/data-views is mounted before the blanket auth guard in
 // api/index.mjs, so it must self-enforce. It once had no auth check and no
 // mandatory filter, which made every saved view on the platform enumerable by
-// an anonymous caller. It is now owner-scoped with no filter parameters.
-// Fetch-by-id stays unauthenticated on purpose: that is how a shared view
-// resolves for a logged-out visitor.
-describe('GET /api/data-views is owner-scoped', function () {
+// an anonymous caller. It is now owner-scoped with no filter parameters, with
+// one deliberate server-side exception: the admin account (userId 1, the same
+// check /data-views/debug and the cache routes use) may list every saved view
+// for audit and triage. Fetch-by-id stays unauthenticated on purpose: that is
+// how a shared view resolves for a logged-out visitor.
+describe('GET /api/data-views is owner-scoped (admin sees all)', function () {
   this.timeout(20000)
+  let token_admin
   let token1
+  let token2
   let user1_id
   let user2_id
 
@@ -40,8 +44,17 @@ describe('GET /api/data-views is owner-scoped', function () {
     await knex.raw('ALTER SEQUENCE IF EXISTS users_id_seq RESTART WITH 1')
 
     const salt = await bcrypt.genSalt(10)
+    const pw_admin = await bcrypt.hash('adminpass', salt)
     const pw1 = await bcrypt.hash('scopetest1', salt)
     const pw2 = await bcrypt.hash('scopetest2', salt)
+
+    // The admin account is user 1, matching the runtime identity the route
+    // treats as admin.
+    await knex('users').insert({
+      email: 'admin@test.com',
+      username: 'admin',
+      password: pw_admin
+    })
 
     const [u1] = await knex('users')
       .insert({
@@ -78,12 +91,27 @@ describe('GET /api/data-views is owner-scoped', function () {
       }
     ])
 
+    token_admin = await get_token('admin@test.com', 'adminpass')
     token1 = await get_token('scopetest1@test.com', 'scopetest1')
+    token2 = await get_token('scopetest2@test.com', 'scopetest2')
   })
 
   it('rejects an unauthenticated caller', async function () {
     const res = await chai_request.execute(server).get('/api/data-views')
     res.should.have.status(401)
+  })
+
+  it('returns every saved view for the admin account', async function () {
+    const res = await chai_request
+      .execute(server)
+      .get('/api/data-views')
+      .set('Authorization', `Bearer ${token_admin}`)
+
+    res.should.have.status(200)
+    res.body.should.be.an('array')
+    res.body.length.should.equal(2)
+    const names = res.body.map((v) => v.view_name).sort()
+    names.should.deep.equal(['Owned By One', 'Owned By Two'])
   })
 
   it('returns only the authenticated user views', async function () {
@@ -119,6 +147,18 @@ describe('GET /api/data-views is owner-scoped', function () {
     res.should.have.status(200)
     res.body.length.should.equal(1)
     res.body[0].user_id.should.equal(user1_id)
+  })
+
+  it('still owner-scopes the list for a second non-admin user', async function () {
+    const res = await chai_request
+      .execute(server)
+      .get('/api/data-views')
+      .set('Authorization', `Bearer ${token2}`)
+
+    res.should.have.status(200)
+    res.body.length.should.equal(1)
+    res.body[0].view_name.should.equal('Owned By Two')
+    res.body[0].user_id.should.equal(user2_id)
   })
 
   // Deliberate: an unguessable view_id is the sharing mechanism, and locking
