@@ -26624,7 +26624,8 @@ CREATE TABLE public.trades (
     accepted timestamp with time zone,
     cancelled timestamp with time zone,
     rejected timestamp with time zone,
-    vetoed timestamp with time zone
+    vetoed timestamp with time zone,
+    approved timestamp with time zone
 );
 
 
