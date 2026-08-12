@@ -1,5 +1,4 @@
 {
-  "skip_query_match": true,
   "name": "player yards created and blocked + team yards blocked",
   "description": "Test case for player yards created and blocked + team yards blocked",
   "request": {

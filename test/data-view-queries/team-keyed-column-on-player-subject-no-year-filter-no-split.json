@@ -1,5 +1,4 @@
 {
-  "skip_query_match": true,
   "name": "team-keyed column on player subject with no year filter and no year split",
   "description": "Exercises the bridge-always-materializes path for a team-keyed measure on a player-subject query with no year filter and no year split. Coverage gap (a).",
   "request": {

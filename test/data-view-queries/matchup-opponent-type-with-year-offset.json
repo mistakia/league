@@ -1,5 +1,4 @@
 {
-  "skip_query_match": true,
   "name": "matchup_opponent_type combined with year_offset",
   "description": "Crosses the inline matchup branch (matchup_opponent_type) with year_offset behavior on a team-stats-from-plays column. Coverage gap (d).",
   "request": {

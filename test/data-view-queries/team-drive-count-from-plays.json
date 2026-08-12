@@ -1,5 +1,4 @@
 {
-  "skip_query_match": true,
   "name": "team drive count from plays",
   "description": "Test case for team drive count from plays",
   "request": {
