@@ -194,9 +194,8 @@ export const api = {
   },
   post_approve_trade({ leagueId, tradeId }) {
     const url = `${API_URL}/leagues/${leagueId}/trades/${tradeId}/approve`
-    return { url, opts: { method: 'POST' } }
+    return { url, ...POST({}) }
   },
-
   post_veto_trade({ leagueId, tradeId }) {
     const url = `${API_URL}/leagues/${leagueId}/trades/${tradeId}/veto`
     return { url, ...POST({}) }

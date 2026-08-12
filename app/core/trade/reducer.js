@@ -89,14 +89,15 @@ export function trade_reducer(state = initialState(), { payload, type }) {
         approveError: null
       })
 
+    // Either action starting clears BOTH errors: the two Alerts render side by
+    // side with nothing tying either to its button, so leaving the other one up
+    // reads as a refusal of the action now in flight.
     case trade_actions.POST_TRADE_VETO_PENDING:
-      return state.merge({ vetoError: null })
+    case trade_actions.POST_TRADE_APPROVE_PENDING:
+      return state.merge({ vetoError: null, approveError: null })
 
     case trade_actions.POST_TRADE_VETO_FAILED:
       return state.merge({ vetoError: read_error_message(payload.error) })
-
-    case trade_actions.POST_TRADE_APPROVE_PENDING:
-      return state.merge({ approveError: null })
 
     case trade_actions.POST_TRADE_APPROVE_FAILED:
       return state.merge({ approveError: read_error_message(payload.error) })

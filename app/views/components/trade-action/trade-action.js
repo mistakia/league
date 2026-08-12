@@ -19,9 +19,6 @@ export default class TradeAction extends React.Component {
   // locked into a scored lineup, the receiving team has signed someone into the
   // space the trade opened, or the other action won a race -- so each reason is
   // rendered next to its button.
-  //
-  // The whole block disappears once the trade is approved or the window runs
-  // out, since neither action is available outside it.
   render_commish_actions = () => {
     const { league, trade, is_commish, veto_error, approve_error } = this.props
 
