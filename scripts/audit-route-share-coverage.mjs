@@ -55,18 +55,13 @@ const MIN_GRADED_WEEKS = 400
 // fire every Sunday and train the operator to ignore this check. REMOVE AN
 // ENTRY WHEN IT IS REPAIRED -- a stale entry silently re-admits the gap.
 //
-// 2021 REG week 15 is the COVID-rescheduling week. nflfastR's `old_game_id`
-// (the only key scripts/import-plays-nflfastr.mjs matches on) disagrees with
-// our `nfl_games.esbid` for 9 of that week's 16 games, so those games took no
-// nflfastR enrichment at all -- is_qb_dropback, epa and is_qb_kneel are null
-// across ~13,000 plays. That is what left 167 receiving gamelogs unable to
-// carry a route_share. The importer's own oracle is year-grained
-// (plays_matched/plays_processed over a whole season), so a 9-game hole is ~2%
-// of the denominator and cannot breach any sane floor -- this check exists at
-// week grain for exactly that reason.
-const KNOWN_COVERAGE_GAPS = [
-  { season_year: 2021, week: 15, season_type: 'REG' }
-]
+// 2021 REG week 15, the COVID-rescheduling week, was the only entry and is
+// REPAIRED as of b567eb179. nflfastR's old_game_id disagreed with our esbid on
+// 9 of that week's 16 games; the importer now resolves a feed game by matchup
+// rather than trusting that id, the nine games were re-imported, and the week
+// sits at 96-98% enrichment against ~97% for the rest of the corpus. Leaving
+// the entry in place would have suppressed a genuine regression there forever.
+const KNOWN_COVERAGE_GAPS = []
 
 const is_known_gap = ({ season_year, week, season_type }) =>
   KNOWN_COVERAGE_GAPS.some(
