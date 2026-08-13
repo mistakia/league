@@ -88,12 +88,21 @@ const pff_player_source = {
 // window). Snap counts accumulate (SUM, left as the default). String metadata
 // columns (position/grade_position/unit) cannot SUM or AVG; they render the
 // most-recent (anchor) season's value via a latest_by_year override below.
-const PFF_PLAYER_RANGE_OFFSET_AGGREGATE = {
+// Exported so test/data-view-player-field-parity.spec.mjs can assert every key
+// resolves to a real column. A key that does not silently defaults to SUM, which
+// is a wrong number rather than a missing one.
+export const PFF_PLAYER_RANGE_OFFSET_AGGREGATE = {
   offense: 'AVG',
   defense: 'AVG',
   special_teams: 'AVG',
-  pass: 'AVG',
-  run: 'AVG',
+  // These three are keyed on the PHYSICAL column name, which is what
+  // create_field_from_pff_player_seasonlogs looks them up by. They read `pass`,
+  // `run` and `speed` until 2026-08-13 -- the names before adffc01fe renamed the
+  // columns -- so the lookup missed, select-string.mjs defaulted them to SUM,
+  // and a multi-year year_offset window ADDED three grades together instead of
+  // averaging them. Exactly what the note above says must not happen.
+  pass_grade: 'AVG',
+  run_grade: 'AVG',
   run_block: 'AVG',
   pass_block: 'AVG',
   pass_rush: 'AVG',
@@ -103,7 +112,7 @@ const PFF_PLAYER_RANGE_OFFSET_AGGREGATE = {
   punter: 'AVG',
   fg_ep_kicker: 'AVG',
   kickoff_kicker: 'AVG',
-  speed: 'AVG',
+  speed_rating: 'AVG',
   offense_rank: 'AVG',
   defense_rank: 'AVG',
   special_teams_rank: 'AVG',
@@ -214,8 +223,13 @@ export default {
   player_pff_kickoff_kicker:
     create_field_from_pff_player_seasonlogs('kickoff_kicker'),
   player_pff_pass: create_field_from_pff_player_seasonlogs('pass_grade'),
-  player_pff_receiving_snaps:
-    create_field_from_pff_player_seasonlogs('receiving_snaps'),
+  // `player_pff_receiving_snaps` was RENAMED to `player_pff_pass_plays`, not
+  // repointed at `routes`. The id named one value and held another; repointing
+  // it under a stable id would have kept the saved views working while silently
+  // changing the number they display. COLUMN_ID_RENAMES in
+  // libs-shared/data-views-saved-view-migration.mjs carries the old id forward.
+  player_pff_pass_plays: create_field_from_pff_player_seasonlogs('pass_plays'),
+  player_pff_routes: create_field_from_pff_player_seasonlogs('routes'),
   player_pff_weight: create_field_from_pff_player_seasonlogs('weight'),
   player_pff_overall_snaps:
     create_field_from_pff_player_seasonlogs('overall_snaps'),

@@ -201,8 +201,10 @@ export default {
     'The number of pass block snaps played by the player according to PFF',
   player_pff_run_block_snaps:
     'The number of run block snaps played by the player according to PFF',
-  player_pff_receiving_snaps:
-    'The number of receiving snaps played by the player according to PFF',
+  player_pff_pass_plays:
+    'The number of pass plays the player was on the field for according to PFF, which is what pff.com displays under PASS',
+  player_pff_routes:
+    'The number of routes the player ran according to PFF — the true receiving-snap count',
   player_pff_overall_snaps:
     'The total number of snaps played by the player according to PFF',
   player_pff_offense_rank: "The player's PFF offense rank for the season",

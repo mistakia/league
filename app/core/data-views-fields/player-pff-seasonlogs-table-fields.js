@@ -130,7 +130,9 @@ export default function ({ is_logged_in }) {
     player_pff_run: pff_seasonlog_field({
       column_title: 'PFF Run Grade',
       header_label: 'Run',
-      player_value_path: 'pff_run'
+      // Column is `run_grade`, so the server emits `pff_run_grade`. This read
+      // said `pff_run` and rendered a blank cell for every row.
+      player_value_path: 'pff_run_grade'
     }),
     player_pff_run_defense_snaps: pff_seasonlog_field({
       column_title: 'PFF Run Defense Snaps',
@@ -177,12 +179,62 @@ export default function ({ is_logged_in }) {
     player_pff_pass: pff_seasonlog_field({
       column_title: 'PFF Pass Grade',
       header_label: 'Pass',
-      player_value_path: 'pff_pass'
+      // Column is `pass_grade`, so the server emits `pff_pass_grade`. Same
+      // blank-cell defect as player_pff_run above.
+      player_value_path: 'pff_pass_grade'
     }),
-    player_pff_receiving_snaps: pff_seasonlog_field({
-      column_title: 'PFF Receiving Snaps',
-      header_label: 'Rec Snaps',
-      player_value_path: 'pff_receiving_snaps'
+    // `player_value_path` tracks the PHYSICAL column, not the column id: the
+    // server derives `select_as` as `pff_${column_name}`, so a path that does
+    // not match its definition's column name renders a blank cell against valid
+    // SQL with every gate green. `player_pff_run` and `player_pff_pass` above
+    // are in exactly that state today.
+    // The six below had a server definition and a description but NO field
+    // here, which makes a column queryable over the API, unselectable in the
+    // UI, and fatal to any saved view still holding it ("Field not found for
+    // column_id"). Same drift the parity spec was written for, in a family it
+    // did not cover until this cluster added it.
+    player_pff_height: pff_seasonlog_field({
+      column_title: 'PFF Height',
+      header_label: 'Height',
+      player_value_path: 'pff_height'
+    }),
+    player_pff_weight: pff_seasonlog_field({
+      column_title: 'PFF Weight',
+      header_label: 'Weight',
+      player_value_path: 'pff_weight'
+    }),
+    player_pff_speed: pff_seasonlog_field({
+      column_title: 'PFF Speed Rating',
+      header_label: 'Speed',
+      player_value_path: 'pff_speed_rating'
+    }),
+    player_pff_position: pff_seasonlog_field({
+      column_title: 'PFF Position',
+      header_label: 'Pos',
+      player_value_path: 'pff_player_position',
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT
+    }),
+    player_pff_unit: pff_seasonlog_field({
+      column_title: 'PFF Unit',
+      header_label: 'Unit',
+      player_value_path: 'pff_unit',
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT
+    }),
+    player_pff_meets_snap_minimum: pff_seasonlog_field({
+      column_title: 'PFF Meets Snap Minimum',
+      header_label: 'Snap Min',
+      player_value_path: 'pff_is_meeting_snap_minimum',
+      data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    }),
+    player_pff_pass_plays: pff_seasonlog_field({
+      column_title: 'PFF Pass Plays',
+      header_label: 'Pass Plays',
+      player_value_path: 'pff_pass_plays'
+    }),
+    player_pff_routes: pff_seasonlog_field({
+      column_title: 'PFF Routes',
+      header_label: 'Routes',
+      player_value_path: 'pff_routes'
     }),
     player_pff_overall_snaps: pff_seasonlog_field({
       column_title: 'PFF Overall Snaps',

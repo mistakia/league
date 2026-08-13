@@ -61,6 +61,9 @@ import * as chai from 'chai'
 
 import player_table_column_definitions from '#libs-server/data-views-column-definitions/player-table-column-definitions.mjs'
 import player_scoring_format_logs_column_definitions from '#libs-server/data-views-column-definitions/player-scoring-format-logs-column-definitions.mjs'
+import pff_player_seasonlogs_column_definitions, {
+  PFF_PLAYER_RANGE_OFFSET_AGGREGATE as pff_player_seasonlogs_range_offset_aggregate
+} from '#libs-server/data-views-column-definitions/player-pff-seasonlogs-column-definitions.mjs'
 import data_view_fields_index from '#libs-shared/data-view-fields-index.mjs'
 
 const { expect } = chai
@@ -79,6 +82,14 @@ const scoring_format_logs_fields_source = fs.readFileSync(
   path.resolve(
     __dirname,
     '../app/core/data-views-fields/scoring-format-logs-table-fields.js'
+  ),
+  'utf8'
+)
+
+const pff_seasonlogs_fields_source = fs.readFileSync(
+  path.resolve(
+    __dirname,
+    '../app/core/data-views-fields/player-pff-seasonlogs-table-fields.js'
   ),
   'utf8'
 )
@@ -249,6 +260,100 @@ describe('data view scoring format logs field parity', function () {
     expect(
       missing,
       `scoring format logs columns with no description: ${missing.join(', ')}`
+    ).to.deep.equal([])
+  })
+})
+
+// The PFF seasonlog family, added 2026-08-13. It was outside this file until
+// then and had accumulated ELEVEN defects behind a green suite: two value paths
+// that rendered blank cells (player_pff_run, player_pff_pass -- both cited in
+// this repo's own CLAUDE.md as the standing example of the class), six server
+// columns with a description and no frontend field at all (height, weight,
+// speed, position, unit, meets_snap_minimum), and three stale entries in the
+// aggregate map below.
+//
+// Unlike scoring-format-logs, the value path IS checkable here even though every
+// definition carries a select_as: create_field_from_pff_player_seasonlogs builds
+// it as `pff_${column_name}`, deterministically, so there is exactly one alias
+// to compare against. That derivation is the whole reason a repoint moves the
+// payload key, which is what makes this assertion load-bearing rather than
+// decorative.
+describe('data view pff seasonlogs field parity', function () {
+  const frontend_fields = parse_frontend_fields(pff_seasonlogs_fields_source)
+  const server_column_ids = Object.keys(
+    pff_player_seasonlogs_column_definitions
+  )
+
+  it('parses the frontend field file', function () {
+    // Positive control: a parser matching nothing passes everything below by
+    // vacuous iteration.
+    expect(frontend_fields.size).to.be.greaterThan(30)
+    expect(frontend_fields.get('player_pff_offense')).to.equal('pff_offense')
+  })
+
+  it('registers every server column in the frontend field file', function () {
+    const missing = server_column_ids.filter(
+      (column_id) => !frontend_fields.has(column_id)
+    )
+    expect(
+      missing,
+      `pff seasonlog columns with no frontend field (unselectable in the UI, and fatal to a saved view holding one): ${missing.join(', ')}`
+    ).to.deep.equal([])
+  })
+
+  it('describes every server column in the shared fields index', function () {
+    const missing = server_column_ids.filter(
+      (column_id) => !data_view_fields_index[column_id]
+    )
+    expect(
+      missing,
+      `pff seasonlog columns with no description: ${missing.join(', ')}`
+    ).to.deep.equal([])
+  })
+
+  it('matches each frontend value path to the emitted pff_ alias', function () {
+    const mismatched = []
+
+    for (const column_id of server_column_ids) {
+      const { column_name } =
+        pff_player_seasonlogs_column_definitions[column_id]
+      if (!column_name) continue
+
+      const value_path = frontend_fields.get(column_id)
+      if (!value_path) continue
+
+      const expected_path = `pff_${column_name}`
+      if (value_path !== expected_path) {
+        mismatched.push(
+          `${column_id}: frontend reads '${value_path}', server emits '${expected_path}'`
+        )
+      }
+    }
+
+    expect(
+      mismatched,
+      `frontend value paths that render an empty cell: ${mismatched.join('; ')}`
+    ).to.deep.equal([])
+  })
+
+  it('keys every aggregate override on a real column name', function () {
+    // A key that matches no column silently falls back to SUM
+    // (select-string.mjs), so a multi-year window ADDS grades instead of
+    // averaging them -- wrong numbers rather than missing ones, and nothing
+    // anywhere reports it. `pass`, `run` and `speed` were in that state from
+    // adffc01fe until 2026-08-13.
+    const column_names = new Set(
+      server_column_ids
+        .map((id) => pff_player_seasonlogs_column_definitions[id].column_name)
+        .filter(Boolean)
+    )
+    const orphaned = Object.keys(
+      pff_player_seasonlogs_range_offset_aggregate
+    ).filter((key) => !column_names.has(key))
+
+    expect(
+      orphaned,
+      `aggregate overrides keyed on a column that does not exist, so they silently default to SUM: ${orphaned.join(', ')}`
     ).to.deep.equal([])
   })
 })

@@ -292,10 +292,37 @@ export const apply_dvoa_type_value_renames = (params) => {
 // `row_axes: ['year']` and the per-game CTE honours `params.year`
 // (rate-type-per-game.mjs), so a persisted year window carries over unchanged;
 // the careerlogs id carries no year window to begin with.
+// `player_pff_receiving_snaps` never held receiving snaps: PFF's
+// `receiving_snaps` field counts the pass plays a player was on the field for,
+// which is what pff.com shows under PASS, so the column became `pass_plays` and
+// the id follows it. This rename is VALUE-PRESERVING and that is the whole
+// point of doing it as a rename -- the alternative on the table was to leave
+// the id alone and repoint it at the new `routes` column, which would have kept
+// every saved view rendering while silently changing the number it displays.
+// Nothing could have caught that: check-saved-view-param-coverage walks param
+// KEYS, so a semantic repoint under a stable id is invisible to it. Anyone
+// wanting routes adds `player_pff_routes` deliberately.
 const COLUMN_ID_RENAMES = {
   player_fantasy_games_played_from_seasonlogs: 'player_games_played',
-  player_fantasy_games_played_from_careerlogs: 'player_games_played'
+  player_fantasy_games_played_from_careerlogs: 'player_games_played',
+  player_pff_receiving_snaps: 'player_pff_pass_plays'
 }
+
+// Column-id renames for the SHARE-URL path, which receives none of the read-time
+// migration a saved view gets: a query string carries no version field, so it
+// never enters the versioned chain and `parse_table_state_from_url` runs only
+// the nfl-week migration plus the dvoa value renames. Without this a shared link
+// naming a renamed id breaks loudly on render, and unlike a saved view it can
+// never be re-saved. Measured at the time of the pff rename: 7 of 869 production
+// URLs carry `player_pff_receiving_snaps`.
+//
+// Narrow on purpose -- column ids only, not the param-key maps. Applying those
+// to URLs too is a real improvement and still unmeasured against the 863 URLs;
+// it stays the separate question the dvoa note above already records.
+export const apply_column_id_rename = (column_id) =>
+  Object.prototype.hasOwnProperty.call(COLUMN_ID_RENAMES, column_id)
+    ? COLUMN_ID_RENAMES[column_id]
+    : column_id
 
 // Merge order is load-bearing: a legacy key may chain through two maps in the
 // single migrate_params pass below, and only this order resolves the chains

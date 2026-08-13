@@ -5,7 +5,10 @@ import {
   migrate_entries_array,
   migrate_sort_array
 } from '#libs-shared/data-views-nfl-week-migration.mjs'
-import { apply_dvoa_type_value_renames } from '#libs-shared/data-views-saved-view-migration.mjs'
+import {
+  apply_column_id_rename,
+  apply_dvoa_type_value_renames
+} from '#libs-shared/data-views-saved-view-migration.mjs'
 
 // A share URL is rewritten by the nfl-week migration and by nothing else -- it
 // never enters the versioned chain in data-view-storage/migrations.mjs, because
@@ -18,6 +21,20 @@ const migrate_dvoa_type_entries = (entries) => {
     if (!entry || typeof entry !== 'object' || !entry.params) return entry
     const { params, changed } = apply_dvoa_type_value_renames(entry.params)
     return changed ? { ...entry, params } : entry
+  })
+}
+
+// Same reasoning one level up: a renamed column ID has to be rewritten here or a
+// shared link naming the old one breaks on render with no way to repair it. An
+// entry is either a bare id string or `{ column_id, params }`, and both shapes
+// occur in production URLs.
+const migrate_column_id_entries = (entries) => {
+  if (!Array.isArray(entries)) return entries
+  return entries.map((entry) => {
+    if (typeof entry === 'string') return apply_column_id_rename(entry)
+    if (!entry || typeof entry !== 'object' || !entry.column_id) return entry
+    const column_id = apply_column_id_rename(entry.column_id)
+    return column_id === entry.column_id ? entry : { ...entry, column_id }
   })
 }
 
@@ -87,14 +104,20 @@ export default function parse_table_state_from_url(search_params) {
   const table_state = apply_legacy_aliases(search_params, parsed_table_state)
 
   return {
-    columns: migrate_dvoa_type_entries(
-      migrate_entries_array(table_state.columns)
+    columns: migrate_column_id_entries(
+      migrate_dvoa_type_entries(migrate_entries_array(table_state.columns))
     ),
-    prefix_columns: migrate_dvoa_type_entries(
-      migrate_entries_array(table_state.prefix_columns)
+    prefix_columns: migrate_column_id_entries(
+      migrate_dvoa_type_entries(
+        migrate_entries_array(table_state.prefix_columns)
+      )
     ),
-    where: migrate_dvoa_type_entries(migrate_entries_array(table_state.where)),
-    sort: migrate_sort_array(table_state.sort),
+    where: migrate_column_id_entries(
+      migrate_dvoa_type_entries(migrate_entries_array(table_state.where))
+    ),
+    // `sort` carries a column_id too, so it has to follow the rename or a shared
+    // link sorts on an id no column supplies.
+    sort: migrate_column_id_entries(migrate_sort_array(table_state.sort)),
     // The schema parser's array branch falls back to `[]` only for absent or
     // unparseable input, so a well-formed non-array (`row_axes={"week":true}`)
     // flows straight through as an object and every downstream axis consumer
