@@ -1109,6 +1109,15 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['is_active']
  * They survive because they HAVE parents, so no orphan sweep can see them:
  * the contamination that produced the orphans is strictly larger than the
  * orphans, and a clean orphan count is not evidence of a clean conflation.
+ * Removing them took 3,785 rows, not 70 -- 2,080 `scoring_format_player_
+ * gamelogs` and 448 `league_format_player_gamelogs` hung off those 36 parents,
+ * and a further 616 + 571 were attached to Conklin's 2018-2019 MIN games that
+ * Izzo never had a parent row for at all. Always count the derived scoring
+ * tables before estimating one of these; the gamelog tables are the small half.
+ * The delete was cleared by Izzo having zero `rosters_players`,
+ * `league_team_lineup_starters` and `league_team_lineup_contributions` rows --
+ * check that first, because for a player who WAS rostered these same deletes
+ * would rewrite a real fantasy result.
  * The oracle to reach for is a gamelog carrying counting stats with zero snaps
  * for that (pid, esbid), which finds 45 rows in 2022 and 90 in 2023. Do not
  * run it on 2024 without a coverage precondition -- `nfl_snaps` holds 2,191
