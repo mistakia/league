@@ -527,12 +527,25 @@ observations:
     config/base-container/validate-user-command.sh (60 lines) covers network tools, destructive
     commands and privilege escalation only, so sed -i, tee, node -e and shell redirection all pass;
     treat path denials as advisory and gate on a diff check instead.
+  - >-
+    [bug] 2026-08-13 The daily-window gate added to getPicks' isActive (commit fd68227e7) trips the
+    previousNotActive frontier early for an off-hours window-passed jump pick, so every later
+    non-user pick returns before draftWindow is set and its "in X hours" board label
+    (draft-pick.js:72) stops rendering off-hours; getPicks' isActive only drives the frontier — the
+    pick action is gated by index.js onTheClock — so the fix is to revert the getPicks and draft.js
+    visual gates to the window-open logic and keep only the index.js isWindowOpen gate.
+  - >-
+    [review] Independent review of fd68227e7 (gate out-of-order draft picks to the daily window
+    hours) found the server gate correct against all three operator rules, with one medium frontend
+    finding — draft.js:105 still renders a 'Time Remaining' panel during the overnight hours when
+    the draft button is correctly hidden; full report at
+    repository/active/league/tmp/draft-window-review-report.md.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-04T18:23:21.377Z'
+updated_at: '2026-08-13T02:12:43.989Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
