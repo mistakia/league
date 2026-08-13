@@ -1,4 +1,12 @@
 import { getLeague, validators } from '#libs-server'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
+
+// Requests that cannot write, and so are never blocked by a pause.
+const SAFE_HTTP_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
+
+// The commissioner's own lever. Mounted beneath the guard like everything else,
+// so it has to be named here or a paused league could never be resumed.
+const PAUSE_ROUTE_PATH = /^\/pause\/?$/
 
 /**
  * Validate authentication
@@ -100,6 +108,68 @@ export async function require_league_access(league, userId, leagueId, db, res) {
   }
 
   return true
+}
+
+/**
+ * Express guard refusing every write to a paused league with 423 Locked.
+ *
+ * MOUNTING: this MUST be mounted with a path that carries the id --
+ * `router.use('/:leagueId', ...)` or `router.use('/:teamId', ...)`. A bare
+ * `router.use(handler)` leaves `req.params` as `{}` (verified against this
+ * repo's express 4.22.2), so the guard would resolve no league, pass every
+ * request, and look exactly like a working guard. It must also be mounted ABOVE
+ * each router's own PUT, which sits above the sub-router mounts.
+ *
+ * TWO RESOLUTION MODES. `/api/leagues/:leagueId/...` carries the league id
+ * directly; `/api/teams/:teamId/...` does not, so the league is resolved from
+ * the team. An unresolvable team PASSES rather than 423s: this guard runs
+ * pre-auth (both routers mount above the blanket 401 in api/index.mjs), so a
+ * 423 on an unknown team id would confirm team existence to an anonymous caller
+ * and turn the guard into an enumeration oracle. The route's own validation
+ * answers for a bad id.
+ *
+ * The response body carries `{ error }` and nothing else -- never `paused_at`
+ * and never the free-text `pause_reason`, both of which would then be readable
+ * by anyone who can shape a POST at a paused league.
+ *
+ * BEST-EFFORT AT REQUEST ENTRY. It cannot interrupt a handler that passed
+ * microseconds before the pause row landed, and a pause does not roll back
+ * committed work.
+ *
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next callback
+ */
+export async function require_league_not_paused(req, res, next) {
+  try {
+    if (SAFE_HTTP_METHODS.has(req.method)) return next()
+    if (PAUSE_ROUTE_PATH.test(req.path)) return next()
+
+    const { db } = req.app.locals
+    const { leagueId, teamId } = req.params
+
+    let league_id = leagueId ? Number(leagueId) : null
+
+    if (!league_id && teamId) {
+      const team = await db('teams')
+        .where({ uid: Number(teamId) })
+        .first('lid')
+
+      if (!team) return next()
+      league_id = team.lid
+    }
+
+    if (!league_id || Number.isNaN(league_id)) return next()
+
+    const open_pause = await get_open_league_pause({ league_id, db })
+    if (!open_pause) return next()
+
+    return res.status(423).send({
+      error: 'league is paused'
+    })
+  } catch (error) {
+    return next(error)
+  }
 }
 
 /**

@@ -1,7 +1,10 @@
 import express from 'express'
 
 import { verifyUserTeam } from '#libs-server'
-import { require_auth } from '#api/routes/leagues/middleware.mjs'
+import {
+  require_auth,
+  require_league_not_paused
+} from '#api/routes/leagues/middleware.mjs'
 import activate from './activate.mjs'
 import cutlist from './cutlist.mjs'
 import deactivate from './deactivate.mjs'
@@ -16,6 +19,13 @@ import players from './players.mjs'
 import { current_season } from '#constants'
 
 const router = express.Router()
+
+// The pause guard, above the PUT below and every sub-router mount. This router
+// is reachable two ways -- mounted at /api/teams and again at
+// /api/leagues/:leagueId/teams -- and only the first carries no league id, so
+// the guard resolves the league from :teamId on this path. See
+// require_league_not_paused for why an unresolvable team passes rather than 423s.
+router.use('/:teamId', require_league_not_paused)
 
 /**
  * @swagger

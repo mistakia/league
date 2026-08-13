@@ -3815,6 +3815,40 @@ const options = {
               description: 'Selection type for selection 4 (OVER/UNDER)'
             }
           }
+        },
+        LeaguePause: {
+          type: 'object',
+          description:
+            'One league pause interval. The row is both current state and ledger: a null resumed_at means the pause is open and the league is paused right now.',
+          properties: {
+            pause_id: {
+              type: 'integer',
+              description: 'Pause interval ID'
+            },
+            league_id: {
+              $ref: '#/components/schemas/LeagueId'
+            },
+            paused_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'When the pause opened'
+            },
+            resumed_at: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+              description:
+                'When the pause closed; null while the league is paused'
+            },
+            pause_reason: {
+              type: 'string',
+              description: 'Why the commissioner paused the league'
+            },
+            paused_by_user_id: {
+              type: 'integer',
+              description: 'User ID of the commissioner who paused'
+            }
+          }
         }
       },
       responses: {
@@ -3847,6 +3881,30 @@ const options = {
             'application/json': {
               schema: {
                 $ref: '#/components/schemas/Error'
+              }
+            }
+          }
+        },
+        ForbiddenError: {
+          description: 'Caller is authenticated but not permitted this action',
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error'
+              }
+            }
+          }
+        },
+        LockedError: {
+          description:
+            "The league is paused, so no transaction may be written. The body carries a bare error string: this guard runs before authentication, so it must not disclose when the pause began or the commissioner's reason for it.",
+          content: {
+            'application/json': {
+              schema: {
+                $ref: '#/components/schemas/Error'
+              },
+              example: {
+                error: 'league is paused'
               }
             }
           }

@@ -15,8 +15,10 @@ import {
   require_auth,
   validate_and_get_league,
   require_commissioner,
+  require_league_not_paused,
   handle_error
 } from './middleware.mjs'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { current_season } from '#constants'
 import {
   league_fields,
@@ -49,6 +51,12 @@ import careerlogs from './careerlogs.mjs'
 import external from './external.mjs'
 
 const router = express.Router()
+
+// The pause guard, above every mutating route in this router INCLUDING the PUT
+// below -- which sits above the sub-router mounts and would otherwise slip past
+// it. The '/:leagueId' path is load-bearing: a bare router.use(handler) yields
+// req.params === {} and the guard would silently pass everything.
+router.use('/:leagueId', require_league_not_paused)
 
 /**
  * @swagger
@@ -504,5 +512,161 @@ router.use('/:leagueId/players', players)
 router.use('/:leagueId/matchups', matchups)
 router.use('/:leagueId/careerlogs', careerlogs)
 router.use('/:leagueId/external', external)
+
+/**
+ * @swagger
+ * /leagues/{leagueId}/pause:
+ *   post:
+ *     tags:
+ *       - Fantasy Leagues
+ *     summary: Pause a league
+ *     description: |
+ *       Open a league-wide pause. While a pause is open no transaction may be
+ *       written and no processor runs for the league, by any actor through any
+ *       transport. Only the league commissioner may pause.
+ *
+ *       At most one pause may be open per league; pausing an already-paused
+ *       league returns the pause that is already open rather than opening a
+ *       second one.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - pause_reason
+ *             properties:
+ *               pause_reason:
+ *                 type: string
+ *                 description: Why the league is being paused
+ *     responses:
+ *       200:
+ *         description: The open pause
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LeaguePause'
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.post('/:leagueId/pause', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    if (!require_auth(req, res)) return
+
+    const { leagueId } = req.params
+    const { pause_reason } = req.body
+
+    if (!pause_reason || !String(pause_reason).trim()) {
+      return res.status(400).send({ error: 'missing pause_reason' })
+    }
+
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
+
+    if (!require_commissioner(league, req.auth.userId, res, 'pause the league'))
+      return
+
+    // Pausing an already-paused league is a no-op that returns the open pause,
+    // not a 409. The commissioner's intent ("this league should be paused") is
+    // already satisfied, and the partial unique index would reject the insert
+    // anyway -- surfacing that as an error would make a double-click look like
+    // a failure.
+    const existing_pause = await get_open_league_pause({
+      league_id: league.uid,
+      db
+    })
+    if (existing_pause) return res.send(existing_pause)
+
+    const [pause] = await db('league_pauses')
+      .insert({
+        league_id: league.uid,
+        paused_at: new Date(),
+        pause_reason: String(pause_reason).trim(),
+        paused_by_user_id: req.auth.userId
+      })
+      .returning('*')
+
+    return res.send(pause)
+  } catch (error) {
+    handle_error(error, logger, res)
+  }
+})
+
+/**
+ * @swagger
+ * /leagues/{leagueId}/pause:
+ *   delete:
+ *     tags:
+ *       - Fantasy Leagues
+ *     summary: Resume a paused league
+ *     description: |
+ *       Close the league's open pause. The interval row is retained as the
+ *       ledger the rookie draft clock credits from, so resuming is an update
+ *       rather than a delete. Only the league commissioner may resume.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *     responses:
+ *       200:
+ *         description: The closed pause
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LeaguePause'
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.delete('/:leagueId/pause', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    if (!require_auth(req, res)) return
+
+    const { leagueId } = req.params
+
+    const league = await validate_and_get_league(leagueId, res)
+    if (!league) return
+
+    if (
+      !require_commissioner(league, req.auth.userId, res, 'resume the league')
+    )
+      return
+
+    const open_pause = await get_open_league_pause({
+      league_id: league.uid,
+      db
+    })
+    if (!open_pause) {
+      return res.status(400).send({ error: 'league is not paused' })
+    }
+
+    const [pause] = await db('league_pauses')
+      .where({ pause_id: open_pause.pause_id })
+      .update({ resumed_at: new Date() })
+      .returning('*')
+
+    return res.send(pause)
+  } catch (error) {
+    handle_error(error, logger, res)
+  }
+})
 
 export default router

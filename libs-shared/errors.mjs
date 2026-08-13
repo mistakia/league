@@ -49,3 +49,18 @@ export class AmbiguousPlayerLookup extends Error {
     this.name = 'AmbiguousPlayerLookupError'
   }
 }
+
+// The league has an open pause, so no transaction may be written and no
+// processor may run for it.
+//
+// This is a HOLD, not a failure, and every consumer must treat it as one. A
+// processor that catches this has correctly declined to act; reporting it as a
+// shortfall is the trap the RFA pause precedent already recorded -- a paused job
+// that goes quiet reads to the runs-ledger staleness sweep as a broken pipeline.
+// It sits alongside the Empty* abstentions above for that reason.
+export class LeaguePaused extends Error {
+  constructor(message = 'league is paused') {
+    super(message)
+    this.name = 'LeaguePausedError'
+  }
+}
