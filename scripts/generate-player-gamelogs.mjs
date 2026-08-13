@@ -1073,6 +1073,32 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['is_active']
  * never touched; where `private/scripts/import-gamelogs-ngs.mjs` has also
  * written to such a pair, its row goes too, and correctly -- the attribution
  * being retracted is the same one.
+ *
+ * Do not read that as the only way a child outlives its parent. A 2026-08-13
+ * sweep found 169 more orphans (125 receiving, 30 defender, 14 rushing;
+ * passing was clean) that this prune did not cause and could not have
+ * prevented, because the pid they carry is one no parent ever had.
+ * `import-gamelogs-ngs.mjs` resolves the NGS `nflId` through
+ * `player.gsis_it_player_id`. While that column was crossed between two
+ * conflated player rows it wrote children under the WRONG pid; it requires no
+ * parent and has no retraction pass of its own, so when the player rows were
+ * later corrected the re-import wrote fresh rows under the right pid and the
+ * stale ones survived forever. 64 of the 169 were that exact shape, on three
+ * pids -- Izzo/Conklin (same birth date, draft year and college on both rows,
+ * the conflation tell) and a Maurice Alexander LB/WR pair -- and every one of
+ * them had a parent under its SWAPPED pid, which is what proved the direction.
+ * 18 were byte-identical duplicates of the corrected row; the other 46 held
+ * NGS columns the correct pid had never received, so they were merged across
+ * rather than dropped.
+ *
+ * Two lessons worth more than the row count. First, an orphan is not evidence
+ * of a bad delete -- here it was evidence of a bad WRITE, and deleting the 64
+ * would have destroyed the only copy of 46 rows of real data. Establish which
+ * end is wrong before reaching for either. Second, `nfl_play_stats` and
+ * `nfl_snaps` answer "did this player appear in this game" independently of
+ * every gamelog writer, and 10 of the 169 came back yes: those describe a real
+ * appearance with no parent, so their PARENT is the thing that is missing and
+ * they were deliberately left in place rather than deleted.
  */
 
 // Columns whose presence proves a row records a stat THIS SCRIPT produced.
