@@ -18,6 +18,7 @@ import {
   getDraftDates,
   get_free_agent_period,
   getDraftWindow,
+  is_within_daily_window,
   groupBy,
   fixTeam,
   is_league_post_season_week,
@@ -409,8 +410,15 @@ export const getPicks = createSelector(
           return p
         }
 
+        // A jump pick is only active inside the daily window hours; an
+        // in-sequence pick (previousSelected) stays active at any time.
         const isActive =
-          current_season.now.isAfter(p.draftWindow) || previousSelected
+          previousSelected ||
+          (current_season.now.isAfter(p.draftWindow) &&
+            is_within_daily_window(
+              current_season.now,
+              get_draft_window_config(league)
+            ))
 
         previousNotActive = !isActive && previousActive
         previousActive = isActive

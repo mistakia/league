@@ -238,6 +238,32 @@ function resolve_daily_window({
   return { start_hour, end_hour }
 }
 
+/**
+ * Whether `time` falls inside the daily window `[start_hour, end_hour)`.
+ *
+ * Resolves the daily window the same way `getDraftWindow` does, so the gate
+ * matches the placement window, including the default for null/missing bounds.
+ * A time's hour of day is compared in the draft timezone — `current_season.now`
+ * is already Eastern, so passing it directly is correct.
+ *
+ * @param {import('dayjs').Dayjs} time - A Dayjs instance in the draft timezone.
+ * @param {Object} [args]
+ * @param {number} [args.daily_window_start_hour]
+ * @param {number} [args.daily_window_end_hour]
+ * @returns {boolean} True when `time.hour()` is an open hour.
+ */
+export const is_within_daily_window = (
+  time,
+  { daily_window_start_hour, daily_window_end_hour }
+) => {
+  const window = resolve_daily_window({
+    daily_window_start_hour,
+    daily_window_end_hour
+  })
+  const hour = time.hour()
+  return is_open_hour(hour, window)
+}
+
 const is_open_hour = (hour, { start_hour, end_hour }) =>
   hour >= start_hour && hour < end_hour
 

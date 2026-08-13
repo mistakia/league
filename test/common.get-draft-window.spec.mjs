@@ -1,11 +1,12 @@
-/* global describe it */
+/* global describe it after */
 
 import * as chai from 'chai'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
+import MockDate from 'mockdate'
 
-import { getDraftWindow, getDraftDates } from '#libs-shared'
+import { getDraftWindow, getDraftDates, isDraftWindowOpen } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
@@ -452,6 +453,76 @@ describe('LIBS-SHARED getDraftWindow', function () {
         last_selection_timestamp: eastern('2026-09-02 15:00').toDate()
       })
       expect(format(draftEnd)).to.equal('2026-09-02 23:59')
+    })
+  })
+
+  describe('isDraftWindowOpen — jumps are gated to the daily window', function () {
+    // The live 2026 draft: pick 1.2 made 07:56 on 8/12. Pick 1.4 is a JUMP
+    // whose window opened 15:00 on 8/12; once that moment has passed it must
+    // not be jumpable again until inside the daily window hours on a later day
+    // (the operator's rule: a team on the clock since the previous day cannot
+    // be jumped until the next day's window start).
+    const last_consecutive_pick = {
+      pick: 2,
+      selection_timestamp: eastern('2026-08-12 07:56').toDate()
+    }
+    const jump_open_at = (eastern_wall_clock) => {
+      MockDate.set(eastern(eastern_wall_clock).toISOString())
+      return isDraftWindowOpen({
+        ...live_2026,
+        last_consecutive_pick,
+        pick_number: 4
+      })
+    }
+
+    after(() => MockDate.reset())
+
+    it('is open inside the daily window once the window moment has passed', () => {
+      expect(jump_open_at('2026-08-12 15:30')).to.equal(true)
+    })
+
+    it('is closed before the window moment, even inside the daily window', () => {
+      expect(jump_open_at('2026-08-12 14:59')).to.equal(false)
+    })
+
+    it('is closed after the daily window closes, even with the moment passed', () => {
+      expect(jump_open_at('2026-08-12 23:30')).to.equal(false)
+    })
+
+    it('is closed overnight before the next day window start', () => {
+      expect(jump_open_at('2026-08-13 06:00')).to.equal(false)
+      expect(jump_open_at('2026-08-13 10:59')).to.equal(false)
+    })
+
+    it('reopens at the next day window start', () => {
+      expect(jump_open_at('2026-08-13 11:00')).to.equal(true)
+    })
+
+    it('gives the on-clock team at least the interval before the first jumper', () => {
+      // Operator rule 2: every team gets at least cadence_interval hours on the
+      // clock before the first jumper's window, across references spread over
+      // the day (including the overnight rollover).
+      for (const ref of [
+        '2026-08-12 11:00',
+        '2026-08-12 18:00',
+        '2026-08-12 19:00',
+        '2026-08-12 21:00'
+      ]) {
+        const lc = { pick: 5, selection_timestamp: eastern(ref).toDate() }
+        const onclock = getDraftWindow({
+          ...live_2026,
+          last_consecutive_pick: lc,
+          pick_number: 6
+        })
+        const jumper = getDraftWindow({
+          ...live_2026,
+          last_consecutive_pick: lc,
+          pick_number: 7
+        })
+        expect(jumper.diff(onclock, 'hour', true)).to.be.at.least(
+          live_2026.cadence_interval
+        )
+      }
     })
   })
 })

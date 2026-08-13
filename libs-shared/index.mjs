@@ -1,4 +1,4 @@
-import getDraftWindow from './get-draft-window.mjs'
+import getDraftWindow, { is_within_daily_window } from './get-draft-window.mjs'
 import { current_season } from '#constants'
 
 export * as common_column_params from './common-column-params.mjs'
@@ -160,8 +160,21 @@ export const debounce = (callback, wait) => {
   }
 }
 
-export const isDraftWindowOpen = (params) =>
-  current_season.now.isAfter(getDraftWindow(params))
+/**
+ * Whether a pick is currently jumpable (eligible to be taken out of order).
+ *
+ * The window moment having passed is necessary and no longer sufficient: once
+ * a jump window's moment has passed it stays passed, so without the daily-window
+ * gate a team stalled on the clock since the previous day could be jumped at
+ * 6am — before the daily window opens. A jump is allowed only when the current
+ * time is also inside the daily window hours.
+ */
+export const isDraftWindowOpen = (params) => {
+  const now = current_season.now
+  return (
+    now.isAfter(getDraftWindow(params)) && is_within_daily_window(now, params)
+  )
+}
 
 export const uuidv4 = () =>
   ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
@@ -185,4 +198,4 @@ export const get_last_consecutive_pick = (draft_picks = []) => {
   return last_consecutive_pick
 }
 
-export { getDraftWindow }
+export { getDraftWindow, is_within_daily_window }

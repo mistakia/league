@@ -5,7 +5,8 @@ import { current_season } from '@constants'
 import {
   getDraftWindow,
   getDraftDates,
-  get_last_consecutive_pick
+  get_last_consecutive_pick,
+  is_within_daily_window
 } from '@libs-shared'
 import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
 import { draft_actions } from '@core/draft'
@@ -55,7 +56,12 @@ const map_state_to_props = createSelector(
       : null
 
     const isWindowOpen =
-      nextPick && current_season.now.isAfter(nextPick.draftWindow)
+      nextPick &&
+      current_season.now.isAfter(nextPick.draftWindow) &&
+      is_within_daily_window(
+        current_season.now,
+        get_draft_window_config(league)
+      )
 
     let is_draft_complete = false
     if (last_pick) {

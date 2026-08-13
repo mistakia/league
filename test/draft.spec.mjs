@@ -236,6 +236,28 @@ describe('API /draft', function () {
       await error(request, 'draft pick not on the clock')
     })
 
+    it('jump blocked outside the daily window even after its window has opened', async () => {
+      // Pick 1 was made by "make selection" at 00:10 7/25, so pick 3 is a real
+      // jump (pick 2 unmade) whose window — reference pick 1 snapped to 11:00
+      // 7/25, plus one hourly step — opened at 12:00 7/25. The clock is 00:00
+      // 7/26, outside the default daily window [11,16): the jump must be
+      // blocked even though its window moment has passed. Under the old code
+      // (window passed ⇒ jumpable at any hour) this test failed.
+      MockDate.set(
+        regular_season_start
+          .subtract('1', 'month')
+          .add('1', 'day')
+          .toISOString()
+      )
+      const request = chai_request
+        .execute(server)
+        .post('/api/leagues/1/draft')
+        .set('Authorization', `Bearer ${user3}`)
+        .send({ teamId: 3, pid: 'xx', pickId: 3 })
+
+      await error(request, 'draft pick not on the clock')
+    })
+
     it('pick is already selected', async () => {
       MockDate.set(
         regular_season_start

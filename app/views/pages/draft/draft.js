@@ -21,6 +21,8 @@ import {
   default_points_added,
   fantasy_positions
 } from '@constants'
+import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
+import { is_within_daily_window } from '@libs-shared'
 
 dayjs.extend(relativeTime)
 
@@ -191,7 +193,12 @@ export default function DraftPage({
       !is_draft_complete &&
       !pick.pid &&
       Boolean(pick.pick) &&
-      (current_season.now.isAfter(pick.draftWindow) || isPreviousSelectionMade)
+      (isPreviousSelectionMade ||
+        (current_season.now.isAfter(pick.draftWindow) &&
+          is_within_daily_window(
+            current_season.now,
+            get_draft_window_config(league)
+          )))
 
     const trade_count = pick.trade_count || 0
 
