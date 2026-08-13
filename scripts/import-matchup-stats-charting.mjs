@@ -33,6 +33,15 @@ if (!process.env.DEBUG) {
 // had time to finish.
 const GAME_COMPLETION_BUFFER_HOURS = 6
 
+// BACKFILLING AN EARLIER SEASON DOES NOT WORK. Measured 2026-08-13: the vendor
+// serves the CURRENT season only, and it is a rolling window -- 2025 answers
+// with data while 2024, 2022 and 2021 answer `{"getPlayerMatchupStatsList":[]}`
+// on a well-formed 200, indistinguishable from a game the vendor does not know.
+// So a season not captured while it is current is likely gone, which is what
+// the weekly schedule exists to prevent, and a backfill run costs one request
+// per game to learn nothing. Probe one game before running one.
+// See user:text/league/data-sources.md § SumerSports.
+
 // Returns the games matching the scope and, separately, the subset still
 // needing an import. A scheduled run repeats the same scope every week, so
 // re-fetching games already covered would cost 272 vendor requests to rewrite
