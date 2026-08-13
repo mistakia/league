@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import dayjs from 'dayjs'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import RepeatIcon from '@mui/icons-material/Repeat'
@@ -15,7 +14,8 @@ export default function DraftPick({
   team,
   is_active,
   is_user,
-  trade_count
+  trade_count,
+  draft_clock_now
 }) {
   const [sheet_open, set_sheet_open] = useState(false)
 
@@ -69,7 +69,7 @@ export default function DraftPick({
             Boolean(pick.pick) &&
             Boolean(pick.draftWindow) && (
               <div className='draft__pick-window'>
-                {dayjs().to(pick.draftWindow)}
+                {draft_clock_now.to(pick.draftWindow)}
               </div>
             )}
           <div className='draft__pick-team'>
@@ -99,5 +99,6 @@ DraftPick.propTypes = {
   team: ImmutablePropTypes.record,
   is_active: PropTypes.bool,
   is_user: PropTypes.bool,
-  trade_count: PropTypes.number
+  trade_count: PropTypes.number,
+  draft_clock_now: PropTypes.object
 }

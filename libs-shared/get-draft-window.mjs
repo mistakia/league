@@ -388,6 +388,33 @@ export const is_within_daily_window = (
 }
 
 /**
+ * The next moment the daily window is open, from `time`.
+ *
+ * A time already inside the band is returned untouched. This is what a surface
+ * announcing "selection window opens ..." has to point at once a pick's own
+ * window moment has passed while the clock sits outside the band hours: the
+ * pick is eligible, but not until the band reopens, so `draftWindow` is in the
+ * past and useless as a target.
+ *
+ * Takes the same argument shape as `is_within_daily_window`, so a call site
+ * gating on one can point at the other with the same config.
+ *
+ * @param {import('dayjs').Dayjs} time - A Dayjs instance in the draft timezone.
+ * @param {Object} [args]
+ * @param {number} [args.daily_window_start_hour]
+ * @param {number} [args.daily_window_end_hour]
+ * @returns {import('dayjs').Dayjs}
+ */
+export const get_next_daily_window_entry = (
+  time,
+  { daily_window_start_hour, daily_window_end_hour } = {}
+) =>
+  advance_to_open_hour(
+    time,
+    resolve_band({ daily_window_start_hour, daily_window_end_hour })
+  )
+
+/**
  * Advances one cadence step, landing on an open hour.
  *
  * An `hour` step consumes open slots, so a step taken at the end of the day

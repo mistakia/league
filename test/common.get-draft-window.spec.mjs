@@ -6,7 +6,13 @@ import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 import MockDate from 'mockdate'
 
-import { getDraftWindow, getDraftDates, isDraftWindowOpen } from '#libs-shared'
+import {
+  getDraftWindow,
+  getDraftDates,
+  isDraftWindowOpen,
+  get_next_daily_window_entry,
+  get_draft_clock_now
+} from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 
 dayjs.extend(utc)
@@ -912,6 +918,81 @@ describe('LIBS-SHARED getDraftWindow', function () {
         }
       })
     })
+  })
+})
+
+describe('LIBS-SHARED get_next_daily_window_entry', function () {
+  const band_11_to_23 = {
+    daily_window_start_hour: 11,
+    daily_window_end_hour: 23
+  }
+
+  it('returns a time already inside the band untouched', () => {
+    const inside = eastern('2026-08-12 14:37')
+    expect(
+      get_next_daily_window_entry(inside, band_11_to_23).valueOf()
+    ).to.equal(inside.valueOf())
+  })
+
+  it('rolls a pre-band morning up to the band opening the same day', () => {
+    const entry = get_next_daily_window_entry(
+      eastern('2026-08-12 06:20'),
+      band_11_to_23
+    )
+    expect(entry.format('YYYY-MM-DD HH:mm')).to.equal('2026-08-12 11:00')
+  })
+
+  it('rolls a post-band evening over to the next morning', () => {
+    // The state the draft page's window label needs: the pick's own window
+    // moment has passed, but the band is shut until tomorrow.
+    const entry = get_next_daily_window_entry(
+      eastern('2026-08-12 23:30'),
+      band_11_to_23
+    )
+    expect(entry.format('YYYY-MM-DD HH:mm')).to.equal('2026-08-13 11:00')
+  })
+
+  it('falls back to the whole day for an unusable band', () => {
+    const now = eastern('2026-08-12 03:15')
+    expect(
+      get_next_daily_window_entry(now, {
+        daily_window_start_hour: 20,
+        daily_window_end_hour: 4
+      }).valueOf()
+    ).to.equal(now.valueOf())
+  })
+})
+
+describe('LIBS-SHARED get_draft_clock_now', function () {
+  it('is the wall clock when the league is not paused', () => {
+    const now = eastern('2026-08-12 14:00')
+    expect(get_draft_clock_now({ paused_at: null, now }).valueOf()).to.equal(
+      now.valueOf()
+    )
+  })
+
+  it('is the pause instant while the league is paused', () => {
+    // The freeze: every draft surface reads this, so a page rendered an hour
+    // into a pause reads the same clock as one rendered at the pause instant.
+    const paused_at = eastern('2026-08-12 14:00').toDate()
+    const frozen = get_draft_clock_now({
+      paused_at,
+      now: eastern('2026-08-12 21:43')
+    })
+
+    expect(frozen.format('YYYY-MM-DD HH:mm')).to.equal('2026-08-12 14:00')
+  })
+
+  it('resolves the pause instant in the draft timezone', () => {
+    // An ISO string off the wire, not a Date — the shape the SPA holds. The
+    // hour of day is compared against the band, so a UTC reading would gate
+    // the label on the wrong hour.
+    const frozen = get_draft_clock_now({
+      paused_at: '2026-08-12T18:00:00.000Z',
+      now: eastern('2026-08-13 09:00')
+    })
+
+    expect(frozen.hour()).to.equal(14)
   })
 })
 

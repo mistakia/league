@@ -1,4 +1,7 @@
-import getDraftWindow, { is_within_daily_window } from './get-draft-window.mjs'
+import getDraftWindow, {
+  is_within_daily_window,
+  get_next_daily_window_entry
+} from './get-draft-window.mjs'
 import { current_season } from '#constants'
 
 export * as common_column_params from './common-column-params.mjs'
@@ -51,6 +54,7 @@ export { default as get_default_trade_slot } from './get-default-trade-slot.mjs'
 export { default as validate_trade_slot_assignment } from './validate-trade-slot-assignment.mjs'
 export { default as isSlotActive } from './is-slot-active.mjs'
 export { default as getDraftDates } from './get-draft-dates.mjs'
+export { default as get_draft_clock_now } from './get-draft-clock-now.mjs'
 export { default as optimizeLineup } from './optimize-lineup.mjs'
 export { default as groupBy } from './group-by.mjs'
 export { default as get_free_agent_period } from './get-free-agent-period.mjs'
@@ -184,4 +188,4 @@ export const uuidv4 = () =>
     ).toString(16)
   )
 
-export { getDraftWindow, is_within_daily_window }
+export { getDraftWindow, is_within_daily_window, get_next_daily_window_entry }

@@ -22,7 +22,10 @@ import {
   fantasy_positions
 } from '@constants'
 import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
-import { is_within_daily_window } from '@libs-shared'
+import {
+  is_within_daily_window,
+  get_next_daily_window_entry
+} from '@libs-shared'
 
 dayjs.extend(relativeTime)
 
@@ -42,7 +45,9 @@ export default function DraftPage({
   load_all_players,
   load_league,
   load_teams,
-  is_draft_complete
+  is_draft_complete,
+  is_paused,
+  draft_clock_now
 }) {
   const { lid } = useParams()
   const scroll_to_pick = () => {
@@ -75,7 +80,7 @@ export default function DraftPage({
 
   const draftActive =
     league.draft_start &&
-    dayjs().isAfter(dayjs(league.draft_start).startOf('day'))
+    draft_clock_now.isAfter(dayjs(league.draft_start).startOf('day'))
 
   const picksSorted = picks.sort((a, b) => a.round - b.round || a.pick - b.pick)
   // previous pick might not be pick - 1 if it belonged to a commissioned team
@@ -86,35 +91,54 @@ export default function DraftPage({
   const isPreviousSelectionMade =
     Boolean(nextPick && nextPick.pick === 1) ||
     Boolean(prev_pick && prev_pick.pid)
+  // Both arms are refused by the server's 423 while paused — the jump arm
+  // (`isDraftWindowOpen`) and the in-sequence arm, which is time-independent
+  // and so would otherwise stay live for the whole pause.
   const onTheClock =
     league.draft_start &&
     nextPick &&
+    !is_paused &&
     (isDraftWindowOpen || isPreviousSelectionMade)
 
   let draftInfo
   if (league.draft_start) {
     const start = dayjs(league.draft_start).startOf('day')
-    if (dayjs().isBefore(start)) {
+    if (draft_clock_now.isBefore(start)) {
       draftInfo = (
         <div className='draft__side-top-pick'>
-          Draft begins {dayjs().to(start)}
+          Draft begins {draft_clock_now.to(start)}
         </div>
       )
     } else if (nextPick) {
-      if (dayjs().isBefore(nextPick.draftWindow) && !isPreviousSelectionMade) {
+      // Mirrors the gate rather than the window moment alone. A pick whose
+      // window moment has passed while the clock sits outside the daily band
+      // is NOT on the clock, and reading `isBefore(draftWindow)` here put the
+      // countdown beside a hidden draft button in exactly that state.
+      if (!isPreviousSelectionMade && !isDraftWindowOpen) {
+        // `draftWindow` is already in the past in the outside-the-band case,
+        // so the honest target is the next time the band opens.
+        const window_opens_at = draft_clock_now.isBefore(nextPick.draftWindow)
+          ? nextPick.draftWindow
+          : get_next_daily_window_entry(
+              draft_clock_now,
+              get_draft_window_config(league)
+            )
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
               Next: Pick #{nextPick.pick} ({nextPick.pick_str})
             </div>
-            <div>Selection window opens {dayjs().to(nextPick.draftWindow)}</div>
+            <div>
+              {is_paused
+                ? 'Selection window opens when the league resumes'
+                : `Selection window opens ${draft_clock_now.to(window_opens_at)}`}
+            </div>
           </div>
         )
       } else {
-        const now = dayjs()
-        const isWindowClosed = now.isAfter(windowEnd)
-        const hours = windowEnd.diff(now, 'hours')
-        const mins = windowEnd.diff(now, 'minutes') % 60
+        const isWindowClosed = draft_clock_now.isAfter(windowEnd)
+        const hours = windowEnd.diff(draft_clock_now, 'hours')
+        const mins = windowEnd.diff(draft_clock_now, 'minutes') % 60
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
@@ -122,7 +146,7 @@ export default function DraftPage({
             </div>
             {!isWindowClosed && (
               <div>
-                Time Remaining: {hours}h {mins}m
+                Time Remaining: {hours}h {mins}m{is_paused ? ' (paused)' : ''}
               </div>
             )}
           </div>
@@ -194,9 +218,9 @@ export default function DraftPage({
       !pick.pid &&
       Boolean(pick.pick) &&
       (isPreviousSelectionMade ||
-        (current_season.now.isAfter(pick.draftWindow) &&
+        (draft_clock_now.isAfter(pick.draftWindow) &&
           is_within_daily_window(
-            current_season.now,
+            draft_clock_now,
             get_draft_window_config(league)
           )))
 
@@ -211,6 +235,7 @@ export default function DraftPage({
         is_user={is_user}
         is_active={is_active}
         trade_count={trade_count}
+        draft_clock_now={draft_clock_now}
       />
     )
 
@@ -428,5 +453,7 @@ DraftPage.propTypes = {
   drafted: ImmutablePropTypes.list,
   isDraftWindowOpen: PropTypes.bool,
   teamId: PropTypes.number,
-  is_draft_complete: PropTypes.bool
+  is_draft_complete: PropTypes.bool,
+  is_paused: PropTypes.bool,
+  draft_clock_now: PropTypes.object
 }

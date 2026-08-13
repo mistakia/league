@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt'
 import { groupBy } from '#libs-shared'
 import { current_season } from '#constants'
 import { validators } from '#libs-server'
+import { get_pause_state_by_league_id } from '#libs-server/league-pause.mjs'
 
 const router = express.Router()
 
@@ -212,6 +213,15 @@ router.get('/?', async (req, res) => {
         'league_scoring_formats.id'
       )
       .whereIn('leagues.uid', leagueIds)
+
+    // The SPA's league store is populated from this payload on auth, so a
+    // league missing its pause state here renders no banner and freezes no
+    // clock — see get_pause_state_by_league_id. `pause_reason` stays off the
+    // wire, as it does on GET /leagues/:leagueId.
+    const pause_state = await get_pause_state_by_league_id({ leagues, db })
+    for (const league of leagues) {
+      Object.assign(league, pause_state[Number(league.uid)])
+    }
 
     const seasons = await db('seasons').whereIn('lid', leagueIds)
 

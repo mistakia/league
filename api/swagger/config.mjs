@@ -312,6 +312,33 @@ const options = {
               description: 'Whether fantasy league is hosted on platform',
               example: false
             },
+            paused_at: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+              description:
+                'When the league pause opened; null when the league is live. The commissioner reason is NOT on this payload — it is served from the authenticated pause route.',
+              example: null
+            },
+            draft_pause_periods: {
+              type: 'array',
+              description:
+                'Pause intervals overlapping the rookie draft, credited back to the pick clock. Intervals rather than a total, so a live pause is measured against the reader own clock; resumed_at is null while open.',
+              items: {
+                type: 'object',
+                properties: {
+                  paused_at: {
+                    type: 'string',
+                    format: 'date-time'
+                  },
+                  resumed_at: {
+                    type: 'string',
+                    format: 'date-time',
+                    nullable: true
+                  }
+                }
+              }
+            },
             espn_league_id: {
               type: 'integer',
               nullable: true,

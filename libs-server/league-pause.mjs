@@ -71,18 +71,70 @@ export const get_draft_pause_periods = async ({
 }) => {
   if (!league_id || !draft_start) return []
 
-  const pause_periods = await db('league_pauses')
-    .where({ league_id: Number(league_id) })
-    .where(function () {
-      this.whereNull('resumed_at').orWhere('resumed_at', '>', draft_start)
-    })
-    .orderBy('paused_at', 'asc')
-    .select('paused_at', 'resumed_at')
+  const pause_state = await get_pause_state_by_league_id({
+    leagues: [{ uid: league_id, draft_start }],
+    db
+  })
 
-  return pause_periods.map((pause_period) => ({
-    paused_at: pause_period.paused_at,
-    resumed_at: pause_period.resumed_at
-  }))
+  return pause_state[Number(league_id)].draft_pause_periods
+}
+
+/**
+ * The wire's pause state for several leagues in one query.
+ *
+ * `GET /api/me` returns every league the user is in, and its league payload is
+ * what the SPA's store holds for an authenticated member — so the pause fields
+ * have to travel on it as well as on `GET /leagues/:leagueId`, or the banner
+ * and every frozen clock are inert for exactly the people a pause is for.
+ *
+ * The two shapes come from ONE implementation on purpose: the single-league
+ * reader above delegates here, so the rule for which intervals matter to the
+ * draft cannot come to mean different things on the two routes.
+ *
+ * @param {Object} args
+ * @param {Array<{uid: number, draft_start: Date|string}>} args.leagues
+ * @param {Object} [args.db]
+ * @returns {Promise<Object>} Keyed by league id, each
+ *   `{ paused_at, draft_pause_periods }`.
+ */
+export const get_pause_state_by_league_id = async ({
+  leagues,
+  db = default_db
+}) => {
+  const league_ids = leagues.map((league) => Number(league.uid))
+  if (!league_ids.length) return {}
+
+  const pause_rows = await db('league_pauses')
+    .whereIn('league_id', league_ids)
+    .orderBy('paused_at', 'asc')
+    .select('league_id', 'paused_at', 'resumed_at')
+
+  const pause_state = {}
+  for (const league of leagues) {
+    const league_id = Number(league.uid)
+    const league_rows = pause_rows.filter(
+      (pause_row) => Number(pause_row.league_id) === league_id
+    )
+    const open_pause = league_rows.find((pause_row) => !pause_row.resumed_at)
+
+    pause_state[league_id] = {
+      paused_at: open_pause ? open_pause.paused_at : null,
+      draft_pause_periods: league.draft_start
+        ? league_rows
+            .filter(
+              (pause_row) =>
+                !pause_row.resumed_at ||
+                new Date(pause_row.resumed_at) > new Date(league.draft_start)
+            )
+            .map((pause_row) => ({
+              paused_at: pause_row.paused_at,
+              resumed_at: pause_row.resumed_at
+            }))
+        : []
+    }
+  }
+
+  return pause_state
 }
 
 /**

@@ -6,6 +6,7 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 import league from '#db/fixtures/league.mjs'
+import users from '#db/fixtures/users.mjs'
 import { current_season } from '#constants'
 import {
   get_open_league_pause,
@@ -46,6 +47,10 @@ describe('LEAGUE PAUSE', function () {
     this.timeout(60 * 1000)
     MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
     await knex.seed.run()
+    // GET /me resolves the caller against `users`, which nothing seeds — in a
+    // full-suite run auth.spec happens to leave rows behind, and this spec must
+    // not depend on that to run alone.
+    await users(knex)
     await league(knex)
   })
 
@@ -355,6 +360,70 @@ describe('LEAGUE PAUSE', function () {
     it('refuses a non-commissioner resume', async () => {
       await pause_league()
       await forbidden(resume_league({ token: user2 }))
+    })
+  })
+
+  // Both routes that carry a league to the SPA. `GET /me` is the one the store
+  // is populated from on auth, so a pause missing there renders no banner and
+  // freezes no clock for a logged-in member — which is every real user.
+  describe('pause state on the league wire', function () {
+    const open_a_pause = () =>
+      knex('league_pauses').insert({
+        league_id,
+        paused_at: new Date(),
+        pause_reason: 'commissioner is reviewing a disputed trade',
+        paused_by_user_id: 1
+      })
+
+    const assert_pause_fields = (league) => {
+      expect(
+        league.paused_at,
+        'paused_at missing from the payload'
+      ).to.not.equal(undefined)
+      expect(league.paused_at).to.not.equal(null)
+      expect(league.draft_pause_periods).to.be.an('array')
+      expect(league.draft_pause_periods.length).to.equal(1)
+      expect(league.pause_reason).to.equal(undefined)
+    }
+
+    it('GET /leagues/:leagueId carries the pause state', async () => {
+      await open_a_pause()
+      const res = await chai_request
+        .execute(server)
+        .get(`/api/leagues/${league_id}`)
+
+      res.should.have.status(200)
+      assert_pause_fields(res.body)
+    })
+
+    it('GET /me carries the pause state on every league', async () => {
+      await open_a_pause()
+      const res = await chai_request
+        .execute(server)
+        .get('/api/me')
+        .set('Authorization', `Bearer ${user1}`)
+
+      res.should.have.status(200)
+      const league = res.body.leagues.find((l) => l.uid === league_id)
+      expect(league, 'league 1 absent from the me payload').to.not.equal(
+        undefined
+      )
+      assert_pause_fields(league)
+    })
+
+    it('reports a live league as unpaused on both routes', async () => {
+      const league_res = await chai_request
+        .execute(server)
+        .get(`/api/leagues/${league_id}`)
+      expect(league_res.body.paused_at).to.equal(null)
+
+      const me_res = await chai_request
+        .execute(server)
+        .get('/api/me')
+        .set('Authorization', `Bearer ${user1}`)
+      const league = me_res.body.leagues.find((l) => l.uid === league_id)
+      expect(league.paused_at).to.equal(null)
+      expect(league.draft_pause_periods).to.deep.equal([])
     })
   })
 

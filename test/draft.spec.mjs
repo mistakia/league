@@ -338,6 +338,52 @@ describe('API /draft', function () {
       await error(request, 'draft has ended')
     })
 
+    // The pause guard is covered per route family in test/league-pause.spec.mjs,
+    // but every request there carries an empty body and so would be refused
+    // anyway — only the status code distinguishes a mounted guard from an
+    // unmounted one. This drives a selection that is valid in every other
+    // respect and asserts the same request answers 423 paused and 200 resumed,
+    // which is the negative control the family sweep cannot give itself.
+    it('league paused', async () => {
+      MockDate.set(
+        regular_season_start
+          .subtract('1', 'month')
+          .add('2', 'day')
+          .toISOString()
+      )
+      const player = await selectPlayer({ rookie: true })
+      const make_request = () =>
+        chai_request
+          .execute(server)
+          .post('/api/leagues/1/draft')
+          .set('Authorization', `Bearer ${user2}`)
+          .send({
+            teamId: 2,
+            pid: player.pid,
+            pickId: 2
+          })
+
+      await knex('league_pauses').insert({
+        league_id: 1,
+        paused_at: new Date(),
+        pause_reason: 'commissioner review',
+        paused_by_user_id: 1
+      })
+
+      const paused_res = await make_request()
+      paused_res.should.have.status(423)
+      paused_res.body.error.should.equal('league is paused')
+
+      const [pick_while_paused] = await knex('draft').where({ uid: 2 })
+      expect(pick_while_paused.pid).to.equal(null)
+
+      await knex('league_pauses').del()
+
+      const resumed_res = await make_request()
+      resumed_res.should.have.status(200)
+      resumed_res.body.pid.should.equal(player.pid)
+    })
+
     it('exceeds roster limit', async () => {
       // TODO
     })

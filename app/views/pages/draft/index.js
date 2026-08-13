@@ -5,7 +5,8 @@ import { current_season } from '@constants'
 import {
   getDraftWindow,
   getDraftDates,
-  is_within_daily_window
+  is_within_daily_window,
+  get_draft_clock_now
 } from '@libs-shared'
 import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
 import { draft_actions } from '@core/draft'
@@ -45,21 +46,28 @@ const map_state_to_props = createSelector(
     app,
     last_pick
   ) => {
+    // Every clock on this page reads one value, so a pause freezes all of them
+    // together. It is also the credit's upper bound, without which a paused
+    // team's remaining time would grow rather than hold.
+    const is_paused = Boolean(league.paused_at)
+    const draft_clock_now = get_draft_clock_now({
+      paused_at: league.paused_at,
+      now: current_season.now
+    })
+
     const windowEnd = nextPick
       ? getDraftWindow({
           ...get_draft_window_config(league),
           draft_picks: picks.toJS(),
-          pick_number: nextPick.pick + 1
+          pick_number: nextPick.pick + 1,
+          until: draft_clock_now
         })
       : null
 
     const isWindowOpen =
       nextPick &&
-      current_season.now.isAfter(nextPick.draftWindow) &&
-      is_within_daily_window(
-        current_season.now,
-        get_draft_window_config(league)
-      )
+      draft_clock_now.isAfter(nextPick.draftWindow) &&
+      is_within_daily_window(draft_clock_now, get_draft_window_config(league))
 
     let is_draft_complete = false
     if (last_pick) {
@@ -69,7 +77,7 @@ const map_state_to_props = createSelector(
         last_selection_timestamp: last_pick.selection_timestamp
       })
 
-      is_draft_complete = current_season.now.isAfter(draftDates.draftEnd)
+      is_draft_complete = draft_clock_now.isAfter(draftDates.draftEnd)
     }
 
     return {
@@ -82,7 +90,9 @@ const map_state_to_props = createSelector(
       picks,
       drafted: draft.drafted,
       league,
-      is_draft_complete
+      is_draft_complete,
+      is_paused,
+      draft_clock_now
     }
   }
 )

@@ -52,6 +52,33 @@ For interactive API exploration, visit `/api/docs` which provides a Swagger UI i
 - `GET /leagues/{lid}/players` - Get league players
 - `GET /leagues/{lid}/restricted-free-agency` - Completed restricted free agency auctions for a season (`?year=`), each with all of its bids, the winner, and an outcome code per losing bid. Resolved auctions are fully disclosed; a live auction is absent because the filter is the nomination's processing timestamp rather than a permission check.
 
+- `POST /leagues/{lid}/pause` - Open a league pause (commissioner only)
+- `DELETE /leagues/{lid}/pause` - Resume a paused league (commissioner only)
+
+#### League pause
+
+While a league is paused every mutating route under `/leagues/{lid}` and
+`/teams/{tid}` answers **423 Locked** with `{"error": "league is paused"}`, and
+reads pass through untouched. The refusal body carries nothing else: the guard
+runs above the blanket 401, so an anonymous caller reaches it and must learn
+neither the reason nor when the pause began.
+
+The league payload on `GET /leagues/{lid}` and `GET /me` carries two pause
+fields, and both routes must carry them — the SPA populates its league store
+from whichever answers last:
+
+- `paused_at` — when the open pause began, null when the league is live. This
+  is what the every-route pause banner renders and what freezes the rookie
+  draft clocks.
+- `draft_pause_periods` — the pause intervals overlapping the rookie draft, as
+  `{paused_at, resumed_at}` with `resumed_at` null while a pause is open. The
+  draft window calculator credits the open time back to the pick clock; they
+  are intervals rather than a total so the credit can be clipped to each pick's
+  own reference.
+
+The commissioner's free-text `pause_reason` is deliberately absent from both
+payloads and is served only from the authenticated pause route.
+
 ### Fantasy Teams
 
 - `GET /teams/{tid}` - Get team details

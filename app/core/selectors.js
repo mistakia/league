@@ -19,6 +19,7 @@ import {
   get_free_agent_period,
   getDraftWindow,
   is_within_daily_window,
+  get_draft_clock_now,
   groupBy,
   fixTeam,
   is_league_post_season_week,
@@ -391,6 +392,12 @@ export const getPicks = createSelector(
     let previousNotActive = false
     let upcoming_windows_placed = 0
     const draft_picks = picks.toJS()
+    // Frozen at the pause instant while the league is paused, so the rail's
+    // windows and its active flags stop advancing for the duration.
+    const draft_clock_now = get_draft_clock_now({
+      paused_at: league.paused_at,
+      now: current_season.now
+    })
 
     return picks
       .sort((a, b) => a.pick - b.pick)
@@ -415,7 +422,8 @@ export const getPicks = createSelector(
           p.draftWindow = getDraftWindow({
             ...get_draft_window_config(league),
             draft_picks,
-            pick_number: p.pick
+            pick_number: p.pick,
+            until: draft_clock_now
           })
         }
 
@@ -428,9 +436,9 @@ export const getPicks = createSelector(
         // in-sequence pick (previousSelected) stays active at any time.
         const isActive =
           previousSelected ||
-          (current_season.now.isAfter(p.draftWindow) &&
+          (draft_clock_now.isAfter(p.draftWindow) &&
             is_within_daily_window(
-              current_season.now,
+              draft_clock_now,
               get_draft_window_config(league)
             ))
 
