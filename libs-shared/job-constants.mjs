@@ -168,7 +168,8 @@ export const job_types = {
   CLOSE_EXPIRED_ROOKIE_DRAFTS: 135,
 
   IMPORT_KEEPTRADECUT_LIQUIDITY: 136,
-  AUDIT_KEEPTRADECUT_LIQUIDITY_COVERAGE: 137
+  AUDIT_KEEPTRADECUT_LIQUIDITY_COVERAGE: 137,
+  AUDIT_ROUTE_SHARE_COVERAGE: 138
 }
 
 export const job_title_by_id = {
@@ -308,5 +309,6 @@ export const job_title_by_id = {
   134: 'Crawl Sleeper External League Graph',
   135: 'Close Expired Rookie Drafts',
   136: 'Import KeepTradeCut Liquidity (recovery)',
-  137: 'Audit KeepTradeCut Liquidity Coverage'
+  137: 'Audit KeepTradeCut Liquidity Coverage',
+  138: 'Audit Route Share Coverage'
 }

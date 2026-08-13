@@ -20,6 +20,16 @@
 ## violation class exceeds its recorded baseline.
 45 4 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/audit-drive-seq-coherence.mjs >> /var/log/league/audit-drive-seq-coherence.log 2>&1
 
+## Every Sunday at 5:15AM — grade the route_share input chain end to end: rows
+## carrying routes with no share that could be filled right now, and per-week
+## nflfastR play enrichment (is_qb_dropback, the dropback denominator every
+## per-game rate divides by). The importer's own match-rate oracle is
+## year-grained, so a whole week missing its enrichment is ~2% of its
+## denominator and invisible there; this runs at week grain for that reason.
+## Findings ride self-closing signals -- a non-zero exit here means the CHECK
+## could not run.
+15 5 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/audit-route-share-coverage.mjs >> /var/log/league/audit-route-share-coverage.log 2>&1
+
 ## Every day at 4:45AM
 ## Must run AFTER import-keeptradecut.mjs (4:30AM, league-imports.cron), which is
 ## the sole producer of the keeptradecut_valuations rows this reads. It ran at
