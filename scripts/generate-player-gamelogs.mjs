@@ -1129,6 +1129,24 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['is_active']
  * 2023122800 carries 15 valid rows named "T.Conklin" on NYJ under Izzo's
  * `gsis_player_id`; the feed has the ids crossed there too. Where a verdict
  * matters, require play stats and snaps to agree.
+ *
+ * The Izzo pair was not the only one. Sweeping the derived scoring tables for
+ * rows with no parent gamelog found 44,247 across 26 pids, and the era
+ * predicate cleared all but 31 games of it: the QB Daniel Jones, born 1997,
+ * held 2001-2010 Giants scoring; Jake Ferguson (2022) held 2002-2009; Shi
+ * Smith (2021) held 2001-2016. 52,979 rows were retracted on that basis and a
+ * further 705 on both oracles agreeing the player never took the field --
+ * 19 of those last being Conklin holding Izzo's New England games, the exact
+ * mirror of the first repair.
+ *
+ * Two guards earned their place here and should be kept on any future sweep of
+ * this shape. Rank `date_of_birth` first, exactly as the prune does: the
+ * draft-year test alone flags 290 PARENT gamelogs that the birth-date test
+ * clears completely, and acting on it would have been 8f4292e08 a second time.
+ * And refuse to delete any row sharing a (pid, season_year, week) with a
+ * `league_team_lineup_starters` entry -- the league's own history begins in
+ * 2021, so almost all of this predates it, but that is a property to assert
+ * rather than assume.
  */
 
 // Columns whose presence proves a row records a stat THIS SCRIPT produced.
