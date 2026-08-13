@@ -49,7 +49,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { is_main, wait } from '#libs-server'
+import { is_main, wait, recompute_route_share } from '#libs-server'
 import { current_season } from '#constants'
 import {
   create_import_collector,
@@ -810,6 +810,27 @@ const generate_gamelogs_for_week = async ({
     }
   } else if (import_gamelogs_ngs) {
     log(`Skipping gamelogs.ngs (in skip list)`)
+  }
+
+  // Routes are written by the NGS gamelog import above, which runs AFTER
+  // generate_player_gamelogs -- and the generator is what derives route_share
+  // from them. Without this pass every route imported here would land too late
+  // for its own share and nothing would ever revisit it. Fills nulls only, so
+  // it is a no-op when the routes were already present at generation time.
+  if (!dry) {
+    try {
+      const route_share_result = await recompute_route_share({ year })
+      log(
+        `recomputed route_share for ${route_share_result.updated} of ${route_share_result.candidates} candidate rows`
+      )
+    } catch (error) {
+      collector.add_error(error, {
+        script: 'recompute_route_share',
+        year,
+        week,
+        seas_type
+      })
+    }
   }
 
   collector.end_stage()

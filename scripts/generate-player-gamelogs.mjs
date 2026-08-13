@@ -25,7 +25,13 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { is_main, report_job, batch_insert } from '#libs-server'
+import {
+  is_main,
+  report_job,
+  batch_insert,
+  calculate_route_share,
+  ROUTE_SHARE_MAX
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   groupBy,
@@ -85,7 +91,7 @@ if (!process.env.DEBUG) {
 const DB_CONSTRAINTS = {
   TEAM_TARGET_SHARE_MAX: 9.9999, // numeric(5,4)
   TEAM_AIR_YARD_SHARE_MAX: 9.9999, // numeric(5,4)
-  ROUTE_SHARE_MAX: 999.99, // numeric(5,2)
+  ROUTE_SHARE_MAX, // numeric(5,2)
   WEIGHTED_OPPORTUNITY_RATING_MAX: 999.99 // numeric(5,2)
 }
 
@@ -331,28 +337,22 @@ const format_receiving_gamelog = ({
     ? stats.targeted_air_yards / team_stats.passing_air_yards
     : 0
 
-  // Calculate route_share, but handle cases where team_dropbacks data is missing/incomplete
-  // If team_dropbacks is too low (less than player_routes), the data is likely incorrect
-  // In such cases, set route_share to null to avoid overflow
-  let route_share = null
-  if (player_routes && team_dropbacks) {
-    // Validate: if team_dropbacks < player_routes, the dropback data is likely incorrect
-    // This can happen when qb_dropback field is not properly populated in nfl_plays
-    if (team_dropbacks >= player_routes) {
-      route_share = (player_routes / team_dropbacks) * 100
-      // Clamp to max 999.99 to prevent database overflow (numeric(5,2) constraint)
-      if (route_share > DB_CONSTRAINTS.ROUTE_SHARE_MAX) {
-        route_share = DB_CONSTRAINTS.ROUTE_SHARE_MAX
-      }
-    } else {
-      // Dropback data appears incorrect - log warning and set to null
-      if (validate) {
-        log(
-          `WARNING: team_dropbacks (${team_dropbacks}) < player_routes (${player_routes}) for pid=${pid}, esbid=${esbid}, year=${year} - setting route_share to null`
-        )
-      }
-      route_share = null
-    }
+  // route_share is derived in libs-server/route-share.mjs, which is also what
+  // the recompute pass uses -- see that module for why an incomplete dropback
+  // count yields null rather than a clamped value.
+  const route_share = calculate_route_share({ player_routes, team_dropbacks })
+
+  if (
+    validate &&
+    route_share === null &&
+    player_routes &&
+    team_dropbacks &&
+    team_dropbacks < player_routes
+  ) {
+    // qb_dropback is not properly populated in nfl_plays for this game
+    log(
+      `WARNING: team_dropbacks (${team_dropbacks}) < player_routes (${player_routes}) for pid=${pid}, esbid=${esbid}, year=${year} - setting route_share to null`
+    )
   }
 
   const receiving_gamelog = {
