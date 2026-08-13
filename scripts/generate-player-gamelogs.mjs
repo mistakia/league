@@ -1099,6 +1099,27 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['is_active']
  * every gamelog writer, and 10 of the 169 came back yes: those describe a real
  * appearance with no parent, so their PARENT is the thing that is missing and
  * they were deliberately left in place rather than deleted.
+ *
+ * One caveat on "the player rows were later corrected": only the IDENTIFIER
+ * was. Validating the repair turned up 36 phantom `player_gamelogs` rows for
+ * RYAN-IZZO-004768 on NYJ across 2022-2023 -- byte-copies of
+ * TYLE-CONK-027880's, with 34 children of their own -- written while the ids
+ * were crossed and never retracted. Izzo has zero `nfl_snaps` in all 36 and
+ * never played for the Jets; his stored 2022 line is Conklin's real season.
+ * They survive because they HAVE parents, so no orphan sweep can see them:
+ * the contamination that produced the orphans is strictly larger than the
+ * orphans, and a clean orphan count is not evidence of a clean conflation.
+ * The oracle to reach for is a gamelog carrying counting stats with zero snaps
+ * for that (pid, esbid), which finds 45 rows in 2022 and 90 in 2023. Do not
+ * run it on 2024 without a coverage precondition -- `nfl_snaps` holds 2,191
+ * distinct players that season against 2,909 and 2,994 in the two before it,
+ * so it reports 880 rows that are mostly correctly-rostered players the feed
+ * simply missed.
+ *
+ * And do not trust `nfl_play_stats` alone to adjudicate one of these. Game
+ * 2023122800 carries 15 valid rows named "T.Conklin" on NYJ under Izzo's
+ * `gsis_player_id`; the feed has the ids crossed there too. Where a verdict
+ * matters, require play stats and snaps to agree.
  */
 
 // Columns whose presence proves a row records a stat THIS SCRIPT produced.
