@@ -33,6 +33,7 @@ import {
 } from '#libs-server/play-enum-utils.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { NFLFASTR_EXCLUSIVE_FIELDS } from '#libs-server/nflfastr/nflfastr-exclusive-fields.mjs'
+import { build_nflfastr_game_resolver } from '#libs-server/nflfastr/resolve-nflfastr-game.mjs'
 import { add_personnel_counts_to_play_data } from '#libs-server/parse-personnel.mjs'
 
 /**
@@ -729,9 +730,22 @@ const process_play = async ({
   year,
   overwrite_existing,
   dry_mode,
-  overwrite_fields
+  overwrite_fields,
+  resolver
 }) => {
-  const esbid = parseInt(item.old_game_id, 10)
+  // Never parseInt(item.old_game_id) here. nflfastR's old_game_id disagrees with
+  // our esbid on 2021 REG week 15, and six of those disagreements name a real
+  // esbid belonging to a different game -- see resolve-nflfastr-game.mjs.
+  const { esbid, method } = resolver.resolve(item)
+  if (!esbid) {
+    return {
+      matched: false,
+      unresolved_game: true,
+      item,
+      resolve_method: method
+    }
+  }
+
   const formatted_play = format_play(item)
   add_personnel_counts_to_play_data(formatted_play)
   const match_criteria = build_match_criteria(esbid, formatted_play, item)
@@ -848,17 +862,25 @@ const run = async ({
     mapValues: ({ header, index, value }) => (value === 'NA' ? null : value)
   })
 
-  // Filter by esbid if specified
+  // Resolve nflfastR games to our esbids before anything reads a game id. The
+  // resolver is built once per year and reused by the --esbid filter and by
+  // every play, so both agree on what game a feed row belongs to.
+  const resolver = await build_nflfastr_game_resolver({ year })
+  log(`Loaded ${resolver.game_count} nfl_games rows for ${year}`)
+
+  // Filter by esbid if specified. Filtering on old_game_id here is the same
+  // defect as matching on it: for 2021 week 15 it selects a different game's
+  // plays than the one asked for.
   if (esbid) {
     const original_count = data.length
-    data = data.filter((item) => parseInt(item.old_game_id, 10) === esbid)
+    data = data.filter((item) => resolver.resolve(item).esbid === esbid)
     log(
       `Filtered from ${original_count} to ${data.length} plays for esbid ${esbid}`
     )
 
     if (data.length === 0) {
       log(`No plays found for esbid ${esbid}`)
-      return
+      return result
     }
   }
 
@@ -871,6 +893,11 @@ const run = async ({
   const plays_matched = []
   const plays_not_matched = []
   const plays_multiple_matches = []
+  // Per-game tallies. The season-grained match rate cannot see a nine-game
+  // hole -- nine games are ~2% of a season's plays, so 2021 week 15 sat at
+  // 42.5% enrichment while the season oracle read healthy. Match rate has to
+  // be graded at the grain the defect occurs at, which is the game.
+  const per_game = new Map()
   let processed_count = 0
   let total_updates_applied = 0
   let total_conflicts_detected = 0
@@ -883,13 +910,21 @@ const run = async ({
       year,
       overwrite_existing,
       dry_mode,
-      overwrite_fields
+      overwrite_fields,
+      resolver
     })
 
     processed_count++
     if (processed_count % 500 === 0) {
       log(`Processed ${processed_count}/${data.length} plays...`)
     }
+
+    if (!per_game.has(item.game_id)) {
+      per_game.set(item.game_id, { processed: 0, matched: 0 })
+    }
+    const game_tally = per_game.get(item.game_id)
+    game_tally.processed += 1
+    if (play_result.matched) game_tally.matched += 1
 
     if (play_result.matched) {
       plays_matched.push(play_result)
@@ -1027,12 +1062,50 @@ const run = async ({
     log('  No conflicts detected')
   }
 
+  // Game resolution summary
+  log('\n=== Game Resolution Summary ===')
+  log(JSON.stringify(resolver.stats))
+  if (resolver.corrections.length) {
+    log(
+      `Games whose old_game_id disagreed with the matchup: ${resolver.corrections.length}`
+    )
+    for (const correction of resolver.corrections) {
+      log(
+        `  ${correction.feed_game_id}: old_game_id=${correction.feed_old_game_id} -> esbid=${correction.resolved_esbid}${
+          correction.collided_with_esbid
+            ? ` (old_game_id collides with esbid ${correction.collided_with_esbid})`
+            : ''
+        }`
+      )
+    }
+  }
+  if (resolver.refusals.length) {
+    log(`Games the resolver refused: ${resolver.refusals.length}`)
+    for (const refusal of resolver.refusals) {
+      log(`  ${refusal.feed_game_id}: ${refusal.reason}`)
+    }
+  }
+
   // Set result values
   result.plays_processed = data.length
   result.plays_matched = plays_matched.length
   result.plays_updated = total_updates_applied
   result.plays_not_matched = plays_not_matched.length
   result.plays_multiple_matches = plays_multiple_matches.length
+  result.games_processed = per_game.size
+  result.games_matchup_corrected = resolver.corrections.length
+  result.games_refused = resolver.refusals.length
+  result.games_below_floor = [...per_game.entries()]
+    .filter(
+      ([, tally]) =>
+        tally.processed > 0 &&
+        tally.matched / tally.processed < GAME_MATCH_RATE_FLOOR
+    )
+    .map(([game_id, tally]) => ({
+      game_id,
+      matched: tally.matched,
+      processed: tally.processed
+    }))
 
   // Pipe issues to collector if provided
   if (collector) {
@@ -1092,6 +1165,34 @@ const check_match_rate = ({ year, result }) => {
   const match_rate = result.plays_matched / result.plays_processed
   if (match_rate >= MATCH_RATE_FLOOR) return null
   return `year=${year}: plays_matched/plays_processed=${result.plays_matched}/${result.plays_processed}=${match_rate.toFixed(3)} (floor=${MATCH_RATE_FLOOR})`
+}
+
+// Per-game match-rate oracle. The season-grained floor above cannot see this
+// defect class: nine unmatched games out of 285 is ~2% of a season's plays, so
+// 2021 week 15 sat at 42.5% enrichment without ever breaching a season floor.
+// A game that resolves at all should match nearly every play, so the game-grain
+// floor is set well above the per-season tolerance.
+const GAME_MATCH_RATE_FLOOR = 0.75
+
+const check_game_resolution = ({ year, result }) => {
+  if (!result || !result.plays_processed) return null
+
+  const problems = []
+  if (result.games_refused) {
+    problems.push(`${result.games_refused} game(s) unresolvable to an esbid`)
+  }
+  if (result.games_below_floor && result.games_below_floor.length) {
+    const detail = result.games_below_floor
+      .slice(0, 10)
+      .map((game) => `${game.game_id}=${game.matched}/${game.processed}`)
+      .join(', ')
+    problems.push(
+      `${result.games_below_floor.length} game(s) below the per-game match floor (${GAME_MATCH_RATE_FLOOR}): ${detail}`
+    )
+  }
+
+  if (!problems.length) return null
+  return `year=${year}: ${problems.join('; ')}`
 }
 
 const main = async () => {
@@ -1154,6 +1255,11 @@ const main = async () => {
         })
         const shortfall = check_match_rate({ year: import_year, result })
         if (shortfall) match_rate_shortfalls.push(shortfall)
+        const game_shortfall = check_game_resolution({
+          year: import_year,
+          result
+        })
+        if (game_shortfall) match_rate_shortfalls.push(game_shortfall)
       }
     } else {
       // Import single year
@@ -1168,6 +1274,8 @@ const main = async () => {
       })
       const shortfall = check_match_rate({ year, result })
       if (shortfall) match_rate_shortfalls.push(shortfall)
+      const game_shortfall = check_game_resolution({ year, result })
+      if (game_shortfall) match_rate_shortfalls.push(game_shortfall)
     }
     if (result) {
       console.log(
