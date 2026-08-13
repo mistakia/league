@@ -30,12 +30,20 @@ const HOURS_PER_DAY = 24
  *
  * The rule, shared by every cadence:
  *
- *   window(pick_number) = reference advanced by (pick_number - reference_pick - 1) steps
+ *   window(pick_number) = reference advanced by one step per unmade pick between
  *
- * The reference is the last consecutively-made pick's selection time, or the
- * draft start pre-draft (treated as the completion of a notional pick 0). The
- * immediate next unmade pick therefore opens at "now" — the instant the pick
- * before it landed — and each subsequent pick opens one step later.
+ * The reference is the selection time of the last pick MADE before this one, or
+ * the draft start pre-draft (treated as the completion of a notional pick 0).
+ * The immediate next unmade pick therefore opens at "now" — the instant the pick
+ * before it landed — and each further unmade pick ahead of it adds a step.
+ *
+ * Counting unmade picks rather than pick numbers is what keeps the placement
+ * honest once a pick has been taken out of order. A jumped pick is already made,
+ * so it consumes no step, and the picks behind it measure from when that jump
+ * actually landed rather than from the last gap-free pick at the top of the
+ * board — which is a stale anchor the moment anybody jumps. It also absorbs a
+ * board whose pick numbering has holes, which is what a decommissioned team's
+ * removed pick leaves behind.
  *
  * A step is `cadence_interval` units of `cadence_unit`, and every step lands on
  * an hour inside the daily window `[daily_window_start_hour,
@@ -50,16 +58,18 @@ const HOURS_PER_DAY = 24
  * @param {number} [args.cadence_interval=1] - Units of `cadence_unit` between consecutive windows.
  * @param {number} [args.daily_window_start_hour=11] - First hour of the day a window may open (inclusive).
  * @param {number} [args.daily_window_end_hour=16] - Hour of the day windows stop opening (EXCLUSIVE).
- * `last_consecutive_pick.selection_timestamp` is timestamptz as of the
- * 2026-08-07 conformance pass (`draft.selection_timestamp`) and is always
- * DB-sourced, so it is taken as an instant here rather than converted at each
- * caller — the same rule `getDraftDates` states for `last_selection_timestamp`.
+ * `draft_picks[].selection_timestamp` is timestamptz as of the 2026-08-07
+ * conformance pass (`draft.selection_timestamp`) and is always DB-sourced, so it
+ * is taken as an instant here rather than converted at each caller — the same
+ * rule `getDraftDates` states for `last_selection_timestamp`.
  * `draft_start_timestamp` stays epoch seconds because this function does
- * arithmetic on it. Passing epoch seconds for the selection throws rather than
+ * arithmetic on it. Passing epoch seconds for a selection throws rather than
  * silently reading as 1970, which is the failure this convention exists to end.
  *
- * @param {Object} [args.last_consecutive_pick] - `{ pick, selection_timestamp }` of the last
- *   pick made with no gap behind it, the selection being a `Date` or ISO string. Omit pre-draft.
+ * @param {Array} [args.draft_picks] - The WHOLE board, as `{ pick, pid,
+ *   selection_timestamp }` rows in any order, the selection being a `Date` or ISO
+ *   string. A pick counts as made when it carries a `pid`. Omit pre-draft. Passing
+ *   a partial board undercounts the steps and so places the window too early.
  *
  * @returns {import('dayjs').Dayjs} The moment the pick's window opens.
  *
@@ -78,7 +88,7 @@ const HOURS_PER_DAY = 24
  * getDraftWindow({
  *   draft_start_timestamp: 1787371200,
  *   pick_number: 9,
- *   last_consecutive_pick: { pick: 8, selection_timestamp: '2026-08-25T18:40:00Z' }
+ *   draft_picks: [{ pick: 8, pid: 'JOSH-ALLE-000001', selection_timestamp: '2026-08-25T18:40:00Z' }]
  * })
  *
  * @example
@@ -97,7 +107,7 @@ export default function getDraftWindow({
   cadence_interval,
   daily_window_start_hour,
   daily_window_end_hour,
-  last_consecutive_pick
+  draft_picks
 }) {
   const cadence = resolve_cadence({ cadence_unit, cadence_interval })
   const daily_window = resolve_daily_window({
@@ -112,7 +122,7 @@ export default function getDraftWindow({
 
   const { reference_timestamp, step_count } = resolve_reference({
     draft_start_timestamp,
-    last_consecutive_pick,
+    draft_picks,
     pick_number
   })
 
@@ -136,42 +146,54 @@ export default function getDraftWindow({
  * Resolves the timestamp to measure from and how many cadence steps past it the
  * requested pick sits.
  *
- * Mid-draft the reference is the last consecutively-made pick; pre-draft it is
- * the draft start, which stands in for the completion of a notional pick 0.
+ * Mid-draft the reference is the last pick MADE before the requested one, and
+ * the step count is how many picks are still UNMADE between the two; pre-draft,
+ * or with nothing made ahead of it, the reference is the draft start, which
+ * stands in for the completion of a notional pick 0.
+ *
+ * A pick is made when it carries a `pid`, but only a `selection_timestamp` can
+ * anchor the measurement — the two come apart in the client, where the draft
+ * reducer writes the `pid` onto a pick the instant a selection lands and the
+ * timestamp arrives with the next load. Such a pick consumes no step and does
+ * not become the anchor, so the window measures from the previous timestamped
+ * selection until the board refreshes.
  */
 function resolve_reference({
   draft_start_timestamp,
-  last_consecutive_pick,
+  draft_picks,
   pick_number
 }) {
-  if (last_consecutive_pick && last_consecutive_pick.selection_timestamp) {
-    const picks_ahead = pick_number - last_consecutive_pick.pick
+  const preceding_picks = (draft_picks ?? [])
+    .filter((draft_pick) => draft_pick.pick < pick_number)
+    .sort((a, b) => a.pick - b.pick)
 
-    if (picks_ahead > 0) {
-      return {
-        reference_timestamp: timestamptz_to_epoch(
-          last_consecutive_pick.selection_timestamp
-        ),
-        step_count: picks_ahead - 1
-      }
+  // A reverse loop rather than findLastIndex: this module is isomorphic and
+  // reaches the SPA bundle, where preset-env transpiles syntax but leaves a
+  // runtime array method to a polyfill that is not configured here.
+  let reference_index = -1
+  for (let index = preceding_picks.length - 1; index >= 0; index--) {
+    if (preceding_picks[index].selection_timestamp) {
+      reference_index = index
+      break
     }
+  }
 
-    // A pick at or behind the last consecutive pick means the caller's view of
-    // the draft is inconsistent (or the pick is already made). Measuring from
-    // the reference would place the window behind it, so fall back to the
-    // pre-draft calculation.
-    console.warn(
-      '[getDraftWindow] pick_number',
-      pick_number,
-      'is not ahead of last_consecutive_pick',
-      last_consecutive_pick.pick,
-      '- measuring from the draft start instead'
-    )
+  if (reference_index === -1) {
+    return {
+      reference_timestamp: draft_start_timestamp,
+      // With no board at all every preceding pick is unmade by definition, which
+      // is the pre-draft case the bare `pick_number` stands in for.
+      step_count: preceding_picks.length || Math.max(pick_number - 1, 0)
+    }
   }
 
   return {
-    reference_timestamp: draft_start_timestamp,
-    step_count: pick_number - 1
+    reference_timestamp: timestamptz_to_epoch(
+      preceding_picks[reference_index].selection_timestamp
+    ),
+    step_count: preceding_picks
+      .slice(reference_index + 1)
+      .filter((draft_pick) => !draft_pick.pid).length
   }
 }
 

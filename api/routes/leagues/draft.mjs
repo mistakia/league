@@ -1,12 +1,7 @@
 import express from 'express'
 import dayjs from 'dayjs'
 
-import {
-  Roster,
-  isDraftWindowOpen,
-  getDraftDates,
-  get_last_consecutive_pick
-} from '#libs-shared'
+import { Roster, isDraftWindowOpen, getDraftDates } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import {
   current_season,
@@ -597,16 +592,16 @@ router.post('/?', async (req, res) => {
     const isPreviousSelectionMade =
       pick.pick === 1 || Boolean(prev_pick && prev_pick.pid)
 
-    // locate the last consecutive pick going back to the first pick
+    // the whole board, which is what places a window: the reference is the last
+    // pick made before this one and the step count is the unmade picks between
     const draft_picks = await db('draft')
       .where({ lid, season_year: current_season.year })
       .orderBy('pick', 'asc')
-    const last_consecutive_pick = get_last_consecutive_pick(draft_picks)
 
     // if previous selection is not made make, check if teams window has opened
     const isWindowOpen = isDraftWindowOpen({
       ...get_draft_window_config(league),
-      last_consecutive_pick,
+      draft_picks,
       pick_number: pick.pick
     })
 

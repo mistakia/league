@@ -22,7 +22,6 @@ import {
   groupBy,
   fixTeam,
   is_league_post_season_week,
-  get_last_consecutive_pick,
   league_has_starting_position,
   get_reserve_eligibility_from_player_map,
   get_default_trade_slot,
@@ -379,34 +378,49 @@ export const is_free_agent_period = createSelector(
 //   }
 // )
 
+// How many picks past the ones on the clock the rail labels with their window.
+const UPCOMING_PICK_WINDOWS = 2
+
 export const getPicks = createSelector(
   get_draft_state,
   get_current_league,
-  (state) => state.get('app'),
-  (draft, league, app) => {
+  (draft, league) => {
     const { picks } = draft
-    const { teamId } = app
     let previousSelected = true
     let previousActive = true
     let previousNotActive = false
-    const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
+    let upcoming_windows_placed = 0
+    const draft_picks = picks.toJS()
 
     return picks
       .sort((a, b) => a.pick - b.pick)
       .map((p) => {
-        if (p.pid || (p.tid !== teamId && previousNotActive)) {
+        if (p.pid) {
+          return p
+        }
+
+        // A pick carries a draftWindow exactly when the rail should label it:
+        // the picks still on the clock, plus the next UPCOMING_PICK_WINDOWS to
+        // reach it. Past those the window is guesswork — it moves every time
+        // anybody ahead picks early — so the rail says nothing rather than
+        // advertising a time it will not honour.
+        if (
+          previousNotActive &&
+          upcoming_windows_placed >= UPCOMING_PICK_WINDOWS
+        ) {
           return p
         }
 
         if (league.draft_start && league.draft_type) {
           p.draftWindow = getDraftWindow({
             ...get_draft_window_config(league),
-            last_consecutive_pick,
+            draft_picks,
             pick_number: p.pick
           })
         }
 
         if (previousNotActive) {
+          upcoming_windows_placed += 1
           return p
         }
 
@@ -421,6 +435,11 @@ export const getPicks = createSelector(
             ))
 
         previousNotActive = !isActive && previousActive
+        // This pick is the first one off the clock, so it is the first of the
+        // upcoming windows the rail shows.
+        if (previousNotActive) {
+          upcoming_windows_placed += 1
+        }
         previousActive = isActive
         previousSelected = Boolean(p.pid)
 
@@ -488,10 +507,9 @@ export const get_rookie_draft_end = createSelector(
     }
 
     const { picks } = draft
-    const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
     const rookie_draft_end = getDraftWindow({
       ...get_draft_window_config(league),
-      last_consecutive_pick,
+      draft_picks: picks.toJS(),
       pick_number: last_pick.pick + 1
     })
 
@@ -553,11 +571,10 @@ export const get_rookie_draft_next_pick = createSelector(
     const pick = team_picks.filter((p) => p.pick).find((p) => !p.pid)
     if (!pick) return null
 
-    const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
     if (league.draft_start && league.draft_type) {
       pick.draftWindow = getDraftWindow({
         ...get_draft_window_config(league),
-        last_consecutive_pick,
+        draft_picks: picks.toJS(),
         pick_number: pick.pick
       })
     }

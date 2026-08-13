@@ -5,7 +5,6 @@ import { current_season } from '@constants'
 import {
   getDraftWindow,
   getDraftDates,
-  get_last_consecutive_pick,
   is_within_daily_window
 } from '@libs-shared'
 import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
@@ -46,11 +45,10 @@ const map_state_to_props = createSelector(
     app,
     last_pick
   ) => {
-    const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
     const windowEnd = nextPick
       ? getDraftWindow({
           ...get_draft_window_config(league),
-          last_consecutive_pick,
+          draft_picks: picks.toJS(),
           pick_number: nextPick.pick + 1
         })
       : null

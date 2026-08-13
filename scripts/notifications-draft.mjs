@@ -67,23 +67,29 @@ const run = async () => {
 
     if (!frontier) continue // draft complete for this league
 
-    // The window opens the instant the previous pick is made (draft_start for
-    // pick 1), per Article XI Section 8. That timestamp is the true on-clock
+    // The whole board, because it is what places a window: the reference is the
+    // last pick MADE before a given one and the step count is the unmade picks
+    // between, so a pick taken out of order moves the anchor for everything
+    // behind it.
+    const draft_picks = await db('draft')
+      .where({ lid: league.uid, season_year: current_season.year })
+      .orderBy('pick', 'asc')
+
+    // The window opens the instant the preceding pick is made (draft_start when
+    // none is), per Article XI Section 8. That timestamp is the true on-clock
     // time and doubles as the stable, unique idempotency key for this pick.
     // Carried in both units on purpose: getDraftWindow takes the selection as
     // an instant, while the marker key and the clock arithmetic below are epoch
-    // seconds.
-    let on_clock_instant = draft_start
-    if (frontier.pick > 1) {
-      const previous = await db('draft')
-        .where({
-          lid: league.uid,
-          season_year: current_season.year,
-          pick: frontier.pick - 1
-        })
-        .first()
-      on_clock_instant = previous?.selection_timestamp || draft_start
-    }
+    // seconds. Read as the last MADE pick rather than `frontier.pick - 1`, which
+    // names a pick that may be unmade or absent from the board entirely.
+    const preceding_selection = draft_picks
+      .filter(
+        (draft_pick) =>
+          draft_pick.pick < frontier.pick && draft_pick.selection_timestamp
+      )
+      .pop()
+    const on_clock_instant =
+      preceding_selection?.selection_timestamp || draft_start
     const on_clock_at = timestamptz_to_epoch(on_clock_instant)
 
     if (on_clock_at > now) continue // window has not opened yet
@@ -112,10 +118,7 @@ const run = async () => {
     const deadline = getDraftWindow({
       ...get_draft_window_config(league),
       pick_number: frontier.pick + 1,
-      last_consecutive_pick:
-        frontier.pick > 1
-          ? { pick: frontier.pick - 1, selection_timestamp: on_clock_instant }
-          : null
+      draft_picks
     }).unix()
 
     const clock_hours = Math.round(((deadline - on_clock_at) / 3600) * 10) / 10

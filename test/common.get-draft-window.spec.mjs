@@ -8,7 +8,6 @@ import MockDate from 'mockdate'
 
 import { getDraftWindow, getDraftDates, isDraftWindowOpen } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
-import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -47,6 +46,23 @@ const live_2026 = {
 }
 
 const format = (window) => window.format('YYYY-MM-DD HH:mm')
+
+// A board whose picks 1..made_through are all made, the last of them at
+// `last_selection` and each earlier one an hour before it, with the rest unmade.
+// The calculator takes the whole board because a pick's reference is the last
+// selection BEFORE it, not a single precomputed pick.
+const board_made_through = ({ made_through, last_selection, total = 70 }) =>
+  Array.from({ length: total }, (unused, index) => {
+    const pick = index + 1
+    if (pick > made_through) return { pick }
+    return {
+      pick,
+      pid: `PICK-${pick}`,
+      selection_timestamp: last_selection
+        .subtract(made_through - pick, 'hour')
+        .toDate()
+    }
+  })
 
 describe('LIBS-SHARED getDraftWindow', function () {
   describe('hourly cadence, pre-draft', function () {
@@ -246,14 +262,15 @@ describe('LIBS-SHARED getDraftWindow', function () {
     })
   })
 
-  describe('mid-draft, measured from the last consecutive pick', function () {
+  describe('mid-draft, measured from the last selection before the pick', function () {
     // draft.selection_timestamp is timestamptz, so the calculator takes the
     // instant rather than epoch seconds.
-    const last_consecutive_pick = {
-      pick: 29,
-      selection_timestamp: eastern('2026-08-25 14:37').toDate()
-    }
-    const mid_draft = { ...hourly_9_to_22, last_consecutive_pick }
+    const last_selection = eastern('2026-08-25 14:37')
+    const draft_picks = board_made_through({
+      made_through: 29,
+      last_selection
+    })
+    const mid_draft = { ...hourly_9_to_22, draft_picks }
 
     it('the immediate next pick is open on the instant', () => {
       // The team on the clock is on it the moment the pick before them lands.
@@ -276,12 +293,13 @@ describe('LIBS-SHARED getDraftWindow', function () {
     })
 
     it('does not regress to the absolute pick number', () => {
-      // Regression: the hourly path ignored last_consecutive_pick.pick and
-      // advanced by pick_number - 1 hours from midnight of the last pick's day,
-      // so making a pick pushed the next team's window HOURS INTO THE FUTURE
-      // instead of opening it. Deep in the draft the error approached two days.
+      // Regression: the hourly path ignored where the reference sat in the board
+      // and advanced by pick_number - 1 hours from midnight of the last pick's
+      // day, so making a pick pushed the next team's window HOURS INTO THE
+      // FUTURE instead of opening it. Deep in the draft the error approached two
+      // days.
       expect(getDraftWindow({ ...mid_draft, pick_number: 30 }).unix()).to.equal(
-        timestamptz_to_epoch(last_consecutive_pick.selection_timestamp)
+        last_selection.unix()
       )
     })
 
@@ -294,10 +312,13 @@ describe('LIBS-SHARED getDraftWindow', function () {
         getDraftWindow({
           ...hourly_9_to_22,
           pick_number: 30,
-          last_consecutive_pick: {
-            pick: 29,
-            selection_timestamp: eastern('2026-08-25 14:37').unix()
-          }
+          draft_picks: [
+            {
+              pick: 29,
+              pid: 'PICK-29',
+              selection_timestamp: eastern('2026-08-25 14:37').unix()
+            }
+          ]
         })
       ).to.throw(/expected a Date or an ISO string/)
     })
@@ -305,10 +326,10 @@ describe('LIBS-SHARED getDraftWindow', function () {
     it('skips the overnight gap', () => {
       const after_hours = {
         ...hourly_9_to_22,
-        last_consecutive_pick: {
-          pick: 29,
-          selection_timestamp: eastern('2026-08-25 21:30').toDate()
-        }
+        draft_picks: board_made_through({
+          made_through: 29,
+          last_selection: eastern('2026-08-25 21:30')
+        })
       }
       expect(
         format(getDraftWindow({ ...after_hours, pick_number: 30 }))
@@ -327,19 +348,96 @@ describe('LIBS-SHARED getDraftWindow', function () {
             cadence_unit: 'day',
             daily_window_start_hour: 0,
             daily_window_end_hour: 24,
-            last_consecutive_pick
+            draft_picks
           })
         )
       ).to.equal('2026-08-26 14:37')
     })
 
-    it('measures from the draft start when the pick is not ahead', () => {
-      // A pick at or behind the reference means the caller's view of the draft
-      // is inconsistent; measuring from the reference would place the window
-      // behind it.
+    it('an already-made pick measures from the selection before it', () => {
+      // The board makes this total: there is no inconsistent-caller case left to
+      // fall back from, because the reference is derived from the board rather
+      // than handed in and so cannot disagree with it.
       expect(
         format(getDraftWindow({ ...mid_draft, pick_number: 29 }))
-      ).to.equal(format(getDraftWindow({ ...hourly_9_to_22, pick_number: 29 })))
+      ).to.equal('2026-08-25 13:37')
+    })
+
+    it('counts unmade picks, so a pick taken out of order consumes no step', () => {
+      // The live 2026 shape on 8/12: picks 1 and 2 made in sequence, 3 stalled,
+      // then 4 and 5 JUMPED that evening. Anchoring on the last gap-free pick
+      // measured everything behind from pick 2 at 07:56 that morning, so pick 7
+      // landed at 15:00 the next day. The last selection before pick 7 is pick
+      // 5's, and only pick 6 is unmade between them, so pick 7 is one step past
+      // 19:11 — which crosses the 23:00 close and lands at the next open hour.
+      const jumped_board = [
+        {
+          pick: 1,
+          pid: 'P1',
+          selection_timestamp: eastern('2026-08-12 05:35').toDate()
+        },
+        {
+          pick: 2,
+          pid: 'P2',
+          selection_timestamp: eastern('2026-08-12 07:56').toDate()
+        },
+        { pick: 3 },
+        {
+          pick: 4,
+          pid: 'P4',
+          selection_timestamp: eastern('2026-08-12 19:14').toDate()
+        },
+        {
+          pick: 5,
+          pid: 'P5',
+          selection_timestamp: eastern('2026-08-12 19:11').toDate()
+        },
+        { pick: 6 },
+        { pick: 7 },
+        { pick: 8 }
+      ]
+      const jumped = { ...live_2026, draft_picks: jumped_board }
+
+      // Pick 3 is still measured from pick 2 — the jumps are ahead of it.
+      expect(format(getDraftWindow({ ...jumped, pick_number: 3 }))).to.equal(
+        '2026-08-12 11:00'
+      )
+      // Pick 6 is in sequence behind the jumped pick 5, so it is open on the
+      // instant that jump landed rather than at 11:00 the next day.
+      expect(format(getDraftWindow({ ...jumped, pick_number: 6 }))).to.equal(
+        '2026-08-12 19:11'
+      )
+      expect(format(getDraftWindow({ ...jumped, pick_number: 7 }))).to.equal(
+        '2026-08-13 11:00'
+      )
+      expect(format(getDraftWindow({ ...jumped, pick_number: 8 }))).to.equal(
+        '2026-08-13 15:00'
+      )
+    })
+
+    it('absorbs a hole in the pick numbering', () => {
+      // A decommissioned team's pick is removed from the board outright, so the
+      // step count has to come from the rows that are there rather than from
+      // arithmetic on pick numbers.
+      const holed_board = [
+        {
+          pick: 1,
+          pid: 'P1',
+          selection_timestamp: eastern('2026-08-25 14:37').toDate()
+        },
+        // pick 2 belonged to a decommissioned team and is gone
+        { pick: 3 },
+        { pick: 4 }
+      ]
+      expect(
+        format(
+          getDraftWindow({
+            ...hourly_9_to_22,
+            draft_picks: holed_board,
+            pick_number: 4
+          })
+        )
+      ).to.equal('2026-08-25 15:37')
     })
   })
 
@@ -462,15 +560,16 @@ describe('LIBS-SHARED getDraftWindow', function () {
     // not be jumpable again until inside the daily window hours on a later day
     // (the operator's rule: a team on the clock since the previous day cannot
     // be jumped until the next day's window start).
-    const last_consecutive_pick = {
-      pick: 2,
-      selection_timestamp: eastern('2026-08-12 07:56').toDate()
-    }
+    const draft_picks = board_made_through({
+      made_through: 2,
+      last_selection: eastern('2026-08-12 07:56'),
+      total: 8
+    })
     const jump_open_at = (eastern_wall_clock) => {
       MockDate.set(eastern(eastern_wall_clock).toISOString())
       return isDraftWindowOpen({
         ...live_2026,
-        last_consecutive_pick,
+        draft_picks,
         pick_number: 4
       })
     }
@@ -508,15 +607,19 @@ describe('LIBS-SHARED getDraftWindow', function () {
         '2026-08-12 19:00',
         '2026-08-12 21:00'
       ]) {
-        const lc = { pick: 5, selection_timestamp: eastern(ref).toDate() }
+        const board = board_made_through({
+          made_through: 5,
+          last_selection: eastern(ref),
+          total: 10
+        })
         const onclock = getDraftWindow({
           ...live_2026,
-          last_consecutive_pick: lc,
+          draft_picks: board,
           pick_number: 6
         })
         const jumper = getDraftWindow({
           ...live_2026,
-          last_consecutive_pick: lc,
+          draft_picks: board,
           pick_number: 7
         })
         expect(jumper.diff(onclock, 'hour', true)).to.be.at.least(
