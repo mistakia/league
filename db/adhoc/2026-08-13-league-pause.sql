@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-13 against league_production
 --
 -- A league-wide pause: while one is open, no transaction may be written and no
 -- processor runs for that league, by any actor through any transport.
