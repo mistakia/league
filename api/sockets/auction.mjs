@@ -8,6 +8,7 @@ import {
   transaction_types
 } from '#constants'
 import { getRoster, getLeague, sendNotifications } from '#libs-server'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import {
   format_nomination_message,
   format_nomination_complete_message
@@ -29,6 +30,7 @@ export default class Auction {
     this._lid = lid
     this._league = null
     this._paused = true
+    this._league_paused = false
     this._pause_on_team_disconnect = false
     this._locked = false
     this._nomination_timer_expired = false
@@ -119,6 +121,14 @@ export default class Auction {
   }
 
   start() {
+    // A league pause outranks the auction's own resume control: the
+    // commissioner must lift the league pause first, or the timers would
+    // restart and the next bid would be refused anyway.
+    if (this._league_paused) {
+      this.logger('refusing to start auction -- league is paused')
+      return
+    }
+
     if (!this._paused) return
 
     this.logger('starting auction')
@@ -207,6 +217,7 @@ export default class Auction {
   }
 
   async bid(message) {
+    if (await this._refresh_league_pause()) return
     if (this._locked) return
     this._locked = true
 
@@ -241,6 +252,8 @@ export default class Auction {
   }
 
   async nominate(message = {}, { user_id, tid }) {
+    if (await this._refresh_league_pause()) return
+
     const nominating_team_id = this.nominating_team_id
     let { userid, value = 0 } = message
     const { pid } = message
@@ -296,6 +309,8 @@ export default class Auction {
   }
 
   async handle_pass_nomination(message, { user_id, tid }) {
+    if (await this._refresh_league_pause()) return
+
     if (!this._slow_mode) {
       this.logger(`pass nomination rejected - not in slow mode`)
       return
@@ -1107,6 +1122,37 @@ export default class Auction {
       this._paused = false
     }
     this.logger(`slow mode enabled: ${this._slow_mode}`)
+
+    await this._refresh_league_pause()
+  }
+
+  /**
+   * Reads the league-wide pause into its OWN flag.
+   *
+   * `_paused` cannot carry this. Slow mode force-clears `_paused` on every
+   * `_load_league` (three lines above), so a league pause stored there would be
+   * silently dropped the moment slow mode is on -- which is precisely when the
+   * auction runs unattended for days and a pause matters most.
+   *
+   * `_paused` is the auction's own clock; `_league_paused` is the league's. The
+   * auction is additionally driven into its own paused state here so the timers
+   * stop and every connected client sees AUCTION_PAUSED, but the two flags stay
+   * separate because only one of them survives slow mode.
+   *
+   * Re-read rather than cached at the three write paths below: the commissioner
+   * pauses over HTTP, in a different process, so a flag set at connect time
+   * would go stale exactly when it matters.
+   */
+  async _refresh_league_pause() {
+    const open_pause = await get_open_league_pause({ league_id: this._lid })
+    this._league_paused = Boolean(open_pause)
+
+    if (this._league_paused) {
+      this.logger('league is paused -- refusing auction writes')
+      this.pause()
+    }
+
+    return this._league_paused
   }
 
   async _calculate_team_capacities() {

@@ -2,6 +2,7 @@ import debug from 'debug'
 import db from '#db'
 import { SyncOrchestrator } from '#libs-server/external-fantasy-leagues/index.mjs'
 import { decrypt_credentials } from '#libs-server/external-fantasy-leagues/utils/credential-encryption.mjs'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 
 const log = debug('external:sync-queue')
 
@@ -260,6 +261,28 @@ class ExternalLeagueSyncQueue {
 
       if (!job) {
         log('Job not found after selection, skipping', { job_id })
+        return
+      }
+
+      // A queued import writes transactions long after its route returned 202,
+      // so the HTTP guard cannot reach it -- the predicate has to live here, at
+      // the worker's per-league entry.
+      //
+      // The job is returned to 'queued' rather than failed or cancelled:
+      // get_next_queued_job() has already marked it running, and a hold that
+      // discarded the job would make the pause destroy queued work. It is
+      // picked up again on the next poll after the pause lifts.
+      const open_pause = await get_open_league_pause({ league_id: job.lid })
+      if (open_pause) {
+        log('League is paused, returning import job to the queue', {
+          job_id,
+          lid: job.lid
+        })
+        await db('external_league_import_jobs').where({ job_id }).update({
+          status: 'queued',
+          started_at: null,
+          updated_at: new Date()
+        })
         return
       }
 
