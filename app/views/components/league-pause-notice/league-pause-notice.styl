@@ -1,0 +1,7 @@
+// A fixed in-page notice, which is exactly what $z_page_chrome names. A bare
+// number here would fail `yarn check:z-index-scale`, and the point of the scale
+// is that the whole stacking order is reviewable in one file.
+.league-pause-notice
+  position sticky
+  top 0
+  z-index $z_page_chrome

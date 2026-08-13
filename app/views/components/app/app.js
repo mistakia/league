@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import hotkeys from 'hotkeys-js'
 
 import Menu from '@components/menu'
+import LeaguePauseNotice from '@components/league-pause-notice'
 import Routes from '@views/routes'
 import Loading from '@components/loading'
 import ContextMenu from '@components/context-menu'
@@ -65,6 +66,12 @@ export default function App({
   return (
     <main className={classNames.join(' ')}>
       <Menu {...{ menu_open, set_menu_open }} />
+      {/* A sibling of <Routes /> rather than inside the league routes: this is
+          the only every-route surface, since the parent <Route
+          path='/leagues/:lid'> has no element of its own. A pause blocks every
+          write in the league, so a member who navigates away must not lose the
+          explanation for why nothing lands. */}
+      <LeaguePauseNotice />
       <Suspense fallback={<Loading loading />}>
         <Routes />
       </Suspense>

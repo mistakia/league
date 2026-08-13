@@ -494,7 +494,9 @@ describe('LIBS-SHARED getDraftWindow', function () {
         cadence_unit: 'hour',
         cadence_interval: 4,
         daily_window_start_hour: 11,
-        daily_window_end_hour: 23
+        daily_window_end_hour: 23,
+        // A season row with no attached pause history maps to no credit.
+        draft_pause_periods: []
       })
     })
 
@@ -627,5 +629,321 @@ describe('LIBS-SHARED getDraftWindow', function () {
         )
       }
     })
+  })
+
+  describe('league pause credit', function () {
+    const pause = (paused_at, resumed_at = null) => ({
+      paused_at: eastern(paused_at).toISOString(),
+      resumed_at: resumed_at ? eastern(resumed_at).toISOString() : null
+    })
+
+    // A twelve-open-hour pause covering the whole of Tuesday's band.
+    const tuesday_pause = [pause('2026-08-11 11:00', '2026-08-11 23:00')]
+
+    const window_for = ({ pick_number, draft_picks, periods, until }) =>
+      getDraftWindow({
+        ...live_2026,
+        draft_picks,
+        pick_number,
+        draft_pause_periods: periods,
+        until: until ? eastern(until) : undefined
+      })
+
+    it('places a window unchanged when there are no pauses', () => {
+      const draft_picks = board_made_through({
+        made_through: 5,
+        last_selection: eastern('2026-08-12 14:00'),
+        total: 10
+      })
+
+      expect(
+        format(window_for({ pick_number: 6, draft_picks, periods: [] }))
+      ).to.equal(
+        format(getDraftWindow({ ...live_2026, draft_picks, pick_number: 6 }))
+      )
+    })
+
+    describe('the compounding fixture', function () {
+      // The case the whole clipped design turns on. A scalar credit measured
+      // from `draft_start` is added to a reference that already POSTDATES the
+      // pause, so every pick after a resume is charged the full pause again —
+      // and because each over-late window delays the selection anchoring the
+      // pick behind it, the error compounds down the board.
+      it('does not charge a pick whose reference postdates the pause', () => {
+        const draft_picks = board_made_through({
+          made_through: 5,
+          last_selection: eastern('2026-08-12 14:00'),
+          total: 10
+        })
+
+        // Under a from-draft_start scalar this would be Thu 14:00.
+        expect(
+          format(
+            window_for({
+              pick_number: 6,
+              draft_picks,
+              periods: tuesday_pause,
+              until: '2026-08-12 15:00'
+            })
+          )
+        ).to.equal('2026-08-12 14:00')
+      })
+
+      it('does not charge the SECOND pick after the resume either', () => {
+        // The distinguishing input: a single-pick fixture cannot tell a clipped
+        // credit from an unclipped one.
+        const draft_picks = board_made_through({
+          made_through: 6,
+          last_selection: eastern('2026-08-13 15:00'),
+          total: 10
+        })
+
+        // Under a from-draft_start scalar this would be Fri 15:00.
+        expect(
+          format(
+            window_for({
+              pick_number: 7,
+              draft_picks,
+              periods: tuesday_pause,
+              until: '2026-08-13 16:00'
+            })
+          )
+        ).to.equal('2026-08-13 15:00')
+      })
+    })
+
+    describe('a pause the pick actually waited through', function () {
+      it('shifts the window by the pause open time', () => {
+        const draft_picks = board_made_through({
+          made_through: 5,
+          last_selection: eastern('2026-08-11 09:00'),
+          total: 10
+        })
+
+        // Reference 09:00 snaps to the band at 11:00; the pause then runs the
+        // whole band, so the window moves a full band forward to Wed 11:00.
+        expect(
+          format(
+            window_for({
+              pick_number: 6,
+              draft_picks,
+              periods: tuesday_pause,
+              until: '2026-08-12 12:00'
+            })
+          )
+        ).to.equal('2026-08-12 11:00')
+      })
+
+      it('credits only the portion of the pause after the reference', () => {
+        const draft_picks = board_made_through({
+          made_through: 5,
+          last_selection: eastern('2026-08-11 15:00'),
+          total: 10
+        })
+
+        // Reference Tue 15:00, pause runs to Tue 23:00 — eight open hours. The
+        // window moves from Tue 15:00 to Wed 11:00 (eight open hours later).
+        expect(
+          format(
+            window_for({
+              pick_number: 6,
+              draft_picks,
+              periods: tuesday_pause,
+              until: '2026-08-12 12:00'
+            })
+          )
+        ).to.equal('2026-08-12 11:00')
+      })
+    })
+
+    describe('an open pause', function () {
+      // A pause with a null `resumed_at` is measured to the caller's now, which
+      // is what holds a pick's remaining time still instead of letting it tick
+      // down while nobody is allowed to draft.
+      it('freezes a pick clock for the duration of the pause', () => {
+        const draft_picks = board_made_through({
+          made_through: 1,
+          last_selection: eastern('2026-08-12 11:30'),
+          total: 10
+        })
+        const open_pause = [pause('2026-08-12 12:00')]
+
+        const remaining_at = (now) => {
+          const window = window_for({
+            pick_number: 2,
+            draft_picks,
+            periods: open_pause,
+            until: now
+          })
+          return window
+            .add(live_2026.cadence_interval, 'hour')
+            .diff(eastern(now), 'minute')
+        }
+
+        expect(remaining_at('2026-08-12 12:00')).to.equal(210)
+        expect(remaining_at('2026-08-12 14:00')).to.equal(210)
+        expect(remaining_at('2026-08-12 18:00')).to.equal(210)
+        expect(remaining_at('2026-08-13 12:00')).to.equal(210)
+      })
+    })
+
+    describe('a day cadence', function () {
+      it('is not credited, since a day step is not open time', () => {
+        const draft_picks = board_made_through({
+          made_through: 1,
+          last_selection: eastern('2026-08-11 14:00'),
+          total: 10
+        })
+        const day_config = { ...live_2026, cadence_unit: 'day' }
+
+        const uncredited = getDraftWindow({
+          ...day_config,
+          draft_picks,
+          pick_number: 2
+        })
+        const credited = getDraftWindow({
+          ...day_config,
+          draft_picks,
+          pick_number: 2,
+          draft_pause_periods: tuesday_pause,
+          until: eastern('2026-08-14 12:00')
+        })
+
+        expect(format(credited)).to.equal(format(uncredited))
+      })
+    })
+
+    describe('population check: minute preservation', function () {
+      // A single-anchor fixture cannot distinguish a minute-preserving advance
+      // from an hour-granular one, which is how the first draft of this design
+      // carried a 59-minute defect. Sweep every anchor minute.
+      it('preserves the anchor minutes at all 60 anchor minutes', () => {
+        const band_pause = [pause('2026-08-12 11:00', '2026-08-12 23:00')]
+
+        for (let minute = 0; minute < 60; minute++) {
+          const last_selection = eastern(
+            `2026-08-12 10:${String(minute).padStart(2, '0')}`
+          )
+          const draft_picks = board_made_through({
+            made_through: 2,
+            last_selection,
+            total: 10
+          })
+
+          const uncredited = getDraftWindow({
+            ...live_2026,
+            draft_picks,
+            pick_number: 4
+          })
+          const credited = getDraftWindow({
+            ...live_2026,
+            draft_picks,
+            pick_number: 4,
+            draft_pause_periods: band_pause,
+            until: eastern('2026-08-13 12:00')
+          })
+
+          expect(
+            credited.minute(),
+            `anchor minute ${minute} lost its minutes`
+          ).to.equal(uncredited.minute())
+        }
+      })
+
+      it('applies the credit AFTER the cadence steps, not to the reference', () => {
+        // Applying the credit to the reference and stepping afterwards re-feeds
+        // the credited anchor through the hour-granular step walker, which
+        // snaps to the top of the hour whenever a step crosses the overnight
+        // gap — truncating exactly the minutes the seconds credit preserves.
+        // Reference 11:59 with one step and an eight-open-hour credit is the
+        // worst measured case: 59 minutes.
+        const draft_picks = board_made_through({
+          made_through: 1,
+          last_selection: eastern('2026-08-12 11:59'),
+          total: 10
+        })
+
+        const credited = getDraftWindow({
+          ...live_2026,
+          draft_picks,
+          pick_number: 3,
+          draft_pause_periods: [pause('2026-08-12 12:00', '2026-08-12 20:00')],
+          until: eastern('2026-08-13 12:00')
+        })
+
+        expect(credited.minute()).to.equal(59)
+      })
+    })
+
+    describe('population check: the clip across a whole draft', function () {
+      // A single-pick fixture cannot distinguish a clipped credit from an
+      // unclipped one. Walk a run of picks made after a resume and assert each
+      // window equals the unpaused schedule — the pause is wholly before every
+      // reference, so it must be credited exactly zero times, not once per pick.
+      it('charges a pause exactly once, never once per pick', () => {
+        for (let made_through = 3; made_through <= 12; made_through++) {
+          const last_selection = eastern('2026-08-12 12:00').add(
+            made_through,
+            'hour'
+          )
+          const draft_picks = board_made_through({
+            made_through,
+            last_selection,
+            total: 20
+          })
+
+          const unpaused = getDraftWindow({
+            ...live_2026,
+            draft_picks,
+            pick_number: made_through + 1
+          })
+          const paused = getDraftWindow({
+            ...live_2026,
+            draft_picks,
+            pick_number: made_through + 1,
+            draft_pause_periods: tuesday_pause,
+            until: last_selection.add(1, 'hour')
+          })
+
+          expect(
+            format(paused),
+            `pick ${made_through + 1} was charged for a pause it never waited through`
+          ).to.equal(format(unpaused))
+        }
+      })
+    })
+  })
+})
+
+describe('LIBS-SHARED get_draft_window_config pause periods', function () {
+  it('passes the pause intervals through to the calculator', () => {
+    const config = get_draft_window_config({
+      draft_start: eastern('2026-08-12 00:00').toDate(),
+      draft_type: 'hour',
+      draft_pick_interval: 4,
+      draft_hour_min: 11,
+      draft_hour_max: 23,
+      draft_pause_periods: [
+        { paused_at: '2026-08-11T15:00:00.000Z', resumed_at: null }
+      ]
+    })
+
+    expect(config.draft_pause_periods).to.deep.equal([
+      { paused_at: '2026-08-11T15:00:00.000Z', resumed_at: null }
+    ])
+  })
+
+  it('yields an empty array when the league carries no pause field', () => {
+    // A call site whose league lacks the field must credit nothing rather than
+    // throw — this is the shape every unpaused league has.
+    const config = get_draft_window_config({
+      draft_start: eastern('2026-08-12 00:00').toDate(),
+      draft_type: 'hour',
+      draft_pick_interval: 4,
+      draft_hour_min: 11,
+      draft_hour_max: 23
+    })
+
+    expect(config.draft_pause_periods).to.deep.equal([])
   })
 })

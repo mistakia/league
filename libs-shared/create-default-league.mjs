@@ -64,6 +64,12 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     receiving_first_downs: 0.0,
     is_excluding_quarterback_kneels: false,
     draft_start: null,
+    // A league that has never been paused carries no open pause and no
+    // intervals. Declared rather than left absent so every consumer of a
+    // default league sees the same shape a real one has -- an absent
+    // `draft_pause_periods` credits nothing silently.
+    paused_at: null,
+    draft_pause_periods: [],
     free_agency_live_auction_start: null,
     min_bid: 1,
     tddate: 1606626000,
