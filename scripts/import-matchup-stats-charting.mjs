@@ -117,7 +117,7 @@ function map_matchup_to_db_fields(matchup) {
 
   // Map receiving matchup fields
   if (matchup.receivingRoutesRun != null)
-    result.receiving_routes_run = matchup.receivingRoutesRun
+    result.receiving_routes = matchup.receivingRoutesRun
   if (matchup.receivingTargets != null)
     result.receiving_targets = matchup.receivingTargets
   if (matchup.receivingReceptions != null)
@@ -133,7 +133,7 @@ function map_matchup_to_db_fields(matchup) {
   if (matchup.receivingCatchRate != null)
     result.receiving_catch_rate = to_fraction(matchup.receivingCatchRate)
   if (matchup.receivingYardsPerRouteRun != null)
-    result.receiving_yards_per_route_run = matchup.receivingYardsPerRouteRun
+    result.receiving_yards_per_route = matchup.receivingYardsPerRouteRun
   if (matchup.receivingEpa != null) result.receiving_epa = matchup.receivingEpa
 
   // Map defense fields
