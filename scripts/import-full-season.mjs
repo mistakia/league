@@ -1212,8 +1212,14 @@ const import_full_season = async ({
           await import_plays_charting({ year, collector })
           await wait(DELAYS.BETWEEN_SCRIPTS)
 
-          // 3. Import matchup stats
-          await import_matchup_stats_charting({ year, collector })
+          // 3. Import matchup stats. The import skips games that already have
+          // matchup rows, so a re-run of a season costs nothing; --ignore-cache
+          // is what asks for those games to be fetched again.
+          await import_matchup_stats_charting({
+            year,
+            collector,
+            force: ignore_cache
+          })
         } catch (error) {
           collector.add_error(error, {
             script: 'charting_data_imports',

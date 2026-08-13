@@ -266,6 +266,27 @@ JOB_PROJECT=league
 
 
 
+# Charting Matchup Stats
+
+## sumersports WR-vs-CB and blocker-vs-rusher matchup charting, one row per
+## offense/defense player pair per game. Nothing scheduled this until 2026-08-13,
+## so the table held only the 13 games of the 2025 postseason -- someone had run
+## it POST-scoped by hand in April and nothing ever ran it again.
+##
+## The line passes no --year and no --seas_type on purpose: the script defaults
+## to current_season.year and imports only games it does not already have rows
+## for, so a normal in-season run fetches that week's ~16 games in a few minutes
+## and a week missed for any reason is picked up by the next run. That is also
+## why the cadence can be weekly without a backlog accumulating. Charting lands
+## a couple of days after each game, hence Wednesday rather than Monday.
+##
+## Re-importing a game already covered needs --force; the default skip is what
+## keeps this from re-fetching all 272 games of a season every week.
+##
+## At 03:50 on Wednesday in January, February, and every month from September
+## through December.
+50 3 * 1,2,9-12 3 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-matchup-stats-charting.mjs >> /var/log/league/league-import-matchup-stats-charting.log 2>&1
+
 # Betting Markets
 
 ## Every 20 minutes - Player hit rates calculation

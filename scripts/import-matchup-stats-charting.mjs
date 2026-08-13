@@ -9,10 +9,36 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import { ChartingDataClient } from '#libs-server/charting-data/index.mjs'
 import { match_charting_player } from '#libs-server/charting-data/player-matching.mjs'
 import { preload_active_players } from '#libs-server/player-cache.mjs'
+import grade_matchup_import_run from '#libs-server/charting-data/grade-matchup-import-run.mjs'
 
 const log = debug('import-matchup-stats-charting')
 
-async function get_games_for_import({ year, week, esbid, seas_type }) {
+// A debug.enable at module scope REPLACES the enabled namespace set for the
+// whole process, and ESM evaluates imports before the importing module's body,
+// so an unguarded call here would clobber whatever an entry point set. Guarding
+// on DEBUG makes an explicit environment value authoritative and leaves this
+// list as the default for a bare CLI run. Deferring it into main() instead is
+// the documented way to silence the script entirely -- a logger constructed at
+// module scope is not reliably re-enabled afterwards -- which is why every
+// outcome line below goes through console.log rather than this logger.
+if (!process.env.DEBUG) {
+  debug.enable(
+    'import-matchup-stats-charting,charting-data,charting-data:player-matching'
+  )
+}
+
+// Charting data only exists once a game has been played, and a game still in
+// progress is charted partially or not at all. Selecting one would count as a
+// failed game against the oracle, so the window excludes anything that has not
+// had time to finish.
+const GAME_COMPLETION_BUFFER_HOURS = 6
+
+// Returns the games matching the scope and, separately, the subset still
+// needing an import. A scheduled run repeats the same scope every week, so
+// re-fetching games already covered would cost 272 vendor requests to rewrite
+// rows that are already there; skipping them also makes the job self-healing,
+// since a week missed for any reason is picked up by the next run.
+async function get_games_for_import({ year, week, esbid, seas_type, force }) {
   const query = db('nfl_games')
     .select(
       'esbid',
@@ -24,6 +50,11 @@ async function get_games_for_import({ year, week, esbid, seas_type }) {
       'away_nfl_team'
     )
     .whereNotNull('shield_game_id')
+    .where(
+      'kickoff_at',
+      '<',
+      db.raw(`now() - interval '${GAME_COMPLETION_BUFFER_HOURS} hours'`)
+    )
 
   if (esbid) {
     query.where('esbid', esbid)
@@ -38,7 +69,26 @@ async function get_games_for_import({ year, week, esbid, seas_type }) {
   }
 
   query.orderBy(['season_year', 'week', 'esbid'])
-  return query
+  const games_selected = await query
+
+  if (force || games_selected.length === 0) {
+    return { games_selected, games_to_process: games_selected }
+  }
+
+  const covered_rows = await db('nfl_matchup_stats')
+    .distinct('esbid')
+    .whereIn(
+      'esbid',
+      games_selected.map((game) => game.esbid)
+    )
+  const covered_esbids = new Set(covered_rows.map((row) => row.esbid))
+
+  return {
+    games_selected,
+    games_to_process: games_selected.filter(
+      (game) => !covered_esbids.has(game.esbid)
+    )
+  }
 }
 
 function map_matchup_to_db_fields(matchup) {
@@ -187,22 +237,38 @@ async function process_game({ game, client, stats, dry = false }) {
   }
 
   if (!dry && rows_to_insert.length > 0) {
-    for (let i = 0; i < rows_to_insert.length; i += BATCH_SIZE) {
-      const batch = rows_to_insert.slice(i, i + BATCH_SIZE)
-      await db('nfl_matchup_stats')
-        .insert(batch)
-        .onConflict([
-          'esbid',
-          'offense_player_id',
-          'defense_player_id',
-          'matchup_type'
-        ])
-        .merge()
+    try {
+      for (let i = 0; i < rows_to_insert.length; i += BATCH_SIZE) {
+        const batch = rows_to_insert.slice(i, i + BATCH_SIZE)
+        await db('nfl_matchup_stats')
+          .insert(batch)
+          .onConflict([
+            'esbid',
+            'offense_player_id',
+            'defense_player_id',
+            'matchup_type'
+          ])
+          .merge()
+      }
+    } catch (error) {
+      // One unwritable row used to abort the whole remaining run: this insert
+      // sat outside the fetch try, so the earliest recorded run of this job
+      // died mid-season on `numeric field overflow` and every later game went
+      // unimported. Losing one game is the smaller failure, and the oracle
+      // fails the run once enough games are lost.
+      console.error(`game ${esbid}: insert failed -- ${error.message}`)
+      stats.games_failed += 1
+      return
     }
   }
 
   stats.games_processed += 1
   stats.total_matchups_inserted += rows_to_insert.length
+  if (rows_to_insert.length > 0) {
+    stats.games_with_rows += 1
+  } else {
+    stats.games_empty += 1
+  }
 
   log(
     `game ${esbid}: ${rows_to_insert.length}/${matchup_data.length} matchups processed`
@@ -218,11 +284,12 @@ export async function import_matchup_stats_charting({
   use_proxy = true,
   request_delay = 3000,
   seas_type = null,
+  force = false,
   collector = null
 } = {}) {
   console.time('import-matchup-stats-charting')
-  log(
-    `starting charting matchup stats import: year=${year} week=${week || 'all'} esbid=${esbid || 'all'} dry=${dry}`
+  console.log(
+    `starting charting matchup stats import: year=${year} week=${week || 'all'} esbid=${esbid || 'all'} dry=${dry} force=${force}`
   )
 
   const client = new ChartingDataClient({
@@ -234,34 +301,42 @@ export async function import_matchup_stats_charting({
   // Preload player cache for matching
   await preload_active_players({ all_players: true })
 
-  const games = await get_games_for_import({ year, week, esbid, seas_type })
-  log(`found ${games.length} games to process`)
-
-  if (games.length === 0) {
-    console.timeEnd('import-matchup-stats-charting')
-    return { games_processed: 0 }
-  }
+  const { games_selected, games_to_process } = await get_games_for_import({
+    year,
+    week,
+    esbid,
+    seas_type,
+    force
+  })
+  console.log(
+    `selected ${games_selected.length} played game(s) in scope, ${games_to_process.length} needing import`
+  )
 
   const stats = {
+    games_selected: games_selected.length,
+    games_attempted: games_to_process.length,
     games_processed: 0,
+    games_with_rows: 0,
     games_failed: 0,
     games_empty: 0,
     total_matchups_inserted: 0,
     players_unmatched: 0
   }
 
-  for (const game of games) {
+  for (const game of games_to_process) {
     await process_game({ game, client, stats, dry })
   }
 
   console.timeEnd('import-matchup-stats-charting')
 
-  log('--- Import Summary ---')
-  log(`games processed: ${stats.games_processed}`)
-  log(`games failed: ${stats.games_failed}`)
-  log(`games empty: ${stats.games_empty}`)
-  log(`matchups inserted: ${stats.total_matchups_inserted}`)
-  log(`players unmatched: ${stats.players_unmatched}`)
+  // The oracle lives here rather than in main() so every caller is graded --
+  // import-full-season.mjs runs this import too, and a stage that idles there
+  // is as invisible as one that idles under cron.
+  const grade = grade_matchup_import_run(stats)
+  console.log(grade.summary)
+  if (!grade.passed) {
+    throw new Error(grade.summary)
+  }
 
   return stats
 }
@@ -306,11 +381,12 @@ const main = async () => {
         type: 'boolean',
         description: 'Disable proxy usage',
         default: false
+      })
+      .option('force', {
+        type: 'boolean',
+        description: 'Re-import games that already have matchup rows',
+        default: false
       }).argv
-
-    debug.enable(
-      'import-matchup-stats-charting,charting-data,charting-data:player-matching'
-    )
 
     await import_matchup_stats_charting({
       year: argv.year,
@@ -320,11 +396,12 @@ const main = async () => {
       proxy_pool: argv.proxy_pool,
       use_proxy: !argv.no_proxy,
       request_delay: argv.request_delay,
-      seas_type: argv.seas_type
+      seas_type: argv.seas_type,
+      force: argv.force
     })
   } catch (err) {
     error = err
-    console.log(error)
+    console.error(error)
   }
 
   await report_job({
@@ -332,7 +409,11 @@ const main = async () => {
     error
   })
 
-  process.exit()
+  // Carry the outcome in the exit code as well as the ledger. A bare
+  // process.exit() is 0, so a failed run reported as a failure to the runs
+  // primitive still told the shell -- and any wrapper reading it -- that it
+  // succeeded.
+  process.exit(error ? 1 : 0)
 }
 
 if (is_main(import.meta.url)) {
