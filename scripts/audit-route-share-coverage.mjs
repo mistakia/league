@@ -63,8 +63,8 @@ const MIN_GRADED_WEEKS = 400
 // the entry in place would have suppressed a genuine regression there forever.
 const KNOWN_COVERAGE_GAPS = []
 
-const is_known_gap = ({ season_year, week, season_type }) =>
-  KNOWN_COVERAGE_GAPS.some(
+const is_known_gap = ({ known_gaps, season_year, week, season_type }) =>
+  known_gaps.some(
     (gap) =>
       gap.season_year === season_year &&
       gap.week === week &&
@@ -99,8 +99,17 @@ const check_unfilled_route_share = async () => {
  * Grade per-week enrichment rows against the floor. Pure, and exported so the
  * classification can be specced without a database -- the query below supplies
  * the rows and nothing else decides a verdict.
+ *
+ * `known_gaps` is injected rather than read from the module constant so the
+ * exclusion BEHAVIOR stays specced when the roster is empty, which is its
+ * healthy steady state. Coupling those specs to the live roster made emptying
+ * it on repair (98ee04c1f) turn the suite red on a commit that changed data,
+ * not behavior.
  */
-export const classify_week_coverage = ({ rows }) => {
+export const classify_week_coverage = ({
+  rows,
+  known_gaps = KNOWN_COVERAGE_GAPS
+}) => {
   const graded = rows
     .map((row) => ({
       season_year: row.season_year,
@@ -116,8 +125,12 @@ export const classify_week_coverage = ({ rows }) => {
 
   return {
     weeks_graded: graded.length,
-    below_floor: below_floor.filter((row) => !is_known_gap(row)),
-    known_gaps_below_floor: below_floor.filter(is_known_gap)
+    below_floor: below_floor.filter(
+      (row) => !is_known_gap({ ...row, known_gaps })
+    ),
+    known_gaps_below_floor: below_floor.filter((row) =>
+      is_known_gap({ ...row, known_gaps })
+    )
   }
 }
 

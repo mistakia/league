@@ -54,8 +54,16 @@ describe('SCRIPTS audit-route-share-coverage', function () {
     expect(result.below_floor).to.have.lengthOf(0)
   })
 
-  it('excludes the recorded known gap and counts it separately', () => {
+  // The known-gap roster is injected here rather than taken from the script's
+  // own constant, which is EMPTY in its healthy state -- every entry gets
+  // removed as its gap is repaired. Specced against the live roster, these two
+  // graded whether a gap happens to be recorded today; injected, they grade the
+  // exclusion behavior, which has to keep working for the next entry.
+  const known_gaps = [{ season_year: 2021, week: 15, season_type: 'REG' }]
+
+  it('excludes a registered known gap and counts it separately', () => {
     const result = classify_week_coverage({
+      known_gaps,
       rows: [
         week({
           season_year: 2021,
@@ -73,6 +81,7 @@ describe('SCRIPTS audit-route-share-coverage', function () {
 
   it('does not exclude a different week of the known gap season', () => {
     const result = classify_week_coverage({
+      known_gaps,
       rows: [
         week({
           season_year: 2021,
@@ -85,6 +94,24 @@ describe('SCRIPTS audit-route-share-coverage', function () {
     })
 
     expect(result.below_floor).to.have.lengthOf(1)
+  })
+
+  it('excludes nothing when the roster is empty, its repaired state', () => {
+    const result = classify_week_coverage({
+      known_gaps: [],
+      rows: [
+        week({
+          season_year: 2021,
+          week: 15,
+          season_type: 'REG',
+          plays: 2846,
+          enriched_plays: 1210
+        })
+      ]
+    })
+
+    expect(result.below_floor).to.have.lengthOf(1)
+    expect(result.known_gaps_below_floor).to.have.lengthOf(0)
   })
 
   it('drops a week too small to grade rather than reporting it', () => {
