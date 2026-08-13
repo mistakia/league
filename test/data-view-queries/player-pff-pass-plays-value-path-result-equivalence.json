@@ -1,0 +1,24 @@
+{
+  "name": "player_pff_pass_plays and player_pff_routes emit distinct non-blank cells under their own payload keys (executed-result parity)",
+  "description": "Seed one player with a PFF 2023 seasonlog carrying pass_plays=612 and routes=451, then request both column ids. The executed result must carry pff_pass_plays_0=612 and pff_routes_0=451 -- the payload keys the frontend fields read (player_value_path pff_pass_plays / pff_routes). A blank cell is the failure this pins: the server aliases the result column as the physical column name, so a select_as that drifts from the field's player_value_path renders an empty cell for a value the API returned correctly. The two values are deliberately different so a repoint of either id at the other's column is red rather than silently equal.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      { "column_id": "player_pff_pass_plays", "params": { "year": [2023] } },
+      { "column_id": "player_pff_routes", "params": { "year": [2023] } }
+    ],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.first_name, player.last_name, \"ta90cad343257940bfecf8a1ded1f3615\".\"pass_plays\" AS \"pff_pass_plays_0\", \"ta90cad343257940bfecf8a1ded1f3615\".\"routes\" AS \"pff_routes_0\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"pff_player_seasonlogs\" as \"ta90cad343257940bfecf8a1ded1f3615\" on \"ta90cad343257940bfecf8a1ded1f3615\".\"pid\" = \"player\".\"pid\" and \"ta90cad343257940bfecf8a1ded1f3615\".\"season_year\" = 2023 where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"ta90cad343257940bfecf8a1ded1f3615\".\"pass_plays\", \"ta90cad343257940bfecf8a1ded1f3615\".\"routes\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-PFFP-000913', 'Test', 'Pffp', 'T.Pffp', 'Test Pffp', 'MLB', 'MLB', '2000-01-01', 2020)",
+      "INSERT INTO pff_player_seasonlogs (pid, season_year, pass_plays, routes) VALUES ('TEST-PFFP-000913', 2023, 612, 451)"
+    ],
+    "expected_rows": [{ "pff_pass_plays_0": 612, "pff_routes_0": 451 }],
+    "compare_columns": ["pff_pass_plays_0", "pff_routes_0"]
+  },
+  "tags": ["pff", "pass_plays", "routes", "value-path", "result-equivalence"]
+}
