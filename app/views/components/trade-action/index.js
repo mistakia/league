@@ -26,8 +26,7 @@ const map_state_to_props = createSelector(
     isValid,
     isProposer: trade.propose_tid === app.teamId,
     is_commish,
-    veto_error: trade_state.vetoError,
-    approve_error: trade_state.approveError
+    action_error: trade_state.action_error
   })
 )
 

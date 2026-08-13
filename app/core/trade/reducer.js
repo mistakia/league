@@ -19,8 +19,7 @@ const initialState = new Record({
   proposingTeamSlots: new Map(), // Map of pid -> slot for players proposing team receives
   acceptingTeamSlots: new Map(), // Map of pid -> slot for players accepting team receives
   validationErrors: new Map(), // Map of team -> slot type -> error message
-  vetoError: null, // the server's reason for refusing the last veto
-  approveError: null // the server's reason for refusing the last approval
+  action_error: null // the server's reason for refusing the last veto or approval
 })
 
 // The failed action carries `err.toString()`, which prefixes the server's
@@ -85,22 +84,19 @@ export function trade_reducer(state = initialState(), { payload, type }) {
       return state.merge({
         selectedTradeId: payload.data.uid,
         items: state.items.set(payload.data.uid, create_trade(payload.data)),
-        vetoError: null,
-        approveError: null
+        action_error: null
       })
 
-    // Either action starting clears BOTH errors: the two Alerts render side by
-    // side with nothing tying either to its button, so leaving the other one up
-    // reads as a refusal of the action now in flight.
+    // Either action starting clears the error: nothing ties the message to a
+    // button, so leaving a refusal up reads as the action now in flight having
+    // failed.
     case trade_actions.POST_TRADE_VETO_PENDING:
     case trade_actions.POST_TRADE_APPROVE_PENDING:
-      return state.merge({ vetoError: null, approveError: null })
+      return state.merge({ action_error: null })
 
     case trade_actions.POST_TRADE_VETO_FAILED:
-      return state.merge({ vetoError: read_error_message(payload.error) })
-
     case trade_actions.POST_TRADE_APPROVE_FAILED:
-      return state.merge({ approveError: read_error_message(payload.error) })
+      return state.merge({ action_error: read_error_message(payload.error) })
 
     case trade_actions.GET_TRADES_FULFILLED:
       return state.withMutations((state) => {
@@ -120,8 +116,7 @@ export function trade_reducer(state = initialState(), { payload, type }) {
         proposingTeamSlots: new Map(),
         acceptingTeamSlots: new Map(),
         validationErrors: new Map(),
-        vetoError: null,
-        approveError: null
+        action_error: null
       })
 
     case trade_actions.TRADE_SET_PROPOSING_TEAM_SLOT:

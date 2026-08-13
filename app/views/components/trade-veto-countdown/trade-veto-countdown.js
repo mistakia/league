@@ -2,7 +2,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { get_trade_veto_deadline } from '@libs-shared'
+import {
+  get_trade_veto_deadline,
+  is_trade_within_veto_window
+} from '@libs-shared'
 import { useClockSeconds } from '@core/utils'
 
 const format_remaining = (seconds) => {
@@ -30,7 +33,7 @@ export default function TradeVetoCountdown({
   const now = useClockSeconds()
 
   const deadline = get_trade_veto_deadline({ trade, league })
-  if (!deadline || trade.vetoed || trade.approved || deadline <= now) {
+  if (!is_trade_within_veto_window({ trade, league, now })) {
     return null
   }
 

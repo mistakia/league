@@ -17,10 +17,10 @@ export default class TradeAction extends React.Component {
 
   // Both endpoints can refuse a legitimate request -- a traded player has
   // locked into a scored lineup, the receiving team has signed someone into the
-  // space the trade opened, or the other action won a race -- so each reason is
-  // rendered next to its button.
+  // space the trade opened, or the other action won a race -- so the reason is
+  // rendered beside the buttons.
   render_commish_actions = () => {
-    const { league, trade, is_commish, veto_error, approve_error } = this.props
+    const { league, trade, is_commish, action_error } = this.props
 
     if (!is_commish || !is_trade_within_veto_window({ trade, league })) {
       return null
@@ -31,8 +31,7 @@ export default class TradeAction extends React.Component {
         <Button onClick={this.handle_veto_click}>Veto Trade</Button>
         <Button onClick={this.handle_approve_click}>Approve Trade</Button>
         <TradeVetoCountdown trade={trade} league={league} />
-        {veto_error && <Alert severity='error'>{veto_error}</Alert>}
-        {approve_error && <Alert severity='error'>{approve_error}</Alert>}
+        {action_error && <Alert severity='error'>{action_error}</Alert>}
       </div>
     )
   }
@@ -93,8 +92,7 @@ TradeAction.propTypes = {
   isValid: PropTypes.bool,
   isProposer: PropTypes.bool,
   is_commish: PropTypes.bool,
-  veto_error: PropTypes.string,
-  approve_error: PropTypes.string,
+  action_error: PropTypes.string,
   league: PropTypes.object,
   trade: ImmutablePropTypes.record
 }
