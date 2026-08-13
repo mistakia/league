@@ -61,9 +61,11 @@ import * as chai from 'chai'
 
 import player_table_column_definitions from '#libs-server/data-views-column-definitions/player-table-column-definitions.mjs'
 import player_scoring_format_logs_column_definitions from '#libs-server/data-views-column-definitions/player-scoring-format-logs-column-definitions.mjs'
+import player_practice_column_definitions from '#libs-server/data-views-column-definitions/player-practice-column-definitions.mjs'
 import pff_player_seasonlogs_column_definitions, {
   PFF_PLAYER_RANGE_OFFSET_AGGREGATE as pff_player_seasonlogs_range_offset_aggregate
 } from '#libs-server/data-views-column-definitions/player-pff-seasonlogs-column-definitions.mjs'
+import all_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import data_view_fields_index from '#libs-shared/data-view-fields-index.mjs'
 
 const { expect } = chai
@@ -94,6 +96,14 @@ const pff_seasonlogs_fields_source = fs.readFileSync(
   'utf8'
 )
 
+const practice_fields_source = fs.readFileSync(
+  path.resolve(
+    __dirname,
+    '../app/core/data-views-fields/practice-table-fields.js'
+  ),
+  'utf8'
+)
+
 // The `export default { ... }` files are a different shape from the selector
 // form above: two-space indent, and a key whose helper call is frequently on the
 // FOLLOWING line when prettier wraps a long column id --
@@ -112,6 +122,24 @@ const parse_export_default_field_ids = (source) => {
   return ids
 }
 
+// The REVERSE direction of every assertion in this file, and the one nothing
+// covered until 2026-08-13. Each family's other checks iterate the SERVER ids,
+// so DROPPING a server definition simply shrinks the iteration and they all stay
+// green -- which is how b69d64899 orphaned `player_practice_status` in the
+// frontend file, the description index and three saved views with every parity
+// check passing. A frontend field with no server definition is fatal to a saved
+// view holding it ("Field not found for column_id").
+//
+// It resolves against the FULL registry rather than the family's own module,
+// because a frontend field file is not partitioned the way the server modules
+// are: `player-table-fields.js` carries `player_nfl_teams`, whose definition
+// lives in `player-team-column-definition.mjs`. Checking family-locally reports
+// that as orphaned when it is correctly registered.
+const find_orphaned_frontend_fields = (frontend_fields) =>
+  [...frontend_fields.keys()].filter(
+    (column_id) => !all_column_definitions[column_id]
+  )
+
 // Each field is a `    player_<name>: {` entry at a fixed indent inside the
 // returned object literal, carrying an optional player_value_path before the
 // entry closes. Anchoring on the indent keeps helper functions and the module's
@@ -123,15 +151,25 @@ const parse_export_default_field_ids = (source) => {
 // frontend fields when they are all present, which is the same vacuous-pattern
 // failure the positive control above exists to catch, arriving from the other
 // direction.
-const parse_frontend_fields = (source) => {
+//
+// `indent` is a parameter because the field files come in two shapes: the
+// selector form nests its entries four spaces deep, while the plain
+// `export default { ... }` files (practice) sit at two. A parser hardcoded to
+// four spaces matches nothing in the latter and passes every assertion below by
+// vacuous iteration -- the exact failure each block's positive control catches.
+const parse_frontend_fields = (source, indent = 4) => {
   const fields = new Map()
-  const field_pattern = /^ {4}(player_[a-z0-9_]+): (?:[a-z_]+\()?\{$/gm
+  const pad = ' '.repeat(indent)
+  const field_pattern = new RegExp(
+    `^ {${indent}}(player_[a-z0-9_]+): (?:[a-z_]+\\()?\\{$`,
+    'gm'
+  )
 
   let match
   while ((match = field_pattern.exec(source)) !== null) {
     const column_id = match[1]
-    const literal_end = source.indexOf('\n    },', match.index)
-    const call_end = source.indexOf('\n    }),', match.index)
+    const literal_end = source.indexOf(`\n${pad}},`, match.index)
+    const call_end = source.indexOf(`\n${pad}}),`, match.index)
     const body_end =
       call_end !== -1 && (literal_end === -1 || call_end < literal_end)
         ? call_end
@@ -175,6 +213,13 @@ describe('data view player field parity', function () {
     expect(
       missing,
       `player table columns with no description: ${missing.join(', ')}`
+    ).to.deep.equal([])
+  })
+
+  it('backs every frontend field with a server column definition', function () {
+    expect(
+      find_orphaned_frontend_fields(frontend_fields),
+      'player table frontend fields with no server column definition'
     ).to.deep.equal([])
   })
 
@@ -262,6 +307,13 @@ describe('data view scoring format logs field parity', function () {
       `scoring format logs columns with no description: ${missing.join(', ')}`
     ).to.deep.equal([])
   })
+
+  it('backs every frontend field with a server column definition', function () {
+    expect(
+      find_orphaned_frontend_fields(frontend_field_ids),
+      'scoring format logs frontend fields with no server column definition'
+    ).to.deep.equal([])
+  })
 })
 
 // The PFF seasonlog family, added 2026-08-13. It was outside this file until
@@ -311,6 +363,13 @@ describe('data view pff seasonlogs field parity', function () {
     ).to.deep.equal([])
   })
 
+  it('backs every frontend field with a server column definition', function () {
+    expect(
+      find_orphaned_frontend_fields(frontend_fields),
+      'pff seasonlog frontend fields with no server column definition'
+    ).to.deep.equal([])
+  })
+
   it('matches each frontend value path to the emitted pff_ alias', function () {
     const mismatched = []
 
@@ -354,6 +413,83 @@ describe('data view pff seasonlogs field parity', function () {
     expect(
       orphaned,
       `aggregate overrides keyed on a column that does not exist, so they silently default to SUM: ${orphaned.join(', ')}`
+    ).to.deep.equal([])
+  })
+})
+
+describe('data view practice field parity', function () {
+  // This file is the `export default { ... }` shape, so its entries sit at a
+  // two-space indent rather than the selector form's four.
+  const frontend_fields = parse_frontend_fields(practice_fields_source, 2)
+  const server_column_ids = Object.keys(player_practice_column_definitions)
+
+  it('parses the frontend field file', function () {
+    // Positive control: a parser matching nothing passes everything below by
+    // vacuous iteration.
+    expect(frontend_fields.size).to.be.greaterThan(5)
+    expect(frontend_fields.get('player_practice_status')).to.equal(
+      'practice_status'
+    )
+  })
+
+  it('registers every server column in the frontend field file', function () {
+    const missing = server_column_ids.filter(
+      (column_id) => !frontend_fields.has(column_id)
+    )
+    expect(
+      missing,
+      `practice columns with no frontend field (unselectable in the UI, and fatal to a saved view holding one): ${missing.join(', ')}`
+    ).to.deep.equal([])
+  })
+
+  it('describes every server column in the shared fields index', function () {
+    const missing = server_column_ids.filter(
+      (column_id) => !data_view_fields_index[column_id]
+    )
+    expect(
+      missing,
+      `practice columns with no description: ${missing.join(', ')}`
+    ).to.deep.equal([])
+  })
+
+  it('backs every frontend field with a server column definition', function () {
+    // The REVERSE direction, and the one that caught nothing until 2026-08-13.
+    // Every assertion above iterates the SERVER ids, so dropping a server
+    // definition simply shrinks the iteration and each of them stays green --
+    // which is exactly how b69d64899 orphaned `player_practice_status` in the
+    // frontend file, the description index and three saved views while every
+    // parity check passed. A frontend field with no server definition is fatal
+    // to any saved view holding it ("Field not found for column_id").
+    expect(
+      find_orphaned_frontend_fields(frontend_fields),
+      'practice frontend fields with no server column definition'
+    ).to.deep.equal([])
+  })
+
+  it('matches each frontend value path to the emitted alias', function () {
+    // The practice family pins `select_as` explicitly rather than deriving it
+    // from the column name, so the expected path is whatever that thunk
+    // returns -- not a `${prefix}_${column_name}` reconstruction.
+    const mismatched = []
+
+    for (const column_id of server_column_ids) {
+      const { select_as } = player_practice_column_definitions[column_id]
+      if (typeof select_as !== 'function') continue
+
+      const value_path = frontend_fields.get(column_id)
+      if (!value_path) continue
+
+      const expected_path = select_as()
+      if (value_path !== expected_path) {
+        mismatched.push(
+          `${column_id}: frontend reads '${value_path}', server emits '${expected_path}'`
+        )
+      }
+    }
+
+    expect(
+      mismatched,
+      `frontend value paths that render an empty cell: ${mismatched.join('; ')}`
     ).to.deep.equal([])
   })
 })

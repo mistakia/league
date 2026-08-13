@@ -62,6 +62,17 @@ const create_player_practice_designation_field = (column_name, day_suffix) => ({
 })
 
 export default {
+  // Participation level (FP/LP/DNP), which is NOT what `game_designation`
+  // holds (PROBABLE/QUESTIONABLE/OUT/DOUBTFUL). b69d64899 added the two
+  // roster_status/game_designation columns and dropped this definition, but
+  // the physical `practice_status` column stayed and is still written --
+  // 53,364 of 85,080 rows carry a value. Dropping the definition orphaned the
+  // frontend field, the description index entry, and every saved view holding
+  // the id, none of which that commit touched.
+  player_practice_status: create_player_practice_field(
+    'practice_status',
+    'practice_status'
+  ),
   player_practice_game_designation: create_player_practice_field(
     'game_designation',
     'practice_game_designation'

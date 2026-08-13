@@ -595,6 +595,10 @@ export default {
   // Practice/Injury Fields
   player_practice_status:
     "The player's practice participation status (Full, Limited, Did Not Practice)",
+  player_practice_game_designation:
+    "The player's official game status designation (Probable, Questionable, Doubtful, Out)",
+  player_practice_roster_status:
+    "The player's roster status as reported on the practice report",
   player_practice_injury:
     "The injury affecting the player's practice participation",
   player_practice_designation_monday:

@@ -21,6 +21,16 @@ export default {
     header_label: 'Status',
     player_value_path: 'practice_status'
   }),
+  player_practice_game_designation: create_practice_field({
+    column_title: 'Game Designation',
+    header_label: 'Game Desig',
+    player_value_path: 'practice_game_designation'
+  }),
+  player_practice_roster_status: create_practice_field({
+    column_title: 'Practice Roster Status',
+    header_label: 'Roster Status',
+    player_value_path: 'practice_roster_status'
+  }),
   player_practice_injury: create_practice_field({
     column_title: 'Practice Injury',
     header_label: 'Injury',

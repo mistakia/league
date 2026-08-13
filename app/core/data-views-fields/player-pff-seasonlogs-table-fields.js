@@ -187,7 +187,7 @@ export default function ({ is_logged_in }) {
     // server derives `select_as` as `pff_${column_name}`, so a path that does
     // not match its definition's column name renders a blank cell against valid
     // SQL with every gate green. `player_pff_run` and `player_pff_pass` above
-    // are in exactly that state today.
+    // were in exactly that state until this cluster repaired them.
     // The six below had a server definition and a description but NO field
     // here, which makes a column queryable over the API, unselectable in the
     // UI, and fatal to any saved view still holding it ("Field not found for
