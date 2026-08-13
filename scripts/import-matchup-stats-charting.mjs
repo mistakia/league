@@ -33,6 +33,8 @@ if (!process.env.DEBUG) {
 // had time to finish.
 const GAME_COMPLETION_BUFFER_HOURS = 6
 
+const DEFAULT_SEASON_TYPES = ['REG', 'POST']
+
 // BACKFILLING AN EARLIER SEASON DOES NOT WORK. Measured 2026-08-13: the vendor
 // serves the CURRENT season only, and it is a rolling window -- 2025 answers
 // with data while 2024, 2022 and 2021 answer `{"getPlayerMatchupStatsList":[]}`
@@ -74,6 +76,13 @@ async function get_games_for_import({ year, week, esbid, seas_type, force }) {
     }
     if (seas_type) {
       query.where('season_type', seas_type)
+    } else {
+      // Preseason is excluded from the default scope. The vendor charts it, but
+      // the rosters are camp bodies we largely do not carry: the 2026 Hall of
+      // Fame game resolved 196 of 296 matchups, a 33.8% unmatched rate against
+      // 3.6% across the 2025 regular season. Ask for it explicitly with
+      // --seas_type PRE.
+      query.whereIn('season_type', DEFAULT_SEASON_TYPES)
     }
   }
 
@@ -341,7 +350,13 @@ export async function import_matchup_stats_charting({
   // The oracle lives here rather than in main() so every caller is graded --
   // import-full-season.mjs runs this import too, and a stage that idles there
   // is as invisible as one that idles under cron.
-  const grade = grade_matchup_import_run(stats)
+  const grade = grade_matchup_import_run({
+    ...stats,
+    // A season-wide scope on the CURRENT season may hold no completed game yet;
+    // any narrower ask (a week, a game, an earlier season) named something the
+    // caller expects to exist.
+    expects_games: Boolean(week || esbid) || year !== current_season.year
+  })
   console.log(grade.summary)
   if (!grade.passed) {
     throw new Error(grade.summary)

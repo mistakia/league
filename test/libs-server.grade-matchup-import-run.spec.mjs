@@ -44,6 +44,23 @@ describe('LIBS-SERVER grade_matchup_import_run', function () {
     expect(grade.failures).to.deep.equal(['scope selected no games'])
   })
 
+  it('passes an empty scope when the scope is not expected to hold games', () => {
+    // The current season ahead of its opener: the weekly cron's first fire of a
+    // season lands before week 1, and that must not read as a mis-specified
+    // scope.
+    const grade = grade_matchup_import_run({
+      games_selected: 0,
+      games_attempted: 0,
+      games_with_rows: 0,
+      games_failed: 0,
+      games_empty: 0,
+      total_matchups_inserted: 0,
+      players_unmatched: 0,
+      expects_games: false
+    })
+    expect(grade.passed).to.equal(true)
+  })
+
   it('passes when every selected game is already imported', () => {
     // The healthy steady state of a scheduled run, and the one case that must
     // NOT be confused with the empty scope above.

@@ -35,7 +35,12 @@ export default function grade_matchup_import_run({
   games_failed,
   games_empty,
   total_matchups_inserted,
-  players_unmatched
+  players_unmatched,
+  // False when the scope legitimately holds no completed games yet -- the
+  // current season before its first game. The weekly cron's first fire of a
+  // season lands ahead of week 1 (the window opens in September, the opener is
+  // a week into it), so an empty scope there is early rather than wrong.
+  expects_games = true
 }) {
   const failures = []
 
@@ -47,7 +52,7 @@ export default function grade_matchup_import_run({
     ? players_unmatched / matchups_seen
     : 0
 
-  if (games_selected === 0) {
+  if (games_selected === 0 && expects_games) {
     // The scope matched nothing at all -- a wrong --year, a season whose games
     // carry no shield_game_id, or a week that has not been played. Distinct
     // from "everything in scope is already imported", which is the healthy
