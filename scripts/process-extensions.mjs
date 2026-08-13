@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { Roster, getExtensionAmount } from '#libs-shared'
+import { Errors, Roster, getExtensionAmount } from '#libs-shared'
 import { current_season, player_tag_types, transaction_types } from '#constants'
 import {
   getLeague,
@@ -17,6 +17,7 @@ import {
   record_league_notification_sent,
   throw_if_shortfall
 } from '#libs-server'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
@@ -96,6 +97,15 @@ const createTransaction = async ({ roster_player, tid, league }) => {
 }
 
 const run = async ({ lid }) => {
+  // Gated HERE rather than only in the scheduled loop because the --lid
+  // override calls run() directly and is documented as "run immediately, no
+  // gating". A pause is the one gate that override must not bypass: extensions
+  // are irreversible roster writes.
+  const open_pause = await get_open_league_pause({ league_id: lid })
+  if (open_pause) {
+    throw new Errors.LeaguePaused(`league ${lid} is paused`)
+  }
+
   const league = await getLeague({ lid })
   const teams = await db('teams').where({
     lid,
@@ -194,6 +204,15 @@ const process_extensions_for_due_leagues = async () => {
       log(
         `league ${lid}: extensions already processed for ext_date ${ext_date}`
       )
+      continue
+    }
+
+    const open_pause = await get_open_league_pause({ league_id: lid })
+    if (open_pause) {
+      // Excluded from due_leagues, not merely skipped: the oracle below asserts
+      // a notification marker for every league in that list, and a held league
+      // never writes one. Leaving it in would report the hold as a shortfall.
+      log(`league ${lid}: LEAGUE PAUSED -- holding extensions`)
       continue
     }
 

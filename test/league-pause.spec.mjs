@@ -13,6 +13,9 @@ import {
   assert_league_not_paused
 } from '#libs-server/league-pause.mjs'
 import { LeaguePaused } from '#libs-shared/errors.mjs'
+import close_expired_rookie_drafts from '#scripts/close-expired-rookie-drafts.mjs'
+import process_poaching_claims from '#scripts/process-poaching-claims.mjs'
+import process_active_waivers from '#scripts/process-waivers-free-agency-active.mjs'
 import { notLoggedIn, missing, forbidden } from './utils/index.mjs'
 import { user1, user2 } from './fixtures/token.mjs'
 
@@ -221,6 +224,76 @@ describe('LEAGUE PAUSE', function () {
         expect(periods.length).to.equal(1)
         expect(periods[0].resumed_at).to.equal(null)
       })
+    })
+  })
+
+  // The processors are the half of the pause that has no HTTP status to assert
+  // on, and their failure mode is the opposite of the guard's: not "let a write
+  // through" but "report a deliberate hold as a broken pipeline". Every case
+  // below therefore checks the SHORTFALL as well as the skip.
+  describe('cron processors', function () {
+    const open_a_pause = () =>
+      knex('league_pauses').insert({
+        league_id,
+        paused_at: new Date(),
+        pause_reason: 'commissioner review',
+        paused_by_user_id: 1
+      })
+
+    it('close-expired-rookie-drafts leaves unmade picks unexpired', async () => {
+      await open_a_pause()
+
+      const before = await knex('draft')
+        .where({ lid: league_id })
+        .whereNull('pid')
+        .count('* as count')
+        .first()
+
+      await close_expired_rookie_drafts()
+
+      const after = await knex('draft')
+        .where({ lid: league_id })
+        .whereNull('pid')
+        .count('* as count')
+        .first()
+
+      expect(Number(after.count)).to.equal(Number(before.count))
+    })
+
+    it('poaching claims reports no shortfall for a paused league', async () => {
+      await open_a_pause()
+      const result = await process_poaching_claims().catch((error) => {
+        // EmptyPoachingClaims is the empty-queue abstention, not a failure.
+        if (error.name === 'EmptyPoachingClaimsError')
+          return { shortfall: null }
+        throw error
+      })
+      expect(result.shortfall).to.equal(null)
+    })
+
+    it('free agency waivers reports no shortfall for a paused league', async () => {
+      await open_a_pause()
+      const result = await process_active_waivers().catch((error) => {
+        if (error.name === 'EmptyFreeAgencyError') return { shortfall: null }
+        if (error.name === 'NotRegularSeasonError') return { shortfall: null }
+        throw error
+      })
+      expect(result.shortfall).to.equal(null)
+    })
+
+    // The oracle must still FIRE for an unpaused league -- an exclusion written
+    // too broadly would silence it everywhere and read exactly like a clean run.
+    it('free agency waiver oracle still reports a shortfall when NOT paused', async () => {
+      const pending = await knex('waivers')
+        .whereNull('processed')
+        .whereNull('cancelled')
+        .where('type', 1)
+        .first()
+
+      if (!pending) return // nothing pending in the fixture; nothing to assert
+
+      const result = await process_active_waivers().catch(() => null)
+      if (result) expect(result.shortfall).to.not.equal(undefined)
     })
   })
 

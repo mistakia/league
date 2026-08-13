@@ -16,8 +16,10 @@ import {
   get_super_priority_status,
   process_super_priority,
   is_main,
-  report_job
+  report_job,
+  throw_if_shortfall
 } from '#libs-server'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import apply_nfl_games_current_week_join from '#libs-server/data-views/join-nfl-games-current-week.mjs'
 
@@ -47,6 +49,14 @@ const process_single_practice_waiver = async (waiver_id, timestamp) => {
   }
 
   const lid = waiver.lid
+
+  // The single-waiver entry path is a separate door into the same write, so it
+  // needs its own gate -- guarding only the loop below would leave an operator
+  // running one waiver by id able to write to a paused league.
+  const open_pause = await get_open_league_pause({ league_id: lid })
+  if (open_pause) {
+    throw new Errors.LeaguePaused(`league ${lid} is paused`)
+  }
 
   // Check game timing constraints if during regular season
   if (current_season.isRegularSeason) {
@@ -98,8 +108,45 @@ const process_bulk_practice_waivers = async (daily, timestamp) => {
   }
 
   for (const lid of league_ids) {
+    const open_pause = await get_open_league_pause({ league_id: lid })
+    if (open_pause) {
+      log(`league ${lid} is paused; holding practice squad waivers`)
+      continue
+    }
+
     await process_league_practice_waivers(lid, timestamp)
   }
+
+  return { shortfall: await get_practice_waiver_shortfall() }
+}
+
+/**
+ * Oracle: practice squad waivers still pending after a run that should have
+ * cleared them.
+ *
+ * This script had no oracle at all before the league pause landed. See the
+ * matching comment in process-waivers-free-agency-active for why one ships in
+ * the same change as the skip, and why paused leagues must be excluded HERE
+ * rather than inferred from the loop.
+ */
+const get_practice_waiver_shortfall = async () => {
+  const stuck_waivers = await db('waivers')
+    .select('waivers.uid', 'waivers.lid')
+    .leftJoin('league_pauses', function () {
+      this.on('league_pauses.league_id', '=', 'waivers.lid').andOnNull(
+        'league_pauses.resumed_at'
+      )
+    })
+    .whereNull('waivers.processed')
+    .whereNull('waivers.cancelled')
+    .where('waivers.type', waiver_types.FREE_AGENCY_PRACTICE)
+    .whereNull('league_pauses.pause_id')
+
+  if (!stuck_waivers.length) return null
+
+  return `${stuck_waivers.length} practice squad waiver(s) remain unprocessed after run: uids=${stuck_waivers
+    .map((waiver) => waiver.uid)
+    .join(',')}`
 }
 
 // Helper functions
@@ -332,13 +379,17 @@ export default process_practice_waivers
 const main = async () => {
   let error
   try {
-    await process_practice_waivers()
+    const result = await process_practice_waivers()
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
   }
 
   const job_success = Boolean(
-    !error || error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers
+    !error ||
+      error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers ||
+      // A pause is a hold, not a failure.
+      error instanceof Errors.LeaguePaused
   )
   if (!job_success) {
     console.log(error)

@@ -10,8 +10,10 @@ import {
   get_waiver_by_id,
   is_main,
   getLeague,
-  report_job
+  report_job,
+  throw_if_shortfall
 } from '#libs-server'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import apply_nfl_games_current_week_join from '#libs-server/data-views/join-nfl-games-current-week.mjs'
 
@@ -42,6 +44,14 @@ const process_single_active_waiver = async (waiver_id, timestamp) => {
 
   const lid = waiver.lid
 
+  // The single-waiver entry path is a separate door into the same write, so it
+  // needs its own gate -- guarding only the loop below would leave an operator
+  // running one waiver by id able to write to a paused league.
+  const open_pause = await get_open_league_pause({ league_id: lid })
+  if (open_pause) {
+    throw new Errors.LeaguePaused(`league ${lid} is paused`)
+  }
+
   // Check game timing constraints if during regular season
   if (current_season.isRegularSeason) {
     await validate_game_timing(waiver_id)
@@ -66,15 +76,19 @@ const process_single_active_waiver = async (waiver_id, timestamp) => {
 const process_bulk_active_waivers = async (daily, timestamp) => {
   // Original bulk processing logic
   // only run outside of regular season waiver period
+  // Both abstentions below return the { shortfall } shape rather than bare
+  // undefined, so every caller can read result.shortfall without a guard. The
+  // oracle deliberately does NOT run on these paths: a waiver pending outside
+  // its run window is not due, so counting it would be a false shortfall.
   if (current_season.isRegularSeason && current_season.isWaiverPeriod) {
     log('during regular season waiver period, active waivers not run')
-    return
+    return { shortfall: null }
   }
 
   // only run daily waivers during offseason
   if (!current_season.isRegularSeason && !daily) {
     log('outside of daily waivers during offseason, active waivers not run')
-    return
+    return { shortfall: null }
   }
 
   const league_ids = await get_leagues_with_pending_active_waivers()
@@ -83,6 +97,12 @@ const process_bulk_active_waivers = async (daily, timestamp) => {
   }
 
   for (const lid of league_ids) {
+    const open_pause = await get_open_league_pause({ league_id: lid })
+    if (open_pause) {
+      log(`league ${lid} is paused; holding free agency waivers`)
+      continue
+    }
+
     if (!current_season.isRegularSeason) {
       const should_skip = await should_skip_league_in_offseason(lid)
       if (should_skip) continue
@@ -90,6 +110,44 @@ const process_bulk_active_waivers = async (daily, timestamp) => {
 
     await process_league_active_waivers(lid, timestamp)
   }
+
+  return { shortfall: await get_active_waiver_shortfall() }
+}
+
+/**
+ * Oracle: free agency waivers still pending after a run that should have
+ * cleared them.
+ *
+ * This script had no oracle at all before the league pause landed, so a run
+ * that silently processed nothing exited 0 and reported success. Adding the
+ * pause skip makes that gap materially worse -- a skip is now an expected
+ * outcome, so "nothing happened" stops being suspicious on its face -- which is
+ * why the oracle ships in the same change as the skip rather than after it.
+ *
+ * Paused leagues are excluded: their waivers are held ON PURPOSE and are not a
+ * shortfall. This mirrors the carve-out in process-restricted-free-agency-bids,
+ * and it is the whole reason the exclusion has to live in the oracle's own
+ * query rather than being inferred from the loop -- a hold that trips the
+ * failure detector turns every paused run into a false pipeline break.
+ */
+const get_active_waiver_shortfall = async () => {
+  const stuck_waivers = await db('waivers')
+    .select('waivers.uid', 'waivers.lid')
+    .leftJoin('league_pauses', function () {
+      this.on('league_pauses.league_id', '=', 'waivers.lid').andOnNull(
+        'league_pauses.resumed_at'
+      )
+    })
+    .whereNull('waivers.processed')
+    .whereNull('waivers.cancelled')
+    .where('waivers.type', waiver_types.FREE_AGENCY)
+    .whereNull('league_pauses.pause_id')
+
+  if (!stuck_waivers.length) return null
+
+  return `${stuck_waivers.length} free agency waiver(s) remain unprocessed after run: uids=${stuck_waivers
+    .map((waiver) => waiver.uid)
+    .join(',')}`
 }
 
 // Helper functions
@@ -248,7 +306,8 @@ export default process_active_waivers
 const main = async () => {
   let error
   try {
-    await process_active_waivers()
+    const result = await process_active_waivers()
+    throw_if_shortfall(result?.shortfall)
   } catch (err) {
     error = err
   }
@@ -256,7 +315,10 @@ const main = async () => {
   const job_success = Boolean(
     !error ||
       error instanceof Errors.EmptyFreeAgencyWaivers ||
-      error instanceof Errors.NotRegularSeason
+      error instanceof Errors.NotRegularSeason ||
+      // A pause is a hold, not a failure: the single-waiver path throws this
+      // rather than writing to a paused league.
+      error instanceof Errors.LeaguePaused
   )
   if (!job_success) {
     console.log(error)

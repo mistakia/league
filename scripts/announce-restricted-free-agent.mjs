@@ -9,6 +9,7 @@ import { hideBin } from 'yargs/helpers'
 import { current_season } from '#constants'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 import {
+  Errors,
   get_restricted_free_agency_window_start,
   get_restricted_free_agency_window_index,
   get_restricted_free_agency_nominating_team_index,
@@ -23,6 +24,7 @@ import {
   has_league_notification_been_sent,
   throw_if_shortfall
 } from '#libs-server'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const NOTIFICATION_TYPE_RFA_ANNOUNCED = 'rfa_announced'
@@ -88,6 +90,13 @@ const announce_restricted_free_agent = async ({
 
   if (!league) {
     throw new Error(`League with lid ${lid} not found`)
+  }
+
+  // Gated here as well as in the scheduled loop, so the --lid override cannot
+  // announce into a paused league.
+  const open_pause = await get_open_league_pause({ league_id: lid })
+  if (open_pause) {
+    throw new Errors.LeaguePaused(`league ${lid} is paused`)
   }
 
   if (!league.restricted_free_agency_period_start) {
@@ -285,6 +294,14 @@ const process_all_leagues = async ({ dry_run = false } = {}) => {
   const due_leagues = []
 
   for (const league of active_leagues) {
+    const open_pause = await get_open_league_pause({ league_id: league.lid })
+    if (open_pause) {
+      // Excluded from due_leagues rather than merely skipped: the oracle below
+      // asserts a marker for every entry, and a held league never writes one.
+      log(`league ${league.lid}: LEAGUE PAUSED -- holding RFA announcement`)
+      continue
+    }
+
     const window_index = get_restricted_free_agency_window_index({
       league,
       timestamp: current_timestamp

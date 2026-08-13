@@ -28,6 +28,7 @@ import {
   record_restricted_free_agency_bid_change
 } from '#libs-server'
 import { resolve_restricted_free_agency_bid_error_outcome } from '#libs-server/restricted-free-agency-bid-error.mjs'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -267,6 +268,15 @@ const run = async ({ dry_run = false } = {}) => {
   // processing time, so there is no league-level hour gate to apply here.
   for (const league of active_leagues) {
     const { lid } = league
+
+    // The league-wide pause is the broader authority and is checked first; the
+    // narrower RFA processing pause below keeps its own scope and still
+    // applies on its own. Both are holds, neither is a failure.
+    const open_league_pause = await get_open_league_pause({ league_id: lid })
+    if (open_league_pause) {
+      log(`league ${lid}: LEAGUE PAUSED -- holding RFA bid processing`)
+      continue
+    }
 
     const processing_pause = get_processing_pause({ league, timestamp })
     if (processing_pause) {
@@ -562,6 +572,15 @@ const run = async ({ dry_run = false } = {}) => {
         '>=',
         processing_instant
       )
+      // The league-wide pause, mirroring the JS gate at the top of the loop.
+      // This half and that one must agree: a bid the loop skipped but the
+      // oracle counts is a false shortfall on every paused run.
+      .whereNotExists(function () {
+        this.select('*')
+          .from('league_pauses')
+          .whereRaw('league_pauses.league_id = rfab.lid')
+          .whereNull('league_pauses.resumed_at')
+      })
       // A paused league's bids are held ON PURPOSE, so they are not a
       // shortfall. Without this the pause would trip the very oracle that
       // exists to detect the loop silently skipping eligible bids -- turning

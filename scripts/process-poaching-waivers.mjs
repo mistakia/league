@@ -13,6 +13,7 @@ import {
   is_main,
   throw_if_shortfall
 } from '#libs-server'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -57,6 +58,16 @@ const run = async ({ daily = false } = {}) => {
 
   for (const lid of leagueIds) {
     const league = await getLeague({ lid })
+
+    // A paused league is HELD, not failed. The oracle below is loop-scoped and
+    // returns { shortfall: null } for a league it never reached, so skipping
+    // here cannot manufacture a false pipeline failure.
+    const open_pause = await get_open_league_pause({ league_id: lid })
+    if (open_pause) {
+      log(`league ${lid} is paused; holding poaching waivers`)
+      continue
+    }
+
     const free_agency_period = get_free_agent_period(league)
     if (
       !current_season.isRegularSeason &&

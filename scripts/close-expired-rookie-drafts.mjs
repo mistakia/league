@@ -12,6 +12,7 @@ import {
 } from '#libs-server'
 import { getDraftDates } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('close-expired-rookie-drafts')
@@ -52,6 +53,19 @@ const run = async () => {
     const league = await getLeague({ lid })
     if (!league) {
       log(`league ${lid}: not found; skipping`)
+      continue
+    }
+
+    // THIS SKIP IS WHAT PROTECTS THE DRAFT'S HARD END, and the open-seconds
+    // credit in increment two cannot do it. getDraftDates quantizes draftEnd to
+    // endOf('day'), so a credit smaller than one whole day moves the end by
+    // exactly zero -- a 12-hour pause leaves draftEnd on the same Wednesday
+    // 23:59 it was already on. Without this skip a pause spanning midnight
+    // expires every unmade pick on schedule, which is the outcome the pause
+    // exists to prevent.
+    const open_pause = await get_open_league_pause({ league_id: lid })
+    if (open_pause) {
+      log(`league ${lid}: LEAGUE PAUSED -- not expiring unmade draft picks`)
       continue
     }
 

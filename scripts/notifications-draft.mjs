@@ -15,6 +15,7 @@ import {
 import { getDraftWindow } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('notifications-draft')
@@ -49,6 +50,15 @@ const run = async () => {
     const { lid, draft_start } = league_season
 
     const league = await getLeague({ lid })
+
+    // No team is on the clock while the league is paused -- the draft route is
+    // behind the pause guard, so nobody could act on the announcement, and the
+    // deadline it would quote is the uncredited one.
+    const open_pause = await get_open_league_pause({ league_id: lid })
+    if (open_pause) {
+      log(`league ${lid}: LEAGUE PAUSED -- not announcing on-clock`)
+      continue
+    }
 
     // The pick actually on the clock is the lowest-numbered unmade pick: the
     // draft is sequential, so every earlier pick is already made. Deriving the

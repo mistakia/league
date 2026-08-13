@@ -3,6 +3,7 @@ import debug from 'debug'
 import db from '#db'
 import { current_season, player_tag_types } from '#constants'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
+import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('reset-player-restricted-free-agency-tags')
@@ -35,6 +36,15 @@ const count_eligible_rfa_rows = async ({ team_uids, lid }) => {
 
 const run = async () => {
   const lid = 1
+
+  // Returning a null shortfall rather than throwing: this script's oracle is
+  // the count of tags still set, and a held league legitimately clears none.
+  // Throwing would report the hold as a job failure.
+  const open_pause = await get_open_league_pause({ league_id: lid })
+  if (open_pause) {
+    log(`league ${lid} is paused; holding RFA tag reset`)
+    return { shortfall: null }
+  }
 
   const teams = await db('teams')
     .where({
