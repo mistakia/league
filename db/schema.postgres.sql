@@ -24125,7 +24125,7 @@ CREATE TABLE public.player_prospect_profile (
     stat_total_points_per_game_slot numeric,
     stat_total_points_per_game_wide numeric,
     stat_target_percentage_plus_minus numeric,
-    stat_deep_route_pct numeric,
+    stat_deep_route_percentage numeric,
     stat_unique_routes numeric,
     stat_yards_after_catch_per_reception numeric,
     stat_total_points_rating_passing numeric,
