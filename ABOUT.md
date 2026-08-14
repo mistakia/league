@@ -541,12 +541,31 @@ observations:
     all three operator rules, and its unit spec genuinely red at fd68227e7~1; the one live frontend
     finding -- draft.js:105 rendering 'Time Remaining' off-hours while the draft button is correctly
     hidden -- is tracked in continuation fix-draft-page-window-label-branch.
+  - >-
+    [finding] check-league-schema-consumers had been BLIND on the cluster runner's invocation since
+    2026-08-08: in_repo was derived from path.isAbsolute(root) on the premise that external roots
+    are absolute, but scripts/check-cluster-gates.mjs has always passed them relative.
+  - >-
+    [finding] That misclassification produced 58 findings against a tree whose true count is 2,
+    reporting about 20 real adjudications as stale while re-reporting their findings — the direction
+    whose invited remedy is deleting load-bearing suppressions.
+  - >-
+    [decision] Fixed by deciding in_repo on where the root RESOLVES relative to the repo root rather
+    than on how it was typed (league 390c71627), confirmed by controlled variable at 22 of 22
+    controls red and findings 58 to 2, with a dirty tree ruled out via a clean worktree.
+  - >-
+    [finding] check-destructive-db-guard and check-dev-fixture-scrub read as BLIND for a different
+    reason: both ran real controls that went red but neither printed the literal NEGATIVE CONTROL
+    marker the runner greps for.
+  - >-
+    [verification] yarn check:cluster now exits 0 with no BLIND gates, where it had been exiting 1
+    on three.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-13T03:34:21.655Z'
+updated_at: '2026-08-14T20:51:05.246Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
