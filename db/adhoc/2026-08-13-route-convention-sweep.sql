@@ -32,9 +32,13 @@
 --    is a separate question from the route family.
 --
 -- Writers, all updated in the same commit: import-matchup-stats-charting.mjs
--- and validate-charting-import.mjs for (1), nothing at all for (2) -- the
--- column has no live code consumer -- and the `college_stats` map in
--- private/libs-server/sis.mjs for (3).
+-- for (1), nothing at all for (2) -- the column has no live code consumer --
+-- and the player-overview map in private/libs-server/sis.mjs for (3).
+--
+-- Two corrections to an earlier version of this header, both caught in review:
+-- `validate-charting-import.mjs` was NOT a writer here and names no route
+-- column at any revision, and (3)'s writer is the player-overview map rather
+-- than the `college_stats` map, which is a different block of the same file.
 
 ALTER TABLE public.nfl_matchup_stats
     RENAME COLUMN receiving_routes_run TO receiving_routes;
