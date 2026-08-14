@@ -208,7 +208,7 @@ export const job_title_by_id = {
   18: 'Generate Draft Picks',
   19: 'Import Players (Armchair)',
   20: 'Import NFL Games',
-  21: 'Import NFL Plays',
+  21: 'Import NFL Plays (NFL Pro)',
   22: 'Import NFL Plays (NFL)',
   23: 'Import NFL Games (NFL)',
   24: 'NFL Players (NFL)',

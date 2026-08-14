@@ -11,15 +11,13 @@ import {
 import { fixTeam } from '#libs-shared'
 import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { get_nfl_api_config } from '#libs-server/nfl.mjs'
 
 const log = debug('import:nfl:players')
 debug.enable('import:nfl:players,get-player,update-player')
 
 const run = async () => {
   const missing = []
-  const nfl_config = await get_nfl_api_config()
-  const api_url = nfl_config.api_url
+  const api_url = 'https://api.nfl.com'
   const token = await nfl.get_session_token_v3()
 
   log('fetching team ids')

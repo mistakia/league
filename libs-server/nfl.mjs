@@ -41,21 +41,34 @@ const fetch_json_with_context = async (url, response) => {
   }
 }
 
-// Cached config from database
-let nfl_api_config_cache = null
+// Endpoints for the PUBLIC NFL API. These were the last two survivors of the
+// `nfl_api_config` DB row, which used to conflate endpoints, credentials and
+// session state in one jsonb column. A URL is a constant under review in git,
+// not rotating state and not a secret; the row now holds NFL Pro session state
+// exclusively (see private/libs-server/nfl-pro/session.mjs).
+const NFL_API_URL = 'https://api.nfl.com'
+const COMBINE_PROFILES_URL = `${NFL_API_URL}/football/v2/combine/profiles`
+const NFL_V3_SESSION_URL = `${NFL_API_URL}/identity/v3/token/refresh`
+const NFL_USER_AGENT =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36'
 
-export const get_nfl_api_config = async () => {
-  if (nfl_api_config_cache) {
-    return nfl_api_config_cache
+// The clientKey/clientSecret pair the www.nfl.com SPA embeds. It stays in the
+// DB rather than moving to code with the URLs above because it is not ours to
+// pin: NFL rotates it when it redeploys the SPA, and the NFL Pro browser
+// harvest refreshes the same two fields (private/libs-server/nfl-pro/
+// session.mjs). Sharing one stored pair is deliberate -- both callers are
+// authenticating as that same SPA client -- but it means this path depends on
+// the NFL Pro harvest having run at least once.
+const get_nfl_client_credentials = async () => {
+  const row = await db('config').where({ key: 'nfl_api_config' }).first()
+  const { client_key, client_secret } = row?.config_value || {}
+  if (!client_key || !client_secret) {
+    throw new Error(
+      'nfl_api_config carries no client_key/client_secret; run the NFL Pro ' +
+        'browser harvest (nfl_pro.get_session_token) to populate them'
+    )
   }
-
-  const config_row = await db('config').where({ key: 'nfl_api_config' }).first()
-  if (!config_row?.config_value) {
-    throw new Error('nfl_api_config not found in database config table')
-  }
-
-  nfl_api_config_cache = config_row.config_value
-  return nfl_api_config_cache
+  return { client_key, client_secret }
 }
 
 export const generate_guid = () => {
@@ -71,9 +84,7 @@ export const get_session_token_v3 = async () => {
   const device_id = generate_guid()
   const refresh_token = generate_guid()
 
-  const nfl_config = await get_nfl_api_config()
-  log(nfl_config)
-  const { client_key, client_secret, session_url, user_agent } = nfl_config
+  const { client_key, client_secret } = await get_nfl_client_credentials()
 
   const form = new FormData()
   form.set('clientKey', client_key)
@@ -86,18 +97,18 @@ export const get_session_token_v3 = async () => {
   form.set('nflClaimGroupsToRemove', '[]')
 
   const response = await fetch_with_retry({
-    url: session_url,
+    url: NFL_V3_SESSION_URL,
     method: 'POST',
     body: form,
     headers: {
       origin: 'https://www.nfl.com',
       referer: 'https://www.nfl.com/',
-      'User-Agent': user_agent
+      'User-Agent': NFL_USER_AGENT
     },
     use_proxy: true
   })
 
-  const data = await fetch_json_with_context(session_url, response)
+  const data = await fetch_json_with_context(NFL_V3_SESSION_URL, response)
   log(data)
   return data.accessToken
 }
@@ -112,8 +123,7 @@ export const getPlayers = async ({ year, token, ignore_cache = false }) => {
     }
   }
 
-  const nfl_config = await get_nfl_api_config()
-  const api_url = nfl_config.api_url
+  const api_url = NFL_API_URL
 
   if (!token) {
     token = await get_session_token_v3()
@@ -237,8 +247,7 @@ export const getGames = async ({
     }
   }
 
-  const nfl_config = await get_nfl_api_config()
-  const api_url = nfl_config.api_url
+  const api_url = NFL_API_URL
 
   if (!token) {
     token = await get_session_token_v3()
@@ -273,8 +282,7 @@ export const get_plays_v1 = async ({ id, token, ignore_cache = false }) => {
     }
   }
 
-  const nfl_config = await get_nfl_api_config()
-  const api_url = nfl_config.api_url
+  const api_url = NFL_API_URL
 
   log(`getting game details for ${id}`)
   if (!token) {
@@ -319,8 +327,7 @@ export const get_combine_profiles = async ({
     }
   }
 
-  const nfl_config = await get_nfl_api_config()
-  const combine_profiles_url = nfl_config.combine_profiles_url
+  const combine_profiles_url = COMBINE_PROFILES_URL
 
   if (!token) {
     token = await get_session_token_v3()
