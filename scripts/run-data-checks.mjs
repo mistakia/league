@@ -437,15 +437,24 @@ export const run_check = async ({ check, parked }) => {
   return { result, emits_ok }
 }
 
-const run_data_checks = async () => {
+/**
+ * Run the whole registry.
+ *
+ * Both inputs are parameters so a spec can drive this over fixture rows rather
+ * than five production queries; every real invocation takes the defaults.
+ */
+export const run_data_checks = async ({
+  checks: given_checks = registry,
+  parked_entries = null
+} = {}) => {
   // Validate the registry BEFORE anything runs. A row missing a required field
   // is a broken detector, not a finding, and the floor is the field that fails
   // silently: `graded < undefined` is false, so an absent min_gradeable_units
   // removes the check's coverage guarantee with no error anywhere.
-  const checks = validate_registry({ checks: registry })
+  const checks = validate_registry({ checks: given_checks })
 
   const parked = load_parked({
-    entries: JSON.parse(fs.readFileSync(PARKED_PATH, 'utf8')),
+    entries: parked_entries ?? JSON.parse(fs.readFileSync(PARKED_PATH, 'utf8')),
     checks_by_id: new Map(checks.map((check) => [check.check_id, check]))
   })
 

@@ -11,7 +11,7 @@ import {
   load_parked,
   validate_registry
 } from '#libs-server/data-check.mjs'
-import { run_check } from '#scripts/run-data-checks.mjs'
+import { run_check, run_data_checks } from '#scripts/run-data-checks.mjs'
 import registry from '#db/checks/registry.mjs'
 
 const expect = chai.expect
@@ -786,6 +786,117 @@ describe('data checks / resolve inspection', function () {
     const { emits_ok } = await run_check({ check: clean_check, parked: [] })
 
     expect(emits_ok).to.equal(false)
+  })
+})
+
+/*
+  The whole-registry runner, over injected fixture checks.
+
+  What these pin is the DISPOSITION: a finding never turns the run red, while a
+  crash, a coverage collapse and a failed emit all do. That is the claim the
+  system exists to make, and until run_data_checks took its checks as a
+  parameter nothing could reach it without five production queries.
+*/
+describe('data checks / runner disposition', function () {
+  const fixture_check = ({ check_id, rows, ...overrides }) => ({
+    check_id,
+    invariant: 'Something must hold.',
+    grain: ['scope'],
+    max_count: 0,
+    calibration: 'Measured today.',
+    min_gradeable_units: 1,
+    repair_command: 'do the thing',
+    rows,
+    ...overrides
+  })
+
+  const clean_rows = async () => [
+    { scope: 'all', numerator: 0, denominator: 1000 }
+  ]
+
+  // A finding is reported and does not make the check ill. Under NODE_ENV=test
+  // `config.signals_api_url` is empty, so the emit declines and shows up as a
+  // failed emit -- which is itself correct behaviour. What must NOT appear is
+  // the check being counted as crashed or below its coverage floor.
+  it('does NOT turn the run red BECAUSE of a finding', async () => {
+    const { total_findings, unhealthy } = await run_data_checks({
+      checks: [
+        fixture_check({
+          check_id: 'finds-something',
+          rows: async () => [{ scope: 'all', numerator: 3, denominator: 1000 }]
+        })
+      ],
+      parked_entries: []
+    })
+
+    expect(total_findings).to.equal(1)
+    expect(unhealthy.join(' ')).to.not.match(/crashed/)
+    expect(unhealthy.join(' ')).to.not.match(/below coverage floor/)
+  })
+
+  // One broken query must not silently green the rest of the registry.
+  it('isolates a crashing check and still runs the others', async () => {
+    const ran = []
+
+    const { unhealthy } = await run_data_checks({
+      checks: [
+        fixture_check({
+          check_id: 'first',
+          rows: async () => {
+            ran.push('first')
+            return clean_rows()
+          }
+        }),
+        fixture_check({
+          check_id: 'crashes',
+          rows: async () => {
+            throw new Error('query exploded')
+          }
+        }),
+        fixture_check({
+          check_id: 'third',
+          rows: async () => {
+            ran.push('third')
+            return clean_rows()
+          }
+        })
+      ],
+      parked_entries: []
+    })
+
+    expect(ran).to.deep.equal(['first', 'third'])
+    expect(unhealthy.join(' ')).to.match(/crashed: crashes/)
+  })
+
+  it('turns the run red on a coverage collapse, separately from a crash', async () => {
+    const { unhealthy } = await run_data_checks({
+      checks: [
+        fixture_check({
+          check_id: 'collapsed',
+          min_gradeable_units: 5,
+          rows: clean_rows
+        })
+      ],
+      parked_entries: []
+    })
+
+    expect(unhealthy.join(' ')).to.match(/below coverage floor: collapsed/)
+    expect(unhealthy.join(' ')).to.not.match(/crashed/)
+  })
+
+  it('refuses to run at all when a check is missing a required field', async () => {
+    const broken = fixture_check({ check_id: 'no-floor', rows: clean_rows })
+    delete broken.min_gradeable_units
+
+    let error
+    try {
+      await run_data_checks({ checks: [broken], parked_entries: [] })
+    } catch (err) {
+      error = err
+    }
+
+    expect(error).to.be.an('error')
+    expect(error.message).to.match(/min_gradeable_units/)
   })
 })
 
