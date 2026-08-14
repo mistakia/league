@@ -1,7 +1,7 @@
 // Gate: every league-scoped table is cleared by the per-league test fixture.
 //
-// THE INCIDENT CLASS. `db/fixtures/league.mjs` resets per-league test state by
-// naming each table explicitly. A table added later and not added to that list
+// THE INCIDENT CLASS. `db/fixtures/reset-league-tables.mjs` resets per-league
+// test state by naming each table explicitly. A table added later and not added to that list
 // keeps its rows across spec FILES, because nothing else clears them -- the
 // fixture is the only thing that does, and `test/global.mjs` drops tables once
 // per RUN, not per file. It has produced two incidents:
@@ -30,8 +30,8 @@
 //   the 2026-08-13 incident was about is invisible to an FK-walk.
 //
 //   A COLUMN-NAME rule alone over-fires. 46 tables carry lid/league_id/tid/
-//   team_id and only 20 of them are in the reset list; the fixture deliberately
-//   does not clear the derived analytics tables. A gate that fires on tables
+//   team_id and, when this was measured, only 20 were in the reset list; the
+//   fixture deliberately does not clear the derived analytics tables. A gate that fires on tables
 //   nobody should reset is worse than no gate, because it will be silenced.
 //
 //   REACHING ONLY THE DIRECTLY-SCOPED TABLES under-fires. 4 of the reset list's
@@ -99,7 +99,15 @@ import { fileURLToPath } from 'url'
 const gate_dir = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(gate_dir, '..', '..')
 const schema_path = path.join(repo_root, 'db', 'schema.postgres.sql')
-const fixture_path = path.join(repo_root, 'db', 'fixtures', 'league.mjs')
+// The single shared reset list. It was split across league.mjs and user.mjs
+// until 2026-08-14, and the two had drifted seventeen tables apart -- this
+// gate's own class of defect, duplicated, with no gate on the second copy.
+const fixture_path = path.join(
+  repo_root,
+  'db',
+  'fixtures',
+  'reset-league-tables.mjs'
+)
 const adjudications_path = path.join(
   gate_dir,
   'league-fixture-reset-adjudications.json'
@@ -671,7 +679,8 @@ const run = async () => {
     console.error(`\n${result.findings.length} finding(s):`)
     for (const finding of result.findings) console.error(`  ${finding}`)
     console.error(
-      '\nRepair by adding the table to db/fixtures/league.mjs, or record why it ' +
+      '\nRepair by adding the table to db/fixtures/reset-league-tables.mjs, or ' +
+        'record why it ' +
         'must not be reset in db/gates/league-fixture-reset-adjudications.json ' +
         '(a reason is required; a name filter is not an option).'
     )

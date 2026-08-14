@@ -1,65 +1,12 @@
 import { current_season } from '#constants'
 import { getLeague, createLeague } from '#libs-server'
+import reset_league_tables from './reset-league-tables.mjs'
 
 export default async function (knex, league_params = {}) {
-  // Clear the rows a sequence hands ids to BEFORE restarting it. Restarting
-  // first leaves a window where the sequence is back at 1 while rows holding
-  // uid 1..n are still present, so any insert landing in that window collides
-  // on the primary key. The window is reachable whenever a spec times out
-  // mid-fixture: mocha abandons the test but cannot cancel its in-flight
-  // queries, so the orphaned inserts run on against the next test's reset.
-  await knex('transactions').del()
-  await knex('trades').del()
-  await knex('trades_picks').del()
-  await knex('trades_players').del()
-  await knex('trades_slots').del()
-  await knex('trades_transactions').del()
-  await knex('trade_releases').del()
-  await knex('waivers').del()
-  await knex('waiver_releases').del()
-  await knex('restricted_free_agency_bids').del()
-  await knex('restricted_free_agency_releases').del()
-  // The nomination holds the auction's state for a whole (league, player,
-  // season), so a leftover row outlives the bids that used to carry that state
-  // per row. Omitting it here leaked an announced nomination across spec files
-  // and made a later nominate return 400 -- on CI only, because it depends on
-  // which spec claimed the player first.
-  await knex('restricted_free_agency_nominations').del()
-  // The bid audit trail outlives the bids it describes by design -- nothing in
-  // production ever deletes from it. That makes it exactly the kind of table
-  // this reset must name: a leftover changelog row from an earlier spec file
-  // carries a bid id the next file's sequence will hand out again, so an
-  // assertion on "this bid's history" would read another spec's rows.
-  await knex('bid_changelog').del()
-  await knex('poaches').del()
-  await knex('poach_releases').del()
-  await knex('draft').del()
-  await knex('league_cutlist').del()
-  await knex('super_priority').del()
-  // A leaked OPEN pause breaks the next spec file two ways, and neither names
-  // this table: every write route answers 423, and the partial unique index
-  // league_pauses_one_open_per_league makes the next pause insert a duplicate
-  // key. Nothing in production deletes these rows, so only this reset can.
-  await knex('league_pauses').del()
-  // Rows in these outlive a spec FILE otherwise: nothing in production deletes
-  // them and no other fixture clears them, so a leftover row from an earlier
-  // file is read by the next one. Measured 2026-08-14 by probing every
-  // league-scoped table at fixture entry across a full suite run -- all eight
-  // held rows there. `matchups` had a fixture of its own
-  // (db/fixtures/matchups.mjs) that nothing imports, and two specs were
-  // hand-purging these tables in their own beforeEach to work around the gap.
-  // Ordered children-first: roster_asset_transformation carries FKs to
-  // roster_asset_holding(holding_id).
-  await knex('league_notifications').del()
-  await knex('league_team_daily_values').del()
-  await knex('league_team_seasonlogs').del()
-  await knex('league_team_lineup_starters').del()
-  await knex('league_team_lineups').del()
-  await knex('roster_asset_transformation').del()
-  await knex('roster_asset_holding').del()
-  await knex('matchups').del()
-  await knex('leagues').del()
-  await knex('seasons').del()
+  // One shared list, so a new league-scoped table cannot be remembered here and
+  // forgotten in the other fixture. Must run BEFORE the sequence restarts below
+  // -- see that module's header for the collision window it protects.
+  await reset_league_tables(knex)
 
   // Reset sequences for test isolation (teams_uid_seq reset after team creation)
   await knex.raw('ALTER SEQUENCE waivers_uid_seq RESTART WITH 1')
@@ -83,11 +30,9 @@ export default async function (knex, league_params = {}) {
   })
   const league = await getLeague({ lid: leagueId })
 
+  // Not league-scoped, so deliberately not part of the shared reset: these are
+  // global rows this fixture clears for its own test isolation.
   await knex('users_sources').del()
-  await knex('users_teams').del()
-  await knex('teams').del()
-  await knex('rosters').del()
-  await knex('rosters_players').del()
   await knex('practice').del()
   await knex('player_gamelogs').del()
   // Built up and inserted per table rather than row by row. This fixture runs

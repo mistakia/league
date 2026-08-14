@@ -81,10 +81,10 @@ const seed_full_league = async () => {
       overall_finish: i
     })
   }
-  // Neither users nor seasonlogs/matchups are cleared by the league fixture, so
-  // make this seeding idempotent across beforeEach runs.
-  await knex('league_team_seasonlogs').where({ lid: 1 }).del()
-  await knex('matchups').where({ lid: 1 }).del()
+  // `users` is not league-scoped and the league fixture does not clear it, so
+  // this seeding stays idempotent across beforeEach runs on its own. The
+  // seasonlogs/matchups purges that used to sit here are gone: the league
+  // fixture clears both, and it runs before this.
   await knex('users').insert(users).onConflict('id').merge()
   await knex('league_team_seasonlogs').insert(seasonlogs)
 
@@ -226,13 +226,6 @@ describe('context documents', function () {
 
   after(function () {
     MockDate.reset()
-  })
-
-  // The league fixture does not clear matchups/seasonlogs, so purge them before
-  // every test to keep lifecycle (empty-state) cases isolated from seeded ones.
-  beforeEach(async function () {
-    await knex('matchups').where({ lid: 1 }).del()
-    await knex('league_team_seasonlogs').where({ lid: 1 }).del()
   })
 
   describe('markdown helpers', function () {

@@ -1,30 +1,22 @@
 import { createLeague } from '#libs-server'
 import { current_season } from '#constants'
+import reset_league_tables from './reset-league-tables.mjs'
 
 export default async function (knex) {
-  await knex('users_sources').del()
-  await knex('users_teams').del()
-  await knex('teams').del()
-  await knex('rosters').del()
-  await knex('rosters_players').del()
+  // This used to carry its own hand-maintained copy of the reset list, and it
+  // had drifted seventeen tables behind league.mjs -- clearing neither the
+  // restricted-free-agency tables, nor bid_changelog, draft, league_cutlist,
+  // super_priority, trades_slots, nor league_pauses. Sharing the one list is
+  // what makes that drift unrepresentable rather than merely fixed.
+  await reset_league_tables(knex)
 
-  // Reset sequences for test isolation
+  // Not league-scoped, so not part of the shared reset.
+  await knex('users_sources').del()
+
+  // After the deletes, never before -- see reset-league-tables.mjs for the
+  // primary-key collision window a restart-first ordering opens.
   await knex.raw('ALTER SEQUENCE teams_uid_seq RESTART WITH 1')
   await knex.raw('ALTER SEQUENCE rosters_uid_seq RESTART WITH 1')
-
-  await knex('trades').del()
-  await knex('trades_picks').del()
-  await knex('trades_players').del()
-  await knex('trades_transactions').del()
-  await knex('trade_releases').del()
-  await knex('transactions').del()
-  await knex('waivers').del()
-  await knex('waiver_releases').del()
-  await knex('poaches').del()
-  await knex('poach_releases').del()
-
-  await knex('leagues').del()
-  await knex('seasons').del()
 
   const userId = 1
   await createLeague({
