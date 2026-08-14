@@ -12,6 +12,20 @@
   nobody is watching, so this grades what the cache holds and reports what it
   cannot grade. Refreshing the cache stays the importer's job.
 
+  ## Two interchangeable corpora, not one
+
+  The retained corpus is opportunistic rather than systematic:
+  `player-gamelogs/` holds a per-SEASON file for only some seasons, while
+  `games/` holds a per-GAME box score whose `player_passing_rushing_receiving`
+  table carries all 13 shared stat fields. The second is a full reference source
+  and not a metadata cache, which is what makes a season with no season file
+  gradeable at all -- 2024 has none, and reading only the season file left this
+  check throwing on it.
+
+  Both readers below are exported so either can be pointed at a season
+  independently, which is how their agreement is established rather than
+  assumed.
+
   ## The precondition is load-bearing, not a detail
 
   `min_rate` is ONE-SIDED, and an agreement comparison is two-sided: ours 816
@@ -30,9 +44,8 @@
 import db from '#db'
 import { get } from './cache.mjs'
 
-// The 13 stat fields both corpora carry, PFR's key against ours. PFR's
-// per-season file and its per-game files agree on every one of them, so the two
-// are interchangeable as a reference.
+// The 13 stat fields both corpora carry, in the per-season file's vocabulary
+// against ours.
 export const SHARED_STAT_FIELDS = {
   pa: 'passing_attempts',
   pc: 'passing_completions',
@@ -49,42 +62,181 @@ export const SHARED_STAT_FIELDS = {
   tdrec: 'receiving_touchdowns'
 }
 
+// The same 13 fields in the PER-GAME box score's vocabulary, which is a
+// different spelling of the same numbers: `player_passing_rushing_receiving`
+// carries one row per player per game with `pass_att` where the season file
+// says `pa`. Both readers below normalize onto OUR column names so nothing
+// downstream has to know which corpus answered.
+export const BOX_SCORE_STAT_FIELDS = {
+  pass_att: 'passing_attempts',
+  pass_cmp: 'passing_completions',
+  pass_yds: 'passing_yards',
+  pass_int: 'passing_interceptions',
+  pass_td: 'passing_touchdowns',
+  rush_att: 'rushing_attempts',
+  rush_yds: 'rushing_yards',
+  rush_td: 'rushing_touchdowns',
+  fumbles_lost: 'fumbles_lost',
+  targets: 'targets',
+  rec: 'receptions',
+  rec_yds: 'receiving_yards',
+  rec_td: 'receiving_touchdowns'
+}
+
 const GRADED_SEASON_TYPE = 'REG'
 
-const read_reference_season = async ({ season_year }) => {
+// The cache API serves one file per request and offers no directory listing, so
+// the per-game corpus is read by enumerating the season index and asking for
+// each game. That is ~272 requests a season against our own API, which is why
+// they run concurrently -- measured 167ms each sequentially against 700ms for
+// 48 in parallel.
+const GAME_FETCH_CONCURRENCY = 8
+
+const map_with_concurrency = async ({ items, limit, worker }) => {
+  const results = new Array(items.length)
+  let next = 0
+
+  const run = async () => {
+    while (next < items.length) {
+      const index = next++
+      results[index] = await worker(items[index])
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, () => run())
+  )
+
+  return results
+}
+
+const add_to_week = ({ by_week, week, game_id, row, field_map }) => {
+  if (!Number.isFinite(week)) return
+
+  if (!by_week.has(week)) {
+    by_week.set(week, { games: new Set(), totals: {} })
+  }
+
+  const bucket = by_week.get(week)
+  bucket.games.add(game_id)
+
+  for (const [source_field, column] of Object.entries(field_map)) {
+    const value = Number(row[source_field])
+    if (!Number.isFinite(value)) continue
+    bucket.totals[column] = (bucket.totals[column] || 0) + value
+  }
+}
+
+/**
+ * Per-week reference totals from the per-SEASON player-gamelog file.
+ *
+ * Returns null when the cache holds no such file, which is the ordinary case
+ * rather than an error: the retained corpus is opportunistic, and a season with
+ * no season file is graded from the per-game corpus below instead.
+ */
+export const read_reference_season_file = async ({ season_year }) => {
   const rows = await get({
     key: `/pro-football-reference/player-gamelogs/${season_year}.json`
   })
 
-  if (!Array.isArray(rows)) {
-    throw new Error(
-      `pfr-gamelog-agreement: cache returned no usable array for ${season_year}`
-    )
-  }
+  if (!Array.isArray(rows)) return null
 
   const by_week = new Map()
 
   for (const row of rows) {
     if (row.seas_type !== GRADED_SEASON_TYPE) continue
 
-    const week = Number(row.week)
-    if (!Number.isFinite(week)) continue
+    add_to_week({
+      by_week,
+      week: Number(row.week),
+      game_id: row.pfr_game_id,
+      row,
+      field_map: SHARED_STAT_FIELDS
+    })
+  }
 
-    if (!by_week.has(week)) {
-      by_week.set(week, { games: new Set(), totals: {} })
-    }
+  return by_week
+}
 
-    const bucket = by_week.get(week)
-    bucket.games.add(row.pfr_game_id)
+/**
+ * Per-week reference totals from the per-GAME box scores.
+ *
+ * The season index (`games/<year>.json`) lists every SCHEDULED game with its
+ * week and season type; a game counts toward the week's reference game count
+ * only when its box score is actually cached. That distinction is what keeps
+ * the precondition honest — counting scheduled games would let a week whose box
+ * scores are half-crawled read as complete.
+ */
+export const read_reference_season_games = async ({ season_year }) => {
+  const index = await get({
+    key: `/pro-football-reference/games/${season_year}.json`
+  })
 
-    for (const field of Object.keys(SHARED_STAT_FIELDS)) {
-      const value = Number(row[field])
-      if (!Number.isFinite(value)) continue
-      bucket.totals[field] = (bucket.totals[field] || 0) + value
+  if (!Array.isArray(index)) return null
+
+  const scheduled = index.filter(
+    (game) => game.seas_type === GRADED_SEASON_TYPE && game.pfr_game_id
+  )
+
+  const box_scores = await map_with_concurrency({
+    items: scheduled,
+    limit: GAME_FETCH_CONCURRENCY,
+    worker: async (game) => ({
+      game,
+      box_score: await get({
+        key: `/pro-football-reference/games/${game.pfr_game_id}.json`
+      })
+    })
+  })
+
+  const by_week = new Map()
+
+  for (const { game, box_score } of box_scores) {
+    if (
+      !box_score ||
+      !Array.isArray(box_score.player_passing_rushing_receiving)
+    )
+      continue
+
+    for (const row of box_score.player_passing_rushing_receiving) {
+      add_to_week({
+        by_week,
+        week: Number(game.week),
+        game_id: game.pfr_game_id,
+        row,
+        field_map: BOX_SCORE_STAT_FIELDS
+      })
     }
   }
 
   return by_week
+}
+
+/**
+ * The reference for one season, from whichever corpus holds it.
+ *
+ * The per-season file is preferred where it exists because it is ONE request
+ * against ~272, and the precondition makes the thinner corpus safe rather than
+ * merely cheaper: a week the season file covers incompletely is reported
+ * un-gradeable, never graded. So preferring it costs coverage in the seasons
+ * where both exist and can never produce a false reading. Verified
+ * interchangeable on 2022, where the two corpora reproduce each other's
+ * per-week totals on every week and every stat.
+ */
+const read_reference_season = async ({ season_year }) => {
+  const from_season_file = await read_reference_season_file({ season_year })
+  if (from_season_file && from_season_file.size) {
+    return { source: 'player-gamelogs', by_week: from_season_file }
+  }
+
+  const from_games = await read_reference_season_games({ season_year })
+  if (from_games && from_games.size) {
+    return { source: 'games', by_week: from_games }
+  }
+
+  throw new Error(
+    `pfr-gamelog-agreement: the cache holds neither a player-gamelogs season file nor any per-game box score for ${season_year}`
+  )
 }
 
 const read_our_season = async ({ season_year }) => {
@@ -116,21 +268,25 @@ export const pfr_gamelog_agreement_rows = async ({ season_years }) => {
   const rows = []
 
   for (const season_year of season_years) {
-    const reference = await read_reference_season({ season_year })
+    const { source, by_week } = await read_reference_season({ season_year })
     const ours = await read_our_season({ season_year })
 
-    for (const [week, bucket] of reference) {
+    for (const [week, bucket] of by_week) {
       const our_week = ours.get(week)
 
-      for (const [field, column] of Object.entries(SHARED_STAT_FIELDS)) {
+      for (const column of Object.values(SHARED_STAT_FIELDS)) {
         rows.push({
           season_year,
           week,
           stat: column,
+          // Rides along for the precondition and the report rather than
+          // entering the grain: which corpus answered changes what is
+          // gradeable, so a reader diagnosing an un-gradeable week needs it.
+          reference_source: source,
           reference_games: bucket.games.size,
           our_games: our_week ? Number(our_week.games) : 0,
           numerator: our_week ? Number(our_week[column]) : 0,
-          denominator: bucket.totals[field] || 0
+          denominator: bucket.totals[column] || 0
         })
       }
     }

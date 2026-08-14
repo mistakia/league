@@ -1,14 +1,6 @@
 [
   {
     "check_id": "pfr-gamelog-agreement",
-    "grain": { "season_year": 2024, "week": 1, "stat": "fumbles_lost" },
-    "disposition": "adjudicated",
-    "reason": "PFR and our feed define a lost fumble differently: PFR credits the fumbling player only where the recovering team gained possession on the same play, while our feed counts every fumble the fumbling team did not recover. This is a definitional gap between two correct sources, not a defect in either.",
-    "evidence": "2024 REG week 1: 18 ours against 15 PFR. The same disagreement class is the only recurring one across both graded seasons.",
-    "validated_at": "2026-08-13"
-  },
-  {
-    "check_id": "pfr-gamelog-agreement",
     "grain": { "season_year": 2022, "week": 8, "stat": "receptions" },
     "disposition": "adjudicated",
     "reason": "One reception PFR credits that our feed does not, in a week otherwise matching exactly. Verified against the game book rather than inferred from the aggregate.",

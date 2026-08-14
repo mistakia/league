@@ -171,7 +171,20 @@ export const job_types = {
 
   IMPORT_KEEPTRADECUT_LIQUIDITY: 136,
   AUDIT_KEEPTRADECUT_LIQUIDITY_COVERAGE: 137,
-  AUDIT_ROUTE_SHARE_COVERAGE: 138
+  // 138 retired 2026-08-14 with the route-share coverage audit script, whose
+  // two conditions became the registered data checks `route-share-unfilled`
+  // and `nflfastr-dropback-coverage`. The id stays RESERVED and unlabelled:
+  // the 5 historical `jobs` rows carrying 138 now render without a title, which
+  // is the honest reading — the job that produced them no longer exists — and
+  // reusing the id would attribute them to a different job. Contrast id 13,
+  // whose label is retained because 1354 rows still render through it; the rule
+  // is the row count, not the retirement.
+
+  // One id for the whole registry rather than one per check: the runner is a
+  // single scheduled job whose outcome is detector health, and a per-check id
+  // would put a finding's shape into the runs ledger, where a red row must mean
+  // only that the detector could not answer.
+  AUDIT_DATA_CHECKS: 139
 }
 
 export const job_title_by_id = {
@@ -312,5 +325,5 @@ export const job_title_by_id = {
   135: 'Close Expired Rookie Drafts',
   136: 'Import KeepTradeCut Liquidity (recovery)',
   137: 'Audit KeepTradeCut Liquidity Coverage',
-  138: 'Audit Route Share Coverage'
+  139: 'Run Data Checks'
 }

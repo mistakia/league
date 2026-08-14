@@ -20,15 +20,22 @@
 ## violation class exceeds its recorded baseline.
 45 4 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/audit-drive-seq-coherence.mjs >> /var/log/league/audit-drive-seq-coherence.log 2>&1
 
-## Every Sunday at 5:15AM — grade the route_share input chain end to end: rows
-## carrying routes with no share that could be filled right now, and per-week
-## nflfastR play enrichment (is_qb_dropback, the dropback denominator every
-## per-game rate divides by). The importer's own match-rate oracle is
-## year-grained, so a whole week missing its enrichment is ~2% of its
-## denominator and invisible there; this runs at week grain for that reason.
-## Findings ride self-closing signals -- a non-zero exit here means the CHECK
-## could not run.
-15 5 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/audit-route-share-coverage.mjs >> /var/log/league/audit-route-share-coverage.log 2>&1
+## Every Sunday at 6:15AM — run the whole registered data-check registry
+## (db/checks/registry.mjs). Replaces the retired route-share coverage audit,
+## whose two conditions are now two rows in that registry.
+##
+## The slot is load-bearing, not arbitrary. It sits after every Sunday line in
+## this file (4:00, 4:15, 4:45) and after the last daily 5:xx line (5:45), so
+## nothing here grades data another job is still writing. The keeptradecut audit
+## below records what the alternative costs: it ran 30 minutes too early for
+## months and graded pre-import data. Grading mid-import manufactures exactly
+## the false findings this system claims 100 percent accuracy over.
+##
+## A non-zero exit means a CHECK could not run — it crashed, its gradeable
+## population collapsed below its floor, or its finding failed to reach the
+## signal queue. Findings themselves ride self-closing signals and never turn
+## this red.
+15 6 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/run-data-checks.mjs >> /var/log/league/run-data-checks.log 2>&1
 
 ## Every day at 4:45AM
 ## Must run AFTER import-keeptradecut.mjs (4:30AM, league-imports.cron), which is
