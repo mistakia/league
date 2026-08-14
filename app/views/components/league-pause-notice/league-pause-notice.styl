@@ -1,7 +1,12 @@
-// A fixed in-page notice, which is exactly what $z_page_chrome names. A bare
-// number here would fail `yarn check:z-index-scale`, and the point of the scale
-// is that the whole stacking order is reviewable in one file.
+// The pause banner pins to the top of the app and is the highest layer on the
+// scale — nothing may cover it, because while it shows every write in the
+// league is blocked and the member needs to keep seeing why. It stays in flow
+// (sticky) so it occupies vertical space, and it publishes its rendered height
+// to --app-banner-height so the top-anchored fixed surfaces (.page, the nav
+// drawer) push themselves down rather than being covered. A bare number here
+// would fail `yarn check:z-index-scale`, and the point of the scale is that
+// the whole stacking order is reviewable in one file.
 .league-pause-notice
   position sticky
   top 0
-  z-index $z_page_chrome
+  z-index $z_banner

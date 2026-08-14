@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useLayoutEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -10,6 +10,20 @@ import './league-pause-notice.styl'
 // module that happens to have done it is an accident of the import graph, and
 // a lazily-loaded route that never mounts leaves `fromNow` undefined.
 dayjs.extend(relativeTime)
+
+// The banner is the highest layer on the scale, so the top-anchored fixed
+// surfaces it shares the viewport with (.page, the nav drawer) have to move
+// themselves down by its height rather than be covered by it. Publish the
+// measured height to --app-banner-height on <html>; measured rather than
+// constant because the alert text wraps on narrow screens, so no single px
+// value is correct. ResizeObserver keeps it honest across re-wraps, zoom and
+// orientation changes.
+const sync_banner_height = (banner) => {
+  document.documentElement.style.setProperty(
+    '--app-banner-height',
+    `${banner.offsetHeight}px`
+  )
+}
 
 /**
  * The every-route banner shown while a league is paused.
@@ -25,12 +39,28 @@ dayjs.extend(relativeTime)
  * which is where a member-only surface can fetch it.
  */
 export default function LeaguePauseNotice({ paused_at }) {
+  const banner_ref = useRef(null)
+  const is_paused = Boolean(paused_at)
+
+  useLayoutEffect(() => {
+    const banner = banner_ref.current
+    if (!is_paused || !banner) return undefined
+
+    sync_banner_height(banner)
+    const observer = new ResizeObserver(() => sync_banner_height(banner))
+    observer.observe(banner)
+    return () => {
+      observer.disconnect()
+      document.documentElement.style.removeProperty('--app-banner-height')
+    }
+  }, [is_paused])
+
   if (!paused_at) return null
 
   const paused_since = dayjs(paused_at)
 
   return (
-    <div className='league-pause-notice'>
+    <div ref={banner_ref} className='league-pause-notice'>
       <Alert severity='warning'>
         This league is paused. No roster moves, trades, waivers or draft picks
         can be made until a commissioner resumes it. Paused{' '}

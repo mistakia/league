@@ -41,6 +41,7 @@ $z_context_menu_backdrop = 1650
 $z_context_menu = 1700           // right-click menu, above whatever opened it
 $z_tooltip = 1800
 $z_app_backdrop = 1900           // app-initializing scrim, blocks everything
+$z_banner = 2000                 // app-wide notice banner, above every surface
 
 // Button styles
 $button_border_radius = 4px
@@ -66,6 +67,12 @@ $dst_color = tint(black, 25%)
   // its rungs with calc(), which substitutes where the token is declared, so an
   // override on any descendant silently does nothing. See react-table STYLE.md.
   --rt-z-base $z_react_table_base
+
+  // Rendered height of the app-wide pause banner (0 when none is showing).
+  // league-pause-notice publishes its measured height here so the top-anchored
+  // fixed surfaces (.page, the nav drawer) push themselves down by it instead
+  // of being covered by the banner.
+  --app-banner-height 0px
 
   --pos-QB #ff4040
   --pos-WR #ffbc40
