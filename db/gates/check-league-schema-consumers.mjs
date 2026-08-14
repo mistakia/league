@@ -315,7 +315,22 @@ const collect_corpus = (roots) => {
     // An in-repo root is displayed relative to the REPO, never relative to the
     // root it was collected under -- see `display_path` for why that distinction
     // is load-bearing rather than cosmetic.
-    const in_repo = !path.isAbsolute(root)
+    //
+    // Decided on where the root RESOLVES TO, not on whether it was typed as an
+    // absolute path. `8096a9588` used `!path.isAbsolute(root)` on the stated
+    // premise that "external roots are absolute arguments", and they are not:
+    // scripts/check-cluster-gates.mjs has always passed the user-base roots
+    // relative (`--root ../../../text/league`). So every external file was
+    // classified in-repo, keyed as `../../../text/league/...` instead of the
+    // basename form its adjudications use, and the run reported ~20 real
+    // adjudications as suppressing nothing WHILE re-reporting their findings --
+    // the expensive direction, since the remedy that invites is deleting
+    // load-bearing suppressions. Control 15 caught it, and the gate had been
+    // BLIND on the runner's invocation since; it only ever went green on a
+    // hand-typed absolute-root run.
+    const relative_to_repo = path.relative(repo_root, absolute)
+    const in_repo =
+      !relative_to_repo.startsWith('..') && !path.isAbsolute(relative_to_repo)
     // A root may name a single file (`CLAUDE.md`) as well as a directory.
     if (fs.statSync(absolute).isFile()) {
       if (permitted(absolute))

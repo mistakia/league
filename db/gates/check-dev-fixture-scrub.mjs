@@ -231,6 +231,12 @@ const run = async () => {
       `${total_columns} columns adjudicated, ${scrubbed_columns} scrubbed`
   )
 
+  // The literal "NEGATIVE CONTROL" is the marker scripts/check-cluster-gates.mjs
+  // greps for to decide whether a gate DECLARING a control actually printed one.
+  // Without it this gate read as BLIND through the runner -- "declares a
+  // negative control and printed none" -- while its four controls were in fact
+  // running and going red on every invocation.
+  console.log('NEGATIVE CONTROL')
   let control_failed = false
   for (const [name, passed] of controls) {
     console.log(

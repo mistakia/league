@@ -418,11 +418,11 @@
     },
     {
       "gate": 1,
-      "path": "league/league-backup-system.md",
-      "table": "users",
-      "column": "phone",
-      "kind": "history",
-      "reason": "Accurate history, and the absent column is the point of the sentence. users.phone was dropped 2026-01-12 in adbce55ca; the passage records that scripts/import-database-backup.mjs nulled it as the FIRST statement of its post-restore secret scrub, so every run raised 42703 and aborted before reaching leagues.discord_webhook_url -- seven months of scrubbing nothing while reading as the safe dev-restore path. That is why the script was deleted (369413b61) rather than repaired. Naming the live column instead would destroy the explanation."
+      "path": "cli/lib/pre-commit-guard-inference-config.sh",
+      "table": "config",
+      "column": "machine_registry",
+      "kind": "not_a_column",
+      "reason": "Not the league config table. This is a shell comment in user-base describing BASE's own config, whose machine_registry key is empty under NODE_ENV=test -- the environment validator-seams.mjs injects around. The league schema happens to carry a table called `config`, which is the only reason the prose pair rule binds the two halves together."
     }
   ]
 }

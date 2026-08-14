@@ -178,7 +178,13 @@ const main = () => {
     `checked ${NON_PRODUCTION_CONFIGS.length} non-production config(s) and ` +
       `${DESTRUCTIVE_ENTRYPOINTS.length} destructive entrypoint(s)`
   )
-  console.log(`negative controls: ${3 - control_failures.length}/3 went red`)
+  // The literal "NEGATIVE CONTROL" is the marker scripts/check-cluster-gates.mjs
+  // greps for to decide whether a gate DECLARING a control actually printed one.
+  // Without it this gate read as BLIND through the runner -- "declares a
+  // negative control and printed none" -- while its three controls were in fact
+  // running and going red on every invocation.
+  console.log('NEGATIVE CONTROL')
+  console.log(`  ${3 - control_failures.length}/3 went red`)
 
   for (const failure of control_failures) console.error(`  ${failure}`)
   for (const finding of findings) console.error(`  FINDING: ${finding}`)
