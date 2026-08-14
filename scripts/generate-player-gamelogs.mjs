@@ -1130,6 +1130,25 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['is_active']
  * `gsis_player_id`; the feed has the ids crossed there too. Where a verdict
  * matters, require play stats and snaps to agree.
  *
+ * **Every repair above was applied to `player_gamelogs` and NOT to
+ * `nfl_play_stats`, so REGENERATING a repaired season re-asserts the defect.**
+ * Confirmed 2026-08-14: the linebacker Maurice Alexander (00-0031393, drafted
+ * 2014) holds no 2024 gamelog, while the vendor table still carries his id on
+ * 33 rows of 2024 Detroit plays that belong to the 2022 wide receiver of the
+ * same name (00-0037708). Nothing here will stop it coming back -- the two
+ * candidates share a name, so no name comparison can separate them, and
+ * `player_could_have_played` guards only the "not yet in the league"
+ * direction, deliberately: a career start is provable from a birth date and a
+ * career END is not, so a retirement falsifier would reject real comebacks.
+ * Repairing `nfl_play_stats` in place does not hold either, since the importer
+ * rewrites it from the feed.
+ *
+ * So before regenerating a season a conflation repair has touched, re-check
+ * the repaired pids afterwards rather than assuming the gamelogs stayed fixed.
+ * The wider population and the reasoning behind leaving it as triage rather
+ * than a sweep are in user:text/league/data-quality-and-validation.md
+ * ("A stat row's NAME can also disagree with its own identifier").
+ *
  * The Izzo pair was not the only one. Sweeping the derived scoring tables for
  * rows with no parent gamelog found 44,247 across 26 pids, and the era
  * predicate cleared all but 31 games of it: the QB Daniel Jones, born 1997,
