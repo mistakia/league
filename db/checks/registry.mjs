@@ -121,10 +121,10 @@ const registry = [
       row.our_games > 0 && row.reference_games === row.our_games,
     min_rate: 1.0,
     calibration:
-      '2022 grades 221 units across 17 admitted weeks and 13 stat fields: median 1.0000, zero below 0.99, minimum 0.9984 at week 8 receptions (635 ours against 636). 2024 weeks 1-2 grade at 26 units with 25 exactly 1.0000, read from the per-GAME box scores because the cache holds no 2024 season file. 2025 admits one week of seven, which is the precondition working. Sensitivity: one missing game in a 16-game week reads about 0.94 and the 2021 week 15 defect shape (9 of 16 games) reads about 0.44, so a single missing game is detectable. min_rate is ONE-SIDED and this comparison is two-sided — a ratio above 1.0 passes silently, so the reference-completeness precondition is the only thing catching a reference that is BEHIND ours, and grading a partial 2025 without it produced ratios up to 5.5. FUMBLES_LOST IS THE ONE FIELD THAT ALWAYS SITS ABOVE 1.0, and it is left gradeable deliberately: measured 2026-08-14, every one of the 15 gradeable units exceeding the reference is fumbles_lost (2022 weeks 2-14 and 18, 2024 week 1, 2025 week 5), ours always the larger side, because PFR credits the fumbling player only where the recovering team gained possession while our feed counts every fumble the fumbling team did not recover. That definitional gap can only push OUR side up, which min_rate cannot see — so keeping the field costs nothing and preserves the direction that is a real defect, a week where we are MISSING lost fumbles. Parking it would have meant 15 entries repeating one reason, which is a baseline wearing an adjudication’s schema.',
+      '2022 grades 221 units across 17 admitted weeks and 13 stat fields: median 1.0000, zero below 0.99, minimum 0.9984 at week 8 receptions (635 ours against 636). 2024 weeks 1-2 grade at 26 units with 25 exactly 1.0000, read from the per-GAME box scores because the cache holds no 2024 season file. 2025 admits one week of seven, which is the precondition working. WHAT THIS CHECK CAN AND CANNOT SEE: the precondition demands `reference_games === our_games`, and `our_games` counts the distinct games we hold gamelogs for — so a week where we are missing a WHOLE GAME fails the precondition and is reported un-gradeable, never as a finding. What it grades is disagreement WITHIN the games both sides cover: a missing or mis-attributed player row moves the ratio while the game count stays equal, which is the defect class this catches and the reason the grain is (season_year, week, stat) rather than the game. A prior version of this prose claimed a single missing game reads about 0.94 and is detectable; that is false against the shipped precondition, and simulating it confirms the week goes un-gradeable with zero findings. Whole-game absence is unowned by this registry — one such week costs 13 of about 260 gradeable units, nowhere near the floor, so it is invisible here rather than merely un-graded. min_rate is ONE-SIDED and this comparison is two-sided — a ratio above 1.0 passes silently, so the reference-completeness precondition is the only thing catching a reference that is BEHIND ours, and grading a partial 2025 without it produced ratios up to 5.5. FUMBLES_LOST IS THE ONE FIELD THAT ALWAYS SITS ABOVE 1.0, and it is left gradeable deliberately: measured 2026-08-14, every one of the 15 gradeable units exceeding the reference is fumbles_lost (2022 weeks 2-14 and 18, 2024 week 1, 2025 week 5), ours always the larger side, because PFR credits the fumbling player only where the recovering team gained possession while our feed counts every fumble the fumbling team did not recover. That definitional gap can only push OUR side up, which min_rate cannot see — so keeping the field costs nothing and preserves the direction that is a real defect, a week where we are MISSING lost fumbles. Parking it would have meant 15 entries repeating one reason, which is a baseline wearing an adjudication’s schema.',
     min_gradeable_units: 150,
     repair_command:
-      'Identify the missing or mis-attributed games for the week, then re-import: node scripts/import-plays-nflfastr.mjs --season_year <year> --week <week>'
+      'Identify the missing or mis-attributed PLAYER rows within the week — a whole missing game fails this check’s precondition and is reported un-gradeable rather than as this finding — then re-import: node scripts/import-plays-nflfastr.mjs --season_year <year> --week <week>'
   },
 
   {
@@ -132,21 +132,25 @@ const registry = [
     invariant:
       'Every graded week carries is_qb_dropback on nearly all of its plays. The importer’s own match rate is season-grained, so a nine-game hole is about 2 percent of its denominator and can never breach any floor.',
     grain: ['season_year', 'week', 'season_type'],
-    rows: async () => {
-      const rows = await db('nfl_plays')
+    rows: async () =>
+      db('nfl_plays')
         .select('season_year', 'week', 'season_type')
         .count('* as denominator')
         .select(db.raw('count(is_qb_dropback) as numerator'))
         .where('season_year', '>=', 1999)
         .whereIn('season_type', ['REG', 'POST'])
         .whereNotNull('week')
-        .groupBy('season_year', 'week', 'season_type')
-
-      // A week below this is a scheduling artifact rather than a gradeable
-      // population, which is a precondition in all but name and is why this
-      // check declares none of its own.
-      return rows.filter((row) => Number(row.denominator) >= 100)
-    },
+        .groupBy('season_year', 'week', 'season_type'),
+    // A week below this is a scheduling artifact rather than a gradeable
+    // population. Declared as a precondition rather than filtered out of
+    // `rows`, because a filtered row enters neither the gradeable nor the
+    // un-gradeable population and is reported NOWHERE -- scope discovered
+    // rather than declared, which is the shape that reports "no problems found"
+    // when the answer is "I found nothing to check". A partial import leaving a
+    // week at 40 plays now surfaces as un-gradeable instead of vanishing.
+    // Measured 2026-08-14: all 533 weeks clear this, the smallest at 163, so it
+    // excludes nothing today.
+    precondition: (row) => row.denominator >= 100,
     min_rate: 0.8,
     calibration:
       'The one threshold here that is a genuine TOLERANCE rather than a target: nflfastR does not enrich every play by design. Across 533 graded weeks measured 2026-08-14 the median is 0.9540 and the minimum is 0.8493, with zero weeks below the floor; the one real defect this was written for (2021 REG week 15, before repair) sat at 0.425. The floor is six points under the healthy minimum and thirty-seven above the defect — calibrated on the gap, not on the worst normal reading. PRE is excluded because nflfastR publishes REG and POST only, so grading it would put roughly 100 permanently-red weeks in front of the one that is real.',

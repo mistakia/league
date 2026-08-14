@@ -22,6 +22,25 @@
   is indistinguishable from health. Both arms are validated against the same
   field for that reason, and a row missing it throws rather than defaulting.
 
+  A row whose `denominator` is zero is UN-GRADEABLE on both arms, not clean. It
+  scanned nothing, so there is no population to judge it against; grading it
+  passed the row silently while still counting it toward the detector-health
+  floor, which is the same false green the contract exists to prevent.
+
+  ## What the two thresholds compare
+
+  `min_rate` is PER ROW -- each unit carries its own ratio against its own
+  denominator, and a unit below the floor is its own finding.
+
+  `max_count` is NOT per row. It is a budget over the check's whole unsuppressed
+  violation count, because the two row shapes in the registry disagree about
+  what one row means: a per-violation check emits one row per bad row carrying
+  `numerator: 1`, while an aggregate check emits a single row whose numerator is
+  already a count. Comparing per row would let the first shape pass ANY
+  threshold above zero, however many violations it found. Parked entries are
+  subtracted before the budget applies, so a threshold covers what is genuinely
+  unaccounted for.
+
   ## Parking
 
   One file, one code path, two dispositions. An `adjudicated` entry asserts
@@ -110,6 +129,16 @@ export const classify_check_rows = ({ rows, check, parked = [] }) => {
 
     const classified = { ...row, numerator, denominator }
 
+    // A row that scanned NOTHING cannot be graded, on either arm. The rate arm
+    // would divide by zero and the count arm would compare against an empty
+    // population, and both previously read as CLEAN -- so a unit whose scan
+    // collapsed passed silently while still counting toward the detector-health
+    // floor. Reported un-gradeable for the same reason a thin reference is.
+    if (denominator <= 0) {
+      ungradeable.push(classified)
+      continue
+    }
+
     // Declared preconditions gate GRADEABILITY, never the verdict. A row that
     // fails one is reported as un-gradeable rather than passed, because a
     // reference too thin to judge against reads as clean under a one-sided
@@ -122,24 +151,31 @@ export const classify_check_rows = ({ rows, check, parked = [] }) => {
     gradeable.push(classified)
   }
 
-  const below_threshold = gradeable.filter((row) =>
+  // The rate arm is per row: each unit is its own ratio against its own
+  // denominator. The count arm is NOT -- `max_count` is a budget over the
+  // check's whole violation count, which is the only reading both row shapes in
+  // the registry share. One shape emits a row per violation carrying
+  // `numerator: 1`, the other emits a single row carrying an aggregate count,
+  // and comparing per row would let a per-violation check pass any threshold
+  // above 0 no matter how many violations it found.
+  const violating = gradeable.filter((row) =>
     has_min_rate
-      ? row.denominator > 0 && row.numerator / row.denominator < min_rate
-      : row.numerator > max_count
+      ? row.numerator / row.denominator < min_rate
+      : row.numerator > 0
   )
 
-  const findings = []
+  const unsuppressed = []
   const adjudicated = []
   const baselined = []
 
-  for (const row of below_threshold) {
+  for (const row of violating) {
     const key = grain_key({ check_id, grain, row })
     const entry = parked_by_key.get(key)
 
     // An UNREGISTERED subject defaults to unadjudicated. Silence is never the
     // failure mode of an omission -- a key with no entry is a finding.
     if (!entry) {
-      findings.push(row)
+      unsuppressed.push(row)
       continue
     }
 
@@ -151,6 +187,16 @@ export const classify_check_rows = ({ rows, check, parked = [] }) => {
       baselined.push({ ...row, parked: entry })
     }
   }
+
+  // Parked violations are subtracted BEFORE the budget is applied, so a
+  // threshold covers what is genuinely unaccounted for rather than being spent
+  // on rows that already carry a reason.
+  const unsuppressed_violations = unsuppressed.reduce(
+    (total, row) => total + row.numerator,
+    0
+  )
+  const within_budget = has_max_count && unsuppressed_violations <= max_count
+  const findings = within_budget ? [] : unsuppressed
 
   const stale_parked = parked_for_check.filter(
     (entry) =>
@@ -167,6 +213,100 @@ export const classify_check_rows = ({ rows, check, parked = [] }) => {
     baselined,
     stale_parked
   }
+}
+
+const REQUIRED_STRING_FIELDS = ['invariant', 'calibration', 'repair_command']
+
+/**
+ * Validate the registry itself, at load.
+ *
+ * The registry's header calls several fields REQUIRED and nothing enforced any
+ * of them -- the only check was a spec, which runs at test time rather than at
+ * load, so a row could reach production missing any of them. The consequential
+ * one is `min_gradeable_units`: omit it and `graded < undefined` is `false`, so
+ * the detector-health floor silently disappears with no error anywhere.
+ *
+ * Returns the checks so a caller can validate and bind in one expression.
+ */
+export const validate_registry = ({ checks }) => {
+  if (!Array.isArray(checks) || !checks.length) {
+    throw new Error('registry must be a non-empty array of checks')
+  }
+
+  const seen = new Set()
+
+  checks.forEach((check, index) => {
+    const at = `registry entry ${index}`
+
+    if (!check.check_id || typeof check.check_id !== 'string') {
+      throw new Error(`${at} is missing a \`check_id\``)
+    }
+
+    // A duplicate id is worse than a missing field: both rows would emit and
+    // resolve on ONE pair of pinned fingerprints, so each would close the
+    // other's open signal.
+    if (seen.has(check.check_id)) {
+      throw new Error(`${at} repeats the check_id \`${check.check_id}\``)
+    }
+    seen.add(check.check_id)
+
+    const where = `${at} (${check.check_id})`
+
+    if (typeof check.rows !== 'function') {
+      throw new Error(`${where} must declare a \`rows\` function`)
+    }
+
+    if (!Array.isArray(check.grain) || !check.grain.length) {
+      throw new Error(`${where} must declare a non-empty \`grain\``)
+    }
+
+    for (const field of REQUIRED_STRING_FIELDS) {
+      if (typeof check[field] !== 'string' || !check[field].trim()) {
+        throw new Error(`${where} must carry a non-empty \`${field}\``)
+      }
+    }
+
+    const declared_thresholds = [check.min_rate, check.max_count].filter(
+      (value) => value !== undefined
+    )
+    if (declared_thresholds.length !== 1) {
+      throw new Error(
+        `${where} must declare exactly one of \`min_rate\` / \`max_count\``
+      )
+    }
+
+    if (
+      typeof check.min_gradeable_units !== 'number' ||
+      !Number.isFinite(check.min_gradeable_units) ||
+      check.min_gradeable_units < 1
+    ) {
+      throw new Error(
+        `${where} must carry a \`min_gradeable_units\` of at least 1 -- an absent floor does not throw, it compares against undefined and silently disappears`
+      )
+    }
+
+    if (check.min_denominator !== undefined) {
+      if (
+        typeof check.min_denominator !== 'number' ||
+        !Number.isFinite(check.min_denominator) ||
+        check.min_denominator < 1
+      ) {
+        throw new Error(
+          `${where} declares a \`min_denominator\` that is not a positive number`
+        )
+      }
+    }
+
+    if (check.precondition !== undefined) {
+      if (typeof check.precondition !== 'function') {
+        throw new Error(
+          `${where} declares a \`precondition\` that is not a function`
+        )
+      }
+    }
+  })
+
+  return checks
 }
 
 const DISPOSITIONS = ['adjudicated', 'baselined']

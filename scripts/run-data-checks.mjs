@@ -87,7 +87,11 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { is_main, report_job, resolve_signal } from '#libs-server'
-import { classify_check_rows, load_parked } from '#libs-server/data-check.mjs'
+import {
+  classify_check_rows,
+  load_parked,
+  validate_registry
+} from '#libs-server/data-check.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import registry from '#db/checks/registry.mjs'
@@ -389,9 +393,15 @@ export const run_check = async ({ check, parked }) => {
 }
 
 const run_data_checks = async () => {
+  // Validate the registry BEFORE anything runs. A row missing a required field
+  // is a broken detector, not a finding, and the floor is the field that fails
+  // silently: `graded < undefined` is false, so an absent min_gradeable_units
+  // removes the check's coverage guarantee with no error anywhere.
+  const checks = validate_registry({ checks: registry })
+
   const parked = load_parked({
     entries: JSON.parse(fs.readFileSync(PARKED_PATH, 'utf8')),
-    checks_by_id: new Map(registry.map((check) => [check.check_id, check]))
+    checks_by_id: new Map(checks.map((check) => [check.check_id, check]))
   })
 
   const crashed = []
@@ -402,7 +412,7 @@ const run_data_checks = async () => {
   // Each check is isolated: one throwing check must not suppress the others,
   // or a single broken query silently turns the whole registry into a green
   // run over four checks that never executed.
-  for (const check of registry) {
+  for (const check of checks) {
     try {
       const { result, emits_ok } = await run_check({ check, parked })
       total_findings += result.findings.length + result.stale_parked.length
@@ -421,7 +431,7 @@ const run_data_checks = async () => {
   }
 
   console.log(
-    `run-data-checks: ${registry.length} checks, ${total_findings} finding(s), ${crashed.length} crashed, ${collapsed.length} below coverage floor, ${emit_failures.length} with a failed emit`
+    `run-data-checks: ${checks.length} checks, ${total_findings} finding(s), ${crashed.length} crashed, ${collapsed.length} below coverage floor, ${emit_failures.length} with a failed emit`
   )
 
   const unhealthy = [

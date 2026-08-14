@@ -6,7 +6,11 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 
-import { classify_check_rows, load_parked } from '#libs-server/data-check.mjs'
+import {
+  classify_check_rows,
+  load_parked,
+  validate_registry
+} from '#libs-server/data-check.mjs'
 import { run_check } from '#scripts/run-data-checks.mjs'
 import registry from '#db/checks/registry.mjs'
 
@@ -155,6 +159,116 @@ describe('data checks', function () {
           check: count_check
         })
       ).to.throw(/denominator/)
+    })
+  })
+
+  describe('classifier / zero denominator', function () {
+    it('reports a zero-denominator rate row as un-gradeable, never as clean', () => {
+      // Reachable in production: the PFR probe writes `bucket.totals[column] ||
+      // 0`, so a reference field-name drift zeroes a stat's denominator across
+      // every week. Graded, this passed silently AND counted toward the floor.
+      const result = classify_check_rows({
+        rows: [{ season_year: 2022, week: 8, numerator: 300, denominator: 0 }],
+        check: rate_check
+      })
+
+      expect(result.ungradeable).to.have.lengthOf(1)
+      expect(result.gradeable).to.have.lengthOf(0)
+      expect(result.findings).to.have.lengthOf(0)
+    })
+
+    it('reports a zero-denominator count row as un-gradeable, never as clean', () => {
+      const result = classify_check_rows({
+        rows: [
+          {
+            child_table: 'player_receiving_gamelogs',
+            esbid: null,
+            pid: null,
+            numerator: 0,
+            denominator: 0
+          }
+        ],
+        check: count_check
+      })
+
+      expect(result.ungradeable).to.have.lengthOf(1)
+      expect(result.gradeable).to.have.lengthOf(0)
+    })
+  })
+
+  describe('classifier / max_count is a budget, not a per-row test', function () {
+    const budgeted_check = {
+      check_id: 'gamelog-orphans',
+      grain: ['child_table', 'esbid', 'pid'],
+      max_count: 5
+    }
+
+    const orphan_rows = (count) =>
+      Array.from({ length: count }, (_, index) => ({
+        child_table: 'player_receiving_gamelogs',
+        esbid: 2003081500 + index,
+        pid: `PLAY-ER${index}-01234${index}`,
+        numerator: 1,
+        denominator: 137900
+      }))
+
+    it('reports every violation once the TOTAL exceeds the budget', () => {
+      // The regression: compared per row, `numerator: 1 > 5` is false for each
+      // of the ten, so ten orphans would report zero findings under a budget of
+      // five and the check would be silently disabled.
+      const result = classify_check_rows({
+        rows: orphan_rows(10),
+        check: budgeted_check
+      })
+
+      expect(result.findings).to.have.lengthOf(10)
+    })
+
+    it('stays clean while the total sits inside the budget', () => {
+      const result = classify_check_rows({
+        rows: orphan_rows(5),
+        check: budgeted_check
+      })
+
+      expect(result.findings).to.have.lengthOf(0)
+      expect(result.gradeable).to.have.lengthOf(5)
+    })
+
+    it('spends the budget on UNSUPPRESSED violations only', () => {
+      const rows = orphan_rows(7)
+      const parked = rows.slice(0, 3).map((row) => ({
+        check_id: 'gamelog-orphans',
+        grain: {
+          child_table: row.child_table,
+          esbid: row.esbid,
+          pid: row.pid
+        },
+        disposition: 'baselined',
+        owner: 'user:task/league/example.md'
+      }))
+
+      const result = classify_check_rows({
+        rows,
+        check: budgeted_check,
+        parked
+      })
+
+      // 7 violations, 3 parked, 4 unsuppressed -- inside a budget of 5.
+      expect(result.baselined).to.have.lengthOf(3)
+      expect(result.findings).to.have.lengthOf(0)
+    })
+
+    it('treats an aggregate-count row the same way', () => {
+      const result = classify_check_rows({
+        rows: [{ scope: 'all', numerator: 6, denominator: 32461 }],
+        check: {
+          check_id: 'route-share-unfilled',
+          grain: ['scope'],
+          max_count: 5
+        }
+      })
+
+      expect(result.findings).to.have.lengthOf(1)
     })
   })
 
@@ -432,7 +546,11 @@ describe('data checks / coverage collapse', function () {
     return null
   }
 
-  it('throws when every scanned population is empty, though the row count is met', async () => {
+  // A fully emptied corpus is caught by the ROW-COUNT floor, because a
+  // zero-denominator row is un-gradeable rather than clean -- so the four
+  // sentinel rows never reach `gradeable` at all. min_denominator is what
+  // catches the harder case below, where the scan is thin but not empty.
+  it('throws when every scanned population is empty', async () => {
     const emptied = Object.fromEntries(
       Object.keys(HEALTHY_TABLES).map((child_table) => [child_table, 0])
     )
@@ -446,7 +564,7 @@ describe('data checks / coverage collapse', function () {
 
     expect(err).to.be.an('error')
     expect(err.name).to.equal('CoverageCollapseError')
-    expect(err.message).to.match(/scanned only 0 row\(s\)/)
+    expect(err.message).to.match(/graded only 0 unit\(s\)/)
   })
 
   it('throws when ONE sub-population collapses behind healthy siblings', async () => {
@@ -477,13 +595,15 @@ describe('data checks / coverage collapse', function () {
   })
 
   it('leaves a check declaring no min_denominator on the row-count floor alone', async () => {
-    const emptied = Object.fromEntries(
-      Object.keys(HEALTHY_TABLES).map((child_table) => [child_table, 0])
-    )
-
+    // The same thin scan that trips the floor above passes here, because
+    // without a declared min_denominator the row count is the only floor and
+    // all four rows are gradeable.
     const { result } = await run_check({
       check: fixed_size_check({
-        denominator_by_table: emptied,
+        denominator_by_table: {
+          ...HEALTHY_TABLES,
+          player_passing_gamelogs: 12
+        },
         min_denominator: undefined
       }),
       parked: []
@@ -628,8 +748,163 @@ describe('data checks / resolve inspection', function () {
   })
 })
 
+describe('data check registry / load-time validation', function () {
+  const valid_check = () => ({
+    check_id: 'example-check',
+    invariant: 'Something must hold.',
+    grain: ['season_year'],
+    rows: async () => [],
+    max_count: 0,
+    calibration: 'Measured today: zero.',
+    min_gradeable_units: 1,
+    repair_command: 'do the thing'
+  })
+
+  it('accepts the shipped registry', () => {
+    expect(() => validate_registry({ checks: registry })).to.not.throw()
+  })
+
+  it('accepts a well-formed check', () => {
+    expect(() => validate_registry({ checks: [valid_check()] })).to.not.throw()
+  })
+
+  // The consequential one. An absent floor does not throw at grading time --
+  // `graded < undefined` is false -- so the check keeps running with no
+  // coverage guarantee at all and nothing anywhere says so.
+  it('throws on a check with no min_gradeable_units', () => {
+    const check = valid_check()
+    delete check.min_gradeable_units
+
+    expect(() => validate_registry({ checks: [check] })).to.throw(
+      /min_gradeable_units/
+    )
+  })
+
+  for (const field of ['invariant', 'calibration', 'repair_command']) {
+    it(`throws on a check with no ${field}`, () => {
+      const check = valid_check()
+      delete check[field]
+
+      expect(() => validate_registry({ checks: [check] })).to.throw(field)
+    })
+
+    it(`throws on a check whose ${field} is whitespace`, () => {
+      const check = valid_check()
+      check[field] = '   '
+
+      expect(() => validate_registry({ checks: [check] })).to.throw(field)
+    })
+  }
+
+  it('throws on a check declaring neither threshold', () => {
+    const check = valid_check()
+    delete check.max_count
+
+    expect(() => validate_registry({ checks: [check] })).to.throw(/min_rate/)
+  })
+
+  it('throws on a check declaring both thresholds', () => {
+    expect(() =>
+      validate_registry({ checks: [{ ...valid_check(), min_rate: 1.0 }] })
+    ).to.throw(/min_rate/)
+  })
+
+  it('throws on a check with no rows function', () => {
+    const check = valid_check()
+    check.rows = 'not a function'
+
+    expect(() => validate_registry({ checks: [check] })).to.throw(/rows/)
+  })
+
+  it('throws on a check with an empty grain', () => {
+    const check = valid_check()
+    check.grain = []
+
+    expect(() => validate_registry({ checks: [check] })).to.throw(/grain/)
+  })
+
+  // Two rows sharing an id would emit and resolve on ONE pair of pinned
+  // fingerprints, so each would close the other's open signal.
+  it('throws on a duplicate check_id', () => {
+    expect(() =>
+      validate_registry({ checks: [valid_check(), valid_check()] })
+    ).to.throw(/repeats the check_id/)
+  })
+
+  it('throws on an empty registry', () => {
+    expect(() => validate_registry({ checks: [] })).to.throw(/non-empty/)
+  })
+
+  it('throws on a non-positive min_denominator', () => {
+    expect(() =>
+      validate_registry({ checks: [{ ...valid_check(), min_denominator: 0 }] })
+    ).to.throw(/min_denominator/)
+  })
+
+  it('throws on a precondition that is not a function', () => {
+    expect(() =>
+      validate_registry({
+        checks: [{ ...valid_check(), precondition: 'nope' }]
+      })
+    ).to.throw(/precondition/)
+  })
+})
+
 describe('data check registry', function () {
   const checks_by_id = new Map(registry.map((check) => [check.check_id, check]))
+
+  // Pins what pfr-gamelog-agreement can and cannot see, through its SHIPPED
+  // precondition. The calibration claimed for a while that a single missing
+  // game "reads about 0.94 and is detectable"; it is not, because the
+  // precondition compares game COUNTS and rejects the week before any ratio is
+  // computed. Asserting it here is what stops that claim drifting back in.
+  describe('pfr-gamelog-agreement reach', function () {
+    const pfr = checks_by_id.get('pfr-gamelog-agreement')
+
+    const week_rows = ({ week, our_games, reference_games, ratio }) =>
+      ['receptions', 'receiving_yards', 'targets'].map((stat) => ({
+        season_year: 2022,
+        week,
+        stat,
+        our_games,
+        reference_games,
+        numerator: 1000 * ratio,
+        denominator: 1000
+      }))
+
+    it('reports a week MISSING a whole game as un-gradeable, never as a finding', () => {
+      const result = classify_check_rows({
+        rows: week_rows({
+          week: 18,
+          our_games: 9,
+          reference_games: 16,
+          ratio: 0.44
+        }),
+        check: pfr,
+        parked: []
+      })
+
+      expect(result.ungradeable).to.have.lengthOf(3)
+      expect(result.gradeable).to.have.lengthOf(0)
+      expect(result.findings).to.have.lengthOf(0)
+    })
+
+    it('DOES report disagreement within games both sides cover', () => {
+      const result = classify_check_rows({
+        rows: week_rows({
+          week: 8,
+          our_games: 16,
+          reference_games: 16,
+          ratio: 0.94
+        }),
+        check: pfr,
+        parked: []
+      })
+
+      expect(result.gradeable).to.have.lengthOf(3)
+      expect(result.findings).to.have.lengthOf(3)
+    })
+  })
 
   it('holds five checks with unique ids', () => {
     expect(registry).to.have.lengthOf(5)
