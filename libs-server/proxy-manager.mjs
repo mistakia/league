@@ -53,6 +53,15 @@ const parse_proxy_string = (proxy_str) => {
   return proxy_config
 }
 
+// A proxy key is `host:port:username`, and the username is a credential — vendor
+// proxies encode the session/auth configuration into it. Never interpolate a key
+// into a log line or an error message: those reach stderr, the job logs, and any
+// error surface that renders the message. This renders the routing half only.
+const proxy_display_label = (proxy_key) =>
+  typeof proxy_key === 'string'
+    ? proxy_key.split(':').slice(0, 2).join(':')
+    : ''
+
 // ProxyPool manages a single pool of proxies with round-robin selection
 class ProxyPool {
   constructor(name) {
@@ -84,7 +93,7 @@ class ProxyPool {
       proxy.failed = false
     }
     log(
-      `[${this.name}] Reset ${failed_keys.length} failed proxies: ${failed_keys.join(', ')}`
+      `[${this.name}] Reset ${failed_keys.length} failed proxies: ${failed_keys.map(proxy_display_label).join(', ')}`
     )
   }
 
@@ -139,7 +148,9 @@ class ProxyPool {
       const proxy = this.proxies.get(key)
       if (proxy && !proxy.failed) {
         proxy.last_used = Date.now()
-        log(`[${this.name}] Selected proxy (round-robin): ${key}`)
+        log(
+          `[${this.name}] Selected proxy (round-robin): ${proxy_display_label(key)}`
+        )
         return { key, ...proxy, pool_name: this.name }
       }
 
@@ -152,7 +163,9 @@ class ProxyPool {
   mark_proxy_failed(proxy_config) {
     for (const [key, proxy] of this.proxies.entries()) {
       if (proxy.connection_string === proxy_config.connection_string) {
-        log(`[${this.name}] Marking proxy ${key} as failed`)
+        log(
+          `[${this.name}] Marking proxy ${proxy_display_label(key)} as failed`
+        )
         proxy.failed = true
         return
       }
@@ -328,7 +341,7 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
 
   while (retries < max_retries) {
     try {
-      log(`Fetching ${url} via proxy ${proxy_config.connection_string}`)
+      log(`Fetching ${url} via proxy ${proxy_config.host}:${proxy_config.port}`)
 
       const proxyAgent = new ProxyAgent(proxy_config.connection_string)
 
@@ -341,7 +354,7 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
 
       if (!response.ok) {
         throw new Error(
-          `HTTP ${response.status}: ${response.statusText} (proxy: ${proxy_config.key})`
+          `HTTP ${response.status}: ${response.statusText} (proxy: ${proxy_display_label(proxy_config.key)})`
         )
       }
 
@@ -351,7 +364,7 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
       return response
     } catch (error) {
       log(
-        `Error with proxy ${proxy_config.connection_string}: ${error.message}`
+        `Error with proxy ${proxy_config.host}:${proxy_config.port}: ${error.message}`
       )
       proxy_manager.mark_proxy_failed(proxy_config)
 
@@ -439,9 +452,9 @@ export async function fetch_with_retry({
 
         if (current_proxy) {
           retry_log(
-            `Attempt ${attempt + 1}/${max_retries + 1} for ${url} via proxy ${current_proxy.key} (pool: ${current_proxy.pool_name})`
+            `Attempt ${attempt + 1}/${max_retries + 1} for ${url} via proxy ${proxy_display_label(current_proxy.key)} (pool: ${current_proxy.pool_name})`
           )
-          proxies_tried.push(current_proxy.key)
+          proxies_tried.push(proxy_display_label(current_proxy.key))
           const proxyAgent = new ProxyAgent(current_proxy.connection_string)
           response = await undiciFetch(url, {
             ...attempt_options,
@@ -461,7 +474,7 @@ export async function fetch_with_retry({
 
       if (!response.ok) {
         const proxy_info = current_proxy
-          ? ` (proxy: ${current_proxy.key}, pool: ${current_proxy.pool_name})`
+          ? ` (proxy: ${proxy_display_label(current_proxy.key)}, pool: ${current_proxy.pool_name})`
           : ' (direct)'
         throw new Error(
           `HTTP ${response.status}: ${response.statusText}${proxy_info}`
@@ -489,7 +502,7 @@ export async function fetch_with_retry({
       }
 
       const proxy_info = current_proxy
-        ? ` via proxy ${current_proxy.key} (pool: ${current_proxy.pool_name})`
+        ? ` via proxy ${proxy_display_label(current_proxy.key)} (pool: ${current_proxy.pool_name})`
         : ' (direct)'
       retry_log(
         `Attempt ${attempt + 1} failed for ${url}${proxy_info}: ${error.message}`
@@ -497,7 +510,9 @@ export async function fetch_with_retry({
 
       // Mark proxy as failed if we were using one
       if (use_proxy && current_proxy) {
-        retry_log(`Marking proxy ${current_proxy.key} as failed`)
+        retry_log(
+          `Marking proxy ${proxy_display_label(current_proxy.key)} as failed`
+        )
         proxy_manager.mark_proxy_failed(current_proxy)
         const stats = proxy_manager.get_pool_stats(current_proxy.pool_name)
         if (stats) {
