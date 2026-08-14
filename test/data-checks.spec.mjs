@@ -853,6 +853,58 @@ describe('data check registry / load-time validation', function () {
 describe('data check registry', function () {
   const checks_by_id = new Map(registry.map((check) => [check.check_id, check]))
 
+  /*
+    Drives nflfastr-dropback-coverage's DECLARED min_rate against the two
+    readings its calibration names. This is the coverage the deleted
+    scripts.audit-route-share-coverage spec used to carry: it pinned
+    COVERAGE_FLOOR = 0.8 against the corpus first percentile (0.857) and the
+    real 2021 week 15 defect (0.425). Without it, moving the floor to 0.9 passes
+    every other test in this file while turning roughly the first percentile of
+    a 533-week corpus red.
+  */
+  describe('nflfastr-dropback-coverage calibration', function () {
+    const dropback = checks_by_id.get('nflfastr-dropback-coverage')
+
+    const week_at = (rate) => ({
+      season_year: 2021,
+      week: 15,
+      season_type: 'REG',
+      numerator: Math.round(1000 * rate),
+      denominator: 1000
+    })
+
+    it('passes the healthy first-percentile reading of 0.857', () => {
+      const result = classify_check_rows({
+        rows: [week_at(0.857)],
+        check: dropback,
+        parked: []
+      })
+
+      expect(result.gradeable).to.have.lengthOf(1)
+      expect(result.findings).to.have.lengthOf(0)
+    })
+
+    it('reports the real 2021 week 15 defect reading of 0.425', () => {
+      const result = classify_check_rows({
+        rows: [week_at(0.425)],
+        check: dropback,
+        parked: []
+      })
+
+      expect(result.findings).to.have.lengthOf(1)
+    })
+
+    it('passes the observed healthy minimum of 0.8493', () => {
+      const result = classify_check_rows({
+        rows: [week_at(0.8493)],
+        check: dropback,
+        parked: []
+      })
+
+      expect(result.findings).to.have.lengthOf(0)
+    })
+  })
+
   // Pins what pfr-gamelog-agreement can and cannot see, through its SHIPPED
   // precondition. The calibration claimed for a while that a single missing
   // game "reads about 0.94 and is detectable"; it is not, because the

@@ -363,14 +363,29 @@ export const run_check = async ({ check, parked }) => {
 
     emits_ok = emits_ok && emit_ok
 
-    for (const row of findings) {
+    // Bounded for the same reason the signal payload is. A `max_count: 0` check
+    // spans six-figure row counts, and a mass parent retraction would otherwise
+    // write one log line per finding into the cron log. The residual count is
+    // what keeps the truncation honest.
+    for (const row of findings.slice(0, SAMPLE_SIZE)) {
       console.log(
         `  FINDING ${check.check_id} ${format_grain({ check, row })} ${row.numerator}/${row.denominator}`
       )
     }
-    for (const entry of stale) {
+    if (findings.length > SAMPLE_SIZE) {
+      console.log(
+        `  ...and ${findings.length - SAMPLE_SIZE} further finding(s) not printed; the signal payload carries a spread sample`
+      )
+    }
+
+    for (const entry of stale.slice(0, SAMPLE_SIZE)) {
       console.log(
         `  PARKED-STALE ${check.check_id} ${JSON.stringify(entry.grain)} (${entry.disposition}) suppressed nothing this run`
+      )
+    }
+    if (stale.length > SAMPLE_SIZE) {
+      console.log(
+        `  ...and ${stale.length - SAMPLE_SIZE} further parked entr(ies) suppressing nothing`
       )
     }
   } else {
