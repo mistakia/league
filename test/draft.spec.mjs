@@ -351,7 +351,16 @@ describe('API /draft', function () {
           .add('2', 'day')
           .toISOString()
       )
-      const player = await selectPlayer({ rookie: true })
+      // `make selection` above drafted a rookie onto team 1's week-0 roster, and
+      // this is the only case in the file that expects a 200 — so an unexcluded
+      // draw that collides with it answers `player rostered` on the RESUME leg
+      // and reads as the pause guard having refused a request it never saw. The
+      // pool is ~34 rookie RBs; measured at 11 failures in 250 runs before this.
+      const drafted_pids = await knex('draft').whereNotNull('pid').pluck('pid')
+      const player = await selectPlayer({
+        rookie: true,
+        exclude_pids: drafted_pids
+      })
       const make_request = () =>
         chai_request
           .execute(server)
