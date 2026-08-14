@@ -22,6 +22,20 @@ debug.enable('audit-conflated-player-identity')
 //   gsis_it_player_id   integer, usable from the 2003 cohort onward
 //   nfl_draft_year      the recorded value itself
 //
+// gsis_it_player_id is a LOWER BOUND on entry rather than a point estimate. GSIS
+// issues it at first contact — a workout, a camp invite, a practice squad — which
+// for a late entrant precedes the entry season by years. Measured across the 8532
+// three-vote rows, it dissents low against agreeing draft-year and gsis votes on
+// exactly 4 rows and dissents HIGH on none, and all 4 are undrafted CFL or rugby
+// converts and kickers (adam bighill, jordan mudge, lirim hajrullahu, taylor
+// russolino). So an early gsis_it read is assignment timing, not a contradiction.
+//
+// It is discounted only when the row's own date_of_birth makes the early first
+// contact the player's own — birth + 20 <= the year the id implies. That keeps the
+// hijack this task found visible: a row holding an OLDER person's gsis_it (the
+// father/son shape, the 2022 devin taylor holding 40080) fails the birth test and
+// still flags, as does any row with no birth date. A LATE read is never discounted,
+// because an id cannot be issued after the player has already played.
 // date_of_birth is deliberately NOT a hard vote. Its implied entry year (birth +
 // 22) is legitimately off by several years for late entrants — AFL punters,
 // rugby and CFL converts, two-sport players — and treating it as exact floods
@@ -126,19 +140,37 @@ const VOTES = `
       ) END AS era_from_nfl_player_id
     FROM candidate
   ),
-  scored AS (
+  bounded AS (
     SELECT
       voted.*,
+      CASE
+        WHEN era_from_gsis_it IS NOT NULL
+          AND birth_year IS NOT NULL
+          AND birth_year + 20 <= era_from_gsis_it
+        THEN greatest(
+          era_from_gsis_it,
+          least(
+            coalesce(era_from_draft_year, era_from_gsis_it),
+            coalesce(era_from_gsis, era_from_gsis_it)
+          )
+        )
+        ELSE era_from_gsis_it
+      END AS era_from_gsis_it_bounded
+    FROM voted
+  ),
+  scored AS (
+    SELECT
+      bounded.*,
       (SELECT max(vote) FROM unnest(ARRAY[
-        era_from_draft_year, era_from_gsis, era_from_gsis_it
+        era_from_draft_year, era_from_gsis, era_from_gsis_it_bounded
       ]) vote) -
       (SELECT min(vote) FROM unnest(ARRAY[
-        era_from_draft_year, era_from_gsis, era_from_gsis_it
+        era_from_draft_year, era_from_gsis, era_from_gsis_it_bounded
       ]) vote) AS hard_spread,
       (SELECT count(vote) FROM unnest(ARRAY[
-        era_from_draft_year, era_from_gsis, era_from_gsis_it
+        era_from_draft_year, era_from_gsis, era_from_gsis_it_bounded
       ]) vote) AS hard_vote_count
-    FROM voted
+    FROM bounded
   )
 `
 
@@ -149,7 +181,8 @@ const build_query = ({ threshold }) => `
     draft_overall_pick, college, gsis_player_id, gsis_it_player_id,
     nfl_player_id, pfr_player_id, esb_player_id,
     era_from_birth, era_from_draft_year, era_from_gsis, era_from_gsis_it,
-    era_from_nfl_player_id, hard_spread, hard_vote_count
+    era_from_gsis_it_bounded, era_from_nfl_player_id, hard_spread,
+    hard_vote_count
   FROM scored
   WHERE hard_vote_count >= 2 AND hard_spread >= ${threshold}
   ORDER BY hard_spread DESC, formatted_name
@@ -168,10 +201,11 @@ const build_coverage_query = () => `
   FROM scored
 `
 
-// The sharpest signal needs no calibration at all. Every identifier column on
-// player carries a UNIQUE index except nfl_player_id, so it is the only one that
-// can hold the same person's id on two rows — which is exactly what a conflation
-// leaves behind when the second person already has a row of their own.
+// The sharpest signal needs no calibration at all: the same person's id on two
+// rows, which is exactly what a conflation leaves behind when the second person
+// already has a row of their own. nfl_player_id took the UNIQUE index every other
+// identifier column carries in league 8405aa3e8, so this now reports zero and is
+// kept as a standing check that the index has not been dropped.
 const DUPLICATE_NFL_PLAYER_ID_QUERY = `
   WITH duplicated AS (
     SELECT nfl_player_id FROM player
