@@ -53,10 +53,15 @@ debug.enable('audit-conflated-player-identity')
 // Note the column is also NOT range-bounded the way the calibration below
 // implies. The 25xxxxx block is the monotone part, but NFL.com's id space
 // genuinely includes small legacy values — 744 is Calais Campbell, 264 is Josh
-// Johnson and 79860 is Matthew Stafford, all confirmed live against
-// fantasy.nfl.com. Calibration restricts to the monotone block because that is
-// where a nearest-median vote means anything, not because values outside it are
-// corrupt.
+// Johnson and 79860 is Matthew Stafford, each confirmed against fantasy.nfl.com
+// on 2026-08-05, while that host still served. Calibration restricts to the
+// monotone block because that is where a nearest-median vote means anything,
+// not because values outside it are corrupt.
+//
+// nfl_player_id has no writer at all now: NFL.com shut its fantasy product down
+// on 2026-08-13 and the three importers on that host were retired in league
+// b12b2dcb4, so the column is frozen historical data. Nothing above can be
+// re-verified against the source, and nothing can drift either.
 
 const CALIBRATION = `
   cohort AS (
