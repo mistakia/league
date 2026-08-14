@@ -3,9 +3,14 @@ import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { current_season } from '@constants'
 
-const { single_year, career_year } = common_column_params
+const { single_year, career_year, pff_seas_type } = common_column_params
 
-const pff_seasonlog_field = (props) => ({
+// `is_season_type_scoped` mirrors PFF_PLAYER_SEASON_TYPE_SCOPED_COLUMNS in
+// libs-server/data-views-column-definitions/player-pff-seasonlogs-column-definitions.mjs.
+// Only a column with REG/POST rows behind it gets the selector -- offering it on
+// a column that holds PFF's combined value alone would be a filter whose only
+// possible answer is a blank cell.
+const pff_seasonlog_field = ({ is_season_type_scoped, ...props }) => ({
   ...props,
   column_groups: [COLUMN_GROUPS.PFF],
   size: 70,
@@ -17,7 +22,8 @@ const pff_seasonlog_field = (props) => ({
         (i) => current_season.year - i
       )
     },
-    career_year
+    career_year,
+    ...(is_season_type_scoped ? { seas_type: pff_seas_type } : {})
   }
 })
 
@@ -234,7 +240,8 @@ export default function ({ is_logged_in }) {
     player_pff_routes: pff_seasonlog_field({
       column_title: 'PFF Routes',
       header_label: 'Routes',
-      player_value_path: 'pff_routes'
+      player_value_path: 'pff_routes',
+      is_season_type_scoped: true
     }),
     player_pff_overall_snaps: pff_seasonlog_field({
       column_title: 'PFF Overall Snaps',

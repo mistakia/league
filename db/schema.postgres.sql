@@ -18943,8 +18943,10 @@ CREATE TABLE public.pff_player_seasonlogs (
     overall_snaps smallint,
     offense_rank smallint,
     routes integer,
+    season_type character varying(10) DEFAULT 'REGPO'::character varying NOT NULL,
     CONSTRAINT pff_player_seasonlogs_grade_position_vocabulary CHECK (((grade_position IS NULL) OR ((grade_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[])))),
-    CONSTRAINT pff_player_seasonlogs_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+    CONSTRAINT pff_player_seasonlogs_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[])))),
+    CONSTRAINT pff_player_seasonlogs_season_type_vocabulary CHECK (((season_type)::text = ANY (ARRAY['REG'::text, 'POST'::text, 'REGPO'::text])))
 );
 
 
@@ -18961,7 +18963,8 @@ CREATE TABLE public.pff_player_seasonlogs_changelog (
     new_value text,
     source text NOT NULL,
     reason text,
-    changed_at timestamp with time zone NOT NULL
+    changed_at timestamp with time zone NOT NULL,
+    season_type character varying(10) DEFAULT 'REGPO'::character varying NOT NULL
 );
 
 
@@ -28813,7 +28816,7 @@ ALTER TABLE ONLY public.pff_player_seasonlogs_changelog
 --
 
 ALTER TABLE ONLY public.pff_player_seasonlogs
-    ADD CONSTRAINT pff_player_seasonlogs_pkey PRIMARY KEY (pid, season_year);
+    ADD CONSTRAINT pff_player_seasonlogs_pkey PRIMARY KEY (pid, season_year, season_type);
 
 
 --

@@ -30,7 +30,7 @@ const CHANGELOG_TABLES = {
     conflict: null
   },
   pff_player_seasonlogs_changelog: {
-    keys: ['pid', 'season_year'],
+    keys: ['pid', 'season_year', 'season_type'],
     conflict: null
   }
 }

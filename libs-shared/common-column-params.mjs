@@ -294,6 +294,19 @@ export const single_seas_type = {
   default_value: 'REG'
 }
 
+// PFF's season-level vocabulary rather than the NFL's, so it cannot reuse
+// nfl_season_types: REGPO is PFF's own spelling for the combined
+// regular-season-plus-postseason value, and PRE has no entry because PFF
+// publishes no preseason season-level grades. REGPO is the default because it
+// is what every pff_player_seasonlogs row held before the season-type dimension
+// existed, so a view sending no season param reads what it always read.
+export const pff_seas_type = {
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  single: true,
+  values: ['REG', 'POST', 'REGPO'],
+  default_value: 'REGPO'
+}
+
 const resolve_nfl_week_dynamic = ({ dv, def }) => {
   const dynamic_def = def?.dynamic_values?.find(
     (d) => d.dynamic_type === dv.dynamic_type

@@ -2,7 +2,20 @@ import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { player_year_offset_range_select } from '#libs-server/data-views/param-utils.mjs'
-import { career_year, year } from '#libs-shared/common-column-params.mjs'
+import {
+  career_year,
+  year,
+  pff_seas_type
+} from '#libs-shared/common-column-params.mjs'
+
+const PFF_COMBINED_SEASON_TYPE = pff_seas_type.default_value
+
+// Only these columns have REG/POST rows behind them -- the scoped rows are
+// aggregated from the game-level archive and carry route counts alone. Exposing
+// the selector on a column with no scoped row would offer a filter whose only
+// possible answer is a blank cell, which is the shape this table has already
+// shipped twice. Add a column here when its scoped values are backfilled.
+const PFF_PLAYER_SEASON_TYPE_SCOPED_COLUMNS = new Set(['routes'])
 
 const get_pff_params = ({ params = {} }) => {
   let year_param = params.year || [current_season.stats_season_year]
@@ -19,9 +32,14 @@ const get_pff_params = ({ params = {} }) => {
     career_year_param = [career_year_param]
   }
 
+  const seas_type_param = Array.isArray(params.seas_type)
+    ? params.seas_type[0]
+    : params.seas_type
+
   return {
     year: year_param,
-    career_year: career_year_param
+    career_year: career_year_param,
+    seas_type: seas_type_param || PFF_COMBINED_SEASON_TYPE
   }
 }
 
@@ -33,16 +51,28 @@ const get_cache_info = create_season_cache_info({
 })
 
 const pff_player_seasonlogs_table_alias = ({ params = {} }) => {
-  const { year: year_param, career_year: career_year_param } = get_pff_params({
-    params
-  })
+  const {
+    year: year_param,
+    career_year: career_year_param,
+    seas_type: seas_type_param
+  } = get_pff_params({ params })
 
   const career_year_key = career_year_param.length
     ? `_career_year_${career_year_param.join('_')}`
     : ''
 
+  // The season type pins a discriminator the source's join predicate carries,
+  // so it belongs in the alias key -- two columns differing only by season type
+  // would otherwise hash alike, collapse into one join group, and both render
+  // whichever column seeded the group. Emitted only when it is not the default,
+  // so an unscoped column keeps the hash it has today.
+  const seas_type_key =
+    seas_type_param === PFF_COMBINED_SEASON_TYPE
+      ? ''
+      : `_seas_type_${seas_type_param}`
+
   return get_table_hash(
-    `pff_player_seasonlogs_${year_param.join('_')}${career_year_key}`
+    `pff_player_seasonlogs_${year_param.join('_')}${career_year_key}${seas_type_key}`
   )
 }
 
@@ -51,6 +81,9 @@ const pff_player_source = {
   grain: 'player_year',
   key_columns: { pid: 'pid', year: 'season_year' },
   year_default: (params) => get_pff_params({ params }).year.map(Number),
+  extra_predicates: (params) => [
+    { column: 'season_type', value: get_pff_params({ params }).seas_type }
+  ],
   attach: ({ query_context, params, table_alias }) => {
     const { career_year: career_year_param } = get_pff_params({ params })
     if (!career_year_param.length) return
@@ -140,10 +173,9 @@ const create_field_from_pff_player_seasonlogs = (column_name) => {
     table_alias: pff_player_seasonlogs_table_alias,
     source: pff_player_source,
     range_offset_aggregate: PFF_PLAYER_RANGE_OFFSET_AGGREGATE[column_name],
-    column_params: {
-      year,
-      career_year
-    },
+    column_params: PFF_PLAYER_SEASON_TYPE_SCOPED_COLUMNS.has(column_name)
+      ? { year, career_year, seas_type: pff_seas_type }
+      : { year, career_year },
     get_cache_info
   }
 
@@ -158,7 +190,13 @@ const create_field_from_pff_player_seasonlogs = (column_name) => {
         source: pff_player_source,
         params,
         data_view_options,
-        latest_by_year: true
+        latest_by_year: true,
+        // This path emits a self-contained correlated subquery instead of
+        // reading the join, so the source's discriminators do not reach it
+        // unless they are handed over. Without them the ORDER BY year DESC
+        // LIMIT 1 can land on a scoped row, where every column but `routes` is
+        // null -- a blank cell rather than an error.
+        extra_predicates: pff_player_source.extra_predicates(params)
       })
   }
 
