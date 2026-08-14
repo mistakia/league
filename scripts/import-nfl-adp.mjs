@@ -14,6 +14,7 @@ import {
   find_or_create_adp_format
 } from '#libs-server'
 import { current_season } from '#constants'
+import throw_if_shortfall from '#libs-server/throw-if-shortfall.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { adp_format } from '#libs-shared'
 
@@ -109,6 +110,17 @@ const import_nfl_adp = async ({
   const url = `https://fantasy.nfl.com/draftcenter/breakdown?leagueId=&offset=1&count=400&position=all&season=${year}&sort=draftAveragePosition`
   const html = await fetch_nfl_data(url)
   const players = parse_nfl_data(html)
+
+  // Output oracle distinct from the exit code. The per-row `if (!tds.length)`
+  // skip inside parse_nfl_data is not one: a page with no rows at all parses to
+  // an empty array, inserts nothing and exits 0. That is exactly what
+  // fantasy.nfl.com started serving on 2026-08-13, when the host began
+  // 301-redirecting every path to a news page -- the sibling projections
+  // importer threw on its own shortfall guard while this one would have gone
+  // quiet. See user:guideline/surface-pipeline-failures.md.
+  throw_if_shortfall(
+    players.length ? null : `nfl adp: parsed 0 players for ${year} (${url})`
+  )
 
   const adp_format_id = await find_or_create_adp_format(
     db,
