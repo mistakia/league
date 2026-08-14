@@ -30,7 +30,7 @@ export const job_types = {
   IMPORT_NFL_GAMES_NGS: 20,
   IMPORT_NFL_GAMES_NFL: 23,
 
-  NFL_PLAYS_NGS: 21,
+  NFL_PLAYS_NFL_PRO: 21,
   NFL_PLAYS_NFL: 22,
 
   NFL_PLAYERS: 24,

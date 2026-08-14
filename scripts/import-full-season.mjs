@@ -101,7 +101,7 @@ import export_data_league_team_seasonlogs from './export-data-league-team-season
 // Private scripts - import with graceful fallback
 let import_players_ngs = null
 let import_gameday_rosters = null
-let import_plays_ngs = null
+let import_plays_nfl_pro = null
 let import_gamelogs_ngs = null
 let import_pff_grades = null
 let import_pff_seasonlogs = null
@@ -126,8 +126,10 @@ try {
 }
 
 try {
-  const ngs_module = await import('#private/scripts/import-plays-ngs.mjs')
-  import_plays_ngs = ngs_module.default
+  const nfl_pro_plays_module = await import(
+    '#private/scripts/import-plays-nfl-pro.mjs'
+  )
+  import_plays_nfl_pro = nfl_pro_plays_module.default
 } catch {
   // Private script not available
 }
@@ -606,21 +608,27 @@ const import_plays_for_week = async ({
 
   // 2. NGS Plays (if available)
   if (
-    import_plays_ngs &&
+    import_plays_nfl_pro &&
     should_run_source({ stage_name: 'plays', source_name: 'ngs', skip_sources })
   ) {
     try {
-      await import_plays_ngs({ year, week, seas_type, ignore_cache, collector })
+      await import_plays_nfl_pro({
+        year,
+        week,
+        seas_type,
+        ignore_cache,
+        collector
+      })
     } catch (error) {
       collector.add_error(error, {
-        script: 'import_plays_ngs',
+        script: 'import_plays_nfl_pro',
         year,
         week,
         seas_type
       })
     }
     await wait(DELAYS.BETWEEN_SCRIPTS)
-  } else if (import_plays_ngs) {
+  } else if (import_plays_nfl_pro) {
     log(`Skipping plays.ngs (in skip list)`)
   }
 
