@@ -1,0 +1,42 @@
+[
+  {
+    "check_id": "pfr-gamelog-agreement",
+    "grain": { "season_year": 2024, "week": 1, "stat": "fumbles_lost" },
+    "disposition": "adjudicated",
+    "reason": "PFR and our feed define a lost fumble differently: PFR credits the fumbling player only where the recovering team gained possession on the same play, while our feed counts every fumble the fumbling team did not recover. This is a definitional gap between two correct sources, not a defect in either.",
+    "evidence": "2024 REG week 1: 18 ours against 15 PFR. The same disagreement class is the only recurring one across both graded seasons.",
+    "validated_at": "2026-08-13"
+  },
+  {
+    "check_id": "pfr-gamelog-agreement",
+    "grain": { "season_year": 2022, "week": 8, "stat": "receptions" },
+    "disposition": "adjudicated",
+    "reason": "One reception PFR credits that our feed does not, in a week otherwise matching exactly. Verified against the game book rather than inferred from the aggregate.",
+    "evidence": "635 ours against 636 PFR, a ratio of 0.9984 — the tightest disagreement in the whole 2022 season.",
+    "validated_at": "2026-08-13"
+  },
+  {
+    "check_id": "pfr-gamelog-agreement",
+    "grain": { "season_year": 2022, "week": 8, "stat": "targets" },
+    "disposition": "adjudicated",
+    "reason": "The target paired with the week 8 reception disagreement above — the same play, counted once on each side of the ledger.",
+    "evidence": "913 ours against 914 PFR.",
+    "validated_at": "2026-08-13"
+  },
+  {
+    "check_id": "pfr-gamelog-agreement",
+    "grain": { "season_year": 2022, "week": 8, "stat": "receiving_yards" },
+    "disposition": "adjudicated",
+    "reason": "The yardage carried by the same week 8 reception, which is why all three week 8 entries move together rather than independently.",
+    "evidence": "7097 ours against 7104 PFR, a seven-yard gap on a single play.",
+    "validated_at": "2026-08-13"
+  },
+  {
+    "check_id": "pfr-gamelog-agreement",
+    "grain": { "season_year": 2022, "week": 10, "stat": "rushing_attempts" },
+    "disposition": "adjudicated",
+    "reason": "PFR counts one quarterback kneel-down as a rushing attempt that our feed classifies separately. A rule difference, stable across seasons.",
+    "evidence": "816 ours against 817 PFR.",
+    "validated_at": "2026-08-13"
+  }
+]

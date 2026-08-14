@@ -1,9 +1,17 @@
 /* global describe it */
 import * as chai from 'chai'
 
+import fs from 'fs'
+import path from 'path'
+
 import { classify_check_rows, load_parked } from '#libs-server/data-check.mjs'
+import registry from '#db/checks/registry.mjs'
 
 const expect = chai.expect
+
+const parked_entries = JSON.parse(
+  fs.readFileSync(path.join(process.cwd(), 'db/checks/parked.json'), 'utf8')
+)
 
 /*
   Drives the SHIPPED classifier over fixtures rather than a copy of it, which is
@@ -365,5 +373,76 @@ describe('data checks', function () {
         })
       ).to.throw(/not in the registry/)
     })
+  })
+})
+
+describe('data check registry', function () {
+  const checks_by_id = new Map(registry.map((check) => [check.check_id, check]))
+
+  it('holds five checks with unique ids', () => {
+    expect(registry).to.have.lengthOf(5)
+    expect(checks_by_id.size).to.equal(registry.length)
+  })
+
+  registry.forEach((check) => {
+    describe(check.check_id, function () {
+      it('declares a grain', () => {
+        expect(check.grain).to.be.an('array')
+        expect(check.grain).to.not.be.empty
+      })
+
+      it('declares a callable rows function', () => {
+        expect(check.rows).to.be.a('function')
+      })
+
+      it('declares exactly one of min_rate / max_count', () => {
+        const declared = [check.min_rate, check.max_count].filter(
+          (value) => value !== undefined
+        )
+        expect(declared).to.have.lengthOf(1)
+      })
+
+      it('carries non-empty calibration prose', () => {
+        // A threshold with no recorded distribution is a number nobody can
+        // re-derive, and the first reader to see a finding cannot tell laxity
+        // from a source limit.
+        expect(check.calibration).to.be.a('string')
+        expect(check.calibration.trim()).to.not.equal('')
+      })
+
+      it('carries an invariant, a repair command and a detector-health floor', () => {
+        expect(check.invariant).to.be.a('string').and.not.equal('')
+        expect(check.repair_command).to.be.a('string').and.not.equal('')
+        expect(check.min_gradeable_units).to.be.a('number')
+      })
+    })
+  })
+
+  it('declares a precondition on every check comparing against an external reference', () => {
+    // A check that cannot refresh its reference MUST be able to say the
+    // reference is too thin to judge against -- otherwise an incomplete
+    // reference inverts the comparison and a one-sided floor passes it.
+    const external_reference_checks = ['pfr-gamelog-agreement']
+
+    for (const check_id of external_reference_checks) {
+      expect(checks_by_id.get(check_id).precondition, check_id).to.be.a(
+        'function'
+      )
+    }
+  })
+
+  it('loads db/checks/parked.json with zero schema errors', () => {
+    expect(() =>
+      load_parked({ entries: parked_entries, checks_by_id })
+    ).to.not.throw()
+  })
+
+  it('parks nothing under a disposition of baselined today', () => {
+    // gamelog-orphans measured zero on all four child tables on 2026-08-14, so
+    // it ships as a regression detector over a clean population. A baselined
+    // entry here would suppress nothing and be reported as stale on every run.
+    expect(
+      parked_entries.filter((entry) => entry.disposition === 'baselined')
+    ).to.have.lengthOf(0)
   })
 })
