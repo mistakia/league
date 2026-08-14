@@ -115,8 +115,25 @@ export const check_removal_safety = async ({ format_id }) => {
 
 /**
  * Check if a scoring format can be safely removed
+ *
+ * This gate and its league-format sibling stand in front of an unconditional
+ * delete of a format's entire derived history, so both fail CLOSED: a check
+ * that could not answer pushes a reason and blocks the removal. Every catch
+ * here used to `console.warn` and fall through, which left `reasons` empty --
+ * byte-identical to "verified unused", and the more dangerous half of a defect
+ * that made both gates inert for as long as they have existed.
+ *
+ * The other half was the parameter name. Both call sites in cleanup-manager
+ * passed `format_hash` while both functions destructure `format_id`, so
+ * `format_id` was `undefined`: the named-format comparison could never match,
+ * and each usage query bound undefined and threw straight into the swallowing
+ * catch. Measured 2026-08-14 -- every orphaned format was reported `safe: true`
+ * with an empty reason list, including ones the classifier had only cleared on
+ * its own separate (and working) usage check. Nothing downstream noticed,
+ * because a safety gate that always passes looks exactly like a safe corpus.
+ *
  * @param {Object} params - Parameters object
- * @param {string} params.format_id - Scoring format hash to check
+ * @param {string} params.format_id - Scoring format id to check
  * @returns {Promise<{safe: boolean, reasons: string[]}>} Safety check result
  */
 export const check_scoring_format_removal_safety = async ({ format_id }) => {
@@ -140,7 +157,8 @@ export const check_scoring_format_removal_safety = async ({ format_id }) => {
       reasons.push(`Used by ${league_format_usage.count} league formats`)
     }
   } catch (error) {
-    console.warn(`Could not check league format usage: ${error.message}`)
+    // Fail CLOSED -- see the note on the league-format check below.
+    reasons.push(`Could not check league format usage: ${error.message}`)
   }
 
   // Check if used in active seasons
@@ -153,7 +171,8 @@ export const check_scoring_format_removal_safety = async ({ format_id }) => {
       reasons.push(`Used by ${season_usage.count} active seasons`)
     }
   } catch (error) {
-    console.warn(`Could not check season usage: ${error.message}`)
+    // Fail CLOSED -- see the note on check_scoring_format_removal_safety.
+    reasons.push(`Could not check season usage: ${error.message}`)
   }
 
   return {
@@ -189,7 +208,8 @@ export const check_league_format_removal_safety = async ({ format_id }) => {
       reasons.push(`Used by ${season_usage.count} active seasons`)
     }
   } catch (error) {
-    console.warn(`Could not check season usage: ${error.message}`)
+    // Fail CLOSED -- see the note on check_scoring_format_removal_safety.
+    reasons.push(`Could not check season usage: ${error.message}`)
   }
 
   return {

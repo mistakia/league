@@ -274,7 +274,7 @@ export const cleanup_orphaned_data = async (options = {}) => {
   // Process orphaned league formats
   for (const league_hash of classification.orphaned.league) {
     const safety_check = await check_league_format_removal_safety({
-      format_hash: league_hash
+      format_id: league_hash
     })
 
     if (!safety_check.safe) {
@@ -304,7 +304,7 @@ export const cleanup_orphaned_data = async (options = {}) => {
   // Process orphaned scoring formats
   for (const scoring_hash of classification.orphaned.scoring) {
     const safety_check = await check_scoring_format_removal_safety({
-      format_hash: scoring_hash
+      format_id: scoring_hash
     })
 
     if (!safety_check.safe) {
