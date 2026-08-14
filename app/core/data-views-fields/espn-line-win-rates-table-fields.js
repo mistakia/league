@@ -77,7 +77,10 @@ export default {
   player_espn_line_wins: create_espn_line_field({
     column_title: 'Player ESPN Line Play Wins',
     header_label: 'Wins',
-    player_value_path: 'espn_line_wins'
+    // Column is `line_win_count` under a `espn_line_` select_as prefix, so the
+    // server emits the doubled `espn_line_line_win_count`. This read said
+    // `espn_line_wins` and rendered a blank cell.
+    player_value_path: 'espn_line_line_win_count'
   }),
   team_espn_pass_rush_win_rate: create_team_espn_line_field({
     column_title: 'Team ESPN Pass Rush Win Rate',

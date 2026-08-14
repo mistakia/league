@@ -107,7 +107,13 @@ export default function ({ week, is_logged_in, fantasy_teams = [] }) {
         COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Inflation Adj',
-      player_value_path: 'season_projected_inflation_adjusted_market_salary',
+      // This entry's select_as is the only one in its file carrying a `player_`
+      // prefix, so the server emits
+      // `player_season_projected_inflation_adjusted_market_salary` while this
+      // read omitted it and rendered a blank cell. Matching the client keeps the
+      // payload key stable for cached results.
+      player_value_path:
+        'player_season_projected_inflation_adjusted_market_salary',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     },
