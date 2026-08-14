@@ -14,7 +14,9 @@ export const job_types = {
   PROJECTIONS_CBS: 10,
   PROJECTIONS_ESPN: 11,
   PROJECTIONS_FANTASYSHARKS: 12,
-  PROJECTIONS_NFL: 13,
+  // 13 retired 2026-08-14 with import-nfl-projections; NFL.com shut its fantasy
+  // product down and handed it to ESPN. The id stays reserved and its label
+  // below stays, because 1354 historical jobs rows still render through it.
 
   NOTIFICATIONS_DRAFT: 14,
   NOTIFICATIONS_POACH_8HR: 15,
@@ -32,7 +34,7 @@ export const job_types = {
   NFL_PLAYS_NFL: 22,
 
   NFL_PLAYERS: 24,
-  NFL_PLAYER_IDS: 25,
+  // 25 retired 2026-08-14 with import-nfl-player-ids; see 13 above.
 
   PROJECTIONS_FBG: 26,
   PROJECTIONS_FFN: 27,
@@ -92,7 +94,7 @@ export const job_types = {
   IMPORT_ESPN_ADP: 69,
   IMPORT_CBS_ADP: 70,
   IMPORT_RTS_ADP: 71,
-  IMPORT_NFL_ADP: 72,
+  // 72 retired 2026-08-14 with import-nfl-adp; see 13 above.
   IMPORT_MFL_ADP: 73,
   IMPORT_YAHOO_ADP: 74,
   IMPORT_PINNACLE_ODDS: 75,
