@@ -5,6 +5,7 @@ import fs from 'fs'
 import path from 'path'
 
 import { classify_check_rows, load_parked } from '#libs-server/data-check.mjs'
+import { run_check } from '#scripts/run-data-checks.mjs'
 import registry from '#db/checks/registry.mjs'
 
 const expect = chai.expect
@@ -376,6 +377,135 @@ describe('data checks', function () {
   })
 })
 
+/*
+  The coverage-collapse arm, driven through the SHIPPED `run_check`.
+
+  These are the negative control for the detector-health floor itself. Every
+  fixture below reports zero findings, which is exactly what an emptied corpus
+  looks like, so a green result here means the runner cannot tell a clean sweep
+  from a scan that reached nothing.
+
+  No signals API is configured under test, so both emits decline before any
+  transport and `emits_ok` is false throughout. That is deliberate: it keeps
+  these cases about the floor, and the emit arm is specced in
+  test/libs-shared.log.spec.mjs where the fetch recorder lives.
+*/
+describe('data checks / coverage collapse', function () {
+  const HEALTHY_TABLES = {
+    player_receiving_gamelogs: 137900,
+    player_rushing_gamelogs: 67621,
+    player_defender_gamelogs: 60090,
+    player_passing_gamelogs: 3870
+  }
+
+  // Shaped like gamelog-orphans: one sentinel row per child table when clean,
+  // so the row count is fixed at 4 and only the denominator moves.
+  const fixed_size_check = ({ denominator_by_table, ...overrides }) => ({
+    check_id: 'gamelog-orphans',
+    grain: ['child_table', 'esbid', 'pid'],
+    max_count: 0,
+    min_gradeable_units: 4,
+    min_denominator: 3000,
+    invariant: 'Every gamelog child row has a parent.',
+    repair_command: 'adjudicate per row',
+    rows: async () =>
+      Object.entries(denominator_by_table).map(
+        ([child_table, denominator]) => ({
+          child_table,
+          esbid: null,
+          pid: null,
+          numerator: 0,
+          denominator
+        })
+      ),
+    ...overrides
+  })
+
+  const rejection_from = async (promise) => {
+    try {
+      await promise
+    } catch (err) {
+      return err
+    }
+    return null
+  }
+
+  it('throws when every scanned population is empty, though the row count is met', async () => {
+    const emptied = Object.fromEntries(
+      Object.keys(HEALTHY_TABLES).map((child_table) => [child_table, 0])
+    )
+
+    const err = await rejection_from(
+      run_check({
+        check: fixed_size_check({ denominator_by_table: emptied }),
+        parked: []
+      })
+    )
+
+    expect(err).to.be.an('error')
+    expect(err.name).to.equal('CoverageCollapseError')
+    expect(err.message).to.match(/scanned only 0 row\(s\)/)
+  })
+
+  it('throws when ONE sub-population collapses behind healthy siblings', async () => {
+    const err = await rejection_from(
+      run_check({
+        check: fixed_size_check({
+          denominator_by_table: {
+            ...HEALTHY_TABLES,
+            player_passing_gamelogs: 12
+          }
+        }),
+        parked: []
+      })
+    )
+
+    expect(err).to.be.an('error')
+    expect(err.message).to.match(/scanned only 12 row\(s\)/)
+  })
+
+  it('passes when every scanned population is above the floor', async () => {
+    const { result } = await run_check({
+      check: fixed_size_check({ denominator_by_table: HEALTHY_TABLES }),
+      parked: []
+    })
+
+    expect(result.findings).to.be.empty
+    expect(result.gradeable).to.have.lengthOf(4)
+  })
+
+  it('leaves a check declaring no min_denominator on the row-count floor alone', async () => {
+    const emptied = Object.fromEntries(
+      Object.keys(HEALTHY_TABLES).map((child_table) => [child_table, 0])
+    )
+
+    const { result } = await run_check({
+      check: fixed_size_check({
+        denominator_by_table: emptied,
+        min_denominator: undefined
+      }),
+      parked: []
+    })
+
+    expect(result.gradeable).to.have.lengthOf(4)
+  })
+
+  it('still reports the row-count floor when the denominator is healthy', async () => {
+    const err = await rejection_from(
+      run_check({
+        check: fixed_size_check({
+          denominator_by_table: HEALTHY_TABLES,
+          min_gradeable_units: 99
+        }),
+        parked: []
+      })
+    )
+
+    expect(err).to.be.an('error')
+    expect(err.message).to.match(/graded only 4 unit\(s\)/)
+  })
+})
+
 describe('data check registry', function () {
   const checks_by_id = new Map(registry.map((check) => [check.check_id, check]))
 
@@ -393,6 +523,12 @@ describe('data check registry', function () {
 
       it('declares a callable rows function', () => {
         expect(check.rows).to.be.a('function')
+      })
+
+      it('declares a usable min_denominator or none at all', () => {
+        if (check.min_denominator === undefined) return
+        expect(check.min_denominator).to.be.a('number')
+        expect(check.min_denominator).to.be.above(0)
       })
 
       it('declares exactly one of min_rate / max_count', () => {

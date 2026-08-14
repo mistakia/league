@@ -25,7 +25,10 @@
     min_rate / max_count  exactly one
     calibration           REQUIRED, validated non-empty at load: the observed
                           distribution and the reading that is a real defect
-    min_gradeable_units   detector-health floor -- fewer THROWS
+    min_gradeable_units   detector-health floor on the ROW count -- fewer THROWS
+    min_denominator       OPTIONAL detector-health floor on the smallest graded
+                          population. REQUIRED where the row count is fixed by
+                          construction and cannot fall
     repair_command        goes in the finding message
 
   ## Two rules that are easy to get wrong
@@ -33,6 +36,13 @@
   Every `rows` function MUST return `denominator` as the population it SCANNED,
   including on a `max_count` check where `numerator` is the violation count.
   Without it the detector-health floor fires precisely when the corpus is clean.
+
+  A check whose result set is a FIXED SIZE -- one sentinel row per child table,
+  one aggregate row -- MUST declare `min_denominator` as well. Its row count is
+  a constant, so `min_gradeable_units` is met no matter how empty the scan is,
+  and only the denominator moves. Reading the row count alone is what let an
+  emptied table report zero findings, pass its floor and resolve its own
+  findings signal.
 
   Calibrate on the GAP between normal and defective, never on the worst normal
   reading, and re-measure immediately before changing a threshold. Every figure
@@ -193,6 +203,14 @@ const registry = [
     calibration:
       'Measured 2026-08-14: zero orphans against 269,481 child rows scanned (receiving 137,900, rushing 67,621, defender 60,090, passing 3,870). This is a REGRESSION detector over a clean population rather than a detector seeded with known debt — the 10 rows the plan carried were repaired by resolve-orphan-receiving-gamelogs and repair-name-match-play-stat-misattribution before this landed, so max_count 0 is a live invariant and not an aspiration. Grain includes pid because one esbid can carry two orphan rows for different players; (child_table, esbid) cannot separate them. REPORTS AND NEVER REMEDIATES: the obvious fix, deleting the orphan, was wrong for 46 of 169 rows in a previous instance and unrecoverable, because the same symptom means either a wrongly-removed parent or a wrongly-written child.',
     min_gradeable_units: 4,
+    // The row count here is 4 when clean and only ever larger, so it can never
+    // breach its own floor -- the denominator is the only number that moves.
+    // Re-measured 2026-08-14: the smallest child table is
+    // player_passing_gamelogs at 3,870 rows, and all four grow monotonically
+    // with each season. 3,000 sits 22 percent under today's smallest and
+    // enormously above the reading this exists to catch, which is a table
+    // emptied to zero or near it.
+    min_denominator: 3000,
     repair_command:
       'Determine per row whether the PARENT was wrongly retracted or the CHILD wrongly written — an independent oracle is required, and deletion is not the default. See user:task/league/remove-unsupported-derived-rows.md'
   },
@@ -223,6 +241,15 @@ const registry = [
     calibration:
       'Exact: any row the healer can fill right now is a row the recompute pass failed to reach, so the healthy reading is zero fillable against a non-zero candidate population. Grain is `all` rather than per-season because recompute_route_share returns four global scalars with no season breakdown; delivering a per-season grain means either N calls or changing a healer shared with two other scripts, which is a separate change. The rows the healer SKIPS are deliberately not this finding — they are the upstream dropback gap that nflfastr-dropback-coverage owns, and counting them here would report one condition twice and leave this key permanently open.',
     min_gradeable_units: 1,
+    // This row emits a fixed-size result set and so OWES a `min_denominator`
+    // under the rule in the header, and deliberately does not carry one yet.
+    // `recompute_route_share` selects only rows where route_share is null, so
+    // `candidates` is the VIOLATING population rather than the scanned one --
+    // measured at 4 on 2026-08-14 and falling as the repair lands. A floor on
+    // that number would go red as a direct consequence of the repair
+    // succeeding, which is the trap design-data-checks.md names. The healer has
+    // to return a scanned count first; until then this check's floor is a
+    // tautology and a broken healer query reads as clean.
     repair_command: 'node scripts/recompute-route-share.mjs'
   },
 
@@ -270,6 +297,13 @@ const registry = [
     calibration:
       'Measured 2026-08-14: 24 candidate shell rows against 27,748 player rows scanned. The predicate is RECONSTRUCTED from the prose specification in the header of db/adhoc/2026-08-04-dedupe-duplicate-person-rows.sql — no dedupe round contains the sweep SQL, only a hardcoded merge_map — and validated by reproducing that round’s two arms in ratio rather than in absolute count: it measured 150 strict-college and 242 relaxed, today 14 and 24, both scaled together. It is sharply sensitive to the twin threshold: requiring the twin to hold TWO or more identifiers gives 24, one or more gives 60, and the round specifies two. The class RECURS BY CONSTRUCTION, which is why a sixth one-shot repair would not settle it: round 4 records that repairing two corrupt birth dates in round 3 made two further pairs agree on a date they had never agreed on, so each repair mints the next round’s findings and nothing watches in between. A finding here is a CANDIDATE for adjudication, never an automatic merge — fathers, sons and namesakes sit in the same predicate.',
     min_gradeable_units: 1,
+    // Always exactly one row when clean, so the row-count floor is a tautology
+    // and the denominator carries the whole signal. Re-measured 2026-08-14:
+    // 27,748 player rows. The population grows with each draft class and the
+    // only thing that shrinks it is this check's own merge repair, which
+    // retires tens of rows a round rather than thousands, so 25,000 leaves ten
+    // percent of headroom against a reading that would mean the table is gone.
+    min_denominator: 25000,
     repair_command:
       'Adjudicate each pair on date_of_birth (nfl_draft_year is corrupt on exactly these rows and cannot discriminate), then write a dated merge file under db/adhoc/ following the shape of 2026-08-05-dedupe-residual-round-4.sql'
   }

@@ -49,11 +49,19 @@
   must resurface when it stops applying, and a console line on a cron job
   reaches nobody. The payload separates them.
 
-  UN-GRADEABLE -- the gradeable population fell below the check's declared
-  `min_gradeable_units`. Coverage collapse must be as loud as a finding, so it
-  is BOTH: the signal names which check and how far it fell, and the throw makes
-  the run red. An emptied predicate reports zero findings and reads exactly like
-  a clean sweep otherwise.
+  UN-GRADEABLE -- the scan did not reach its corpus. Coverage collapse must be
+  as loud as a finding, so it is BOTH: the signal names which check and how far
+  it fell, and the throw makes the run red. An emptied predicate reports zero
+  findings and reads exactly like a clean sweep otherwise.
+
+  Two detectors answer that one question, so they share one key. The gradeable
+  population can fall below `min_gradeable_units`, which is the whole story for
+  a check whose row count tracks its coverage. It does NOT track coverage on a
+  check that emits a fixed-size result set -- one sentinel row per child table,
+  or one aggregate row -- where the row count is a constant and only the
+  DENOMINATOR moves. Those declare `min_denominator`, read against the smallest
+  graded population so a collapsed sub-population cannot hide behind a healthy
+  sibling.
 
   ## A failed emit is detector ill-health
 
@@ -185,32 +193,67 @@ const spread_sample = ({ rows, size }) => {
 const SAMPLE_SIZE = 10
 
 /**
+ * Why this check's scan should be treated as not having reached its corpus, or
+ * null when it did. Two detectors for ONE condition, which is why they share
+ * the un-gradeable dedup key rather than splitting it.
+ *
+ * The row-count floor alone is blind on a check whose result set is fixed by
+ * construction. `gamelog-orphans` emits one sentinel row per child table
+ * whether that table holds 137,900 rows or zero, so its gradeable count is
+ * always at least 4 and `min_gradeable_units` can never fire — an emptied
+ * table would report zero findings, pass the floor and RESOLVE the findings
+ * key. `min_denominator` is what sees that, and it reads the SMALLEST scanned
+ * population rather than the largest so one collapsed sub-population cannot
+ * hide behind a healthy sibling.
+ */
+const collapse_reason = ({ check, graded, smallest_denominator }) => {
+  if (graded < check.min_gradeable_units) {
+    return `graded only ${graded} unit(s) against a floor of ${check.min_gradeable_units}`
+  }
+
+  if (
+    check.min_denominator !== undefined &&
+    smallest_denominator < check.min_denominator
+  ) {
+    return `scanned only ${smallest_denominator} row(s) in its smallest graded population, against a floor of ${check.min_denominator}`
+  }
+
+  return null
+}
+
+/**
  * Grade one check and carry its two conditions to the signal queue.
  *
  * Returns the classification plus whether every emit reached the queue. Throws
  * only on ill-health: a crash out of the check's own `rows`, or coverage
- * collapse below the declared floor.
+ * collapse below either declared floor.
  */
-const run_check = async ({ check, parked }) => {
+export const run_check = async ({ check, parked }) => {
   const rows = await check.rows()
   const result = classify_check_rows({ rows, check, parked })
 
   const graded = result.gradeable.length
   const ungradeable = result.ungradeable.length
-  const scanned = result.gradeable
-    .concat(result.ungradeable)
-    .reduce((total, row) => Math.max(total, row.denominator), 0)
+  const denominators = result.gradeable.map((row) => row.denominator)
+  const largest_denominator = denominators.length
+    ? Math.max(...denominators)
+    : 0
+  const smallest_denominator = denominators.length
+    ? Math.min(...denominators)
+    : 0
 
   console.log(
-    `${check.check_id}: ${graded} graded, ${ungradeable} un-gradeable, ${result.findings.length} findings, ${result.adjudicated.length} adjudicated, ${result.baselined.length} baselined, ${result.stale_parked.length} parked-but-suppressing-nothing (largest denominator ${scanned})`
+    `${check.check_id}: ${graded} graded, ${ungradeable} un-gradeable, ${result.findings.length} findings, ${result.adjudicated.length} adjudicated, ${result.baselined.length} baselined, ${result.stale_parked.length} parked-but-suppressing-nothing (scanned population ${smallest_denominator}-${largest_denominator})`
   )
 
-  // The floor is checked BEFORE any grading verdict is emitted or resolved. A
-  // collapsed scan reports zero findings, so resolving the findings key here
+  // Both floors are checked BEFORE any grading verdict is emitted or resolved.
+  // A collapsed scan reports zero findings, so resolving the findings key here
   // would close a real open signal on the strength of a detector that is not
   // reaching its corpus.
-  if (graded < check.min_gradeable_units) {
-    const message = `${check.check_id} graded only ${graded} unit(s) against a floor of ${check.min_gradeable_units} (${ungradeable} un-gradeable, largest denominator ${scanned}). The scan is not reaching its corpus, so its zero findings mean nothing.`
+  const collapsed = collapse_reason({ check, graded, smallest_denominator })
+
+  if (collapsed) {
+    const message = `${check.check_id} ${collapsed} (${graded} graded, ${ungradeable} un-gradeable, scanned population ${smallest_denominator}-${largest_denominator}). The scan is not reaching its corpus, so its zero findings mean nothing.`
 
     const emit_ok = await emit_condition({
       fingerprint: ungradeable_fingerprint(check.check_id),
@@ -221,7 +264,9 @@ const run_check = async ({ check, parked }) => {
         gradeable_units: graded,
         min_gradeable_units: check.min_gradeable_units,
         ungradeable_units: ungradeable,
-        largest_denominator: scanned,
+        smallest_denominator,
+        largest_denominator,
+        min_denominator: check.min_denominator ?? null,
         ungradeable_sample: spread_sample({
           rows: result.ungradeable,
           size: SAMPLE_SIZE
