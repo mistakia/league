@@ -227,11 +227,16 @@ const registry = [
       // can reproduce with the repair command this check names.
       const result = await recompute_route_share({ dry_run: true })
 
+      // `scanned`, never `candidates`: the candidate set is the rows still
+      // MISSING a share, which is the violating population and drains to zero
+      // as the repair succeeds. Reporting it as the denominator would make a
+      // healthy corpus and a selector matching nothing read identically.
       return [
         {
           scope: 'all',
           numerator: result.updated,
-          denominator: result.candidates,
+          denominator: result.scanned,
+          candidates: result.candidates,
           skipped_missing_dropbacks: result.skipped_missing_dropbacks,
           skipped_invalid_dropbacks: result.skipped_invalid_dropbacks
         }
@@ -239,17 +244,15 @@ const registry = [
     },
     max_count: 0,
     calibration:
-      'Exact: any row the healer can fill right now is a row the recompute pass failed to reach, so the healthy reading is zero fillable against a non-zero candidate population. Grain is `all` rather than per-season because recompute_route_share returns four global scalars with no season breakdown; delivering a per-season grain means either N calls or changing a healer shared with two other scripts, which is a separate change. The rows the healer SKIPS are deliberately not this finding — they are the upstream dropback gap that nflfastr-dropback-coverage owns, and counting them here would report one condition twice and leave this key permanently open.',
+      'Exact: any row the healer can fill right now is a row the recompute pass failed to reach, so the healthy reading is zero fillable against a non-zero SCANNED population. Measured 2026-08-14: 32,461 rows carry routes and 4 of them still lack a share. The denominator is the scanned figure and not the candidate count, because candidates are the violating rows and drain toward zero as the repair lands — a floor on that number would go red as a direct consequence of the pass succeeding, and a zero there is indistinguishable from a selector that has stopped matching anything. Grain is `all` rather than per-season because recompute_route_share returns global scalars with no season breakdown; delivering a per-season grain means either N calls or changing a healer shared with two other scripts, which is a separate change. The rows the healer SKIPS are deliberately not this finding — they are the upstream dropback gap that nflfastr-dropback-coverage owns, and counting them here would report one condition twice and leave this key permanently open.',
     min_gradeable_units: 1,
-    // This row emits a fixed-size result set and so OWES a `min_denominator`
-    // under the rule in the header, and deliberately does not carry one yet.
-    // `recompute_route_share` selects only rows where route_share is null, so
-    // `candidates` is the VIOLATING population rather than the scanned one --
-    // measured at 4 on 2026-08-14 and falling as the repair lands. A floor on
-    // that number would go red as a direct consequence of the repair
-    // succeeding, which is the trap design-data-checks.md names. The healer has
-    // to return a scanned count first; until then this check's floor is a
-    // tautology and a broken healer query reads as clean.
+    // Always exactly one row, so the row-count floor is a tautology and the
+    // denominator carries the whole signal. Re-measured 2026-08-14: 32,461
+    // player_receiving_gamelogs rows carry routes. The population grows with
+    // each NGS import and nothing retracts routes, so 30,000 sits about eight
+    // percent under today's figure and far above the reading this exists to
+    // catch, which is the healer's join breaking and selecting nothing.
+    min_denominator: 30000,
     repair_command: 'node scripts/recompute-route-share.mjs'
   },
 

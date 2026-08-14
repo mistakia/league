@@ -255,6 +255,34 @@ describe('SCRIPTS recompute-route-share', function () {
     expect(await get_route_share({ pid: home_pid })).to.equal(50)
   })
 
+  // `scanned` is what the registered route-share-unfilled check grades against.
+  // It must count every row carrying routes, not the unfilled subset, or a
+  // fully-repaired corpus and a selector matching nothing read identically.
+  it('reports the scanned population separately from the candidates', async () => {
+    const first_run = await recompute_route_share({ year: season_year })
+
+    expect(first_run.scanned).to.be.at.least(first_run.candidates)
+    expect(first_run.candidates).to.be.at.least(1)
+
+    const second_run = await recompute_route_share({ year: season_year })
+
+    // The repair drained every FILLABLE candidate, so the candidate count
+    // shrinks -- the rows that remain are the ones the healer deliberately
+    // skips and can never fill. The scanned population must NOT move, which is
+    // the whole reason the check grades against it.
+    expect(second_run.candidates).to.be.below(first_run.candidates)
+    expect(second_run.updated).to.equal(0)
+    expect(second_run.scanned).to.equal(first_run.scanned)
+  })
+
+  it('counts a row that already carries a share as scanned', async () => {
+    const result = await recompute_route_share({ year: season_year })
+
+    // already_shared_pid is excluded from candidates but carries routes, so it
+    // belongs to the scanned population.
+    expect(result.scanned).to.be.above(result.candidates)
+  })
+
   it('writes nothing on a dry run', async () => {
     const result = await recompute_route_share({
       year: season_year,

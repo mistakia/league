@@ -104,13 +104,44 @@ const apply_updates = async ({ updates }) => {
  * A row whose game has no dropback data, or whose dropbacks fall below the
  * player's routes, is left null and counted as skipped rather than written with
  * a value the inputs do not support.
+ *
+ * Reports `scanned` alongside `candidates`, and they are different populations:
+ * `scanned` is every row carrying routes, `candidates` only the subset still
+ * missing a share. A caller grading this pass needs the first, because the
+ * second is the VIOLATING population and shrinks to zero exactly when the pass
+ * is succeeding -- so a detector reading it cannot tell a healthy corpus from a
+ * selector that has stopped matching anything.
  */
 export const recompute_route_share = async ({
   year = null,
   esbids = null,
   dry_run = false
 } = {}) => {
-  const query = db('player_receiving_gamelogs as rg')
+  // One builder for both populations so the scanned count and the candidate
+  // count can never drift apart on their join or their scoping.
+  const scoped_rows_with_routes = () => {
+    const query = db('player_receiving_gamelogs as rg')
+      .join('player_gamelogs as g', function () {
+        this.on('g.pid', '=', 'rg.pid')
+          .andOn('g.esbid', '=', 'rg.esbid')
+          .andOn('g.season_year', '=', 'rg.season_year')
+      })
+      .whereNotNull('rg.routes')
+
+    if (year) {
+      query.where('rg.season_year', year)
+    }
+
+    if (esbids && esbids.length) {
+      query.whereIn('rg.esbid', esbids)
+    }
+
+    return query
+  }
+
+  const [scanned] = await scoped_rows_with_routes().count('* as count')
+
+  const rows = await scoped_rows_with_routes()
     .select(
       'rg.pid',
       'rg.esbid',
@@ -118,25 +149,10 @@ export const recompute_route_share = async ({
       'rg.routes',
       'g.nfl_team as nfl_team'
     )
-    .join('player_gamelogs as g', function () {
-      this.on('g.pid', '=', 'rg.pid')
-        .andOn('g.esbid', '=', 'rg.esbid')
-        .andOn('g.season_year', '=', 'rg.season_year')
-    })
-    .whereNotNull('rg.routes')
     .whereNull('rg.route_share')
 
-  if (year) {
-    query.where('rg.season_year', year)
-  }
-
-  if (esbids && esbids.length) {
-    query.whereIn('rg.esbid', esbids)
-  }
-
-  const rows = await query
-
   const result = {
+    scanned: Number(scanned.count),
     candidates: rows.length,
     updated: 0,
     skipped_missing_dropbacks: 0,
