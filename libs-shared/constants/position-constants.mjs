@@ -58,8 +58,13 @@ export const group_for_position = Object.fromEntries(
 )
 
 // Vendor and historical spellings. Keys are never legal stored values; values
-// always are. Includes the single-wing-era codes carried by pre-1950 player rows
-// and the side-qualified codes parsed out of NFL gamebooks.
+// always are. Includes the single-wing-era codes carried by pre-1950 player rows,
+// the side-qualified codes parsed out of NFL gamebooks, and the alignment
+// spellings PFF's game-grain facets emit in place of a roster position
+// (LWR/SRWR/TE-R/SCB/DRT/WLB and friends). The alignment codes fold to the
+// roster position the player occupies, which is the only thing a player lookup
+// can match on -- where the player lined up on a snap is not a roster fact and
+// is still not stored anywhere in this vocabulary.
 export const position_alias_map = {
   // offensive line
   OT: 'T',
@@ -74,16 +79,26 @@ export const position_alias_map = {
   ED: 'EDGE',
   LDE: 'DE',
   RDE: 'DE',
+  DLE: 'DE',
+  DRE: 'DE',
+  LE: 'DE',
+  RE: 'DE',
   DI: 'DT',
   DG: 'DT',
   LDT: 'DT',
   RDT: 'DT',
+  DLT: 'DT',
+  DRT: 'DT',
 
   // linebacker
   MIKE: 'MLB',
   WILL: 'OLB',
   LOLB: 'OLB',
   ROLB: 'OLB',
+  SLB: 'OLB',
+  WLB: 'OLB',
+  LLB: 'OLB',
+  RLB: 'OLB',
   LILB: 'ILB',
   RILB: 'ILB',
   $LB: 'LB',
@@ -94,6 +109,7 @@ export const position_alias_map = {
   SAF: 'S',
   LCB: 'CB',
   RCB: 'CB',
+  SCB: 'CB',
 
   // backfield, including single-wing spellings
   HB: 'RB',
@@ -106,6 +122,12 @@ export const position_alias_map = {
   OE: 'TE',
   E: 'TE',
   FL: 'WR',
+  LWR: 'WR',
+  RWR: 'WR',
+  SLWR: 'WR',
+  SRWR: 'WR',
+  'TE-L': 'TE',
+  'TE-R': 'TE',
 
   // team defense
   DEF: 'DST'
