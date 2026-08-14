@@ -91,6 +91,22 @@ jobs:
       - name: Knex column resolution gate
         run: node db/gates/check-knex-column-resolution.mjs
 
+      # Fails when a league-scoped table in db/schema.postgres.sql is not
+      # cleared by the per-league test fixture, does not cascade from something
+      # the fixture clears, and carries no adjudication. The class has produced
+      # two incidents (a restricted-free-agency table in 2026-08, league_pauses
+      # in 2026-08-13) and both were "a human has to remember to edit a list".
+      #
+      # CI-eligible on the same terms as the conformance ratchet: it reads the
+      # committed schema and the committed fixture, needs no base ref and no
+      # database, and answers in a quarter of a second. It CAN go red on a table
+      # someone adds without adjudicating it — that is the gate working, and
+      # both of its inputs land in the same commit under this repo's one-commit
+      # rule for DDL plus schema export plus dependent code, so it cannot go red
+      # on a sibling's in-flight migration the way the base-ref gates can.
+      - name: League fixture reset coverage
+        run: node db/gates/check-league-fixture-reset-coverage.mjs
+
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update

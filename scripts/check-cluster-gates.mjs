@@ -131,6 +131,14 @@ const GATES = [
       'every dumped column carries a disposition in the dev-fixture projection, and the named secrets are not emitted verbatim'
   },
   {
+    id: 'league-fixture-reset-coverage',
+    command: ['db/gates/check-league-fixture-reset-coverage.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      'every league-scoped table in the schema is cleared by db/fixtures/league.mjs, cascade-cleared, or adjudicated — MEMBERSHIP only, not the list ORDER'
+  },
+  {
     id: 'schema-conformance-ratchet',
     command: ['db/gates/check-schema-conformance-ratchet.mjs'],
     requires: 'none',

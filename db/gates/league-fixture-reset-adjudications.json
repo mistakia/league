@@ -1,0 +1,112 @@
+{
+  "_README": [
+    "Adjudications for check-league-fixture-reset-coverage.mjs.",
+    "",
+    "Each entry says: this table IS league-scoped, and the per-league test fixture",
+    "(db/fixtures/league.mjs) deliberately does not clear it. A reason is required.",
+    "This is NOT a name filter -- the gate refuses to let it decay into one:",
+    "",
+    "  - An entry that suppresses nothing is itself a finding. Add the table to the",
+    "    fixture, or drop it from the schema, and this entry must go with it.",
+    "  - `writer_roots` records the roots holding an INSERT site for the table at",
+    "    the time the reason was written, and the gate re-derives it every run. It",
+    "    is a recorded FACT, not a reachability claim: if a table adjudicated as",
+    "    unwritten-by-the-suite gains an insert site in api/ or libs-server/, the",
+    "    entry is reported so the reason gets re-read rather than inherited.",
+    "",
+    "The evidence behind every `no_suite_writer` reason below is one measurement,",
+    "made 2026-08-14: db/fixtures/league.mjs was instrumented to probe every",
+    "league-scoped table for rows AT FIXTURE ENTRY, and the full suite (3686",
+    "passing) was run. These 16 tables held rows at no fixture entry, so no spec",
+    "puts per-league rows in them and there is nothing to leak. Eight tables that",
+    "DID hold rows there were added to the fixture in the same change rather than",
+    "adjudicated. Re-run that probe rather than trusting these entries if you are",
+    "about to rely on one.",
+    "",
+    "Note the measurement bounds the reason, not the gate: a table no spec writes",
+    "cannot leak today, and the day a spec starts writing one, the writer_roots",
+    "ratchet above is what surfaces it."
+  ],
+  "tables": [
+    {
+      "table": "league_baselines",
+      "reason": "Derived baseline values, written only by the offline generator scripts/generate-league-baselines.mjs. No suite-reachable writer; held no rows at any fixture entry across a full suite run.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_divisions",
+      "reason": "League division names. No INSERT site anywhere in api/, libs-server/, scripts/, jobs/ or private/ -- the rows are commissioner-authored in production and nothing in the suite creates one.",
+      "writer_roots": []
+    },
+    {
+      "table": "league_nfl_team_seasonlogs",
+      "reason": "Derived per-league NFL team seasonlogs, written only by an offline generator. No suite-reachable writer; held no rows at any fixture entry across a full suite run.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_player_projection_values",
+      "reason": "Derived weekly projection values, written only by process-projections-for-league-format.mjs. That script IS imported by a spec, but the spec drives it against its own scoping and left no rows at any fixture entry across a full suite run.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_player_rest_of_season_projection_values",
+      "reason": "Rest-of-season half of the projection-value store, same writer and same measurement as league_player_projection_values.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_player_season_projection_values",
+      "reason": "Full-season half of the projection-value store, same writer and same measurement as league_player_projection_values.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_player_seasonlogs",
+      "reason": "Derived per-league player seasonlogs, written only by an offline generator. No suite-reachable writer; held no rows at any fixture entry across a full suite run.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_team_careerlogs",
+      "reason": "Derived multi-season team careerlogs, written only by an offline generator. No suite-reachable writer; held no rows at any fixture entry across a full suite run.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_team_forecast",
+      "reason": "Derived playoff-odds forecast, written only by an offline generator. No suite-reachable writer; held no rows at any fixture entry across a full suite run.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_team_lineup_contribution_weeks",
+      "reason": "Derived per-week lineup contribution detail, written only by an offline generator. Its two siblings (league_team_lineups, league_team_lineup_starters) DID hold rows at a fixture entry and were added to the fixture; this one did not.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_team_lineup_contributions",
+      "reason": "Derived season-level lineup contribution rollup, written only by an offline generator. Same measurement as league_team_lineup_contribution_weeks.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_team_player_seasonlogs",
+      "reason": "Derived per-team player seasonlogs, written only by an offline generator. No suite-reachable writer; held no rows at any fixture entry across a full suite run.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "league_user_careerlogs",
+      "reason": "Derived per-user careerlogs, written only by an offline generator. No suite-reachable writer; held no rows at any fixture entry across a full suite run.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "player_team_extension_state",
+      "reason": "Denormalized extension-ladder state. The only INSERT is libs-server/roster-asset-lineage/refresh-extension-state.mjs; generate-roster-asset-lineage.mjs clears it per-league before each refresh but never inserts. Held no rows at any fixture entry across a full suite run. Note the writer is in libs-server rather than scripts, so a spec CAN reach it -- if one starts doing so this table belongs in the fixture, and the writer_roots ratchet is what will say so.",
+      "writer_roots": ["libs-server"]
+    },
+    {
+      "table": "playoffs",
+      "reason": "Postseason results, written only by offline generators. Held no rows at any fixture entry across a full suite run.",
+      "writer_roots": ["scripts"]
+    },
+    {
+      "table": "roster_asset_lineage_refresh_state",
+      "reason": "Bookkeeping for the lineage refresh job -- one row per league recording how far the refresh has walked. Written only by refresh-roster-asset-lineage.mjs; held no rows at any fixture entry across a full suite run.",
+      "writer_roots": ["scripts"]
+    }
+  ]
+}
