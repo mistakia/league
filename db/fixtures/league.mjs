@@ -41,6 +41,23 @@ export default async function (knex, league_params = {}) {
   // league_pauses_one_open_per_league makes the next pause insert a duplicate
   // key. Nothing in production deletes these rows, so only this reset can.
   await knex('league_pauses').del()
+  // Rows in these outlive a spec FILE otherwise: nothing in production deletes
+  // them and no other fixture clears them, so a leftover row from an earlier
+  // file is read by the next one. Measured 2026-08-14 by probing every
+  // league-scoped table at fixture entry across a full suite run -- all eight
+  // held rows there. `matchups` had a fixture of its own
+  // (db/fixtures/matchups.mjs) that nothing imports, and two specs were
+  // hand-purging these tables in their own beforeEach to work around the gap.
+  // Ordered children-first: roster_asset_transformation carries FKs to
+  // roster_asset_holding(holding_id).
+  await knex('league_notifications').del()
+  await knex('league_team_daily_values').del()
+  await knex('league_team_seasonlogs').del()
+  await knex('league_team_lineup_starters').del()
+  await knex('league_team_lineups').del()
+  await knex('roster_asset_transformation').del()
+  await knex('roster_asset_holding').del()
+  await knex('matchups').del()
   await knex('leagues').del()
   await knex('seasons').del()
 
