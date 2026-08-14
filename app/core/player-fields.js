@@ -1060,8 +1060,11 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'passing efficiency matchup',
       column_header: 'CPOE',
       csv_header: 'Opponent completion percentage over expectation',
+      // The column was renamed to completion_percentage_over_expected while the
+      // 20 percentiles rows still key on 'cpoe', so these two differ until those
+      // rows are migrated.
       percentile_field: 'cpoe',
-      ...opponent_field('cpoe')
+      ...opponent_field('completion_percentage_over_expected')
     },
     opponent_pass_epa_per_dropback: {
       category: 'passing efficiency matchup',
@@ -1151,8 +1154,8 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'receiving efficiency matchup',
       column_header: 'CROE',
       csv_header: 'Opponent catch rate over expectation',
-      percentile_field: 'cpoe',
-      ...opponent_field('cpoe')
+      percentile_field: 'catch_rate_over_expected',
+      ...opponent_field('catch_rate_over_expected')
     },
     opponent_recv_yards_per_reception: {
       category: 'receiving efficiency matchup',
@@ -1172,22 +1175,22 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'receiving efficiency matchup',
       column_header: 'EPA/TGT',
       csv_header: 'Opponent receiving EPA per target over average',
-      percentile_field: 'receiving_epa_per_target',
-      ...opponent_field('receiving_epa_per_target')
+      percentile_field: 'recv_epa_per_target',
+      ...opponent_field('recv_epa_per_target')
     },
     opponent_receiving_epa_per_route: {
       category: 'receiving efficiency matchup',
       column_header: 'EPA/RTE',
       csv_header: 'Opponent receiving EPA per route over average',
-      percentile_field: 'receiving_epa_per_route',
-      ...opponent_field('receiving_epa_per_route')
+      percentile_field: 'recv_epa_per_route',
+      ...opponent_field('recv_epa_per_route')
     },
     opponent_receiving_yards_after_catch_over_expected: {
       category: 'receiving efficiency matchup',
       column_header: 'YAC/E',
       csv_header: 'Opponent receiving yards after catch over expected',
-      percentile_field: 'receiving_yards_after_catch_over_expected',
-      ...opponent_field('receiving_yards_after_catch_over_expected')
+      percentile_field: 'recv_yards_after_catch_over_expected',
+      ...opponent_field('recv_yards_after_catch_over_expected')
     },
     opponent_rushing_yards_over_expectation: {
       category: 'rushing efficiency matchup',
