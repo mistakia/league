@@ -36,6 +36,11 @@ export default async function (knex, league_params = {}) {
   await knex('draft').del()
   await knex('league_cutlist').del()
   await knex('super_priority').del()
+  // A leaked OPEN pause breaks the next spec file two ways, and neither names
+  // this table: every write route answers 423, and the partial unique index
+  // league_pauses_one_open_per_league makes the next pause insert a duplicate
+  // key. Nothing in production deletes these rows, so only this reset can.
+  await knex('league_pauses').del()
   await knex('leagues').del()
   await knex('seasons').del()
 
