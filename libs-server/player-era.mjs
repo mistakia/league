@@ -79,7 +79,10 @@
 
 // The youngest a real NFL player has been in a season, by year subtraction.
 // See the birth-date section above -- amobi okoye sits exactly on this floor.
-const MINIMUM_PLAUSIBLE_AGE_IN_SEASON = 20
+// Exported because it is the same floor the conflated-identity audit needs to
+// decide whether an early gsis_it_player_id can be the player's OWN first
+// contact; two copies of this number would be two answers to one question.
+export const MINIMUM_PLAUSIBLE_AGE_IN_SEASON = 20
 
 // A player row whose `draft_round` is 0 or null went undrafted, so its
 // `nfl_draft_year` is an entry year rather than a debut year. See above.

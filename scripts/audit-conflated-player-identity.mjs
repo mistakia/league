@@ -6,6 +6,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { is_main } from '#libs-server'
+import { MINIMUM_PLAUSIBLE_AGE_IN_SEASON } from '#libs-server/player-era.mjs'
 
 const log = debug('audit-conflated-player-identity')
 debug.enable('audit-conflated-player-identity')
@@ -146,7 +147,7 @@ const VOTES = `
       CASE
         WHEN era_from_gsis_it IS NOT NULL
           AND birth_year IS NOT NULL
-          AND birth_year + 20 <= era_from_gsis_it
+          AND birth_year + ${MINIMUM_PLAUSIBLE_AGE_IN_SEASON} <= era_from_gsis_it
         THEN greatest(
           era_from_gsis_it,
           least(
