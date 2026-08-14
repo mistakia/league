@@ -71,6 +71,14 @@
   run still exits 0, which is the mute-oracle shape this whole system exists to
   avoid. Every emit and every resolve is inspected, and a failure turns the run
   red.
+
+  The resolve arm needs one more check than the emit arm, because null is not
+  its only failure. `resolve_signal` returns null only when it could not POST;
+  a resolve that REACHED the route and closed nothing comes back TRUTHY as
+  `{ resolved: false, reason }`. Exactly one reason is benign -- the route
+  answers a clean run that had nothing open with `no_open_signal` -- and the
+  rest (`missing_dedup_key`, `update_failed`, `writer_unreachable`) leave a row
+  open that the run believed it had closed.
 */
 
 import debug from 'debug'
@@ -149,12 +157,27 @@ const emit_condition = async ({ fingerprint, message, severity, context }) => {
   return true
 }
 
+// The one resolve outcome that is NOT a failure: the route answers a clean run
+// with `{ resolved: false, reason: 'no_open_signal' }` when nothing was open,
+// which is the ordinary case and must stay green. Every other reason the
+// resolver emits -- `missing_dedup_key`, `update_failed`, `writer_unreachable`
+// -- leaves a row open that this run believed it closed.
+const BENIGN_RESOLVE_REASON = 'no_open_signal'
+
 /**
  * Close one condition on the verifiably clean branch.
  *
  * Gated on the OBSERVED clean state by the caller, never on an in-process "did
  * I emit" latch: this is a fresh process every run, so a latch could only ever
  * strand the open signal. The route is a cheap no-op when nothing is open.
+ *
+ * Inspect the RESULT, not just the null. `resolve_signal` returns null only
+ * when it could not POST at all; a resolve that REACHED the route and closed
+ * nothing comes back truthy as `{ resolved: false, reason }`, so a null check
+ * alone reports a stale open row as a successful close. That is the same blind
+ * spot base's own resolvers carry a comment about -- it left signal #123654
+ * open for seven hours with nothing in any log -- and it is exactly the
+ * mute-oracle shape the emit arm of this file already guards against.
  */
 const resolve_condition = async ({ fingerprint, resolution_note }) => {
   const result = await resolve_signal({
@@ -165,6 +188,13 @@ const resolve_condition = async ({ fingerprint, resolution_note }) => {
   if (!result) {
     console.error(
       `RESOLVE FAILED ${fingerprint}: the signals API did not answer, so a stale open row may survive a clean run`
+    )
+    return false
+  }
+
+  if (!result.resolved && result.reason !== BENIGN_RESOLVE_REASON) {
+    console.error(
+      `RESOLVE FAILED ${fingerprint}: the signals API answered but closed nothing (reason ${result.reason || 'unknown'}), so a stale open row survives a clean run`
     )
     return false
   }

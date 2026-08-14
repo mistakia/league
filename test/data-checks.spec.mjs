@@ -1,7 +1,9 @@
-/* global describe it */
+/* global describe it beforeEach afterEach */
 import * as chai from 'chai'
 
+import crypto from 'crypto'
 import fs from 'fs'
+import os from 'os'
 import path from 'path'
 
 import { classify_check_rows, load_parked } from '#libs-server/data-check.mjs'
@@ -503,6 +505,126 @@ describe('data checks / coverage collapse', function () {
 
     expect(err).to.be.an('error')
     expect(err.message).to.match(/graded only 4 unit\(s\)/)
+  })
+})
+
+/*
+  The resolve arm, driven through the SHIPPED `run_check` over a stubbed
+  transport.
+
+  `resolve_signal` returns null only when it could not POST. A resolve that
+  REACHED the route and closed nothing comes back TRUTHY as
+  `{ resolved: false, reason }`, so these pin the one distinction a null check
+  cannot make. The reason vocabulary is the resolver's own: `no_open_signal` is
+  the benign clean-run answer, and `missing_dedup_key` / `update_failed` /
+  `writer_unreachable` each leave a row open.
+
+  Every check here is CLEAN — no findings, denominator above both floors — so
+  nothing is emitted and the only signal traffic is the two resolves.
+*/
+describe('data checks / resolve inspection', function () {
+  let original_base_api_url
+  let original_machine_slug
+  let original_key_file
+  let original_fetch
+  let key_dir
+
+  beforeEach(() => {
+    original_base_api_url = process.env.BASE_API_URL
+    original_machine_slug = process.env.BASE_MACHINE_SLUG
+    original_key_file = process.env.BASE_INSTANCE_KEY_FILE
+    original_fetch = globalThis.fetch
+
+    key_dir = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'data-checks-resolve-spec-')
+    )
+    const key_path = path.join(key_dir, 'instance-private.key')
+    const { privateKey } = crypto.generateKeyPairSync('ed25519')
+    fs.writeFileSync(
+      key_path,
+      privateKey.export({ format: 'pem', type: 'pkcs8' }),
+      { mode: 0o600 }
+    )
+
+    process.env.BASE_API_URL = 'http://localhost:9999'
+    process.env.BASE_MACHINE_SLUG = 'league'
+    process.env.BASE_INSTANCE_KEY_FILE = key_path
+  })
+
+  afterEach(() => {
+    globalThis.fetch = original_fetch
+    process.env.BASE_API_URL = original_base_api_url
+    process.env.BASE_MACHINE_SLUG = original_machine_slug
+    process.env.BASE_INSTANCE_KEY_FILE = original_key_file
+    fs.rmSync(key_dir, { recursive: true, force: true })
+  })
+
+  const stub_resolve_response = (payload) => {
+    globalThis.fetch = async () => ({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      json: async () => payload
+    })
+  }
+
+  const clean_check = {
+    check_id: 'duplicate-person-rows',
+    grain: ['pid'],
+    max_count: 0,
+    min_gradeable_units: 1,
+    min_denominator: 25000,
+    invariant: 'No person holds both a canonical row and a shell row.',
+    repair_command: 'adjudicate each pair',
+    rows: async () => [{ pid: null, numerator: 0, denominator: 27748 }]
+  }
+
+  it('counts a clean run that closed nothing as a successful resolve', async () => {
+    stub_resolve_response({ resolved: false, reason: 'no_open_signal' })
+
+    const { result, emits_ok } = await run_check({
+      check: clean_check,
+      parked: []
+    })
+
+    expect(result.findings).to.be.empty
+    expect(emits_ok).to.equal(true)
+  })
+
+  it('counts a resolve that actually closed a row as successful', async () => {
+    stub_resolve_response({ resolved: true })
+
+    const { emits_ok } = await run_check({ check: clean_check, parked: [] })
+
+    expect(emits_ok).to.equal(true)
+  })
+
+  // The regression this arm exists for: every one of these is a TRUTHY response
+  // that closed nothing, which a null check reports as a successful close.
+  for (const reason of [
+    'writer_unreachable',
+    'update_failed',
+    'missing_dedup_key'
+  ]) {
+    it(`reports a truthy resolve that closed nothing (${reason}) as detector ill-health`, async () => {
+      stub_resolve_response({ resolved: false, reason })
+
+      const { emits_ok } = await run_check({ check: clean_check, parked: [] })
+
+      expect(emits_ok).to.equal(false)
+    })
+  }
+
+  it('reports a resolve that could not POST at all as detector ill-health', async () => {
+    globalThis.fetch = async () => ({
+      ok: false,
+      status: 401,
+      statusText: 'Unauthorized'
+    })
+
+    const { emits_ok } = await run_check({ check: clean_check, parked: [] })
+
+    expect(emits_ok).to.equal(false)
   })
 })
 
