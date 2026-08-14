@@ -344,11 +344,12 @@ export default function ({ is_logged_in }) {
       header_label: 'Team',
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      // Column is `current_nfl_team` with no select_as, so that IS the payload
-      // key. This read said `team`, and PlayerRowNFLTeam renders 'FA' when the
-      // value is falsy -- so the miss showed a plausible wrong value rather than
-      // an empty cell.
-      player_value_path: 'current_nfl_team',
+      // `team`, NOT `current_nfl_team`: createPlayer renames the key between the
+      // API row and the table row (app/core/players/player.js:76-77), so the
+      // payload key is not what this path resolves against. Reading the raw
+      // column name here is a real regression, and
+      // test/data-view-player-field-parity.spec.mjs pins it.
+      player_value_path: 'team',
       component: React.memo(PlayerRowNFLTeam),
       column_groups: [COLUMN_GROUPS.NFL_TEAM],
       operators: [
