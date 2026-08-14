@@ -6,7 +6,7 @@
   Nothing here touches a database, a signal or the filesystem beyond reading the
   parked file, so the whole classification is specced against fixtures through
   the SHIPPED expression rather than a copy of it. That is the compensating
-  control for eight checks sharing one classifier -- see
+  control for the checks sharing one classifier -- see
   user:guideline/software/design-data-checks.md.
 
   ## The denominator contract

@@ -21,11 +21,18 @@
 
   ## Dedup keys
 
-  Two conditions per check, each with its own pinned key so one can close while
-  the other stands:
+  THREE conditions per check, each with its own pinned key so one can close
+  while the others stand:
 
     log_error:<service>:data-check-findings-<check_id>
     log_error:<service>:data-check-ungradeable-<check_id>
+    log_error:<service>:data-check-parked-stale-<check_id>
+
+  The third was carved out of the first. Findings and a parked entry that
+  suppresses nothing can be true INDEPENDENTLY, and one key cannot carry two
+  such conditions: findings clearing while an entry went stale emitted under an
+  already-open findings row, which dedup collapses into a no-op, so the stale
+  entry left no trace anywhere.
 
   They ride `log_error` with a `fingerprint_override` rather than a `data_check`
   signal kind, which is the convention the retired route-share coverage audit
@@ -37,17 +44,19 @@
   that move every run, so a computed fingerprint would open a fresh row per run
   and none of them could ever be closed by the resolve arm.
 
-  A check REMOVED from the registry takes its two keys' only closers with it.
-  Resolve both by hand in the same change, or any row open at deletion becomes
-  permanently un-closeable.
+  A check REMOVED from the registry takes its three keys' only closers with
+  it. Resolve all three by hand in the same change, or any row open at deletion
+  becomes permanently un-closeable.
 
   ## What each condition means
 
-  FINDINGS -- graded rows below the threshold that no parked entry suppresses,
-  OR parked entries that suppressed nothing. The second belongs on this key
-  rather than in a log line for the reason the guideline gives: a parked item
-  must resurface when it stops applying, and a console line on a cron job
-  reaches nobody. The payload separates them.
+  FINDINGS -- graded rows below the threshold that no parked entry suppresses.
+
+  PARKED-STALE -- a parked entry that suppressed nothing this run, so it has
+  stopped applying and should be removed or re-validated. It travels as a signal
+  rather than a log line for the reason the guideline gives: a parked item must
+  RESURFACE when it stops applying, and a console line on a cron job reaches
+  nobody.
 
   UN-GRADEABLE -- the scan did not reach its corpus. Coverage collapse must be
   as loud as a finding, so it is BOTH: the signal names which check and how far
@@ -116,6 +125,8 @@ const PARKED_PATH = path.join(
 const findings_fingerprint = (check_id) => `data-check-findings-${check_id}`
 const ungradeable_fingerprint = (check_id) =>
   `data-check-ungradeable-${check_id}`
+const stale_parked_fingerprint = (check_id) =>
+  `data-check-parked-stale-${check_id}`
 const dedup_key_for = (fingerprint) => `log_error:${SERVICE}:${fingerprint}`
 
 // Thrown when a check's gradeable population falls below its declared floor.
@@ -321,25 +332,15 @@ export const run_check = async ({ check, parked }) => {
   const findings = result.findings
   const stale = result.stale_parked
 
-  if (findings.length || stale.length) {
-    const summary = findings.length
-      ? spread_sample({ rows: findings, size: SAMPLE_SIZE })
-          .map(
-            (row) =>
-              `${format_grain({ check, row })} at ${row.numerator}/${row.denominator}`
-          )
-          .join('; ')
-      : 'none'
+  if (findings.length) {
+    const summary = spread_sample({ rows: findings, size: SAMPLE_SIZE })
+      .map(
+        (row) =>
+          `${format_grain({ check, row })} at ${row.numerator}/${row.denominator}`
+      )
+      .join('; ')
 
-    const message = [
-      `${check.check_id}: ${findings.length} finding(s) over ${graded} graded unit(s)`,
-      stale.length
-        ? ` and ${stale.length} parked entr(ies) suppressing nothing`
-        : '',
-      `. ${check.invariant}`,
-      findings.length ? ` Sample: ${summary}.` : '',
-      ` Repair: ${check.repair_command}`
-    ].join('')
+    const message = `${check.check_id}: ${findings.length} finding(s) over ${graded} graded unit(s). ${check.invariant} Sample: ${summary}. Repair: ${check.repair_command}`
 
     const emit_ok = await emit_condition({
       fingerprint: findings_fingerprint(check.check_id),
@@ -353,10 +354,6 @@ export const run_check = async ({ check, parked }) => {
         adjudicated_count: result.adjudicated.length,
         baselined_count: result.baselined.length,
         findings: spread_sample({ rows: findings, size: SAMPLE_SIZE }),
-        // A parked entry that suppresses nothing rides this key deliberately:
-        // it must RESURFACE when it stops applying, and a console line on a
-        // cron job reaches nobody.
-        parked_suppressing_nothing: stale,
         repair_command: check.repair_command
       }
     })
@@ -377,6 +374,39 @@ export const run_check = async ({ check, parked }) => {
         `  ...and ${findings.length - SAMPLE_SIZE} further finding(s) not printed; the signal payload carries a spread sample`
       )
     }
+  } else {
+    const resolve_ok = await resolve_condition({
+      fingerprint: findings_fingerprint(check.check_id),
+      resolution_note: `[Fix] ${check.check_id} found nothing unsuppressed across ${graded} graded unit(s)`
+    })
+    emits_ok = emits_ok && resolve_ok
+  }
+
+  // A parked entry that suppresses nothing is its OWN condition on its OWN key.
+  // It rode the findings key until it was noticed that the two can be true
+  // independently: findings clearing while an entry goes stale would emit under
+  // an already-open findings row, which dedup collapses into a no-op, so the
+  // stale entry left no trace anywhere. It still travels as a signal rather than
+  // a log line, because the guideline requires a parked item to RESURFACE when
+  // it stops applying and a console line on a cron job reaches nobody.
+  if (stale.length) {
+    const stale_summary = stale
+      .slice(0, SAMPLE_SIZE)
+      .map((entry) => `${JSON.stringify(entry.grain)} (${entry.disposition})`)
+      .join('; ')
+
+    const stale_emit_ok = await emit_condition({
+      fingerprint: stale_parked_fingerprint(check.check_id),
+      message: `${check.check_id}: ${stale.length} parked entr(ies) suppressed nothing this run, so each has stopped applying and should be removed or re-validated. Sample: ${stale_summary}.`,
+      severity: 'low',
+      context: {
+        check_id: check.check_id,
+        stale_count: stale.length,
+        parked_suppressing_nothing: stale
+      }
+    })
+
+    emits_ok = emits_ok && stale_emit_ok
 
     for (const entry of stale.slice(0, SAMPLE_SIZE)) {
       console.log(
@@ -389,11 +419,11 @@ export const run_check = async ({ check, parked }) => {
       )
     }
   } else {
-    const resolve_ok = await resolve_condition({
-      fingerprint: findings_fingerprint(check.check_id),
-      resolution_note: `[Fix] ${check.check_id} found nothing unsuppressed across ${graded} graded unit(s), and every parked entry still applies`
+    const stale_resolve_ok = await resolve_condition({
+      fingerprint: stale_parked_fingerprint(check.check_id),
+      resolution_note: `[Fix] ${check.check_id}: every parked entry suppressed a finding this run`
     })
-    emits_ok = emits_ok && resolve_ok
+    emits_ok = emits_ok && stale_resolve_ok
   }
 
   // Debt is a number to watch shrinking; an adjudication is expected to be
@@ -423,6 +453,7 @@ const run_data_checks = async () => {
   const collapsed = []
   const emit_failures = []
   let total_findings = 0
+  let total_stale_parked = 0
 
   // Each check is isolated: one throwing check must not suppress the others,
   // or a single broken query silently turns the whole registry into a green
@@ -430,7 +461,8 @@ const run_data_checks = async () => {
   for (const check of checks) {
     try {
       const { result, emits_ok } = await run_check({ check, parked })
-      total_findings += result.findings.length + result.stale_parked.length
+      total_findings += result.findings.length
+      total_stale_parked += result.stale_parked.length
       if (!emits_ok) emit_failures.push(check.check_id)
     } catch (err) {
       log(err)
@@ -446,7 +478,7 @@ const run_data_checks = async () => {
   }
 
   console.log(
-    `run-data-checks: ${checks.length} checks, ${total_findings} finding(s), ${crashed.length} crashed, ${collapsed.length} below coverage floor, ${emit_failures.length} with a failed emit`
+    `run-data-checks: ${checks.length} checks, ${total_findings} finding(s), ${total_stale_parked} parked-but-suppressing-nothing, ${crashed.length} crashed, ${collapsed.length} below coverage floor, ${emit_failures.length} with a failed emit`
   )
 
   const unhealthy = [
@@ -457,7 +489,7 @@ const run_data_checks = async () => {
       : null
   ].filter(Boolean)
 
-  return { total_findings, unhealthy }
+  return { total_findings, total_stale_parked, unhealthy }
 }
 
 const main = async () => {

@@ -75,7 +75,7 @@ change; a check watches a STANDING condition.** A conflated player row can
 arise with no code change at all; a renamed param key cannot.
 
 `registry.mjs` is the whole interface — one row per check, carrying its query,
-grain, precondition, threshold, calibration and repair command — and its header
+grain, optional precondition, threshold, calibration and repair command — and its header
 carries the how-to-add. `parked.json` is the state file beside it, holding every
 suppressed finding under a required `adjudicated` or `baselined` disposition.
 `scripts/run-data-checks.mjs` runs them and `libs-server/data-check.mjs` grades

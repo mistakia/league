@@ -173,12 +173,18 @@ export const job_types = {
   AUDIT_KEEPTRADECUT_LIQUIDITY_COVERAGE: 137,
   // 138 retired 2026-08-14 with the route-share coverage audit script, whose
   // two conditions became the registered data checks `route-share-unfilled`
-  // and `nflfastr-dropback-coverage`. The id stays RESERVED and unlabelled:
-  // the 5 historical `jobs` rows carrying 138 now render without a title, which
-  // is the honest reading — the job that produced them no longer exists — and
-  // reusing the id would attribute them to a different job. Contrast id 13,
-  // whose label is retained because 1354 rows still render through it; the rule
-  // is the row count, not the retirement.
+  // and `nflfastr-dropback-coverage`. The id stays RESERVED so nothing reuses
+  // it and attributes those rows to a different job.
+  //
+  // It is also unlabelled, which is a DEPARTURE from what this file does
+  // elsewhere rather than the rule: ids 13, 25 and 72 are likewise retired and
+  // all three keep their titles, at 1354, 9 and 52 historical rows against
+  // 138's 5. No threshold separates 5 from 9, so the earlier claim here that
+  // "the rule is the row count" did not describe the file's own behaviour.
+  // The consequence of leaving it unlabelled is small and real: `getJobs`
+  // groups by type with no time bound, so type 138's last row is returned
+  // forever and the status page renders it with no title. Restoring the label
+  // would be the consistent choice if that row ever needs to be readable.
 
   // One id for the whole registry rather than one per check: the runner is a
   // single scheduled job whose outcome is detector health, and a per-check id

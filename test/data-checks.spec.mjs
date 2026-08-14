@@ -22,7 +22,7 @@ const parked_entries = JSON.parse(
 
 /*
   Drives the SHIPPED classifier over fixtures rather than a copy of it, which is
-  the compensating control for eight registered checks sharing one code path --
+  the compensating control for the registered checks sharing one code path --
   editing libs-server/data-check.mjs is what these tests exercise.
 
   A check reading live production rows cannot mutate its corpus to prove it goes
@@ -734,6 +734,47 @@ describe('data checks / resolve inspection', function () {
       expect(emits_ok).to.equal(false)
     })
   }
+
+  /*
+    Findings and a stale parked entry are INDEPENDENT conditions and now take
+    separate keys. Under one key, findings clearing while an entry went stale
+    emitted into an already-open findings row, which dedup collapses into a
+    no-op, so the stale entry left no trace anywhere.
+
+    The emitted KEY cannot be asserted here: `config.signals_api_url` is empty
+    under NODE_ENV=test, so `create_logger().error` declines before any
+    transport and no emit reaches the stubbed fetch. What that makes observable
+    is the distinction itself -- a clean run with a stale entry ATTEMPTS an emit
+    (which declines, so emits_ok goes false) while a clean run without one only
+    resolves (so emits_ok stays true). The classifier-level `stale_parked`
+    population is asserted separately above.
+  */
+  const stale_entry = {
+    check_id: 'duplicate-person-rows',
+    grain: { pid: 'NOBO-DYHE-000000' },
+    disposition: 'adjudicated',
+    reason: 'Validated as a genuine namesake pair.',
+    evidence: 'Distinct dates of birth on both rows.',
+    validated_at: '2026-08-14'
+  }
+
+  it('treats a stale parked entry as its own condition on a clean run', async () => {
+    stub_resolve_response({ resolved: true })
+
+    const with_stale = await run_check({
+      check: clean_check,
+      parked: [stale_entry]
+    })
+
+    expect(with_stale.result.findings).to.be.empty
+    expect(with_stale.result.stale_parked).to.have.lengthOf(1)
+    expect(with_stale.emits_ok).to.equal(false)
+
+    const without_stale = await run_check({ check: clean_check, parked: [] })
+
+    expect(without_stale.result.stale_parked).to.be.empty
+    expect(without_stale.emits_ok).to.equal(true)
+  })
 
   it('reports a resolve that could not POST at all as detector ill-health', async () => {
     globalThis.fetch = async () => ({
