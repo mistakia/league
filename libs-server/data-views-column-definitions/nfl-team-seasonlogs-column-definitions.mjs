@@ -279,9 +279,10 @@ export default {
     create_field_from_nfl_team_seasonlogs('sacks_taken'),
   nfl_team_seasonlogs_expected_pass_comp:
     create_field_from_nfl_team_seasonlogs('expected_pass_comp'),
-  nfl_team_seasonlogs_cpoe: create_field_from_nfl_team_seasonlogs(
-    'completion_percentage_over_expected'
-  ),
+  nfl_team_seasonlogs_completion_percentage_over_expected:
+    create_field_from_nfl_team_seasonlogs(
+      'completion_percentage_over_expected'
+    ),
   nfl_team_seasonlogs_dropbacks:
     create_field_from_nfl_team_seasonlogs('dropbacks'),
   nfl_team_seasonlogs_pass_epa:

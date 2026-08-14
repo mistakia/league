@@ -356,11 +356,13 @@ export default {
     header_label: 'xComp',
     player_value_path: 'nfl_team_seasonlogs_expected_pass_comp'
   }),
-  nfl_team_seasonlogs_cpoe: create_seasonlog_field({
-    column_title: 'CPOE Generated/Allowed By Position',
-    header_label: 'CPOE',
-    player_value_path: 'nfl_team_seasonlogs_cpoe'
-  }),
+  nfl_team_seasonlogs_completion_percentage_over_expected:
+    create_seasonlog_field({
+      column_title: 'CPOE Generated/Allowed By Position',
+      header_label: 'CPOE',
+      player_value_path:
+        'nfl_team_seasonlogs_completion_percentage_over_expected'
+    }),
   nfl_team_seasonlogs_dropbacks: create_seasonlog_field({
     column_title: 'Dropbacks Generated/Allowed By Position',
     header_label: 'DB',

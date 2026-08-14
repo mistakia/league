@@ -760,7 +760,8 @@ export default {
   nfl_team_seasonlogs_sacks: 'Sacks Generated/Allowed By Position',
   nfl_team_seasonlogs_expected_pass_comp:
     'Expected Pass Completions Generated/Allowed By Position',
-  nfl_team_seasonlogs_cpoe: 'CPOE Generated/Allowed By Position',
+  nfl_team_seasonlogs_completion_percentage_over_expected:
+    'CPOE Generated/Allowed By Position',
   nfl_team_seasonlogs_dropbacks: 'Dropbacks Generated/Allowed By Position',
   nfl_team_seasonlogs_pass_epa: 'Pass EPA Generated/Allowed By Position',
   nfl_team_seasonlogs_pass_epa_per_db:

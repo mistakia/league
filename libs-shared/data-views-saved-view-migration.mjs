@@ -305,7 +305,16 @@ export const apply_dvoa_type_value_renames = (params) => {
 const COLUMN_ID_RENAMES = {
   player_fantasy_games_played_from_seasonlogs: 'player_games_played',
   player_fantasy_games_played_from_careerlogs: 'player_games_played',
-  player_pff_receiving_snaps: 'player_pff_pass_plays'
+  player_pff_receiving_snaps: 'player_pff_pass_plays',
+  // The 2026-08-04 shorthand sweep renamed the COLUMN to
+  // completion_percentage_over_expected but left the id spelled `cpoe`, and
+  // select_as derives the payload key from the column -- so the client's
+  // player_value_path had been reading a key the server stopped emitting and the
+  // column rendered blank. Measured 0 saved views and 0 share URLs on the old id
+  // at the time of the fix; the entry is here for anything saved between then
+  // and the deploy.
+  nfl_team_seasonlogs_cpoe:
+    'nfl_team_seasonlogs_completion_percentage_over_expected'
 }
 
 // Column-id renames for the SHARE-URL path, which receives none of the read-time
