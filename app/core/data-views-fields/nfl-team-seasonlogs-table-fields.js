@@ -138,7 +138,10 @@ export default {
   league_nfl_team_seasonlogs_rank: create_league_seasonlog_field({
     column_title: 'Fantasy Points Rank Allowed By Position',
     header_label: 'Rank',
-    player_value_path: 'league_nfl_team_seasonlogs_rank'
+    // Column is `points_rank`, so the server emits
+    // `league_nfl_team_seasonlogs_points_rank`. This read said
+    // `league_nfl_team_seasonlogs_rank` and rendered a blank cell.
+    player_value_path: 'league_nfl_team_seasonlogs_points_rank'
   }),
   league_nfl_team_seasonlogs_points: create_league_seasonlog_field({
     column_title: 'Fantasy Points Allowed By Position',
@@ -349,7 +352,9 @@ export default {
   nfl_team_seasonlogs_sacks: create_seasonlog_field({
     column_title: 'Sacks Generated/Allowed By Position',
     header_label: 'Sacks',
-    player_value_path: 'nfl_team_seasonlogs_sacks'
+    // Column is `sacks_taken`, so the server emits `nfl_team_seasonlogs_sacks_taken`.
+    // This read said `nfl_team_seasonlogs_sacks` and rendered a blank cell.
+    player_value_path: 'nfl_team_seasonlogs_sacks_taken'
   }),
   nfl_team_seasonlogs_expected_pass_comp: create_seasonlog_field({
     column_title: 'Expected Pass Completions Generated/Allowed By Position',
