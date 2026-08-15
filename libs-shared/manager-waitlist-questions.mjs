@@ -192,22 +192,31 @@ export const questions = [
     max: MAX_LONG_ANSWER_LENGTH
   },
   {
-    // Was "how did each of those leagues end, if they ended?", which had three
-    // problems: it asked about OTHER PEOPLE's leagues dying, which a candidate
-    // often does not truly know the reason for and which nobody can check; the
-    // "if they ended" clause handed over a complete non-answer ("none of them,
-    // still in all of them"); and it scaled with the previous question, so
-    // someone who listed five leagues faced five paragraphs at the point they
-    // are most likely to quit the form.
+    // ATTRITION, ASKED AS A CHECKABLE FACT RATHER THAN A CONFESSION.
     //
-    // Attrition is the thing being predicted, and the honest instrument for it
-    // is the candidate's OWN leaving rather than a league's ending. This
-    // version is about them, is answerable in a sentence, and has no polite
-    // way to decline.
-    id: 'prior_departures',
+    // This replaces "have you ever left a league, or stopped playing one out?
+    // What happened?", which could not work: it asked a motivated applicant to
+    // self-report the single thing most likely to cost them the seat. Its help
+    // text made it worse by naming what we were wary of, so it told the reader
+    // precisely what to write. Nobody was going to answer it honestly, and an
+    // answer nobody gives honestly is worse than no question -- it consumes
+    // form length and returns noise that reads like signal.
+    //
+    // Tenure is the same signal with the sign flipped. It is a thing people
+    // are pleased to report, it is a number rather than a narrative, and --
+    // unlike a departure -- it is VERIFIABLE: a league someone has been in for
+    // six years has a page, a commissioner, and other members. The last
+    // sentence of the help says we check, which deters inflation better than
+    // any phrasing of the negative question could.
+    //
+    // The rest of the attrition read comes from evidence rather than claims:
+    // the league list and links above, whoever will vouch, and the bad-season
+    // scenario below, which asks about behaviour in the situation that
+    // actually causes people to leave.
+    id: 'longest_league_tenure',
     label:
-      'Have you ever left a league, or stopped playing one out? What happened?',
-    help: 'Everyone has. The answer we are wary of is not "yes" — it is "no, never" from someone who has been in nine leagues.',
+      'What is the longest you have stayed in one league, and is it still going?',
+    help: 'Link it if it is public, and name whoever runs it if they would vouch for you. This is the claim on the form we can most easily check, which is why it is the one worth making carefully.',
     required: true,
     max: MAX_LONG_ANSWER_LENGTH
   },
