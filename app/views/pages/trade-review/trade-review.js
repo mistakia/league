@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useLayoutEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
@@ -9,6 +9,16 @@ import TradeReviewTrade from '@components/trade-review-trade'
 import PageLayout from '@layouts/page'
 
 import './trade-review.styl'
+
+// The page scrolls its layout container, not the window, so a scroll position
+// is read and written there rather than through window.scrollTo.
+const get_scroll_container = () => document.querySelector('.page__body.scroll')
+
+// Module-scoped on purpose: the page unmounts between the list and a single
+// trade, so a ref or a piece of component state cannot carry the reader's place
+// across the navigation. The list is long enough that returning to its top
+// after reading one trade loses where they were, which is the whole point.
+const list_scroll_position = { lid: null, top: 0 }
 
 export default function TradeReviewPage({
   load_trade_review,
@@ -71,7 +81,31 @@ export default function TradeReviewPage({
     load_trade_review_trade
   ])
 
-  const go_to_trade = (uid) => navigate(`/leagues/${lid}/trade-review/${uid}`)
+  // The scroll container is shared by both views, so a trade opened from
+  // halfway down the list would otherwise start halfway down its own page.
+  useLayoutEffect(() => {
+    if (!is_single_trade) return
+    const container = get_scroll_container()
+    if (container) container.scrollTop = 0
+  }, [is_single_trade, trade_uid])
+
+  // ...and coming back puts the reader where they left off. Keyed on the list
+  // having rendered its trades, since a scroll offset cannot be applied to a
+  // container that is still one spinner tall.
+  useLayoutEffect(() => {
+    if (is_single_trade) return
+    if (list_scroll_position.lid !== Number(lid)) return
+    if (!trades.size) return
+    const container = get_scroll_container()
+    if (container) container.scrollTop = list_scroll_position.top
+  }, [is_single_trade, lid, trades.size])
+
+  const go_to_trade = (uid) => {
+    const container = get_scroll_container()
+    list_scroll_position.lid = Number(lid)
+    list_scroll_position.top = container ? container.scrollTop : 0
+    navigate(`/leagues/${lid}/trade-review/${uid}`)
+  }
   const go_to_list = () => navigate(`/leagues/${lid}/trade-review`)
 
   let trade_body

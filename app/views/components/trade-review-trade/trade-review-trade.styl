@@ -34,16 +34,18 @@
   font-weight 800
   letter-spacing 0.16em
   text-transform uppercase
+  white-space nowrap
 
 .trade-review-trade__summary-top
   align-items center
   display flex
-  gap 10px
-  margin-bottom 10px
+  flex-wrap wrap
+  gap 8px 12px
+  margin-bottom 12px
 
 .trade-review-trade__date
   color $textColor
-  font-size 13px
+  font-size 14px
   font-weight 600
 
 // The shape of the deal — "2 for 1" — which is how an owner recalls a trade
@@ -55,6 +57,27 @@
   font-size 11px
   font-variant-numeric tabular-nums
   padding 1px 8px
+
+// The trade-level verdict, read as a labelled stat rather than as a sentence:
+// the arrow carries "toward", so no prose is needed to say which side gained.
+.trade-review-trade__swing
+  align-items center
+  cursor help
+  display flex
+  gap 6px
+
+.trade-review-trade__swing-value
+  font-size 14px
+  font-variant-numeric tabular-nums
+  font-weight 600
+
+.trade-review-trade__swing-arrow
+  color #bdbdbd
+
+.trade-review-trade__swing-team
+  align-items center
+  display flex
+  gap 4px
 
 .trade-review-trade__open
   align-items center
@@ -76,9 +99,9 @@
   border 1px solid #eeeeee
   border-radius 6px
   display flex
-  flex 1 1 260px
+  flex 1 1 280px
   flex-direction column
-  gap 6px
+  gap 8px
   min-width 0
   padding 10px 12px
 
@@ -91,19 +114,53 @@
 .trade-review-trade__side-assets
   display flex
   flex-direction column
-  gap 2px
+  gap 6px
 
+// The traded assets are the subject of the card, so they carry the largest type
+// on it. A headshot makes a name identifiable before it is read.
 .trade-review-trade__side-asset
-  align-items baseline
+  align-items center
   display flex
-  font-size 13px
-  gap 8px
+  font-size 15px
+  gap 10px
   justify-content space-between
+  min-height 32px
 
 .trade-review-trade__side-value
-  color #757575
-  font-size 12px
+  color #616161
+  flex 0 0 auto
+  font-size 13px
   font-variant-numeric tabular-nums
+
+// PlayerName renders a fragment of two siblings — the name and its status
+// chips — so each one needs its own flex wrapper or the chips wrap onto a line
+// of their own. The flex on .player__name is overridden for the same reason:
+// left alone it expands to fill the row and pushes the value away.
+.trade-review-trade__player
+  align-items center
+  display inline-flex
+  gap 4px
+  min-width 0
+
+  .player__name
+    flex 0 1 auto
+    min-width 0
+
+  .player__name-label
+    flex 0 0 auto
+
+.trade-review-trade__pick
+  display flex
+  flex-direction column
+  line-height 1.25
+  min-width 0
+
+.trade-review-trade__pick-main
+  font-weight 500
+
+.trade-review-trade__pick-meta
+  color #9e9e9e
+  font-size 11px
 
 // The pair of totals is what makes the perspective structural rather than
 // captioned: one net figure needs a sentence naming whose side it is written
@@ -111,9 +168,9 @@
 .trade-review-trade__side-totals
   border-top 1px solid #f0f0f0
   display flex
-  gap 20px
+  gap 24px
   margin-top auto
-  padding-top 6px
+  padding-top 8px
 
 .trade-review-trade__total
   display flex
@@ -121,7 +178,7 @@
   gap 1px
 
 .trade-review-trade__total-value
-  font-size 15px
+  font-size 16px
   font-variant-numeric tabular-nums
   font-weight 600
 
@@ -139,47 +196,25 @@
   font-size 12px
   font-style italic
 
-.trade-review-trade__swing
-  align-items center
-  color #616161
-  display flex
-  flex-wrap wrap
-  font-size 12px
-  gap 4px
-  margin-top 10px
-
-  &.trade-review-trade__swing--unpriced
-    color #9e9e9e
-    cursor help
-    font-style italic
-
-.trade-review-trade__swing-value
-  font-variant-numeric tabular-nums
-  font-weight 600
-
-.trade-review-trade__swing-team
-  align-items center
-  display flex
-  gap 4px
-
 .trade-review-trade__detail
   background #fcfcfc
   border-top 1px solid #e0e0e0
   display flex
   flex-wrap wrap
-  gap 16px
-  padding 14px 16px 16px
+  gap 20px
+  padding 16px
 
 .trade-review-trade__perspective
-  flex 1 1 380px
+  flex 1 1 400px
   min-width 0
 
 .trade-review-trade__perspective-header
   align-items center
-  border-bottom 1px solid #eeeeee
+  border-bottom 1px solid #e6e6e6
   display flex
+  flex-wrap wrap
   gap 8px
-  padding-bottom 6px
+  padding-bottom 8px
 
 .trade-review-trade__perspective-team
   align-items center
@@ -189,36 +224,30 @@
 // What this side actually got out of the assets, in points and dollars, which
 // is the question a market value cannot answer.
 .trade-review-trade__production
-  align-items baseline
-  color #616161
-  display flex
-  flex-wrap wrap
+  color #757575
+  cursor help
   font-size 12px
   font-variant-numeric tabular-nums
-  gap 10px
-  padding 6px 0 0
-
-.trade-review-trade__production-caption
-  color #9e9e9e
-  font-variant-numeric normal
+  margin-left auto
 
 .trade-review-trade__asset
-  border-bottom 1px solid #f0f0f0
-  padding 8px 0
+  border-bottom 1px solid #ececec
+  padding 12px 0
 
   &:last-child
     border-bottom none
 
 .trade-review-trade__asset-header
-  align-items baseline
+  align-items center
   display flex
   flex-wrap wrap
-  gap 4px 12px
+  gap 6px 12px
   justify-content space-between
 
 .trade-review-trade__asset-name
   align-items center
   display flex
+  font-size 15px
   font-weight 600
   gap 6px
   min-width 0
@@ -227,7 +256,7 @@
   align-items baseline
   color #616161
   display flex
-  font-size 12px
+  font-size 13px
   font-variant-numeric tabular-nums
   gap 6px
 
@@ -236,6 +265,7 @@
 
 .trade-review-trade__lineage-state
   cursor help
+  font-size 12px
   margin-left 6px
 
   &.no_longer_held
@@ -244,50 +274,76 @@
   &.held
     color #2e7d32
 
-.trade-review-trade__resulting
-  align-items center
-  color #616161
-  display flex
-  flex-wrap wrap
-  font-size 12px
-  gap 4px 8px
-  padding-top 4px
-
+// The lineage, as a dated timeline rather than a table. Each step is one
+// holding: when it began, who held it, and how it came about. The rail and its
+// dots are what make a chain read as a single path at a glance.
 .trade-review-trade__chain
-  border-left 2px solid #e6e6e6
-  margin 6px 0 0 4px
-  padding-left 10px
+  margin 8px 0 0 4px
 
-.trade-review-trade__chain-row
+.trade-review-trade__step
   display flex
-  font-size 12px
   gap 10px
-  padding 4px 0
+  position relative
 
-  & + &
-    border-top 1px dashed #f0f0f0
+.trade-review-trade__step-marker
+  flex 0 0 9px
+  position relative
 
-// The date leads every hop, because a lineage read without one is a list of
-// events in no particular time.
-.trade-review-trade__chain-when
-  color #9e9e9e
-  flex 0 0 88px
-  font-variant-numeric tabular-nums
+  &::before
+    background #fff
+    border 2px solid #bdbdbd
+    border-radius 50%
+    content ''
+    height 9px
+    left 0
+    position absolute
+    top 5px
+    width 9px
+    z-index 1
 
-.trade-review-trade__chain-body
+  &::after
+    background #e6e6e6
+    bottom 0
+    content ''
+    left 4px
+    position absolute
+    top 14px
+    width 1px
+
+.trade-review-trade__step.last .trade-review-trade__step-marker::after
+  display none
+
+.trade-review-trade__step.open .trade-review-trade__step-marker::before
+  background #2e7d32
+  border-color #2e7d32
+
+.trade-review-trade__step-content
   display flex
   flex-direction column
   gap 2px
   min-width 0
+  padding-bottom 12px
 
-.trade-review-trade__chain-headline
+.trade-review-trade__step-headline
   align-items baseline
   display flex
   flex-wrap wrap
   gap 2px 8px
 
-.trade-review-trade__chain-event
+.trade-review-trade__step-date
+  color #9e9e9e
+  flex 0 0 auto
+  font-size 12px
+  font-variant-numeric tabular-nums
+
+.trade-review-trade__step-team
+  align-items center
+  display flex
+  gap 4px
+
+.trade-review-trade__step-event
   color #424242
+  font-size 13px
 
   a
     color #1565c0
@@ -295,26 +351,28 @@
     &:hover
       text-decoration underline
 
-.trade-review-trade__chain-asset
+// The asset is named only where it CHANGES — a pick that became a player —
+// because repeating one name down every step of a chain is what made the old
+// layout read as a wall.
+.trade-review-trade__step-asset
   align-items center
   display flex
-  gap 4px
+  font-size 13px
+  gap 6px
   min-width 0
 
-.trade-review-trade__chain-team
-  align-items center
-  display flex
-  gap 4px
-
-.trade-review-trade__chain-outcome
-  color #757575
-
-.trade-review-trade__chain-stats
+.trade-review-trade__step-stats
   color #9e9e9e
   display flex
   flex-wrap wrap
+  font-size 12px
   font-variant-numeric tabular-nums
   gap 10px
+
+.trade-review-trade__step-end
+  color #616161
+  font-size 12px
+  font-weight 500
 
 // The named state an asset with no lineage rows renders as. A blank here would
 // be indistinguishable from an asset that produced nothing.
@@ -349,8 +407,6 @@
   to
     transform rotate(360deg)
 
-// Narrow widths stack the two sides and drop the date out of its own column, so
-// a hop reads as two lines rather than as a wrapped five-column row.
 @media (max-width 599px)
   .trade-review-trade__summary
     padding 12px
@@ -358,9 +414,5 @@
   .trade-review-trade__open span
     display none
 
-  .trade-review-trade__chain-row
-    flex-direction column
-    gap 2px
-
-  .trade-review-trade__chain-when
-    flex 0 0 auto
+  .trade-review-trade__production
+    margin-left 0

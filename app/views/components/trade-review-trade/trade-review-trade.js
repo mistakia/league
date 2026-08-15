@@ -7,7 +7,6 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 
 import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'
-import format_trade_asset_label from '@libs-shared/format-trade-asset-label.mjs'
 import format_lineage_event, {
   terminated_by_labels,
   lineage_state_labels,
@@ -29,6 +28,9 @@ const AT_TRADE_EXPLANATION =
 // would claim more than the number supports.
 const TODAY_EXPLANATION =
   "Today's KeepTradeCut value of every still-open asset descended from what this team received. An asset whose whole line has been released, expired or converted is worth nothing."
+
+const SWING_EXPLANATION =
+  'How far the trade has moved since the day it was made, and toward which side. Realized value minus at-trade value.'
 
 const format_value = (value) => Math.round(value).toLocaleString()
 
@@ -55,40 +57,84 @@ const side_totals = (assets) => {
   }
 }
 
-function AssetLabel({ asset }) {
-  const player_id = asset.get('player_id')
-  if (player_id) {
-    return (
-      // The player name opens the selected-player view, and the collapsed card
-      // it sits in navigates to the trade on click. The stop keeps the two from
-      // firing together, so selecting a player never also leaves the page. A
-      // pick has no player view, so it is left to the card.
-      <span onClick={(event) => event.stopPropagation()}>
-        <PlayerName pid={player_id} hidePosition />
-      </span>
-    )
+// What an asset IS, for deciding whether a lineage step is still carrying the
+// same thing. A pick and the player it became are different identities; the
+// same player under a new contract is not.
+const asset_identity_key = (asset) =>
+  asset.get('player_id') ||
+  `${asset.get('pick_year')}-${asset.get('pick_round')}-${asset.get('pick_draft_overall_position')}`
+
+// A pick renders over two tiers rather than as the one-line spelling
+// format_trade_asset_label produces for the grade-trades CLI. The year and
+// round are what an owner recognises the pick by; the overall slot qualifies it
+// and must not compete with it for the same weight.
+function PickLabel({ asset }) {
+  const pick_year = asset.get('pick_year')
+  if (!pick_year) {
+    return <span className='trade-review-trade__pick'>Unknown asset</span>
   }
+  const pick_draft_overall_position = asset.get('pick_draft_overall_position')
   return (
     <span className='trade-review-trade__pick'>
-      {format_trade_asset_label({
-        player_id: null,
-        pick_year: asset.get('pick_year'),
-        pick_round: asset.get('pick_round'),
-        pick_draft_overall_position: asset.get('pick_draft_overall_position')
-      })}
+      <span className='trade-review-trade__pick-main'>
+        {pick_year} Round {asset.get('pick_round')}
+      </span>
+      {Boolean(pick_draft_overall_position) && (
+        <span className='trade-review-trade__pick-meta'>
+          #{pick_draft_overall_position} overall
+        </span>
+      )}
     </span>
   )
 }
 
-AssetLabel.propTypes = {
+PickLabel.propTypes = {
   asset: ImmutablePropTypes.map.isRequired
 }
 
-// One holding the asset passed through. Depth 0 is the asset as it landed in
-// this trade; every later row is what it turned into. A hop that was itself a
-// trade links to that trade's own review, which is the whole reason a lineage
-// is worth rendering as a chain rather than as an endpoint.
-function ChainRow({ chain_row, is_origin, league_id, trade_uid }) {
+function AssetLabel({ asset, headshot_width }) {
+  const player_id = asset.get('player_id')
+  if (player_id) {
+    return (
+      // PlayerName renders a fragment of two siblings, so it needs a flex
+      // wrapper of its own or its status chips wrap away from the name.
+      //
+      // The stop is what keeps the two click targets apart: the name opens the
+      // selected-player view, and the collapsed card it sits in navigates to
+      // the trade. A pick has no player view, so it is left to the card.
+      <span
+        className='trade-review-trade__player'
+        onClick={(event) => event.stopPropagation()}
+      >
+        <PlayerName
+          pid={player_id}
+          hidePosition
+          headshot_width={headshot_width}
+        />
+      </span>
+    )
+  }
+  return <PickLabel asset={asset} />
+}
+
+AssetLabel.propTypes = {
+  asset: ImmutablePropTypes.map.isRequired,
+  headshot_width: PropTypes.number
+}
+
+// One holding on the asset's way to whatever it is today, as a step on a dated
+// timeline. Three things keep a chain readable that a flat row of columns did
+// not: the date leads every step, the asset is named only where it CHANGES, and
+// a holding's termination is printed only where nothing follows from it --
+// otherwise "Traded away" and the next step's "Traded" say the same thing twice.
+function ChainStep({
+  chain_row,
+  is_origin,
+  is_continued,
+  shows_asset,
+  league_id,
+  trade_uid
+}) {
   const period_end = chain_row.get('period_end')
   const terminated_by = chain_row.get('terminated_by')
   const weeks_started = chain_row.get('weeks_started')
@@ -100,47 +146,45 @@ function ChainRow({ chain_row, is_origin, league_id, trade_uid }) {
     'projected_pts_added_at_acquisition'
   )
   const hop_trade_uid = chain_row.get('transformation_trade_uid')
+  const is_open = period_end == null
 
   const event_label = is_origin
     ? 'Acquired in this trade'
     : format_lineage_event(chain_row.get('transformation_type'))
 
   return (
-    <div className='trade-review-trade__chain-row'>
-      <div className='trade-review-trade__chain-when'>
-        {format_date(chain_row.get('period_start'))}
-      </div>
-      <div className='trade-review-trade__chain-body'>
-        <div className='trade-review-trade__chain-headline'>
-          <span className='trade-review-trade__chain-event'>
-            {hop_trade_uid && hop_trade_uid !== trade_uid ? (
-              <Link
-                to={`/leagues/${league_id}/trade-review/${hop_trade_uid}`}
-                onClick={(event) => event.stopPropagation()}
-              >
-                {event_label}
-              </Link>
-            ) : (
-              event_label
-            )}
+    <div
+      className={`trade-review-trade__step${is_open ? ' open' : ''}${is_continued ? '' : ' last'}`}
+    >
+      <div className='trade-review-trade__step-marker' />
+      <div className='trade-review-trade__step-content'>
+        <div className='trade-review-trade__step-headline'>
+          <span className='trade-review-trade__step-date'>
+            {format_date(chain_row.get('period_start'))}
           </span>
-          <span className='trade-review-trade__chain-asset'>
-            <AssetLabel asset={chain_row} />
-          </span>
-          <span className='trade-review-trade__chain-team'>
+          <span className='trade-review-trade__step-team'>
             <TeamName
               tid={chain_row.get('tid')}
               year={dayjs(chain_row.get('period_start')).year()}
               abbrv
             />
           </span>
-          <span className='trade-review-trade__chain-outcome'>
-            {period_end
-              ? `${terminated_by_labels[terminated_by] || 'Ended'} — ${format_date(period_end)}`
-              : 'Still held'}
+          <span className='trade-review-trade__step-event'>
+            {hop_trade_uid && hop_trade_uid !== trade_uid ? (
+              <Link to={`/leagues/${league_id}/trade-review/${hop_trade_uid}`}>
+                {event_label}
+              </Link>
+            ) : (
+              event_label
+            )}
           </span>
         </div>
-        <div className='trade-review-trade__chain-stats'>
+        {shows_asset && (
+          <div className='trade-review-trade__step-asset'>
+            <AssetLabel asset={chain_row} />
+          </div>
+        )}
+        <div className='trade-review-trade__step-stats'>
           {realized != null && (
             <span title='Points added over replacement while this team held the asset'>
               {Number(realized).toFixed(1)} pts added
@@ -162,14 +206,65 @@ function ChainRow({ chain_row, is_origin, league_id, trade_uid }) {
             </span>
           )}
         </div>
+        {!is_continued && (
+          <div className='trade-review-trade__step-end'>
+            {is_open
+              ? 'Still held today'
+              : `${terminated_by_labels[terminated_by] || 'Ended'} — ${format_date(period_end)}`}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-ChainRow.propTypes = {
+ChainStep.propTypes = {
   chain_row: ImmutablePropTypes.map.isRequired,
   is_origin: PropTypes.bool,
+  is_continued: PropTypes.bool,
+  shows_asset: PropTypes.bool,
+  league_id: PropTypes.string,
+  trade_uid: PropTypes.number
+}
+
+function Chain({ chain, league_id, trade_uid }) {
+  // A holding is continued when some later holding in the chain was built out
+  // of it. That is a property of the graph rather than of the ordering, so it
+  // stays correct when a chain branches -- a pick that became a player who was
+  // then extended has two rows off one parent, and only the leaves end.
+  const continued_holding_ids = new Set()
+  for (const chain_row of chain) {
+    const source_holding_id = chain_row.get('source_holding_id')
+    if (source_holding_id) continued_holding_ids.add(source_holding_id)
+  }
+
+  let previous_identity = null
+  return (
+    <div className='trade-review-trade__chain'>
+      {chain.map((chain_row, index) => {
+        const identity = asset_identity_key(chain_row)
+        const shows_asset = index === 0 || identity !== previous_identity
+        previous_identity = identity
+        return (
+          <ChainStep
+            key={index}
+            chain_row={chain_row}
+            is_origin={index === 0}
+            is_continued={continued_holding_ids.has(
+              chain_row.get('holding_id')
+            )}
+            shows_asset={shows_asset && index !== 0}
+            league_id={league_id}
+            trade_uid={trade_uid}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+Chain.propTypes = {
+  chain: ImmutablePropTypes.list.isRequired,
   league_id: PropTypes.string,
   trade_uid: PropTypes.number
 }
@@ -177,14 +272,13 @@ ChainRow.propTypes = {
 function Asset({ asset, has_chains, league_id, trade_uid }) {
   const lineage_state = asset.get('lineage_state')
   const chain = asset.get('chain')
-  const resulting_assets = asset.get('resulting_assets')
   const keeptradecut_value_at_trade = asset.get('keeptradecut_value_at_trade')
 
   return (
     <div className='trade-review-trade__asset'>
       <div className='trade-review-trade__asset-header'>
         <div className='trade-review-trade__asset-name'>
-          <AssetLabel asset={asset} />
+          <AssetLabel asset={asset} headshot_width={40} />
         </div>
         <div className='trade-review-trade__asset-values'>
           <span title={AT_TRADE_EXPLANATION}>
@@ -211,29 +305,9 @@ function Asset({ asset, has_chains, league_id, trade_uid }) {
           </span>
         </div>
       </div>
-      {Boolean(resulting_assets && resulting_assets.size) && (
-        <div className='trade-review-trade__resulting'>
-          <span className='trade-review-trade__micro-label'>Still open</span>
-          {resulting_assets.map((resulting_asset, index) => (
-            <span key={index} className='trade-review-trade__resulting-asset'>
-              <AssetLabel asset={resulting_asset} />
-            </span>
-          ))}
-        </div>
-      )}
       {has_chains &&
         (chain && chain.size ? (
-          <div className='trade-review-trade__chain'>
-            {chain.map((chain_row, index) => (
-              <ChainRow
-                key={index}
-                chain_row={chain_row}
-                is_origin={index === 0}
-                league_id={league_id}
-                trade_uid={trade_uid}
-              />
-            ))}
-          </div>
+          <Chain chain={chain} league_id={league_id} trade_uid={trade_uid} />
         ) : (
           // Every leg has a chain of at least its own row, so reaching here
           // means the response did not match the contract. Naming that beats an
@@ -300,21 +374,16 @@ function Perspective({ perspective, season_year, has_chains, league_id }) {
           <TeamName tid={tid} year={season_year} image />
         </div>
         <span className='trade-review-trade__micro-label'>received</span>
+        {Boolean(production) && (
+          <span
+            className='trade-review-trade__production'
+            title='Production and salary accrued by this team on these assets and on everything they became, counted only for the stretches this team held them.'
+          >
+            {production.points_added.toFixed(1)} pts · $
+            {Math.round(production.salary_paid).toLocaleString()} while held
+          </span>
+        )}
       </div>
-      {Boolean(production) && (
-        <div
-          className='trade-review-trade__production'
-          title='Production and salary accrued by this team on these assets and on everything they became, counted only for the stretches this team held them.'
-        >
-          <span>{production.points_added.toFixed(1)} pts added</span>
-          <span>
-            ${Math.round(production.salary_paid).toLocaleString()} paid
-          </span>
-          <span className='trade-review-trade__production-caption'>
-            while held
-          </span>
-        </div>
-      )}
       {acquired_assets.map((asset, index) => (
         <Asset
           key={index}
@@ -364,7 +433,7 @@ function SideSummary({ tid, season_year, assets, show_assets }) {
         <div className='trade-review-trade__side-assets'>
           {assets.map((asset, index) => (
             <div key={index} className='trade-review-trade__side-asset'>
-              <AssetLabel asset={asset} />
+              <AssetLabel asset={asset} headshot_width={40} />
               <span className='trade-review-trade__side-value'>
                 {asset.get('keeptradecut_value_at_trade') == null
                   ? '—'
@@ -414,50 +483,43 @@ SideSummary.propTypes = {
   show_assets: PropTypes.bool
 }
 
-// The one thing the two side columns above cannot show: which way the trade has
-// moved since the day it was made. net_value_change is written from the lead
-// team's view, so its sign picks the team the value moved toward and the
-// sentence names that team outright.
+// The one thing the two side columns cannot show: which way the trade has moved
+// since the day it was made. net_value_change is written from the lead team's
+// view, so its sign picks the team the value moved toward. Read as a labelled
+// stat rather than as a sentence -- the arrow carries "toward".
 function TradeSwing({
   lead_tid,
   counterparty_tid,
   net_value_change,
   season_year
 }) {
-  if (net_value_change == null) {
-    return (
-      <div
-        className='trade-review-trade__swing trade-review-trade__swing--unpriced'
-        title={UNPRICED_EXPLANATION}
-      >
-        No swing figure — at least one asset had no market price on the trade
-        date.
-      </div>
-    )
-  }
-
-  if (!net_value_change) {
-    return (
-      <div className='trade-review-trade__swing'>
-        The two sides are worth exactly what they were on the day of the trade.
-      </div>
-    )
-  }
-
   return (
-    <div className='trade-review-trade__swing'>
-      <span>Since the trade,</span>
-      <span className='trade-review-trade__swing-value'>
-        {Math.abs(net_value_change).toLocaleString()}
-      </span>
-      <span>in value has swung toward</span>
-      <span className='trade-review-trade__swing-team'>
-        <TeamName
-          tid={net_value_change > 0 ? lead_tid : counterparty_tid}
-          year={season_year}
-          abbrv
-        />
-      </span>
+    <div className='trade-review-trade__swing' title={SWING_EXPLANATION}>
+      <span className='trade-review-trade__micro-label'>Swing</span>
+      {net_value_change == null ? (
+        <span
+          className='trade-review-trade__unpriced'
+          title={UNPRICED_EXPLANATION}
+        >
+          Not priced
+        </span>
+      ) : !net_value_change ? (
+        <span className='trade-review-trade__swing-value'>Even</span>
+      ) : (
+        <>
+          <span className='trade-review-trade__swing-value'>
+            {Math.abs(net_value_change).toLocaleString()}
+          </span>
+          <span className='trade-review-trade__swing-arrow'>→</span>
+          <span className='trade-review-trade__swing-team'>
+            <TeamName
+              tid={net_value_change > 0 ? lead_tid : counterparty_tid}
+              year={season_year}
+              abbrv
+            />
+          </span>
+        </>
+      )}
     </div>
   )
 }
@@ -518,6 +580,12 @@ export default function TradeReviewTrade({
           <div className='trade-review-trade__shape'>
             {acquired_assets.size} for {sent_assets.size}
           </div>
+          <TradeSwing
+            lead_tid={lead.get('tid')}
+            counterparty_tid={lead.get('counterparty_tid')}
+            net_value_change={lead.get('net_value_change')}
+            season_year={season_year}
+          />
           {is_interactive && (
             <div className='trade-review-trade__open'>
               <span>Lineage</span>
@@ -539,12 +607,6 @@ export default function TradeReviewTrade({
             show_assets={!is_expanded}
           />
         </div>
-        <TradeSwing
-          lead_tid={lead.get('tid')}
-          counterparty_tid={lead.get('counterparty_tid')}
-          net_value_change={lead.get('net_value_change')}
-          season_year={season_year}
-        />
       </div>
       {is_expanded && (
         <div className='trade-review-trade__detail'>
