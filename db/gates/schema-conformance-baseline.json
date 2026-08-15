@@ -1,11 +1,3326 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-08T23:36:28.103Z",
-  "count": 1,
+  "generated_at": "2026-08-15T13:44:03.388Z",
+  "count": 664,
   "violations": [
+    {
+      "table": "adp_format",
+      "column": "num_qb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "adp_format",
+      "column": "num_teams",
+      "rule": "shorthand"
+    },
+    {
+      "table": "composite_market_value_blend_weights",
+      "column": "adp_weight",
+      "rule": "shorthand"
+    },
+    {
+      "table": "composite_market_value_blend_weights",
+      "column": "ktc_weight",
+      "rule": "shorthand"
+    },
+    {
+      "table": "composite_market_value_daily",
+      "column": "adp_value",
+      "rule": "shorthand"
+    },
+    {
+      "table": "composite_market_value_daily",
+      "column": "cmv_row_id",
+      "rule": "shorthand"
+    },
+    {
+      "table": "composite_market_value_daily",
+      "column": "ktc_value",
+      "rule": "shorthand"
+    },
+    {
+      "table": "draft",
+      "column": "pick_str",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_seasonlogs_history",
+      "column": "fg_xp_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_seasonlogs_index",
+      "column": "fg_xp_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "fourth_quarter_ot_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "fourth_quarter_ot_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_points_allowed_per_game_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_points_allowed_per_game_wr1",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_points_allowed_per_game_wr2",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_points_allowed_per_game_wr3",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_rb_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_rb_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_wr1_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_wr1_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_wr2_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_wr2_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_wr3_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_wr3_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_yards_allowed_per_game_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_yards_allowed_per_game_wr1",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_yards_allowed_per_game_wr2",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_yards_allowed_per_game_wr3",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "team_rb_yards_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "team_rb_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "fourth_quarter_ot_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "fourth_quarter_ot_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_points_allowed_per_game_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_points_allowed_per_game_wr1",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_points_allowed_per_game_wr2",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_points_allowed_per_game_wr3",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_rb_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_rb_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_wr1_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_wr1_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_wr2_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_wr2_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_wr3_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_wr3_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_yards_allowed_per_game_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_yards_allowed_per_game_wr1",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_yards_allowed_per_game_wr2",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_yards_allowed_per_game_wr3",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "team_rb_yards_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "team_rb_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "espn_receiving_metrics_history",
+      "column": "espn_rtm_recv_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "espn_receiving_metrics_history",
+      "column": "espn_rtm_routes",
+      "rule": "shorthand"
+    },
+    {
+      "table": "espn_receiving_metrics_history",
+      "column": "espn_rtm_targets",
+      "rule": "shorthand"
+    },
+    {
+      "table": "external_league_trade_legs",
+      "column": "faab_amount",
+      "rule": "shorthand"
+    },
+    {
+      "table": "external_league_trades",
+      "column": "num_sides",
+      "rule": "shorthand"
+    },
+    {
+      "table": "external_leagues",
+      "column": "num_teams",
+      "rule": "shorthand"
+    },
+    {
+      "table": "format_category_signal_mapping",
+      "column": "adp_format_id",
+      "rule": "shorthand"
+    },
+    {
+      "table": "format_category_signal_mapping",
+      "column": "ktc_qb_axis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "historical_injury_index",
+      "column": "snaps_def",
+      "rule": "shorthand"
+    },
+    {
+      "table": "historical_injury_index",
+      "column": "snaps_off",
+      "rule": "shorthand"
+    },
+    {
+      "table": "historical_injury_index",
+      "column": "snaps_st",
+      "rule": "shorthand"
+    },
+    {
+      "table": "keeptradecut_liquidity",
+      "column": "std_liquidity",
+      "rule": "shorthand"
+    },
+    {
+      "table": "keeptradecut_pick",
+      "column": "ktc_player_id",
+      "rule": "shorthand"
+    },
+    {
+      "table": "keeptradecut_pick",
+      "column": "ktc_player_name",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_format_player_projection_values_history",
+      "column": "pts_added",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_format_player_projection_values",
+      "column": "pts_added",
+      "rule": "shorthand"
+    },
     {
       "table": "league_formats",
       "column": "cap",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "num_teams",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "starter_slots_dst",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "starter_slots_qb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "starter_slots_rb_wr_flex",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "starter_slots_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "starter_slots_wr_te_flex",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "starter_slots_wr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_player_projection_values",
+      "column": "market_salary_adj",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_player_projection_values",
+      "column": "salary_adj_pts_added",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_player_rest_of_season_projection_values",
+      "column": "salary_adj_points_added_net",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_player_rest_of_season_projection_values",
+      "column": "salary_adj_pts_added",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_player_season_projection_values",
+      "column": "market_salary_adj",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_player_season_projection_values",
+      "column": "salary_adj_points_added_net",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_player_season_projection_values",
+      "column": "salary_adj_pts_added",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_careerlogs",
+      "column": "num_byes",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_careerlogs",
+      "column": "num_seasons",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_daily_values",
+      "column": "ktc_share",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_daily_values",
+      "column": "ktc_value",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_player_seasonlogs",
+      "column": "pts_added_earned_optimal",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_player_seasonlogs",
+      "column": "pts_added_earned_rostered",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_player_seasonlogs",
+      "column": "pts_added_earned_started",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_player_seasonlogs",
+      "column": "pts_added_net_optimal",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_player_seasonlogs",
+      "column": "pts_added_net_rostered",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_player_seasonlogs",
+      "column": "pts_added_net_started",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_seasonlogs",
+      "column": "starter_points_dst",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_seasonlogs",
+      "column": "starter_points_qb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_seasonlogs",
+      "column": "starter_points_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_seasonlogs",
+      "column": "starter_points_wr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_user_careerlogs",
+      "column": "num_byes",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_user_careerlogs",
+      "column": "num_seasons",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_game_coaches",
+      "column": "def_play_caller_id",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_game_coaches",
+      "column": "off_play_caller_id",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_games",
+      "column": "away_qb_pid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_games",
+      "column": "home_qb_pid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_games",
+      "column": "time_est",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_games",
+      "column": "time_tz_offset",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_matchup_stats",
+      "column": "defense_avg_time_to_pressure",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "away_to_rem",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "away_wp_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "away_wp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "bc_gsis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "comp_air_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "comp_air_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "comp_yac_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "comp_yac_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "cov_type_charted",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "cov_type",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "db_blitzers",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "def_personnel_db_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "def_personnel_dl_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "def_personnel_lb_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "def_personnel",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "def_score_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "def_score",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "def_to_rem",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "drive_end_qtr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "drive_end_ydl",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "drive_fds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "drive_seq",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "drive_start_qtr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "drive_start_ydl",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "drive_yds_penalized",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "drive_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "ep_result",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "extra_point_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "fg_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "fg_result",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "home_to_rem",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "home_wp_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "home_wp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "intp_gsis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_dropback",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_fault_sack",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_hit",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_hurry",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_kneel",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_left_pocket",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_pressure_tracking",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_pressure",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_rush",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_scramble",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_sneak",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "is_qb_spike",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "n_offense_backfield",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "no_score_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "off_formation",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "off_personnel_ol_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "off_personnel_qb_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "off_personnel_rb_count_pp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "off_personnel_rb_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "off_personnel_te_count_pp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "off_personnel_te_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "off_personnel_wr_count_pp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "off_personnel_wr_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "off_personnel",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "opp_fg_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "opp_safety_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "opp_td_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "pass_oe",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "pass_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "pen_team",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "pen_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "player_fuml_gsis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "player_fuml_pid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "pos_score_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "pos_score",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "pos_to_rem",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "psr_gsis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "qb_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "qb_position",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "qb_scramble_side",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "recv_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "ret_tm",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "ret_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "rush_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "safety_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "score_diff_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "score_diff",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "sec_rem_gm",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "sec_rem_half",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "sec_rem_qtr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "series_seq",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "td_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "td_tm",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "total_away_comp_air_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "total_away_comp_air_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "total_away_comp_yac_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "total_away_comp_yac_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "total_home_comp_air_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "total_home_comp_air_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "total_home_comp_yac_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "total_home_comp_yac_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "tp_result",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "trg_gsis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "two_conv_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "vegas_home_wp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "vegas_wp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "xpass_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "xyac_fd_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "xyac_mean_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "xyac_median_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "xyac_succ_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "ydl_100",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "ydl_end",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "ydl_num",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "ydl_side",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "ydl_start",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "yds_gained",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_passer",
+      "column": "avg_passing_speed",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_passer",
+      "column": "is_turnover_td",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_passer",
+      "column": "passing_zone_los_distance",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_passer",
+      "column": "player_esbid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_player",
+      "column": "in_play_dist",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_player",
+      "column": "is_lined_up_as_qb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_player",
+      "column": "is_st_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_player",
+      "column": "player_esbid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_player",
+      "column": "player_get_off",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_player",
+      "column": "separation_to_qb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_player",
+      "column": "time_to_qb_hurry",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_receiver",
+      "column": "player_esbid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_rusher",
+      "column": "player_esbid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_rusher",
+      "column": "speed_at_los",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_rusher",
+      "column": "time_to_los",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_rusher",
+      "column": "x_at_los",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_rusher",
+      "column": "y_at_los",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "avg_height",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "avg_pass_rusher_distance_to_qb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "away_to_rem",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "away_win_prob_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "away_win_prob_pre",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "away_wp_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "away_wp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "bc_gsis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "broken_tackles_rec",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "comp_air_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "comp_air_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "comp_yac_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "comp_yac_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "cov_type_charted",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "cov_type",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "db_blitzers",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "def_personnel_db_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "def_personnel_dl_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "def_personnel_lb_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "def_personnel",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "def_score_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "def_score",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "def_to_rem",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "desc_nflfastr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "drive_end_qtr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "drive_end_ydl",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "drive_fds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "drive_seq",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "drive_start_qtr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "drive_start_ydl",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "drive_yds_penalized",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "drive_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ep_ngs",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ep_result",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "extra_point_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "fg_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "fg_result_detail",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "fg_result",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "home_to_rem",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "home_win_prob_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "home_win_prob_pre",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "home_wp_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "home_wp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "intp_gsis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_dropback",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_fault_sack",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_hit",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_hurry",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_kneel",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_left_pocket",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_pressure_tracking",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_pressure",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_rush",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_scramble",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_sneak",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "is_qb_spike",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "kickoff_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "n_offense_backfield",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "no_score_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "num_high_safeties",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "num_shifted_players",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "off_formation",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "off_personnel_ol_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "off_personnel_qb_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "off_personnel_rb_count_pp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "off_personnel_rb_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "off_personnel_te_count_pp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "off_personnel_te_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "off_personnel_wr_count_pp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "off_personnel_wr_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "off_personnel",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "opp_fg_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "opp_safety_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "opp_td_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "pass_oe",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "pass_prob_non_tracking",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "pass_prob_tracking",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "pass_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "pen_team",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "pen_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "player_fuml_gsis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "player_fuml_pid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "pos_score_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "pos_score",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "pos_to_rem",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "psr_gsis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "punt_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "qb_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "qb_pid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "qb_position_tracking",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "qb_position",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "qb_scramble_side",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "recv_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ret_tm",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ret_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "rush_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "safety_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "score_diff_post",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "score_diff",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "sec_rem_gm",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "sec_rem_half",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "sec_rem_qtr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "series_seq",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "td_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "td_tm",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "total_away_comp_air_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "total_away_comp_air_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "total_away_comp_yac_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "total_away_comp_yac_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "total_home_comp_air_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "total_home_comp_air_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "total_home_comp_yac_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "total_home_comp_yac_wpa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "tp_result",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "trg_gsis",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "two_conv_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "vegas_home_wp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "vegas_wp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "xpass_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "xyac_fd_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "xyac_mean_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "xyac_median_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "xyac_succ_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ydl_100",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ydl_end",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ydl_num",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ydl_side",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "ydl_start",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "yds_gained",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_avg_get_off",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_avg_target_separation",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_avg_time_to_pressure",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_avg_time_to_throw",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_blitz_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_pass_epa_per_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_pass_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_pass_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_pass_plays",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_pass_touchdowns",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_pass_yards_per_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_pass_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_pressure_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_pressures",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_run_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_run_plays",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_attempts_inside_tackles_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_attempts_light_box_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_attempts_outside_tackles_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_attempts_stacked_box_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_epa_per_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_stuffed_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_touchdowns",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_yards_10_plus",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_yards_after_contact_per_attempt",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_yards_before_contact_per_attempt",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_yards_over_expected_per_attempt",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_yards_over_expected",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_yards_per_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_rush_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_sack_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_sack_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_sacks",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_tight_window_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_yards_after_catch_over_expected",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "def_yards_after_catch",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_avg_target_separation",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_avg_time_to_pressure",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_avg_time_to_throw",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_blitz_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_pass_attempts",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_pass_epa_per_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_pass_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_pass_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_pass_plays",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_pass_touchdowns",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_pass_yards_per_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_pass_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_play_action_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_pressure_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_pressures",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_run_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_run_plays",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_attempts_inside_tackles_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_attempts_light_box_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_attempts_outside_tackles_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_attempts_stacked_box_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_attempts_stuffed_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_epa_per_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_success_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_touchdowns",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_yards_10_plus",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_yards_after_contact_per_attempt",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_yards_before_contact_per_attempt",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_yards_over_expected_per_attempt",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_yards_over_expected",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_yards_per_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_rush_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_sack_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_sack_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_sacks",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_yards_after_catch_over_expected",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_gamelogs",
+      "column": "off_yards_after_catch",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "air_yards_per_pass_att",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "avg_route_depth",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "avg_target_separation",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "avg_time_to_pressure",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "avg_time_to_sack",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "avg_time_to_throw",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "deep_pass_att_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "endzone_recs",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "expected_pass_comp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "expected_recv_yards_after_catch",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "pass_comp_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "pass_epa_per_db",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_air_yards_per_target",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_air_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_avg_target_separation",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_deep_target_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_drop_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_drops",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_epa_per_route",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_epa_per_target",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_tight_window_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_yards_15_plus_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_yards_after_catch_over_expected",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_yards_after_catch_per_reception",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_yards_after_catch",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_yards_per_reception",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "recv_yards_per_route",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_team_seasonlogs",
+      "column": "rush_avg_time_to_line_of_scrimmage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "pff_player_seasonlogs",
+      "column": "fg_ep_kicker",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_adp_history",
+      "column": "adp_format_id",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_adp_history",
+      "column": "std_dev",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_adp_index",
+      "column": "adp_format_id",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_adp_index",
+      "column": "std_dev",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "broken_missed_tackles_per_100db",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "broken_tackles_per_100touches",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "dropped_int",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "false_start_pen",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "forty_yd_dash_is_pro_day",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "forty_yd_dash_is_unofficial",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "forty_yd_dash",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "fumbles_per_100touches",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "holding_pen_drawn",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "holding_pen",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "missed_tackles_per_100touches",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "pass_cov_points_press",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "pass_cov_points_rating",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "pass_cov_points_slot",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "pass_cov_points_wide",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "pass_cov_points",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "pass_td",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "qb_rating",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "rec_epa_per_target",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "rec_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "rec_td",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "rec_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "run_def_points_rating",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "run_def_points",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "vert_jump_is_pro_day",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "vert_jump_is_unofficial",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_careerlogs",
+      "column": "vert_jump",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "broken_missed_tackles_per_100db",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "broken_tackles_per_100touches",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "dropped_int",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "false_start_pen",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "forty_yd_dash_is_pro_day",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "forty_yd_dash_is_unofficial",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "forty_yd_dash",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "fumbles_per_100touches",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "holding_pen_drawn",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "holding_pen",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "missed_tackles_per_100touches",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "pass_cov_points_press",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "pass_cov_points_rating",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "pass_cov_points_slot",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "pass_cov_points_wide",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "pass_cov_points",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "pass_td",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "qb_rating",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "rec_epa_per_target",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "rec_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "rec_td",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "rec_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "run_def_points_rating",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "run_def_points",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "vert_jump_is_pro_day",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "vert_jump_is_unofficial",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_college_seasonlogs",
+      "column": "vert_jump",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_defender_gamelogs",
+      "column": "avg_target_separation_allowed",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_defender_gamelogs",
+      "column": "pass_rush_get_off",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_defender_gamelogs",
+      "column": "recs_nearest_defender",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_defender_gamelogs",
+      "column": "recv_tds_nearest_defender",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_defender_gamelogs",
+      "column": "recv_yards_nearest_defender",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_game_outcome_correlations",
+      "column": "leading_fpg",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_game_outcome_correlations",
+      "column": "overall_fpg",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_game_outcome_correlations",
+      "column": "trailing_fpg",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q1_snaps_def_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q1_snaps_def",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q1_snaps_off_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q1_snaps_off",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q2_snaps_def_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q2_snaps_def",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q2_snaps_off_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q2_snaps_off",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q3_snaps_def_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q3_snaps_def",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q3_snaps_off_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q3_snaps_off",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q4_snaps_def_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q4_snaps_def",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q4_snaps_off_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "q4_snaps_off",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "snaps_def_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "snaps_def",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "snaps_low_prob_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "snaps_low_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "snaps_off_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "snaps_off",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "snaps_st_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "snaps_st",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_pair_correlations",
+      "column": "nfl_team_a",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_pair_correlations",
+      "column": "nfl_team_b",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_pair_correlations",
+      "column": "pid_a",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_pair_correlations",
+      "column": "pid_b",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "air_yards_per_pass_att",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "avg_target_separation",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "avg_time_to_pressure",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "avg_time_to_sack",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "avg_time_to_throw",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "deep_pass_att_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "expected_pass_comp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "pass_comp_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_passing_gamelogs",
+      "column": "pass_epa_per_db",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_prospect_profile",
+      "column": "positional_factor_off_man_coverage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "avg_route_depth",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "endzone_recs",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "expected_recv_yards_after_catch",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_air_yards_per_target",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_air_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_avg_target_separation",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_deep_target_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_drop_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_drops",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_epa_per_route",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_epa_per_target",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_epa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_tight_window_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_yards_15_plus_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_yards_15_plus_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_yards_after_catch_over_expected",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_yards_after_catch_per_reception",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_yards_after_catch",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_yards_per_reception",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_receiving_gamelogs",
+      "column": "recv_yards_per_route",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_rushing_gamelogs",
+      "column": "rush_attempts_goaline",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_rushing_gamelogs",
+      "column": "rush_avg_time_to_line_of_scrimmage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_seasonlogs",
+      "column": "espn_rtm_recv_yds",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_seasonlogs",
+      "column": "espn_rtm_routes",
+      "rule": "shorthand"
+    },
+    {
+      "table": "player_seasonlogs",
+      "column": "espn_rtm_targets",
+      "rule": "shorthand"
+    },
+    {
+      "table": "players_status",
+      "column": "exp_return",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "current_season_hist_edge_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "current_season_hist_edge_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "current_season_hist_rate_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "current_season_hist_rate_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "current_season_joint_hist_rate_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "current_season_opp_allow_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "current_season_sum_hist_rate_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "current_season_sum_hist_rate_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_five_hist_edge_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_five_hist_edge_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_five_hist_rate_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_five_hist_rate_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_five_joint_hist_rate_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_season_hist_edge_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_season_hist_edge_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_season_hist_rate_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_season_hist_rate_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_season_joint_hist_rate_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_ten_hist_edge_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_ten_hist_edge_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_ten_hist_rate_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_ten_hist_rate_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "last_ten_joint_hist_rate_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "prop_pairings",
+      "column": "market_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "hist_edge_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "hist_edge_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "hist_rate_hard",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "hist_rate_soft",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "hits_opp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "market_prob",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "o_am",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "opp_allow_rate",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "opp_hit_weeks",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "opp_weeks",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props_index",
+      "column": "u_am",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props",
+      "column": "o_am",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props",
+      "column": "u_am",
+      "rule": "shorthand"
+    },
+    {
+      "table": "roster_asset_holding",
+      "column": "projected_pts_added_at_acquisition",
+      "rule": "shorthand"
+    },
+    {
+      "table": "roster_asset_holding",
+      "column": "projected_pts_added_remaining_at_termination",
+      "rule": "shorthand"
+    },
+    {
+      "table": "roster_asset_holding",
+      "column": "ps_slot_subtype",
+      "rule": "shorthand"
+    },
+    {
+      "table": "roster_asset_holding",
+      "column": "realized_pts_added_earned_through_termination",
+      "rule": "shorthand"
+    },
+    {
+      "table": "roster_asset_holding",
+      "column": "realized_pts_added_net_in_active_slot",
+      "rule": "shorthand"
+    },
+    {
+      "table": "roster_asset_holding",
+      "column": "realized_pts_added_net_in_practice_squad_slot",
+      "rule": "shorthand"
+    },
+    {
+      "table": "roster_asset_holding",
+      "column": "realized_pts_added_net_in_started_slot",
+      "rule": "shorthand"
+    },
+    {
+      "table": "roster_asset_holding",
+      "column": "realized_pts_added_net_through_termination",
+      "rule": "shorthand"
+    },
+    {
+      "table": "roster_asset_holding",
+      "column": "weeks_cov",
+      "rule": "shorthand"
+    },
+    {
+      "table": "roster_asset_transformation",
+      "column": "trade_uid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "scoring_format_player_gamelogs",
+      "column": "pos_rnk",
+      "rule": "shorthand"
+    },
+    {
+      "table": "scoring_format_player_seasonlogs",
+      "column": "points_per_game_pos_rnk",
+      "rule": "shorthand"
+    },
+    {
+      "table": "scoring_format_player_seasonlogs",
+      "column": "points_per_game_rnk",
+      "rule": "shorthand"
+    },
+    {
+      "table": "scoring_format_player_seasonlogs",
+      "column": "points_pos_rnk",
+      "rule": "shorthand"
+    },
+    {
+      "table": "scoring_format_player_seasonlogs",
+      "column": "points_rnk",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
+      "column": "ext_date",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
+      "column": "franchise_tag_salary_qb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
+      "column": "franchise_tag_salary_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
+      "column": "franchise_tag_salary_wr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
+      "column": "max_roster_dst",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
+      "column": "max_roster_qb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
+      "column": "max_roster_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
+      "column": "max_roster_wr",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
+      "column": "starting_faab_budget",
+      "rule": "shorthand"
+    },
+    {
+      "table": "selection_combination_odds_history",
+      "column": "is_sgp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "selection_combination_odds_index",
+      "column": "is_sgp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "teams",
+      "column": "faab_balance",
+      "rule": "shorthand"
+    },
+    {
+      "table": "trades_slots",
+      "column": "trade_uid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "weekly_market_selections_analysis_cache",
+      "column": "current_season_hits_opp",
+      "rule": "shorthand"
+    },
+    {
+      "table": "weekly_market_selections_analysis_cache",
+      "column": "current_season_opp_hit_weeks",
+      "rule": "shorthand"
+    },
+    {
+      "table": "weekly_market_selections_analysis_cache",
+      "column": "current_season_opp_weeks_played",
       "rule": "shorthand"
     }
   ]
