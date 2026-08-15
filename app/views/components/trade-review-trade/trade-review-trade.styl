@@ -331,6 +331,7 @@
 
 .trade-review-trade__step-content
   display flex
+  flex 1 1 auto
   flex-direction column
   gap 2px
   min-width 0
@@ -373,19 +374,9 @@
   gap 6px
   min-width 0
 
-.trade-review-trade__step-stats
-  display flex
-  flex-wrap wrap
-  font-size 12px
-  gap 2px 8px
-
-.trade-review-trade__step-idle
-  color #9e9e9e
-  font-style italic
-
 // A figure and the noun it counts, always in that order and always together.
-// The number carries the weight and the noun stays muted, which is what lets a
-// row of these be scanned without reading every word of it.
+// Used where a number stands alone — a side's production, the combined line —
+// as opposed to the chain table below, which heads its columns instead.
 .trade-review-trade__stat-chip
   align-items baseline
   cursor help
@@ -404,6 +395,53 @@
 
 .trade-review-trade__stat-chip-label
   color #9e9e9e
+
+// The chain's figures, as columns under one header rather than as a labelled
+// phrase repeated on every row. The nouns are identical down a chain, so
+// stating them once is what keeps the rows short — and the alignment is what
+// makes "which holder got something out of him" answerable by looking.
+.trade-review-trade__chain-header
+  align-items flex-end
+  display flex
+  gap 10px
+  padding-bottom 4px
+
+.trade-review-trade__chain-header-lead
+  flex 1 1 auto
+  min-width 0
+
+.trade-review-trade__step-stats
+  display flex
+  flex 0 0 auto
+  font-size 12px
+  gap 10px
+
+.trade-review-trade__stat-cell
+  cursor help
+  flex 0 0 auto
+  min-width 52px
+  text-align right
+
+  &.absent
+    color #d5d5d5
+
+.trade-review-trade__stat-cell-value
+  color $textColor
+  font-variant-numeric tabular-nums
+  font-weight 600
+
+.trade-review-trade__stat-cell.absent .trade-review-trade__stat-cell-value
+  color #d5d5d5
+  font-weight 400
+
+// The column's own noun, carried in the markup so a narrow screen can drop the
+// header and show it inline instead. One markup, two layouts.
+.trade-review-trade__stat-cell-label
+  display none
+
+.trade-review-trade__step-idle
+  color #9e9e9e
+  font-style italic
 
 .trade-review-trade__step-end
   color #616161
@@ -455,3 +493,37 @@
 
   .trade-review-trade__stat-value
     font-size 15px
+
+  // Too narrow for columns, so the header goes and each cell carries its own
+  // noun inline — the same markup, read the other way. An absent cell holds a
+  // column open on a wide screen and has nothing to say on a narrow one.
+  .trade-review-trade__chain-header
+    display none
+
+  .trade-review-trade__step
+    flex-wrap wrap
+
+  .trade-review-trade__step-stats
+    flex-basis 100%
+    flex-wrap wrap
+    gap 2px 8px
+    padding 0 0 10px 19px
+
+  .trade-review-trade__stat-cell
+    align-items baseline
+    display inline-flex
+    gap 3px
+    min-width 0
+    text-align left
+
+    &.absent
+      display none
+
+    & + &::before
+      color #d5d5d5
+      content '·'
+      margin-right 5px
+
+  .trade-review-trade__stat-cell-label
+    color #9e9e9e
+    display inline

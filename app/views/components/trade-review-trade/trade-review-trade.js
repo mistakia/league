@@ -188,91 +188,91 @@ StatChip.propTypes = {
   title: PropTypes.string
 }
 
-const plural = (count, singular, plural_form) =>
-  count === 1 ? singular : plural_form
-
-// What one holding produced and cost. This replaced a "0/5/0 wks" triple whose
-// three numbers could only be read against a tooltip naming their order —
-// exactly the coded label the house style forbids.
+// What one holding produced and cost, as a row of aligned cells rather than a
+// run of labelled phrases.
 //
-// The column semantics, since none of them is self-evident from the name:
+// The nouns are identical on every step of a chain, so repeating them per row
+// spends most of the line restating what the reader already knows. Stating them
+// ONCE in a header buys two things: the rows get short, and the values line up
+// vertically — which is what makes "which holder actually got something out of
+// him" answerable by looking rather than by reading.
+//
+// This is not the "0/5/0 wks" triple it replaced. That was a coded label whose
+// meaning lived in a tooltip; a column under a header is labelled in place.
+//
+// The column semantics, since none is self-evident from its name:
 //   realized_pts_added_net_through_termination  summed over every week the team
 //     held the player, BENCH WEEKS INCLUDED, and a week below replacement
 //     subtracts, so the figure can be negative.
 //   weeks_active   weeks in an active-roster slot, which in this league's slot
 //     sets INCLUDES the bench and excludes the practice squad and reserve.
 //   weeks_started  weeks in a starting slot. Starting slots are a subset of
-//     active ones and the counter is a separate `if`, so every start is also an
-//     active week — the two do not sum to anything meaningful.
-function HoldingStats({ chain_row }) {
-  const weeks_started = chain_row.get('weeks_started')
-  const weeks_active = chain_row.get('weeks_active')
-  const weeks_practice_squad = chain_row.get('weeks_practice_squad')
-  const salary_paid = chain_row.get('salary_paid')
-  const realized = chain_row.get('realized_pts_added_net_through_termination')
-
-  const chips = []
-
-  if (realized != null) {
-    chips.push({
-      key: 'points',
-      value: Number(realized).toFixed(1),
-      label: 'pts above replacement',
-      title:
-        'Points above replacement this team scored from the asset over the weeks it held him, bench weeks included. A week below replacement subtracts, so this can be negative.'
-    })
+//     active ones and the counter is a separate `if`, so every start is also a
+//     rostered week — the two do not sum to anything meaningful.
+const HOLDING_COLUMNS = [
+  {
+    key: 'points',
+    label: 'Pts added',
+    title:
+      'Points above replacement this team scored from the asset over the weeks it held him, bench weeks included. A week below replacement subtracts, so this can be negative.',
+    read: (chain_row) => {
+      const value = chain_row.get('realized_pts_added_net_through_termination')
+      return value == null ? null : Number(value).toFixed(1)
+    }
+  },
+  {
+    key: 'rostered',
+    label: 'Rostered',
+    title:
+      'Weeks on the active roster — starting lineup and bench both, but not the practice squad or reserve.',
+    read: (chain_row) => chain_row.get('weeks_active')
+  },
+  {
+    key: 'starts',
+    label: 'Starts',
+    title:
+      'Weeks in a starting lineup slot. Every start is also a rostered week, so the two are not additive.',
+    read: (chain_row) => chain_row.get('weeks_started')
+  },
+  {
+    key: 'practice_squad',
+    label: 'Practice squad',
+    title: 'Weeks stashed on the practice squad.',
+    read: (chain_row) => chain_row.get('weeks_practice_squad'),
+    // Most holdings never see the practice squad, and a column of zeros is
+    // width spent on nothing. It appears for a chain that used one.
+    only_when_used: true
+  },
+  {
+    key: 'salary',
+    label: 'Salary',
+    title: 'Salary this team paid against the cap over this holding.',
+    read: (chain_row) => {
+      const value = chain_row.get('salary_paid')
+      return value == null ? null : `$${Number(value).toLocaleString()}`
+    }
   }
+]
 
-  if (weeks_active) {
-    chips.push({
-      key: 'active',
-      value: weeks_active,
-      label: plural(weeks_active, 'week rostered', 'weeks rostered'),
-      title:
-        'Weeks on the active roster — starting lineup and bench both, but not the practice squad or reserve.'
+// Which columns a given chain earns. A chain of picks has nothing to report on
+// any of them and gets no table at all.
+const holding_columns_for = (chain) =>
+  HOLDING_COLUMNS.filter((column) =>
+    chain.some((chain_row) => {
+      const value = column.read(chain_row)
+      if (value == null) return false
+      return column.only_when_used ? Number(value) > 0 : true
     })
-  }
+  )
 
-  // "0 starts" is worth printing whenever the player was on the roster at all:
-  // a player held for a season and never started is the thing a reader most
-  // wants to see, and an omitted zero reads as missing data.
-  if (weeks_active || weeks_started) {
-    chips.push({
-      key: 'starts',
-      value: weeks_started || 0,
-      label: plural(weeks_started || 0, 'start', 'starts'),
-      title:
-        'Weeks in a starting lineup slot. Every start is also a rostered week, so the two are not additive.'
-    })
-  }
+function HoldingStats({ chain_row, columns }) {
+  if (!columns.length) return null
 
-  if (weeks_practice_squad) {
-    chips.push({
-      key: 'practice_squad',
-      value: weeks_practice_squad,
-      label: plural(
-        weeks_practice_squad,
-        'week on the practice squad',
-        'weeks on the practice squad'
-      ),
-      title: 'Weeks stashed on the practice squad.'
-    })
-  }
-
-  if (salary_paid) {
-    chips.push({
-      key: 'salary',
-      value: `$${Number(salary_paid).toLocaleString()}`,
-      label: 'salary paid',
-      title: 'Salary this team paid against the cap over this holding.'
-    })
-  }
-
-  if (!chips.length) {
-    // A pick is never on a roster, so silence is correct for one. For a player
-    // it is a finding: the team held him and he never dressed. Saying so beats
-    // an empty line, which reads as data that did not load.
-    if (!chain_row.get('player_id')) return null
+  // A player the team held but never dressed reads as a row of zeros, which is
+  // a finding rather than an absence — but a row of em-dashes is not, so it is
+  // named. A pick has no roster life at all and its columns simply do not exist.
+  const has_any_value = columns.some((column) => column.read(chain_row) != null)
+  if (!has_any_value && chain_row.get('player_id')) {
     return (
       <div className='trade-review-trade__step-stats'>
         <span className='trade-review-trade__step-idle'>
@@ -284,15 +284,30 @@ function HoldingStats({ chain_row }) {
 
   return (
     <div className='trade-review-trade__step-stats'>
-      {chips.map(({ key, value, label, title }) => (
-        <StatChip key={key} value={value} label={label} title={title} />
-      ))}
+      {columns.map((column) => {
+        const value = column.read(chain_row)
+        return (
+          <span
+            key={column.key}
+            className={`trade-review-trade__stat-cell${value == null ? ' absent' : ''}`}
+            title={column.title}
+          >
+            <span className='trade-review-trade__stat-cell-value'>
+              {value == null ? '—' : value}
+            </span>
+            <span className='trade-review-trade__stat-cell-label'>
+              {column.label}
+            </span>
+          </span>
+        )
+      })}
     </div>
   )
 }
 
 HoldingStats.propTypes = {
-  chain_row: ImmutablePropTypes.map.isRequired
+  chain_row: ImmutablePropTypes.map.isRequired,
+  columns: PropTypes.array.isRequired
 }
 
 // One holding on the asset's way to whatever it is today, as a step on a dated
@@ -305,6 +320,7 @@ function ChainStep({
   is_origin,
   is_continued,
   shows_asset,
+  columns,
   league_id,
   trade_uid
 }) {
@@ -349,7 +365,6 @@ function ChainStep({
             <AssetLabel asset={chain_row} />
           </div>
         )}
-        <HoldingStats chain_row={chain_row} />
         {!is_continued && (
           <div className='trade-review-trade__step-end'>
             {is_open
@@ -358,6 +373,7 @@ function ChainStep({
           </div>
         )}
       </div>
+      <HoldingStats chain_row={chain_row} columns={columns} />
     </div>
   )
 }
@@ -367,6 +383,7 @@ ChainStep.propTypes = {
   is_origin: PropTypes.bool,
   is_continued: PropTypes.bool,
   shows_asset: PropTypes.bool,
+  columns: PropTypes.array.isRequired,
   league_id: PropTypes.string,
   trade_uid: PropTypes.number
 }
@@ -382,9 +399,29 @@ function Chain({ chain, league_id, trade_uid }) {
     if (source_holding_id) continued_holding_ids.add(source_holding_id)
   }
 
+  // The header is what pays for the short rows below it, so it is only earned
+  // when there is a column to head.
+  const columns = holding_columns_for(chain)
+
   let previous_identity = null
   return (
     <div className='trade-review-trade__chain'>
+      {Boolean(columns.length) && (
+        <div className='trade-review-trade__chain-header'>
+          <div className='trade-review-trade__chain-header-lead' />
+          <div className='trade-review-trade__step-stats'>
+            {columns.map((column) => (
+              <span
+                key={column.key}
+                className='trade-review-trade__stat-cell trade-review-trade__micro-label'
+                title={column.title}
+              >
+                {column.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
       {chain.map((chain_row, index) => {
         const identity = asset_identity_key(chain_row)
         const shows_asset = index !== 0 && identity !== previous_identity
@@ -398,6 +435,7 @@ function Chain({ chain, league_id, trade_uid }) {
               chain_row.get('holding_id')
             )}
             shows_asset={shows_asset}
+            columns={columns}
             league_id={league_id}
             trade_uid={trade_uid}
           />
