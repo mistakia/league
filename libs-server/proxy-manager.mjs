@@ -2,6 +2,7 @@ import { ProxyAgent, fetch as undiciFetch } from 'undici'
 import debug from 'debug'
 
 import db from '#db'
+import { create_logger } from '#libs-shared/log.mjs'
 
 const log = debug('proxy-manager')
 
@@ -62,10 +63,34 @@ const proxy_display_label = (proxy_key) =>
     ? proxy_key.split(':').slice(0, 2).join(':')
     : ''
 
-// ProxyPool manages a single pool of proxies with round-robin selection
+// The two selection modes a pool row may declare.
+//
+// round_robin spreads load across entries and is the right default for a
+// scraping pool, where many IPs is the point. sticky pins to one entry and is
+// for a pool whose purpose is a STABLE EGRESS IDENTITY -- an authenticated
+// vendor session that a changing source IP would look suspicious to. Under
+// round_robin a three-entry pool delivers three rotating IPs, which for that
+// case is the exact inverse of the goal.
+const SELECTION_MODES = new Set(['round_robin', 'sticky'])
+const DEFAULT_SELECTION = 'round_robin'
+
+// ProxyPool manages a single pool of proxies under a declared selection mode
 class ProxyPool {
-  constructor(name) {
+  constructor(name, { selection = DEFAULT_SELECTION } = {}) {
+    // Reject an unknown mode rather than coercing it. Every other failure path
+    // in this module is fail-OPEN and log-only -- an unresolved pool silently
+    // uses `default`, an empty pool silently goes direct -- and both land on
+    // precisely the egress a sticky pool exists to avoid. A typo'd 'stickey'
+    // that quietly meant round_robin would be that same class of bug, invisible
+    // until someone audited the egress IPs.
+    if (!SELECTION_MODES.has(selection)) {
+      throw new Error(
+        `[${name}] unknown proxy selection '${selection}'; ` +
+          `expected one of ${[...SELECTION_MODES].join(', ')}`
+      )
+    }
     this.name = name
+    this.selection = selection
     this.proxies = new Map()
     this.proxy_keys = []
     this.round_robin_index = 0
@@ -137,19 +162,31 @@ class ProxyPool {
       }
     }
 
-    // Round-robin selection: try each proxy in order, skipping failed ones
+    // Selection. Both modes scan in order and skip failed entries; they differ
+    // only in whether the starting point advances.
+    //
+    //   round_robin -- advance the index on EVERY call, so consecutive calls
+    //     land on different entries.
+    //   sticky -- never advance. Return the first non-failed entry, which is the
+    //     same one every call until it is marked failed, at which point the scan
+    //     naturally moves to the next and stays there. Failover survives; only
+    //     rotation-for-its-own-sake is removed.
     const proxy_count = this.proxy_keys.length
     let attempts = 0
+    let index = this.round_robin_index
 
     while (attempts < proxy_count) {
-      const key = this.proxy_keys[this.round_robin_index]
-      this.round_robin_index = (this.round_robin_index + 1) % proxy_count
+      const key = this.proxy_keys[index]
+      index = (index + 1) % proxy_count
+      if (this.selection === 'round_robin') {
+        this.round_robin_index = index
+      }
 
       const proxy = this.proxies.get(key)
       if (proxy && !proxy.failed) {
         proxy.last_used = Date.now()
         log(
-          `[${this.name}] Selected proxy (round-robin): ${proxy_display_label(key)}`
+          `[${this.name}] Selected proxy (${this.selection}): ${proxy_display_label(key)}`
         )
         return { key, ...proxy, pool_name: this.name }
       }
@@ -210,15 +247,37 @@ class ProxyManager {
             ? 'default'
             : config.key.replace('proxy_config_', '')
 
-        const pool = new ProxyPool(pool_name)
-        const proxy_list = config.config_value
+        // Row shape: { selection, proxies }. Selection lives in the row that
+        // owns it rather than in a second config key, which could disagree with
+        // it. The bare-array form it replaced is NOT accepted -- all three rows
+        // migrated together, and carrying both shapes would leave exactly the
+        // transitional cruft the clean-end-state guideline forbids. A row still
+        // holding an array therefore throws here rather than silently yielding
+        // an empty pool, which would fail open to a direct fetch.
+        const { selection, proxies: proxy_list } = config.config_value || {}
+
+        if (!Array.isArray(proxy_list)) {
+          // Named by POOL rather than by config.key. The row key is not itself a
+          // credential, but the credential-logging gate matches any `.key`
+          // interpolation on this file and quieting it by exception is how the
+          // one real leak would get through later. pool_name is derived from the
+          // same row and says the same thing.
+          throw new Error(
+            `proxy config for pool '${pool_name}' is not { selection, proxies }; ` +
+              'migrate the row -- the bare-array form is no longer read'
+          )
+        }
+
+        const pool = new ProxyPool(pool_name, { selection })
 
         for (const proxy_str of proxy_list) {
           pool.add_proxy(proxy_str)
         }
 
         this.pools.set(pool_name, pool)
-        log(`Initialized pool '${pool_name}' with ${pool.proxies.size} proxies`)
+        log(
+          `Initialized pool '${pool_name}' with ${pool.proxies.size} proxies (${pool.selection})`
+        )
       }
 
       if (this.pools.size === 0) {
@@ -277,6 +336,33 @@ class ProxyManager {
 }
 
 const proxy_manager = new ProxyManager()
+
+// A requires_proxy refusal. Distinct class so the retry loop can rethrow it
+// immediately: retrying a misconfigured or empty pool cannot succeed, and the
+// backoff would only delay the report.
+class ProxyRequirementError extends Error {
+  constructor(message) {
+    super(message)
+    this.name = 'ProxyRequirementError'
+  }
+}
+
+const proxy_signal_log = create_logger('proxy-manager', {
+  service: 'league-imports'
+})
+
+// Refuse to proceed unproxied, loudly. A log line is not an oracle -- this is
+// the failure that otherwise succeeds silently from the wrong IP -- so it
+// raises a signal before throwing, per user:guideline/surface-pipeline-failures.
+// The message names the POOL only; a proxy key's username half is a credential.
+const refuse_unproxied = async (message) => {
+  log(message)
+  const emitted = proxy_signal_log.error(new Error(message), {
+    severity: 'high'
+  })
+  if (emitted?.promise) await emitted.promise
+  throw new ProxyRequirementError(message)
+}
 
 // A single proxied attempt that returns the raw Response with no ok-check and
 // no retry -- for a caller (like the PFF session/auth flow) that must branch on
@@ -402,6 +488,7 @@ export async function fetch_with_retry({
   initial_delay = 1000,
   max_delay = 10000,
   use_proxy = false,
+  requires_proxy = false,
   proxy_pool = 'default',
   response_type,
   timeout_ms = 30000,
@@ -445,10 +532,36 @@ export async function fetch_with_retry({
       if (use_proxy) {
         // Get a working proxy from the specified pool (rotates on failure)
         await proxy_manager.initialize()
-        current_proxy = await proxy_manager.get_working_proxy(
-          proxy_pool,
-          signal
-        )
+
+        if (requires_proxy) {
+          // Fail CLOSED. Both of this module's fall-throughs -- an unresolved
+          // pool silently using `default`, and an empty pool silently going
+          // direct -- put the request on an egress the caller has declared it
+          // must not use, and both are log-only. For a caller pinned to a
+          // dedicated identity that is worse than an outage: the fetch succeeds
+          // and nothing reports that it left from the wrong address.
+          //
+          // Resolved here rather than through get_working_proxy so the
+          // default-pool fallback is bypassed entirely instead of detected
+          // after the fact.
+          const pool = proxy_manager.get_pool(proxy_pool)
+          if (!pool) {
+            await refuse_unproxied(
+              `requires_proxy: pool '${proxy_pool}' is not configured`
+            )
+          }
+          current_proxy = await pool.get_working_proxy(signal)
+          if (!current_proxy) {
+            await refuse_unproxied(
+              `requires_proxy: pool '${proxy_pool}' yielded no working proxy`
+            )
+          }
+        } else {
+          current_proxy = await proxy_manager.get_working_proxy(
+            proxy_pool,
+            signal
+          )
+        }
 
         if (current_proxy) {
           retry_log(
@@ -494,6 +607,13 @@ export async function fetch_with_retry({
       return response
     } catch (error) {
       last_error = error
+
+      // A requires_proxy refusal is a configuration fact, not a transient: no
+      // number of retries makes an unconfigured pool resolve, and swallowing it
+      // into the backoff would delay the signal and end in the same throw.
+      if (error instanceof ProxyRequirementError) {
+        throw error
+      }
 
       // If the caller's overall deadline fired, stop immediately — further
       // attempts and backoff sleeps would only burn time past the budget.
@@ -542,5 +662,11 @@ export async function fetch_with_retry({
   throw last_error
 }
 
-export { proxy_manager, fetch_with_proxy, fetch_via_proxy_raw, ProxyPool }
+export {
+  proxy_manager,
+  fetch_with_proxy,
+  fetch_via_proxy_raw,
+  ProxyPool,
+  ProxyRequirementError
+}
 export default fetch_with_proxy
