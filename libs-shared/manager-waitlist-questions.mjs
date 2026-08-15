@@ -32,9 +32,18 @@ export const MAX_LONG_ANSWER_LENGTH = 4000
 // invites the answer the reader thinks we want and tells us nothing; stating
 // what the league actually expects and requiring an explicit yes is both
 // shorter and harder to fake.
+// Two facts, no argument for them. An applicant deciding whether to spend ten
+// minutes on the form needs the shape of the obligation, not a case for why it
+// is reasonable -- and the checkbox below binds to these, so anything a reader
+// has to interpret is something they cannot meaningfully affirm.
+//
+// The eight months are May through December: restricted free agency opens in
+// May or June, the rookie draft runs a month or more after it, the auction is
+// in the days before kickoff, and the season plays out through Week 17 in late
+// December. January to April is the only genuinely quiet stretch.
 export const commitment_terms = [
-  'This is a dynasty league. Rosters carry over, and trades are made years ahead — someone will give up a good player now for a pick that only pays off two seasons from now, and they are counting on you still being here when it does. Joining means planning to be here for several seasons, not one.',
-  'The offseason is most of the year and is not optional. Restricted free agency runs about two weeks in May or June, the rookie draft follows on a pick clock and takes a month or more, and the free agency auction is in the days before the season starts.'
+  'This is a dynasty league. Joining means planning to be here for several seasons, not one.',
+  'It is active about eight months a year, May through December. January to April is the only quiet stretch.'
 ]
 
 // The other half of the same disclosure, and deliberately a SEPARATE list. The
