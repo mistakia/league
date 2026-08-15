@@ -52,11 +52,16 @@ const direction_of = (value) =>
 // whole when any one of its assets is unpriced -- the same rule the engine
 // applies to its own figures, for the same reason: a partial sum reads as a
 // real price.
+//
+// The assets responsible come back with it. A withheld total states an effect,
+// and on its own the reader has to guess the cause -- which one did: a side
+// holding a marquee player beside a round-6 pick reads as though the PLAYER had
+// no price, because he is the thing the eye lands on.
 const side_totals = (assets) => {
-  const has_unpriced = assets.some(
+  const unpriced_assets = assets.filter(
     (asset) => asset.get('keeptradecut_value_at_trade') == null
   )
-  const at_trade = has_unpriced
+  const at_trade = unpriced_assets.size
     ? null
     : assets.reduce(
         (total, asset) => total + asset.get('keeptradecut_value_at_trade'),
@@ -66,7 +71,12 @@ const side_totals = (assets) => {
     (total, asset) => total + asset.get('current_keeptradecut_value'),
     0
   )
-  return { at_trade, today, change: at_trade == null ? null : today - at_trade }
+  return {
+    at_trade,
+    today,
+    change: at_trade == null ? null : today - at_trade,
+    unpriced_assets
+  }
 }
 
 // What an asset IS, for deciding whether a lineage step is still carrying the
@@ -584,7 +594,7 @@ function SideSummary({
   realized_points_added,
   salary_paid
 }) {
-  const { at_trade, today, change } = side_totals(assets)
+  const { at_trade, today, change, unpriced_assets } = side_totals(assets)
 
   return (
     <div className='trade-review-trade__side'>
@@ -597,11 +607,22 @@ function SideSummary({
           {assets.map((asset, index) => (
             <div key={index} className='trade-review-trade__side-asset'>
               <AssetLabel asset={asset} headshot_width={40} />
-              <span className='trade-review-trade__side-value'>
-                {asset.get('keeptradecut_value_at_trade') == null
-                  ? '—'
-                  : format_value(asset.get('keeptradecut_value_at_trade'))}
-              </span>
+              {/* One state, one spelling. This read as an em-dash while the
+                  side total beside it said "Not priced" and the detail card
+                  said "Not priced" again -- three renderings of one fact, which
+                  is what let a reader attach the absence to the wrong asset. */}
+              {asset.get('keeptradecut_value_at_trade') == null ? (
+                <span
+                  className='trade-review-trade__unpriced'
+                  title={UNPRICED_EXPLANATION}
+                >
+                  Not priced
+                </span>
+              ) : (
+                <span className='trade-review-trade__side-value'>
+                  {format_value(asset.get('keeptradecut_value_at_trade'))}
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -620,6 +641,27 @@ function SideSummary({
           title={CHANGE_EXPLANATION}
         />
       </div>
+      {/* Named beneath the totals rather than left to the reader to work out.
+          On the detail page the asset rows above are suppressed entirely, so
+          without this the withheld total has no visible cause anywhere on the
+          card and attaches itself to whichever asset the eye landed on. */}
+      {Boolean(unpriced_assets.size) && (
+        <div
+          className='trade-review-trade__unpriced-cause'
+          title={UNPRICED_EXPLANATION}
+        >
+          <span className='trade-review-trade__unpriced'>
+            No price on the day
+          </span>
+          <span className='trade-review-trade__unpriced-assets'>
+            {unpriced_assets.map((asset, index) => (
+              <span key={index} className='trade-review-trade__unpriced-asset'>
+                <AssetLabel asset={asset} />
+              </span>
+            ))}
+          </span>
+        </div>
+      )}
       <ProductionLine
         realized_points_added={realized_points_added}
         salary_paid={salary_paid}

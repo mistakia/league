@@ -217,6 +217,29 @@
   font-size 12px
   font-style italic
 
+// Which asset withheld the side's at-trade total. Sits directly under the
+// figure it explains, because the alternative is the reader picking a cause
+// themselves — and they pick the marquee player, not the round-6 pick.
+.trade-review-trade__unpriced-cause
+  align-items baseline
+  cursor help
+  display flex
+  flex-wrap wrap
+  font-size 12px
+  gap 2px 6px
+
+.trade-review-trade__unpriced-assets
+  align-items baseline
+  color #757575
+  display flex
+  flex-wrap wrap
+  gap 2px 8px
+  min-width 0
+
+.trade-review-trade__unpriced-asset .trade-review-trade__pick
+  flex-direction row
+  gap 4px
+
 .trade-review-trade__detail
   background #fcfcfc
   border-top 1px solid #e0e0e0
