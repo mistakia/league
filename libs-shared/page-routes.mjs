@@ -171,12 +171,12 @@ export const page_routes = [
   },
   {
     pattern: '/leagues/:lid/trade-review',
-    title: 'Trade Review',
+    title: 'Trades',
     description: 'Completed trades with valuation at the time of the trade.'
   },
   {
     pattern: '/leagues/:lid/trade-review/:trade_uid',
-    title: 'Trade Review',
+    title: 'Trades',
     description: 'Completed trades with valuation at the time of the trade.'
   },
   {

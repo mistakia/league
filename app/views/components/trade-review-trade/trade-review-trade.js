@@ -7,7 +7,6 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 
 import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'
-import Loading from '@components/loading'
 import format_trade_asset_label from '@libs-shared/format-trade-asset-label.mjs'
 import format_lineage_event, {
   terminated_by_labels,
@@ -20,16 +19,29 @@ import './trade-review-trade.styl'
 const UNPRICED_EXPLANATION =
   'At least one asset in this trade has no market price on the trade date. KeepTradeCut deletes a draft class once its draft has passed, so pick prices before September 2023 are permanently unrecoverable. A figure computed from one side only would read as an even trade.'
 
+// What each of the three net figures measures. The labels are terse to stay
+// scannable; the meaning lives in the tooltip, alongside the caption naming
+// whose side the numbers are written from.
+const METRIC_EXPLANATIONS = {
+  at_trade: 'Net market value gained or lost, priced on the day of the trade.',
+  realized:
+    "The same trade priced at today's value of everything each side still holds.",
+  change:
+    'Realized minus at-trade — whether the trade came out better or worse over time.'
+}
+
 const format_signed = (value) =>
   `${value > 0 ? '+' : ''}${Math.round(value).toLocaleString()}`
 
 // A missing figure is rendered as a named absence, never as 0 and never as a
 // blank cell -- both read as "this trade came out even", which is the one thing
 // the data does not say.
-function NetValue({ value, label }) {
+function NetValue({ value, label, title }) {
   return (
     <div className='trade-review-trade__net'>
-      <span className='trade-review-trade__net-label'>{label}</span>
+      <span className='trade-review-trade__net-label' title={title}>
+        {label}
+      </span>
       {value == null ? (
         <span
           className='trade-review-trade__net-unpriced'
@@ -42,6 +54,7 @@ function NetValue({ value, label }) {
           className={`trade-review-trade__net-value ${
             value > 0 ? 'positive' : value < 0 ? 'negative' : ''
           }`}
+          title={title}
         >
           {format_signed(value)}
         </span>
@@ -52,7 +65,8 @@ function NetValue({ value, label }) {
 
 NetValue.propTypes = {
   value: PropTypes.number,
-  label: PropTypes.string
+  label: PropTypes.string,
+  title: PropTypes.string
 }
 
 function AssetLabel({ asset }) {
@@ -243,6 +257,40 @@ Perspective.propTypes = {
   has_chains: PropTypes.bool
 }
 
+// One side of a trade as it reads in the collapsed card: the team and, in its
+// own column, everything it received. The counterparty's received assets are
+// this record's sent_assets, so both columns render from the lead record.
+function SideSummary({ tid, season_year, assets }) {
+  return (
+    <div className='trade-review-trade__side'>
+      <div className='trade-review-trade__side-team'>
+        <TeamName tid={tid} year={season_year} abbrv image />
+      </div>
+      <div className='trade-review-trade__side-label'>received</div>
+      <div className='trade-review-trade__side-assets'>
+        {assets.map((asset, index) => (
+          <div key={index} className='trade-review-trade__side-asset'>
+            <AssetLabel asset={asset} />
+            {asset.get('keeptradecut_value_at_trade') != null && (
+              <span className='trade-review-trade__side-value'>
+                {Math.round(
+                  asset.get('keeptradecut_value_at_trade')
+                ).toLocaleString()}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+SideSummary.propTypes = {
+  tid: PropTypes.number,
+  season_year: PropTypes.number,
+  assets: ImmutablePropTypes.list
+}
+
 export default function TradeReviewTrade({
   trade,
   is_expanded,
@@ -251,7 +299,6 @@ export default function TradeReviewTrade({
 }) {
   const perspectives = trade.get('perspectives')
   const has_chains = trade.get('has_chains')
-  const is_pending = trade.get('is_pending')
 
   const lead = perspectives.first()
   const occurred_at = lead.get('occurred_at')
@@ -268,34 +315,56 @@ export default function TradeReviewTrade({
           if (event.key === 'Enter' || event.key === ' ') on_toggle(trade_uid)
         }}
       >
-        <div className='trade-review-trade__date'>
-          {dayjs(occurred_at).format('MMM D, YYYY')}
+        <div className='trade-review-trade__summary-top'>
+          <div className='trade-review-trade__date'>
+            {dayjs(occurred_at).format('MMM D, YYYY')}
+          </div>
+          <div className='trade-review-trade__expand'>
+            {is_expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          </div>
         </div>
-        <div className='trade-review-trade__teams'>
-          <TeamName tid={lead.get('tid')} year={season_year} abbrv image />
-          <span className='trade-review-trade__versus'>and</span>
-          <TeamName
+        <div className='trade-review-trade__sides'>
+          <SideSummary
+            tid={lead.get('tid')}
+            season_year={season_year}
+            assets={lead.get('acquired_assets')}
+          />
+          <span className='trade-review-trade__versus'>vs</span>
+          <SideSummary
             tid={lead.get('counterparty_tid')}
-            year={season_year}
-            abbrv
-            image
+            season_year={season_year}
+            assets={lead.get('sent_assets')}
           />
         </div>
-        {/* Every figure on this row is written from the lead team's view. The
-            other perspective is its exact sign inversion, so printing both
-            would say the same thing twice. */}
+        {/* Every figure below is written from the lead team's view. The other
+            perspective is its exact sign inversion, so printing both would say
+            the same thing twice -- but the reader has to know which side the
+            numbers belong to, which is what the caption states. */}
         <div className='trade-review-trade__nets'>
-          <NetValue value={lead.get('net_value_at_trade')} label='At trade' />
-          <NetValue value={lead.get('net_value_realized')} label='Realized' />
-          <NetValue value={lead.get('net_value_change')} label='Change' />
+          <NetValue
+            value={lead.get('net_value_at_trade')}
+            label='At trade'
+            title={METRIC_EXPLANATIONS.at_trade}
+          />
+          <NetValue
+            value={lead.get('net_value_realized')}
+            label='Realized'
+            title={METRIC_EXPLANATIONS.realized}
+          />
+          <NetValue
+            value={lead.get('net_value_change')}
+            label='Change'
+            title={METRIC_EXPLANATIONS.change}
+          />
         </div>
-        <div className='trade-review-trade__expand'>
-          {is_expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        <div className='trade-review-trade__net-perspective'>
+          <span>Net figures are from the</span>
+          <TeamName tid={lead.get('tid')} year={season_year} abbrv />
+          <span>side — the other side is the exact mirror.</span>
         </div>
       </div>
       {is_expanded && (
         <div className='trade-review-trade__detail'>
-          {is_pending && !has_chains && <Loading loading />}
           {perspectives.map((perspective, index) => (
             <Perspective
               key={index}
@@ -304,6 +373,11 @@ export default function TradeReviewTrade({
               has_chains={has_chains}
             />
           ))}
+          {!has_chains && (
+            <div className='trade-review-trade__chains-loading'>
+              Loading each asset's lineage...
+            </div>
+          )}
         </div>
       )}
     </div>
