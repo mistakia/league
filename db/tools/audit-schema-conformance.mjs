@@ -24,6 +24,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { parse_partition_children } from './schema-partitions.mjs'
+import { nonconforming_tokens } from './schema-token-vocabulary.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const schema_path = path.join(__dirname, '..', 'schema.postgres.sql')
@@ -122,12 +123,18 @@ const column_specific_shorthand = new Map([])
 // edit to this file, which is the ratchet property the enumeration lacked.
 //
 // Scope is deliberately narrow: a BARE name (no underscore) of five characters
-// or fewer. A token-level rule was measured and is unusable -- 1991 of 2595
-// distinct column names contain some token of four characters or fewer, because
-// legitimate compounds (`is_home`, `pass_yards`, `player_id`) are built from
-// short tokens. The bare short name is the actual hazard the standard names:
+// or fewer. A LENGTH-based token rule was measured and is unusable -- 1991 of
+// 2595 distinct column names contain some token of four characters or fewer,
+// because legitimate compounds (`is_home`, `pass_yards`, `player_id`) are built
+// from short tokens. The bare short name is the actual hazard the standard names:
 // "A name SHOULD be specific enough to be globally unique across the schema so
 // that a grep for it returns exactly its real uses."
+//
+// That measurement is about LENGTH, and reading it as a verdict on token-level
+// rules in general is what left the interior-token gap open for as long as it
+// was. A token rule keyed on VOCABULARY rather than on length is both usable and
+// necessary, and it lives in the `vocabulary_shorthand` branch below; this rule
+// keeps the bare name, which the vocabulary rule deliberately does not judge.
 //
 // Membership test: a bare name is exempt only if it names a STRUCTURAL attribute
 // or identifier -- a category, a key, a label, an ordinal position. A bare name
@@ -588,6 +595,31 @@ function check_column(table, col, entity_type_vocabulary) {
     is_bare_shorthand(lower)
   ) {
     findings.push({ rule: 'shorthand', table, column: col.name })
+  } else if (lower.includes('_')) {
+    // The INTERIOR-TOKEN half. Everything above judges the whole name -- the
+    // table-specific hint, the abbreviation map and the bare-name rule all match
+    // a name end to end -- so a column carrying its shorthand in an interior
+    // token read CLEAN and the audit certified a bad name as good. That is the
+    // same false-conformance class as `draft_franchise_id` and the permissive
+    // two-token `external_id` shape, and the third time this program has found
+    // one: `player_fuml_gsis`, `yds_gained`, `drive_yds_penalized` and
+    // `deep_pass_att_percentage` all passed.
+    //
+    // Disjoint from the bare-name rule BY CONSTRUCTION rather than by care: that
+    // branch returns false for any name containing an underscore and this one
+    // requires one, so no column can be reported twice. The chain's earlier
+    // branches take precedence for the same reason -- a name the abbreviation
+    // map can NAME gets the map's concrete full-word hint, which is strictly
+    // more useful than a token list.
+    const offending_tokens = nonconforming_tokens(lower)
+    if (offending_tokens.length) {
+      findings.push({
+        rule: 'shorthand',
+        table,
+        column: col.name,
+        token: offending_tokens.join(', ')
+      })
+    }
   }
 
   // Season grain (bare `year` / abbreviated `seas_type`).
