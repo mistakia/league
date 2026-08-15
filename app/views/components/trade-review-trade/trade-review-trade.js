@@ -53,40 +53,17 @@ const format_date = (value) => dayjs(value).format('MMM D, YYYY')
 const direction_of = (value) =>
   value == null || !value ? '' : value > 0 ? 'up' : 'down'
 
-// COMPATIBILITY READ ACROSS THE FIELD RENAME. The SPA does not deploy in
-// lockstep with the API -- deploy:all reloads the API before it ships the
-// bundle, and an already-open tab has no expiry -- so this card must render
-// correctly against both the pre-rename and the post-rename API. It reads the
-// new key first and falls back to the retired one, which lies about nothing;
-// the reverse accommodation on the API side is impossible without emitting one
-// quantity under the other's name.
-//
-// This whole block is DELETED as its own step once the rename is deployed and
-// confirmed. Nothing retires it on its own.
-const RETIRED_STATE_LABELS = {
-  held: 'Still held',
-  no_longer_held: 'No longer held'
-}
+// The card reads the post-rename vocabulary directly. The compatibility read
+// across the field rename -- new key first, fall back to the retired one --
+// was shipped one release ahead and removed once the rename was deployed and
+// confirmed; there is no second vocabulary left to serve.
+const asset_still_held = (asset) => asset.get('keeptradecut_value_still_held')
 
-const asset_still_held = (asset) =>
-  asset.has('keeptradecut_value_still_held')
-    ? asset.get('keeptradecut_value_still_held')
-    : asset.get('current_keeptradecut_value')
+const asset_proceeds = (asset) => asset.get('keeptradecut_value_proceeds')
 
-// There is no pre-rename equivalent of the proceeds figure. Undefined here
-// means the API has not been renamed yet, and every site below renders the
-// pre-rename shape rather than substituting the asset-line figure for it --
-// that substitution would be the silent swap this rename exists to prevent.
-const asset_proceeds = (asset) =>
-  asset.has('keeptradecut_value_proceeds')
-    ? asset.get('keeptradecut_value_proceeds')
-    : undefined
+const asset_state = (asset) => asset.get('team_asset_state')
 
-const asset_state = (asset) =>
-  asset.get('team_asset_state') || asset.get('lineage_state')
-
-const state_label = (state) =>
-  team_asset_state_labels[state] || RETIRED_STATE_LABELS[state] || state
+const state_label = (state) => team_asset_state_labels[state] || state
 
 const state_description = (state) => team_asset_state_descriptions[state]
 
@@ -117,22 +94,15 @@ const side_totals = (assets) => {
     (total, asset) => total + asset_still_held(asset),
     0
   )
-  const has_proceeds = assets.every(
-    (asset) => asset_proceeds(asset) !== undefined
-  )
-  const proceeds =
-    !has_proceeds || assets.some((asset) => asset_proceeds(asset) == null)
-      ? null
-      : assets.reduce((total, asset) => total + asset_proceeds(asset), 0)
-  // The headline figure, and what Change is measured against. Before the
-  // rename there is no proceeds figure at all, so the card falls back to
-  // headlining what the API does emit.
-  const headline = has_proceeds ? proceeds : still_held
+  const proceeds = assets.some((asset) => asset_proceeds(asset) == null)
+    ? null
+    : assets.reduce((total, asset) => total + asset_proceeds(asset), 0)
+  // The headline figure, and what Change is measured against.
+  const headline = proceeds
   return {
     at_trade,
     still_held,
     proceeds,
-    has_proceeds,
     headline,
     change: at_trade == null || headline == null ? null : headline - at_trade,
     unpriced_assets
@@ -552,32 +522,24 @@ function Asset({ asset, has_chains, league_id, trade_uid }) {
               still holds off the line sits beside it as secondary detail --
               they are different quantities and a card that showed only one of
               them is what conflated them in the first place. */}
-          {proceeds === undefined ? (
-            <span title={STILL_HELD_EXPLANATION}>
-              {format_value(still_held)}
-            </span>
-          ) : (
-            <>
-              <span title={PROCEEDS_EXPLANATION}>
-                {proceeds == null ? (
-                  <span
-                    className='trade-review-trade__unpriced'
-                    title={WITHHELD_PROCEEDS_EXPLANATION}
-                  >
-                    Not attributable
-                  </span>
-                ) : (
-                  format_value(proceeds)
-                )}
-              </span>
+          <span title={PROCEEDS_EXPLANATION}>
+            {proceeds == null ? (
               <span
-                className='trade-review-trade__asset-still-held'
-                title={STILL_HELD_EXPLANATION}
+                className='trade-review-trade__unpriced'
+                title={WITHHELD_PROCEEDS_EXPLANATION}
               >
-                {format_value(still_held)} held
+                Not attributable
               </span>
-            </>
-          )}
+            ) : (
+              format_value(proceeds)
+            )}
+          </span>
+          <span
+            className='trade-review-trade__asset-still-held'
+            title={STILL_HELD_EXPLANATION}
+          >
+            {format_value(still_held)} held
+          </span>
           <span
             className={`trade-review-trade__team-asset-state ${team_asset_state}`}
             title={state_description(team_asset_state)}
@@ -683,14 +645,8 @@ function SideSummary({
   realized_points_added,
   salary_paid
 }) {
-  const {
-    at_trade,
-    still_held,
-    proceeds,
-    has_proceeds,
-    change,
-    unpriced_assets
-  } = side_totals(assets)
+  const { at_trade, still_held, proceeds, change, unpriced_assets } =
+    side_totals(assets)
 
   return (
     <div className='trade-review-trade__side'>
@@ -729,26 +685,16 @@ function SideSummary({
           value={at_trade}
           title={AT_TRADE_EXPLANATION}
         />
-        {has_proceeds ? (
-          <>
-            <ValueStat
-              label='Turned into'
-              value={proceeds}
-              title={PROCEEDS_EXPLANATION}
-            />
-            <ValueStat
-              label='Still held'
-              value={still_held}
-              title={STILL_HELD_EXPLANATION}
-            />
-          </>
-        ) : (
-          <ValueStat
-            label='Still held'
-            value={still_held}
-            title={STILL_HELD_EXPLANATION}
-          />
-        )}
+        <ValueStat
+          label='Turned into'
+          value={proceeds}
+          title={PROCEEDS_EXPLANATION}
+        />
+        <ValueStat
+          label='Still held'
+          value={still_held}
+          title={STILL_HELD_EXPLANATION}
+        />
         <ValueStat
           label='Change'
           value={change}
