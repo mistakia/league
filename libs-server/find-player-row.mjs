@@ -4,6 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import is_main from './is-main.mjs'
 import { fixTeam, format_player_name, Errors, team_aliases } from '#libs-shared'
+import { normalize_position } from '#libs-shared/constants/position-constants.mjs'
 import { player_nfl_status } from '#constants'
 import db from '#db'
 
@@ -15,123 +16,73 @@ if (!process.env.DEBUG) {
   debug.enable('get-player')
 }
 
-// Expand positions to include all equivalent positions for matching
-// Also normalizes positions (e.g., HB -> RB, C -> OL) before expanding
+// Match tolerance for a position lookup. Every value here is a legal stored
+// value: these lists are matched against primary/secondary/tertiary_position,
+// all three of which carry a CHECK constraint on position_vocabulary, so an
+// alias in an expansion is dead weight in the whereIn. Vendor and side-qualified
+// spellings are folded by normalize_position before the table is consulted --
+// this file owns tolerance only, not a second normalizer.
+const OFFENSIVE_LINE = ['OL', 'T', 'G', 'C', 'LS']
+const DEFENSIVE_LINE = ['DL', 'DE', 'DT', 'NT', 'EDGE']
+const LINEBACKER = ['LB', 'OLB', 'ILB', 'MLB']
+const DEFENSIVE_BACK = ['DB', 'CB', 'S']
+
+const tolerance = ({ keys, expansion }) =>
+  Object.fromEntries(keys.map((key) => [key, expansion]))
+
+// K and P are deliberately absent, and must stay absent: the player table
+// carries BOTH conventions (207 rows 'P', 557 'K'), and 38 name groups hold the
+// same specialist under each, so a K/P tolerance set would turn 38
+// currently-clean lookups into MatchedMultiplePlayers across every
+// find_player_row caller. LS is grouped with the offensive line rather than with
+// the other specialists because long snappers are routinely listed as C.
+const POSITION_MATCH_TOLERANCE = {
+  ...tolerance({ keys: OFFENSIVE_LINE, expansion: OFFENSIVE_LINE }),
+
+  // Edge rushers are cross-classified between the front seven, so each of these
+  // two reaches into the other. The reach is asymmetric on purpose: the line
+  // reaches only the outside linebackers, while a linebacker lookup reaches the
+  // whole edge of the line.
+  ...tolerance({
+    keys: DEFENSIVE_LINE,
+    expansion: [...DEFENSIVE_LINE, 'LB', 'OLB']
+  }),
+  ...tolerance({
+    keys: LINEBACKER,
+    expansion: [...LINEBACKER, 'EDGE', 'DE', 'DL']
+  }),
+
+  ...tolerance({ keys: DEFENSIVE_BACK, expansion: DEFENSIVE_BACK }),
+
+  // A fullback is routinely listed as a running back. One-way on purpose --
+  // widening every RB lookup to fullbacks is a much larger blast radius.
+  FB: ['FB', 'RB']
+}
+
+// Expand a position into the stored values a lookup for it should match.
 export const expand_position = (pos) => {
-  const normalized_pos = pos.toUpperCase()
-
-  // First normalize the position
   let normalized
-  switch (normalized_pos) {
-    case 'HB':
-      normalized = 'RB'
-      break
-    case 'C':
-      normalized = 'OL'
-      break
-    case 'CB':
-      normalized = 'DB'
-      break
-    case 'DE':
-      normalized = 'DL'
-      break
-    case 'DT':
-      normalized = 'DL'
-      break
-    case 'OG':
-      normalized = 'OL'
-      break
-    case 'OT':
-      normalized = 'OL'
-      break
-    case 'S':
-      normalized = 'DB'
-      break
-    case 'SAF':
-      normalized = 'DB'
-      break
-    case 'G':
-      normalized = 'OL'
-      break
-    case 'T':
-      normalized = 'OL'
-      break
-    case 'DI':
-      normalized = 'DL'
-      break
-    case 'ED':
-      normalized = 'DL'
-      break
-    // Full-word specialist positions. FantasyPoints emits these for a handful of
-    // rows where every other row uses the abbreviation, and an unnormalized
-    // 'PUNTER' expands only to itself and never matches anything. Normalizing is
-    // safe in a way a K/P/LS expansion group is not: the player table carries
-    // BOTH conventions (207 rows 'P', 557 'K'), and 38 name groups hold the same
-    // punter under each, so cross-matching K and P would turn 38 currently-clean
-    // lookups into MatchedMultiplePlayers across every find_player_row caller.
-    case 'PUNTER':
-      normalized = 'P'
-      break
-    case 'KICKER':
-      normalized = 'K'
-      break
-    default:
-      normalized = normalized_pos
+  try {
+    normalized = normalize_position(pos)
+  } catch {
+    // An unmapped code self-expands and matches nothing, which is what today's
+    // callers already handle. Throwing here is a real improvement and a much
+    // wider blast radius -- several of the ~100 find_player_row call sites mint
+    // a player on undefined -- so it belongs in its own change. It is also what
+    // keeps PFF's ALIGNMENT spellings (LWR, SRWR, DRT) falling through: those
+    // report where a player lined up rather than his roster position and are
+    // folded at the archive boundary, not here.
+    normalized = String(pos).trim().toUpperCase()
   }
 
-  // Then expand the normalized position
-  switch (normalized) {
-    // Defensive backs - all safety and corner variants
-    case 'DB':
-    case 'CB':
-    case 'S':
-    case 'SAF':
-    case 'FS':
-    case 'SS':
-      return ['DB', 'CB', 'S', 'SAF', 'FS', 'SS']
-
-    // Defensive line - all DL variants including edge rushers and OLBs (often cross-classified)
-    case 'DL':
-    case 'DE':
-    case 'DT':
-    case 'NT':
-    case 'EDGE':
-      // 'ED' and 'DI' are normalized above but must also appear here as STORED
-      // values: normalization rewrites the incoming query position, while these
-      // lists are matched against primary/secondary/tertiary_position in the
-      // table. Omitting them made every player stored as 'ED' unreachable from
-      // any other position code -- 3 players, including Chop Robinson, who the
-      // FantasyPoints import reported as an unresolvable no-match.
-      return ['DL', 'DE', 'DT', 'NT', 'EDGE', 'ED', 'DI', 'LB', 'OLB']
-
-    // Offensive line - all OL variants including long snappers (often listed as C)
-    case 'OL':
-    case 'OG':
-    case 'OT':
-    case 'C':
-    case 'G':
-    case 'T':
-    case 'LS':
-      return ['OL', 'OG', 'OT', 'C', 'G', 'T', 'LS']
-
-    // Fullback can match RB
-    case 'FB':
-      return ['FB', 'RB']
-
-    // Running back (includes normalized HB)
-    case 'RB':
-      return ['RB', 'HB']
-
-    // Linebackers - all LB variants including edge rushers (often classified as DE/DL)
-    case 'LB':
-    case 'OLB':
-    case 'ILB':
-    case 'MLB':
-      return ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'ED', 'DI', 'DE', 'DL']
-
-    default:
-      return [normalized]
+  // normalize_position spells absent as null. Dropping the element is
+  // equivalent in effect to the '' this used to return -- both match nothing --
+  // and keeps a junk value out of the whereIn.
+  if (!normalized) {
+    return []
   }
+
+  return POSITION_MATCH_TOLERANCE[normalized] || [normalized]
 }
 
 // The lookup below resolves exactly ONE dimension per call: an else-if ladder over

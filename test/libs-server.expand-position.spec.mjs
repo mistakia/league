@@ -29,140 +29,88 @@ const expect = chai.expect
 const EXPECTED_EXPANSIONS = {
   // skill positions -- no tolerance, they are their own group
   QB: ['QB'],
+  RB: ['RB'],
   WR: ['WR'],
   TE: ['TE'],
   DST: ['DST'],
 
-  // backfield. FB reaches RB but RB does not reach FB: a lookup for a fullback
-  // should find him listed as a running back, while an RB lookup that also
-  // matched fullbacks would widen every RB lookup in the codebase.
-  RB: ['RB', 'HB'],
+  // A fullback is routinely listed as a running back. One-way: RB does not
+  // reach FB.
   FB: ['FB', 'RB'],
-  HB: ['RB', 'HB'],
-  'H-B': ['H-B'],
-  TB: ['TB'],
-  BB: ['BB'],
-  WB: ['WB'],
 
   // offensive line, including long snappers (frequently listed as C)
-  OL: ['OL', 'OG', 'OT', 'C', 'G', 'T', 'LS'],
-  T: ['OL', 'OG', 'OT', 'C', 'G', 'T', 'LS'],
-  G: ['OL', 'OG', 'OT', 'C', 'G', 'T', 'LS'],
-  C: ['OL', 'OG', 'OT', 'C', 'G', 'T', 'LS'],
-  LS: ['OL', 'OG', 'OT', 'C', 'G', 'T', 'LS'],
-  OT: ['OL', 'OG', 'OT', 'C', 'G', 'T', 'LS'],
-  OG: ['OL', 'OG', 'OT', 'C', 'G', 'T', 'LS'],
-  LT: ['LT'],
-  RT: ['RT'],
-  LG: ['LG'],
-  RG: ['RG'],
-  OC: ['OC'],
+  OL: ['OL', 'T', 'G', 'C', 'LS'],
+  T: ['OL', 'T', 'G', 'C', 'LS'],
+  G: ['OL', 'T', 'G', 'C', 'LS'],
+  C: ['OL', 'T', 'G', 'C', 'LS'],
+  LS: ['OL', 'T', 'G', 'C', 'LS'],
+  OT: ['OL', 'T', 'G', 'C', 'LS'],
+  OG: ['OL', 'T', 'G', 'C', 'LS'],
+  LT: ['OL', 'T', 'G', 'C', 'LS'],
+  RT: ['OL', 'T', 'G', 'C', 'LS'],
+  LG: ['OL', 'T', 'G', 'C', 'LS'],
+  RG: ['OL', 'T', 'G', 'C', 'LS'],
+  OC: ['OL', 'T', 'G', 'C', 'LS'],
 
   // defensive line. Reaches into LB because edge rushers are cross-classified.
-  DL: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'ED', 'DI', 'LB', 'OLB'],
-  DE: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'ED', 'DI', 'LB', 'OLB'],
-  DT: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'ED', 'DI', 'LB', 'OLB'],
-  NT: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'ED', 'DI', 'LB', 'OLB'],
-  EDGE: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'ED', 'DI', 'LB', 'OLB'],
-  ED: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'ED', 'DI', 'LB', 'OLB'],
-  DI: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'ED', 'DI', 'LB', 'OLB'],
-  LDE: ['LDE'],
-  RDE: ['RDE'],
-  DG: ['DG'],
-  LDT: ['LDT'],
-  RDT: ['RDT'],
+  DL: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  DE: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  DT: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  NT: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  EDGE: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  ED: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  DI: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  DG: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  LDE: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  RDE: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  LDT: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
+  RDT: ['DL', 'DE', 'DT', 'NT', 'EDGE', 'LB', 'OLB'],
 
   // linebacker. The mirror of the DL cross-reach above.
-  LB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'ED', 'DI', 'DE', 'DL'],
-  OLB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'ED', 'DI', 'DE', 'DL'],
-  ILB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'ED', 'DI', 'DE', 'DL'],
-  MLB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'ED', 'DI', 'DE', 'DL'],
-  MIKE: ['MIKE'],
-  WILL: ['WILL'],
-  LOLB: ['LOLB'],
-  ROLB: ['ROLB'],
-  LILB: ['LILB'],
-  RILB: ['RILB'],
-  $LB: ['$LB'],
+  LB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
+  OLB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
+  ILB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
+  MLB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
+  MIKE: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
+  WILL: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
+  LOLB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
+  ROLB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
+  LILB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
+  RILB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
+  $LB: ['LB', 'OLB', 'ILB', 'MLB', 'EDGE', 'DE', 'DL'],
 
   // defensive back
-  DB: ['DB', 'CB', 'S', 'SAF', 'FS', 'SS'],
-  CB: ['DB', 'CB', 'S', 'SAF', 'FS', 'SS'],
-  S: ['DB', 'CB', 'S', 'SAF', 'FS', 'SS'],
-  SS: ['DB', 'CB', 'S', 'SAF', 'FS', 'SS'],
-  FS: ['DB', 'CB', 'S', 'SAF', 'FS', 'SS'],
-  SAF: ['DB', 'CB', 'S', 'SAF', 'FS', 'SS'],
-  LCB: ['LCB'],
-  RCB: ['RCB'],
+  DB: ['DB', 'CB', 'S'],
+  CB: ['DB', 'CB', 'S'],
+  S: ['DB', 'CB', 'S'],
+  SS: ['DB', 'CB', 'S'],
+  FS: ['DB', 'CB', 'S'],
+  SAF: ['DB', 'CB', 'S'],
+  LCB: ['DB', 'CB', 'S'],
+  RCB: ['DB', 'CB', 'S'],
 
   // specialists. K and P deliberately do NOT reach each other -- see the hazard
-  // comment in find-player-row.mjs.
+  // comment on POSITION_MATCH_TOLERANCE in find-player-row.mjs.
   K: ['K'],
   P: ['P'],
   KICKER: ['K'],
   PUNTER: ['P'],
 
+  // backfield, including single-wing spellings
+  HB: ['RB'],
+  'H-B': ['RB'],
+  TB: ['RB'],
+  BB: ['RB'],
+  WB: ['RB'],
+
   // receiver and end, including single-wing spellings
-  OE: ['OE'],
-  E: ['E'],
-  FL: ['FL'],
+  OE: ['TE'],
+  E: ['TE'],
+  FL: ['WR'],
 
   // team defense
-  DEF: ['DEF']
+  DEF: ['DST']
 }
-
-// Spellings the table states that position_alias_map does not carry. These are
-// FantasyPoints' full-word specialist codes, folded by expand_position's own
-// normalizer rather than by normalize_position -- which is the duplication this
-// golden exists to gate.
-const SPELLINGS_ABSENT_FROM_THE_ALIAS_MAP = ['PUNTER', 'KICKER']
-
-// Aliases whose expansion does not contain the canonical position they name.
-// Each one matches NOTHING: expand_position hands back the alias itself, and no
-// position column stores an alias. This is the defect, enumerated.
-const ALIASES_THAT_MATCH_NOTHING = [
-  'LT',
-  'RT',
-  'LG',
-  'RG',
-  'OC',
-  'LDE',
-  'RDE',
-  'DG',
-  'LDT',
-  'RDT',
-  'MIKE',
-  'WILL',
-  'LOLB',
-  'ROLB',
-  'LILB',
-  'RILB',
-  '$LB',
-  'LCB',
-  'RCB',
-  'H-B',
-  'TB',
-  'BB',
-  'WB',
-  'OE',
-  'E',
-  'FL',
-  'DEF'
-]
-
-// Values that appear in an expansion but are not legal stored values. All three
-// position columns on player carry a CHECK constraint on position_vocabulary,
-// so a whereIn against these can never match a row.
-const UNSTORABLE_VALUES_IN_EXPANSIONS = [
-  'OG',
-  'OT',
-  'ED',
-  'DI',
-  'SAF',
-  'FS',
-  'SS',
-  'HB'
-]
 
 describe('LIBS-SERVER expand_position', function () {
   describe('expansion table', function () {
@@ -177,36 +125,36 @@ describe('LIBS-SERVER expand_position', function () {
     })
   })
 
+  // An unmapped code self-expands and matches nothing, which is what callers
+  // already handle. PFF's ALIGNMENT spellings depend on it: they report where a
+  // player lined up rather than his roster position, and are folded at the
+  // archive boundary in private/libs-server/pff-archive.mjs. Making this throw
+  // is a real improvement with a much wider blast radius and is its own task.
+  describe('unmapped codes', function () {
+    it('self-expands a PFF alignment code rather than throwing', function () {
+      expect(expand_position('LWR')).to.deep.equal(['LWR'])
+      expect(expand_position('SRWR')).to.deep.equal(['SRWR'])
+      expect(expand_position('DRT')).to.deep.equal(['DRT'])
+    })
+
+    it('drops an absent position rather than matching on empty string', function () {
+      expect(expand_position('')).to.deep.equal([])
+      expect(expand_position(null)).to.deep.equal([])
+      expect(expand_position(undefined)).to.deep.equal([])
+    })
+  })
+
   // The ratchet. A new alias added to position_alias_map without a stated
   // expansion fails here, which is what stops a fourth position vocabulary
   // accreting the way expand_position's own normalizer did.
   describe('key-set completeness', function () {
     it('states an expansion for every position code in the vocabulary', function () {
       const expected_keys = [
-        ...new Set([
-          ...position_vocabulary,
-          ...Object.keys(position_alias_map),
-          ...SPELLINGS_ABSENT_FROM_THE_ALIAS_MAP
-        ])
+        ...new Set([...position_vocabulary, ...Object.keys(position_alias_map)])
       ].sort()
 
       expect(Object.keys(EXPECTED_EXPANSIONS).sort()).to.deep.equal(
         expected_keys
-      )
-    })
-
-    it('states which spellings normalize_position does not know', function () {
-      const unknown = Object.keys(EXPECTED_EXPANSIONS).filter((pos) => {
-        try {
-          normalize_position(pos)
-          return false
-        } catch {
-          return true
-        }
-      })
-
-      expect(unknown.sort()).to.deep.equal(
-        [...SPELLINGS_ABSENT_FROM_THE_ALIAS_MAP].sort()
       )
     })
   })
@@ -225,29 +173,22 @@ describe('LIBS-SERVER expand_position', function () {
         }
       }
 
-      expect([...unstorable].sort()).to.deep.equal(
-        [
-          ...UNSTORABLE_VALUES_IN_EXPANSIONS,
-          ...ALIASES_THAT_MATCH_NOTHING
-        ].sort()
-      )
+      expect([...unstorable]).to.deep.equal([])
     })
   })
 
   // Self-match. A lookup for a code must at minimum find players stored under
-  // the canonical position that code names, or it cannot resolve anyone.
+  // the canonical position that code names, or it cannot resolve anyone. This
+  // is what the 27 self-expanding aliases used to fail.
   describe('self-match', function () {
     it("contains each code's own canonical position", function () {
       const missing = []
 
       for (const [pos, expansion] of Object.entries(EXPECTED_EXPANSIONS)) {
-        if (SPELLINGS_ABSENT_FROM_THE_ALIAS_MAP.includes(pos)) continue
         if (!expansion.includes(normalize_position(pos))) missing.push(pos)
       }
 
-      expect(missing.sort()).to.deep.equal(
-        [...ALIASES_THAT_MATCH_NOTHING].sort()
-      )
+      expect(missing).to.deep.equal([])
     })
   })
 })

@@ -108,7 +108,11 @@ export const position_alias_map = {
   FL: 'WR',
 
   // team defense
-  DEF: 'DST'
+  DEF: 'DST',
+
+  // specialists, full-word vendor spellings (FantasyPoints)
+  PUNTER: 'P',
+  KICKER: 'K'
 }
 
 /**
