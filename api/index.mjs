@@ -166,6 +166,10 @@ api.use('/api/settings', routes.settings)
 // rather than beside /api/waitlist so the blanket guard above refuses an
 // anonymous caller before any handler runs.
 api.use('/api/waitlist-submissions', routes.waitlist_submissions)
+// Confidential ballots. Mounted here rather than under /api/leagues, which sits
+// ABOVE the blanket guard, so an anonymous caller is refused before any handler
+// touches an admission vote row.
+api.use('/api/admission-votes', routes.admission_votes)
 // `fallthrough: false` so a MISSING bundle asset 404s here instead of reaching
 // the SPA catch-all below. With fallthrough the catch-all answered every absent
 // chunk with `200 text/html` and index.html's body, so the browser parsed

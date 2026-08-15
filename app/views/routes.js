@@ -48,6 +48,7 @@ const WaitlistPage = lazy(() => import('@pages/waitlist'))
 const WaitlistSubmissionsPage = lazy(
   () => import('@pages/waitlist-submissions')
 )
+const AdmissionVotePage = lazy(() => import('@pages/admission-vote'))
 
 const map_state_to_props = createSelector(get_app, (app) => ({ app }))
 
@@ -149,6 +150,13 @@ const Routes = ({ app }) => {
         <Route
           path='/leagues/:lid/waitlist-submissions'
           element={<WaitlistSubmissionsPage />}
+        />
+        {/* Confidential ballots. The API refuses anyone who does not manage a
+            team in this league, and discloses nothing at all while the vote is
+            open, so this route being reachable renders neither. */}
+        <Route
+          path='/leagues/:lid/admission-vote'
+          element={<AdmissionVotePage />}
         />
         <Route path='/leagues/:lid/settings' element={<LeagueSettingsPage />} />
         <Route path='/leagues/:lid' element={<LeagueHomePage />} />
