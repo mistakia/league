@@ -48,7 +48,10 @@ const format = (item) => {
     ...(item.id && { detail_v1_game_id: item.id }),
 
     ...(year && { season_year: year }),
-    ...(item.week && { week: item.week }),
+    // `!= null`, not a truthiness test: PRE week 0 is the Hall of Fame game and
+    // is falsy, so a truthiness test dropped `week` from the payload entirely
+    // and the insert failed the NOT NULL constraint on nfl_games.week.
+    ...(item.week != null && { week: item.week }),
     ...(date && { date }),
     ...(time_est && { time_est }),
     ...(day && { day }),
@@ -67,8 +70,13 @@ const format = (item) => {
       is_overtime: (score.detail.phase || '').includes('OVERTIME')
     }),
 
-    ...(score.homePointsTotal && { home_score: score.homePointsTotal }),
-    ...(score.visitorPointsTotal && { away_score: score.visitorPointsTotal }),
+    // Same falsy trap: a shutout is a legitimate score of 0, and a truthiness
+    // test silently dropped it, leaving the column at whatever it already held.
+    // `!= null` still skips the pre-game nulls.
+    ...(score.homePointsTotal != null && { home_score: score.homePointsTotal }),
+    ...(score.visitorPointsTotal != null && {
+      away_score: score.visitorPointsTotal
+    }),
 
     ...(item.venue && {
       stadium_name: item.venue.name,
