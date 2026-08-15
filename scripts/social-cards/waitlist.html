@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./card.css" />
+    <style>
+      /* The page is noindex, so this card exists for the one case that still
+         happens: somebody is sent the link directly. What they need is not a
+         pitch and not a picture of a form — it is the league itself.
+
+         Every figure is real league 1 configuration, read from the database
+         rather than written from memory:
+
+           select lf.cap, lf.num_teams, lf.starter_slots_*, lf.bench_slot_count,
+                  lf.practice_squad_slot_count, s.playoff_team_count
+           from seasons s join league_formats lf on lf.id = s.league_format_id
+           where s.lid = 1 and s.season_year = 2026
+
+         All six are CONFIGURATION, not counters. A trade or transaction total
+         would be a truer picture of an active league and would also be stale
+         the week after this PNG is committed — the same trap that put a season
+         number on the front-door card. Configuration changes by amendment, and
+         an amendment is a good reason to re-run the generator. */
+      .waitlist__eyebrow {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+
+      .waitlist__heading {
+        font-size: 66px;
+      }
+
+      .waitlist__rule {
+        margin: 22px 0;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        row-gap: 26px;
+        margin-top: auto;
+      }
+
+      .stat__figure {
+        font-family: var(--mono);
+        font-size: 54px;
+        line-height: 1.1;
+        color: var(--text-dark);
+      }
+
+      .stat__label {
+        margin-top: 6px;
+        font-family: var(--mono);
+        font-size: 17px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-light);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="waitlist__eyebrow">
+        <div class="card__wordmark">xo.football</div>
+        <div class="card__wordmark">Waitlist</div>
+      </div>
+
+      <div>
+        <h1 class="card__heading waitlist__heading">Genesis League</h1>
+        <div class="card__rule waitlist__rule"></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat__figure">10</div>
+          <div class="stat__label">Teams</div>
+        </div>
+        <div class="stat">
+          <div class="stat__figure">$200</div>
+          <div class="stat__label">Salary Cap</div>
+        </div>
+        <div class="stat">
+          <div class="stat__figure">2020</div>
+          <div class="stat__label">Founded</div>
+        </div>
+        <div class="stat">
+          <div class="stat__figure">9</div>
+          <div class="stat__label">Starters</div>
+        </div>
+        <div class="stat">
+          <div class="stat__figure">7&nbsp;+&nbsp;4</div>
+          <div class="stat__label">Bench + Practice Squad</div>
+        </div>
+        <div class="stat">
+          <div class="stat__figure">6</div>
+          <div class="stat__label">Playoff Teams</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

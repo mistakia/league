@@ -9,6 +9,13 @@ import {
   league_url,
   questionnaire_path
 } from './landing-content'
+import {
+  league_founding_year,
+  league_last_season_count,
+  league_season_phrase,
+  league_team_count,
+  league_this_season_ordinal
+} from '@libs-shared/social-sharing.mjs'
 
 import './landing.styl'
 
@@ -29,8 +36,9 @@ export default function LandingPage() {
     <div className='landing'>
       <header className='landing__hero'>
         <p className='landing__lede'>
-          A ten-team dynasty league going into its seventh season. I built the
-          platform it runs on, and everything it does is public.
+          A {league_team_count}-team dynasty league going into{' '}
+          {league_season_phrase}. I built the platform it runs on, and
+          everything it does is public.
         </p>
         {/* The waitlist is the primary action and the league link is proof,
             so they are not peers: one filled button, one quiet one. */}
@@ -63,13 +71,14 @@ export default function LandingPage() {
       <section className='landing__section'>
         <div className='landing__trust'>
           <div className='landing__trust-item'>
-            <h3>Six seasons with the same people</h3>
+            <h3>{league_last_season_count} seasons with the same people</h3>
             <p>
-              The league has played six seasons since 2020 and is about to play
-              its seventh. Twelve managers hold the ten teams, and every one of
-              them has been here since the first year. Three people have left in
-              that time, and nobody new has been seated since the league was
-              founded.
+              The league has played {league_last_season_count} seasons since{' '}
+              {league_founding_year} and is about to play its{' '}
+              {league_this_season_ordinal}. Twelve managers hold the{' '}
+              {league_team_count} teams, and every one of them has been here
+              since the first year. Three people have left in that time, and
+              nobody new has been seated since the league was founded.
             </p>
           </div>
 

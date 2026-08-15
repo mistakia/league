@@ -1,0 +1,194 @@
+/* Shared chrome for every social card. One stylesheet so the set cannot drift
+   into six different looks — a per-card template supplies only its own content
+   and whatever visual belongs to that section.
+
+   Everything here is taken from the site's own type and palette
+   (app/styles/variables.styl) rather than invented for the cards: the field
+   color, the hard 4px offset panel, the red accent, and the two webfonts
+   app/index.html already loads. */
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 300;
+  src: url(https://fonts.gstatic.com/s/ibmplexmono/v7/-F6qfjptAgt5VM-kVkqdyU8n3oQIwlBFgsAXHNk.woff2)
+    format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/ibmplexmono/v7/-F63fjptAgt5VM-kVkqdyU8n1i8q131nj-o.woff2)
+    format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/inter/v3/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff)
+    format('woff');
+}
+
+:root {
+  --text: #444;
+  --text-dark: #3a3a3a;
+  --text-light: #7a7a7a;
+  --field: #f0f0f0;
+  --border: #d0d0d0;
+  --accent: red;
+
+  --qb: #ff4040;
+  --rb: #40bf40;
+  --wr: #ffbf40;
+  --te: #4040ff;
+  --dst: #404040;
+  --flex: #9040c0;
+
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+  /* Matches $markdown_serif — system faces only, exactly as the constitution
+     page declares them. */
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua',
+    Georgia, 'Times New Roman', serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 1200px;
+  height: 630px;
+}
+
+body {
+  background: var(--field);
+  color: var(--text);
+  font-family: var(--sans);
+  /* The screenshot is taken at exactly this size, so any overflow is a card
+     that does not fit rather than something a viewer can scroll to. */
+  overflow: hidden;
+}
+
+/* The site's signature shape: a white panel with a hard 4px offset rather than
+   a soft shadow ($box_shadow in variables.styl). */
+.card {
+  position: absolute;
+  top: 40px;
+  right: 44px;
+  bottom: 44px;
+  left: 40px;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: var(--border) 4px 4px 0px 0px;
+  padding: 60px 64px;
+  display: flex;
+  flex-direction: column;
+  /* A card that overruns its panel spills onto the field and reads as broken.
+     Clip at the panel so an overrun is visibly cropped rather than looking
+     like a deliberate bleed. */
+  overflow: hidden;
+}
+
+/* Small letterspaced wordmark, top-left of every card in the set. */
+.card__wordmark {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 21px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+
+.card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card__heading {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 92px;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  color: var(--text-dark);
+  text-transform: uppercase;
+}
+
+.card__rule {
+  width: 88px;
+  height: 5px;
+  background: var(--accent);
+  margin: 30px 0;
+}
+
+.card__descriptor {
+  font-size: 27px;
+  line-height: 1.45;
+  color: var(--text-light);
+  max-width: 780px;
+}
+
+/* The chip row, lifted from the league header the site already renders. It is
+   the one element in the old screenshot that stayed legible when shrunk, which
+   is why the whole set is built around it. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.chip {
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  padding: 10px 18px;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.chip--neutral {
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.chip--muted {
+  background: #ededed;
+  color: var(--text);
+}
+
+.chip--qb {
+  background: var(--qb);
+  color: #fff;
+}
+.chip--rb {
+  background: var(--rb);
+  color: #fff;
+}
+.chip--wr {
+  background: var(--wr);
+  color: #fff;
+}
+.chip--te {
+  background: var(--te);
+  color: #fff;
+}
+.chip--dst {
+  background: var(--dst);
+  color: #fff;
+}
+.chip--flex {
+  background: var(--flex);
+  color: #fff;
+}

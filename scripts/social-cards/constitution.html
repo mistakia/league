@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./card.css" />
+    <style>
+      /* A crop of the document's own head. Every value here is taken from
+         .markdown__constitution in app/views/pages/markdown/markdown.styl —
+         the serif stack, the centered tracked caps, the italic attestation
+         over a 4px double rule, and the justified body. The card is the page,
+         scaled up, rather than a design about the page.
+
+         The serif is the page's own system stack with no webfont, so the
+         render host decides which face this bakes in. Generated on macOS,
+         where it resolves to Iowan Old Style. */
+      .constitution {
+        font-family: var(--serif);
+        color: var(--text);
+        /* The page sets its measure at 800px; hold the same one so the line
+           breaks look like the document's. */
+        width: 820px;
+        /* Clear of the wordmark, which otherwise sits on the title's own line
+           and reads as a collision. The body fades one line earlier for it. */
+        margin: 20px auto 0;
+        text-align: center;
+      }
+
+      /* h1 — uppercase, centered, 0.08em tracking. */
+      .constitution__title {
+        font-size: 52px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        line-height: 1.25;
+        color: var(--text-dark);
+      }
+
+      /* h1 + p — the attestation line, italic over the double rule. */
+      .constitution__attestation {
+        margin-top: 12px;
+        padding-bottom: 22px;
+        font-style: italic;
+        font-size: 23px;
+        color: #6e6e6e;
+        border-bottom: 4px double #9c9c9c;
+      }
+
+      /* h2 — "Article I". */
+      .constitution__article {
+        margin-top: 28px;
+        font-size: 28px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--text-dark);
+      }
+
+      /* h2 + p — the article title. */
+      .constitution__article-title {
+        margin-top: 12px;
+        font-size: 20px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      /* The opening paragraph, justified and hyphenated as the page sets it,
+         fading out at the panel edge so the document reads as continuing
+         rather than as having been truncated. */
+      .constitution__body {
+        margin-top: 20px;
+        font-size: 18px;
+        line-height: 1.7;
+        text-align: justify;
+        hyphens: auto;
+        color: #8a8a8a;
+        -webkit-mask-image: linear-gradient(
+          to bottom,
+          #000 0%,
+          #000 35%,
+          transparent 100%
+        );
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card__wordmark">xo.football</div>
+
+      <div class="constitution">
+        <h1 class="constitution__title">Genesis League Constitution</h1>
+        <p class="constitution__attestation">(Originally adopted 2020)</p>
+
+        <div class="constitution__article">Article I</div>
+        <div class="constitution__article-title">
+          Formation and Duration of Constitution
+        </div>
+
+        <p class="constitution__body">
+          This GENESIS LEAGUE (LEAGUE) Constitution constitutes an agreement
+          among the LEAGUE Football Teams, as identified herein, each of which
+          shall be entitled to the benefits of and shall be bound by all the
+          terms and provisions hereof, and it shall remain in effect
+          indefinitely, except that the provisions of Article III, Section 2
+          shall expire at such time as the current Commissioner ceases to hold
+          office.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

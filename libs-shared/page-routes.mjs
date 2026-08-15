@@ -17,47 +17,83 @@ import {
 //   robots         defaults to indexable_robots when omitted
 //   og_type        defaults to default_og_type when omitted
 //   canonical_path fixed canonical when the route is not its own canonical URL
+//   og_image       per-section social card; defaults to default_image_path
+//   og_image_alt   alt for that card, describing what is depicted for a reader
+//                  who cannot see it; defaults to default_image_alt
 //
 // Order matters: the first match wins, so an exact pattern must precede any
 // `:param` pattern that would also match it.
+
+// Cards shared by more than one route, so a card's path and alt are written
+// once rather than restated per route. The league-surface card and the default
+// card are applied in page-meta, not listed here.
+const front_door_card = {
+  og_image: '/static/images/social/league-front-door.png',
+  og_image_alt:
+    'GENESIS LEAGUE, a ten-team half-PPR superflex dynasty league with a salary cap, and its starting lineup of one quarterback, two running backs, two receivers, a tight end, a flex, a superflex and a defense'
+}
+const data_views_card = {
+  og_image: '/static/images/social/data-views.png',
+  og_image_alt:
+    'A table of players sorted by yards per route, with position, team, targets and points columns'
+}
+const plays_card = {
+  og_image: '/static/images/social/plays.png',
+  og_image_alt:
+    'A drive across a football field marked in ten-yard lines: a seven-yard rush, a twenty-four-yard pass, and a touchdown'
+}
+
 export const page_routes = [
   {
     pattern: '/',
     title: default_title,
-    description: default_description
+    description: default_description,
+    ...front_door_card
   },
 
   // Documents. These are the pages a recruiting link points at, so they carry
   // real copy rather than a bare noun.
   {
     pattern: '/constitution',
-    title: 'League Constitution',
+    title: 'Genesis League Constitution',
     description:
       'The rules of the GENESIS LEAGUE, adopted in 2020, with every ratified amendment and the date it passed.',
-    og_type: 'article'
+    og_type: 'article',
+    og_image: '/static/images/social/constitution.png',
+    og_image_alt:
+      'The opening of the Genesis League Constitution, originally adopted in 2020, showing Article I on the formation and duration of the constitution'
   },
   {
-    // The one conversion surface on the site, and the destination of the
-    // landing page's primary call to action — so it is deliberately indexable
-    // and carries real copy rather than a bare noun.
+    // The landing page's primary call to action, but deliberately not indexed:
+    // the league does not advertise that a seat is open.
     pattern: '/waitlist',
     title: 'Join the Waitlist',
     description:
-      'Apply for the open manager seat in the GENESIS LEAGUE: a ten-team, half-PPR, superflex dynasty league with a salary cap, running since 2020.'
+      'The waiting list for the GENESIS LEAGUE: a ten-team, half-PPR, superflex dynasty league with a salary cap, running since 2020.',
+    robots: private_robots,
+    og_image: '/static/images/social/waitlist.png',
+    og_image_alt:
+      'The Genesis League in figures: ten teams, a two hundred dollar salary cap, founded in 2020, nine starters, seven bench and four practice squad places, and six playoff teams'
   },
   {
     pattern: '/glossary',
     title: 'Glossary',
     description:
       'Fantasy football terminology, statistics, and abbreviations used across xo.football.',
-    og_type: 'article'
+    og_type: 'article',
+    og_image: '/static/images/social/glossary.png',
+    og_image_alt:
+      'Glossary entries for snap share, expected points added, and average draft position'
   },
   {
     pattern: '/resources',
     title: 'Resources',
     description:
       'Reference material and external resources for fantasy football research.',
-    og_type: 'article'
+    og_type: 'article',
+    og_image: '/static/images/social/resources.png',
+    og_image_alt:
+      'The resource directory sections: stats and research, projections, rankings and ADP, premium content, forums, trade tools, libraries, blogs and NFL draft'
   },
   {
     pattern: '/guides/data-views',
@@ -73,7 +109,8 @@ export const page_routes = [
     pattern: '/about',
     title: default_title,
     description: default_description,
-    canonical_path: '/'
+    canonical_path: '/',
+    ...front_door_card
   },
 
   // Public analytics surfaces.
@@ -81,7 +118,8 @@ export const page_routes = [
     pattern: '/data-views',
     title: 'Data Views',
     description:
-      'Build custom NFL and fantasy football tables from projections, betting markets, play-by-play, and league data.'
+      'Build custom NFL and fantasy football tables from projections, betting markets, play-by-play, and league data.',
+    ...data_views_card
   },
   {
     // A saved view id resolves to a user-owned view with no public flag, so the
@@ -90,19 +128,22 @@ export const page_routes = [
     pattern: '/data-views/:view_id',
     title: 'Data Views',
     description:
-      'Build custom NFL and fantasy football tables from projections, betting markets, play-by-play, and league data.'
+      'Build custom NFL and fantasy football tables from projections, betting markets, play-by-play, and league data.',
+    ...data_views_card
   },
   {
     pattern: '/plays',
     title: 'Plays',
     description:
-      'Search and filter NFL play-by-play, with situational, personnel, and win-probability splits.'
+      'Search and filter NFL play-by-play, with situational, personnel, and win-probability splits.',
+    ...plays_card
   },
   {
     pattern: '/plays/:view_id',
     title: 'Plays',
     description:
-      'Search and filter NFL play-by-play, with situational, personnel, and win-probability splits.'
+      'Search and filter NFL play-by-play, with situational, personnel, and win-probability splits.',
+    ...plays_card
   },
   {
     pattern: '/status',
@@ -203,7 +244,16 @@ export const page_routes = [
     // the API refuses anyone who does not manage a team in the league.
     pattern: '/leagues/:lid/waitlist-submissions',
     title: 'Waitlist Applications',
-    description: 'Prospective manager applications for the open seat.',
+    description: 'Prospective manager applications.',
+    robots: private_robots
+  },
+  {
+    // Before the bare admission-vote pattern below it: first match wins, and a
+    // `:param` pattern that also matched would take this page's title.
+    pattern: '/leagues/:lid/admission-vote/commissioner',
+    title: 'Admission Vote — Commissioner',
+    description:
+      'Open the admission vote, watch turnout, and admit the highest ranked candidate or pass.',
     robots: private_robots
   },
   {

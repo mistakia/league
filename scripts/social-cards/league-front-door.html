@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./card.css" />
+    <style>
+      /* The front door leads on the league's name and its shape. No chart:
+         a twelve-series value chart is unreadable at the ~500px a feed
+         actually renders, and it is the one thing the previous card got
+         wrong twice over. */
+      .front-door__heading {
+        font-size: 104px;
+      }
+
+      /* "Since 2020" rides the wordmark line rather than joining the format
+         chips: a sixth chip wraps alone onto the next row, and the founding
+         year is a different kind of fact from the roster rules anyway. */
+      .front-door__header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+
+      /* Five format chips is what fits on one line at this size. */
+      .front-door__chips {
+        margin-top: 52px;
+      }
+
+      .front-door__chips-lineup {
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="front-door__header">
+        <div class="card__wordmark">xo.football</div>
+        <div class="card__wordmark">Since 2020</div>
+      </div>
+
+      <div class="card__body">
+        <h1 class="card__heading front-door__heading">Genesis League</h1>
+        <div class="card__rule"></div>
+        <!-- No season count here on purpose. A PNG is a committed artifact, so
+             a derived season number is only correct until the next spring and
+             then silently wrong until somebody re-runs the generator. The
+             header already says SINCE 2020, which is a fact that cannot go
+             stale and lets the reader do the arithmetic. -->
+        <p class="card__descriptor">
+          A ten-team dynasty league, running on a platform built for it.
+        </p>
+      </div>
+
+      <div class="front-door__chips">
+        <div class="chips">
+          <span class="chip chip--neutral">10 Teams</span>
+          <span class="chip chip--neutral">Half PPR</span>
+          <span class="chip chip--neutral">Dynasty</span>
+          <span class="chip chip--neutral">Salary Cap</span>
+        </div>
+        <div class="chips front-door__chips-lineup">
+          <span class="chip chip--qb">1QB</span>
+          <span class="chip chip--rb">2RB</span>
+          <span class="chip chip--wr">2WR</span>
+          <span class="chip chip--te">1TE</span>
+          <span class="chip chip--flex">1RB/WR/TE</span>
+          <!-- Red like 1QB rather than a colour of its own: in the site's own
+               chip language red signals quarterback eligibility, which is the
+               whole point of the slot. -->
+          <span class="chip chip--qb">1SUPERFLEX</span>
+          <span class="chip chip--dst">1DST</span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

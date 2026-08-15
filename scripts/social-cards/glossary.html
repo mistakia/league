@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./card.css" />
+    <style>
+      /* The glossary's own signature is the abbreviation column — short mono
+         tokens, which is the most legible thing there is at feed size. So the
+         card leads on the abbreviations and lets the definitions fall away,
+         rather than rendering rows of prose that turn to grey mush.
+
+         Deliberately not a table: data views already owns that shape, and two
+         table cards are the same card as a thumbnail. */
+      .glossary__heading {
+        font-size: 68px;
+      }
+
+      /* Tighter than the shared rule so three terms clear the panel. Two terms
+         plus a third sliced in half reads as a card that ran out of room. */
+      .glossary__rule {
+        margin: 24px 0;
+      }
+
+      .glossary__descriptor {
+        margin-top: 0;
+        font-size: 24px;
+      }
+
+      .terms {
+        margin-top: 20px;
+        flex: 1;
+      }
+
+      .term {
+        display: grid;
+        grid-template-columns: 168px 1fr;
+        align-items: baseline;
+        column-gap: 28px;
+        padding: 11px 0;
+        border-top: 1px solid #ededed;
+      }
+
+      .term__abbrev {
+        font-family: var(--mono);
+        font-size: 36px;
+        letter-spacing: 0.02em;
+        color: var(--text-dark);
+      }
+
+      .term__name {
+        font-size: 23px;
+        color: var(--text);
+      }
+
+      .term__definition {
+        margin-top: 5px;
+        font-size: 18px;
+        line-height: 1.5;
+        color: var(--text-light);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card__wordmark">xo.football</div>
+
+      <div>
+        <h1 class="card__heading glossary__heading">Glossary</h1>
+        <div class="card__rule glossary__rule"></div>
+        <p class="card__descriptor glossary__descriptor">
+          Every statistic and abbreviation used across the site.
+        </p>
+      </div>
+
+      <div class="terms">
+        <div class="term">
+          <div class="term__abbrev">SNP%</div>
+          <div>
+            <div class="term__name">Snap Share</div>
+            <div class="term__definition">
+              The share of his team's offensive plays a player was on the field
+              for.
+            </div>
+          </div>
+        </div>
+
+        <div class="term">
+          <div class="term__abbrev">EPA</div>
+          <div>
+            <div class="term__name">Expected Points Added</div>
+            <div class="term__definition">
+              The change in a drive's expected point value produced by one play.
+            </div>
+          </div>
+        </div>
+
+        <div class="term">
+          <div class="term__abbrev">ADP</div>
+          <div>
+            <div class="term__name">Average Draft Position</div>
+            <div class="term__definition">
+              Average draft position across drafts in comparable league formats.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

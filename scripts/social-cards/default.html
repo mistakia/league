@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./card.css" />
+    <style>
+      /* The fallback: /status, every route behind a login, and any path the
+         route table does not know. Those are shared as links far more often
+         than they are indexed, so the card's job is to say what the site is to
+         somebody who has been handed a URL with no other context.
+
+         The heading IS the wordmark here, so the small one every other card
+         carries would just be the same word twice. */
+      .default__heading {
+        font-size: 96px;
+        text-transform: none;
+      }
+
+      .default__descriptor {
+        margin-top: 4px;
+        font-size: 27px;
+        max-width: 720px;
+      }
+
+      .default__sections {
+        margin-top: auto;
+      }
+
+      .chip--section {
+        font-size: 22px;
+        letter-spacing: 0.06em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card__body">
+        <h1 class="card__heading default__heading">xo.football</h1>
+        <div class="card__rule"></div>
+        <!-- The project's own tagline, from README.md. Deliberately not the
+             league: this card is the fallback for /status, every logged-in
+             route and any unmatched path, none of which are about one
+             league. -->
+        <p class="card__descriptor default__descriptor">
+          An open-source platform for managing fantasy football leagues,
+          exploring analytics, and participating in betting markets.
+        </p>
+      </div>
+
+      <div class="default__sections">
+        <div class="chips">
+          <span class="chip chip--muted chip--section">Data Views</span>
+          <span class="chip chip--muted chip--section">Plays</span>
+          <span class="chip chip--muted chip--section">Constitution</span>
+          <span class="chip chip--muted chip--section">Glossary</span>
+          <span class="chip chip--muted chip--section">Resources</span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

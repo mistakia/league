@@ -1,5 +1,9 @@
 // Copy and link targets for the landing page, kept apart from the markup so a
 // change of fact or of contact route is a one-line edit rather than a JSX edit.
+// The league facts (team count, format, founding year, season number) come
+// from the shared copy module, which is the single source.
+
+import { league_team_count } from '@libs-shared/social-sharing.mjs'
 
 // The vetting questionnaire, and the page's primary call to action. It is an
 // in-site route rather than an external form: the argument this page makes is
@@ -20,7 +24,7 @@ export const league_format = [
   {
     title: 'Format',
     items: [
-      'Ten teams, half-PPR, superflex.',
+      `${league_team_count} teams, half-PPR, superflex.`,
       'Dynasty with a salary cap. Players extend automatically up a fixed ladder each offseason, so the decision each year is who you let go.',
       'One franchise tag, two restricted free agency nominations, and one rookie tag per year.'
     ]

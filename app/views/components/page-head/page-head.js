@@ -34,6 +34,8 @@ export const apply_document_meta = (meta_data) => {
   set_meta_content('meta[property="og:description"]', meta_data.OG_DESCRIPTION)
   set_meta_content('meta[property="og:type"]', meta_data.OG_TYPE)
   set_meta_content('meta[property="og:url"]', meta_data.OG_URL)
+  set_meta_content('meta[property="og:image"]', meta_data.OG_IMAGE)
+  set_meta_content('meta[property="og:image:alt"]', meta_data.OG_IMAGE_ALT)
 
   set_meta_content('meta[name="twitter:title"]', meta_data.TWITTER_TITLE)
   set_meta_content(

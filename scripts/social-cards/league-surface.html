@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./card.css" />
+    <style>
+      /* Shared by every /leagues/:lid/* route, for every league — so nothing
+         on it may be QUERIED data. Only league 1 has any value history, which
+         is exactly why the old card was wrong: a chart here is one league's
+         numbers shown to fifteen pages of everyone else's.
+
+         The cap and salary figures below are illustrative and belong to no
+         league. They are safe because the names are bars: nothing on the card
+         attributes a number to a team or a player anyone could look up.
+
+         The page title already carries the real league name, so the card
+         carries the shape of a front office instead: a cap and a lineup. */
+      .league__heading {
+        font-size: 76px;
+      }
+
+      .league__descriptor {
+        margin-top: 22px;
+        font-size: 24px;
+      }
+
+      .cap {
+        margin-top: 28px;
+      }
+
+      .cap__header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        font-family: var(--mono);
+      }
+
+      .cap__label {
+        font-size: 18px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-light);
+      }
+
+      .cap__figure {
+        font-size: 24px;
+        color: var(--text-dark);
+      }
+
+      .cap__bar {
+        margin-top: 12px;
+        height: 14px;
+        border-radius: 3px;
+        background: #ededed;
+        overflow: hidden;
+      }
+
+      .cap__fill {
+        height: 100%;
+        width: 91%;
+        background: var(--text-dark);
+      }
+
+      /* Sized so the third slot clears the panel. A chip sliced in half by the
+         crop reads as a broken image, where clipped text reads as continuing. */
+      .slots {
+        margin-top: 18px;
+        flex: 1;
+      }
+
+      .slot {
+        display: grid;
+        grid-template-columns: 132px 1fr 132px;
+        align-items: center;
+        height: 54px;
+        border-top: 1px solid #ededed;
+      }
+
+      .slot__name {
+        height: 13px;
+        border-radius: 3px;
+        background: #dcdcdc;
+      }
+
+      .slot__salary {
+        text-align: right;
+        font-family: var(--mono);
+        font-size: 22px;
+        color: var(--text);
+      }
+
+      .chip--slot {
+        font-size: 19px;
+        padding: 6px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card__wordmark">xo.football</div>
+
+      <div>
+        <h1 class="card__heading league__heading">Front Office</h1>
+        <div class="card__rule"></div>
+        <p class="card__descriptor league__descriptor">
+          Rosters, cap space, trades, waivers, and weekly matchups.
+        </p>
+      </div>
+
+      <div class="cap">
+        <div class="cap__header">
+          <span class="cap__label">Salary Cap</span>
+          <span class="cap__figure">$182 / $200</span>
+        </div>
+        <div class="cap__bar"><div class="cap__fill"></div></div>
+      </div>
+
+      <div class="slots">
+        <div class="slot">
+          <div><span class="chip chip--qb chip--slot">QB</span></div>
+          <div><div class="slot__name" style="width: 188px"></div></div>
+          <div class="slot__salary">$48</div>
+        </div>
+        <div class="slot">
+          <div><span class="chip chip--rb chip--slot">RB</span></div>
+          <div><div class="slot__name" style="width: 156px"></div></div>
+          <div class="slot__salary">$31</div>
+        </div>
+        <div class="slot">
+          <div><span class="chip chip--wr chip--slot">WR</span></div>
+          <div><div class="slot__name" style="width: 204px"></div></div>
+          <div class="slot__salary">$27</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

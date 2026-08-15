@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./card.css" />
+    <style>
+      /* Resources is a curated link directory, and its structure is its
+         sections — so the sections are the visual. Chips rather than the
+         glossary's term rows, so the two reference pages do not resolve to the
+         same card as thumbnails. */
+      .resources__heading {
+        font-size: 68px;
+      }
+
+      .resources__descriptor {
+        margin-top: 0;
+        font-size: 24px;
+      }
+
+      .resources__sections {
+        margin-top: auto;
+      }
+
+      .resources__row + .resources__row {
+        margin-top: 12px;
+      }
+
+      .chip--section {
+        font-size: 22px;
+        letter-spacing: 0.06em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card__wordmark">xo.football</div>
+
+      <div>
+        <h1 class="card__heading resources__heading">Resources</h1>
+        <div class="card__rule"></div>
+        <p class="card__descriptor resources__descriptor">
+          A directory of the stats, projections, and tools worth using.
+        </p>
+      </div>
+
+      <div class="resources__sections">
+        <div class="chips resources__row">
+          <span class="chip chip--muted chip--section">Stats &amp; Research</span>
+          <span class="chip chip--muted chip--section">Projections</span>
+          <span class="chip chip--muted chip--section">Rankings &amp; ADP</span>
+        </div>
+        <div class="chips resources__row">
+          <span class="chip chip--muted chip--section">Premium Content</span>
+          <span class="chip chip--muted chip--section">Forums</span>
+          <span class="chip chip--muted chip--section">Trade Tools</span>
+        </div>
+        <div class="chips resources__row">
+          <span class="chip chip--muted chip--section">Libraries</span>
+          <span class="chip chip--muted chip--section">Blogs</span>
+          <span class="chip chip--muted chip--section">NFL Draft</span>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

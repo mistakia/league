@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./card.css" />
+    <style>
+      /* The section's visual is a table, because that is what the tool makes.
+         It is abstracted rather than screenshotted: player names are bars, so
+         the eye reads "a sorted table of players" at feed size instead of
+         failing to read twelve columns of real text. */
+      .data-views__heading {
+        font-size: 76px;
+      }
+
+      .data-views__descriptor {
+        margin-top: 22px;
+        font-size: 25px;
+      }
+
+      .table {
+        margin-top: 40px;
+        font-family: var(--mono);
+        /* Clipped by the panel, so the table reads as continuing past the
+           bottom edge rather than as four rows that happen to be all there
+           is. */
+        flex: 1;
+      }
+
+      .table__row {
+        display: grid;
+        grid-template-columns: 232px 96px 92px 132px 132px 132px;
+        align-items: center;
+        height: 52px;
+        border-bottom: 1px solid #ededed;
+      }
+
+      .table__head {
+        font-size: 17px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-light);
+        border-bottom: 2px solid var(--border);
+      }
+
+      /* A wrapped header cell grows the row and drags the rule below it out of
+         line with the rest of the table. Keep every label on one line and
+         shorten the label instead when it does not fit. */
+      .table__head .table__cell {
+        white-space: nowrap;
+      }
+
+      .table__cell {
+        padding-right: 20px;
+      }
+
+      .table__cell--numeric {
+        text-align: right;
+        font-size: 21px;
+        color: var(--text);
+      }
+
+      /* The sorted column. Every data view has one, and it is the single
+         detail that makes a table graphic read as this tool rather than as a
+         generic spreadsheet. */
+      .table__cell--sorted {
+        background: #fff4f4;
+        color: var(--text-dark);
+      }
+
+      .table__head .table__cell--sorted {
+        color: var(--accent);
+      }
+
+      /* Player names as bars. A real name is noise at card size and invites
+         the reader to check whether the numbers beside it are true. */
+      .table__name {
+        height: 13px;
+        border-radius: 3px;
+        background: #dcdcdc;
+      }
+
+      .table__team {
+        font-size: 20px;
+        color: var(--text-light);
+      }
+
+      .chip--table {
+        font-size: 18px;
+        padding: 5px 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card__wordmark">xo.football</div>
+
+      <div>
+        <h1 class="card__heading data-views__heading">Data Views</h1>
+        <div class="card__rule"></div>
+        <p class="card__descriptor data-views__descriptor">
+          Custom tables built from projections, betting markets, play-by-play,
+          and league data.
+        </p>
+      </div>
+
+      <div class="table">
+        <div class="table__row table__head">
+          <div class="table__cell">Player</div>
+          <div class="table__cell">Pos</div>
+          <div class="table__cell">Team</div>
+          <div class="table__cell table__cell--numeric">Targets</div>
+          <div class="table__cell table__cell--numeric table__cell--sorted">
+            Yds/Rte&nbsp;&darr;
+          </div>
+          <div class="table__cell table__cell--numeric">Points</div>
+        </div>
+
+        <div class="table__row">
+          <div class="table__cell"><div class="table__name" style="width: 168px"></div></div>
+          <div class="table__cell"><span class="chip chip--wr chip--table">WR</span></div>
+          <div class="table__cell table__team">CIN</div>
+          <div class="table__cell table__cell--numeric">164</div>
+          <div class="table__cell table__cell--numeric table__cell--sorted">2.91</div>
+          <div class="table__cell table__cell--numeric">78.4</div>
+        </div>
+
+        <div class="table__row">
+          <div class="table__cell"><div class="table__name" style="width: 142px"></div></div>
+          <div class="table__cell"><span class="chip chip--te chip--table">TE</span></div>
+          <div class="table__cell table__team">KC</div>
+          <div class="table__cell table__cell--numeric">121</div>
+          <div class="table__cell table__cell--numeric table__cell--sorted">2.64</div>
+          <div class="table__cell table__cell--numeric">61.2</div>
+        </div>
+
+        <div class="table__row">
+          <div class="table__cell"><div class="table__name" style="width: 196px"></div></div>
+          <div class="table__cell"><span class="chip chip--wr chip--table">WR</span></div>
+          <div class="table__cell table__team">MIN</div>
+          <div class="table__cell table__cell--numeric">158</div>
+          <div class="table__cell table__cell--numeric table__cell--sorted">2.47</div>
+          <div class="table__cell table__cell--numeric">55.9</div>
+        </div>
+
+        <div class="table__row">
+          <div class="table__cell"><div class="table__name" style="width: 154px"></div></div>
+          <div class="table__cell"><span class="chip chip--rb chip--table">RB</span></div>
+          <div class="table__cell table__team">SF</div>
+          <div class="table__cell table__cell--numeric">83</div>
+          <div class="table__cell table__cell--numeric table__cell--sorted">2.15</div>
+          <div class="table__cell table__cell--numeric">49.7</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

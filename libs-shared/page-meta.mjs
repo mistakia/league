@@ -5,6 +5,8 @@ import {
   default_image_path,
   default_title,
   format_page_title,
+  league_surface_image_alt,
+  league_surface_image_path,
   private_robots,
   site_name,
   twitter_card_type
@@ -54,14 +56,16 @@ const build_meta_data = ({
   robots,
   og_type,
   canonical_url,
-  origin
+  origin,
+  image = default_image_path,
+  image_alt = default_image_alt
 }) => {
   const page_title = sanitize_meta_text(
     format_page_title(title),
     max_title_length
   )
   const page_description = sanitize_meta_text(description)
-  const image_url = absolute_url(origin, default_image_path)
+  const image_url = absolute_url(origin, image)
 
   return {
     PAGE_TITLE: page_title,
@@ -73,7 +77,7 @@ const build_meta_data = ({
     OG_TYPE: og_type,
     OG_URL: canonical_url,
     OG_IMAGE: image_url,
-    OG_IMAGE_ALT: sanitize_meta_text(default_image_alt),
+    OG_IMAGE_ALT: sanitize_meta_text(image_alt),
     SITE_NAME: site_name,
     TWITTER_CARD: twitter_card_type,
     TWITTER_TITLE: page_title,
@@ -114,13 +118,25 @@ export const resolve_page_meta = ({ url_path, origin, league_name }) => {
         : `${route.title} - ${league_name}`
   }
 
+  // The league family shares one card — the shape of a front office rather than
+  // any league's real numbers — so any route that resolves a league gets it
+  // unless the route carries its own.
+  let image = route.og_image
+  let image_alt = route.og_image_alt
+  if (params.lid && !image) {
+    image = league_surface_image_path
+    image_alt = league_surface_image_alt
+  }
+
   return build_meta_data({
     title,
     description: route.description,
     robots: route_robots(route),
     og_type: route_og_type(route),
     canonical_url: absolute_url(origin, route.canonical_path || path_only),
-    origin
+    origin,
+    image,
+    image_alt
   })
 }
 

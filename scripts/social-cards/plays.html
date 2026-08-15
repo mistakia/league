@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./card.css" />
+    <style>
+      /* A field strip rather than a list of plays. The plays page renders a
+         table, but so does data views, and two table cards are
+         indistinguishable at thumbnail size — the whole point of a per-section
+         card is that the sections look different in a feed. Yard lines read as
+         football at any size and read as nothing else. */
+      .plays__heading {
+        font-size: 76px;
+      }
+
+      .plays__descriptor {
+        margin-top: 22px;
+        font-size: 25px;
+      }
+
+      .field {
+        position: relative;
+        margin-top: auto;
+        height: 214px;
+      }
+
+      /* The yard lines, every ten yards across the strip. */
+      .field__line {
+        position: absolute;
+        top: 0;
+        bottom: 38px;
+        width: 1px;
+        background: #e4e4e4;
+      }
+
+      .field__line--midfield {
+        background: var(--border);
+      }
+
+      .field__number {
+        position: absolute;
+        bottom: 0;
+        transform: translateX(-50%);
+        font-family: var(--mono);
+        font-size: 19px;
+        color: var(--text-light);
+      }
+
+      .field__baseline {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 38px;
+        height: 2px;
+        background: var(--border);
+      }
+
+      /* One play: a bar spanning the yards it gained, tagged with the gain at
+         its leading edge. */
+      .play {
+        position: absolute;
+        height: 34px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 12px;
+        font-family: var(--mono);
+        font-size: 19px;
+        color: #fff;
+      }
+
+      .play--pass {
+        background: var(--te);
+      }
+
+      .play--rush {
+        background: var(--rb);
+      }
+
+      .play--touchdown {
+        background: var(--accent);
+      }
+
+      /* Down and distance, sitting off the trailing edge of each bar where the
+         play began. */
+      /* Anchored to the bar's own left edge and then pulled fully outside it.
+         Without the explicit left the span falls back to its static position
+         inside the flex row, which lands outside a narrow bar and inside a
+         wide one — the same rule rendering two different ways. */
+      .play__down {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.06em;
+        color: var(--text-light);
+        transform: translateX(-100%);
+        padding-right: 14px;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="card__wordmark">xo.football</div>
+
+      <div>
+        <h1 class="card__heading plays__heading">Plays</h1>
+        <div class="card__rule"></div>
+        <p class="card__descriptor plays__descriptor">
+          Every NFL play, searchable by situation, personnel, and win
+          probability.
+        </p>
+      </div>
+
+      <div class="field">
+        <div class="field__line" style="left: 10%"></div>
+        <div class="field__line" style="left: 20%"></div>
+        <div class="field__line" style="left: 30%"></div>
+        <div class="field__line" style="left: 40%"></div>
+        <div class="field__line field__line--midfield" style="left: 50%"></div>
+        <div class="field__line" style="left: 60%"></div>
+        <div class="field__line" style="left: 70%"></div>
+        <div class="field__line" style="left: 80%"></div>
+        <div class="field__line" style="left: 90%"></div>
+
+        <div class="field__baseline"></div>
+
+        <div class="field__number" style="left: 10%">10</div>
+        <div class="field__number" style="left: 20%">20</div>
+        <div class="field__number" style="left: 30%">30</div>
+        <div class="field__number" style="left: 40%">40</div>
+        <div class="field__number" style="left: 50%">50</div>
+        <div class="field__number" style="left: 60%">40</div>
+        <div class="field__number" style="left: 70%">30</div>
+        <div class="field__number" style="left: 80%">20</div>
+        <div class="field__number" style="left: 90%">10</div>
+
+        <div class="play play--rush" style="left: 14%; width: 12%; top: 6px">
+          <span class="play__down">1st &amp; 10</span>+7
+        </div>
+        <div class="play play--pass" style="left: 26%; width: 27%; top: 52px">
+          <span class="play__down">2nd &amp; 3</span>+24
+        </div>
+        <div
+          class="play play--touchdown"
+          style="left: 53%; width: 42%; top: 98px"
+        >
+          <span class="play__down">1st &amp; 10</span>Touchdown
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
