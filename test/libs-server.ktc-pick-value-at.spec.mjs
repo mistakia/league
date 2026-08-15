@@ -22,7 +22,17 @@ const expect = chai.expect
 const PID_2023_R1_EARLY = 'TEST-KTCPICK-000001'
 const PID_2023_R1_EARLY_NOT_SF = 'TEST-KTCPICK-000002'
 const PID_2027_R1_MID = 'TEST-KTCPICK-000003'
-const PICK_PIDS = [PID_2023_R1_EARLY, PID_2023_R1_EARLY_NOT_SF, PID_2027_R1_MID]
+const PID_2026_R2_EARLY = 'TEST-KTCPICK-000004'
+const PID_2026_R2_MID = 'TEST-KTCPICK-000005'
+const PID_2026_R2_LATE = 'TEST-KTCPICK-000006'
+const PICK_PIDS = [
+  PID_2023_R1_EARLY,
+  PID_2023_R1_EARLY_NOT_SF,
+  PID_2027_R1_MID,
+  PID_2026_R2_EARLY,
+  PID_2026_R2_MID,
+  PID_2026_R2_LATE
+]
 
 const seed_pick = ({ pid, ktc_player_id, season_year, round, slot }) =>
   db('keeptradecut_pick').insert({
@@ -57,7 +67,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
   after(cleanup)
 
   describe('slot_from_position', function () {
-    it('buckets overall position into thirds of num_teams', () => {
+    it('buckets a within-round position into thirds of num_teams', () => {
       slot_from_position(1, 12).should.equal(PICK_SLOT.EARLY)
       slot_from_position(4, 12).should.equal(PICK_SLOT.EARLY)
       slot_from_position(5, 12).should.equal(PICK_SLOT.MID)
@@ -342,6 +352,80 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
           idx
         })
       ).to.equal(null)
+    })
+  })
+
+  describe('ktc_pick_at overall position outside round one', function () {
+    // All three slots of one round, at values far enough apart that a
+    // mis-slotted pick resolves to a different number rather than the same one
+    // -- a fixture whose slots shared a value could not tell the two apart.
+    const TARGET_UNIX = Math.floor(
+      new Date('2026-07-29T00:00:00Z').getTime() / 1000
+    )
+    const NUM_TEAMS = 10
+
+    before(async () => {
+      await cleanup()
+      const seeds = [
+        { pid: PID_2026_R2_EARLY, slot: PICK_SLOT.EARLY, value: 3341 },
+        { pid: PID_2026_R2_MID, slot: PICK_SLOT.MID, value: 3035 },
+        { pid: PID_2026_R2_LATE, slot: PICK_SLOT.LATE, value: 2821 }
+      ]
+      for (const [index, seed] of seeds.entries()) {
+        await seed_pick({
+          pid: seed.pid,
+          ktc_player_id: 900031 + index,
+          season_year: 2026,
+          round: 2,
+          slot: seed.slot
+        })
+        await seed_valuations({
+          pid: seed.pid,
+          is_superflex: true,
+          observations: [
+            { observed_at: new Date('2026-01-10T00:00:00Z'), value: seed.value }
+          ]
+        })
+      }
+    })
+    after(cleanup)
+
+    it('reduces a league-wide overall position to its position within the round', async () => {
+      const idx = await load_pick_ktc_indexes({ is_superflex: true })
+      const value_at = (pick_overall_position) =>
+        ktc_pick_at({
+          pick_year: 2026,
+          pick_round: 2,
+          pick_overall_position,
+          num_teams: NUM_TEAMS,
+          target_unix: TARGET_UNIX,
+          idx
+        })
+
+      // Regression signature: the overall rank went straight into the slot
+      // bucketer, and an overall rank in round 2 or beyond always exceeds two
+      // thirds of num_teams -- so every one of these resolved to LATE (2821),
+      // understating every pick outside round 1 in the league.
+      value_at(11).should.equal(3341) // round 2 pick 1 -- early
+      value_at(13).should.equal(3341) // round 2 pick 3 -- early
+      value_at(14).should.equal(3035) // round 2 pick 4 -- mid
+      value_at(17).should.equal(2821) // round 2 pick 7 -- late
+      value_at(20).should.equal(2821) // round 2 pick 10 -- late
+    })
+
+    it('prices at the mid tier when the overall position falls outside its own round', async () => {
+      const idx = await load_pick_ktc_indexes({ is_superflex: true })
+      // Overall 3 cannot be a round-2 pick in a 10-team league, so the position
+      // and the round disagree. Mid is the same default an unassigned future
+      // pick takes, rather than the EARLY edge the raw value buckets to.
+      ktc_pick_at({
+        pick_year: 2026,
+        pick_round: 2,
+        pick_overall_position: 3,
+        num_teams: NUM_TEAMS,
+        target_unix: TARGET_UNIX,
+        idx
+      }).should.equal(3035)
     })
   })
 })
