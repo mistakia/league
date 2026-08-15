@@ -224,22 +224,31 @@ const OpenVoteForm = ({
                 update_candidate(index, { candidate_name: event.target.value })
               }
             />
-            <TeamCheckboxes
-              teams={league_teams}
-              selected={candidate.sponsor_team_ids}
-              on_toggle={(team_id) =>
-                update_candidate(index, {
-                  sponsor_team_ids: candidate.sponsor_team_ids.includes(team_id)
-                    ? candidate.sponsor_team_ids.filter(
-                        (entry) => entry !== team_id
-                      )
-                    : [...candidate.sponsor_team_ids, team_id]
-                })
-              }
-            />
+            {/* Labelled, like every other control on the page. Section 9(c):
+                an individual nominated by more than one Manager is one
+                Candidate and each of them is a Sponsor, so this is a list. */}
+            <div className='admission-vote-commissioner__field'>
+              <span>Sponsors</span>
+              <TeamCheckboxes
+                teams={league_teams}
+                selected={candidate.sponsor_team_ids}
+                on_toggle={(team_id) =>
+                  update_candidate(index, {
+                    sponsor_team_ids: candidate.sponsor_team_ids.includes(
+                      team_id
+                    )
+                      ? candidate.sponsor_team_ids.filter(
+                          (entry) => entry !== team_id
+                        )
+                      : [...candidate.sponsor_team_ids, team_id]
+                  })
+                }
+              />
+            </div>
           </div>
         ))}
         <button
+          className='admission-vote-commissioner__action--add'
           type='button'
           onClick={() =>
             set_candidates([
@@ -252,7 +261,11 @@ const OpenVoteForm = ({
         </button>
       </fieldset>
 
-      <button type='submit' disabled={is_working}>
+      <button
+        className='admission-vote-commissioner__action'
+        type='submit'
+        disabled={is_working}
+      >
         Open the admission vote
       </button>
     </form>
@@ -352,6 +365,7 @@ const TranscribeForm = ({ state, on_transcribe, is_working }) => {
       </label>
 
       <button
+        className='admission-vote-commissioner__action'
         type='submit'
         disabled={is_working || !team_id || !ranked_candidate_ids.length}
       >
@@ -420,6 +434,7 @@ const DecisionPanel = ({ state, on_decide, is_working }) => {
 
       {highest_ranked.map((row) => (
         <button
+          className='admission-vote-commissioner__action'
           key={row.admission_vote_candidate_id}
           type='button'
           disabled={is_working}
@@ -454,7 +469,11 @@ const DecisionPanel = ({ state, on_decide, is_working }) => {
             onChange={(event) => set_pass_reason(event.target.value)}
           />
         </label>
-        <button type='submit' disabled={is_working || !pass_reason.trim()}>
+        <button
+          className='admission-vote-commissioner__action'
+          type='submit'
+          disabled={is_working || !pass_reason.trim()}
+        >
           Pass and reopen nominations
         </button>
       </form>
@@ -635,7 +654,12 @@ export default function AdmissionVoteCommissionerPage() {
                   : ''}
                 . Voting closes {format_moment(vote.closes_at)}.
               </p>
-              <button type='button' disabled={is_working} onClick={close}>
+              <button
+                className='admission-vote-commissioner__action'
+                type='button'
+                disabled={is_working}
+                onClick={close}
+              >
                 Close the vote and pin the tally
               </button>
             </section>

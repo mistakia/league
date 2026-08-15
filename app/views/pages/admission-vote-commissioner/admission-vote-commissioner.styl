@@ -1,128 +1,97 @@
-// The commissioner's working surface for the admission vote. Same measure and
-// the same two fonts as the manager-facing page, because it is the same subject
-// and switching between them should not feel like switching applications.
-$admission_vote_commissioner_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
-$admission_vote_commissioner_mono = 'IBM Plex Mono', monospace
+// The commissioner's working surface for the admission vote. Same measure,
+// fonts and form language as the manager-facing page and the waiting-list
+// questionnaire, because it is the same subject and switching between them
+// should not feel like switching applications.
+//
+// The shared language lives in app/styles/prose-form.styl. Note especially that
+// the team checkboxes below draw their own box through prose_checkbox() — the
+// global `input { -webkit-appearance: none }` in normalize.css means a bare one
+// renders 0x0 and invisible, which is exactly how this page shipped.
 
 .admission-vote-commissioner
-  max-width 720px
-  margin 0 auto 80px
-  padding 24px 16px
-  font 400 16px/1.65 $admission_vote_commissioner_sans
-  color $textColor
-
-  h2
-    margin 0 0 0.5em
-    font-family $admission_vote_commissioner_mono
-    font-size 1.125em
-    color $textColorDark
-
-  button
-    margin-right 8px
-    margin-top 12px
-    padding 8px 16px
-    font-family $admission_vote_commissioner_mono
-    font-size 0.875em
-    cursor pointer
-
-    &:disabled
-      cursor not-allowed
-      opacity 0.5
+  prose_page()
 
 .admission-vote-commissioner__title
-  margin 0 0 0.5em
-  font-family $admission_vote_commissioner_mono
-  font-size 1.5em
-  line-height 1.25
-  color $textColorDark
+  prose_title()
 
 .admission-vote-commissioner__intro
   margin 0 0 2em
 
 .admission-vote-commissioner__section
-  padding-top 32px
-  margin-top 40px
-  border-top 1px solid $borderColor
+  margin-top 48px
+
+  h2
+    prose_section_title()
+
+// Tighter than the questionnaire's 48px: there the form follows several
+// paragraphs of prose, here it follows a section heading that has already
+// spaced it.
+.admission-vote-commissioner__form
+  prose_form()
+  margin-top 24px
 
 .admission-vote-commissioner__field
-  display block
-  margin-bottom 16px
+  prose_field()
+  border none
+  margin 0
+  padding 0
 
-  > span, legend
-    display block
-    margin-bottom 4px
-    font-family $admission_vote_commissioner_mono
-    font-size 0.8125em
-    color $textColor
+  > span
+    prose_label()
 
-  input[type='text'], input[type='number'], input[type='datetime-local'], select
-    width 100%
-    max-width 360px
-    padding 6px 8px
-    font 400 15px $admission_vote_commissioner_sans
-    color $textColorDark
+  // A legend groups several controls, so it is set as a section label rather
+  // than as a field label — otherwise it is indistinguishable from the label of
+  // the first control inside it, and the two read as two stacked prompts.
+  //
+  // A legend is also laid out specially inside a fieldset and does NOT take the
+  // flex gap above it, so its separation has to be stated.
+  > legend
+    prose_section_title()
+    padding 0
+    margin-bottom 12px
+
+  input[type='text'], input[type='number'], input[type='datetime-local']
+    prose_input()
+
+  select
+    prose_select()
+
+.admission-vote-commissioner__hint
+  prose_help()
+  margin 0
 
 // The eligibility snapshot and the sponsor lists are both "which teams", so
 // they get one control shape rather than two that have to be learned apart.
-//
-// THE BOX IS DRAWN HERE BECAUSE THERE IS NO NATIVE ONE TO STYLE.
-// app/styles/normalize.css carries a global `input { -webkit-appearance: none }`,
-// which strips the platform checkbox app-wide — so a bare checkbox renders at
-// 0x0 with no border and no tick, and `accent-color` does nothing, since it
-// only applies to natively-rendered controls. The control was fully functional
-// that way and completely invisible: the toggle fired, the state changed, and
-// nothing on screen moved, which reads as team selection being broken. Every
-// property below is load-bearing; this is not decoration over a working
-// control. `app/views/pages/waitlist/waitlist.styl` is the same fix.
 .admission-vote-commissioner__teams
   display flex
   flex-wrap wrap
-  gap 4px 16px
+  gap 8px 20px
+  margin-top 4px
 
   label
-    display flex
-    align-items center
-    gap 6px
-    font-size 0.9375em
-    cursor pointer
+    prose_checkbox_label()
 
   input[type='checkbox']
-    flex-shrink 0
-    width 16px
-    height 16px
-    margin 0
-    border 1px solid $borderColor
-    border-radius 2px
-    background transparent
-    cursor pointer
-    transition background 120ms ease, border-color 120ms ease
+    prose_checkbox(16px, 11px)
 
-    &:hover
-      border-color $textColorDark
-
-    // Checked state has to supply its own mark. The tick is an inline SVG
-    // background rather than a pseudo-element: `input` is a void element, and
-    // generated content on one is not reliable across browsers even once
-    // appearance is stripped.
-    &:checked
-      background $textColorDark url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-6'/%3E%3C/svg%3E") center / 11px 11px no-repeat
-      border-color $textColorDark
-
-    &:focus-visible
-      outline 2px solid $accentColor
-      outline-offset 2px
-
+// One candidate per block. Space separates a block from the legend above it;
+// a rule separates one candidate from the NEXT, because several of these stack
+// and three unruled blocks of the same shape read as one long form.
 .admission-vote-commissioner__candidate
-  padding 12px 0
-  border-bottom 1px solid $borderColor
+  display flex
+  flex-direction column
+  gap 12px
 
-  input[type='text']
-    margin-bottom 8px
+  & + &
+    margin-top 24px
+    padding-top 24px
+    border-top 1px solid $borderColor
 
-.admission-vote-commissioner__hint
-  margin 0 0 1em
-  font-size 0.875em
-  color $textColor
+.admission-vote-commissioner__action
+  prose_submit()
+
+.admission-vote-commissioner__action--add
+  prose_button_secondary()
 
 .admission-vote-commissioner__totals
   width 100%
@@ -135,20 +104,18 @@ $admission_vote_commissioner_mono = 'IBM Plex Mono', monospace
     border-bottom 1px solid $borderColor
 
   th
-    font-family $admission_vote_commissioner_mono
+    font-family $prose_mono
     font-size 0.8125em
     font-weight 700
+    letter-spacing 0.08em
+    text-transform uppercase
     color $textColor
 
   td
     color $textColorDark
 
 .admission-vote-commissioner__notice
-  padding 12px 14px
-  border-left 3px solid $borderColor
-  color $textColorDark
+  prose_message()
 
 .admission-vote-commissioner__error
-  padding 12px 14px
-  border-left 3px solid $accentColor
-  color $textColorDark
+  prose_error()

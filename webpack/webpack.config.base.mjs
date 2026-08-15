@@ -159,7 +159,10 @@ export default {
                 use: [nib()],
                 import: [
                   'nib',
-                  path.resolve(__dirname, '../app/styles/variables.styl')
+                  path.resolve(__dirname, '../app/styles/variables.styl'),
+                  // Mixins only, so this emits nothing until a stylesheet calls
+                  // one. Must follow variables.styl, which it references.
+                  path.resolve(__dirname, '../app/styles/prose-form.styl')
                 ]
               }
             }

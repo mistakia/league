@@ -1,33 +1,16 @@
 // The questionnaire is read by the same person who just read the landing page,
 // so it carries the same measure and the same two fonts. Anything that looks
 // like the app's dense chrome would read as a different site.
-$waitlist_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
-$waitlist_mono = 'IBM Plex Mono', monospace
+//
+// The form language itself lives in app/styles/prose-form.styl, shared with the
+// admission vote pages — this page originated it, and the mixins are what stop
+// the three from drifting apart again.
 
 .waitlist
-  max-width 660px
-  margin 0 auto 80px
-  padding 24px 16px
-  font 400 17px/1.7 $waitlist_sans
-  color $textColor
-
-  p
-    margin 0 0 1em
-
-  a
-    color $textColorDark
-    font-weight 700
-    font-family $waitlist_mono
-    border-bottom 1px solid $borderColor
-    &:hover
-      border-bottom 1px solid $accentColor
+  prose_page()
 
 .waitlist__title
-  margin 0 0 0.75em
-  font-family $waitlist_mono
-  font-size 1.5em
-  line-height 1.25
-  color $textColorDark
+  prose_title()
 
 // The two disclosure sections that come before the form. They are the part of
 // the page where the league talks rather than asks, and a reader who is out
@@ -38,111 +21,47 @@ $waitlist_mono = 'IBM Plex Mono', monospace
   margin-top 40px
 
 .waitlist__intro-title
-  margin 0 0 0.75em
-  font-family $waitlist_mono
-  font-size 0.8125em
-  font-weight 700
-  letter-spacing 0.08em
-  text-transform uppercase
-  color $textColor
+  prose_section_title()
 
 .waitlist__form
-  display flex
-  flex-direction column
-  gap 32px
-  margin-top 48px
+  prose_form()
 
 // Sits at the top of the form rather than beside the submit button: it gates
 // everything below it, so agreeing to it is the first act, not the last.
-//
-// THE BOX IS DRAWN HERE BECAUSE THERE IS NO NATIVE ONE TO STYLE.
-// app/styles/normalize.css carries a global `input { -webkit-appearance: none }`,
-// which strips the platform checkbox app-wide — so a bare checkbox renders with
-// no tick and no intrinsic size, and `accent-color` does nothing, since it only
-// applies to natively-rendered controls. Every property below is load-bearing
-// for that reason; this is not decoration over a working control.
 .waitlist__affirmation
-  display flex
+  prose_checkbox_label()
   align-items flex-start
   gap 12px
-  font-family $waitlist_mono
+  font-family $prose_mono
   font-weight 700
-  font-size 0.9375em
   line-height 1.4
   color $textColorDark
-  cursor pointer
 
   input[type='checkbox']
-    flex-shrink 0
-    width 18px
-    height 18px
+    prose_checkbox()
     // The label's first line is ~22px tall against an 18px box, so this centers
     // the box on that line rather than hanging it off the top.
     margin 2px 0 0
-    border 1px solid $borderColor
-    border-radius 2px
-    background transparent
-    cursor pointer
-    transition background 120ms ease, border-color 120ms ease
 
-    &:hover
-      border-color $textColorDark
-
-    // Checked state has to supply its own mark. The tick is an inline SVG
-    // background rather than a pseudo-element: `input` is a void element, and
-    // generated content on one is not reliable across browsers even once
-    // appearance is stripped.
-    &:checked
-      background $textColorDark url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-6'/%3E%3C/svg%3E") center / 12px 12px no-repeat
-      border-color $textColorDark
-
-    &:focus-visible
-      outline 2px solid $accentColor
-      outline-offset 2px
-
-// Each question is a block: prompt, then the reason it is being asked, then the
-// box. The gap above carries the separation, so there are no rules or boxes
-// around a question — a form that looks like paperwork gets abandoned.
 .waitlist__field
-  display flex
-  flex-direction column
-  gap 8px
+  prose_field()
 
 .waitlist__label
-  font-family $waitlist_mono
-  font-weight 700
-  font-size 0.9375em
-  line-height 1.4
-  color $textColorDark
+  prose_label()
 
 .waitlist__optional
   font-weight 400
   color $textColor
 
 .waitlist__help
-  font-size 0.875em
-  line-height 1.5
-  color $textColor
+  prose_help()
 
 .waitlist__input
-  width 100%
-  padding 10px 12px
-  font 400 17px/1.5 $waitlist_sans
-  color $textColorDark
-  background transparent
-  border 1px solid $borderColor
-  border-radius 2px
-  box-sizing border-box
-  &:focus
-    outline none
-    border-color $accentColor
+  prose_input()
 
 .waitlist__input--multiline
   resize vertical
 
-// A select keeps its native arrow — normalize.css strips appearance from
-// `input` only, not from `select`, so unlike the checkbox above there is a real
-// control here to inherit. It only needs the page's border and type.
 .waitlist__input--select
   cursor pointer
 
@@ -157,29 +76,7 @@ $waitlist_mono = 'IBM Plex Mono', monospace
   opacity 0
 
 .waitlist__error
-  padding 12px 14px
-  font-size 0.9375em
-  color $textColorDark
-  border-left 3px solid $accentColor
+  prose_error()
 
 .waitlist__submit
-  align-self flex-start
-  padding 14px 24px
-  font-family $waitlist_mono
-  font-weight 700
-  font-size 0.9375em
-  letter-spacing 0.02em
-  color white
-  background $textColorDark
-  border none
-  border-radius 2px
-  cursor pointer
-  transition background 120ms ease
-  &:hover
-    background $accentColor
-  &:focus-visible
-    outline 2px solid $accentColor
-    outline-offset 3px
-  &:disabled
-    opacity 0.5
-    cursor default
+  prose_submit()

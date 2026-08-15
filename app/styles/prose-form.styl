@@ -1,0 +1,217 @@
+// THE PROSE-PAGE FORM LANGUAGE, shared by every page that talks to a person
+// rather than showing him a table: the waiting-list questionnaire, the
+// admission vote ballot, and the commissioner's side of that vote.
+//
+// These pages are read at a prose measure in the site's two fonts, and anything
+// that looks like the app's dense chrome reads as a different site. They were
+// each carrying their own copy of that language, which had already drifted
+// three ways — two measures, two type scales, and a checkbox that was drawn on
+// one page and invisible on another. This is the one definition.
+//
+// MIXINS AND VARIABLES ONLY, NO BARE RULES. This file is injected into every
+// stylesheet in the app by webpack's stylusOptions.import, so a rule at the top
+// level here would be emitted once per stylesheet. A mixin emits nothing until
+// it is called.
+//
+// Injected AFTER variables.styl, so $textColor and its siblings resolve.
+
+$prose_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
+$prose_mono = 'IBM Plex Mono', monospace
+
+// The page itself. One measure across all three pages: these are read one
+// after another by the same person, and a measure that changes between them
+// reads as a different site rather than as a different page.
+prose_page()
+  max-width 660px
+  margin 0 auto 80px
+  padding 24px 16px
+  font 400 17px/1.7 $prose_sans
+  color $textColor
+
+  p
+    margin 0 0 1em
+
+  a
+    color $textColorDark
+    font-weight 700
+    font-family $prose_mono
+    border-bottom 1px solid $borderColor
+    &:hover
+      border-bottom 1px solid $accentColor
+
+prose_title()
+  margin 0 0 0.75em
+  font-family $prose_mono
+  font-size 1.5em
+  line-height 1.25
+  color $textColorDark
+
+// A section heading inside the page. Small, uppercase and spaced rather than
+// large: the page has no rules or boxes, so weight and spacing are what
+// separate one part from the next.
+prose_section_title()
+  margin 0 0 0.75em
+  font-family $prose_mono
+  font-size 0.8125em
+  font-weight 700
+  letter-spacing 0.08em
+  text-transform uppercase
+  color $textColor
+
+prose_form()
+  display flex
+  flex-direction column
+  gap 32px
+  margin-top 48px
+
+// A field is a block: prompt, then the reason it is being asked, then the box.
+// The gap carries the separation — a form that looks like paperwork gets
+// abandoned, so there are no rules or boxes around a question.
+prose_field()
+  display flex
+  flex-direction column
+  gap 8px
+
+prose_label()
+  font-family $prose_mono
+  font-weight 700
+  font-size 0.9375em
+  line-height 1.4
+  color $textColorDark
+
+prose_help()
+  font-size 0.875em
+  line-height 1.5
+  color $textColor
+
+prose_input()
+  width 100%
+  padding 10px 12px
+  font 400 17px/1.5 $prose_sans
+  color $textColorDark
+  background transparent
+  border 1px solid $borderColor
+  border-radius 2px
+  box-sizing border-box
+  &:focus
+    outline none
+    border-color $accentColor
+
+// A select keeps its native arrow — normalize.css strips appearance from
+// `input` only, not from `select`, so unlike the checkbox below there is a real
+// control here to inherit. It only needs the page's border and type.
+prose_select()
+  prose_input()
+  cursor pointer
+
+// THE BOX IS DRAWN HERE BECAUSE THERE IS NO NATIVE ONE TO STYLE.
+// app/styles/normalize.css carries a global `input { -webkit-appearance: none }`,
+// which strips the platform checkbox app-wide — so a bare checkbox renders with
+// no tick and no intrinsic size, and `accent-color` does nothing, since it only
+// applies to natively-rendered controls. Every property below is load-bearing;
+// this is not decoration over a working control.
+//
+// This mixin exists because that trap has already cost two features. The
+// waiting-list page drew its own box and wrote the reason down; the commissioner
+// page did not, and shipped a 0x0 control that toggled correctly and was
+// invisible, which read as team selection being broken. Call this rather than
+// styling a checkbox by hand.
+prose_checkbox(size = 18px, tick = 12px)
+  flex-shrink 0
+  width size
+  height size
+  margin 0
+  border 1px solid $borderColor
+  border-radius 2px
+  background transparent
+  cursor pointer
+  transition background 120ms ease, border-color 120ms ease
+
+  &:hover
+    border-color $textColorDark
+
+  // Checked state has to supply its own mark. The tick is an inline SVG
+  // background rather than a pseudo-element: `input` is a void element, and
+  // generated content on one is not reliable across browsers even once
+  // appearance is stripped.
+  //
+  // background-size is its own declaration rather than the `center / w h` half
+  // of the shorthand: stylus reads that slash as DIVISION once either side is
+  // an expression rather than a literal, and the parse error it raises is
+  // reported against every OTHER stylesheet in the app, since this file is
+  // injected into all of them.
+  &:checked
+    background $textColorDark url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-6'/%3E%3C/svg%3E") center no-repeat
+    background-size tick tick
+    border-color $textColorDark
+
+  &:focus-visible
+    outline 2px solid $accentColor
+    outline-offset 2px
+
+// A checkbox with its label beside it, which is how every one of these pages
+// uses it.
+prose_checkbox_label()
+  display flex
+  align-items center
+  gap 8px
+  font-size 0.9375em
+  cursor pointer
+
+prose_submit()
+  align-self flex-start
+  padding 14px 24px
+  font-family $prose_mono
+  font-weight 700
+  font-size 0.9375em
+  letter-spacing 0.02em
+  color white
+  background $textColorDark
+  border none
+  border-radius 2px
+  cursor pointer
+  transition background 120ms ease
+  &:hover
+    background $accentColor
+  &:focus-visible
+    outline 2px solid $accentColor
+    outline-offset 3px
+  &:disabled
+    opacity 0.5
+    cursor default
+
+// The quieter of the two buttons — an action that is not the point of the page
+// (adding another candidate row, closing a vote). Outlined rather than filled,
+// so the filled one stays the thing the eye lands on.
+prose_button_secondary()
+  align-self flex-start
+  padding 10px 18px
+  font-family $prose_mono
+  font-weight 700
+  font-size 0.875em
+  color $textColorDark
+  background transparent
+  border 1px solid $borderColor
+  border-radius 2px
+  cursor pointer
+  transition border-color 120ms ease, color 120ms ease
+  &:hover
+    border-color $textColorDark
+  &:focus-visible
+    outline 2px solid $accentColor
+    outline-offset 2px
+  &:disabled
+    opacity 0.5
+    cursor default
+
+// A message the page is making, set off by a bar rather than a box. The accent
+// bar is the error; the plain one is ordinary confirmation.
+prose_message()
+  padding 12px 14px
+  font-size 0.9375em
+  color $textColorDark
+  border-left 3px solid $borderColor
+
+prose_error()
+  prose_message()
+  border-left-color $accentColor

@@ -1,49 +1,34 @@
 // A judgement about people, read at a prose measure rather than in the app's
-// dense table chrome — the same reasoning and the same two fonts as the
-// waitlist applications page it links out to.
-$admission_vote_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
-$admission_vote_mono = 'IBM Plex Mono', monospace
+// dense table chrome — the same measure, fonts and form language as the
+// waiting-list questionnaire, which is where these candidates came from and
+// which several of these readers filled in themselves.
+//
+// The shared language lives in app/styles/prose-form.styl.
 
 .admission-vote
-  max-width 720px
-  margin 0 auto 80px
-  padding 24px 16px
-  font 400 16px/1.65 $admission_vote_sans
-  color $textColor
-
-  a
-    color $textColorDark
-    border-bottom 1px solid $borderColor
-    &:hover
-      border-bottom 1px solid $accentColor
-
-  h2
-    margin 0 0 0.5em
-    font-family $admission_vote_mono
-    font-size 1.125em
-    color $textColorDark
+  prose_page()
 
 .admission-vote__title
-  margin 0 0 0.5em
-  font-family $admission_vote_mono
-  font-size 1.5em
-  line-height 1.25
-  color $textColorDark
+  prose_title()
 
 .admission-vote__intro
   margin 0 0 2em
 
+// Spacing sets the sections apart rather than a rule, which is how the
+// questionnaire does it — a page about a person should not read as paperwork.
 .admission-vote__section
-  padding-top 32px
-  margin-top 40px
-  border-top 1px solid $borderColor
+  margin-top 48px
+
+  h2
+    prose_section_title()
 
 .admission-vote__meta
-  font-size 0.875em
-  color $textColor
+  prose_help()
 
 // A rule between candidates rather than a box around each: the panels are
-// short, and a border the eye has to keep checking reads as a container.
+// short, and a border the eye has to keep checking reads as a container. This
+// is a list separator rather than form chrome, which is why it survives on a
+// page that otherwise has no rules.
 .admission-vote__candidate
   margin-top 20px
   padding-top 20px
@@ -51,48 +36,35 @@ $admission_vote_mono = 'IBM Plex Mono', monospace
 
 .admission-vote__candidate-name
   margin 0 0 0.25em
-  font-family $admission_vote_mono
-  font-size 1.125em
+  font-family $prose_mono
+  font-weight 700
+  font-size 1.0625em
   color $textColorDark
 
 .admission-vote__candidate-meta
-  font-size 0.875em
-  color $textColor
+  prose_help()
 
 .admission-vote__ballot-intro
-  margin 0 0 1.5em
-
-// One row per preference, numbered, because the RANK is the thing being
-// entered and a bare list of selects does not say which one is first.
-.admission-vote__slot
-  display flex
-  align-items center
-  gap 12px
-  margin-bottom 12px
-
-  select
-    flex 1
-    padding 6px 8px
-    font 400 15px $admission_vote_sans
-    color $textColorDark
-
-.admission-vote__slot-label
-  flex 0 0 110px
-  font-family $admission_vote_mono
-  font-size 0.8125em
-  color $textColor
+  margin 0 0 0.5em
 
 .admission-vote__ballot
-  button
-    margin-top 12px
-    padding 8px 16px
-    font-family $admission_vote_mono
-    font-size 0.875em
-    cursor pointer
+  prose_form()
+  margin-top 24px
 
-    &:disabled
-      cursor not-allowed
-      opacity 0.5
+  button[type='submit']
+    prose_submit()
+
+// One block per preference, numbered, because the RANK is the thing being
+// entered and a bare list of selects does not say which one is first. Same
+// shape as a questionnaire field: label above the control, not beside it.
+.admission-vote__slot
+  prose_field()
+
+  select
+    prose_select()
+
+.admission-vote__slot-label
+  prose_label()
 
 // Points per candidate and nothing else. Section 10(e) discloses this figure
 // for each Candidate; a per-team row is the thing it forbids, so there is
@@ -108,9 +80,11 @@ $admission_vote_mono = 'IBM Plex Mono', monospace
     border-bottom 1px solid $borderColor
 
   th
-    font-family $admission_vote_mono
+    font-family $prose_mono
     font-size 0.8125em
     font-weight 700
+    letter-spacing 0.08em
+    text-transform uppercase
     color $textColor
 
   td
@@ -121,11 +95,7 @@ $admission_vote_mono = 'IBM Plex Mono', monospace
   color $textColorDark
 
 .admission-vote__notice
-  padding 12px 14px
-  border-left 3px solid $borderColor
-  color $textColorDark
+  prose_message()
 
 .admission-vote__error
-  padding 12px 14px
-  border-left 3px solid $accentColor
-  color $textColorDark
+  prose_error()
