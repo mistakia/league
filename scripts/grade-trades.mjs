@@ -9,6 +9,13 @@ import format_trade_asset_label from '#libs-shared/format-trade-asset-label.mjs'
 const log = debug('grade-trades')
 debug.enable('grade-trades')
 
+// Calibrated against league 1's net_value_proceeds distribution, which is not
+// the distribution the old default was set against: the figure it grades is now
+// what a side's assets turned into for that team rather than the unfiltered
+// asset line, and the spread narrowed. Re-derive it before reading the rates as
+// anything but a relative signal on another league.
+const BOOM_THRESHOLD_DEFAULT = 2500
+
 const initialize_cli = () =>
   yargs(hideBin(process.argv))
     .option('lid', { type: 'number', demandOption: true })
@@ -28,8 +35,8 @@ const initialize_cli = () =>
     })
     .option('boom_threshold', {
       type: 'number',
-      default: 2500,
-      describe: 'net_value_realized magnitude counting as a boom or a bust'
+      default: BOOM_THRESHOLD_DEFAULT,
+      describe: 'net_value_proceeds magnitude counting as a boom or a bust'
     })
     .option('min_age_days', {
       type: 'number',
@@ -40,9 +47,18 @@ const initialize_cli = () =>
 
 const describe_asset = (asset) => {
   const resulting = asset.resulting_assets.length
-    ? asset.resulting_assets.map(format_trade_asset_label).join(', ')
-    : asset.lineage_state
-  return `${format_trade_asset_label(asset)} -> ${resulting} (now ${asset.current_keeptradecut_value})`
+    ? asset.resulting_assets
+        .map((entry) => `${format_trade_asset_label(entry)}@${entry.tid}`)
+        .join(', ')
+    : '-'
+  // The two figures are printed distinctly and never added: still-held is what
+  // this team holds off the line, proceeds is what its side turned into. A
+  // withheld proceeds figure prints as such rather than as a zero.
+  const proceeds =
+    asset.keeptradecut_value_proceeds == null
+      ? 'withheld'
+      : Math.round(asset.keeptradecut_value_proceeds)
+  return `${format_trade_asset_label(asset)} [${asset.team_asset_state}] -> ${resulting} (still held ${Math.round(asset.keeptradecut_value_still_held)}, proceeds ${proceeds})`
 }
 
 const report = ({ results, boom_threshold }) => {
@@ -52,8 +68,10 @@ const report = ({ results, boom_threshold }) => {
       trade.net_value_at_trade == null
         ? `unpriced(${trade.unpriced_leg_count})`
         : trade.net_value_at_trade
+    const proceeds =
+      trade.net_value_proceeds == null ? 'withheld' : trade.net_value_proceeds
     log(
-      `trade ${trade.trade_uid} ${date} tid=${trade.tid} net_value_at_trade=${at_trade} net_value_realized=${trade.net_value_realized}`
+      `trade ${trade.trade_uid} ${date} tid=${trade.tid} net_value_at_trade=${at_trade} net_value_still_held=${trade.net_value_still_held} net_value_proceeds=${proceeds}`
     )
     for (const asset of trade.acquired_assets) {
       log(`   in  ${describe_asset(asset)}`)
@@ -66,27 +84,41 @@ const report = ({ results, boom_threshold }) => {
   const graded = results.length
   if (!graded) return
 
-  const wins = results.filter((t) => t.net_value_realized > 0).length
-  const booms = results.filter(
-    (t) => t.net_value_realized >= boom_threshold
+  // Win, boom and bust are graded on the proceeds figure, over the records that
+  // HAVE one. A withheld figure is reported separately rather than folded in as
+  // a zero, which would count every withheld record as a loss.
+  const attributed = results.filter((t) => t.net_value_proceeds != null)
+  const withheld = graded - attributed.length
+  const wins = attributed.filter((t) => t.net_value_proceeds > 0).length
+  const booms = attributed.filter(
+    (t) => t.net_value_proceeds >= boom_threshold
   ).length
-  const busts = results.filter(
-    (t) => t.net_value_realized <= -boom_threshold
+  const busts = attributed.filter(
+    (t) => t.net_value_proceeds <= -boom_threshold
   ).length
   const priced = results.filter((t) => t.net_value_at_trade != null)
-  const total_realized = results.reduce(
-    (sum, t) => sum + t.net_value_realized,
-    0
-  )
-  const percentage_of_graded = (count) => ((100 * count) / graded).toFixed(1)
+  const percentage_of_attributed = (count) =>
+    attributed.length ? ((100 * count) / attributed.length).toFixed(1) : '0.0'
 
   log('---')
   log(`graded ${graded} trade perspectives`)
-  log(`win rate     ${percentage_of_graded(wins)}% (${wins}/${graded})`)
-  log(`boom rate    ${percentage_of_graded(booms)}% (>= +${boom_threshold})`)
-  log(`bust rate    ${percentage_of_graded(busts)}% (<= -${boom_threshold})`)
-  log(`total net_value_realized ${total_realized}`)
-  log(`mean net_value_realized  ${Math.round(total_realized / graded)}`)
+  log(
+    `attributed ${attributed.length}; ${withheld} withheld because an outgoing bundle was unpriced or short of the trade source tables`
+  )
+  log(
+    `win rate     ${percentage_of_attributed(wins)}% (${wins}/${attributed.length})`
+  )
+  log(
+    `boom rate    ${percentage_of_attributed(booms)}% (>= +${boom_threshold})`
+  )
+  log(
+    `bust rate    ${percentage_of_attributed(busts)}% (<= -${boom_threshold})`
+  )
+  // No total and no mean. net_value_proceeds is transitively attributed -- the
+  // same value appears on every card along a conversion chain -- so summing or
+  // averaging it across a team's trades multiplies one outcome by the length of
+  // the chain. Under --tid that triple counts. The lines are deleted rather
+  // than repointed because there is no correct field to repoint them at.
   if (priced.length) {
     const mean_at_trade = Math.round(
       priced.reduce((sum, t) => sum + t.net_value_at_trade, 0) / priced.length

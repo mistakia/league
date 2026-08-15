@@ -298,11 +298,36 @@
 .trade-review-trade__asset-arrow
   color #bdbdbd
 
-.trade-review-trade__lineage-state
+// The value chip beside the headline. Secondary by construction: what a team
+// still holds is detail under what its side of the trade turned into.
+.trade-review-trade__asset-still-held
+  color #9e9e9e
   cursor help
   font-size 12px
   margin-left 6px
 
+// Three values, and traded_onward must NOT read like consumed -- distinguishing
+// "converted this into something else" from "got nothing out of this" is the
+// whole point of the state. Both present as a zero still-held figure.
+//
+// A value rename here produces no error, no failing test and an unstyled chip,
+// so these selectors have to move with the vocabulary they name.
+.trade-review-trade__team-asset-state
+  cursor help
+  font-size 12px
+  margin-left 6px
+
+  &.consumed
+    color #9e9e9e
+
+  &.traded_onward
+    color #1565c0
+
+  &.still_held
+    color #2e7d32
+
+  // Retired vocabulary, read only until the API rename is deployed. Deleted
+  // with the card's compatibility read.
   &.no_longer_held
     color #9e9e9e
 

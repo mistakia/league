@@ -55,6 +55,11 @@ const without_chains = (trade) => ({
  *       Returns one record per team per accepted trade, across all seasons. The
  *       two records for a trade are sign-inverted mirrors of each other.
  *
+ *       Three value figures per asset and per record, each a property of
+ *       something different: `at_trade` belongs to the leg, `still_held` to the
+ *       team and the asset, `proceeds` to the team and the trade. Asset lineage
+ *       and team accounting are different traversals over one graph.
+ *
  *       `net_value_at_trade` is `null` — never `0` — when any leg of the trade
  *       has no market value at the trade date. KeepTradeCut deletes a draft
  *       class once its draft has passed, so pick prices before 2023-09 are
@@ -113,12 +118,29 @@ const without_chains = (trade) => ({
  *           description: >-
  *             Value received minus value given, priced at the trade date. Null
  *             when any leg was unpriced; never 0 for that reason.
- *         net_value_realized:
+ *         net_value_still_held:
  *           type: integer
- *           description: The same comparison priced today.
- *         net_value_change:
+ *           description: >-
+ *             What this team still holds off what it received, minus what the
+ *             counterparty still holds off what this team gave up, priced
+ *             today. An asset either side traded onward counts nothing here.
+ *         net_value_proceeds:
  *           type: integer
  *           nullable: true
+ *           description: >-
+ *             What each side's assets turned into FOR THAT TEAM, netted and
+ *             priced today, following the consideration through every onward
+ *             trade. MUST NOT be summed or averaged across a team's trades:
+ *             the figure is transitively attributed, so the same value
+ *             legitimately appears on every card along a conversion chain and
+ *             adding them multiplies it. Null when the figure is withheld,
+ *             which happens when an outgoing bundle is unpriced or short of the
+ *             trade source tables and the attribution weight is therefore a
+ *             division by an unknown. Never 0 for that reason.
+ *         net_value_proceeds_change:
+ *           type: integer
+ *           nullable: true
+ *           description: Proceeds minus at-trade. Null when either is null.
  *         unpriced_leg_count:
  *           type: integer
  *         realized_points_added_while_held:
@@ -159,19 +181,45 @@ const without_chains = (trade) => ({
  *         pick_draft_overall_position:
  *           type: integer
  *           nullable: true
- *           description: Position across the whole draft, not within its round
+ *           description: >-
+ *             Position across the whole draft, not within its round. Always
+ *             null on the traded asset itself: view_trade_asset_flow does not
+ *             select this column, so only the entries in resulting_assets,
+ *             which are read from the holding rows, carry it.
  *         keeptradecut_value_at_trade:
  *           type: number
  *           nullable: true
- *         current_keeptradecut_value:
+ *           description: What this leg was worth on the day. A property of the leg.
+ *         keeptradecut_value_still_held:
  *           type: number
- *         lineage_state:
- *           type: string
- *           enum: [no_longer_held, held]
  *           description: >-
- *             no_longer_held means every asset descended from this one is
- *             closed, so it is worth nothing to this team today. It presents as
- *             a zero value and must not be rendered as one.
+ *             Today's value of what the RECEIVING team still holds off this
+ *             asset. A property of the team and the asset, not of the asset
+ *             line: holdings that have moved to another team count nothing.
+ *         keeptradecut_value_proceeds:
+ *           type: number
+ *           nullable: true
+ *           description: >-
+ *             What this team's side of the trade turned into for it: what it
+ *             still holds, plus the weighted value of what it received when it
+ *             traded this asset onward, weighted by this asset's share of the
+ *             at-trade value of the whole outgoing bundle. Stops at the team's
+ *             first disposal. Null when withheld — see net_value_proceeds — and
+ *             never 0 for that reason. Must not be summed across a team's
+ *             trades.
+ *         team_asset_state:
+ *           type: string
+ *           enum: [still_held, traded_onward, consumed]
+ *           description: >-
+ *             What the RECEIVING TEAM did with this asset, derived from the
+ *             transformation type of that team's own termination edge.
+ *             traded_onward and consumed both present as a zero still-held
+ *             value and mean opposite things — the first converted the asset
+ *             into the proceeds figure, the second got nothing back — so a
+ *             client must render them distinctly and must not render either as
+ *             a bare zero. traded_onward wins over still_held where a team
+ *             disposed of a line and later reacquired it, because the proceeds
+ *             figure stops at that disposal.
  *         hop_count:
  *           type: integer
  *           description: 0 when the asset never moved again after the trade

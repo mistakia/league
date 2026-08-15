@@ -46,19 +46,31 @@ export const terminated_by_labels = {
   10: 'Still held'
 }
 
-// The two lineage_state values the grading engine emits, spelled out. An asset
-// whose descendants are all closed is worth zero, exactly as an asset that was
-// never worth anything is, so the label is the only thing separating "this team
-// consumed the asset" from "this trade came to nothing".
-export const lineage_state_labels = {
-  no_longer_held: 'No longer held',
-  held: 'Still held'
+// The three team_asset_state values the grading engine emits, spelled out.
+// The axis is what the RECEIVING TEAM did with the asset, not what became of
+// the asset line, so the labels name an act by that team.
+//
+// Note the deliberate absence of the string "Still held" on anything but the
+// still_held value. That phrase was the label of the old two-value vocabulary's
+// "held", which was true of a foreign team's holding too; a reader who
+// remembers it from the old card would read continuity where the meaning
+// narrowed. TERMINATED_BY.STILL_HELD above is a third, per-holding use of the
+// same words and is unrelated to either.
+//
+// test/trade-review.spec.mjs asserts these two maps cover exactly the states
+// the engine emits, so a state added there cannot render as a raw identifier.
+export const team_asset_state_labels = {
+  still_held: 'Still held',
+  traded_onward: 'Traded onward',
+  consumed: 'Consumed'
 }
 
-export const lineage_state_descriptions = {
-  no_longer_held:
-    'Every asset descended from this one has since been released, expired or converted, so it is worth nothing to this team today.',
-  held: 'At least one asset descended from this one is still on a roster.'
+export const team_asset_state_descriptions = {
+  still_held: 'This team still holds an asset descended from this one.',
+  traded_onward:
+    'This team converted this asset into something else in a later trade. What it turned into is the proceeds figure, not zero.',
+  consumed:
+    'This team released, expired or otherwise used up everything descended from this asset, so it is worth nothing to it today.'
 }
 
 const format_lineage_event = (transformation_type) =>

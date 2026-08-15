@@ -9,28 +9,33 @@ import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'
 import format_lineage_event, {
   terminated_by_labels,
-  lineage_state_labels,
-  lineage_state_descriptions
+  team_asset_state_labels,
+  team_asset_state_descriptions
 } from '@libs-shared/format-lineage-event.mjs'
 
 import './trade-review-trade.styl'
 
 const UNPRICED_EXPLANATION =
-  'At least one asset in this trade has no market price on the trade date. KeepTradeCut deletes a draft class once its draft has passed, so pick prices before September 2023 are permanently unrecoverable. A figure computed from one side only would read as an even trade.'
+  'At least one asset in this trade has no market price on the trade date, so a figure computed from one side only would read as an even trade. Some of these are unrecoverable — KeepTradeCut deletes a draft class once its draft has passed — and some are assets it has never published a price for at all.'
+
+const WITHHELD_PROCEEDS_EXPLANATION =
+  'This team traded the asset onward and what it received cannot be attributed: an asset it sent in that trade has no price on the day, so this asset share of the outgoing bundle is undefined. A zero here would read as "got nothing", which is a different claim.'
 
 const AT_TRADE_EXPLANATION =
   'KeepTradeCut value of everything this team received, priced on the day of the trade.'
 
-// Deliberately phrased as the lineage rather than as this team's holdings. The
-// engine sums every still-open holding descended from the traded asset, and it
-// does not filter those to the receiving team -- an asset later traded onward
-// still has an open holding somewhere. Saying "what this team still holds"
-// would claim more than the number supports.
-const TODAY_EXPLANATION =
-  "Today's KeepTradeCut value of every still-open asset descended from what this team received. An asset whose whole line has been released, expired or converted is worth nothing."
+// Says what this team holds, plainly. The wording used to hedge because the
+// number behind it was the asset LINE's value and included holdings this team
+// had traded away; it is now filtered to the receiving team, so the plain
+// statement is the true one.
+const STILL_HELD_EXPLANATION =
+  "Today's KeepTradeCut value of what this team STILL HOLDS off what it received. An asset it traded onward counts nothing here — see Turned into."
+
+const PROCEEDS_EXPLANATION =
+  'What this team side of the trade turned into FOR IT: what it still holds, plus what it received in exchange when it traded these assets onward, weighted by each asset share of the outgoing bundle. Right for this trade and never to be added up across a team trades — the same value appears on every card along a conversion chain.'
 
 const CHANGE_EXPLANATION =
-  'What this side of the trade has gained or lost in market value since the day it was made. Both sides can gain, and both sides can lose — this is not a comparison against the other team.'
+  'What this side of the trade has gained or lost in market value since the day it was made, measured against what it turned into. Both sides can gain, and both sides can lose — this is not a comparison against the other team.'
 
 const PRODUCTION_EXPLANATION =
   'Points above replacement actually scored from what this team received, and from everything those assets became, counted only for the stretches this team held them and including weeks spent on the bench. A week below replacement subtracts. Market value says what an asset is worth; this says what it did.'
@@ -48,6 +53,43 @@ const format_date = (value) => dayjs(value).format('MMM D, YYYY')
 const direction_of = (value) =>
   value == null || !value ? '' : value > 0 ? 'up' : 'down'
 
+// COMPATIBILITY READ ACROSS THE FIELD RENAME. The SPA does not deploy in
+// lockstep with the API -- deploy:all reloads the API before it ships the
+// bundle, and an already-open tab has no expiry -- so this card must render
+// correctly against both the pre-rename and the post-rename API. It reads the
+// new key first and falls back to the retired one, which lies about nothing;
+// the reverse accommodation on the API side is impossible without emitting one
+// quantity under the other's name.
+//
+// This whole block is DELETED as its own step once the rename is deployed and
+// confirmed. Nothing retires it on its own.
+const RETIRED_STATE_LABELS = {
+  held: 'Still held',
+  no_longer_held: 'No longer held'
+}
+
+const asset_still_held = (asset) =>
+  asset.has('keeptradecut_value_still_held')
+    ? asset.get('keeptradecut_value_still_held')
+    : asset.get('current_keeptradecut_value')
+
+// There is no pre-rename equivalent of the proceeds figure. Undefined here
+// means the API has not been renamed yet, and every site below renders the
+// pre-rename shape rather than substituting the asset-line figure for it --
+// that substitution would be the silent swap this rename exists to prevent.
+const asset_proceeds = (asset) =>
+  asset.has('keeptradecut_value_proceeds')
+    ? asset.get('keeptradecut_value_proceeds')
+    : undefined
+
+const asset_state = (asset) =>
+  asset.get('team_asset_state') || asset.get('lineage_state')
+
+const state_label = (state) =>
+  team_asset_state_labels[state] || RETIRED_STATE_LABELS[state] || state
+
+const state_description = (state) => team_asset_state_descriptions[state]
+
 // One side's market value, on the day and now. The at-trade total is withheld
 // whole when any one of its assets is unpriced -- the same rule the engine
 // applies to its own figures, for the same reason: a partial sum reads as a
@@ -57,6 +99,10 @@ const direction_of = (value) =>
 // and on its own the reader has to guess the cause -- which one did: a side
 // holding a marquee player beside a round-6 pick reads as though the PLAYER had
 // no price, because he is the thing the eye lands on.
+//
+// `proceeds` is withheld on its own terms and for a different reason: an
+// unpriced OUTGOING bundle makes the weight a division by an unknown, which is
+// not the same condition as this side carrying an unpriced leg.
 const side_totals = (assets) => {
   const unpriced_assets = assets.filter(
     (asset) => asset.get('keeptradecut_value_at_trade') == null
@@ -67,14 +113,28 @@ const side_totals = (assets) => {
         (total, asset) => total + asset.get('keeptradecut_value_at_trade'),
         0
       )
-  const today = assets.reduce(
-    (total, asset) => total + asset.get('current_keeptradecut_value'),
+  const still_held = assets.reduce(
+    (total, asset) => total + asset_still_held(asset),
     0
   )
+  const has_proceeds = assets.every(
+    (asset) => asset_proceeds(asset) !== undefined
+  )
+  const proceeds =
+    !has_proceeds || assets.some((asset) => asset_proceeds(asset) == null)
+      ? null
+      : assets.reduce((total, asset) => total + asset_proceeds(asset), 0)
+  // The headline figure, and what Change is measured against. Before the
+  // rename there is no proceeds figure at all, so the card falls back to
+  // headlining what the API does emit.
+  const headline = has_proceeds ? proceeds : still_held
   return {
     at_trade,
-    today,
-    change: at_trade == null ? null : today - at_trade,
+    still_held,
+    proceeds,
+    has_proceeds,
+    headline,
+    change: at_trade == null || headline == null ? null : headline - at_trade,
     unpriced_assets
   }
 }
@@ -462,9 +522,11 @@ Chain.propTypes = {
 }
 
 function Asset({ asset, has_chains, league_id, trade_uid }) {
-  const lineage_state = asset.get('lineage_state')
+  const team_asset_state = asset_state(asset)
   const chain = asset.get('chain')
   const keeptradecut_value_at_trade = asset.get('keeptradecut_value_at_trade')
+  const still_held = asset_still_held(asset)
+  const proceeds = asset_proceeds(asset)
 
   return (
     <div className='trade-review-trade__asset'>
@@ -486,14 +548,41 @@ function Asset({ asset, has_chains, league_id, trade_uid }) {
             )}
           </span>
           <span className='trade-review-trade__asset-arrow'>→</span>
-          <span title={TODAY_EXPLANATION}>
-            {format_value(asset.get('current_keeptradecut_value'))}
-          </span>
+          {/* The headline is what the asset turned into for this team. What it
+              still holds off the line sits beside it as secondary detail --
+              they are different quantities and a card that showed only one of
+              them is what conflated them in the first place. */}
+          {proceeds === undefined ? (
+            <span title={STILL_HELD_EXPLANATION}>
+              {format_value(still_held)}
+            </span>
+          ) : (
+            <>
+              <span title={PROCEEDS_EXPLANATION}>
+                {proceeds == null ? (
+                  <span
+                    className='trade-review-trade__unpriced'
+                    title={WITHHELD_PROCEEDS_EXPLANATION}
+                  >
+                    Not attributable
+                  </span>
+                ) : (
+                  format_value(proceeds)
+                )}
+              </span>
+              <span
+                className='trade-review-trade__asset-still-held'
+                title={STILL_HELD_EXPLANATION}
+              >
+                {format_value(still_held)} held
+              </span>
+            </>
+          )}
           <span
-            className={`trade-review-trade__lineage-state ${lineage_state}`}
-            title={lineage_state_descriptions[lineage_state]}
+            className={`trade-review-trade__team-asset-state ${team_asset_state}`}
+            title={state_description(team_asset_state)}
           >
-            {lineage_state_labels[lineage_state] || lineage_state}
+            {state_label(team_asset_state)}
           </span>
         </div>
       </div>
@@ -594,7 +683,14 @@ function SideSummary({
   realized_points_added,
   salary_paid
 }) {
-  const { at_trade, today, change, unpriced_assets } = side_totals(assets)
+  const {
+    at_trade,
+    still_held,
+    proceeds,
+    has_proceeds,
+    change,
+    unpriced_assets
+  } = side_totals(assets)
 
   return (
     <div className='trade-review-trade__side'>
@@ -633,7 +729,26 @@ function SideSummary({
           value={at_trade}
           title={AT_TRADE_EXPLANATION}
         />
-        <ValueStat label='Today' value={today} title={TODAY_EXPLANATION} />
+        {has_proceeds ? (
+          <>
+            <ValueStat
+              label='Turned into'
+              value={proceeds}
+              title={PROCEEDS_EXPLANATION}
+            />
+            <ValueStat
+              label='Still held'
+              value={still_held}
+              title={STILL_HELD_EXPLANATION}
+            />
+          </>
+        ) : (
+          <ValueStat
+            label='Still held'
+            value={still_held}
+            title={STILL_HELD_EXPLANATION}
+          />
+        )}
         <ValueStat
           label='Change'
           value={change}
@@ -687,14 +802,17 @@ function CombinedOutcome({ sides, realized_points_added }) {
   const at_trade = sides.some((side) => side.at_trade == null)
     ? null
     : sides.reduce((total, side) => total + side.at_trade, 0)
-  const today = sides.reduce((total, side) => total + side.today, 0)
-  const change = at_trade == null ? null : today - at_trade
+  const has_headline = sides.every((side) => side.headline != null)
+  const today = has_headline
+    ? sides.reduce((total, side) => total + side.headline, 0)
+    : null
+  const change = at_trade == null || today == null ? null : today - at_trade
 
   return (
     <div className='trade-review-trade__combined' title={COMBINED_EXPLANATION}>
       <span className='trade-review-trade__micro-label'>Both teams</span>
       <span className='trade-review-trade__combined-flow'>
-        {at_trade == null ? (
+        {at_trade == null || today == null ? (
           <span className='trade-review-trade__unpriced'>Not priced</span>
         ) : (
           <>
