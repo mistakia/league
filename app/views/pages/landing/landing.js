@@ -2,22 +2,11 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { NavLink } from 'react-router-dom'
 
-import { DISCORD_URL } from '@core/constants'
 import PageLayout from '@layouts/page'
 
-import {
-  league_documents,
-  league_format,
-  manager_expectations,
-  questionnaire_url
-} from './landing-content'
+import { league_format, league_url, questionnaire_url } from './landing-content'
 
 import './landing.styl'
-
-const contact_url = questionnaire_url || DISCORD_URL
-const contact_label = questionnaire_url
-  ? 'Answer a few questions about your league history'
-  : 'Message me on Discord'
 
 const Section = ({ title, children }) => (
   <section className='landing__section'>
@@ -31,20 +20,20 @@ Section.propTypes = {
   children: PropTypes.node
 }
 
-const CallToAction = () => (
-  <a
-    className='landing__cta'
-    href={contact_url}
-    target='_blank'
-    rel='noopener noreferrer'
-  >
-    {contact_label}
-  </a>
-)
+// Renders nothing until there is a vetting questionnaire to send someone to.
+const CallToAction = () =>
+  questionnaire_url ? (
+    <a
+      className='landing__cta'
+      href={questionnaire_url}
+      target='_blank'
+      rel='noopener noreferrer'
+    >
+      Answer a few questions about your league history
+    </a>
+  ) : null
 
 export default function LandingPage() {
-  const published_documents = league_documents.filter((doc) => doc.url)
-
   const body = (
     <div className='landing'>
       <header className='landing__hero'>
@@ -52,13 +41,13 @@ export default function LandingPage() {
         <p className='landing__lede'>
           I also built the platform it plays on. Everything I would want to
           check before joining a stranger&apos;s league is public here — the
-          rules, the record of every time we changed them, and how the league
-          settles anything decided at random.
+          rules, the record of every time we changed them, and the league
+          itself.
         </p>
         <div className='landing__hero-actions'>
           <CallToAction />
-          <NavLink className='landing__secondary-action' to='/data-views'>
-            Look around the platform first
+          <NavLink className='landing__secondary-action' to={league_url}>
+            Look at the league
           </NavLink>
         </div>
       </header>
@@ -69,6 +58,33 @@ export default function LandingPage() {
             <li key={index}>{item}</li>
           ))}
         </ul>
+        <p>
+          Rosters, standings, transactions and every team&apos;s history are
+          readable without an account, so none of this has to be taken on trust.{' '}
+          <NavLink to={league_url}>Go and look.</NavLink>
+        </p>
+      </Section>
+
+      <Section title='How the season ends'>
+        <p>
+          The postseason is scored rather than bracketed, which is the part
+          worth reading twice. Fourteen weeks of regular season decide six
+          places.
+        </p>
+        <p>
+          The two teams with the best all-play win percentage — how you would
+          have done against every team every week, not just the one you were
+          scheduled against — skip the first round outright. Four more play the
+          wildcard in Week 15: the next two by head-to-head record, then the
+          highest scorers among whoever is left. That round is a single week,
+          and the two highest scoring of those four advance.
+        </p>
+        <p>
+          The championship runs Weeks 16 and 17. Four teams — the two that
+          skipped the wildcard and the two that won through it — and the highest
+          combined score across both weeks is the champion. Nobody is knocked
+          out by a single bad Sunday against one opponent.
+        </p>
       </Section>
 
       <Section title='Why you can check my work'>
@@ -86,13 +102,13 @@ export default function LandingPage() {
           </div>
 
           <div className='landing__trust-item'>
-            <h3>Random draws are committed to before they happen</h3>
+            <h3>Anything decided at random is committed to beforehand</h3>
             <p>
-              Anything the league decides at random — division draws, draft
-              order — is settled against a future Ethereum block. I announce the
-              target block height before that block exists, then derive the
-              result from its finalized hash, so I cannot pick the outcome and
-              anyone can re-check it afterwards.
+              When the league settles something by chance, it is settled against
+              a future Ethereum block. The target block height is announced
+              before that block exists and the result is derived from its
+              finalized hash, so I cannot pick the outcome and anyone can
+              re-check it afterwards.
             </p>
           </div>
 
@@ -112,69 +128,8 @@ export default function LandingPage() {
               Read the source on GitHub
             </a>
           </div>
-
-          <div className='landing__trust-item'>
-            <h3>Team value is computed, not asserted</h3>
-            <p>
-              Roster value comes from public market data on a documented method
-              and is recomputed nightly, back to the league&apos;s first day.
-              That matters if you are taking over an existing roster: you can
-              see what you are inheriting and how it got there.
-            </p>
-          </div>
         </div>
       </Section>
-
-      <Section title='What the platform actually shows'>
-        <figure className='landing__figure'>
-          <img
-            src='/static/images/landing/league-team-value-history.png'
-            alt='Chart of team market value across the league from 2020 to 2026'
-          />
-          <figcaption>
-            Every team&apos;s market value since the league started in 2020,
-            updated nightly.
-          </figcaption>
-        </figure>
-        <figure className='landing__figure'>
-          <img
-            src='/static/images/landing/league-constitution.png'
-            alt='The opening articles of the Genesis League constitution as served by the platform'
-          />
-          <figcaption>
-            The constitution, served by the platform rather than sitting in
-            someone&apos;s document folder.
-          </figcaption>
-        </figure>
-      </Section>
-
-      <Section title='What I ask of a manager'>
-        <ul className='landing__list'>
-          {manager_expectations.map((item, index) => (
-            <li key={index}>{item}</li>
-          ))}
-        </ul>
-        <p className='landing__note'>
-          There are annual dues and a refundable deposit sized to the roster you
-          take on, so a rebuilding team costs less to enter than a contender. I
-          would rather work through that in a conversation than post numbers at
-          a stranger, so nothing about money happens until we have both decided
-          we are interested.
-        </p>
-      </Section>
-
-      {published_documents.length > 0 && (
-        <Section title='Read for yourself'>
-          <ul className='landing__documents'>
-            {published_documents.map((doc) => (
-              <li key={doc.title}>
-                <NavLink to={doc.url}>{doc.title}</NavLink>
-                <span>{doc.description}</span>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )}
 
       <footer className='landing__footer'>
         <p>
