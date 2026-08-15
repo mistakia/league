@@ -208,6 +208,36 @@ const main = async () => {
           ? `import-nfl-games-nfl --current shortfall: 0 games processed AND 0 games skipped — no current-week rows AND API returned no games`
           : null
       )
+    } else if (argv.full_season) {
+      // Preseason cron entry-point. --current cannot serve PRE: it targets
+      // current_season.nfl_seas_week, which is derived by whole-week diff from
+      // regular_season_start and runs a week ahead of the games being played --
+      // on 2026-08-15 it read 2 while PRE week 1 games were in progress, so
+      // --current would refresh an unplayed week and never mark week 1 FINAL.
+      // Sweeping every week of the season type is week-agnostic.
+      const year = argv.year || current_season.year
+      const seas_type = argv.seas_type || current_season.nfl_seas_type
+
+      const weeks = await db('nfl_games')
+        .select('week')
+        .where({ season_year: year, season_type: seas_type })
+        .groupBy('week')
+        .orderBy('week', 'asc')
+
+      let games_processed = 0
+      let games_skipped = 0
+      for (const { week } of weeks) {
+        const result = await run({ year, week, seas_type, ignore_cache })
+        games_processed += result.games_processed || 0
+        games_skipped += result.games_skipped || 0
+        await wait(3000)
+      }
+
+      throw_if_shortfall(
+        games_processed === 0 && games_skipped === 0
+          ? `import-nfl-games-nfl --full_season shortfall: 0 games processed AND 0 games skipped across ${weeks.length} ${seas_type} week(s) in ${year}`
+          : null
+      )
     } else if (argv.year && argv.all) {
       const year = argv.year
 

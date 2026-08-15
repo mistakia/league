@@ -11,6 +11,17 @@
 ## Update NFL Schedule At 03:00 every day (Off Season)
 0 3 * 5-8 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-ngs.mjs >> /var/log/league/import-nfl-games-ngs.log 2>&1
 
+## Preseason status and scores (July, August)
+## --current is unusable for PRE: it targets current_season.nfl_seas_week, which
+## runs a week ahead of the games being played, so it would refresh an unplayed
+## week and leave the week in progress at status=null / 0-0 forever.
+## --full_season sweeps every PRE week instead.
+## Every 15 minutes from 1pm-midnight ET on game days (Thu, Fri, Sat, Sun)
+*/15 13-23 * 7,8 4,5,6,0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --full_season --seas_type PRE >> /var/log/league/league-import-nfl-games-preseason.log 2>&1
+
+## Post-game catch-up at 00:30 the morning after each preseason game day
+30 0 * 7,8,9 5,6,0,1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --full_season --seas_type PRE >> /var/log/league/league-import-nfl-games-preseason.log 2>&1
+
 ## At every 15th minute past every hour from 19 through 20 on Monday in January, February, and every month from September through December.
 # */15 19-20 * 1,2,9-12 1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force >> /var/log/league/league-import-nfl-games-nfl.log 2>&1
 
@@ -19,6 +30,33 @@
 
 ## At every 15th minute on Sunday in January, February, and every month from September through December.
 # */15 * * 1,2,9-12 7 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-nfl-games-nfl.mjs --current --force >> /var/log/league/league-import-nfl-games-nfl.log 2>&1
+
+################################### PRESEASON PLAY IMPORTING ########################################
+## Preseason has no live worker. jobs/import-live-plays-worker.mjs gates on
+## nfl_seas_type === 'REG' by design, so cron carries PRE entirely.
+##
+## --full_season sweeps every PRE week rather than trusting
+## current_season.nfl_seas_week, which is a whole-week diff from
+## regular_season_start and names the week AFTER the one being played (on
+## 2026-08-15 it read 2 while PRE week 1 games were on). Already-final games are
+## skipped, so a full sweep of ~49 games is cheap.
+##
+## Preseason games run Thu-Sun, 13:00-23:30 ET, from the Hall of Fame game in
+## late July through the final preseason week in late August.
+
+## Offset from the games pass above (:00/:15/:30/:45) on purpose: the plays
+## importer SKIPS any game with a null detail_v1_game_id, and that id is written
+## by import-nfl-games-nfl.mjs. Games must land first or every game is skipped.
+## Every 10 minutes from 1pm-midnight ET on game days (Thu, Fri, Sat, Sun)
+7-57/10 13-23 * 7,8 4,5,6,0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --full_season --seas_type PRE --ignore_cache >> /var/log/league/import-plays-preseason.log 2>&1
+
+## Post-game finalization at 00:45 the morning after each preseason game day --
+## catches games that ran past the last in-window pass (15 min after the 00:30
+## games catch-up, same ordering constraint)
+45 0 * 7,8,9 5,6,0,1 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --full_season --seas_type PRE --ignore_cache >> /var/log/league/import-plays-preseason.log 2>&1
+
+## Daily 05:00 force pass for late stat corrections (July, August)
+0 5 * 7,8 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-plays-nfl-v1.mjs --full_season --seas_type PRE --ignore_cache --final >> /var/log/league/import-plays-preseason.log 2>&1
 
 ################################### PLAYOFF PLAY IMPORTING ########################################
 ## Import plays and finalize completed playoff games

@@ -36,6 +36,12 @@ const initialize_cli = () => {
       default: false,
       describe: 'Skip per-game finalization after END_GAME detection'
     })
+    .option('full_season', {
+      type: 'boolean',
+      default: false,
+      describe:
+        'Sweep every week of --seas_type in the current (or --year) season, finalizing as it goes'
+    })
     .parse()
 }
 
@@ -273,7 +279,11 @@ const importPlaysForWeek = async ({
   dry_run = false,
   collector = null
 } = {}) => {
-  week = week || current_season.last_week_with_stats
+  // `??`, not `||`: PRE week 0 is a real week (the Hall of Fame game) and is
+  // falsy, so `||` silently rewrote an explicit week 0 to
+  // last_week_with_stats -- the HOF game could never be imported through the
+  // week loop, and the pass was wasted re-importing another week instead.
+  week = week ?? current_season.last_week_with_stats
   const is_current_week =
     !force_update &&
     year === current_season.year &&
@@ -642,10 +652,22 @@ const importPlaysForYear = async ({
     token = await nfl.get_session_token_v3()
   }
 
+  // Aggregated so a caller (the preseason cron sweep) can run the same
+  // plays_processed shortfall oracle the single-week path runs. Without a
+  // returned result main() skips the oracle entirely and a wholesale failure
+  // -- an expired session token returning empty bodies -- exits 0 silently.
+  const totals = {
+    all_games_skipped: true,
+    plays_processed: 0,
+    plays_updated: 0,
+    games_processed: 0,
+    missing_gsisids: 0
+  }
+
   log(`processing plays for ${weeks.length} weeks in ${year} (${seas_type})`)
   for (const { week } of weeks) {
     log(`loading plays for week: ${week} (${seas_type})`)
-    await importPlaysForWeek({
+    const week_result = await importPlaysForWeek({
       year,
       week,
       seas_type,
@@ -655,8 +677,18 @@ const importPlaysForYear = async ({
       token,
       dry_run
     })
+    if (week_result) {
+      totals.all_games_skipped =
+        totals.all_games_skipped && week_result.all_games_skipped
+      totals.plays_processed += week_result.plays_processed
+      totals.plays_updated += week_result.plays_updated
+      totals.games_processed += week_result.games_processed
+      totals.missing_gsisids += week_result.missing_gsisids
+    }
     await wait(4000)
   }
+
+  return totals
 }
 
 const importAllPlays = async ({
@@ -735,7 +767,24 @@ const main = async () => {
     const dry_run = argv.dry
 
     let result
-    if (argv.all) {
+    if (argv.full_season) {
+      // Sweep every week of one season type in the current (or given) year,
+      // with finalization ON. This is the preseason cron shape: PRE has no
+      // live worker (import-live-plays-worker gates on REG by design) and
+      // current_season.nfl_seas_week cannot be trusted to name the week whose
+      // games are in progress -- on 2026-08-15 it read 2 while PRE week 1
+      // games were still being played -- so the default-week path silently
+      // imports an unplayed week. Sweeping all weeks is week-agnostic, and
+      // already-final games are skipped, so the cost is one cheap pass.
+      result = await importPlaysForYear({
+        year: argv.year || current_season.year,
+        seas_type: argv.seas_type,
+        ignore_cache: argv.ignore_cache,
+        force_update: argv.final,
+        skip_finalization: argv.skip_finalization,
+        dry_run
+      })
+    } else if (argv.all) {
       // Backfill mode: skip finalization by default
       await importAllPlays({
         start: argv.start,
