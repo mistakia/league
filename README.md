@@ -16,7 +16,7 @@ user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349
 
 # xo.football
 
-[xo.football](https://xo.football) is an open-source platform for managing fantasy football leagues, exploring analytics, and participating in betting markets. We're actively developing it and seeking contributors for development and testing. Interested? Join us on [Discord](https://discord.com/invite/azSX97Qj9Z).
+[xo.football](https://xo.football) is an open-source platform for managing fantasy football leagues, exploring analytics, and participating in betting markets. We're actively developing it and seeking contributors for development and testing. Interested? [Open an issue](https://github.com/mistakia/league/issues) or send a pull request.
 
 ## Features
 

@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { NavLink, useLocation } from 'react-router-dom'
 
-import { DISCORD_URL } from '@core/constants'
 import TeamName from '@components/team-name'
 import LeagueSchedule from '@components/league-schedule'
 
@@ -237,9 +236,6 @@ export default function AppMenu({
                   rel='noopener noreferrer'
                 >
                   GitHub
-                </a>
-                <a href={DISCORD_URL} target='_blank' rel='noopener noreferrer'>
-                  Discord
                 </a>
                 <a
                   href='https://github.com/users/mistakia/projects/3/views/1'

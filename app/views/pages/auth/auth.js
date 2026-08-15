@@ -115,7 +115,7 @@ const AuthPage = ({
                 type='text'
                 error={Boolean(auth_error)}
                 variant='outlined'
-                helperText='Available for contributors and testers. Request via discord'
+                helperText='Available for contributors and testers'
                 required
               />
               <TextField
