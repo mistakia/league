@@ -71,7 +71,17 @@ NetValue.propTypes = {
 
 function AssetLabel({ asset }) {
   const player_id = asset.get('player_id')
-  if (player_id) return <PlayerName pid={player_id} hidePosition />
+  if (player_id) {
+    return (
+      // The player name opens the selected-player view, and the card it sits in
+      // toggles the whole trade on click. The stop keeps the two from firing
+      // together, so selecting a player never also expands or collapses the
+      // trade. A pick has no player view, so it is left to toggle the card.
+      <span onClick={(event) => event.stopPropagation()}>
+        <PlayerName pid={player_id} hidePosition />
+      </span>
+    )
+  }
   return (
     <span className='trade-review-trade__pick'>
       {format_trade_asset_label({
