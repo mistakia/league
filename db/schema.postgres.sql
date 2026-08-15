@@ -6600,6 +6600,13 @@ CREATE TABLE public.nfl_plays_passer (
 
 
 --
+-- Name: TABLE nfl_plays_passer; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.nfl_plays_passer IS 'Per-player play-by-play detail for the passer on a play, keyed (esbid, play_id, season_year, gsis_it_player_id). RETAINED DELIBERATELY: this is per-player play-by-play data to be expanded once the data pipeline supports it. It has no analytics consumer today and that is expected -- do not read the absence of readers, or sparse season coverage, as evidence the table is abandoned. See db/adhoc/2026-08-15-comment-play-participant-tables.sql.';
+
+
+--
 -- Name: nfl_plays_player; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -6656,6 +6663,13 @@ CREATE TABLE public.nfl_plays_player (
 
 
 --
+-- Name: TABLE nfl_plays_player; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.nfl_plays_player IS 'Per-player play-by-play participation detail covering every participant rather than a single named role, keyed (esbid, play_id, season_year, gsis_it_player_id). RETAINED DELIBERATELY: this is per-player play-by-play data to be expanded once the data pipeline supports it. It has no analytics consumer today and that is expected -- do not read the absence of readers, or sparse season coverage, as evidence the table is abandoned. Written by scripts/process-nfl-plays-player.mjs. See db/adhoc/2026-08-15-comment-play-participant-tables.sql.';
+
+
+--
 -- Name: nfl_plays_receiver; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -6693,6 +6707,13 @@ CREATE TABLE public.nfl_plays_receiver (
 
 
 --
+-- Name: TABLE nfl_plays_receiver; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.nfl_plays_receiver IS 'Per-player play-by-play detail for a targeted or routed receiver, keyed (esbid, play_id, gsis_player_id). RETAINED DELIBERATELY: this is per-player play-by-play data to be expanded once the data pipeline supports it. It is the only participant table with a live analytics consumer -- the player_routes data-view column and its rate-type denominator CTE count route rows here, which is the one route source that can serve sub-game periods (half/quarter/drive/series). Season-grain route totals belong to pff_player_seasonlogs.routes and game-grain to player_receiving_gamelogs.routes; this table is not their substitute and they are not its. See db/adhoc/2026-08-15-comment-play-participant-tables.sql.';
+
+
+--
 -- Name: nfl_plays_rusher; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -6725,6 +6746,13 @@ CREATE TABLE public.nfl_plays_rusher (
     yards_gained_after_close_in numeric(10,4),
     yards_gained_before_close_in numeric(10,4)
 );
+
+
+--
+-- Name: TABLE nfl_plays_rusher; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.nfl_plays_rusher IS 'Per-player play-by-play detail for the ball carrier on a rush, keyed (esbid, play_id, season_year, gsis_it_player_id). RETAINED DELIBERATELY: this is per-player play-by-play data to be expanded once the data pipeline supports it. It has no analytics consumer today and that is expected -- do not read the absence of readers, or sparse season coverage, as evidence the table is abandoned. See db/adhoc/2026-08-15-comment-play-participant-tables.sql.';
 
 
 --
