@@ -44,8 +44,17 @@ const HOLDING = {
   DRAFTED_PLAYER: 105,
   // Only seeded by the per-team production case, which needs a holding that
   // belongs to neither side of the trade.
-  MOVED_ON_PLAYER: 106
+  MOVED_ON_PLAYER: 106,
+  // Only seeded by the zero-priced case, which needs a trade whose every leg
+  // is priced and one of whose legs is priced at exactly 0.
+  ZERO_PRICED_ORIGIN: 201,
+  ZERO_PRICED_RECEIVED: 202,
+  PRICED_ORIGIN: 203,
+  PRICED_RECEIVED: 204
 }
+
+const ZERO_PRICED_TRADE_UID = 2
+const ZERO_PRICED_COUNTERPARTY_VALUE = 3000
 
 const TRADED_PLAYER_VALUE_AT_TRADE = 5000
 const DRAFTED_PLAYER_VALUE_NOW = 7000
@@ -232,6 +241,120 @@ const seed_trade = async () => {
   return { traded_player, drafted_player }
 }
 
+// A second trade whose every leg IS priced, one of them at exactly 0. A stored
+// 0 is a genuine quote for a player off the KeepTradeCut board on the trade
+// date, so this trade's at-trade figure must be a number.
+//
+// Seeded per case rather than in seed_trade: the shared fixture's record count
+// is asserted elsewhere, and this trade would change it.
+const seed_zero_priced_trade = async ({ exclude_pids }) => {
+  const zero_priced_player = await selectPlayer({
+    rookie: false,
+    exclude_pids
+  })
+  const counterparty_player = await selectPlayer({
+    rookie: false,
+    exclude_pids: [...exclude_pids, zero_priced_player.pid]
+  })
+
+  const season_row = await knex('seasons')
+    .where({ lid: LID, season_year: current_season.year })
+    .first()
+  const league_format_id = season_row.league_format_id
+
+  const now = Date.now()
+  const day = 24 * 60 * 60 * 1000
+  const acquired_at = new Date(now - 200 * day)
+  const traded_at = new Date(now - 150 * day)
+
+  await knex('roster_asset_holding').insert([
+    {
+      holding_id: HOLDING.ZERO_PRICED_ORIGIN,
+      lid: LID,
+      tid: PROPOSE_TID,
+      asset_type: ASSET_TYPE.PLAYER,
+      player_id: zero_priced_player.pid,
+      period_start: acquired_at,
+      period_end: traded_at,
+      terminated_by: TERMINATED_BY.TRADE,
+      keeptradecut_value_at_termination: 0,
+      league_format_id
+    },
+    {
+      holding_id: HOLDING.ZERO_PRICED_RECEIVED,
+      lid: LID,
+      tid: ACCEPT_TID,
+      asset_type: ASSET_TYPE.PLAYER,
+      player_id: zero_priced_player.pid,
+      period_start: traded_at,
+      period_end: null,
+      terminated_by: TERMINATED_BY.STILL_HELD,
+      league_format_id
+    },
+    {
+      holding_id: HOLDING.PRICED_ORIGIN,
+      lid: LID,
+      tid: ACCEPT_TID,
+      asset_type: ASSET_TYPE.PLAYER,
+      player_id: counterparty_player.pid,
+      period_start: acquired_at,
+      period_end: traded_at,
+      terminated_by: TERMINATED_BY.TRADE,
+      keeptradecut_value_at_termination: ZERO_PRICED_COUNTERPARTY_VALUE,
+      league_format_id
+    },
+    {
+      holding_id: HOLDING.PRICED_RECEIVED,
+      lid: LID,
+      tid: PROPOSE_TID,
+      asset_type: ASSET_TYPE.PLAYER,
+      player_id: counterparty_player.pid,
+      period_start: traded_at,
+      period_end: null,
+      terminated_by: TERMINATED_BY.STILL_HELD,
+      league_format_id
+    }
+  ])
+
+  await knex('roster_asset_transformation').insert([
+    {
+      transformation_id: knex.raw('gen_random_uuid()'),
+      lid: LID,
+      transformation_type: TRANSFORMATION_TYPE.TRADE,
+      occurred_at: traded_at,
+      source_holding_id: HOLDING.ZERO_PRICED_ORIGIN,
+      target_holding_id: HOLDING.ZERO_PRICED_RECEIVED,
+      source_share: 1.0,
+      target_share: 1.0,
+      trade_uid: ZERO_PRICED_TRADE_UID
+    },
+    {
+      transformation_id: knex.raw('gen_random_uuid()'),
+      lid: LID,
+      transformation_type: TRANSFORMATION_TYPE.TRADE,
+      occurred_at: traded_at,
+      source_holding_id: HOLDING.PRICED_ORIGIN,
+      target_holding_id: HOLDING.PRICED_RECEIVED,
+      source_share: 1.0,
+      target_share: 1.0,
+      trade_uid: ZERO_PRICED_TRADE_UID
+    }
+  ])
+
+  await knex('trades').insert({
+    uid: ZERO_PRICED_TRADE_UID,
+    propose_tid: PROPOSE_TID,
+    accept_tid: ACCEPT_TID,
+    lid: LID,
+    userid: 1,
+    season_year: current_season.year,
+    offered: new Date(traded_at.getTime() - 3600 * 1000),
+    accepted: traded_at
+  })
+
+  return { zero_priced_player, counterparty_player }
+}
+
 describe('LIBS SERVER trade-review', function () {
   let traded_player
   let drafted_player
@@ -355,6 +478,49 @@ describe('LIBS SERVER trade-review', function () {
         expect(record.net_value_at_trade).to.be.a('number')
       }
     }
+  })
+
+  // The truthiness test and the null check differ by one character and read
+  // alike, so nothing but a leg priced at exactly 0 can tell them apart.
+  it('prices a leg quoted at exactly zero rather than counting it unpriced', async () => {
+    const { zero_priced_player } = await seed_zero_priced_trade({
+      exclude_pids: [traded_player.pid, drafted_player.pid]
+    })
+
+    const zero_legs = await knex('view_trade_asset_flow')
+      .where({ lid: LID, trade_uid: ZERO_PRICED_TRADE_UID })
+      .select('keeptradecut_value_at_trade')
+    expect(
+      zero_legs.some(
+        (leg) =>
+          leg.keeptradecut_value_at_trade != null &&
+          Number(leg.keeptradecut_value_at_trade) === 0
+      )
+    ).to.equal(
+      true,
+      'the fixture has no leg priced at exactly 0, so this case proves nothing'
+    )
+
+    const results = await grade_trades({
+      lid: LID,
+      trade_uid: ZERO_PRICED_TRADE_UID
+    })
+    expect(results.length).to.equal(2)
+
+    for (const record of results) {
+      expect(record.unpriced_leg_count).to.equal(
+        0,
+        'a leg quoted at exactly 0 was counted as unpriced'
+      )
+      expect(record.net_value_at_trade).to.be.a('number')
+    }
+
+    const proposer = results.find((record) => record.tid === PROPOSE_TID)
+    const sent_zero = proposer.sent_assets.find(
+      (asset) => asset.player_id === zero_priced_player.pid
+    )
+    expect(sent_zero.keeptradecut_value_at_trade).to.equal(0)
+    expect(proposer.net_value_at_trade).to.equal(ZERO_PRICED_COUNTERPARTY_VALUE)
   })
 
   // Neither map may be short a value: an unlabelled transformation renders as

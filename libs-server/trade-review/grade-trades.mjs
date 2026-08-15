@@ -350,9 +350,14 @@ const grade_trades = async ({
     return {
       ...asset_identity(leg),
       origin_holding_id: leg.target_holding_id,
-      keeptradecut_value_at_trade: leg.keeptradecut_value_at_trade
-        ? Number(leg.keeptradecut_value_at_trade)
-        : null,
+      // An explicit null check, not a truthiness test: a stored 0 is a real
+      // quote for a player off the KeepTradeCut board on the trade date, and
+      // treating it as unpriced withholds the whole trade's at-trade figure
+      // and change over complete data.
+      keeptradecut_value_at_trade:
+        leg.keeptradecut_value_at_trade == null
+          ? null
+          : Number(leg.keeptradecut_value_at_trade),
       current_keeptradecut_value: terminals.reduce(
         (sum, terminal_row) => sum + terminal_value(terminal_row),
         0
