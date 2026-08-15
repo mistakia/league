@@ -4394,8 +4394,46 @@ CREATE TABLE public.league_team_daily_values (
     date date NOT NULL,
     observed_at timestamp with time zone NOT NULL,
     ktc_value integer,
-    ktc_share numeric(6,5)
+    ktc_share numeric(6,5),
+    pick_value integer,
+    total_value integer,
+    total_share numeric(6,5)
 );
+
+
+--
+-- Name: COLUMN league_team_daily_values.ktc_value; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_team_daily_values.ktc_value IS 'Sum of the keeptradecut value of the team''s PLAYERS at the end of this date. Excludes draft picks; see pick_value.';
+
+
+--
+-- Name: COLUMN league_team_daily_values.ktc_share; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_team_daily_values.ktc_share IS 'This team''s share of the day''s player-only total. Excludes draft picks; see total_share.';
+
+
+--
+-- Name: COLUMN league_team_daily_values.pick_value; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_team_daily_values.pick_value IS 'Sum of the keeptradecut value of the draft picks the team holds at the end of this date. Ownership comes from roster_asset_holding; rounds 5 and beyond have no keeptradecut series and contribute zero.';
+
+
+--
+-- Name: COLUMN league_team_daily_values.total_value; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_team_daily_values.total_value IS 'ktc_value + pick_value: the team''s whole dynasty trade value for this date.';
+
+
+--
+-- Name: COLUMN league_team_daily_values.total_share; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_team_daily_values.total_share IS 'This team''s share of the day''s total_value across the league. The Article XXII deposit divisor.';
 
 
 --

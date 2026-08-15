@@ -14,6 +14,7 @@ import {
   throw_if_shortfall
 } from '#libs-server'
 import { derive_league_format_is_superflex } from '#libs-server/derive-league-format-is-superflex.mjs'
+import { build_pick_holding_value_index } from '#libs-server/league-pick-holding-values.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -130,17 +131,26 @@ const build_day_inserts = ({
   lid,
   teams_index,
   keeptradecut_index,
+  pick_holding_value_index,
   date,
   observed_at
 }) => {
   const day_inserts = []
   let day_ktc_total = 0
+  let day_total_value = 0
   let roster_player_count = 0
   let valued_player_count = 0
+  let held_pick_count = 0
+  let valued_pick_count = 0
+
+  // Pick ownership comes from the roster-asset lineage rather than from the
+  // transaction replay below, which sees only the trade legs and so would know
+  // nothing about a pick a team has held since it was endowed.
+  const pick_values_by_team_id = pick_holding_value_index.get_team_pick_values({
+    date
+  })
 
   for (const team of Object.values(teams_index)) {
-    // Picks are tracked on the team index but keeptradecut pick valuations are
-    // not imported, so they contribute nothing to the total yet.
     let team_ktc_value = 0
     for (const pid of Object.keys(team.players)) {
       roster_player_count += 1
@@ -155,13 +165,26 @@ const build_day_inserts = ({
       team_ktc_value += ktc_value
     }
 
+    // A team absent from the map holds no picks that day, which is an ordinary
+    // state for a team that has traded them all away.
+    const team_picks = pick_values_by_team_id.get(team.uid)
+    const team_pick_value = team_picks ? team_picks.pick_value : 0
+    if (team_picks) {
+      held_pick_count += team_picks.held_pick_count
+      valued_pick_count += team_picks.valued_pick_count
+    }
+
+    const team_total_value = team_ktc_value + team_pick_value
     day_ktc_total += team_ktc_value
+    day_total_value += team_total_value
     day_inserts.push({
       lid,
       tid: team.uid,
       date,
       observed_at,
-      ktc_value: team_ktc_value
+      ktc_value: team_ktc_value,
+      pick_value: team_pick_value,
+      total_value: team_total_value
     })
   }
 
@@ -169,19 +192,30 @@ const build_day_inserts = ({
     date,
     roster_player_count,
     valued_player_count,
-    day_ktc_total
+    held_pick_count,
+    valued_pick_count,
+    day_ktc_total,
+    day_total_value
   }
 
-  // Every team sits at zero, so there is no denominator and no share can be
-  // computed. Measured on league 1 this is the 2020 league-inception window,
-  // where rosters were still empty; the other way to reach it is a keeptradecut
-  // import that produced nothing, which the coverage assertion below reports.
-  if (day_ktc_total === 0) {
+  // Every team sits at zero on both halves, so there is no denominator and no
+  // share can be computed. Measured on league 1 this is the 2020
+  // league-inception window, where rosters were still empty; the other way to
+  // reach it is a keeptradecut import that produced nothing, which the coverage
+  // assertion below reports.
+  if (day_total_value === 0) {
     return { day_inserts: [], coverage }
   }
 
   for (const insert of day_inserts) {
-    insert.ktc_share = insert.ktc_value / day_ktc_total
+    // The two shares have different denominators on purpose. ktc_share keeps
+    // its existing player-only meaning, which the SPA's team-value chart reads;
+    // total_share is the one that prices a pick-rich team correctly. A day can
+    // carry pick value before any player is ranked, and dividing by a zero
+    // player total would write NaN into every row.
+    insert.ktc_share =
+      day_ktc_total === 0 ? null : insert.ktc_value / day_ktc_total
+    insert.total_share = insert.total_value / day_total_value
   }
 
   return { day_inserts, coverage }
@@ -197,6 +231,12 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   // than taking one. Latent so far only because lid 1 is currently the sole
   // such league; 33 of the 116 leagues carrying seasons rows are single-QB.
   const is_superflex = await derive_league_format_is_superflex({ lid })
+
+  log('building pick holding value index')
+  const pick_holding_value_index = await build_pick_holding_value_index({
+    lid,
+    is_superflex
+  })
 
   const teams_index = {}
   const trades = await get_trades({ lid })
@@ -248,6 +288,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
       lid,
       teams_index,
       keeptradecut_index,
+      pick_holding_value_index,
       date,
       observed_at
     })
@@ -287,8 +328,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
 
         teams_index[team.uid] = {
           ...team,
-          players: {},
-          picks: {}
+          players: {}
         }
       }
 
@@ -397,30 +437,11 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
         }).players[player.pid] = true
       }
 
-      // process picks
-      for (const pick of trade.picks) {
-        const old_team_id = pick.tid
-        const new_team_id =
-          trade.propose_tid === old_team_id
-            ? trade.accept_tid
-            : trade.propose_tid
-
-        // remove pick from old_team_id
-        delete get_team({
-          teams_index,
-          tid: old_team_id,
-          transaction,
-          site: 'trade pick origin'
-        }).picks[pick.pickid]
-
-        // add pick to new_team_id
-        get_team({
-          teams_index,
-          tid: new_team_id,
-          transaction,
-          site: 'trade pick destination'
-        }).picks[pick.pickid] = true
-      }
+      // Traded picks are deliberately not applied here. This replay saw only
+      // the trade legs, never a pick's endowment or its conversion at the
+      // draft, so the index it built held every pick a team ever acquired and
+      // none it started with. Pick ownership is read from roster_asset_holding
+      // in build_day_inserts instead, which walks all four.
 
       processed_trades_index[trade.uid] = true
     }
@@ -504,6 +525,31 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   log(
     `keeptradecut coverage: ${covered_days.length} days with rosters, ${partial_days.length} partial, ${empty_days.length} with no valued player`
   )
+
+  // Pick coverage is reported rather than asserted. Rounds 5 and beyond are
+  // outside keeptradecut's published series by construction, so a held-equals-
+  // valued floor would fail forever on a league that awards them -- league 1
+  // holds 25 such picks today. What the numbers do surface is the failure this
+  // whole path is exposed to: a league whose lineage has never been generated
+  // reports every team as holding nothing, which is indistinguishable from a
+  // league that genuinely holds no picks unless the two are separated.
+  const days_holding_picks = day_coverage.filter(
+    (day) => day.held_pick_count > 0
+  )
+  log(
+    `pick coverage: ${pick_holding_value_index.holding_count} lineage pick holdings, ${days_holding_picks.length} of ${day_coverage.length} days with a pick held`
+  )
+
+  if (!pick_holding_value_index.holding_count) {
+    const [{ count: draft_pick_count }] = await db('draft')
+      .where({ lid })
+      .count()
+    if (Number(draft_pick_count) > 0) {
+      shortfalls.push(
+        `no roster_asset_holding pick rows for lid=${lid} while draft holds ${draft_pick_count} picks: every team's pick_value is zero. Run scripts/generate-roster-asset-lineage.mjs --lid ${lid}`
+      )
+    }
+  }
 
   const today_day_number = to_day_number(dayjs().format('YYYY-MM-DD'))
   const low_coverage_days = covered_days.filter(
