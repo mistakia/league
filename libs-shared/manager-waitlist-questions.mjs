@@ -57,9 +57,9 @@ export const commitment_terms = [
 // deliberate omission — the league is filling a seat, and every item below is
 // about engagement rather than temperament.
 export const what_we_look_for = [
-  'Someone who is actually around. The league moves most in the months when nothing is on television, and the people who enjoy it are the ones who are there for that part.',
-  'Someone who likes the machinery. Contracts, the cap, restricted free agency, a constitution with 42 amendments — if that reads as the fun part rather than as homework, you will fit here.',
-  'Someone competitive who is good at this. A league is only as interesting as its hardest matchup, and we would rather lose to someone sharp than beat someone who stopped paying attention.',
+  'Someone who is actually around. The league moves most in the months when nothing is on television.',
+  'Someone who likes the machinery. Contracts, the cap, restricted free agency, a constitution with 42 amendments, verifiable draws, a platform built for this league and nothing else — if all of that reads as the fun part rather than as homework, you will fit here.',
+  'Someone competitive who is good at this. A league is only as interesting as its hardest matchup, and there is nothing better than someone who runs their mouth and then backs it up.',
   'Someone who trades and talks.'
 ]
 
