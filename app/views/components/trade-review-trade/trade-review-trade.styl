@@ -1,3 +1,6 @@
+// One accepted trade. The collapsed card in the list is a scoreboard — two
+// sides, what each received, and what that has come to — and it opens the
+// trade's own page, where the same scoreboard sits above the per-asset lineage.
 .trade-review-trade
   background #fff
   border 1px solid #e0e0e0
@@ -5,48 +8,90 @@
   margin-bottom 12px
   overflow hidden
 
-.trade-review-trade__summary
-  cursor pointer
-  padding 12px 16px
+  &.interactive .trade-review-trade__summary
+    cursor pointer
 
-  &:hover
-    background #fafafa
+    &:hover
+      background #fafafa
+
+    &:hover .trade-review-trade__open
+      color #1565c0
+
+    &:focus-visible
+      outline 2px solid #1565c0
+      outline-offset -2px
+
+.trade-review-trade__summary
+  padding 14px 16px
+
+// The uppercase mono micro-label the rest of the app uses for a field caption.
+// It has to read as a caption at a glance so the value beside it does not have
+// to be qualified in prose.
+.trade-review-trade__micro-label
+  color rgba(0, 0, 0, 0.5)
+  font-family 'IBM Plex Mono', monospace
+  font-size 10px
+  font-weight 800
+  letter-spacing 0.16em
+  text-transform uppercase
 
 .trade-review-trade__summary-top
   align-items center
   display flex
-  justify-content space-between
-  margin-bottom 8px
-
-.trade-review-trade__date
-  color #616161
-  font-size 12px
-
-.trade-review-trade__sides
-  align-items stretch
-  display flex
-  flex-wrap wrap
-  gap 8px 16px
+  gap 10px
   margin-bottom 10px
 
+.trade-review-trade__date
+  color $textColor
+  font-size 13px
+  font-weight 600
+
+// The shape of the deal — "2 for 1" — which is how an owner recalls a trade
+// before he recalls any of the names in it.
+.trade-review-trade__shape
+  background #f2f2f2
+  border-radius 10px
+  color #616161
+  font-size 11px
+  font-variant-numeric tabular-nums
+  padding 1px 8px
+
+.trade-review-trade__open
+  align-items center
+  color #757575
+  display flex
+  font-size 12px
+  gap 2px
+  margin-left auto
+
+  svg
+    font-size 18px
+
+.trade-review-trade__sides
+  display flex
+  flex-wrap wrap
+  gap 12px
+
 .trade-review-trade__side
-  flex 1 1 220px
+  border 1px solid #eeeeee
+  border-radius 6px
+  display flex
+  flex 1 1 260px
+  flex-direction column
+  gap 6px
   min-width 0
+  padding 10px 12px
 
 .trade-review-trade__side-team
   align-items center
   display flex
+  flex-wrap wrap
   gap 6px
 
-.trade-review-trade__side-label
-  color #9e9e9e
-  font-size 10px
-  letter-spacing 0.04em
-  margin-top 2px
-  text-transform uppercase
-
 .trade-review-trade__side-assets
-  margin-top 2px
+  display flex
+  flex-direction column
+  gap 2px
 
 .trade-review-trade__side-asset
   align-items baseline
@@ -56,76 +101,77 @@
   justify-content space-between
 
 .trade-review-trade__side-value
-  color #616161
+  color #757575
   font-size 12px
   font-variant-numeric tabular-nums
 
-.trade-review-trade__versus
-  align-self center
-  color #9e9e9e
-  flex 0 0 auto
-  font-size 12px
-
-.trade-review-trade__nets
+// The pair of totals is what makes the perspective structural rather than
+// captioned: one net figure needs a sentence naming whose side it is written
+// from, two side totals do not.
+.trade-review-trade__side-totals
+  border-top 1px solid #f0f0f0
   display flex
-  flex-wrap wrap
   gap 20px
+  margin-top auto
+  padding-top 6px
 
-.trade-review-trade__net
+.trade-review-trade__total
   display flex
   flex-direction column
-  min-width 84px
+  gap 1px
 
-.trade-review-trade__net-label
-  color #9e9e9e
-  font-size 10px
-  letter-spacing 0.04em
-  text-transform uppercase
-
-.trade-review-trade__net-value
+.trade-review-trade__total-value
+  font-size 15px
   font-variant-numeric tabular-nums
   font-weight 600
 
-  &.positive
+  &.up
     color #2e7d32
 
-  &.negative
+  &.down
     color #c62828
 
 // Deliberately styled as prose rather than as a number: the absence has to read
 // as "we do not know", not as a small or neutral value.
-.trade-review-trade__net-unpriced
+.trade-review-trade__unpriced
   color #9e9e9e
   cursor help
   font-size 12px
   font-style italic
 
-// The caption naming whose numbers these are. A positive figure is only
-// meaningful once the reader knows which side it belongs to, so this is stated
-// rather than left to the reader to infer from the order of the columns above.
-.trade-review-trade__net-perspective
+.trade-review-trade__swing
   align-items center
-  color #757575
+  color #616161
   display flex
   flex-wrap wrap
   font-size 12px
   gap 4px
-  margin-top 8px
+  margin-top 10px
 
-.trade-review-trade__expand
+  &.trade-review-trade__swing--unpriced
+    color #9e9e9e
+    cursor help
+    font-style italic
+
+.trade-review-trade__swing-value
+  font-variant-numeric tabular-nums
+  font-weight 600
+
+.trade-review-trade__swing-team
   align-items center
-  color #757575
   display flex
+  gap 4px
 
 .trade-review-trade__detail
+  background #fcfcfc
   border-top 1px solid #e0e0e0
   display flex
   flex-wrap wrap
   gap 16px
-  padding 12px 16px 16px
+  padding 14px 16px 16px
 
 .trade-review-trade__perspective
-  flex 1 1 340px
+  flex 1 1 380px
   min-width 0
 
 .trade-review-trade__perspective-header
@@ -135,13 +181,33 @@
   gap 8px
   padding-bottom 6px
 
-.trade-review-trade__perspective-label
-  color #9e9e9e
+.trade-review-trade__perspective-team
+  align-items center
+  display flex
+  gap 6px
+
+// What this side actually got out of the assets, in points and dollars, which
+// is the question a market value cannot answer.
+.trade-review-trade__production
+  align-items baseline
+  color #616161
+  display flex
+  flex-wrap wrap
   font-size 12px
+  font-variant-numeric tabular-nums
+  gap 10px
+  padding 6px 0 0
+
+.trade-review-trade__production-caption
+  color #9e9e9e
+  font-variant-numeric normal
 
 .trade-review-trade__asset
-  border-bottom 1px solid #f5f5f5
+  border-bottom 1px solid #f0f0f0
   padding 8px 0
+
+  &:last-child
+    border-bottom none
 
 .trade-review-trade__asset-header
   align-items baseline
@@ -158,17 +224,22 @@
   min-width 0
 
 .trade-review-trade__asset-values
+  align-items baseline
   color #616161
   display flex
   font-size 12px
   font-variant-numeric tabular-nums
-  gap 12px
+  gap 6px
+
+.trade-review-trade__asset-arrow
+  color #bdbdbd
 
 .trade-review-trade__lineage-state
   cursor help
+  margin-left 6px
 
   &.no_longer_held
-    color #757575
+    color #9e9e9e
 
   &.held
     color #2e7d32
@@ -182,35 +253,58 @@
   gap 4px 8px
   padding-top 4px
 
-.trade-review-trade__resulting-label
-  color #9e9e9e
-  font-size 10px
-  letter-spacing 0.04em
-  text-transform uppercase
-
 .trade-review-trade__chain
-  border-left 2px solid #e0e0e0
-  margin 6px 0 0 6px
+  border-left 2px solid #e6e6e6
+  margin 6px 0 0 4px
   padding-left 10px
 
 .trade-review-trade__chain-row
+  display flex
+  font-size 12px
+  gap 10px
+  padding 4px 0
+
+  & + &
+    border-top 1px dashed #f0f0f0
+
+// The date leads every hop, because a lineage read without one is a list of
+// events in no particular time.
+.trade-review-trade__chain-when
+  color #9e9e9e
+  flex 0 0 88px
+  font-variant-numeric tabular-nums
+
+.trade-review-trade__chain-body
+  display flex
+  flex-direction column
+  gap 2px
+  min-width 0
+
+.trade-review-trade__chain-headline
   align-items baseline
   display flex
   flex-wrap wrap
-  font-size 12px
-  gap 2px 10px
-  padding 3px 0
+  gap 2px 8px
 
 .trade-review-trade__chain-event
   color #424242
-  flex 0 0 auto
-  min-width 150px
+
+  a
+    color #1565c0
+
+    &:hover
+      text-decoration underline
 
 .trade-review-trade__chain-asset
   align-items center
   display flex
   gap 4px
   min-width 0
+
+.trade-review-trade__chain-team
+  align-items center
+  display flex
+  gap 4px
 
 .trade-review-trade__chain-outcome
   color #757575
@@ -219,6 +313,7 @@
   color #9e9e9e
   display flex
   flex-wrap wrap
+  font-variant-numeric tabular-nums
   gap 10px
 
 // The named state an asset with no lineage rows renders as. A blank here would
@@ -229,7 +324,7 @@
   padding 4px 0 0 8px
 
 // The line shown while an expanded trade's per-asset lineage chains are still
-// being fetched. The perspectives above it render immediately from the list
+// being fetched. The scoreboard above it renders immediately from the list
 // response, so this marks the one part of the detail that is still arriving
 // rather than replacing the whole detail with a spinner. The spinner is small
 // on purpose: the loading belongs to this card, not the page.
@@ -254,9 +349,18 @@
   to
     transform rotate(360deg)
 
-@media (max-width 899px)
-  .trade-review-trade__nets
-    gap 12px
+// Narrow widths stack the two sides and drop the date out of its own column, so
+// a hop reads as two lines rather than as a wrapped five-column row.
+@media (max-width 599px)
+  .trade-review-trade__summary
+    padding 12px
 
-  .trade-review-trade__net
-    min-width 70px
+  .trade-review-trade__open span
+    display none
+
+  .trade-review-trade__chain-row
+    flex-direction column
+    gap 2px
+
+  .trade-review-trade__chain-when
+    flex 0 0 auto

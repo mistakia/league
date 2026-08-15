@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 
 import Loading from '@components/loading'
 import TradeReviewTrade from '@components/trade-review-trade'
@@ -85,12 +86,15 @@ export default function TradeReviewPage({
       )
     } else {
       trade_body = (
+        // No on_open on the detail page: the card there is a document, not a
+        // control, and the back link above it is the way out. A card that
+        // navigated away from itself on a stray click would be a trap.
         <TradeReviewTrade
           trade={trade}
           trade_uid={trade_uid}
+          league_id={lid}
           is_expanded
           is_failed={trade_is_failed}
-          on_toggle={go_to_list}
         />
       )
     }
@@ -127,7 +131,8 @@ export default function TradeReviewPage({
           key={uid}
           trade_uid={uid}
           trade={trade_entry}
-          on_toggle={go_to_trade}
+          league_id={lid}
+          on_open={go_to_trade}
         />
       ))
   }
@@ -140,6 +145,7 @@ export default function TradeReviewPage({
           className='trade-review__back'
           onClick={go_to_list}
         >
+          <ChevronLeftIcon />
           Back to all trades
         </button>
       )}
