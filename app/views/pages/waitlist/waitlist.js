@@ -5,19 +5,26 @@ import { NavLink } from 'react-router-dom'
 
 import PageLayout from '@layouts/page'
 import { API_URL } from '@core/constants'
-
 import {
+  commitment_affirmation_label,
+  commitment_terms,
   contact_fields,
   honeypot_field_name,
-  intro,
   questions,
-  seat_field
-} from './waitlist-content'
+  what_we_look_for
+} from '@libs-shared/manager-waitlist-questions.mjs'
 
 import './waitlist.styl'
 
 // The vetting questionnaire. Public, anonymous, and the one place a prospective
 // manager can act on the landing page's pitch.
+//
+// IT OPENS ON THE COMMITMENT, NOT ON A PITCH. The landing page has already made
+// the case and already told the reader the group has never taken in a stranger,
+// so repeating any of that here costs the one thing this page is short of,
+// which is the reader's patience. What it owes them instead is the thing the
+// landing page cannot say in passing: exactly what they are signing up for,
+// before they spend ten minutes writing.
 //
 // DELIBERATELY NOT WIRED THROUGH REDUX. Every other write in this app goes
 // through app/core/api/service.js plus a domain's actions/reducer/sagas, which
@@ -31,48 +38,82 @@ import './waitlist.styl'
 // them and is legible in one screen.
 const submit_url = `${API_URL}/waitlist`
 
-const Field = ({ field, value, on_change, multiline }) => (
-  <label className='waitlist__field' htmlFor={field.name}>
+const Field = ({
+  name,
+  label,
+  help,
+  type,
+  required,
+  multiline,
+  options,
+  value,
+  on_change
+}) => (
+  <label className='waitlist__field' htmlFor={name}>
     <span className='waitlist__label'>
-      {field.label}
-      {field.required === false && (
-        <span className='waitlist__optional'> (optional)</span>
-      )}
+      {label}
+      {!required && <span className='waitlist__optional'> (optional)</span>}
     </span>
-    {field.help && <span className='waitlist__help'>{field.help}</span>}
-    {multiline ? (
+    {help && <span className='waitlist__help'>{help}</span>}
+    {options ? (
+      <select
+        id={name}
+        name={name}
+        className='waitlist__input waitlist__input--select'
+        value={value}
+        onChange={on_change}
+        required={required}
+      >
+        {/* An empty first option so the control opens with nothing chosen.
+            Without it the browser preselects the first real range, and a
+            required select that is already satisfied collects a default rather
+            than an answer. */}
+        <option value=''>Pick one</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    ) : multiline ? (
       <textarea
-        id={field.name}
-        name={field.name}
+        id={name}
+        name={name}
         className='waitlist__input waitlist__input--multiline'
         rows={4}
         value={value}
         onChange={on_change}
-        required={field.required !== false}
+        required={required}
       />
     ) : (
       <input
-        id={field.name}
-        name={field.name}
-        type={field.type || 'text'}
+        id={name}
+        name={name}
+        type={type || 'text'}
         className='waitlist__input'
         value={value}
         onChange={on_change}
-        required={field.required !== false}
+        required={required}
       />
     )}
   </label>
 )
 
 Field.propTypes = {
-  field: PropTypes.object,
+  name: PropTypes.string,
+  label: PropTypes.string,
+  help: PropTypes.string,
+  type: PropTypes.string,
+  required: PropTypes.bool,
+  multiline: PropTypes.bool,
+  options: PropTypes.array,
   value: PropTypes.string,
-  on_change: PropTypes.func,
-  multiline: PropTypes.bool
+  on_change: PropTypes.func
 }
 
 export default function WaitlistPage() {
   const [values, set_values] = React.useState({})
+  const [has_affirmed, set_has_affirmed] = React.useState(false)
   const [is_submitting, set_is_submitting] = React.useState(false)
   const [is_submitted, set_is_submitted] = React.useState(false)
   const [error_message, set_error_message] = React.useState(null)
@@ -91,7 +132,12 @@ export default function WaitlistPage() {
       const response = await fetch(submit_url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values)
+        // The affirmation is sent as a real boolean because the API checks it
+        // with `!== true` — a checkbox serialized as a string would be refused.
+        body: JSON.stringify({
+          ...values,
+          has_affirmed_commitment: has_affirmed
+        })
       })
 
       if (!response.ok) {
@@ -133,35 +179,66 @@ export default function WaitlistPage() {
     body = (
       <div className='waitlist'>
         <h1 className='waitlist__title'>Join the waitlist</h1>
-        {intro.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
-        ))}
+
+        {/* Two sections, in this order on purpose: what the league requires
+            comes before what it hopes for, so a reader who is out on the
+            commitment never has to read the pitch. */}
+        <section className='waitlist__intro-section'>
+          <h2 className='waitlist__intro-title'>What you are signing up for</h2>
+          {commitment_terms.map((term) => (
+            <p key={term}>{term}</p>
+          ))}
+        </section>
+
+        <section className='waitlist__intro-section'>
+          <h2 className='waitlist__intro-title'>What we are looking for</h2>
+          {what_we_look_for.map((quality) => (
+            <p key={quality}>{quality}</p>
+          ))}
+        </section>
 
         <form className='waitlist__form' onSubmit={handle_submit}>
+          <label
+            className='waitlist__affirmation'
+            htmlFor='has_affirmed_commitment'
+          >
+            <input
+              id='has_affirmed_commitment'
+              name='has_affirmed_commitment'
+              type='checkbox'
+              checked={has_affirmed}
+              onChange={(event) => set_has_affirmed(event.target.checked)}
+              required
+            />
+            <span>{commitment_affirmation_label}</span>
+          </label>
+
           {contact_fields.map((field) => (
             <Field
-              key={field.name}
-              field={field}
-              value={values[field.name] || ''}
+              key={field.column}
+              name={field.column}
+              label={field.label}
+              help={field.help}
+              type={field.type}
+              required={Boolean(field.required)}
+              value={values[field.column] || ''}
               on_change={handle_change}
             />
           ))}
 
-          {questions.map((field) => (
+          {questions.map((question) => (
             <Field
-              key={field.name}
-              field={field}
-              value={values[field.name] || ''}
+              key={question.id}
+              name={question.id}
+              label={question.label}
+              help={question.help}
+              required={Boolean(question.required)}
+              options={question.options}
+              multiline={!question.options}
+              value={values[question.id] || ''}
               on_change={handle_change}
-              multiline
             />
           ))}
-
-          <Field
-            field={seat_field}
-            value={values[seat_field.name] || ''}
-            on_change={handle_change}
-          />
 
           {/* Hidden from people, visible to form-filling bots. Positioned off
               screen rather than `display: none`, which some bots skip. */}

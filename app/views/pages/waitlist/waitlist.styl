@@ -29,11 +29,76 @@ $waitlist_mono = 'IBM Plex Mono', monospace
   line-height 1.25
   color $textColorDark
 
+// The two disclosure sections that come before the form. They are the part of
+// the page where the league talks rather than asks, and a reader who is out
+// should be able to leave here having spent a minute rather than ten. Spacing
+// alone sets them apart — the page has no rules or boxes anywhere else, and one
+// here read as a pull quote rather than as terms.
+.waitlist__intro-section
+  margin-top 40px
+
+.waitlist__intro-title
+  margin 0 0 0.75em
+  font-family $waitlist_mono
+  font-size 0.8125em
+  font-weight 700
+  letter-spacing 0.08em
+  text-transform uppercase
+  color $textColor
+
 .waitlist__form
   display flex
   flex-direction column
   gap 32px
   margin-top 48px
+
+// Sits at the top of the form rather than beside the submit button: it gates
+// everything below it, so agreeing to it is the first act, not the last.
+//
+// THE BOX IS DRAWN HERE BECAUSE THERE IS NO NATIVE ONE TO STYLE.
+// app/styles/normalize.css carries a global `input { -webkit-appearance: none }`,
+// which strips the platform checkbox app-wide — so a bare checkbox renders with
+// no tick and no intrinsic size, and `accent-color` does nothing, since it only
+// applies to natively-rendered controls. Every property below is load-bearing
+// for that reason; this is not decoration over a working control.
+.waitlist__affirmation
+  display flex
+  align-items flex-start
+  gap 12px
+  font-family $waitlist_mono
+  font-weight 700
+  font-size 0.9375em
+  line-height 1.4
+  color $textColorDark
+  cursor pointer
+
+  input[type='checkbox']
+    flex-shrink 0
+    width 18px
+    height 18px
+    // The label's first line is ~22px tall against an 18px box, so this centers
+    // the box on that line rather than hanging it off the top.
+    margin 2px 0 0
+    border 1px solid $borderColor
+    border-radius 2px
+    background transparent
+    cursor pointer
+    transition background 120ms ease, border-color 120ms ease
+
+    &:hover
+      border-color $textColorDark
+
+    // Checked state has to supply its own mark. The tick is an inline SVG
+    // background rather than a pseudo-element: `input` is a void element, and
+    // generated content on one is not reliable across browsers even once
+    // appearance is stripped.
+    &:checked
+      background $textColorDark url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-6'/%3E%3C/svg%3E") center / 12px 12px no-repeat
+      border-color $textColorDark
+
+    &:focus-visible
+      outline 2px solid $accentColor
+      outline-offset 2px
 
 // Each question is a block: prompt, then the reason it is being asked, then the
 // box. The gap above carries the separation, so there are no rules or boxes
@@ -74,6 +139,12 @@ $waitlist_mono = 'IBM Plex Mono', monospace
 
 .waitlist__input--multiline
   resize vertical
+
+// A select keeps its native arrow — normalize.css strips appearance from
+// `input` only, not from `select`, so unlike the checkbox above there is a real
+// control here to inherit. It only needs the page's border and type.
+.waitlist__input--select
+  cursor pointer
 
 // Off screen rather than `display: none` or `visibility: hidden`, both of which
 // a bot can cheaply detect and skip. `tabIndex={-1}` and `autoComplete='off'` at

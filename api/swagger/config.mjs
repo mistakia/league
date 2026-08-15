@@ -47,7 +47,9 @@ const options = {
         // two schemas in this file whose properties live in a file nobody
         // reading them would open. The property set is the column set of
         // manager_waitlist_submissions, which is what lets gate 2 of
-        // check-api-response-shapes compare it against db/schema.postgres.sql.
+        // check-api-response-shapes compare it against db/schema.postgres.sql --
+        // so the questionnaire's own answers are one `responses` property here
+        // rather than a property per question.
         WaitlistSubmission: {
           type: 'object',
           properties: {
@@ -58,15 +60,14 @@ const options = {
             contact_email: { type: 'string' },
             contact_handle: { type: 'string', nullable: true },
             timezone_name: { type: 'string' },
-            commitment_intent: { type: 'string' },
-            dynasty_experience: { type: 'string' },
-            salary_cap_experience: { type: 'string' },
-            contract_mechanics_comfort: { type: 'string' },
-            offseason_activity: { type: 'string' },
-            rules_tolerance: { type: 'string' },
-            commissioner_disagreement: { type: 'string' },
-            prior_league_history: { type: 'string' },
-            requested_seat: { type: 'string', nullable: true }
+            has_affirmed_commitment: { type: 'boolean' },
+            requested_seat: { type: 'string', nullable: true },
+            responses: {
+              type: 'object',
+              additionalProperties: { type: 'string' },
+              description:
+                'Question id -> answer text. The id set is defined in libs-shared/manager-waitlist-questions.mjs, so it is deliberately not enumerated here — a schema restating it would be a fourth place to keep in step.'
+            }
           }
         },
 

@@ -4715,21 +4715,15 @@ ALTER SEQUENCE public.leagues_uid_seq OWNED BY public.leagues.uid;
 
 CREATE TABLE public.manager_waitlist_submissions (
     submission_id bigint NOT NULL,
-    questionnaire_version smallint DEFAULT 1 NOT NULL,
+    questionnaire_version smallint DEFAULT 2 NOT NULL,
     submitted_at timestamp with time zone DEFAULT now() NOT NULL,
     candidate_name text NOT NULL,
     contact_email text NOT NULL,
     contact_handle text,
     timezone_name text NOT NULL,
-    commitment_intent text NOT NULL,
-    dynasty_experience text NOT NULL,
-    salary_cap_experience text NOT NULL,
-    contract_mechanics_comfort text NOT NULL,
-    offseason_activity text NOT NULL,
-    rules_tolerance text NOT NULL,
-    commissioner_disagreement text NOT NULL,
-    prior_league_history text NOT NULL,
-    requested_seat text
+    has_affirmed_commitment boolean NOT NULL,
+    requested_seat text,
+    responses jsonb DEFAULT '{}'::jsonb NOT NULL
 );
 
 
@@ -4737,7 +4731,14 @@ CREATE TABLE public.manager_waitlist_submissions (
 -- Name: TABLE manager_waitlist_submissions; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON TABLE public.manager_waitlist_submissions IS 'Prospective manager questionnaire responses feeding the Article IV waiting-list ranking vote. Candidate PII: the API exposes it only to the league''s sitting managers, but league_reader can read it directly via pg_read_all_data. Deleted when the recruiting round closes.';
+COMMENT ON TABLE public.manager_waitlist_submissions IS 'Prospective manager questionnaire responses feeding the Article IV waiting-list ranking vote. Answers are keyed by question id from libs-shared/manager-waitlist-questions.mjs. Candidate PII: the API exposes it only to the league''s sitting managers, but league_reader can read it directly via pg_read_all_data. Deleted when the recruiting round closes.';
+
+
+--
+-- Name: COLUMN manager_waitlist_submissions.responses; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.manager_waitlist_submissions.responses IS 'Question id -> answer text. The id set is defined in libs-shared/manager-waitlist-questions.mjs; an id is a stored key and must not be reused for a different question.';
 
 
 --

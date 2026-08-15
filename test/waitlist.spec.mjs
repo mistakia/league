@@ -12,6 +12,10 @@ import {
   SUBMISSIONS_PER_DAY,
   submit_rate_limit_store
 } from '#api/routes/waitlist.mjs'
+import {
+  manager_waitlist_questionnaire_version,
+  questions
+} from '#libs-shared/manager-waitlist-questions.mjs'
 import { user1 } from './fixtures/token.mjs'
 
 chai.use(chai_http)
@@ -28,24 +32,31 @@ const league_id = 1
 // pre-guard route reading user-owned rows, so the anonymous GET case below is
 // the assertion that matters most.
 
+// Built FROM the question registry rather than restating it, so cutting or
+// adding a question cannot leave the spec asserting on a question the form no
+// longer asks -- which is exactly what happened to the first version of this
+// file when two questions were removed.
 const valid_submission = {
   candidate_name: 'Casey Rivera',
   contact_email: 'casey@example.com',
   contact_handle: 'casey#1234',
   timezone_name: 'America/Denver',
-  commitment_intent: 'Three or four years, assuming I enjoy it.',
-  dynasty_experience: 'Two dynasty leagues since 2019, one with a cap.',
-  salary_cap_experience:
-    'Comfortable. I have run a cap league as commissioner.',
-  contract_mechanics_comfort: 'Tags yes, restricted free agency not really.',
-  offseason_activity: 'Very active. The offseason is the best part.',
-  rules_tolerance: 'I would rather have the rule written down than argued.',
-  commissioner_disagreement:
-    'Ask why in the league chat, accept the ruling, propose an amendment.',
-  prior_league_history:
-    'One league folded when the commissioner quit. The other is still running.',
-  requested_seat: 'Whichever is open.'
+  requested_seat: 'Whichever is open.',
+  has_affirmed_commitment: true,
+  // A choice question only accepts its own vocabulary, so the fixture answers
+  // each one with a real option rather than prose.
+  ...Object.fromEntries(
+    questions.map((question) => [
+      question.id,
+      question.options ? question.options[0] : `An answer to ${question.id}.`
+    ])
+  )
 }
+
+// The first FREE-TEXT question, used by the length-cap case, which a choice
+// question cannot exercise.
+const first_question = questions.find((question) => !question.options)
+const first_choice_question = questions.find((question) => question.options)
 
 const submit = (body) =>
   chai_request.execute(server).post('/api/waitlist').send(body)
@@ -84,17 +95,26 @@ describe('WAITLIST', function () {
       const rows = await knex('manager_waitlist_submissions')
       rows.length.should.equal(1)
       rows[0].candidate_name.should.equal(valid_submission.candidate_name)
-      rows[0].prior_league_history.should.equal(
-        valid_submission.prior_league_history
+      rows[0].has_affirmed_commitment.should.equal(true)
+      rows[0].questionnaire_version.should.equal(
+        manager_waitlist_questionnaire_version
       )
-      rows[0].questionnaire_version.should.equal(1)
+
+      // Every question the registry defines is stored under its id, and
+      // NOTHING ELSE is -- the key set is asserted exactly so a stray body key
+      // written through into a schemaless column fails here.
+      Object.keys(rows[0].responses)
+        .sort()
+        .should.deep.equal(questions.map((question) => question.id).sort())
+      rows[0].responses[first_question.id].should.equal(
+        valid_submission[first_question.id]
+      )
     })
 
     it('stores an absent optional answer as null', async function () {
-      const { requested_seat, contact_handle, ...without_optionals } =
-        valid_submission
-      expect(requested_seat).to.be.a('string')
-      expect(contact_handle).to.be.a('string')
+      const without_optionals = { ...valid_submission }
+      delete without_optionals.requested_seat
+      delete without_optionals.contact_handle
 
       const response = await submit(without_optionals)
       response.should.have.status(200)
@@ -105,24 +125,69 @@ describe('WAITLIST', function () {
     })
 
     it('refuses a missing required answer', async function () {
-      const { prior_league_history, ...incomplete } = valid_submission
-      expect(prior_league_history).to.be.a('string')
+      const incomplete = { ...valid_submission }
+      delete incomplete[first_question.id]
 
       const response = await submit(incomplete)
       response.should.have.status(400)
-      response.body.error.should.equal('Missing prior_league_history')
+      response.body.error.should.equal(`Missing ${first_question.id}`)
 
       const rows = await knex('manager_waitlist_submissions')
       rows.length.should.equal(0)
     })
 
+    // The affirmation replaced a "how many years will you commit?" question, so
+    // it is the only field where a caller's value is a promise rather than an
+    // opinion. `!== true` is what stops a string 'false' reading as yes.
+    it('refuses a submission that does not affirm the commitment', async function () {
+      for (const value of [false, undefined, 'false', 'true', 1]) {
+        const body = { ...valid_submission, has_affirmed_commitment: value }
+        const response = await submit(body)
+        response.should.have.status(400)
+        response.body.error.should.match(/^You must confirm: /)
+      }
+
+      const rows = await knex('manager_waitlist_submissions')
+      rows.length.should.equal(0)
+    })
+
+    // A select is only a suggestion until the server enforces it — anyone can
+    // post by hand — and these two questions exist to be COMPARABLE, which
+    // arbitrary prose in them would destroy.
+    it('refuses a choice answer outside its vocabulary', async function () {
+      const response = await submit({
+        ...valid_submission,
+        [first_choice_question.id]: 'about nine hours give or take'
+      })
+      response.should.have.status(400)
+      response.body.error.should.equal(
+        `${first_choice_question.id} is not one of the choices`
+      )
+
+      const rows = await knex('manager_waitlist_submissions')
+      rows.length.should.equal(0)
+    })
+
+    // The responses column is schemaless, so what keeps it from becoming a
+    // dumping ground is the route storing only ids the registry defines.
+    it('drops a body key that is not a known question', async function () {
+      const response = await submit({
+        ...valid_submission,
+        not_a_question: 'should not be stored'
+      })
+      response.should.have.status(200)
+
+      const rows = await knex('manager_waitlist_submissions')
+      expect(rows[0].responses.not_a_question).to.equal(undefined)
+    })
+
     it('refuses an answer past the length cap', async function () {
       const response = await submit({
         ...valid_submission,
-        prior_league_history: 'x'.repeat(4001)
+        [first_question.id]: 'x'.repeat(first_question.max + 1)
       })
       response.should.have.status(400)
-      response.body.error.should.equal('prior_league_history is too long')
+      response.body.error.should.equal(`${first_question.id} is too long`)
     })
 
     it('refuses an unusable contact email', async function () {
@@ -219,6 +284,9 @@ describe('WAITLIST', function () {
       )
       response.body[0].contact_email.should.equal(
         valid_submission.contact_email
+      )
+      response.body[0].responses[first_question.id].should.equal(
+        valid_submission[first_question.id]
       )
     })
 
