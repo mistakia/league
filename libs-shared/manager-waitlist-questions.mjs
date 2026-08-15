@@ -225,7 +225,7 @@ export const questions = [
     id: 'bad_season_response',
     label:
       'You are 2-8, you have lost two starters to injury, and you are getting the worst of every close game. What does the rest of your season look like?',
-    help: 'This is the situation that ends most dynasty tenures, so it is worth being straight about it. "I would check out a bit" is a real answer and not automatically the wrong one.',
+    help: 'This is the situation that ends most dynasty tenures, so it is worth being straight about it.',
     required: true,
     max: MAX_LONG_ANSWER_LENGTH
   },
