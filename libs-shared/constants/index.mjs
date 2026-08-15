@@ -136,6 +136,13 @@ export {
   is_valid_restricted_free_agency_bid_outcome
 } from './restricted-free-agency-constants.mjs'
 
+// Amendment XLIII admission vote constants
+export {
+  admission_vote_statuses,
+  admission_vote_outcomes,
+  admission_vote_decision_period_days
+} from './admission-vote-constants.mjs'
+
 // Bid changelog constants
 export {
   bid_types,
