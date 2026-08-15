@@ -65,6 +65,19 @@ export default async function reset_league_tables(knex) {
   // league_pauses_one_open_per_league makes the next pause insert a duplicate
   // key. Nothing in production deletes these rows, so only this reset can.
   await knex('league_pauses').del()
+  // Amendment XLIII Admission Vote. Children before parents: the preferences
+  // carry a foreign key to the ballots, the ballots to the eligibility
+  // snapshot, and all of them to the vote. The partial unique index
+  // admission_votes_one_open_vote_per_league_season makes a leaked OPEN vote a
+  // duplicate key on the next spec file's open, the same shape as
+  // league_pauses above. Nothing in production deletes any of these rows --
+  // ballots are retained permanently by design.
+  await knex('admission_vote_ballot_preferences').del()
+  await knex('admission_vote_ballots').del()
+  await knex('admission_vote_candidate_sponsors').del()
+  await knex('admission_vote_candidates').del()
+  await knex('admission_vote_eligible_teams').del()
+  await knex('admission_votes').del()
   // Rows in these outlive a spec FILE otherwise: nothing in production deletes
   // them and no other fixture clears them, so a leftover row from an earlier
   // file is read by the next one. Measured 2026-08-14 by probing every

@@ -59,6 +59,13 @@ ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_lid_fkey;
 ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_created_by_fkey;
 ALTER TABLE IF EXISTS ONLY public.adp_format DROP CONSTRAINT IF EXISTS adp_format_scoring_format_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_eligible_teams DROP CONSTRAINT IF EXISTS admission_vote_eligible_teams_admission_vote_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_candidates DROP CONSTRAINT IF EXISTS admission_vote_candidates_submission_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_candidates DROP CONSTRAINT IF EXISTS admission_vote_candidates_admission_vote_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_candidate_sponsors DROP CONSTRAINT IF EXISTS admission_vote_candidate_spons_admission_vote_candidate_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_ballots DROP CONSTRAINT IF EXISTS admission_vote_ballots_admission_vote_id_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_ballot_preferences DROP CONSTRAINT IF EXISTS admission_vote_ballot_preference_admission_vote_id_team_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_ballot_preferences DROP CONSTRAINT IF EXISTS admission_vote_ballot_preferen_admission_vote_candidate_id_fkey;
 DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS trigger_update_selection_combination_definitions_updated_at ON public.selection_combination_definitions;
 DROP TRIGGER IF EXISTS trigger_external_league_import_jobs_updated_at ON public.external_league_import_jobs;
@@ -459,6 +466,7 @@ DROP INDEX IF EXISTS public.cmv_pick_date_idx;
 DROP INDEX IF EXISTS public.cmv_date_category_type_idx;
 DROP INDEX IF EXISTS public.cmv_blend_weights_category_effective_idx;
 DROP INDEX IF EXISTS public.adp_format_axis_unique;
+DROP INDEX IF EXISTS public.admission_votes_one_open_vote_per_league_season;
 ALTER TABLE IF EXISTS ONLY public.weekly_market_selections_analysis_cache DROP CONSTRAINT IF EXISTS weekly_market_selections_analysis_cache_pkey;
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
 ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
@@ -649,6 +657,14 @@ ALTER TABLE IF EXISTS ONLY public.composite_market_value_calibration DROP CONSTR
 ALTER TABLE IF EXISTS ONLY public.composite_market_value_blend_weights DROP CONSTRAINT IF EXISTS composite_market_value_blend_weights_pkey;
 ALTER TABLE IF EXISTS ONLY public.bid_changelog DROP CONSTRAINT IF EXISTS bid_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.adp_format DROP CONSTRAINT IF EXISTS adp_format_pkey;
+ALTER TABLE IF EXISTS ONLY public.admission_votes DROP CONSTRAINT IF EXISTS admission_votes_pkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_eligible_teams DROP CONSTRAINT IF EXISTS admission_vote_eligible_teams_pkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_candidates DROP CONSTRAINT IF EXISTS admission_vote_candidates_pkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_candidates DROP CONSTRAINT IF EXISTS admission_vote_candidates_name_unique_per_vote;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_candidate_sponsors DROP CONSTRAINT IF EXISTS admission_vote_candidate_sponsors_pkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_ballots DROP CONSTRAINT IF EXISTS admission_vote_ballots_pkey;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_ballot_preferences DROP CONSTRAINT IF EXISTS admission_vote_ballot_preferences_rank_unique_per_ballot;
+ALTER TABLE IF EXISTS ONLY public.admission_vote_ballot_preferences DROP CONSTRAINT IF EXISTS admission_vote_ballot_preferences_pkey;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
@@ -1001,6 +1017,12 @@ DROP SEQUENCE IF EXISTS public.composite_market_value_blend_weights_version_id_s
 DROP TABLE IF EXISTS public.composite_market_value_blend_weights;
 DROP TABLE IF EXISTS public.bid_changelog;
 DROP TABLE IF EXISTS public.adp_format;
+DROP TABLE IF EXISTS public.admission_votes;
+DROP TABLE IF EXISTS public.admission_vote_eligible_teams;
+DROP TABLE IF EXISTS public.admission_vote_candidates;
+DROP TABLE IF EXISTS public.admission_vote_candidate_sponsors;
+DROP TABLE IF EXISTS public.admission_vote_ballots;
+DROP TABLE IF EXISTS public.admission_vote_ballot_preferences;
 DROP FUNCTION IF EXISTS public.update_selection_combination_definitions_updated_at();
 DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.update_job_progress(p_job_id uuid, p_progress integer, p_current_step character varying);
@@ -1850,6 +1872,161 @@ $$;
 
 
 SET default_table_access_method = heap;
+
+--
+-- Name: admission_vote_ballot_preferences; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.admission_vote_ballot_preferences (
+    admission_vote_id integer NOT NULL,
+    team_id integer NOT NULL,
+    admission_vote_candidate_id integer NOT NULL,
+    preference_rank smallint NOT NULL,
+    CONSTRAINT admission_vote_ballot_preferences_rank_floor CHECK ((preference_rank >= 1))
+);
+
+
+--
+-- Name: TABLE admission_vote_ballot_preferences; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.admission_vote_ballot_preferences IS 'Confidential under Section 10(e). Reaching an individual ballot takes a deliberate query; no UI renders one, for any caller including the Commissioner.';
+
+
+--
+-- Name: admission_vote_ballots; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.admission_vote_ballots (
+    admission_vote_id integer NOT NULL,
+    team_id integer NOT NULL,
+    submitted_at timestamp with time zone NOT NULL,
+    commissioner_entered_reason text
+);
+
+
+--
+-- Name: TABLE admission_vote_ballots; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.admission_vote_ballots IS 'Confidential under Section 10(e). Do not query this table or its preferences ad hoc: only the per-Candidate totals may be disclosed, and /api/db/league/query lands results in a synced, indexed timeline.';
+
+
+--
+-- Name: admission_vote_candidate_sponsors; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.admission_vote_candidate_sponsors (
+    admission_vote_candidate_id integer NOT NULL,
+    team_id integer NOT NULL
+);
+
+
+--
+-- Name: admission_vote_candidates; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.admission_vote_candidates (
+    admission_vote_candidate_id integer NOT NULL,
+    admission_vote_id integer NOT NULL,
+    candidate_name text NOT NULL,
+    submission_id bigint,
+    points_total integer,
+    CONSTRAINT admission_vote_candidates_points_total_not_negative CHECK (((points_total IS NULL) OR (points_total >= 0)))
+);
+
+
+--
+-- Name: COLUMN admission_vote_candidates.points_total; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.admission_vote_candidates.points_total IS 'Section 10(e) discloses this figure for each Candidate to any Manager on request. Written at close.';
+
+
+--
+-- Name: admission_vote_candidates_admission_vote_candidate_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.admission_vote_candidates ALTER COLUMN admission_vote_candidate_id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.admission_vote_candidates_admission_vote_candidate_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: admission_vote_eligible_teams; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.admission_vote_eligible_teams (
+    admission_vote_id integer NOT NULL,
+    team_id integer NOT NULL,
+    recorded_at timestamp with time zone NOT NULL,
+    recorded_reason text
+);
+
+
+--
+-- Name: TABLE admission_vote_eligible_teams; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.admission_vote_eligible_teams IS 'One row per Team entitled to a ballot, confirmed by the Commissioner at open. A Team with two userids gets one row.';
+
+
+--
+-- Name: admission_votes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.admission_votes (
+    admission_vote_id integer NOT NULL,
+    league_id integer NOT NULL,
+    season_year smallint NOT NULL,
+    opened_at timestamp with time zone NOT NULL,
+    closes_at timestamp with time zone NOT NULL,
+    closed_at timestamp with time zone,
+    maximum_ranked_candidates smallint NOT NULL,
+    vote_status text NOT NULL,
+    decision_due_at timestamp with time zone,
+    decision_outcome text,
+    decided_admission_vote_candidate_id integer,
+    decided_at timestamp with time zone,
+    decision_reason text,
+    CONSTRAINT admission_votes_admitted_candidate_matches_outcome CHECK (((decided_admission_vote_candidate_id IS NOT NULL) = (decision_outcome = 'admitted'::text))),
+    CONSTRAINT admission_votes_closed_status_matches_timestamp CHECK (((vote_status = 'closed'::text) = (closed_at IS NOT NULL))),
+    CONSTRAINT admission_votes_closes_after_opening CHECK ((closes_at > opened_at)),
+    CONSTRAINT admission_votes_decided_only_after_close CHECK (((decided_at IS NULL) OR (closed_at IS NOT NULL))),
+    CONSTRAINT admission_votes_decision_due_at_set_on_close CHECK (((decision_due_at IS NOT NULL) = (closed_at IS NOT NULL))),
+    CONSTRAINT admission_votes_decision_recorded_together CHECK (((decision_outcome IS NULL) = (decided_at IS NULL))),
+    CONSTRAINT admission_votes_maximum_ranked_candidates_floor CHECK ((maximum_ranked_candidates >= 1)),
+    CONSTRAINT admission_votes_outcome_vocabulary CHECK ((decision_outcome = ANY (ARRAY['admitted'::text, 'passed'::text]))),
+    CONSTRAINT admission_votes_pass_states_a_reason CHECK (((decision_outcome IS DISTINCT FROM 'passed'::text) OR (decision_reason IS NOT NULL))),
+    CONSTRAINT admission_votes_status_vocabulary CHECK ((vote_status = ANY (ARRAY['open'::text, 'closed'::text])))
+);
+
+
+--
+-- Name: TABLE admission_votes; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.admission_votes IS 'Amendment XLIII Admission Vote. decision_outcome null past decision_due_at is the Section 11(a) deemed pass.';
+
+
+--
+-- Name: admission_votes_admission_vote_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.admission_votes ALTER COLUMN admission_vote_id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.admission_votes_admission_vote_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
 
 --
 -- Name: adp_format; Type: TABLE; Schema: public; Owner: -
@@ -28155,6 +28332,70 @@ ALTER TABLE ONLY public.waivers ALTER COLUMN uid SET DEFAULT nextval('public.wai
 
 
 --
+-- Name: admission_vote_ballot_preferences admission_vote_ballot_preferences_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_ballot_preferences
+    ADD CONSTRAINT admission_vote_ballot_preferences_pkey PRIMARY KEY (admission_vote_id, team_id, admission_vote_candidate_id);
+
+
+--
+-- Name: admission_vote_ballot_preferences admission_vote_ballot_preferences_rank_unique_per_ballot; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_ballot_preferences
+    ADD CONSTRAINT admission_vote_ballot_preferences_rank_unique_per_ballot UNIQUE (admission_vote_id, team_id, preference_rank);
+
+
+--
+-- Name: admission_vote_ballots admission_vote_ballots_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_ballots
+    ADD CONSTRAINT admission_vote_ballots_pkey PRIMARY KEY (admission_vote_id, team_id);
+
+
+--
+-- Name: admission_vote_candidate_sponsors admission_vote_candidate_sponsors_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_candidate_sponsors
+    ADD CONSTRAINT admission_vote_candidate_sponsors_pkey PRIMARY KEY (admission_vote_candidate_id, team_id);
+
+
+--
+-- Name: admission_vote_candidates admission_vote_candidates_name_unique_per_vote; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_candidates
+    ADD CONSTRAINT admission_vote_candidates_name_unique_per_vote UNIQUE (admission_vote_id, candidate_name);
+
+
+--
+-- Name: admission_vote_candidates admission_vote_candidates_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_candidates
+    ADD CONSTRAINT admission_vote_candidates_pkey PRIMARY KEY (admission_vote_candidate_id);
+
+
+--
+-- Name: admission_vote_eligible_teams admission_vote_eligible_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_eligible_teams
+    ADD CONSTRAINT admission_vote_eligible_teams_pkey PRIMARY KEY (admission_vote_id, team_id);
+
+
+--
+-- Name: admission_votes admission_votes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_votes
+    ADD CONSTRAINT admission_votes_pkey PRIMARY KEY (admission_vote_id);
+
+
+--
 -- Name: adp_format adp_format_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -29672,6 +29913,13 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.weekly_market_selections_analysis_cache
     ADD CONSTRAINT weekly_market_selections_analysis_cache_pkey PRIMARY KEY (source_id, source_market_id, source_selection_id);
+
+
+--
+-- Name: admission_votes_one_open_vote_per_league_season; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX admission_votes_one_open_vote_per_league_season ON public.admission_votes USING btree (league_id, season_year) WHERE (vote_status = 'open'::text);
 
 
 --
@@ -57108,6 +57356,62 @@ CREATE TRIGGER update_config_modtime BEFORE UPDATE ON public.config FOR EACH ROW
 
 
 --
+-- Name: admission_vote_ballot_preferences admission_vote_ballot_preferen_admission_vote_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_ballot_preferences
+    ADD CONSTRAINT admission_vote_ballot_preferen_admission_vote_candidate_id_fkey FOREIGN KEY (admission_vote_candidate_id) REFERENCES public.admission_vote_candidates(admission_vote_candidate_id) ON DELETE CASCADE;
+
+
+--
+-- Name: admission_vote_ballot_preferences admission_vote_ballot_preference_admission_vote_id_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_ballot_preferences
+    ADD CONSTRAINT admission_vote_ballot_preference_admission_vote_id_team_id_fkey FOREIGN KEY (admission_vote_id, team_id) REFERENCES public.admission_vote_ballots(admission_vote_id, team_id) ON DELETE CASCADE;
+
+
+--
+-- Name: admission_vote_ballots admission_vote_ballots_admission_vote_id_team_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_ballots
+    ADD CONSTRAINT admission_vote_ballots_admission_vote_id_team_id_fkey FOREIGN KEY (admission_vote_id, team_id) REFERENCES public.admission_vote_eligible_teams(admission_vote_id, team_id) ON DELETE CASCADE;
+
+
+--
+-- Name: admission_vote_candidate_sponsors admission_vote_candidate_spons_admission_vote_candidate_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_candidate_sponsors
+    ADD CONSTRAINT admission_vote_candidate_spons_admission_vote_candidate_id_fkey FOREIGN KEY (admission_vote_candidate_id) REFERENCES public.admission_vote_candidates(admission_vote_candidate_id) ON DELETE CASCADE;
+
+
+--
+-- Name: admission_vote_candidates admission_vote_candidates_admission_vote_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_candidates
+    ADD CONSTRAINT admission_vote_candidates_admission_vote_id_fkey FOREIGN KEY (admission_vote_id) REFERENCES public.admission_votes(admission_vote_id) ON DELETE CASCADE;
+
+
+--
+-- Name: admission_vote_candidates admission_vote_candidates_submission_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_candidates
+    ADD CONSTRAINT admission_vote_candidates_submission_id_fkey FOREIGN KEY (submission_id) REFERENCES public.manager_waitlist_submissions(submission_id) ON DELETE RESTRICT;
+
+
+--
+-- Name: admission_vote_eligible_teams admission_vote_eligible_teams_admission_vote_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.admission_vote_eligible_teams
+    ADD CONSTRAINT admission_vote_eligible_teams_admission_vote_id_fkey FOREIGN KEY (admission_vote_id) REFERENCES public.admission_votes(admission_vote_id) ON DELETE CASCADE;
+
+
+--
 -- Name: adp_format adp_format_scoring_format_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -57440,6 +57744,62 @@ ALTER TABLE ONLY public.seasons
 --
 
 GRANT USAGE ON SCHEMA public TO league_reader;
+
+
+--
+-- Name: TABLE admission_vote_ballot_preferences; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.admission_vote_ballot_preferences TO league_reader;
+
+
+--
+-- Name: TABLE admission_vote_ballots; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.admission_vote_ballots TO league_reader;
+
+
+--
+-- Name: TABLE admission_vote_candidate_sponsors; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.admission_vote_candidate_sponsors TO league_reader;
+
+
+--
+-- Name: TABLE admission_vote_candidates; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.admission_vote_candidates TO league_reader;
+
+
+--
+-- Name: SEQUENCE admission_vote_candidates_admission_vote_candidate_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.admission_vote_candidates_admission_vote_candidate_id_seq TO league_reader;
+
+
+--
+-- Name: TABLE admission_vote_eligible_teams; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.admission_vote_eligible_teams TO league_reader;
+
+
+--
+-- Name: TABLE admission_votes; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.admission_votes TO league_reader;
+
+
+--
+-- Name: SEQUENCE admission_votes_admission_vote_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.admission_votes_admission_vote_id_seq TO league_reader;
 
 
 --
