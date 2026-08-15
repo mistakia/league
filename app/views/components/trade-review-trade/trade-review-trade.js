@@ -29,32 +29,44 @@ const AT_TRADE_EXPLANATION =
 const TODAY_EXPLANATION =
   "Today's KeepTradeCut value of every still-open asset descended from what this team received. An asset whose whole line has been released, expired or converted is worth nothing."
 
-const SWING_EXPLANATION =
-  'How far the trade has moved since the day it was made, and toward which side. Realized value minus at-trade value.'
+const CHANGE_EXPLANATION =
+  'What this side of the trade has gained or lost in market value since the day it was made. Both sides can gain, and both sides can lose — this is not a comparison against the other team.'
+
+const PRODUCTION_EXPLANATION =
+  'Points above replacement this team has actually scored from what it received, and from everything those assets became, counted only for the stretches this team held them. Market value says what an asset is worth; this says what it did.'
+
+const COMBINED_EXPLANATION =
+  'A trade is not zero-sum. This is what both sides hold together now against what they held on the day, plus the production the two rosters have taken out of it.'
 
 const format_value = (value) => Math.round(value).toLocaleString()
 
+const format_signed = (value) =>
+  `${value > 0 ? '+' : ''}${Math.round(value).toLocaleString()}`
+
 const format_date = (value) => dayjs(value).format('MMM D, YYYY')
 
-// A side's at-trade total is withheld whole when any one of its assets is
-// unpriced -- the same rule the engine applies to the net figures, for the same
-// reason: a partial sum reads as a real price.
+const direction_of = (value) =>
+  value == null || !value ? '' : value > 0 ? 'up' : 'down'
+
+// One side's market value, on the day and now. The at-trade total is withheld
+// whole when any one of its assets is unpriced -- the same rule the engine
+// applies to its own figures, for the same reason: a partial sum reads as a
+// real price.
 const side_totals = (assets) => {
   const has_unpriced = assets.some(
     (asset) => asset.get('keeptradecut_value_at_trade') == null
   )
-  return {
-    at_trade: has_unpriced
-      ? null
-      : assets.reduce(
-          (total, asset) => total + asset.get('keeptradecut_value_at_trade'),
-          0
-        ),
-    today: assets.reduce(
-      (total, asset) => total + asset.get('current_keeptradecut_value'),
-      0
-    )
-  }
+  const at_trade = has_unpriced
+    ? null
+    : assets.reduce(
+        (total, asset) => total + asset.get('keeptradecut_value_at_trade'),
+        0
+      )
+  const today = assets.reduce(
+    (total, asset) => total + asset.get('current_keeptradecut_value'),
+    0
+  )
+  return { at_trade, today, change: at_trade == null ? null : today - at_trade }
 }
 
 // What an asset IS, for deciding whether a lineage step is still carrying the
@@ -63,6 +75,42 @@ const side_totals = (assets) => {
 const asset_identity_key = (asset) =>
   asset.get('player_id') ||
   `${asset.get('pick_year')}-${asset.get('pick_round')}-${asset.get('pick_draft_overall_position')}`
+
+// A labelled figure. Every number on this card is one of these, so a reader
+// never has to work out what a bare value is measuring.
+function ValueStat({ label, value, signed, title }) {
+  if (value == null) {
+    return (
+      <div className='trade-review-trade__stat'>
+        <span className='trade-review-trade__micro-label'>{label}</span>
+        <span
+          className='trade-review-trade__unpriced'
+          title={UNPRICED_EXPLANATION}
+        >
+          Not priced
+        </span>
+      </div>
+    )
+  }
+  return (
+    <div className='trade-review-trade__stat'>
+      <span className='trade-review-trade__micro-label'>{label}</span>
+      <span
+        className={`trade-review-trade__stat-value ${signed ? direction_of(value) : ''}`}
+        title={title}
+      >
+        {signed ? format_signed(value) : format_value(value)}
+      </span>
+    </div>
+  )
+}
+
+ValueStat.propTypes = {
+  label: PropTypes.string,
+  value: PropTypes.number,
+  signed: PropTypes.bool,
+  title: PropTypes.string
+}
 
 // A pick renders over two tiers rather than as the one-line spelling
 // format_trade_asset_label produces for the grade-trades CLI. The year and
@@ -142,9 +190,6 @@ function ChainStep({
   const weeks_practice_squad = chain_row.get('weeks_practice_squad')
   const salary_paid = chain_row.get('salary_paid')
   const realized = chain_row.get('realized_pts_added_net_through_termination')
-  const projected_at_acquisition = chain_row.get(
-    'projected_pts_added_at_acquisition'
-  )
   const hop_trade_uid = chain_row.get('transformation_trade_uid')
   const is_open = period_end == null
 
@@ -186,13 +231,8 @@ function ChainStep({
         )}
         <div className='trade-review-trade__step-stats'>
           {realized != null && (
-            <span title='Points added over replacement while this team held the asset'>
-              {Number(realized).toFixed(1)} pts added
-            </span>
-          )}
-          {projected_at_acquisition != null && (
-            <span title='Points added this asset was projected for at the moment it was acquired'>
-              {Number(projected_at_acquisition).toFixed(1)} projected
+            <span title='Points above replacement scored while this team held the asset'>
+              {Number(realized).toFixed(1)} pts above replacement
             </span>
           )}
           {weeks_started != null && (
@@ -243,7 +283,7 @@ function Chain({ chain, league_id, trade_uid }) {
     <div className='trade-review-trade__chain'>
       {chain.map((chain_row, index) => {
         const identity = asset_identity_key(chain_row)
-        const shows_asset = index === 0 || identity !== previous_identity
+        const shows_asset = index !== 0 && identity !== previous_identity
         previous_identity = identity
         return (
           <ChainStep
@@ -253,7 +293,7 @@ function Chain({ chain, league_id, trade_uid }) {
             is_continued={continued_holding_ids.has(
               chain_row.get('holding_id')
             )}
-            shows_asset={shows_asset && index !== 0}
+            shows_asset={shows_asset}
             league_id={league_id}
             trade_uid={trade_uid}
           />
@@ -327,34 +367,30 @@ Asset.propTypes = {
   trade_uid: PropTypes.number
 }
 
-// What one side got out of the trade while it held it. The chain follows an
-// asset past this team -- a player traded onward keeps accruing rows under his
-// new team -- so the rows are filtered to this team before they are summed, and
-// the label says "while held" rather than implying the whole line.
-const production_while_held = ({ assets, tid }) => {
-  let points_added = 0
-  let salary_paid = 0
-  let has_any = false
-  for (const asset of assets) {
-    const chain = asset.get('chain')
-    if (!chain) continue
-    for (const chain_row of chain) {
-      if (chain_row.get('tid') !== tid) continue
-      const realized = chain_row.get(
-        'realized_pts_added_net_through_termination'
-      )
-      const salary = chain_row.get('salary_paid')
-      if (realized != null) {
-        points_added += Number(realized)
-        has_any = true
-      }
-      if (salary != null) {
-        salary_paid += Number(salary)
-        has_any = true
-      }
-    }
-  }
-  return has_any ? { points_added, salary_paid } : null
+// Production and cost, in one muted line. It sits under the market figures
+// rather than beside them because it answers a different question: not what an
+// asset was worth, but what it did.
+function ProductionLine({ realized_points_added, salary_paid }) {
+  if (realized_points_added == null) return null
+  return (
+    <div
+      className='trade-review-trade__production'
+      title={PRODUCTION_EXPLANATION}
+    >
+      <span className='trade-review-trade__production-value'>
+        {realized_points_added.toFixed(1)}
+      </span>
+      <span>pts above replacement</span>
+      {salary_paid != null && (
+        <span>· ${salary_paid.toLocaleString()} paid</span>
+      )}
+    </div>
+  )
+}
+
+ProductionLine.propTypes = {
+  realized_points_added: PropTypes.number,
+  salary_paid: PropTypes.number
 }
 
 // One side of the trade in the expanded detail: what this team received, and
@@ -362,27 +398,14 @@ const production_while_held = ({ assets, tid }) => {
 // leg exactly once, so nothing is listed twice.
 function Perspective({ perspective, season_year, has_chains, league_id }) {
   const acquired_assets = perspective.get('acquired_assets')
-  const tid = perspective.get('tid')
-  const production = has_chains
-    ? production_while_held({ assets: acquired_assets, tid })
-    : null
 
   return (
     <div className='trade-review-trade__perspective'>
       <div className='trade-review-trade__perspective-header'>
         <div className='trade-review-trade__perspective-team'>
-          <TeamName tid={tid} year={season_year} image />
+          <TeamName tid={perspective.get('tid')} year={season_year} image />
         </div>
         <span className='trade-review-trade__micro-label'>received</span>
-        {Boolean(production) && (
-          <span
-            className='trade-review-trade__production'
-            title='Production and salary accrued by this team on these assets and on everything they became, counted only for the stretches this team held them.'
-          >
-            {production.points_added.toFixed(1)} pts · $
-            {Math.round(production.salary_paid).toLocaleString()} while held
-          </span>
-        )}
       </div>
       {acquired_assets.map((asset, index) => (
         <Asset
@@ -404,24 +427,19 @@ Perspective.propTypes = {
   league_id: PropTypes.string
 }
 
-// One side of a trade as it reads at the top of the card: the team, what it
-// received, and what that has come to. Both columns render from the lead
-// record -- the counterparty's received assets are this record's sent_assets --
-// so the two sides are always drawn from one consistent snapshot.
-//
-// Showing both sides' totals is what removes the need for a caption naming
-// whose numbers these are: a single net figure is meaningless until the reader
-// knows its perspective, and a pair of side totals states it structurally.
-function SideSummary({ tid, season_year, assets, show_assets }) {
-  const { at_trade, today } = side_totals(assets)
-  const direction =
-    at_trade == null
-      ? ''
-      : today > at_trade
-        ? 'up'
-        : today < at_trade
-          ? 'down'
-          : ''
+// One side of a trade: the team, what it received, what that has come to, and
+// what it produced. Every figure here belongs to this side alone — a side is
+// up or down against its own starting point, not against the other team, so
+// both sides can be up and both can be down.
+function SideSummary({
+  tid,
+  season_year,
+  assets,
+  show_assets,
+  realized_points_added,
+  salary_paid
+}) {
+  const { at_trade, today, change } = side_totals(assets)
 
   return (
     <div className='trade-review-trade__side'>
@@ -444,34 +462,23 @@ function SideSummary({ tid, season_year, assets, show_assets }) {
         </div>
       )}
       <div className='trade-review-trade__side-totals'>
-        <div className='trade-review-trade__total'>
-          <span className='trade-review-trade__micro-label'>At trade</span>
-          {at_trade == null ? (
-            <span
-              className='trade-review-trade__unpriced'
-              title={UNPRICED_EXPLANATION}
-            >
-              Not priced
-            </span>
-          ) : (
-            <span
-              className='trade-review-trade__total-value'
-              title={AT_TRADE_EXPLANATION}
-            >
-              {format_value(at_trade)}
-            </span>
-          )}
-        </div>
-        <div className='trade-review-trade__total'>
-          <span className='trade-review-trade__micro-label'>Today</span>
-          <span
-            className={`trade-review-trade__total-value ${direction}`}
-            title={TODAY_EXPLANATION}
-          >
-            {format_value(today)}
-          </span>
-        </div>
+        <ValueStat
+          label='At trade'
+          value={at_trade}
+          title={AT_TRADE_EXPLANATION}
+        />
+        <ValueStat label='Today' value={today} title={TODAY_EXPLANATION} />
+        <ValueStat
+          label='Change'
+          value={change}
+          signed
+          title={CHANGE_EXPLANATION}
+        />
       </div>
+      <ProductionLine
+        realized_points_added={realized_points_added}
+        salary_paid={salary_paid}
+      />
     </div>
   )
 }
@@ -480,55 +487,55 @@ SideSummary.propTypes = {
   tid: PropTypes.number,
   season_year: PropTypes.number,
   assets: ImmutablePropTypes.list,
-  show_assets: PropTypes.bool
+  show_assets: PropTypes.bool,
+  realized_points_added: PropTypes.number,
+  salary_paid: PropTypes.number
 }
 
-// The one thing the two side columns cannot show: which way the trade has moved
-// since the day it was made. net_value_change is written from the lead team's
-// view, so its sign picks the team the value moved toward. Read as a labelled
-// stat rather than as a sentence -- the arrow carries "toward".
-function TradeSwing({
-  lead_tid,
-  counterparty_tid,
-  net_value_change,
-  season_year
-}) {
+// The trade as a whole. Two teams can both come out ahead of a trade and both
+// come out behind it, so the question the card has to answer past the two side
+// columns is not who won — it is whether the deal grew or shrank the value the
+// two rosters hold together, and what they scored with it.
+function CombinedOutcome({ sides, realized_points_added }) {
+  const at_trade = sides.some((side) => side.at_trade == null)
+    ? null
+    : sides.reduce((total, side) => total + side.at_trade, 0)
+  const today = sides.reduce((total, side) => total + side.today, 0)
+  const change = at_trade == null ? null : today - at_trade
+
   return (
-    <div className='trade-review-trade__swing' title={SWING_EXPLANATION}>
-      <span className='trade-review-trade__micro-label'>Swing</span>
-      {net_value_change == null ? (
+    <div className='trade-review-trade__combined' title={COMBINED_EXPLANATION}>
+      <span className='trade-review-trade__micro-label'>Both teams</span>
+      <span className='trade-review-trade__combined-flow'>
+        {at_trade == null ? (
+          <span className='trade-review-trade__unpriced'>Not priced</span>
+        ) : (
+          <>
+            {format_value(at_trade)}
+            <span className='trade-review-trade__asset-arrow'>→</span>
+            {format_value(today)}
+          </>
+        )}
+      </span>
+      {change != null && (
         <span
-          className='trade-review-trade__unpriced'
-          title={UNPRICED_EXPLANATION}
+          className={`trade-review-trade__combined-change ${direction_of(change)}`}
         >
-          Not priced
+          {format_signed(change)}
         </span>
-      ) : !net_value_change ? (
-        <span className='trade-review-trade__swing-value'>Even</span>
-      ) : (
-        <>
-          <span className='trade-review-trade__swing-value'>
-            {Math.abs(net_value_change).toLocaleString()}
-          </span>
-          <span className='trade-review-trade__swing-arrow'>→</span>
-          <span className='trade-review-trade__swing-team'>
-            <TeamName
-              tid={net_value_change > 0 ? lead_tid : counterparty_tid}
-              year={season_year}
-              abbrv
-            />
-          </span>
-        </>
+      )}
+      {realized_points_added != null && (
+        <span className='trade-review-trade__combined-production'>
+          · {realized_points_added.toFixed(1)} pts above replacement
+        </span>
       )}
     </div>
   )
 }
 
-TradeSwing.propTypes = {
-  lead_tid: PropTypes.number,
-  counterparty_tid: PropTypes.number,
-  net_value_change: PropTypes.number,
-  season_year: PropTypes.number
+CombinedOutcome.propTypes = {
+  sides: PropTypes.array.isRequired,
+  realized_points_added: PropTypes.number
 }
 
 export default function TradeReviewTrade({
@@ -542,11 +549,25 @@ export default function TradeReviewTrade({
   const perspectives = trade.get('perspectives')
   const has_chains = trade.get('has_chains')
 
+  // Both columns render from the lead record — the counterparty's received
+  // assets are this record's sent_assets — so the two sides are always drawn
+  // from one consistent snapshot. Production is the exception: it is computed
+  // per record server-side, so the counterparty's own record supplies its half.
   const lead = perspectives.first()
+  const counterparty = perspectives.get(1)
   const occurred_at = lead.get('occurred_at')
   const season_year = dayjs(occurred_at).year()
   const acquired_assets = lead.get('acquired_assets')
   const sent_assets = lead.get('sent_assets')
+
+  const lead_points_added = lead.get('realized_points_added_while_held')
+  const counterparty_points_added = counterparty
+    ? counterparty.get('realized_points_added_while_held')
+    : null
+  const combined_points_added =
+    lead_points_added != null && counterparty_points_added != null
+      ? lead_points_added + counterparty_points_added
+      : null
 
   // The collapsed card in the list opens the trade's own page; the expanded
   // card on that page is not a control at all, because the page already carries
@@ -580,12 +601,6 @@ export default function TradeReviewTrade({
           <div className='trade-review-trade__shape'>
             {acquired_assets.size} for {sent_assets.size}
           </div>
-          <TradeSwing
-            lead_tid={lead.get('tid')}
-            counterparty_tid={lead.get('counterparty_tid')}
-            net_value_change={lead.get('net_value_change')}
-            season_year={season_year}
-          />
           {is_interactive && (
             <div className='trade-review-trade__open'>
               <span>Lineage</span>
@@ -599,14 +614,24 @@ export default function TradeReviewTrade({
             season_year={season_year}
             assets={acquired_assets}
             show_assets={!is_expanded}
+            realized_points_added={lead_points_added}
+            salary_paid={lead.get('salary_paid_while_held')}
           />
           <SideSummary
             tid={lead.get('counterparty_tid')}
             season_year={season_year}
             assets={sent_assets}
             show_assets={!is_expanded}
+            realized_points_added={counterparty_points_added}
+            salary_paid={
+              counterparty ? counterparty.get('salary_paid_while_held') : null
+            }
           />
         </div>
+        <CombinedOutcome
+          sides={[side_totals(acquired_assets), side_totals(sent_assets)]}
+          realized_points_added={combined_points_added}
+        />
       </div>
       {is_expanded && (
         <div className='trade-review-trade__detail'>

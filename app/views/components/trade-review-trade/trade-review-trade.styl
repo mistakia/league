@@ -58,27 +58,6 @@
   font-variant-numeric tabular-nums
   padding 1px 8px
 
-// The trade-level verdict, read as a labelled stat rather than as a sentence:
-// the arrow carries "toward", so no prose is needed to say which side gained.
-.trade-review-trade__swing
-  align-items center
-  cursor help
-  display flex
-  gap 6px
-
-.trade-review-trade__swing-value
-  font-size 14px
-  font-variant-numeric tabular-nums
-  font-weight 600
-
-.trade-review-trade__swing-arrow
-  color #bdbdbd
-
-.trade-review-trade__swing-team
-  align-items center
-  display flex
-  gap 4px
-
 .trade-review-trade__open
   align-items center
   color #757575
@@ -162,22 +141,23 @@
   color #9e9e9e
   font-size 11px
 
-// The pair of totals is what makes the perspective structural rather than
-// captioned: one net figure needs a sentence naming whose side it is written
-// from, two side totals do not.
+// Every figure on a side belongs to that side alone, which is what lets both
+// columns read green at once. A single net figure could not: it needs a
+// sentence naming whose view it is written from, and it forces one winner.
 .trade-review-trade__side-totals
   border-top 1px solid #f0f0f0
   display flex
-  gap 24px
+  gap 20px
   margin-top auto
   padding-top 8px
 
-.trade-review-trade__total
+.trade-review-trade__stat
   display flex
   flex-direction column
   gap 1px
+  min-width 0
 
-.trade-review-trade__total-value
+.trade-review-trade__stat-value
   font-size 16px
   font-variant-numeric tabular-nums
   font-weight 600
@@ -187,6 +167,57 @@
 
   &.down
     color #c62828
+
+// What the assets DID, as against what they were worth. Muted and beneath the
+// market figures because it answers a different question, not a lesser one.
+.trade-review-trade__production
+  align-items baseline
+  color #757575
+  cursor help
+  display flex
+  flex-wrap wrap
+  font-size 12px
+  gap 4px
+
+.trade-review-trade__production-value
+  color $textColor
+  font-variant-numeric tabular-nums
+  font-weight 600
+
+// The trade as a whole, which is the reading the two side columns cannot give:
+// a deal can grow or shrink the value both rosters hold together.
+.trade-review-trade__combined
+  align-items center
+  border-top 1px solid #f0f0f0
+  cursor help
+  display flex
+  flex-wrap wrap
+  gap 8px
+  margin-top 12px
+  padding-top 10px
+
+.trade-review-trade__combined-flow
+  align-items center
+  display flex
+  font-size 14px
+  font-variant-numeric tabular-nums
+  gap 6px
+
+.trade-review-trade__combined-change
+  font-size 14px
+  font-variant-numeric tabular-nums
+  font-weight 600
+
+  &.up
+    color #2e7d32
+
+  &.down
+    color #c62828
+
+.trade-review-trade__combined-production
+  color #757575
+  font-size 12px
+  font-variant-numeric tabular-nums
 
 // Deliberately styled as prose rather than as a number: the absence has to read
 // as "we do not know", not as a small or neutral value.
@@ -220,15 +251,6 @@
   align-items center
   display flex
   gap 6px
-
-// What this side actually got out of the assets, in points and dollars, which
-// is the question a market value cannot answer.
-.trade-review-trade__production
-  color #757575
-  cursor help
-  font-size 12px
-  font-variant-numeric tabular-nums
-  margin-left auto
 
 .trade-review-trade__asset
   border-bottom 1px solid #ececec
@@ -414,5 +436,8 @@
   .trade-review-trade__open span
     display none
 
-  .trade-review-trade__production
-    margin-left 0
+  .trade-review-trade__side-totals
+    gap 14px
+
+  .trade-review-trade__stat-value
+    font-size 15px

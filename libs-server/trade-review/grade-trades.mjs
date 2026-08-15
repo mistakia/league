@@ -226,6 +226,34 @@ const load_lineage_chains = async ({ origin_holding_ids }) => {
 
 const is_terminal = (chain_row) => chain_row.period_end == null
 
+// What a team actually got out of what it received, in production and in cost,
+// as distinct from what the market says the assets were worth.
+//
+// A chain follows an asset PAST this team -- a player traded onward keeps
+// accruing holdings under whoever holds him next -- so only rows belonging to
+// this team are counted. Anything else would credit a team with points another
+// roster scored.
+//
+// This is the one figure the list route cannot derive for itself: chains are
+// stripped from the list payload, so a collapsed row has nothing to sum.
+const production_while_held = ({ assets, tid }) => {
+  let realized_points_added = 0
+  let salary_paid = 0
+  for (const asset of assets) {
+    for (const chain_row of asset.chain) {
+      if (chain_row.tid !== tid) continue
+      realized_points_added += Number(
+        chain_row.realized_pts_added_net_through_termination ?? 0
+      )
+      salary_paid += Number(chain_row.salary_paid ?? 0)
+    }
+  }
+  return {
+    realized_points_added: Math.round(realized_points_added * 10) / 10,
+    salary_paid: Math.round(salary_paid)
+  }
+}
+
 const grade_trades = async ({
   lid,
   tid = null,
@@ -375,8 +403,15 @@ const grade_trades = async ({
         sum_of(acquired_assets, 'current_keeptradecut_value') -
         sum_of(sent_assets, 'current_keeptradecut_value')
 
+      const production = production_while_held({
+        assets: acquired_assets,
+        tid: perspective_tid
+      })
+
       results.push({
         trade_uid: uid,
+        realized_points_added_while_held: production.realized_points_added,
+        salary_paid_while_held: production.salary_paid,
         tid: perspective_tid,
         counterparty_tid: participants.find((t) => t !== perspective_tid),
         occurred_at: trade_legs[0].occurred_at,

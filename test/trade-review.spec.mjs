@@ -32,6 +32,7 @@ const LID = 1
 const PROPOSE_TID = 1
 const ACCEPT_TID = 2
 const TRADE_UID = 1
+const THIRD_TID = 3
 
 // Holding ids are assigned by hand rather than by a sequence so the assertions
 // can name them. roster_asset_holding.holding_id has no default.
@@ -40,7 +41,10 @@ const HOLDING = {
   SENT_PLAYER_RECEIVED: 102,
   SENT_PICK_ORIGIN: 103,
   SENT_PICK_RECEIVED: 104,
-  DRAFTED_PLAYER: 105
+  DRAFTED_PLAYER: 105,
+  // Only seeded by the per-team production case, which needs a holding that
+  // belongs to neither side of the trade.
+  MOVED_ON_PLAYER: 106
 }
 
 const TRADED_PLAYER_VALUE_AT_TRADE = 5000
@@ -451,6 +455,106 @@ describe('API /leagues/:leagueId/trade-review', function () {
         expect(asset).to.have.property('chain')
       }
     }
+  })
+
+  // The list route strips chains, so a collapsed card cannot sum production for
+  // itself -- these two fields are the only way it can report what a side
+  // actually scored. The rule they encode is that a chain follows an asset PAST
+  // the receiving team, so a later holder's rows must not be counted.
+  it('carries per-team production on both routes, counting only that team', async () => {
+    // Extend the shared fixture, for this case only, with a hop that carries
+    // the drafted player on to a THIRD team. Without it the two teams' chains
+    // hold nothing but their own holdings, and an assertion on the sums agrees
+    // whether or not the team filter exists.
+    const drafted_holding = await knex('roster_asset_holding')
+      .where({ holding_id: HOLDING.DRAFTED_PLAYER })
+      .first()
+    const moved_on_at = new Date(Date.now() - 15 * 24 * 60 * 60 * 1000)
+
+    await knex('roster_asset_holding')
+      .where({ holding_id: HOLDING.DRAFTED_PLAYER })
+      .update({ period_end: moved_on_at, terminated_by: TERMINATED_BY.TRADE })
+
+    await knex('roster_asset_holding').insert({
+      holding_id: HOLDING.MOVED_ON_PLAYER,
+      lid: LID,
+      tid: THIRD_TID,
+      asset_type: ASSET_TYPE.PLAYER,
+      player_id: drafted_holding.player_id,
+      period_start: moved_on_at,
+      period_end: null,
+      terminated_by: TERMINATED_BY.STILL_HELD,
+      salary_paid: 50,
+      weeks_started: 3,
+      weeks_active: 3,
+      weeks_practice_squad: 0,
+      realized_pts_added_net_through_termination: 33.3,
+      league_format_id: drafted_holding.league_format_id
+    })
+
+    await knex('roster_asset_transformation').insert({
+      transformation_id: knex.raw('gen_random_uuid()'),
+      lid: LID,
+      transformation_type: TRANSFORMATION_TYPE.TRADE,
+      occurred_at: moved_on_at,
+      source_holding_id: HOLDING.DRAFTED_PLAYER,
+      target_holding_id: HOLDING.MOVED_ON_PLAYER,
+      source_share: 1.0,
+      target_share: 1.0
+    })
+
+    const list_res = await chai_request
+      .execute(server)
+      .get(`/api/leagues/${LID}/trade-review`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    list_res.should.have.status(200)
+    expect(list_res.body.length).to.equal(2)
+    for (const record of list_res.body) {
+      expect(record.realized_points_added_while_held).to.be.a('number')
+      expect(record.salary_paid_while_held).to.be.a('number')
+    }
+
+    const detail_res = await chai_request
+      .execute(server)
+      .get(`/api/leagues/${LID}/trade-review/${TRADE_UID}`)
+      .set('Authorization', `Bearer ${user1}`)
+
+    detail_res.should.have.status(200)
+
+    let counted_a_foreign_holding = false
+    for (const record of detail_res.body) {
+      let expected_points = 0
+      let expected_salary = 0
+      for (const asset of record.acquired_assets) {
+        for (const chain_row of asset.chain) {
+          if (chain_row.tid !== record.tid) {
+            counted_a_foreign_holding = true
+            continue
+          }
+          expected_points += Number(
+            chain_row.realized_pts_added_net_through_termination ?? 0
+          )
+          expected_salary += Number(chain_row.salary_paid ?? 0)
+        }
+      }
+
+      expect(record.realized_points_added_while_held).to.be.closeTo(
+        expected_points,
+        0.05
+      )
+      expect(record.salary_paid_while_held).to.equal(
+        Math.round(expected_salary)
+      )
+    }
+
+    // Without a holding belonging to somebody else in the fixture, the sums
+    // above would agree whether or not the filter exists, and the assertion
+    // would pass over a rule it cannot see.
+    expect(counted_a_foreign_holding).to.equal(
+      true,
+      'the fixture has no foreign-team holding, so the team filter is untested'
+    )
   })
 
   it('returns 404 for a trade this league has no accepted record of', async () => {

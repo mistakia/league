@@ -121,6 +121,16 @@ const without_chains = (trade) => ({
  *           nullable: true
  *         unpriced_leg_count:
  *           type: integer
+ *         realized_points_added_while_held:
+ *           type: number
+ *           description: >-
+ *             Points added over replacement this team accrued on what it
+ *             received and on everything those assets became, counted only for
+ *             the stretches this team held them. A chain follows an asset past
+ *             this team, so rows belonging to a later holder are excluded.
+ *         salary_paid_while_held:
+ *           type: integer
+ *           description: Salary this team paid over those same holdings.
  *         acquired_assets:
  *           type: array
  *           items:
