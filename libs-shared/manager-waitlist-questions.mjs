@@ -170,9 +170,13 @@ export const questions = [
     max: MAX_LONG_ANSWER_LENGTH
   },
   {
+    // Plural and open-ended on purpose. "Name a player" caps the answer at one
+    // and reads as a quota to satisfy; someone with real opinions has several,
+    // and how many they volunteer is itself a signal, so nothing here should
+    // discourage them from emptying the list out.
     id: 'market_disagreement',
-    label: 'Name a player the market has wrong, and say which way.',
-    help: 'Over or under, dynasty or redraft, your call. The interesting part is what you think everyone else is missing.',
+    label: 'Which players does the market have wrong, and which way?',
+    help: 'As many as you like — one or a dozen. Over or under, dynasty or redraft, your call. The interesting part is what you think everyone else is missing.',
     required: true,
     max: MAX_LONG_ANSWER_LENGTH
   },
