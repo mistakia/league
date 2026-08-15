@@ -32,10 +32,11 @@ export const MAX_LONG_ANSWER_LENGTH = 4000
 // invites the answer the reader thinks we want and tells us nothing; stating
 // what the league actually expects and requiring an explicit yes is both
 // shorter and harder to fake.
+//
 // Two facts, no argument for them. An applicant deciding whether to spend ten
 // minutes on the form needs the shape of the obligation, not a case for why it
-// is reasonable -- and the checkbox below binds to these, so anything a reader
-// has to interpret is something they cannot meaningfully affirm.
+// is reasonable -- and the checkbox binds to these, so anything a reader has to
+// interpret is something they cannot meaningfully affirm.
 //
 // The eight months are May through December: restricted free agency opens in
 // May or June, the rookie draft runs a month or more after it, the auction is
@@ -203,6 +204,24 @@ export const questions = [
     label:
       'Have you ever left a league, or stopped playing one out? What happened?',
     help: 'Everyone has. The answer we are wary of is not "yes" — it is "no, never" from someone who has been in nine leagues.',
+    required: true,
+    max: MAX_LONG_ANSWER_LENGTH
+  },
+  {
+    // The forward-looking half of the attrition pair above. `prior_departures`
+    // asks what they have already done; this asks about the situation that
+    // causes it, which in a dynasty league is almost always a lost season
+    // rather than a lost interest.
+    //
+    // Deliberately a SCENARIO rather than "how do you handle a bad year?".
+    // The general form invites a slogan -- nobody writes "badly" -- while a
+    // concrete standing forces a description of what they would actually do,
+    // and in dynasty that answer doubles as a skill signal: selling into a lost
+    // season is the correct move and not everyone knows it.
+    id: 'bad_season_response',
+    label:
+      'You are 2-8, you have lost two starters to injury, and you are getting the worst of every close game. What does the rest of your season look like?',
+    help: 'This is the situation that ends most dynasty tenures, so it is worth being straight about it. "I would check out a bit" is a real answer and not automatically the wrong one.',
     required: true,
     max: MAX_LONG_ANSWER_LENGTH
   },
