@@ -38,12 +38,23 @@ export const MAX_LONG_ANSWER_LENGTH = 4000
 // is reasonable -- and the checkbox binds to these, so anything a reader has to
 // interpret is something they cannot meaningfully affirm.
 //
+// NO NUMBER OF YEARS, DELIBERATELY. An earlier draft said "several seasons",
+// which is unaffirmable, and the obvious fix looked like picking a figure. It
+// is not: no manager commitment term exists anywhere -- not in the
+// constitution, whose only stated term is the Commissioner's own two-year
+// minimum, and not in the recruiting material. Writing "three seasons" beside a
+// constitution reference would read as a rule the constitution does not
+// contain, which is worse than vague: a commitment nobody can hold anyone to,
+// presented as one they can. The ask is binary instead -- intending to stay
+// rather than to try it -- which is both honest and something a checkbox can
+// bind to.
+//
 // The eight months are May through December: restricted free agency opens in
 // May or June, the rookie draft runs a month or more after it, the auction is
 // in the days before kickoff, and the season plays out through Week 17 in late
 // December. January to April is the only genuinely quiet stretch.
 export const commitment_terms = [
-  'This is a dynasty league. Joining means planning to be here for several seasons, not one.',
+  'This is a dynasty league. Joining means planning to stay, not trying it for a season.',
   'It is active about eight months a year, May through December. January to April is the only quiet stretch.'
 ]
 
