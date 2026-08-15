@@ -10,8 +10,26 @@
 // Nine questions plus contact details is the budget, and it holds the form
 // under ten minutes. Adding one means removing one.
 
+// THE CONTINUITY SENTENCE IS A CLAIM WITH AN EXPIRY, AND SEATING SOMEONE IS
+// WHAT EXPIRES IT. Re-derived 2026-08-15 against league_production: six seasons
+// played to a champion (2020-2025), fifteen people have ever managed a team,
+// twelve are still here, and all fifteen were present in 2020 — which is what
+// makes "never seated anyone from outside" true rather than merely unrecorded.
+//
+// The moment this round seats a manager the third sentence is FALSE, and it is
+// false in the flattering direction, so nothing about the page will look wrong.
+// Rewrite it as part of seating, not later. The SQL to re-derive all four
+// numbers, plus the three schema traps that inflate them (co-managers, existing
+// 2027 rows, and vacancy not being visible as a team without a manager), is in
+// user:text/home-dynasty-league/league-operations/league-manager-continuity.md
+//
+// Note "twelve managers" is not "twelve teams" — the league plays ten, and
+// users_teams carries co-managers. Do not reconcile the two numbers by editing
+// one of them.
 export const intro = [
   'The GENESIS LEAGUE has an open seat for 2026. This is the whole application — there is no second round of forms.',
+  'Six seasons since 2020. Fifteen people have ever managed a team here, twelve are still in it, and every one of them has been here since the first year.',
+  'We have never seated anyone from outside that group, so this process is as new to us as it is to you. It is also why the questions below are blunt.',
   'Answers go to the current managers, who rank candidates and vote. Write like you are talking to them, because you are. A short honest answer beats a long careful one.'
 ]
 
