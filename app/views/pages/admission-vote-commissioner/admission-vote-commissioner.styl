@@ -1,0 +1,120 @@
+// The commissioner's working surface for the admission vote. Same measure and
+// the same two fonts as the manager-facing page, because it is the same subject
+// and switching between them should not feel like switching applications.
+$admission_vote_commissioner_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
+$admission_vote_commissioner_mono = 'IBM Plex Mono', monospace
+
+.admission-vote-commissioner
+  max-width 720px
+  margin 0 auto 80px
+  padding 24px 16px
+  font 400 16px/1.65 $admission_vote_commissioner_sans
+  color $textColor
+
+  h2
+    margin 0 0 0.5em
+    font-family $admission_vote_commissioner_mono
+    font-size 1.125em
+    color $textColorDark
+
+  button
+    margin-right 8px
+    margin-top 12px
+    padding 8px 16px
+    font-family $admission_vote_commissioner_mono
+    font-size 0.875em
+    cursor pointer
+
+    &:disabled
+      cursor not-allowed
+      opacity 0.5
+
+.admission-vote-commissioner__title
+  margin 0 0 0.5em
+  font-family $admission_vote_commissioner_mono
+  font-size 1.5em
+  line-height 1.25
+  color $textColorDark
+
+.admission-vote-commissioner__intro
+  margin 0 0 2em
+
+.admission-vote-commissioner__section
+  padding-top 32px
+  margin-top 40px
+  border-top 1px solid $borderColor
+
+.admission-vote-commissioner__field
+  display block
+  margin-bottom 16px
+
+  > span, legend
+    display block
+    margin-bottom 4px
+    font-family $admission_vote_commissioner_mono
+    font-size 0.8125em
+    color $textColor
+
+  input[type='text'], input[type='number'], input[type='datetime-local'], select
+    width 100%
+    max-width 360px
+    padding 6px 8px
+    font 400 15px $admission_vote_commissioner_sans
+    color $textColorDark
+
+// The eligibility snapshot and the sponsor lists are both "which teams", so
+// they get one control shape rather than two that have to be learned apart.
+.admission-vote-commissioner__teams
+  display flex
+  flex-wrap wrap
+  gap 4px 16px
+
+  label
+    display flex
+    align-items center
+    gap 6px
+    font-size 0.9375em
+
+  input[type='checkbox']
+    width auto
+
+.admission-vote-commissioner__candidate
+  padding 12px 0
+  border-bottom 1px solid $borderColor
+
+  input[type='text']
+    margin-bottom 8px
+
+.admission-vote-commissioner__hint
+  margin 0 0 1em
+  font-size 0.875em
+  color $textColor
+
+.admission-vote-commissioner__totals
+  width 100%
+  margin-bottom 1.5em
+  border-collapse collapse
+
+  th, td
+    padding 8px 4px
+    text-align left
+    border-bottom 1px solid $borderColor
+
+  th
+    font-family $admission_vote_commissioner_mono
+    font-size 0.8125em
+    font-weight 700
+    color $textColor
+
+  td
+    color $textColorDark
+
+.admission-vote-commissioner__notice
+  padding 12px 14px
+  border-left 3px solid $borderColor
+  color $textColorDark
+
+.admission-vote-commissioner__error
+  padding 12px 14px
+  border-left 3px solid $accentColor
+  color $textColorDark

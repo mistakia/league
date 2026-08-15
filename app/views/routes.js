@@ -49,6 +49,9 @@ const WaitlistSubmissionsPage = lazy(
   () => import('@pages/waitlist-submissions')
 )
 const AdmissionVotePage = lazy(() => import('@pages/admission-vote'))
+const AdmissionVoteCommissionerPage = lazy(
+  () => import('@pages/admission-vote-commissioner')
+)
 
 const map_state_to_props = createSelector(get_app, (app) => ({ app }))
 
@@ -154,6 +157,13 @@ const Routes = ({ app }) => {
         {/* Confidential ballots. The API refuses anyone who does not manage a
             team in this league, and discloses nothing at all while the vote is
             open, so this route being reachable renders neither. */}
+        {/* The exact path must precede the :param patterns above it in
+            page-routes.mjs for the same first-match reason; here react-router
+            ranks the more specific path itself. */}
+        <Route
+          path='/leagues/:lid/admission-vote/commissioner'
+          element={<AdmissionVoteCommissionerPage />}
+        />
         <Route
           path='/leagues/:lid/admission-vote'
           element={<AdmissionVotePage />}

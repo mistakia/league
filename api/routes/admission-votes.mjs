@@ -1,9 +1,13 @@
 import express from 'express'
 
 import { current_season } from '#constants'
+import close_admission_vote from '#libs-server/close-admission-vote.mjs'
 import get_admission_vote_totals from '#libs-server/get-admission-vote-totals.mjs'
 import write_admission_vote_ballot from '#libs-server/write-admission-vote-ballot.mjs'
-import { admission_vote_statuses } from '#libs-shared/constants/admission-vote-constants.mjs'
+import {
+  admission_vote_statuses,
+  admission_vote_outcomes
+} from '#libs-shared/constants/admission-vote-constants.mjs'
 
 const router = express.Router()
 
@@ -190,10 +194,24 @@ router.get('/', async (req, res) => {
         .send({ error: 'you do not manage a team in this league' })
     }
 
+    // Team names, so the Commissioner can build the eligibility snapshot and
+    // record Sponsors by name rather than by id. Not confidential: the Notice
+    // names every Sponsor in terms, and nothing here says how a Team voted.
+    const league_teams = await db('teams')
+      .where({ lid: league_id, season_year: current_season.year })
+      .orderBy('uid', 'asc')
+      .select('uid as team_id', 'name as team_name')
+
     const vote = await get_latest_vote({ db, league_id })
 
     if (!vote) {
-      return res.send({ vote: null, candidates: [], totals: [] })
+      return res.send({
+        vote: null,
+        candidates: [],
+        totals: [],
+        league_teams,
+        viewer: { is_commissioner: membership.is_commissioner }
+      })
     }
 
     const { admission_vote_id } = vote
@@ -261,6 +279,7 @@ router.get('/', async (req, res) => {
       // Empty while the vote is open. Sealing is a status check inside the
       // totals read, not a permission check here.
       totals: await get_admission_vote_totals({ admission_vote_id }),
+      league_teams,
       eligible_team_ids: [...eligible_team_ids],
       ballot_count: Number(ballot_counts.ballot_count),
       commissioner_entered_ballot_count: Number(
@@ -550,6 +569,461 @@ router.post('/:admission_vote_id/transcribed-ballot', async (req, res) => {
     })
 
     res.send({ admission_vote_id: vote.admission_vote_id, team_id })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.message })
+  }
+})
+
+/**
+ * @swagger
+ * /admission-votes:
+ *   post:
+ *     summary: Open an admission vote
+ *     description: |
+ *       Section 10. The commissioner gives Notice of every Candidate and his
+ *       Sponsors and of the number of Candidates a Team may rank, then holds
+ *       the vote open. The eligibility snapshot is written here and frozen:
+ *       row presence in users_teams cannot signal a seated manager, so the
+ *       teams entitled to a ballot are stated rather than inferred.
+ *     tags:
+ *       - Admission votes
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The vote was opened
+ *       400:
+ *         description: Malformed request
+ *       401:
+ *         description: Authentication required
+ *       403:
+ *         description: The caller is not the commissioner
+ *       409:
+ *         description: The league already has an open admission vote
+ */
+router.post('/', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const league_id = get_league_id(req.body.league_id)
+    if (!league_id) {
+      return res.status(400).send({ error: 'missing league_id' })
+    }
+
+    const membership = await resolve_league_membership({
+      db,
+      league_id,
+      user_id: req.auth.userId
+    })
+
+    if (!membership) {
+      return res.status(400).send({ error: 'invalid league_id' })
+    }
+
+    if (!membership.is_commissioner) {
+      return res
+        .status(403)
+        .send({ error: 'only the commissioner can open an admission vote' })
+    }
+
+    const maximum_ranked_candidates = Number(req.body.maximum_ranked_candidates)
+    // Section 10: the stated number "shall be not less than one (1)". A stated
+    // maximum of zero would score every Candidate at zero and hand the whole
+    // ranking to the Commissioner under a parameter he alone sets.
+    if (
+      !Number.isInteger(maximum_ranked_candidates) ||
+      maximum_ranked_candidates < 1
+    ) {
+      return res
+        .status(400)
+        .send({ error: 'maximum_ranked_candidates must be at least 1' })
+    }
+
+    const opened_at = new Date()
+    const closes_at = new Date(req.body.closes_at)
+    if (Number.isNaN(closes_at.getTime()) || closes_at <= opened_at) {
+      return res.status(400).send({ error: 'closes_at must be in the future' })
+    }
+
+    const candidates = Array.isArray(req.body.candidates)
+      ? req.body.candidates
+      : []
+    if (!candidates.length) {
+      return res
+        .status(400)
+        .send({ error: 'an admission vote needs at least one candidate' })
+    }
+
+    const league_team_ids = new Set(
+      (
+        await db('teams')
+          .where({ lid: league_id, season_year: current_season.year })
+          .select('uid')
+      ).map((team) => team.uid)
+    )
+
+    const eligible_teams = Array.isArray(req.body.eligible_teams)
+      ? req.body.eligible_teams
+      : []
+    if (!eligible_teams.length) {
+      return res
+        .status(400)
+        .send({ error: 'at least one team must be entitled to a ballot' })
+    }
+
+    for (const eligible_team of eligible_teams) {
+      if (!league_team_ids.has(Number(eligible_team.team_id))) {
+        return res
+          .status(400)
+          .send({ error: 'eligible team is not a team in this league' })
+      }
+    }
+
+    for (const candidate of candidates) {
+      if (
+        typeof candidate.candidate_name !== 'string' ||
+        !candidate.candidate_name.trim()
+      ) {
+        return res.status(400).send({ error: 'every candidate needs a name' })
+      }
+      for (const team_id of candidate.sponsor_team_ids || []) {
+        if (!league_team_ids.has(Number(team_id))) {
+          return res
+            .status(400)
+            .send({ error: 'sponsor is not a team in this league' })
+        }
+      }
+    }
+
+    // A partial unique index already bounds a league to one OPEN vote per
+    // season, so this is the readable refusal rather than the enforcement.
+    const open_vote = await db('admission_votes')
+      .where({
+        league_id,
+        season_year: current_season.year,
+        vote_status: admission_vote_statuses.OPEN
+      })
+      .first()
+
+    if (open_vote) {
+      return res
+        .status(409)
+        .send({ error: 'this league already has an open admission vote' })
+    }
+
+    let admission_vote_id
+
+    // One transaction. A vote whose eligibility snapshot or candidate list only
+    // half landed would be open and unvotable, and the ballot route's foreign
+    // key to the snapshot would refuse every Team that fell in the gap.
+    await db.transaction(async (trx) => {
+      const [inserted] = await trx('admission_votes')
+        .insert({
+          league_id,
+          season_year: current_season.year,
+          opened_at,
+          closes_at,
+          maximum_ranked_candidates,
+          vote_status: admission_vote_statuses.OPEN
+        })
+        .returning('admission_vote_id')
+
+      admission_vote_id = inserted.admission_vote_id
+
+      await trx('admission_vote_eligible_teams').insert(
+        eligible_teams.map((eligible_team) => ({
+          admission_vote_id,
+          team_id: Number(eligible_team.team_id),
+          recorded_at: opened_at,
+          recorded_reason: eligible_team.recorded_reason || null
+        }))
+      )
+
+      for (const candidate of candidates) {
+        const [inserted_candidate] = await trx('admission_vote_candidates')
+          .insert({
+            admission_vote_id,
+            candidate_name: candidate.candidate_name.trim(),
+            submission_id: candidate.submission_id || null
+          })
+          .returning('admission_vote_candidate_id')
+
+        const sponsor_team_ids = [
+          ...new Set((candidate.sponsor_team_ids || []).map(Number))
+        ]
+
+        if (sponsor_team_ids.length) {
+          await trx('admission_vote_candidate_sponsors').insert(
+            sponsor_team_ids.map((team_id) => ({
+              admission_vote_candidate_id:
+                inserted_candidate.admission_vote_candidate_id,
+              team_id
+            }))
+          )
+        }
+      }
+    })
+
+    res.send({ admission_vote_id })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.message })
+  }
+})
+
+/**
+ * @swagger
+ * /admission-votes/{admission_vote_id}/close:
+ *   post:
+ *     summary: Close the admission vote and pin its tally
+ *     description: |
+ *       Writes each Candidate's point total and starts the Section 11(a)
+ *       seven-day decision clock. Closing early is permitted and widens
+ *       nothing: the transcription refusal keys on `closes_at`, not on this.
+ *     tags:
+ *       - Admission votes
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The vote was closed
+ *       401:
+ *         description: Authentication required
+ *       403:
+ *         description: The caller is not the commissioner
+ *       409:
+ *         description: The vote is already closed
+ */
+router.post('/:admission_vote_id/close', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const league_id = get_league_id(req.body.league_id)
+    if (!league_id) {
+      return res.status(400).send({ error: 'missing league_id' })
+    }
+
+    const membership = await resolve_league_membership({
+      db,
+      league_id,
+      user_id: req.auth.userId
+    })
+
+    if (!membership) {
+      return res.status(400).send({ error: 'invalid league_id' })
+    }
+
+    if (!membership.is_commissioner) {
+      return res
+        .status(403)
+        .send({ error: 'only the commissioner can close an admission vote' })
+    }
+
+    const vote = await db('admission_votes')
+      .where({
+        admission_vote_id: Number(req.params.admission_vote_id),
+        league_id
+      })
+      .first()
+
+    if (!vote) {
+      return res.status(400).send({ error: 'invalid admission_vote_id' })
+    }
+
+    if (vote.vote_status !== admission_vote_statuses.OPEN) {
+      return res
+        .status(409)
+        .send({ error: 'the admission vote is already closed' })
+    }
+
+    const { decision_due_at } = await close_admission_vote({
+      admission_vote_id: vote.admission_vote_id
+    })
+
+    res.send({ admission_vote_id: vote.admission_vote_id, decision_due_at })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.message })
+  }
+})
+
+/**
+ * @swagger
+ * /admission-votes/{admission_vote_id}/decision:
+ *   post:
+ *     summary: Admit the highest ranked candidate, or pass
+ *     description: |
+ *       Section 11(a) grants the commissioner two elections and no third. There
+ *       is deliberately no admit-someone-else action, with or without a
+ *       recorded reason: a candidate below the top of the ranking is refused.
+ *       Where candidates are tied on points, Section 11(c) puts the ranking
+ *       within the tie in the commissioner's exclusive discretion, so any of
+ *       the tied top-scorers may be admitted and the admitted candidate is
+ *       still the highest ranked. A pass requires a reason, per Section 11(b).
+ *       The action is refused once `decision_due_at` has passed, at which point
+ *       he is deemed to have passed.
+ *     tags:
+ *       - Admission votes
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The decision was recorded
+ *       400:
+ *         description: Malformed request, or an admission of a candidate who is not highest ranked
+ *       401:
+ *         description: Authentication required
+ *       403:
+ *         description: The caller is not the commissioner
+ *       409:
+ *         description: The vote is still open, already decided, or past its deadline
+ */
+router.post('/:admission_vote_id/decision', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const league_id = get_league_id(req.body.league_id)
+    if (!league_id) {
+      return res.status(400).send({ error: 'missing league_id' })
+    }
+
+    const membership = await resolve_league_membership({
+      db,
+      league_id,
+      user_id: req.auth.userId
+    })
+
+    if (!membership) {
+      return res.status(400).send({ error: 'invalid league_id' })
+    }
+
+    if (!membership.is_commissioner) {
+      return res
+        .status(403)
+        .send({ error: 'only the commissioner can decide an admission vote' })
+    }
+
+    const vote = await db('admission_votes')
+      .where({
+        admission_vote_id: Number(req.params.admission_vote_id),
+        league_id
+      })
+      .first()
+
+    if (!vote) {
+      return res.status(400).send({ error: 'invalid admission_vote_id' })
+    }
+
+    if (vote.vote_status !== admission_vote_statuses.CLOSED) {
+      return res
+        .status(409)
+        .send({ error: 'the admission vote has not closed yet' })
+    }
+
+    if (vote.decision_outcome) {
+      return res
+        .status(409)
+        .send({ error: 'this admission vote has already been decided' })
+    }
+
+    // Section 11(a): "He shall admit or pass within seven (7) days of the close
+    // of the Admission Vote, and where he does neither he is deemed to have
+    // passed." Once that has happened the deemed pass has taken effect, so
+    // there is no decision left to make and writing one would overwrite it.
+    if (Date.now() > new Date(vote.decision_due_at).getTime()) {
+      return res.status(409).send({
+        error:
+          'the seven-day period has passed and the commissioner is deemed to have passed'
+      })
+    }
+
+    const { decision_outcome } = req.body
+    if (
+      decision_outcome !== admission_vote_outcomes.ADMITTED &&
+      decision_outcome !== admission_vote_outcomes.PASSED
+    ) {
+      return res
+        .status(400)
+        .send({ error: 'decision_outcome must be admitted or passed' })
+    }
+
+    const decision_reason =
+      typeof req.body.decision_reason === 'string'
+        ? req.body.decision_reason.trim()
+        : ''
+
+    if (decision_outcome === admission_vote_outcomes.PASSED) {
+      // Section 11(b): he "shall give Notice of the pass and of his reason
+      // for it".
+      if (!decision_reason) {
+        return res.status(400).send({ error: 'a pass requires a reason' })
+      }
+
+      await db('admission_votes')
+        .where({ admission_vote_id: vote.admission_vote_id })
+        .update({
+          decision_outcome: admission_vote_outcomes.PASSED,
+          decided_at: new Date(),
+          decision_reason
+        })
+
+      return res.send({
+        admission_vote_id: vote.admission_vote_id,
+        decision_outcome
+      })
+    }
+
+    const admission_vote_candidate_id = Number(
+      req.body.admission_vote_candidate_id
+    )
+    if (!Number.isInteger(admission_vote_candidate_id)) {
+      return res
+        .status(400)
+        .send({ error: 'missing admission_vote_candidate_id' })
+    }
+
+    // The ranking is computed here rather than stored, so there is no field a
+    // commissioner could reorder before "accepting the vote". An earlier draft
+    // carried a freely editable rank that the decision was staged from, which
+    // is exactly that bypass.
+    const totals = await get_admission_vote_totals({
+      admission_vote_id: vote.admission_vote_id
+    })
+
+    const highest_points = totals.length ? totals[0].points_total : null
+    const candidate = totals.find(
+      (row) => row.admission_vote_candidate_id === admission_vote_candidate_id
+    )
+
+    if (!candidate) {
+      return res
+        .status(400)
+        .send({ error: 'candidate is not standing in this admission vote' })
+    }
+
+    // Section 11(a) grants admission of "the highest ranked Candidate" and
+    // nothing else. Equality rather than identity is what makes the Section
+    // 11(c) tie work: among candidates tied at the top the commissioner ranks
+    // them himself, so any of them IS the highest ranked once he has.
+    if (candidate.points_total !== highest_points) {
+      return res.status(400).send({
+        error:
+          'only the highest ranked candidate may be admitted; the other election is to pass'
+      })
+    }
+
+    await db('admission_votes')
+      .where({ admission_vote_id: vote.admission_vote_id })
+      .update({
+        decision_outcome: admission_vote_outcomes.ADMITTED,
+        decided_at: new Date(),
+        decided_admission_vote_candidate_id: admission_vote_candidate_id,
+        decision_reason: decision_reason || null
+      })
+
+    res.send({
+      admission_vote_id: vote.admission_vote_id,
+      decision_outcome,
+      admission_vote_candidate_id
+    })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.message })
