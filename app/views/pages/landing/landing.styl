@@ -1,0 +1,132 @@
+// The landing page is read by people with no account and no context, so it is
+// a single readable column of prose rather than the dense app chrome the rest
+// of the site uses. Fonts follow the markdown pages: mono for headings and
+// links, sans for body copy.
+$landing_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
+$landing_mono = 'IBM Plex Mono', monospace
+
+.landing
+  max-width 760px
+  margin 0 auto 150px
+  padding 24px 16px
+  font 400 17px/1.7 $landing_sans
+  color $textColor
+
+  h1
+  h2
+  h3
+    font-family $landing_mono
+    color $textColorDark
+    line-height 1.25
+
+  p
+    margin 0 0 1em
+    font-family inherit
+    line-height inherit
+    letter-spacing normal
+
+  a
+    color $accentColor
+    font-weight 700
+    font-family $landing_mono
+    &:hover
+      border-bottom 1px solid $accentColor
+
+.landing__hero
+  padding-bottom 32px
+  border-bottom 1px solid $borderColor
+
+  h1
+    margin 0 0 0.5em
+    font-size 2em
+
+.landing__lede
+  font-size 1.0625em
+
+.landing__hero-actions
+  display flex
+  flex-wrap wrap
+  align-items center
+  gap 16px
+  margin-top 24px
+
+// The single call to action. Filled rather than outlined so it stays the one
+// obvious next step on a page that is otherwise all prose and links.
+// Qualified with the page class so it wins over the generic `.landing a` color
+// above, which would otherwise render accent-on-dark.
+.landing a.landing__cta
+  display inline-block
+  padding 12px 20px
+  background $textColorDark
+  color white
+  font-family $landing_mono
+  font-weight 700
+  border-radius 4px
+  &:hover
+    background $accentColor
+    border-bottom none
+
+.landing__secondary-action
+  font-size 0.9375em
+
+.landing__section
+  margin-top 40px
+
+.landing__section-title
+  margin 0 0 0.75em
+  font-size 1.375em
+
+.landing__list
+  margin 0
+  padding-left 1.25em
+
+  li
+    margin-bottom 0.75em
+
+.landing__trust-item
+  margin-bottom 28px
+
+  h3
+    margin 0 0 0.4em
+    font-size 1.0625em
+
+  p
+    margin-bottom 0.5em
+
+.landing__figure
+  margin 0 0 28px
+
+  img
+    display block
+    width 100%
+    border 1px solid $borderColor
+    border-radius 4px
+
+  figcaption
+    margin-top 8px
+    font-size 0.875em
+    color lighten($textColor, 20%)
+
+.landing__note
+  margin-top 1.25em
+  padding-left 1.25em
+  border-left 3px solid $borderColor
+  color lighten($textColor, 10%)
+
+.landing__documents
+  margin 0
+  padding 0
+  list-style none
+
+  li
+    margin-bottom 1em
+
+  span
+    display block
+    font-size 0.9375em
+    color lighten($textColor, 15%)
+
+.landing__footer
+  margin-top 48px
+  padding-top 32px
+  border-top 1px solid $borderColor

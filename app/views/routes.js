@@ -43,6 +43,7 @@ const MatchupPage = lazy(() => import('@pages/matchup'))
 const UserSettingsPage = lazy(() => import('@pages/user-settings'))
 const ErrorTest = lazy(() => import('@components/error-test'))
 const ShortUrlResolverPage = lazy(() => import('@pages/short-url-resolver'))
+const LandingPage = lazy(() => import('@pages/landing'))
 
 const map_state_to_props = createSelector(get_app, (app) => ({ app }))
 
@@ -60,8 +61,20 @@ const Routes = ({ app }) => {
     }
   }
 
+  // The front door. Anonymous visitors get the league pitch; a member with a
+  // league already connected has no use for it and goes straight to their
+  // league, matching what UnmatchedRoute does for every other unknown path.
+  const RootRoute = () => {
+    if (app.leagueId) {
+      return <Navigate to={`/leagues/${app.leagueId}`} replace />
+    }
+
+    return <LandingPage />
+  }
+
   return (
     <RouterRoutes>
+      <Route path='/' element={<RootRoute />} />
       {!app.userId && <Route path='/login' element={<AuthPage />} />}
       {/* Both halves of the reset flow are for users who cannot log in, so
           neither is gated on userId — unlike /login, which is hidden once a
@@ -131,7 +144,11 @@ const Routes = ({ app }) => {
         path='/leagues/:lid/team-settings'
         element={<TeamSettingsPage />}
       />
-      <Route path='/about' element={<MarkdownPage path='/README.md' />} />
+      {/* /about used to render the repo README, which is written for
+          contributors rather than for anyone deciding whether to join the
+          league. The landing page is now the honest answer to "what is this",
+          so /about points at it rather than keeping a second, worse pitch. */}
+      <Route path='/about' element={<Navigate to='/' replace />} />
       <Route
         path='/resources'
         element={<MarkdownPage path='/resources.md' />}
