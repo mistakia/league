@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import * as chai from 'chai'
 
 import { page_routes } from '#libs-shared/page-routes.mjs'
+import * as waitlist_questions from '#libs-shared/manager-waitlist-questions.mjs'
 import {
   default_description,
   default_title,
@@ -93,6 +94,36 @@ describe('LIBS-SHARED social meta copy', function () {
       )
       expect(route.og_image_alt.trim(), `${route.pattern} og_image_alt`).to.be
         .ok
+    }
+  })
+
+  // The questionnaire is the surface a prospective manager actually reads, so
+  // it is where a recruiting claim does the most work — and it sat outside this
+  // gate until its help text was found still saying "One seat is confirmed
+  // open" after every route had been cleaned.
+  //
+  // Reads the module's EXPORTED VALUES rather than its source. A source scan
+  // would have to exclude comments by hand, and a comment is exactly where the
+  // policy gets written down — page-routes.mjs already carries "the league does
+  // not advertise that a seat is open", which any source scan would report as a
+  // violation of itself. Walking the exports also picks up commitment_terms,
+  // what_we_look_for and the affirmation label, none of which are label/help
+  // keys, so nothing user-facing in the file is out of reach.
+  it('does not advertise a recruiting claim in the waitlist questionnaire', function () {
+    const collect_strings = (value) => {
+      if (typeof value === 'string') return [value]
+      if (Array.isArray(value)) return value.flatMap(collect_strings)
+      if (value && typeof value === 'object') {
+        return Object.values(value).flatMap(collect_strings)
+      }
+      return []
+    }
+
+    const copy = collect_strings(waitlist_questions)
+    expect(copy.length, 'no questionnaire copy was read').to.be.greaterThan(20)
+
+    for (const text of copy) {
+      expect(find_recruiting_token(text), text).to.equal(undefined)
     }
   })
 

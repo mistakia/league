@@ -38,6 +38,12 @@ export const apply_document_meta = (meta_data) => {
   set_meta_content('meta[property="og:image:alt"]', meta_data.OG_IMAGE_ALT)
 
   set_meta_content('meta[name="twitter:title"]', meta_data.TWITTER_TITLE)
+  // The twitter pair has to move with the og pair. og:image became per-route
+  // above, and leaving these behind makes the two describe different images
+  // after an in-app navigation — which is the exact drift this module exists
+  // to prevent. Note index.html binds twitter:image:alt to OG_IMAGE_ALT.
+  set_meta_content('meta[name="twitter:image"]', meta_data.TWITTER_IMAGE)
+  set_meta_content('meta[name="twitter:image:alt"]', meta_data.OG_IMAGE_ALT)
   set_meta_content(
     'meta[name="twitter:description"]',
     meta_data.TWITTER_DESCRIPTION

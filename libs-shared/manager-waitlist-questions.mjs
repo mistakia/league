@@ -109,7 +109,7 @@ export const contact_fields = [
   {
     column: 'requested_seat',
     label: 'Is there a particular team you are interested in?',
-    help: 'Optional. One seat is confirmed open; if others come free we will come back to you.',
+    help: 'Optional. If a seat comes free we will come back to you.',
     required: false,
     max: MAX_SHORT_ANSWER_LENGTH
   }
