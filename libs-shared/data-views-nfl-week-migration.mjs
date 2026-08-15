@@ -2,7 +2,7 @@ import { format_nfl_week_identifier } from './nfl-week-identifier.mjs'
 
 export const SINGLE_WEEK_COLUMNS = new Set([
   'player_dfs_salary',
-  'player_dfs_ownership_pct',
+  'player_dfs_ownership_percentage',
   'player_practice_status',
   'player_practice_injury',
   'player_practice_game_designation',

@@ -314,7 +314,39 @@ const COLUMN_ID_RENAMES = {
   // at the time of the fix; the entry is here for anything saved between then
   // and the deploy.
   nfl_team_seasonlogs_cpoe:
-    'nfl_team_seasonlogs_completion_percentage_over_expected'
+    'nfl_team_seasonlogs_completion_percentage_over_expected',
+  // The 2026-08-15 pct -> percentage conform. Fifteen ids move because their
+  // spelling embeds a renamed column; column ids derive from column_name, so the
+  // server stops emitting the old key and the client's player_value_path renders
+  // blank without these -- the same failure the cpoe entry above records.
+  //
+  // Listed in full rather than only the ids with production occurrences, per the
+  // reasoning in the dvoa note: a client on a stale bundle can persist any of
+  // them at any time, so an id with no hits today is a latent instance.
+  player_contract_apy: 'player_contract_average_annual_value',
+  player_contract_apy_cap_pct:
+    'player_contract_average_annual_value_cap_percentage',
+  player_contract_inflated_apy: 'player_contract_inflated_average_annual_value',
+  player_dfs_ownership_pct: 'player_dfs_ownership_percentage',
+  nfl_team_seasonlogs_pass_comp_pct: 'nfl_team_seasonlogs_pass_comp_percentage',
+  nfl_team_seasonlogs_pass_yards_after_catch_pct:
+    'nfl_team_seasonlogs_pass_yards_after_catch_percentage',
+  nfl_team_seasonlogs_deep_pass_att_pct:
+    'nfl_team_seasonlogs_deep_pass_att_percentage',
+  nfl_team_seasonlogs_tight_window_pct:
+    'nfl_team_seasonlogs_tight_window_percentage',
+  nfl_team_seasonlogs_play_action_pct:
+    'nfl_team_seasonlogs_play_action_percentage',
+  nfl_team_seasonlogs_rush_attempts_inside_tackles_pct:
+    'nfl_team_seasonlogs_rush_attempts_inside_tackles_percentage',
+  nfl_team_seasonlogs_rush_attempts_stacked_box_pct:
+    'nfl_team_seasonlogs_rush_attempts_stacked_box_percentage',
+  nfl_team_seasonlogs_rush_attempts_under_center_pct:
+    'nfl_team_seasonlogs_rush_attempts_under_center_percentage',
+  nfl_team_seasonlogs_recv_deep_target_pct:
+    'nfl_team_seasonlogs_recv_deep_target_percentage',
+  nfl_team_seasonlogs_recv_tight_window_pct:
+    'nfl_team_seasonlogs_recv_tight_window_percentage'
 }
 
 // Column-id renames for the SHARE-URL path, which receives none of the read-time

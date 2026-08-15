@@ -230,7 +230,7 @@ const calculateStandings = ({
       : null
     teamStats[tid].stats.point_differential =
       teamStats[tid].stats.points_for - teamStats[tid].stats.points_against
-    teamStats[tid].stats.potential_points_pct =
+    teamStats[tid].stats.potential_points_percentage =
       (teamStats[tid].stats.points_for /
         teamStats[tid].stats.potential_points) *
         100 || null

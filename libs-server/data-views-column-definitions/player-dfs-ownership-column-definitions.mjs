@@ -49,7 +49,7 @@ const player_dfs_ownership_source = {
     // ownership despite being the largest by entries.
     const cte_query = db.raw(
       `
-      SELECT o.pid, o.ownership_pct, o.season_year, o.week
+      SELECT o.pid, o.ownership_percentage, o.season_year, o.week
       FROM player_dfs_ownership o
       INNER JOIN (
         SELECT dc.source_contest_id, dc.source_id,
@@ -60,7 +60,7 @@ const player_dfs_ownership_source = {
         FROM dfs_contests dc
         INNER JOIN (
           SELECT source_contest_id, source_id,
-                 COUNT(*) FILTER (WHERE ownership_pct > 0) AS nonzero_count
+                 COUNT(*) FILTER (WHERE ownership_percentage > 0) AS nonzero_count
           FROM player_dfs_ownership
           GROUP BY source_contest_id, source_id
         ) own_stats ON own_stats.source_contest_id = dc.source_contest_id
@@ -90,12 +90,14 @@ const player_dfs_ownership_source = {
 
 const create_player_dfs_ownership_field = (field) => ({
   column_name: field,
-  select_as: () => 'dfs_ownership_pct',
+  select_as: () => 'dfs_ownership_percentage',
   table_alias: generate_table_alias,
   source: player_dfs_ownership_source,
   get_cache_info
 })
 
 export default {
-  player_dfs_ownership_pct: create_player_dfs_ownership_field('ownership_pct')
+  player_dfs_ownership_percentage: create_player_dfs_ownership_field(
+    'ownership_percentage'
+  )
 }

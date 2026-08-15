@@ -87,6 +87,18 @@ const USER_BASE_ROOTS = [
   '../../../text/league',
   '--root',
   '../../../workflow/nfl',
+  // text/nfl holds the six runnable query files under text/nfl/query/, which are
+  // the canonical SQL analysis sessions execute. text/nfl-betting is a SIBLING
+  // directory that text/nfl does not reach, and text/home-dynasty-league is a
+  // third root again -- all three were outside the corpus until the 2026-08-15
+  // pct conform, whose breaking SQL lived in every one of them and over which
+  // the gate returned green.
+  '--root',
+  '../../../text/nfl',
+  '--root',
+  '../../../text/nfl-betting',
+  '--root',
+  '../../../text/home-dynasty-league',
   // The user-base CLI tree, for GATE 3. It holds EXECUTABLE schema consumers --
   // monitoring scripts shipping SQL over ssh to psql, and scripts POSTing SQL to
   // `/api/db/<database>/query` — a different corpus from the three prose roots

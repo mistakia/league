@@ -230,7 +230,9 @@ export const compute_fanduel_ownership = async ({
   for (const [fixture_player_id, count] of player_counts) {
     ownership.push({
       fixture_player_id,
-      ownership_pct: Number(((count / total_entries_sampled) * 100).toFixed(2))
+      ownership_percentage: Number(
+        ((count / total_entries_sampled) * 100).toFixed(2)
+      )
     })
   }
 

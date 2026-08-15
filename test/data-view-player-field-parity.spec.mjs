@@ -145,7 +145,7 @@ const find_orphaned_frontend_fields = (frontend_fields) =>
 // entry closes. Anchoring on the indent keeps helper functions and the module's
 // own top-level consts out of the match.
 //
-// The helper-call form (`player_contract_apy: contract_field({`) has to be
+// The helper-call form (`player_contract_average_annual_value: contract_field({`) has to be
 // matched too. An earlier version of this parser accepted only the bare object
 // literal and silently dropped the nine contract columns -- they read as missing
 // frontend fields when they are all present, which is the same vacuous-pattern
@@ -193,7 +193,9 @@ describe('data view player field parity', function () {
     expect(frontend_fields.size).to.be.greaterThan(50)
     expect(frontend_fields.get('player_position')).to.equal('primary_position')
     // The helper-call form, which the first version of the parser missed.
-    expect(frontend_fields.get('player_contract_apy')).to.equal('contract_apy')
+    expect(
+      frontend_fields.get('player_contract_average_annual_value')
+    ).to.equal('contract_average_annual_value')
   })
 
   it('registers every server column in the frontend field file', function () {

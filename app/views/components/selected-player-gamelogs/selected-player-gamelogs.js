@@ -53,7 +53,7 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
   const pid = player_map.get('pid')
   const position = player_map.get('primary_position')
   const [show_quarter_snaps, set_show_quarter_snaps] = useState(false)
-  const [show_quarter_pct, set_show_quarter_pct] = useState(false)
+  const [show_quarter_percentage, set_show_quarter_percentage] = useState(false)
 
   useEffect(() => {
     load({ pid, position })
@@ -63,8 +63,8 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
     set_show_quarter_snaps(!show_quarter_snaps)
   }
 
-  const handle_toggle_quarter_pct = () => {
-    set_show_quarter_pct(!show_quarter_pct)
+  const handle_toggle_quarter_percentage = () => {
+    set_show_quarter_percentage(!show_quarter_percentage)
   }
 
   const snaps_config = get_snaps_config(position)
@@ -83,7 +83,7 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
     )
     const gamelogs = years[year]
     gamelogs.forEach((game, gameIndex) => {
-      const snaps_off_pct = game.snaps_off_pct
+      const snaps_off_percentage = game.snaps_off_percentage
       const lead = (
         <>
           <div className='table__cell metric sticky__column game__day'>
@@ -113,8 +113,8 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
           <div className='row__group'>
             <div className='row__group-body'>
               <div className='table__cell metric'>
-                {snaps_off_pct != null
-                  ? `${(snaps_off_pct * 100).toFixed(0)}%`
+                {snaps_off_percentage != null
+                  ? `${(snaps_off_percentage * 100).toFixed(0)}%`
                   : '-'}
               </div>
               {snaps_config.fields.map((field) => (
@@ -126,17 +126,21 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
                 QUARTER_LABELS.map((label, index) => {
                   const quarter_num = index + 1
                   const snap_count_field = `q${quarter_num}_snaps_${quarter_snap_type}`
-                  const snap_pct_field = `q${quarter_num}_snaps_${quarter_snap_type}_pct`
+                  const snap_percentage_field = `q${quarter_num}_snaps_${quarter_snap_type}_percentage`
                   const snap_count = game[snap_count_field]
-                  const snap_pct = game[snap_pct_field]
-                  const pct_value =
-                    snap_pct != null ? (snap_pct * 100).toFixed(0) : null
+                  const snap_percentage = game[snap_percentage_field]
+                  const percentage_value =
+                    snap_percentage != null
+                      ? (snap_percentage * 100).toFixed(0)
+                      : null
                   const background_opacity =
-                    snap_pct != null ? Math.min(snap_pct * 0.6, 0.6) : 0
+                    snap_percentage != null
+                      ? Math.min(snap_percentage * 0.6, 0.6)
+                      : 0
 
-                  const display_value = show_quarter_pct
-                    ? pct_value != null
-                      ? `${pct_value}%`
+                  const display_value = show_quarter_percentage
+                    ? percentage_value != null
+                      ? `${percentage_value}%`
                       : '-'
                     : (snap_count ?? '-')
 
@@ -197,9 +201,9 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
                 <>
                   <span
                     className='snaps-toggle-button'
-                    onClick={handle_toggle_quarter_pct}
+                    onClick={handle_toggle_quarter_percentage}
                   >
-                    {show_quarter_pct ? '%' : '#'}
+                    {show_quarter_percentage ? '%' : '#'}
                   </span>
                   <span className='snaps-toggle-separator'>|</span>
                 </>

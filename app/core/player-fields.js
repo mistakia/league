@@ -1053,8 +1053,8 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'passing efficiency matchup',
       column_header: 'COMP%',
       csv_header: 'Opponent pass completion percentage over average',
-      percentile_field: 'pass_comp_pct',
-      ...opponent_field('pass_comp_pct')
+      percentile_field: 'pass_comp_percentage',
+      ...opponent_field('pass_comp_percentage')
     },
     opponent_completion_percentage_over_expectation: {
       category: 'passing efficiency matchup',
@@ -1126,22 +1126,22 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'passing usage matchup',
       column_header: 'DP%',
       csv_header: 'Opponent deep pass attempts percentage over average',
-      percentile_field: 'deep_pass_att_pct',
-      ...opponent_field('deep_pass_att_pct')
+      percentile_field: 'deep_pass_att_percentage',
+      ...opponent_field('deep_pass_att_percentage')
     },
     opponent_tight_window_pct: {
       category: 'passing usage matchup',
       column_header: 'TW%',
       csv_header: 'Opponent tight window passes percentage over average',
-      percentile_field: 'tight_window_pct',
-      ...opponent_field('tight_window_pct')
+      percentile_field: 'tight_window_percentage',
+      ...opponent_field('tight_window_percentage')
     },
     opponent_play_action_pct: {
       category: 'passing usage matchup',
       column_header: 'PA%',
       csv_header: 'Opponent play action passes percentage over average',
-      percentile_field: 'play_action_pct',
-      ...opponent_field('play_action_pct')
+      percentile_field: 'play_action_percentage',
+      ...opponent_field('play_action_percentage')
     },
     opponent_receiving_passer_rating: {
       category: 'receiving efficiency matchup',

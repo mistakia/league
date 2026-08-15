@@ -132,11 +132,11 @@ const process_team_directional_rushing = async (
         team_rush_right_end_yards_rank: row[15],
         team_running_back_carries: row[16],
         team_running_back_carries_rank: row[17],
-        team_rush_left_end_pct: row[18],
-        team_rush_left_tackle_pct: row[19],
-        team_rush_mid_guard_pct: row[20],
-        team_rush_right_tackle_pct: row[21],
-        team_rush_right_end_pct: row[22],
+        team_rush_left_end_percentage: row[18],
+        team_rush_left_tackle_percentage: row[19],
+        team_rush_mid_guard_percentage: row[20],
+        team_rush_right_tackle_percentage: row[21],
+        team_rush_right_end_percentage: row[22],
         observed_at
       }
     })

@@ -136,11 +136,11 @@ const CONTRACT_SUMMARY_FIELDS = [
   'contract_year_signed',
   'contract_years',
   'contract_value',
-  'contract_apy',
+  'contract_average_annual_value',
   'contract_guaranteed',
-  'contract_apy_cap_pct',
+  'contract_average_annual_value_cap_percentage',
   'contract_inflated_value',
-  'contract_inflated_apy',
+  'contract_inflated_average_annual_value',
   'contract_inflated_guaranteed'
 ]
 
@@ -174,11 +174,14 @@ const format_contract_summary = (row) => ({
   contract_year_signed: Number(row.year_signed) || null,
   contract_years: Number(row.years) || null,
   contract_value: format_number(row.value, 2),
-  contract_apy: format_number(row.apy, 2),
+  contract_average_annual_value: format_number(row.apy, 2),
   contract_guaranteed: format_number(row.guaranteed, 2),
-  contract_apy_cap_pct: format_number(row.apy_cap_pct, 3),
+  contract_average_annual_value_cap_percentage: format_number(
+    row.apy_cap_pct,
+    3
+  ),
   contract_inflated_value: format_number(row.inflated_value, 6),
-  contract_inflated_apy: format_number(row.inflated_apy, 6),
+  contract_inflated_average_annual_value: format_number(row.inflated_apy, 6),
   contract_inflated_guaranteed: format_number(row.inflated_guaranteed, 6)
 })
 

@@ -26,7 +26,7 @@ debug.enable('generate-nfl-team-seasonlogs')
 const passing_stats = [
   'pass_rating',
   'pass_yards_per_attempt',
-  'pass_comp_pct',
+  'pass_comp_percentage',
   'passing_sacks',
   'expected_pass_comp',
   'completion_percentage_over_expected',
@@ -44,12 +44,12 @@ const passing_stats = [
   'pass_completed_air_yards',
   'pass_yards_after_catch',
   'expected_pass_yards_after_catch',
-  'pass_yards_after_catch_pct',
+  'pass_yards_after_catch_percentage',
   'air_yards_per_pass_att',
   'avg_target_separation',
-  'deep_pass_att_pct',
-  'tight_window_pct',
-  'play_action_pct'
+  'deep_pass_att_percentage',
+  'tight_window_percentage',
+  'play_action_percentage'
 ]
 
 const rushing_stats = [
@@ -68,9 +68,9 @@ const rushing_stats = [
   'rush_attempts_speed_15_plus_mph',
   'rush_attempts_speed_20_plus_mph',
   'rush_avg_time_to_line_of_scrimmage',
-  'rush_attempts_inside_tackles_pct',
-  'rush_attempts_stacked_box_pct',
-  'rush_attempts_under_center_pct',
+  'rush_attempts_inside_tackles_percentage',
+  'rush_attempts_stacked_box_percentage',
+  'rush_attempts_under_center_percentage',
   'longest_rush',
   'rush_yards_per_attempt',
   'rush_yards_10_plus_rate'
@@ -102,8 +102,8 @@ const receiving_stats = [
   'endzone_recs',
   'team_target_share',
   'team_air_yard_share',
-  'recv_deep_target_pct',
-  'recv_tight_window_pct',
+  'recv_deep_target_percentage',
+  'recv_tight_window_percentage',
   'longest_reception',
   'recv_yards_15_plus_rate'
 ]
@@ -111,17 +111,17 @@ const receiving_stats = [
 const rate_stats = [
   'pass_rating',
   'pass_yards_per_attempt',
-  'pass_comp_pct',
+  'pass_comp_percentage',
   'expected_pass_comp',
   'pass_epa_per_db',
   'pressure_rate_against',
   'blitz_rate',
   'drop_rate',
-  'pass_yards_after_catch_pct',
+  'pass_yards_after_catch_percentage',
   'air_yards_per_pass_att',
-  'deep_pass_att_pct',
-  'tight_window_pct',
-  'play_action_pct',
+  'deep_pass_att_percentage',
+  'tight_window_percentage',
+  'play_action_percentage',
   'rush_epa_per_attempt',
   'expected_rush_yards_per_attempt',
   'rush_yards_over_expected_per_attempt',
@@ -143,8 +143,8 @@ const rate_stats = [
   'recv_air_yards_per_target',
   'target_rate',
   'avg_route_depth',
-  'recv_deep_target_pct',
-  'recv_tight_window_pct',
+  'recv_deep_target_percentage',
+  'recv_tight_window_percentage',
   'recv_yards_15_plus_rate',
   'longest_reception',
   'longest_rush',

@@ -113,7 +113,7 @@ const get_cache_info = create_season_cache_info({
 const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
   'pass_rating',
   'pass_yards_per_attempt',
-  'pass_comp_pct',
+  'pass_comp_percentage',
   'expected_pass_comp',
   'completion_percentage_over_expected',
   'pass_epa_per_db',
@@ -123,12 +123,12 @@ const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
   'pressure_rate_against',
   'blitz_rate',
   'drop_rate',
-  'pass_yards_after_catch_pct',
+  'pass_yards_after_catch_percentage',
   'air_yards_per_pass_att',
   'avg_target_separation',
-  'deep_pass_att_pct',
-  'tight_window_pct',
-  'play_action_pct',
+  'deep_pass_att_percentage',
+  'tight_window_percentage',
+  'play_action_percentage',
   'rush_epa_per_attempt',
   'expected_rush_yards_per_attempt',
   'rush_yards_over_expected_per_attempt',
@@ -136,9 +136,9 @@ const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
   'rush_yards_before_contact_per_attempt',
   'rush_success_rate',
   'rush_avg_time_to_line_of_scrimmage',
-  'rush_attempts_inside_tackles_pct',
-  'rush_attempts_stacked_box_pct',
-  'rush_attempts_under_center_pct',
+  'rush_attempts_inside_tackles_percentage',
+  'rush_attempts_stacked_box_percentage',
+  'rush_attempts_under_center_percentage',
   'rush_yards_per_attempt',
   'rush_yards_10_plus_rate',
   'receiving_passer_rating',
@@ -157,8 +157,8 @@ const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
   'avg_route_depth',
   'team_target_share',
   'team_air_yard_share',
-  'recv_deep_target_pct',
-  'recv_tight_window_pct',
+  'recv_deep_target_percentage',
+  'recv_tight_window_percentage',
   'recv_yards_15_plus_rate'
 ]
 
@@ -273,8 +273,8 @@ export default {
     create_field_from_nfl_team_seasonlogs('pass_rating'),
   nfl_team_seasonlogs_pass_yards_per_attempt:
     create_field_from_nfl_team_seasonlogs('pass_yards_per_attempt'),
-  nfl_team_seasonlogs_pass_comp_pct:
-    create_field_from_nfl_team_seasonlogs('pass_comp_pct'),
+  nfl_team_seasonlogs_pass_comp_percentage:
+    create_field_from_nfl_team_seasonlogs('pass_comp_percentage'),
   nfl_team_seasonlogs_sacks:
     create_field_from_nfl_team_seasonlogs('sacks_taken'),
   nfl_team_seasonlogs_expected_pass_comp:
@@ -311,18 +311,18 @@ export default {
     create_field_from_nfl_team_seasonlogs('pass_yards_after_catch'),
   nfl_team_seasonlogs_expected_pass_yards_after_catch:
     create_field_from_nfl_team_seasonlogs('expected_pass_yards_after_catch'),
-  nfl_team_seasonlogs_pass_yards_after_catch_pct:
-    create_field_from_nfl_team_seasonlogs('pass_yards_after_catch_pct'),
+  nfl_team_seasonlogs_pass_yards_after_catch_percentage:
+    create_field_from_nfl_team_seasonlogs('pass_yards_after_catch_percentage'),
   nfl_team_seasonlogs_air_yards_per_pass_att:
     create_field_from_nfl_team_seasonlogs('air_yards_per_pass_att'),
   nfl_team_seasonlogs_avg_target_separation:
     create_field_from_nfl_team_seasonlogs('avg_target_separation'),
-  nfl_team_seasonlogs_deep_pass_att_pct:
-    create_field_from_nfl_team_seasonlogs('deep_pass_att_pct'),
-  nfl_team_seasonlogs_tight_window_pct:
-    create_field_from_nfl_team_seasonlogs('tight_window_pct'),
-  nfl_team_seasonlogs_play_action_pct:
-    create_field_from_nfl_team_seasonlogs('play_action_pct'),
+  nfl_team_seasonlogs_deep_pass_att_percentage:
+    create_field_from_nfl_team_seasonlogs('deep_pass_att_percentage'),
+  nfl_team_seasonlogs_tight_window_percentage:
+    create_field_from_nfl_team_seasonlogs('tight_window_percentage'),
+  nfl_team_seasonlogs_play_action_percentage:
+    create_field_from_nfl_team_seasonlogs('play_action_percentage'),
   nfl_team_seasonlogs_rush_epa:
     create_field_from_nfl_team_seasonlogs('rush_epa'),
   nfl_team_seasonlogs_rush_epa_per_attempt:
@@ -359,12 +359,18 @@ export default {
     create_field_from_nfl_team_seasonlogs('rush_attempts_speed_20_plus_mph'),
   nfl_team_seasonlogs_rush_avg_time_to_line_of_scrimmage:
     create_field_from_nfl_team_seasonlogs('rush_avg_time_to_line_of_scrimmage'),
-  nfl_team_seasonlogs_rush_attempts_inside_tackles_pct:
-    create_field_from_nfl_team_seasonlogs('rush_attempts_inside_tackles_pct'),
-  nfl_team_seasonlogs_rush_attempts_stacked_box_pct:
-    create_field_from_nfl_team_seasonlogs('rush_attempts_stacked_box_pct'),
-  nfl_team_seasonlogs_rush_attempts_under_center_pct:
-    create_field_from_nfl_team_seasonlogs('rush_attempts_under_center_pct'),
+  nfl_team_seasonlogs_rush_attempts_inside_tackles_percentage:
+    create_field_from_nfl_team_seasonlogs(
+      'rush_attempts_inside_tackles_percentage'
+    ),
+  nfl_team_seasonlogs_rush_attempts_stacked_box_percentage:
+    create_field_from_nfl_team_seasonlogs(
+      'rush_attempts_stacked_box_percentage'
+    ),
+  nfl_team_seasonlogs_rush_attempts_under_center_percentage:
+    create_field_from_nfl_team_seasonlogs(
+      'rush_attempts_under_center_percentage'
+    ),
   nfl_team_seasonlogs_longest_rush:
     create_field_from_nfl_team_seasonlogs('longest_rush'),
   nfl_team_seasonlogs_rush_yards_per_attempt:
@@ -424,10 +430,10 @@ export default {
     create_field_from_nfl_team_seasonlogs('team_target_share'),
   nfl_team_seasonlogs_team_air_yard_share:
     create_field_from_nfl_team_seasonlogs('team_air_yard_share'),
-  nfl_team_seasonlogs_recv_deep_target_pct:
-    create_field_from_nfl_team_seasonlogs('recv_deep_target_pct'),
-  nfl_team_seasonlogs_recv_tight_window_pct:
-    create_field_from_nfl_team_seasonlogs('recv_tight_window_pct'),
+  nfl_team_seasonlogs_recv_deep_target_percentage:
+    create_field_from_nfl_team_seasonlogs('recv_deep_target_percentage'),
+  nfl_team_seasonlogs_recv_tight_window_percentage:
+    create_field_from_nfl_team_seasonlogs('recv_tight_window_percentage'),
   nfl_team_seasonlogs_longest_reception:
     create_field_from_nfl_team_seasonlogs('longest_reception'),
   nfl_team_seasonlogs_recv_yards_15_plus_rate:

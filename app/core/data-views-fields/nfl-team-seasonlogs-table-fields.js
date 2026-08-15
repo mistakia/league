@@ -344,10 +344,10 @@ export default {
     header_label: 'Y/A',
     player_value_path: 'nfl_team_seasonlogs_pass_yards_per_attempt'
   }),
-  nfl_team_seasonlogs_pass_comp_pct: create_seasonlog_field({
+  nfl_team_seasonlogs_pass_comp_percentage: create_seasonlog_field({
     column_title: 'Pass Completion % Generated/Allowed By Position',
     header_label: 'Comp%',
-    player_value_path: 'nfl_team_seasonlogs_pass_comp_pct'
+    player_value_path: 'nfl_team_seasonlogs_pass_comp_percentage'
   }),
   nfl_team_seasonlogs_sacks: create_seasonlog_field({
     column_title: 'Sacks Generated/Allowed By Position',
@@ -438,11 +438,13 @@ export default {
     header_label: 'xYAC',
     player_value_path: 'nfl_team_seasonlogs_expected_pass_yards_after_catch'
   }),
-  nfl_team_seasonlogs_pass_yards_after_catch_pct: create_seasonlog_field({
-    column_title: 'Pass YAC % Generated/Allowed By Position',
-    header_label: 'YAC%',
-    player_value_path: 'nfl_team_seasonlogs_pass_yards_after_catch_pct'
-  }),
+  nfl_team_seasonlogs_pass_yards_after_catch_percentage: create_seasonlog_field(
+    {
+      column_title: 'Pass YAC % Generated/Allowed By Position',
+      header_label: 'YAC%',
+      player_value_path: 'nfl_team_seasonlogs_pass_yards_after_catch_percentage'
+    }
+  ),
   nfl_team_seasonlogs_air_yards_per_pass_att: create_seasonlog_field({
     column_title: 'Air Yards per Pass Attempt Generated/Allowed By Position',
     header_label: 'AY/Att',
@@ -453,20 +455,20 @@ export default {
     header_label: 'Sep',
     player_value_path: 'nfl_team_seasonlogs_avg_target_separation'
   }),
-  nfl_team_seasonlogs_deep_pass_att_pct: create_seasonlog_field({
+  nfl_team_seasonlogs_deep_pass_att_percentage: create_seasonlog_field({
     column_title: 'Deep Pass Attempt % Generated/Allowed By Position',
     header_label: 'Deep%',
-    player_value_path: 'nfl_team_seasonlogs_deep_pass_att_pct'
+    player_value_path: 'nfl_team_seasonlogs_deep_pass_att_percentage'
   }),
-  nfl_team_seasonlogs_tight_window_pct: create_seasonlog_field({
+  nfl_team_seasonlogs_tight_window_percentage: create_seasonlog_field({
     column_title: 'Tight Window % Generated/Allowed By Position',
     header_label: 'Tight%',
-    player_value_path: 'nfl_team_seasonlogs_tight_window_pct'
+    player_value_path: 'nfl_team_seasonlogs_tight_window_percentage'
   }),
-  nfl_team_seasonlogs_play_action_pct: create_seasonlog_field({
+  nfl_team_seasonlogs_play_action_percentage: create_seasonlog_field({
     column_title: 'Play Action % Generated/Allowed By Position',
     header_label: 'PA%',
-    player_value_path: 'nfl_team_seasonlogs_play_action_pct'
+    player_value_path: 'nfl_team_seasonlogs_play_action_percentage'
   }),
   nfl_team_seasonlogs_rush_epa: create_seasonlog_field({
     column_title: 'Rush EPA Generated/Allowed By Position',
@@ -556,23 +558,30 @@ export default {
       player_value_path:
         'nfl_team_seasonlogs_rush_avg_time_to_line_of_scrimmage'
     }),
-  nfl_team_seasonlogs_rush_attempts_inside_tackles_pct: create_seasonlog_field({
-    column_title:
-      'Rush Attempts Inside Tackles % Generated/Allowed By Position',
-    header_label: 'Inside%',
-    player_value_path: 'nfl_team_seasonlogs_rush_attempts_inside_tackles_pct'
-  }),
-  nfl_team_seasonlogs_rush_attempts_stacked_box_pct: create_seasonlog_field({
-    column_title:
-      'Rush Attempts vs Stacked Box % Generated/Allowed By Position',
-    header_label: 'Stack%',
-    player_value_path: 'nfl_team_seasonlogs_rush_attempts_stacked_box_pct'
-  }),
-  nfl_team_seasonlogs_rush_attempts_under_center_pct: create_seasonlog_field({
-    column_title: 'Rush Attempts Under Center % Generated/Allowed By Position',
-    header_label: 'UC%',
-    player_value_path: 'nfl_team_seasonlogs_rush_attempts_under_center_pct'
-  }),
+  nfl_team_seasonlogs_rush_attempts_inside_tackles_percentage:
+    create_seasonlog_field({
+      column_title:
+        'Rush Attempts Inside Tackles % Generated/Allowed By Position',
+      header_label: 'Inside%',
+      player_value_path:
+        'nfl_team_seasonlogs_rush_attempts_inside_tackles_percentage'
+    }),
+  nfl_team_seasonlogs_rush_attempts_stacked_box_percentage:
+    create_seasonlog_field({
+      column_title:
+        'Rush Attempts vs Stacked Box % Generated/Allowed By Position',
+      header_label: 'Stack%',
+      player_value_path:
+        'nfl_team_seasonlogs_rush_attempts_stacked_box_percentage'
+    }),
+  nfl_team_seasonlogs_rush_attempts_under_center_percentage:
+    create_seasonlog_field({
+      column_title:
+        'Rush Attempts Under Center % Generated/Allowed By Position',
+      header_label: 'UC%',
+      player_value_path:
+        'nfl_team_seasonlogs_rush_attempts_under_center_percentage'
+    }),
   nfl_team_seasonlogs_longest_rush: create_seasonlog_field({
     column_title: 'Longest Rush Generated/Allowed By Position',
     header_label: 'Long',
@@ -718,15 +727,15 @@ export default {
     header_label: 'AirShare',
     player_value_path: 'nfl_team_seasonlogs_team_air_yard_share'
   }),
-  nfl_team_seasonlogs_recv_deep_target_pct: create_seasonlog_field({
+  nfl_team_seasonlogs_recv_deep_target_percentage: create_seasonlog_field({
     column_title: 'Deep Target Percentage Generated/Allowed By Position',
     header_label: 'Deep%',
-    player_value_path: 'nfl_team_seasonlogs_recv_deep_target_pct'
+    player_value_path: 'nfl_team_seasonlogs_recv_deep_target_percentage'
   }),
-  nfl_team_seasonlogs_recv_tight_window_pct: create_seasonlog_field({
+  nfl_team_seasonlogs_recv_tight_window_percentage: create_seasonlog_field({
     column_title: 'Tight Window Percentage Generated/Allowed By Position',
     header_label: 'Tight%',
-    player_value_path: 'nfl_team_seasonlogs_recv_tight_window_pct'
+    player_value_path: 'nfl_team_seasonlogs_recv_tight_window_percentage'
   }),
   nfl_team_seasonlogs_longest_reception: create_seasonlog_field({
     column_title: 'Longest Reception Generated/Allowed By Position',

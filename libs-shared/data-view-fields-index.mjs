@@ -664,7 +664,7 @@ export default {
   // Player DFS fields
   player_dfs_salary:
     "The player's salary for Daily Fantasy Sports contests (DraftKings, FanDuel, etc.)",
-  player_dfs_ownership_pct:
+  player_dfs_ownership_percentage:
     "The player's ownership percentage in Daily Fantasy Sports contests (percentage of lineups containing this player)",
 
   // Player routes
@@ -755,7 +755,7 @@ export default {
     'Passer Rating Generated/Allowed By Position',
   nfl_team_seasonlogs_pass_yards_per_attempt:
     'Pass Yards per Attempt Generated/Allowed By Position',
-  nfl_team_seasonlogs_pass_comp_pct:
+  nfl_team_seasonlogs_pass_comp_percentage:
     'Pass Completion % Generated/Allowed By Position',
   nfl_team_seasonlogs_sacks: 'Sacks Generated/Allowed By Position',
   nfl_team_seasonlogs_expected_pass_comp:
@@ -785,17 +785,17 @@ export default {
     'Pass Yards After Catch Generated/Allowed By Position',
   nfl_team_seasonlogs_expected_pass_yards_after_catch:
     'Expected Pass YAC Generated/Allowed By Position',
-  nfl_team_seasonlogs_pass_yards_after_catch_pct:
+  nfl_team_seasonlogs_pass_yards_after_catch_percentage:
     'Pass YAC % Generated/Allowed By Position',
   nfl_team_seasonlogs_air_yards_per_pass_att:
     'Air Yards per Pass Attempt Generated/Allowed By Position',
   nfl_team_seasonlogs_avg_target_separation:
     'Average Target Separation Generated/Allowed By Position',
-  nfl_team_seasonlogs_deep_pass_att_pct:
+  nfl_team_seasonlogs_deep_pass_att_percentage:
     'Deep Pass Attempt % Generated/Allowed By Position',
-  nfl_team_seasonlogs_tight_window_pct:
+  nfl_team_seasonlogs_tight_window_percentage:
     'Tight Window % Generated/Allowed By Position',
-  nfl_team_seasonlogs_play_action_pct:
+  nfl_team_seasonlogs_play_action_percentage:
     'Play Action % Generated/Allowed By Position',
   nfl_team_seasonlogs_rush_epa: 'Rush EPA Generated/Allowed By Position',
   nfl_team_seasonlogs_rush_epa_per_attempt:
@@ -826,11 +826,11 @@ export default {
     'Rush Attempts 20+ MPH Generated/Allowed By Position',
   nfl_team_seasonlogs_rush_avg_time_to_line_of_scrimmage:
     'Average Time to Line of Scrimmage Generated/Allowed By Position',
-  nfl_team_seasonlogs_rush_attempts_inside_tackles_pct:
+  nfl_team_seasonlogs_rush_attempts_inside_tackles_percentage:
     'Rush Attempts Inside Tackles % Generated/Allowed By Position',
-  nfl_team_seasonlogs_rush_attempts_stacked_box_pct:
+  nfl_team_seasonlogs_rush_attempts_stacked_box_percentage:
     'Rush Attempts vs Stacked Box % Generated/Allowed By Position',
-  nfl_team_seasonlogs_rush_attempts_under_center_pct:
+  nfl_team_seasonlogs_rush_attempts_under_center_percentage:
     'Rush Attempts Under Center % Generated/Allowed By Position',
   nfl_team_seasonlogs_longest_rush:
     'Longest Rush Generated/Allowed By Position',
@@ -884,9 +884,9 @@ export default {
     'Team Target Share Generated/Allowed By Position',
   nfl_team_seasonlogs_team_air_yard_share:
     'Team Air Yard Share Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_deep_target_pct:
+  nfl_team_seasonlogs_recv_deep_target_percentage:
     'Deep Target Percentage Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_tight_window_pct:
+  nfl_team_seasonlogs_recv_tight_window_percentage:
     'Tight Window Percentage Generated/Allowed By Position',
   nfl_team_seasonlogs_longest_reception:
     'Longest Reception Generated/Allowed By Position',
@@ -952,14 +952,15 @@ export default {
   player_contract_year_signed: 'The year the current contract was signed',
   player_contract_years: 'Total years of the current contract',
   player_contract_value: 'Total value of the current contract in dollars',
-  player_contract_apy:
+  player_contract_average_annual_value:
     'Average Per Year (APY) value of the contract in dollars',
   player_contract_guaranteed: 'Total guaranteed money in the contract',
-  player_contract_apy_cap_pct:
+  player_contract_average_annual_value_cap_percentage:
     'APY as a percentage of the salary cap when signed',
   player_contract_inflated_value:
     'Contract value adjusted for salary cap inflation',
-  player_contract_inflated_apy: 'APY adjusted for salary cap inflation',
+  player_contract_inflated_average_annual_value:
+    'APY adjusted for salary cap inflation',
   player_contract_inflated_guaranteed:
     'Guaranteed money adjusted for salary cap inflation',
 

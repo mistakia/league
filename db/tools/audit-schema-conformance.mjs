@@ -308,10 +308,10 @@ const external_system_tokens = ['pff', 'ngs', 'nfl_pro', 'nflpro']
 // metrics ("bounce/position percentage when run at [the gap]") -- numeric
 // percentages, not timestamps. Keyed table.column so the exemption is narrow.
 const accepted_non_timestamp_columns = new Set([
-  'player_college_careerlogs.bounce_pct_when_run_at',
-  'player_college_careerlogs.pos_pct_when_run_at',
-  'player_college_seasonlogs.bounce_pct_when_run_at',
-  'player_college_seasonlogs.pos_pct_when_run_at',
+  'player_college_careerlogs.bounce_percentage_when_run_at',
+  'player_college_careerlogs.positive_percentage_when_run_at',
+  'player_college_seasonlogs.bounce_percentage_when_run_at',
+  'player_college_seasonlogs.positive_percentage_when_run_at',
   // Numeric DURATIONS, not instants: seconds elapsed within a play. The name
   // rule matches the _time suffix, but there is no instant to make tz-aware.
   // Operator-ruled keeps (2026-07-24, nfl-plays-snaps cluster) -- recorded here

@@ -69,7 +69,7 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
         wins: Number($(cells[3]).text()),
         plays: Number($(cells[4]).text()),
         [win_rate_key]: parseFloat($(cells[5]).text()) / 100,
-        double_team_pct: parseFloat($(cells[6]).text()) / 100
+        double_team_percentage: parseFloat($(cells[6]).text()) / 100
       }
 
       // Try espn_id lookup first, then fallback to name+team lookup
@@ -195,7 +195,7 @@ const import_espn_line_win_rates = async ({ collector = null } = {}) => {
         line_win_count: win_rate_entry.wins,
         total_plays: win_rate_entry.plays,
         win_rate: win_rate_entry[`${data_key}_win_rate`],
-        double_team_pct: win_rate_entry.double_team_pct,
+        double_team_percentage: win_rate_entry.double_team_percentage,
         espn_win_rate_type: win_rate_type,
         observed_at,
         season_year: current_season.year

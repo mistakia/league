@@ -596,9 +596,9 @@ export default {
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },
-  player_contract_apy: {
+  player_contract_average_annual_value: {
     table_name: 'player',
-    column_name: 'contract_apy',
+    column_name: 'contract_average_annual_value',
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },
@@ -608,9 +608,9 @@ export default {
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },
-  player_contract_apy_cap_pct: {
+  player_contract_average_annual_value_cap_percentage: {
     table_name: 'player',
-    column_name: 'contract_apy_cap_pct',
+    column_name: 'contract_average_annual_value_cap_percentage',
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },
@@ -620,9 +620,9 @@ export default {
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },
-  player_contract_inflated_apy: {
+  player_contract_inflated_average_annual_value: {
     table_name: 'player',
-    column_name: 'contract_inflated_apy',
+    column_name: 'contract_inflated_average_annual_value',
     source: { grain: 'player' },
     get_cache_info: player_table_get_cache_info
   },

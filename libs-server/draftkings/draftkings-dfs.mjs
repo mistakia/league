@@ -93,10 +93,10 @@ export const parse_draftkings_ownership_csv = ({ csv_text }) => {
 
     if (!player_name || !pct_drafted_raw) continue
 
-    const ownership_pct = parseFloat(pct_drafted_raw.replace('%', ''))
+    const ownership_percentage = parseFloat(pct_drafted_raw.replace('%', ''))
     const fpts = parseFloat(fpts_raw)
 
-    if (isNaN(ownership_pct)) continue
+    if (isNaN(ownership_percentage)) continue
 
     // Deduplicate -- each player appears once in ownership data
     const player_key = `${player_name}_${roster_position}`
@@ -106,7 +106,7 @@ export const parse_draftkings_ownership_csv = ({ csv_text }) => {
     ownership_rows.push({
       player_name,
       roster_position,
-      ownership_pct,
+      ownership_percentage,
       fpts: isNaN(fpts) ? null : fpts
     })
   }

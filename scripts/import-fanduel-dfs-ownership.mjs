@@ -263,11 +263,11 @@ const import_ownership = async ({
 
       if (!player_row) {
         unmatched++
-        if (row.ownership_pct > 5) {
+        if (row.ownership_percentage > 5) {
           log(
             'unmatched high-ownership fixture_player %s - %.1f%%',
             row.fixture_player_id,
-            row.ownership_pct
+            row.ownership_percentage
           )
         }
         continue
@@ -283,7 +283,7 @@ const import_ownership = async ({
         source_contest_id: contest.source_contest_id,
         source_id: 'FANDUEL',
         source_draft_group_id: contest.source_draft_group_id,
-        ownership_pct: row.ownership_pct,
+        ownership_percentage: row.ownership_percentage,
         roster_position: fixture_player?.position || null,
         fantasy_points: null,
         source_player_display_name: display_name,

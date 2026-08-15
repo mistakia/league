@@ -62,7 +62,7 @@ const calculate_league_careerlogs = async ({ lid }) => {
       potential_points: 0,
       potential_wins: 0,
       potential_losses: 0,
-      potential_points_pct: 0,
+      potential_points_percentage: 0,
       highest_weekly_score: 0,
       lowest_weekly_score: Number.MAX_VALUE,
       worst_regular_season_finish: 0,
@@ -78,8 +78,8 @@ const calculate_league_careerlogs = async ({ lid }) => {
       championship_rounds: 0,
       regular_season_leader: 0,
       num_byes: 0,
-      best_season_win_pct: 0,
-      best_season_all_play_pct: 0,
+      best_season_win_percentage: 0,
+      best_season_all_play_percentage: 0,
       wildcards: 0,
       wildcard_wins: 0,
       wildcard_highest_score: 0,
@@ -158,15 +158,15 @@ const calculate_league_careerlogs = async ({ lid }) => {
         league_team_seasonlog.regular_season_finish === 1 ? 1 : 0
       careerlog.num_byes +=
         league_team_seasonlog.regular_season_finish <= 2 ? 1 : 0
-      careerlog.best_season_win_pct = Math.max(
-        careerlog.best_season_win_pct,
+      careerlog.best_season_win_percentage = Math.max(
+        careerlog.best_season_win_percentage,
         league_team_seasonlog.regular_season_wins /
           (league_team_seasonlog.regular_season_wins +
             league_team_seasonlog.regular_season_losses +
             league_team_seasonlog.regular_season_ties)
       )
-      careerlog.best_season_all_play_pct = Math.max(
-        careerlog.best_season_all_play_pct,
+      careerlog.best_season_all_play_percentage = Math.max(
+        careerlog.best_season_all_play_percentage,
         league_team_seasonlog.all_play_wins /
           (league_team_seasonlog.all_play_wins +
             league_team_seasonlog.all_play_losses +
@@ -233,11 +233,12 @@ const calculate_league_careerlogs = async ({ lid }) => {
       careerlog.championship_lowest_score = 0
     }
 
-    careerlog.best_season_win_pct = careerlog.best_season_win_pct * 100
-    careerlog.best_season_all_play_pct =
-      careerlog.best_season_all_play_pct * 100
+    careerlog.best_season_win_percentage =
+      careerlog.best_season_win_percentage * 100
+    careerlog.best_season_all_play_percentage =
+      careerlog.best_season_all_play_percentage * 100
 
-    careerlog.potential_points_pct =
+    careerlog.potential_points_percentage =
       (careerlog.points_for / careerlog.potential_points) * 100
 
     return careerlog

@@ -371,7 +371,7 @@ const import_ownership = async ({
           source_contest_id: contest.source_contest_id,
           source_id: 'DRAFTKINGS',
           source_draft_group_id: contest.source_draft_group_id,
-          ownership_pct: row.ownership_pct,
+          ownership_percentage: row.ownership_percentage,
           roster_position: row.roster_position,
           fantasy_points: row.fpts,
           source_player_display_name: row.player_name,

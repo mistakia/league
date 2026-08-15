@@ -486,7 +486,7 @@ export const fantasy_team_stats = [
   'potential_points_penalty',
   'potential_wins',
   'potential_losses',
-  'potential_points_pct',
+  'potential_points_percentage',
 
   'highest_weekly_score',
   'lowest_weekly_score',

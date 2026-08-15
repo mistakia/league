@@ -713,30 +713,30 @@ export default function ({ is_logged_in }) {
       header_label: 'Value',
       player_value_path: 'contract_value'
     }),
-    player_contract_apy: contract_field({
+    player_contract_average_annual_value: contract_field({
       column_title: 'Contract APY (Current)',
       header_label: 'APY',
-      player_value_path: 'contract_apy'
+      player_value_path: 'contract_average_annual_value'
     }),
     player_contract_guaranteed: contract_field({
       column_title: 'Contract Guaranteed (Current)',
       header_label: 'Gtd',
       player_value_path: 'contract_guaranteed'
     }),
-    player_contract_apy_cap_pct: contract_field({
+    player_contract_average_annual_value_cap_percentage: contract_field({
       column_title: 'Contract APY Cap % (Current)',
       header_label: 'APY Cap %',
-      player_value_path: 'contract_apy_cap_pct'
+      player_value_path: 'contract_average_annual_value_cap_percentage'
     }),
     player_contract_inflated_value: contract_field({
       column_title: 'Contract Inflated Value (Current)',
       header_label: 'Inflated Value',
       player_value_path: 'contract_inflated_value'
     }),
-    player_contract_inflated_apy: contract_field({
+    player_contract_inflated_average_annual_value: contract_field({
       column_title: 'Contract Inflated APY (Current)',
       header_label: 'Inflated APY',
-      player_value_path: 'contract_inflated_apy'
+      player_value_path: 'contract_inflated_average_annual_value'
     }),
     player_contract_inflated_guaranteed: contract_field({
       column_title: 'Contract Inflated Guaranteed (Current)',

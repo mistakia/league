@@ -35,7 +35,7 @@ const careerlog_group_fields = {
     all_play_wins: { label: 'Wins' },
     all_play_losses: { label: 'Losses' },
     all_play_ties: { label: 'Ties' },
-    best_season_all_play_pct: { label: 'Best %', fixed: 1 }
+    best_season_all_play_percentage: { label: 'Best %', fixed: 1 }
   },
   Points: {
     points_for: { label: 'Total' },
@@ -47,7 +47,7 @@ const careerlog_group_fields = {
   },
   Potential: {
     potential_points: { label: 'Points' },
-    potential_points_pct: { label: '%', fixed: 1 },
+    potential_points_percentage: { label: '%', fixed: 1 },
     potential_wins: { label: 'Wins' },
     potential_losses: { label: 'Losses' }
   },
@@ -57,7 +57,7 @@ const careerlog_group_fields = {
   },
   'Regular Season': {
     regular_season_leader: { label: 'Leader' },
-    best_season_win_pct: { label: 'Best Win %', fixed: 1 },
+    best_season_win_percentage: { label: 'Best Win %', fixed: 1 },
     best_regular_season_finish: { label: 'Best Finish' },
     worst_regular_season_finish: { label: 'Worst Finish' }
   },
@@ -162,7 +162,7 @@ const season_fields = {
       label: 'Points',
       tooltip: 'Potential points. Points scored with optimal lineup.'
     },
-    potential_points_pct: {
+    potential_points_percentage: {
       label: '%',
       tooltip: 'Potential points percentage. Points scored with optimal lineup.'
     },
