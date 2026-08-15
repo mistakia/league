@@ -138,12 +138,12 @@ export default function LandingPage() {
         </figure>
         <figure className='landing__figure'>
           <img
-            src='/static/images/landing/league-positional-value.png'
-            alt='Bar chart of projected points by position for each team in the league'
+            src='/static/images/landing/league-constitution.png'
+            alt='The opening articles of the Genesis League constitution as served by the platform'
           />
           <figcaption>
-            Projected points by position for every roster, including draft
-            picks.
+            The constitution, served by the platform rather than sitting in
+            someone&apos;s document folder.
           </figcaption>
         </figure>
       </Section>
