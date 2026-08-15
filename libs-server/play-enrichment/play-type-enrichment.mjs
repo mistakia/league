@@ -66,7 +66,7 @@ export const enrich_play_types = (plays) => {
       play_type,
       // NOPL plays shouldn't be marked as special teams
       // (penalties during ST formations don't count as ST plays)
-      ...(play_type === 'NOPL' && { special: false })
+      ...(play_type === 'NOPL' && { is_special_teams_play: false })
     }
   })
 
