@@ -1,6 +1,6 @@
 import path, { dirname } from 'path'
 import webpack from 'webpack'
-import nib from 'nib'
+import { stylus_options } from './stylus-options.mjs'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -155,16 +155,7 @@ export default {
           {
             loader: 'stylus-loader',
             options: {
-              stylusOptions: {
-                use: [nib()],
-                import: [
-                  'nib',
-                  path.resolve(__dirname, '../app/styles/variables.styl'),
-                  // Mixins only, so this emits nothing until a stylesheet calls
-                  // one. Must follow variables.styl, which it references.
-                  path.resolve(__dirname, '../app/styles/prose-form.styl')
-                ]
-              }
+              stylusOptions: stylus_options
             }
           }
         ]

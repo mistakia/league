@@ -10,7 +10,7 @@ import HtmlWebpackInlineSourcePlugin from 'html-webpack-inline-source-plugin'
 import { merge } from 'webpack-merge'
 import TerserPlugin from 'terser-webpack-plugin'
 import { fileURLToPath } from 'url'
-import nib from 'nib'
+import { stylus_options } from './stylus-options.mjs'
 
 import baseConfig from './webpack.config.base.mjs'
 
@@ -88,13 +88,7 @@ export default merge(baseConfig, {
           {
             loader: 'stylus-loader',
             options: {
-              stylusOptions: {
-                use: [nib()],
-                import: [
-                  'nib',
-                  path.resolve(__dirname, '../app/styles/variables.styl')
-                ]
-              }
+              stylusOptions: stylus_options
             }
           }
         ]
