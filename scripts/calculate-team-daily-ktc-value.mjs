@@ -366,7 +366,16 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
       case transaction_types.AUCTION_PROCESSED:
       case transaction_types.PRACTICE_ADD:
       case transaction_types.DRAFT:
+      case transaction_types.SUPER_PRIORITY:
       case transaction_types.POACHED:
+        // The two halves of the poach flow are both adds. POACHED gives the
+        // player to the poaching team; SUPER_PRIORITY returns him to his
+        // original team, which holds first rights to reclaim him once the
+        // poaching team releases him. Neither was applied before, and they had
+        // to be fixed together: with the poach unapplied the player never left,
+        // so nothing had to bring him back, and applying the poach alone would
+        // have taken him off his original roster for good.
+        //
         // A player is on at most one roster at a time, and the replay has to
         // ENFORCE that rather than trust the log to record every departure. A
         // poach is written only against the team that GAINS the player --

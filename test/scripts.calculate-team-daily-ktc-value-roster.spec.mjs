@@ -23,6 +23,7 @@ const lid = 1
 const day_one = '2026-03-01'
 const day_two = '2026-03-02'
 const day_three = '2026-03-03'
+const day_four = '2026-03-04'
 
 const LOSING_TEAM_ID = 1
 const GAINING_TEAM_ID = 2
@@ -55,7 +56,7 @@ describe('SCRIPTS - calculate team daily ktc value - roster reconstruction', fun
   this.timeout(60 * 1000)
 
   before(async function () {
-    MockDate.set(dayjs(`${day_three} 18:00:00`).toISOString())
+    MockDate.set(dayjs(`${day_four} 18:00:00`).toISOString())
   })
 
   beforeEach(async function () {
@@ -63,7 +64,7 @@ describe('SCRIPTS - calculate team daily ktc value - roster reconstruction', fun
     await knex('league_team_daily_values').where({ lid }).del()
     await knex('keeptradecut_valuations').del()
 
-    for (const date of [day_one, day_two, day_three]) {
+    for (const date of [day_one, day_two, day_three, day_four]) {
       await knex('keeptradecut_valuations').insert({
         pid: POACHED_PLAYER,
         is_superflex: true,
@@ -118,6 +119,46 @@ describe('SCRIPTS - calculate team daily ktc value - roster reconstruction', fun
       0
     )
     day_total.should.equal(PLAYER_VALUE)
+  })
+
+  it('returns a super-priority reclaim to the original team', async function () {
+    // The other half of the poach flow. It was latent while the poach itself
+    // went unapplied -- the player never left, so nothing had to bring him back
+    // -- and became live the moment that was fixed.
+    await insert_transaction({
+      uid: 521,
+      tid: LOSING_TEAM_ID,
+      pid: POACHED_PLAYER,
+      type: transaction_types.DRAFT,
+      date: day_one
+    })
+    await insert_transaction({
+      uid: 522,
+      tid: GAINING_TEAM_ID,
+      pid: POACHED_PLAYER,
+      type: transaction_types.POACHED,
+      date: day_two
+    })
+    await insert_transaction({
+      uid: 523,
+      tid: LOSING_TEAM_ID,
+      pid: POACHED_PLAYER,
+      type: transaction_types.SUPER_PRIORITY,
+      date: day_three
+    })
+    await insert_transaction({
+      uid: 524,
+      tid: GAINING_TEAM_ID,
+      pid: 'PLAY-OTHR-000002',
+      type: transaction_types.DRAFT,
+      date: day_four
+    })
+
+    await calculate_team_daily_ktc_value({ lid })
+
+    const reclaimed = await rows_by_team_id(day_three)
+    reclaimed[LOSING_TEAM_ID].ktc_value.should.equal(PLAYER_VALUE)
+    reclaimed[GAINING_TEAM_ID].ktc_value.should.equal(0)
   })
 
   it('keeps one roster per player across a re-add by another team', async function () {
