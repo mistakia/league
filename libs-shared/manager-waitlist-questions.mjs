@@ -58,7 +58,7 @@ export const commitment_terms = [
 export const what_we_look_for = [
   'Someone who is actually around. The league moves most in the months when nothing is on television, and the people who enjoy it are the ones who are there for that part.',
   'Someone who likes the machinery. Contracts, the cap, restricted free agency, a constitution with 42 amendments — if that reads as the fun part rather than as homework, you will fit here.',
-  'A real dynasty interest. Not just who is good this year, but who you want to still own in three years and what you would give up to get them.',
+  'Someone competitive who is good at this. A league is only as interesting as its hardest matchup, and we would rather lose to someone sharp than beat someone who stopped paying attention.',
   'Someone who trades and talks. A quiet team that sets a lineup and disappears is worse for the league than a bad one.'
 ]
 
