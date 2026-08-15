@@ -54,7 +54,7 @@ export const MAX_LONG_ANSWER_LENGTH = 4000
 // in the days before kickoff, and the season plays out through Week 17 in late
 // December. January to April is the only genuinely quiet stretch.
 export const commitment_terms = [
-  'This is a dynasty league. Joining means planning to stay, not trying it for a season.',
+  'This is a dynasty league. Joining means planning to stay.',
   'It is active about eight months a year, May through December. January to April is the only quiet stretch.'
 ]
 
