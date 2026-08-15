@@ -179,12 +179,12 @@ export const page_routes = [
     description: 'Restricted free agency nominations, bids, and results.'
   },
   {
-    pattern: '/leagues/:lid/trade-review',
+    pattern: '/leagues/:lid/trades',
     title: 'Trades',
     description: 'Completed trades with valuation at the time of the trade.'
   },
   {
-    pattern: '/leagues/:lid/trade-review/:trade_uid',
+    pattern: '/leagues/:lid/trades/:trade_uid',
     title: 'Trades',
     description: 'Completed trades with valuation at the time of the trade.'
   },

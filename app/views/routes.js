@@ -138,12 +138,9 @@ const Routes = ({ app }) => {
           path='/leagues/:lid/restricted-free-agency/:season_year'
           element={<RestrictedFreeAgencyPage />}
         />
+        <Route path='/leagues/:lid/trades' element={<TradeReviewPage />} />
         <Route
-          path='/leagues/:lid/trade-review'
-          element={<TradeReviewPage />}
-        />
-        <Route
-          path='/leagues/:lid/trade-review/:trade_uid'
+          path='/leagues/:lid/trades/:trade_uid'
           element={<TradeReviewPage />}
         />
         {/* Candidate PII. The API refuses anyone who does not manage a team

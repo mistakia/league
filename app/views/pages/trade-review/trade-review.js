@@ -48,7 +48,7 @@ export default function TradeReviewPage({
       return navigate('/', { replace: true })
     }
     if (is_single_trade && isNaN(trade_uid)) {
-      return navigate(`/leagues/${lid}/trade-review`, { replace: true })
+      return navigate(`/leagues/${lid}/trades`, { replace: true })
     }
   }, [lid, is_single_trade, trade_uid, navigate])
 
@@ -104,9 +104,9 @@ export default function TradeReviewPage({
     const container = get_scroll_container()
     list_scroll_position.lid = Number(lid)
     list_scroll_position.top = container ? container.scrollTop : 0
-    navigate(`/leagues/${lid}/trade-review/${uid}`)
+    navigate(`/leagues/${lid}/trades/${uid}`)
   }
-  const go_to_list = () => navigate(`/leagues/${lid}/trade-review`)
+  const go_to_list = () => navigate(`/leagues/${lid}/trades`)
 
   let trade_body
   if (is_single_trade) {

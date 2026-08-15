@@ -362,7 +362,7 @@ function ChainStep({
           </span>
           <span className='trade-review-trade__step-event'>
             {hop_trade_uid && hop_trade_uid !== trade_uid ? (
-              <Link to={`/leagues/${league_id}/trade-review/${hop_trade_uid}`}>
+              <Link to={`/leagues/${league_id}/trades/${hop_trade_uid}`}>
                 {event_label}
               </Link>
             ) : (
