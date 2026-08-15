@@ -73,7 +73,12 @@ TeamCheckboxes.propTypes = {
   on_toggle: PropTypes.func
 }
 
-const OpenVoteForm = ({ league_teams, on_open, is_working }) => {
+const OpenVoteForm = ({
+  league_teams,
+  waitlist_submissions,
+  on_open,
+  is_working
+}) => {
   const [closes_at, set_closes_at] = React.useState('')
   const [maximum_ranked_candidates, set_maximum_ranked_candidates] =
     React.useState(3)
@@ -81,7 +86,7 @@ const OpenVoteForm = ({ league_teams, on_open, is_working }) => {
     league_teams.map((team) => team.team_id)
   )
   const [candidates, set_candidates] = React.useState([
-    { candidate_name: '', sponsor_team_ids: [] }
+    { candidate_name: '', submission_id: null, sponsor_team_ids: [] }
   ])
 
   const toggle = (list, set_list, value) =>
@@ -107,9 +112,13 @@ const OpenVoteForm = ({ league_teams, on_open, is_working }) => {
           closes_at: new Date(closes_at).toISOString(),
           maximum_ranked_candidates: Number(maximum_ranked_candidates),
           eligible_teams: eligible_team_ids.map((team_id) => ({ team_id })),
-          candidates: candidates.filter((candidate) =>
-            candidate.candidate_name.trim()
-          )
+          candidates: candidates
+            .filter((candidate) => candidate.candidate_name.trim())
+            .map(({ candidate_name, submission_id, sponsor_team_ids }) => ({
+              candidate_name,
+              submission_id,
+              sponsor_team_ids
+            }))
         })
       }}
     >
@@ -156,8 +165,55 @@ const OpenVoteForm = ({ league_teams, on_open, is_working }) => {
 
       <fieldset className='admission-vote-commissioner__field'>
         <legend>Candidates and their sponsors</legend>
+        {/* The waiting list is the pool Candidates are drawn from, never a
+            nomination channel — a Manager names someone on the Boards, and the
+            picker is only how you attach that person's application when he has
+            one on file. So the typed name stands on its own beside it: a
+            Candidate nominated directly has no submission and never will, and
+            with an empty waiting list the picker degrades to its one option
+            rather than becoming a dead end. */}
         {candidates.map((candidate, index) => (
           <div className='admission-vote-commissioner__candidate' key={index}>
+            <label className='admission-vote-commissioner__field'>
+              <span>Application on file</span>
+              <select
+                value={candidate.submission_id ?? ''}
+                onChange={(event) => {
+                  const submission_id = event.target.value
+                    ? Number(event.target.value)
+                    : null
+                  const submission = waitlist_submissions.find(
+                    (row) => row.submission_id === submission_id
+                  )
+                  // Picking fills the name from the application; typing over it
+                  // afterwards is allowed, because the Notice names the
+                  // Candidate and the Commissioner may hold a better spelling
+                  // of it than the applicant typed.
+                  update_candidate(index, {
+                    submission_id,
+                    ...(submission
+                      ? { candidate_name: submission.candidate_name }
+                      : {})
+                  })
+                }}
+              >
+                <option value=''>
+                  {waitlist_submissions.length
+                    ? '— nominated directly, no application —'
+                    : '— no applications on file —'}
+                </option>
+                {waitlist_submissions.map((submission) => (
+                  <option
+                    key={submission.submission_id}
+                    value={submission.submission_id}
+                  >
+                    {submission.candidate_name} (
+                    {format_moment(submission.submitted_at)})
+                  </option>
+                ))}
+              </select>
+            </label>
+
             <input
               type='text'
               placeholder='Candidate name'
@@ -186,7 +242,7 @@ const OpenVoteForm = ({ league_teams, on_open, is_working }) => {
           onClick={() =>
             set_candidates([
               ...candidates,
-              { candidate_name: '', sponsor_team_ids: [] }
+              { candidate_name: '', submission_id: null, sponsor_team_ids: [] }
             ])
           }
         >
@@ -203,6 +259,7 @@ const OpenVoteForm = ({ league_teams, on_open, is_working }) => {
 
 OpenVoteForm.propTypes = {
   league_teams: PropTypes.array,
+  waitlist_submissions: PropTypes.array,
   on_open: PropTypes.func,
   is_working: PropTypes.bool
 }
@@ -415,6 +472,7 @@ export default function AdmissionVoteCommissionerPage() {
   const { token } = app
 
   const [state, set_state] = React.useState(null)
+  const [waitlist_submissions, set_waitlist_submissions] = React.useState([])
   const [is_loading, set_is_loading] = React.useState(true)
   const [is_working, set_is_working] = React.useState(false)
   const [error_message, set_error_message] = React.useState(null)
@@ -441,10 +499,34 @@ export default function AdmissionVoteCommissionerPage() {
     }
   }, [lid, token])
 
+  // The waiting list, for the picker. Its own request rather than a field on
+  // the vote payload: it is a live, already-gated route, and the candidate PII
+  // it carries has no business riding along on a read every Manager makes.
+  //
+  // A failure here is NOT an error on this page. The list is empty far more
+  // often than not — it holds zero rows today — and the route additionally
+  // needs the caller to manage a team, which a Commissioner need not. Either
+  // way the answer is the same: no applications to pick from, type the name.
+  const load_waitlist_submissions = React.useCallback(async () => {
+    if (!token || !lid) {
+      return
+    }
+    try {
+      const response = await fetch(
+        `${API_URL}/waitlist-submissions?league_id=${lid}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      set_waitlist_submissions(response.ok ? await response.json() : [])
+    } catch {
+      set_waitlist_submissions([])
+    }
+  }, [lid, token])
+
   React.useEffect(() => {
     set_is_loading(true)
     load()
-  }, [load])
+    load_waitlist_submissions()
+  }, [load, load_waitlist_submissions])
 
   const run = async (make_request) => {
     set_is_working(true)
@@ -530,6 +612,7 @@ export default function AdmissionVoteCommissionerPage() {
             <h2>Open an admission vote</h2>
             <OpenVoteForm
               league_teams={league_teams}
+              waitlist_submissions={waitlist_submissions}
               on_open={open_admission_vote}
               is_working={is_working}
             />

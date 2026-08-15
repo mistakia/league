@@ -679,6 +679,12 @@ router.post('/', async (req, res) => {
       }
     }
 
+    // A Candidate always has a NAME. The submission is optional and always was:
+    // the waiting list is the pool Candidates are drawn from rather than a
+    // nomination channel, so a Candidate named on the Boards with no
+    // application on file is the ordinary case, not a degraded one.
+    const submission_ids = []
+
     for (const candidate of candidates) {
       if (
         typeof candidate.candidate_name !== 'string' ||
@@ -692,6 +698,43 @@ router.post('/', async (req, res) => {
             .status(400)
             .send({ error: 'sponsor is not a team in this league' })
         }
+      }
+      if (
+        candidate.submission_id !== null &&
+        candidate.submission_id !== undefined
+      ) {
+        const submission_id = Number(candidate.submission_id)
+        if (!Number.isInteger(submission_id)) {
+          return res.status(400).send({ error: 'invalid submission_id' })
+        }
+        submission_ids.push(submission_id)
+      }
+    }
+
+    if (submission_ids.length) {
+      // Checked here so a stale pick is a readable refusal. The foreign key
+      // would otherwise reject it as a 500 naming a constraint, which tells the
+      // Commissioner nothing about what to do next -- and the pick CAN go
+      // stale, since the submissions are deleted when a recruiting round
+      // closes and this page holds the list it loaded on mount.
+      const found = await db('manager_waitlist_submissions')
+        .whereIn('submission_id', submission_ids)
+        .pluck('submission_id')
+
+      if (found.length !== new Set(submission_ids).size) {
+        return res.status(400).send({
+          error: 'no waiting-list application with that submission_id'
+        })
+      }
+
+      // One application is one person, so two Candidates cannot cite it. The
+      // schema does not forbid this -- submission_id carries no unique index,
+      // deliberately, since a person may stand in more than one Admission Vote
+      // over time -- so the rule that holds WITHIN a vote is enforced here.
+      if (new Set(submission_ids).size !== submission_ids.length) {
+        return res.status(400).send({
+          error: 'two candidates cannot share one waiting-list application'
+        })
       }
     }
 
@@ -744,7 +787,11 @@ router.post('/', async (req, res) => {
           .insert({
             admission_vote_id,
             candidate_name: candidate.candidate_name.trim(),
-            submission_id: candidate.submission_id || null
+            submission_id:
+              candidate.submission_id === null ||
+              candidate.submission_id === undefined
+                ? null
+                : Number(candidate.submission_id)
           })
           .returning('admission_vote_candidate_id')
 

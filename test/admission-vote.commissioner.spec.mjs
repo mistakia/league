@@ -216,6 +216,106 @@ describe('ADMISSION VOTE COMMISSIONER', function () {
       const votes = await knex('admission_votes').where({ league_id })
       expect(votes).to.have.length(0)
     })
+
+    // NOMINATING FROM THE WAITING LIST. The waiting list is the pool Candidates
+    // are drawn from, never a nomination channel -- a Manager names someone on
+    // the Boards, and citing his application is how the ballot page reaches it.
+    // So the typed name has to keep working beside the pick, and does: today
+    // the table holds zero rows, and a Candidate named with no application on
+    // file is the ordinary case rather than a degraded one.
+    describe('nominating from the waiting list', function () {
+      let submission_id
+
+      beforeEach(async () => {
+        await knex('manager_waitlist_submissions').del()
+        const [row] = await knex('manager_waitlist_submissions')
+          .insert({
+            candidate_name: 'Dana Whitfield',
+            contact_email: 'dana@example.com',
+            timezone_name: 'America/New_York',
+            has_affirmed_commitment: true
+          })
+          .returning('submission_id')
+        submission_id = row.submission_id
+      })
+
+      after(async () => {
+        await knex('manager_waitlist_submissions').del()
+      })
+
+      it('records the submission a candidate was picked from', async () => {
+        const response = await open_vote({
+          candidates: [
+            { candidate_name: 'Dana Whitfield', submission_id },
+            { candidate_name: 'Typed By Name', sponsor_team_ids: [1] }
+          ]
+        })
+        response.should.have.status(200)
+
+        const candidates = await knex('admission_vote_candidates')
+          .where({ admission_vote_id: response.body.admission_vote_id })
+          .orderBy('candidate_name', 'asc')
+
+        expect(candidates).to.have.length(2)
+        // The picked one carries its application; the typed one carries null,
+        // which is what renders "Nominated directly" on the ballot page.
+        expect(candidates[0].candidate_name).to.equal('Dana Whitfield')
+        expect(candidates[0].submission_id).to.equal(submission_id)
+        expect(candidates[1].candidate_name).to.equal('Typed By Name')
+        expect(candidates[1].submission_id).to.equal(null)
+      })
+
+      // The pick can go stale in the Commissioner's browser: submissions are
+      // deleted when a recruiting round closes, and the page holds the list it
+      // loaded on mount. The foreign key would reject it as a 500 naming a
+      // constraint, which says nothing about what to do next.
+      it('refuses a submission_id that does not exist', async () => {
+        const response = await open_vote({
+          candidates: [
+            { candidate_name: 'Dana Whitfield', submission_id: 999999 }
+          ]
+        })
+        response.should.have.status(400)
+        expect(response.body.error).to.include('submission_id')
+
+        const votes = await knex('admission_votes').where({ league_id })
+        expect(votes).to.have.length(0)
+      })
+
+      // One application is one person. The schema does not forbid this --
+      // submission_id carries no unique index, since a person may stand in more
+      // than one Admission Vote over time -- so the rule holds within a vote.
+      it('refuses two candidates sharing one application', async () => {
+        const response = await open_vote({
+          candidates: [
+            { candidate_name: 'Dana Whitfield', submission_id },
+            { candidate_name: 'Dana W', submission_id }
+          ]
+        })
+        response.should.have.status(400)
+        expect(response.body.error).to.include('share one waiting-list')
+
+        const votes = await knex('admission_votes').where({ league_id })
+        expect(votes).to.have.length(0)
+      })
+
+      // The empty pool is the state today, and it must open a vote rather than
+      // being a dead end.
+      it('opens a vote with every candidate typed by name', async () => {
+        await knex('manager_waitlist_submissions').del()
+
+        const response = await open_vote()
+        response.should.have.status(200)
+
+        const candidates = await knex('admission_vote_candidates').where({
+          admission_vote_id: response.body.admission_vote_id
+        })
+        expect(candidates).to.have.length(3)
+        for (const candidate of candidates) {
+          expect(candidate.submission_id).to.equal(null)
+        }
+      })
+    })
   })
 
   describe('close', function () {
