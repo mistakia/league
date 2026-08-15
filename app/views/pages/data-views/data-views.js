@@ -104,16 +104,19 @@ export default function DataViewsPage({
   const [filter_controls_open, set_filter_controls_open] = useState(false)
 
   useEffect(() => {
-    // The saved-view list is owner-scoped and requires auth, so a logged-out
-    // visitor has nothing to list. A shared view still resolves for them
-    // through load_data_view below, which fetches by view_id.
-    if (isLoggedIn) {
-      load_data_views()
-    }
+    // Always call this, logged in or not. The saved-view LIST is owner-scoped
+    // and requires auth, but selecting a view is not the same job as listing
+    // one: default-view selection and browser-state restoration both hang off
+    // load_data_views, so skipping it when logged out left an anonymous
+    // visitor with no view selected and therefore no results request — the
+    // page rendered its headers over an empty body indefinitely, with nothing
+    // in the console and no failed request to react to. load_data_views itself
+    // decides whether to call the API.
+    load_data_views()
     if (view_id) {
       load_data_view(view_id)
     }
-  }, [isLoggedIn, load_data_views, load_data_view, view_id])
+  }, [load_data_views, load_data_view, view_id])
 
   useEffect(() => {
     if (!view_id) {

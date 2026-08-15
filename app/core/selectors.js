@@ -3036,7 +3036,15 @@ export function get_overall_standings(state) {
   // blanks the standings page and the league-home dashboard outright. A league
   // whose format has not loaded yet is an ordinary transient state, so degrade
   // to record-ordered standings with no playoff bands rather than crashing.
-  if (!Number.isInteger(league.playoff_team_count)) {
+  //
+  // An EMPTY team list is the same class and was the live instance: nothing
+  // loads teams for an anonymous visitor (see the teams-store note in
+  // CLAUDE.md), so /leagues/:lid/standings threw `bye_candidate_pool 'league'
+  // yields 0 candidate(s)` and rendered a stack trace to exactly the cold
+  // prospect the public pages exist for. The bye_count throw is a real config
+  // guard on the server — the settings route validates against it — so it stays
+  // where it is; this degrades rather than weakening it.
+  if (!Number.isInteger(league.playoff_team_count) || !flat_teams.length) {
     return {
       teams,
       divisionTeams,

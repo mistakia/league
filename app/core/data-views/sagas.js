@@ -184,6 +184,21 @@ export function* handle_delete_data_view({ payload }) {
 }
 
 export function* load_data_views() {
+  const { userId } = yield select(get_app)
+
+  // GET /api/data-views requires a user — 216c1a5d0 closed an anonymous leak of
+  // every saved view on the platform. An anonymous visitor has no saved views
+  // to list, and waiting on a request that can only 401 left the page with NO
+  // view ever selected: the bootstrap that ends in the results request hangs
+  // off GET_DATA_VIEWS_FULFILLED, so /data-views rendered its headers and an
+  // empty body indefinitely, with nothing in the console and no failed request
+  // the page reacted to. Restore straight from the browser instead, which is
+  // the only place an anonymous visitor's view state lives.
+  if (!userId) {
+    yield call(restore_browser_state_for_all_views, { data: [] })
+    return
+  }
+
   const request_history = yield select(get_request_history)
   if (request_history.has('GET_DATA_VIEWS')) {
     return
