@@ -304,6 +304,7 @@ SideSummary.propTypes = {
 export default function TradeReviewTrade({
   trade,
   is_expanded,
+  is_failed,
   on_toggle,
   trade_uid
 }) {
@@ -385,8 +386,14 @@ export default function TradeReviewTrade({
           ))}
           {!has_chains && (
             <div className='trade-review-trade__chains-loading'>
-              <span className='trade-review-trade__chains-loading-spinner' />
-              Loading each asset's lineage...
+              {is_failed ? (
+                <span>Lineage could not be loaded.</span>
+              ) : (
+                <>
+                  <span className='trade-review-trade__chains-loading-spinner' />
+                  Loading each asset's lineage...
+                </>
+              )}
             </div>
           )}
         </div>
@@ -399,5 +406,6 @@ TradeReviewTrade.propTypes = {
   trade: ImmutablePropTypes.map.isRequired,
   trade_uid: PropTypes.number.isRequired,
   is_expanded: PropTypes.bool,
+  is_failed: PropTypes.bool,
   on_toggle: PropTypes.func.isRequired
 }

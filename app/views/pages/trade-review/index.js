@@ -11,6 +11,7 @@ const map_state_to_props = createSelector(
   get_app,
   (trade_review, app) => ({
     trades: trade_review.get('trades'),
+    list_lid: trade_review.get('list_lid'),
     is_pending: trade_review.get('is_pending'),
     is_failed: trade_review.get('is_failed'),
     is_logged_in: Boolean(app.userId)
