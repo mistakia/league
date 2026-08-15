@@ -23,13 +23,22 @@ export default function TradeReviewPage({
     trade_uid_param ? Number(trade_uid_param) : null
   )
 
+  // The redirect lives apart from the load so the load can be keyed on the
+  // league alone. navigate changes identity on every route match -- its own
+  // deps include the matched path -- so an effect that listed it would re-run
+  // on every expand and collapse, re-fetching the whole list and dropping the
+  // page back onto its full-width spinner.
   useEffect(() => {
     if (isNaN(lid)) {
       return navigate('/', { replace: true })
     }
+  }, [lid, navigate])
+
+  useEffect(() => {
+    if (isNaN(lid)) return
 
     load_trade_review({ leagueId: lid })
-  }, [lid, load_trade_review, navigate])
+  }, [lid, load_trade_review])
 
   // The URL owns which trade is open, so a row can be linked to directly. A
   // deep link fetches its trade without waiting for the list, which is why the

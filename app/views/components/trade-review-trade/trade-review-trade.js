@@ -375,6 +375,7 @@ export default function TradeReviewTrade({
           ))}
           {!has_chains && (
             <div className='trade-review-trade__chains-loading'>
+              <span className='trade-review-trade__chains-loading-spinner' />
               Loading each asset's lineage...
             </div>
           )}
