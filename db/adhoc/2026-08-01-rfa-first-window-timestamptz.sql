@@ -5,7 +5,7 @@
 -- db/adhoc/2026-08-01-rfa-configurable-windows.sql, following its neighbours
 -- restricted_free_agency_period_start / _end. The schema conformance ratchet
 -- correctly flags that as new debt: a new time column has to be timestamptz
--- (see user:guideline/league/database-schema-standards.md).
+-- (see user:guideline/nfl/league/database-schema-standards.md).
 --
 -- The two neighbouring epoch columns stay bigint for now. They are read by the
 -- SPA, the verify path and several selectors, so retyping them is its own

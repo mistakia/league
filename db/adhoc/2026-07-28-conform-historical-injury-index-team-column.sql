@@ -3,7 +3,7 @@
 -- Conform historical_injury_index.tm to nfl_team.
 --
 -- The last `tm` spelling of a team code in the schema. Per
--- user:guideline/league/database-schema-standards.md a team code is `nfl_team`,
+-- user:guideline/nfl/league/database-schema-standards.md a team code is `nfl_team`,
 -- with explicit role qualifiers where a row carries more than one; this table
 -- carries exactly one team per row (the team the player was rostered on for that
 -- game), so the unqualified `nfl_team` is the correct name rather than a

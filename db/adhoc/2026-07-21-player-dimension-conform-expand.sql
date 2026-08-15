@@ -2,7 +2,7 @@
 --
 -- Redesign task: user:task/league/redesign-league-database-schema.md
 -- Column mapping: scratch/league/schema-redesign/player-column-mapping.md
--- Guideline: user:guideline/league/database-schema-standards.md
+-- Guideline: user:guideline/nfl/league/database-schema-standards.md
 --
 -- What this does, all metadata-only except two small 28k-row table rewrites
 -- (the dob retype and the gsispid tighten):

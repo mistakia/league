@@ -2,7 +2,7 @@
 --
 -- Converge the last route columns onto the ruled convention.
 --
--- The convention (user:guideline/league/database-schema-standards.md, ruled by
+-- The convention (user:guideline/nfl/league/database-schema-standards.md, ruled by
 -- the operator 2026-08-13 and validated against the live schema): the count of
 -- routes run is `routes`, never `routes_run`, because a route is run by
 -- definition and the suffix carries no information; per-route rates are

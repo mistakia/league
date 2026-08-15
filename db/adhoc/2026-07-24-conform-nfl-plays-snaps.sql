@@ -1,6 +1,6 @@
 -- Conform the NFL plays/snaps canonical fact family to snake_case full-word naming
 -- (schema-redesign nfl-plays-snaps cluster). Pure METADATA renames — no data movement,
--- no type change. Follows user:guideline/league/database-schema-standards.md.
+-- no type change. Follows user:guideline/nfl/league/database-schema-standards.md.
 --
 -- Mechanism (per the player_gamelogs 4f0b1d07 + nfl_games 06128e28 precedents): ALTER
 -- TABLE RENAME COLUMN on a partitioned parent cascades to every partition child by

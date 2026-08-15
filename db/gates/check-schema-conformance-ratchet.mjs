@@ -128,7 +128,7 @@ function main() {
     }
     console.error(
       '\nIf this is new debt (a feature added a non-conforming column/table): fix ' +
-        'the name before merging -- see user:guideline/league/database-schema-standards.md.\n' +
+        'the name before merging -- see user:guideline/nfl/league/database-schema-standards.md.\n' +
         'If this is a deliberate audit widening (a new/broadened rule that legitimately ' +
         'surfaces existing debt): run ' +
         '`node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` and commit the ' +

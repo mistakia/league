@@ -1,7 +1,7 @@
 // Schema conformance audit for the league four-layer redesign.
 //
 // Parses db/schema.postgres.sql (the source of truth) and flags every column
-// and table identifier that violates user:guideline/league/database-schema-standards.md.
+// and table identifier that violates user:guideline/nfl/league/database-schema-standards.md.
 // It is the ratcheting oracle the per-cluster migration recipe cites in its
 // "conformance-audit clean" verify step: run it whole to see the standing debt,
 // or scoped to one table/cluster to prove that cluster conforms.

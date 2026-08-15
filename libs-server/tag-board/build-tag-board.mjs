@@ -45,7 +45,7 @@ export const RESTRICTED_FREE_AGENCY_NOMINATION_REPLACEMENT_FLOOR_POINTS = -25
 // minimum contract prices at $0 at best, so its gap can never exceed $5: any
 // threshold above $5 removes every minimum contract from the pool, not for
 // being fairly priced but for being cheap. That is exactly the cut
-// user:guideline/home-dynasty-league/write-team-homepage.md forbids, and at $6
+// user:guideline/nfl/home-dynasty-league/write-team-homepage.md forbids, and at $6
 // it would have deleted 25 of 76 live rows — the rows that matter most when
 // rosters are full and a rival shedding a $5 player opens the roster spot.
 //
