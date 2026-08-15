@@ -190,6 +190,8 @@ Two rules the scale encodes and a literal cannot. **A surface that is always ope
 
 Two things generalize past the one fix. **Any state derived from the route at mount is a candidate** — a mount-only effect is the shape to grep for, and `app.year`/`app.teamId` are reached the same way — so when you add route-derived state, drive it from the route rather than from `INIT_APP`. And **a browser check has to CLICK the path a user takes**: the two anonymous defects fixed the week before (standings, data views) were both found and verified by direct `page.goto`, which is exactly the method that reads this one as working. Drive the real link with `page.click` and compare against a `goto` of the same URL; a disagreement between them IS the bug.
 
+**`useNavigate()` returns a NEW function identity whenever the matched route changes** — its own deps include the resolved pathname and the match array — so an effect that lists `navigate` in its dependency array re-runs on every in-page navigation, not just on mount. On 2026-08-14 the trade-review page's list-load effect listed it, so toggling a row (which navigates between the two sibling routes `/trade-review` and `/trade-review/:trade_uid`) re-fired `load_trade_review` and dropped the page back onto its full-width spinner every time. Keep `navigate` out of a data-fetch effect's deps: an absolute redirect like `navigate('/', { replace: true })` does not need a fresh identity, so split it into its own effect keyed on `[lid, navigate]` and key the fetch on `[lid]` alone.
+
 **Frontend Import Aliases** (configured in webpack):
 
 - `@core` → `app/core`
