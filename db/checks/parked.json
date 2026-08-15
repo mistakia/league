@@ -30,5 +30,37 @@
     "reason": "PFR counts one quarterback kneel-down as a rushing attempt that our feed classifies separately. A rule difference, stable across seasons.",
     "evidence": "816 ours against 817 PFR.",
     "validated_at": "2026-08-13"
+  },
+  {
+    "check_id": "nickname-legal-name-duplicate-rows",
+    "grain": { "pid": "RICH-SAUL-014018", "duplicate_pid": "RONA-SAUL-014155" },
+    "disposition": "adjudicated",
+    "reason": "Rich and Ron Saul are twin brothers, both of whom played in the NFL. Two people, so the rows must stay apart.",
+    "evidence": "Michigan State, 1970 entry, birth date 1948-02-05 on both rows — the anchor and the birth date agree because they are twins, which is exactly why an agreeing birth date cannot be read as same-person evidence here. They played different positions (C and G).",
+    "validated_at": "2026-08-15"
+  },
+  {
+    "check_id": "nickname-legal-name-duplicate-rows",
+    "grain": { "pid": "RALE-MCKE-019193", "duplicate_pid": "REGI-MCKE-023172" },
+    "disposition": "adjudicated",
+    "reason": "Raleigh and Reggie McKenzie are identical twin brothers, both of whom played in the NFL. Two people.",
+    "evidence": "Tennessee, 1985 entry, birth date 1963-02-08 on both rows — an agreeing date is the twin signature here rather than corroboration. The discriminators are position (OL and LB) and draft_overall_pick, which is 290 on the Raleigh row and null on the Reggie row, so the two were not one selection.",
+    "validated_at": "2026-08-15"
+  },
+  {
+    "check_id": "nickname-legal-name-duplicate-rows",
+    "grain": { "pid": "HARO-SHOE-021140", "duplicate_pid": "HERB-SHOE-011342" },
+    "disposition": "adjudicated",
+    "reason": "Harold and Herbert Shoener are brothers, both of whom played in the NFL. Two people.",
+    "evidence": "Iowa, 1947 entry, birth date 1923-01-02 on both rows — an agreeing date is the twin signature here rather than corroboration. They played different positions (TE and DE) and neither row carries a draft_overall_pick, so there is no shared selection to read as one person.",
+    "validated_at": "2026-08-15"
+  },
+  {
+    "check_id": "nickname-legal-name-duplicate-rows",
+    "grain": { "pid": "COLT-TAYL-019782", "duplicate_pid": "DYLA-TAYL-020394" },
+    "disposition": "adjudicated",
+    "reason": "Colton Taylor and Dylan Taylor are two different Texas A&M players in the same class. NO veto can reach this pair, because both rows carry the 0000-00-00 sentinel, so there is no birth date to disagree on and no identifier held on both sides.",
+    "evidence": "Texas A&M, 2021 entry, different positions (QB and WR), and neither row carries a draft_overall_pick. It is the reason this class is a detector rather than a mint-time attach rule — an attach would have merged them silently. Note it is not the only both-sentinel pair the check returns (Daijun/Sevarian Edwards is the other, and is an open finding rather than an adjudicated one); it is the pair known to be two people.",
+    "validated_at": "2026-08-15"
   }
 ]

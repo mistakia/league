@@ -313,6 +313,146 @@ const registry = [
     min_denominator: 25000,
     repair_command:
       'Adjudicate each pair on date_of_birth (nfl_draft_year is corrupt on exactly these rows and cannot discriminate), then write a dated merge file under db/adhoc/ following the shape of 2026-08-05-dedupe-residual-round-4.sql'
+  },
+
+  {
+    check_id: 'nickname-legal-name-duplicate-rows',
+    invariant:
+      'No person holds two `player` rows spelling their first name differently. The sibling duplicate-person-rows check cannot see this class on TWO independent grounds, both verified 2026-08-15 against production: it joins on `formatted_name` equality, which Red/Khalil Murdock and L.T./Labbeus Overton fail by construction, and it requires the second row to hold ZERO external identifiers, while these carry an esb id. It returns none of the five live 2026 pairs. Nothing else grades it either — libs-server/player-name-utils.mjs reaches Jimmy/James and Pat/Patrick but not Red/Khalil, L.T./Labbeus or Trey/James, and `player_aliases` cannot be seeded because the minting source (scripts/import-players-sleeper.mjs, cron 30 3 * * *) carries no legal-name spelling in its payload.',
+    grain: ['pid', 'duplicate_pid'],
+    rows: async () => {
+      // A NON-NAME anchor, which is the whole point: last name, college and
+      // draft year read none of the first name, so they join the pairs every
+      // name-anchored oracle is structurally blind to. That makes the anchor
+      // strong enough to need vetoing rather than trusting -- it also joins
+      // brothers and same-class teammates, so each veto below removes a class
+      // the bare anchor gets wrong, and what survives is a CANDIDATE for
+      // adjudication rather than an automatic merge.
+      //
+      // Deliberately NOT vetoed: the twin signature (an agreeing birth date
+      // with unrelated first names). Measured 2026-08-15, six pairs carry it
+      // and the split is roughly even -- Saul, McKenzie and Shoener are genuine
+      // brothers, MacKenzie and Walker each carry the SAME draft_overall_pick
+      // on both rows (218 and 14), and Brent/Gary Smith carries neither proof.
+      // A rule cannot split those, so the three brother pairs are parked in
+      // db/checks/parked.json and the rest are reported.
+
+      // Every identifier below is issued per person by its own authority, so
+      // two rows holding different values of any one of them are two people
+      // whatever else agrees. All are varchar except nfl_player_id.
+      const varchar_identifiers = [
+        'gsis_player_id',
+        'esb_player_id',
+        'pfr_player_id',
+        'smart_player_id',
+        'sleeper_player_id'
+      ]
+      const person_level_identifiers = [...varchar_identifiers, 'nfl_player_id']
+
+      // A blank string has to be made absent exactly as '0000-00-00' is on the
+      // birth date. Left alone it reads as a CONFLICTING value against a real
+      // id and vetoes a true duplicate silently -- one row holds a blank
+      // pfr_player_id today.
+      const identifier_select = [
+        ...varchar_identifiers.map(
+          (column) => `nullif(trim(${column}), '') as ${column}`
+        ),
+        'nfl_player_id'
+      ].join(', ')
+
+      const identifier_conflict = person_level_identifiers
+        .map(
+          (column) =>
+            `(a.${column} is not null and b.${column} is not null and a.${column} <> b.${column})`
+        )
+        .join(' or ')
+
+      // The population the check SCANS. A row missing any anchor leg cannot
+      // enter a pair, so this -- not `count(*) from player` -- is what
+      // min_denominator must read: counting the whole table leaves the floor
+      // unable to move when the scan collapses, so wiping `college` would make
+      // the check find nothing, emit its clean sentinel, and pass a floor still
+      // reading the untouched table.
+      const scanned_population = `
+        from player
+        where last_name is not null and trim(last_name) <> ''
+          and college is not null and trim(college) <> ''
+          and nfl_draft_year is not null
+      `
+
+      const { rows: found } = await db.raw(
+        `
+        with anchored as (
+          select
+            pid,
+            formatted_name,
+            lower(trim(last_name)) as last_name_key,
+            lower(trim(college)) as college_key,
+            nfl_draft_year,
+            -- date_of_birth is a varchar whose absent value is the STRING
+            -- '0000-00-00', so absence has to be made explicit before it can
+            -- be compared.
+            nullif(date_of_birth, '0000-00-00') as date_of_birth,
+            ${identifier_select}
+          ${scanned_population}
+        ),
+        anchor_groups as (
+          select last_name_key, college_key, nfl_draft_year, count(*) as row_count
+          from anchored
+          group by 1, 2, 3
+        )
+        select a.pid, b.pid as duplicate_pid
+        from anchored a
+        join anchored b
+          on a.last_name_key = b.last_name_key
+         and a.college_key = b.college_key
+         and a.nfl_draft_year = b.nfl_draft_year
+         and a.pid < b.pid
+        -- Three or more rows on one anchor cannot say WHICH pair is the
+        -- duplicate, so the anchor abstains rather than reporting every
+        -- combination.
+        join anchor_groups g
+          on g.last_name_key = a.last_name_key
+         and g.college_key = a.college_key
+         and g.nfl_draft_year = a.nfl_draft_year
+         and g.row_count = 2
+        -- Equal names are the sibling check's class, not this one's.
+        where a.formatted_name is distinct from b.formatted_name
+          and not (${identifier_conflict})
+          and not (
+            a.date_of_birth is not null
+            and b.date_of_birth is not null
+            and a.date_of_birth <> b.date_of_birth
+          )
+        `
+      )
+
+      const {
+        rows: [scanned]
+      } = await db.raw(`select count(*) as count ${scanned_population}`)
+      const denominator = Number(scanned.count)
+
+      return found.length
+        ? found.map((row) => ({
+            pid: row.pid,
+            duplicate_pid: row.duplicate_pid,
+            numerator: 1,
+            denominator
+          }))
+        : [{ pid: null, duplicate_pid: null, numerator: 0, denominator }]
+    },
+    max_count: 0,
+    calibration:
+      'Measured 2026-08-15: 73 pairs against 27,236 rows scanned, out of 27,748 in the table — the 512 difference is rows missing an anchor leg, which cannot enter a pair. 18 of the 73 are from 2024 or later, and 65 carry the 0000-00-00 sentinel on exactly one side, which is the live minting shape; 2 more carry it on both. Every veto is load-bearing and was measured on the bare anchor: 492 two-row anchor keys drop to 380 on the identifier conflict and to 323 on the birth-date conflict, and requiring the two names to DIFFER takes it to 73. The birth-date veto stays reachable on the population it guards, removing 31 of the 104 pairs that survive the identifier veto with differing names — unlike the sentinel-restricted attach rule this class replaced, whose twin veto could never fire. What the check CANNOT grade is an anchor holding three or more rows: 9 such groups covering 27 rows abstain, because the anchor cannot say which pair is the duplicate. Externally verified same-person readings in the differing-name set include Chop/Demeioun Robinson, Kool-Aid/Ga-Quincy McKinstry, Speedy/Devante Noil, Geno/Euguene Hayes, Cobee/Jacobee Bryant, George/Miles Dieffenbach, John/Tyler Varga and Christian/Blake Proehl. The known FALSE joins are Colton/Dylan Taylor (Texas A&M 2021, a quarterback and a receiver, both carrying the sentinel so no veto can see them) and the three brother pairs, all parked. A finding is a CANDIDATE, never an automatic merge: this class was deliberately left as a detector rather than a mint-time guard, because attaching on it would MERGE two people on a wrong match and the write side is where that becomes unrecoverable.',
+    min_gradeable_units: 1,
+    // One sentinel row when clean, so the row-count floor is a tautology and
+    // the denominator carries the whole signal. 27,236 rows measured
+    // 2026-08-15 in the scanned population; it only grows with each draft
+    // class, so 25,000 leaves about eight percent of headroom against a
+    // reading that would mean an anchor leg stopped being populated.
+    min_denominator: 25000,
+    repair_command:
+      'Adjudicate each pair before merging anything. The strongest positive same-person evidence available here is the same draft_overall_pick on both rows — within one anchor group, since the column is NOT unique per year across the table (96 year/pick groups hold more than one row, 40 of them with differing last names). A shared birth date is NOT evidence, because brothers share one. Park a genuine two-person pair in db/checks/parked.json; merge the rest in a dated file under db/adhoc/ following 2026-08-05-dedupe-residual-round-4.sql'
   }
 ]
 
