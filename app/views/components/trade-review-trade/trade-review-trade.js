@@ -33,7 +33,7 @@ const CHANGE_EXPLANATION =
   'What this side of the trade has gained or lost in market value since the day it was made. Both sides can gain, and both sides can lose — this is not a comparison against the other team.'
 
 const PRODUCTION_EXPLANATION =
-  'Points above replacement this team has actually scored from what it received, and from everything those assets became, counted only for the stretches this team held them. Market value says what an asset is worth; this says what it did.'
+  'Points above replacement actually scored from what this team received, and from everything those assets became, counted only for the stretches this team held them and including weeks spent on the bench. A week below replacement subtracts. Market value says what an asset is worth; this says what it did.'
 
 const COMBINED_EXPLANATION =
   'A trade is not zero-sum. This is what both sides hold together now against what they held on the day, plus the production the two rosters have taken out of it.'
@@ -170,6 +170,131 @@ AssetLabel.propTypes = {
   headshot_width: PropTypes.number
 }
 
+// A number and the noun it is counting, in that order, so the figure never has
+// to be decoded against a legend somewhere else. The tooltip carries the
+// precision; the visible text has to be right on its own.
+function StatChip({ value, label, title }) {
+  return (
+    <span className='trade-review-trade__stat-chip' title={title}>
+      <span className='trade-review-trade__stat-chip-value'>{value}</span>
+      <span className='trade-review-trade__stat-chip-label'>{label}</span>
+    </span>
+  )
+}
+
+StatChip.propTypes = {
+  value: PropTypes.node,
+  label: PropTypes.string,
+  title: PropTypes.string
+}
+
+const plural = (count, singular, plural_form) =>
+  count === 1 ? singular : plural_form
+
+// What one holding produced and cost. This replaced a "0/5/0 wks" triple whose
+// three numbers could only be read against a tooltip naming their order —
+// exactly the coded label the house style forbids.
+//
+// The column semantics, since none of them is self-evident from the name:
+//   realized_pts_added_net_through_termination  summed over every week the team
+//     held the player, BENCH WEEKS INCLUDED, and a week below replacement
+//     subtracts, so the figure can be negative.
+//   weeks_active   weeks in an active-roster slot, which in this league's slot
+//     sets INCLUDES the bench and excludes the practice squad and reserve.
+//   weeks_started  weeks in a starting slot. Starting slots are a subset of
+//     active ones and the counter is a separate `if`, so every start is also an
+//     active week — the two do not sum to anything meaningful.
+function HoldingStats({ chain_row }) {
+  const weeks_started = chain_row.get('weeks_started')
+  const weeks_active = chain_row.get('weeks_active')
+  const weeks_practice_squad = chain_row.get('weeks_practice_squad')
+  const salary_paid = chain_row.get('salary_paid')
+  const realized = chain_row.get('realized_pts_added_net_through_termination')
+
+  const chips = []
+
+  if (realized != null) {
+    chips.push({
+      key: 'points',
+      value: Number(realized).toFixed(1),
+      label: 'pts above replacement',
+      title:
+        'Points above replacement this team scored from the asset over the weeks it held him, bench weeks included. A week below replacement subtracts, so this can be negative.'
+    })
+  }
+
+  if (weeks_active) {
+    chips.push({
+      key: 'active',
+      value: weeks_active,
+      label: plural(weeks_active, 'week rostered', 'weeks rostered'),
+      title:
+        'Weeks on the active roster — starting lineup and bench both, but not the practice squad or reserve.'
+    })
+  }
+
+  // "0 starts" is worth printing whenever the player was on the roster at all:
+  // a player held for a season and never started is the thing a reader most
+  // wants to see, and an omitted zero reads as missing data.
+  if (weeks_active || weeks_started) {
+    chips.push({
+      key: 'starts',
+      value: weeks_started || 0,
+      label: plural(weeks_started || 0, 'start', 'starts'),
+      title:
+        'Weeks in a starting lineup slot. Every start is also a rostered week, so the two are not additive.'
+    })
+  }
+
+  if (weeks_practice_squad) {
+    chips.push({
+      key: 'practice_squad',
+      value: weeks_practice_squad,
+      label: plural(
+        weeks_practice_squad,
+        'week on the practice squad',
+        'weeks on the practice squad'
+      ),
+      title: 'Weeks stashed on the practice squad.'
+    })
+  }
+
+  if (salary_paid) {
+    chips.push({
+      key: 'salary',
+      value: `$${Number(salary_paid).toLocaleString()}`,
+      label: 'salary paid',
+      title: 'Salary this team paid against the cap over this holding.'
+    })
+  }
+
+  if (!chips.length) {
+    // A pick is never on a roster, so silence is correct for one. For a player
+    // it is a finding: the team held him and he never dressed. Saying so beats
+    // an empty line, which reads as data that did not load.
+    if (!chain_row.get('player_id')) return null
+    return (
+      <div className='trade-review-trade__step-stats'>
+        <span className='trade-review-trade__step-idle'>
+          Never on a game-week roster
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div className='trade-review-trade__step-stats'>
+      {chips.map(({ key, value, label, title }) => (
+        <StatChip key={key} value={value} label={label} title={title} />
+      ))}
+    </div>
+  )
+}
+
+HoldingStats.propTypes = {
+  chain_row: ImmutablePropTypes.map.isRequired
+}
+
 // One holding on the asset's way to whatever it is today, as a step on a dated
 // timeline. Three things keep a chain readable that a flat row of columns did
 // not: the date leads every step, the asset is named only where it CHANGES, and
@@ -185,11 +310,6 @@ function ChainStep({
 }) {
   const period_end = chain_row.get('period_end')
   const terminated_by = chain_row.get('terminated_by')
-  const weeks_started = chain_row.get('weeks_started')
-  const weeks_active = chain_row.get('weeks_active')
-  const weeks_practice_squad = chain_row.get('weeks_practice_squad')
-  const salary_paid = chain_row.get('salary_paid')
-  const realized = chain_row.get('realized_pts_added_net_through_termination')
   const hop_trade_uid = chain_row.get('transformation_trade_uid')
   const is_open = period_end == null
 
@@ -229,23 +349,7 @@ function ChainStep({
             <AssetLabel asset={chain_row} />
           </div>
         )}
-        <div className='trade-review-trade__step-stats'>
-          {realized != null && (
-            <span title='Points above replacement scored while this team held the asset'>
-              {Number(realized).toFixed(1)} pts above replacement
-            </span>
-          )}
-          {weeks_started != null && (
-            <span title='Weeks started / weeks on the active roster / weeks stashed on the practice squad'>
-              {weeks_started}/{weeks_active}/{weeks_practice_squad} wks
-            </span>
-          )}
-          {salary_paid != null && (
-            <span title='Salary this team paid over the holding'>
-              ${Number(salary_paid).toLocaleString()}
-            </span>
-          )}
-        </div>
+        <HoldingStats chain_row={chain_row} />
         {!is_continued && (
           <div className='trade-review-trade__step-end'>
             {is_open
@@ -367,22 +471,25 @@ Asset.propTypes = {
   trade_uid: PropTypes.number
 }
 
-// Production and cost, in one muted line. It sits under the market figures
-// rather than beside them because it answers a different question: not what an
-// asset was worth, but what it did.
+// Production and cost for a whole side, in the same chips the timeline uses so
+// a reader learns the vocabulary once. It sits under the market figures rather
+// than beside them because it answers a different question: not what an asset
+// was worth, but what it did.
 function ProductionLine({ realized_points_added, salary_paid }) {
   if (realized_points_added == null) return null
   return (
-    <div
-      className='trade-review-trade__production'
-      title={PRODUCTION_EXPLANATION}
-    >
-      <span className='trade-review-trade__production-value'>
-        {realized_points_added.toFixed(1)}
-      </span>
-      <span>pts above replacement</span>
+    <div className='trade-review-trade__production'>
+      <StatChip
+        value={realized_points_added.toFixed(1)}
+        label='pts above replacement'
+        title={PRODUCTION_EXPLANATION}
+      />
       {salary_paid != null && (
-        <span>· ${salary_paid.toLocaleString()} paid</span>
+        <StatChip
+          value={`$${salary_paid.toLocaleString()}`}
+          label='salary paid'
+          title='Salary this team paid against the cap over those same holdings.'
+        />
       )}
     </div>
   )
@@ -526,7 +633,11 @@ function CombinedOutcome({ sides, realized_points_added }) {
       )}
       {realized_points_added != null && (
         <span className='trade-review-trade__combined-production'>
-          · {realized_points_added.toFixed(1)} pts above replacement
+          <StatChip
+            value={realized_points_added.toFixed(1)}
+            label='pts above replacement, both rosters'
+            title={PRODUCTION_EXPLANATION}
+          />
         </span>
       )}
     </div>

@@ -9,7 +9,10 @@ import PageLayout from '@layouts/page'
 import { get_app } from '@core/selectors'
 import { API_URL } from '@core/constants'
 
-import { questions, seat_field } from '@pages/waitlist/waitlist-content'
+import {
+  contact_fields,
+  questions
+} from '@libs-shared/manager-waitlist-questions.mjs'
 
 import './waitlist-submissions.styl'
 
@@ -22,9 +25,16 @@ import './waitlist-submissions.styl'
 // truncated cells is the shape that makes ten paragraphs of prose unreadable.
 // There are a handful of candidates, so the whole set fits on one page.
 //
-// It reuses the questionnaire's own content module for the prompts, so a
-// question reworded on the form cannot drift from the label it is read under.
-const QUESTION_LABELS = [...questions, seat_field]
+// It reads its prompts from the questionnaire's own definition, so a question
+// reworded on the form cannot drift from the label it is read under.
+//
+// Answers live in the `responses` jsonb keyed by question id, so a submission
+// recorded under an EARLIER question set simply has no key for a question added
+// since -- which renders as an absent block rather than as an error. That is
+// the intended behaviour and the reason `questionnaire_version` is shown.
+const seat_field = contact_fields.find(
+  (field) => field.column === 'requested_seat'
+)
 
 const Submission = ({ submission }) => (
   <article className='waitlist-submissions__card'>
@@ -43,17 +53,36 @@ const Submission = ({ submission }) => (
         </a>
         {submission.contact_handle && ` — ${submission.contact_handle}`}
       </div>
+      {/* The API refuses a submission that does not affirm the commitment, so
+          this can only read yes today. It is shown anyway because it is the one
+          thing on the card that is a statement of intent rather than an
+          opinion, and because a future round that softens the requirement would
+          otherwise silently stop displaying it. */}
+      <div className='waitlist-submissions__meta'>
+        {submission.has_affirmed_commitment
+          ? 'Affirmed the commitment'
+          : 'DID NOT affirm the commitment'}
+      </div>
     </header>
 
-    {QUESTION_LABELS.map((question) => {
-      const answer = submission[question.name]
+    {submission.requested_seat && (
+      <div className='waitlist-submissions__answer'>
+        <h3 className='waitlist-submissions__question'>{seat_field.label}</h3>
+        <p className='waitlist-submissions__response'>
+          {submission.requested_seat}
+        </p>
+      </div>
+    )}
+
+    {questions.map((question) => {
+      const answer = submission.responses?.[question.id]
       // An unanswered optional question is rendered as nothing rather than as
       // an empty heading, so a short card reads as short rather than as broken.
       if (!answer) {
         return null
       }
       return (
-        <div className='waitlist-submissions__answer' key={question.name}>
+        <div className='waitlist-submissions__answer' key={question.id}>
           <h3 className='waitlist-submissions__question'>{question.label}</h3>
           <p className='waitlist-submissions__response'>{answer}</p>
         </div>

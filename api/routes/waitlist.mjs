@@ -1,6 +1,14 @@
 import express from 'express'
 import rate_limit, { MemoryStore } from 'express-rate-limit'
 
+import {
+  commitment_affirmation_label,
+  contact_fields,
+  honeypot_field_name,
+  manager_waitlist_questionnaire_version,
+  questions
+} from '#libs-shared/manager-waitlist-questions.mjs'
+
 const router = express.Router()
 
 // PUBLIC, UNAUTHENTICATED WRITE. This router carries the questionnaire submit
@@ -13,43 +21,11 @@ const router = express.Router()
 // route reading user-owned rows behind a hand-written `req.auth` predicate that
 // was inverted for anonymous callers. A reader that cannot be reached without a
 // token has no predicate to get wrong.
-
-// Longest answer here is the prior-league-history paragraph. Generous enough
-// that nobody writing in good faith is truncated, bounded so a single request
-// cannot push megabytes of text into a table nothing paginates.
-const MAX_SHORT_ANSWER_LENGTH = 200
-const MAX_LONG_ANSWER_LENGTH = 4000
-
-// Every question, in the order the form asks them. `required` is what the route
-// enforces; the column set in
-// db/adhoc/2026-08-15-add-manager-waitlist-submissions.sql matches it exactly.
-const FIELDS = [
-  { name: 'candidate_name', required: true, max: MAX_SHORT_ANSWER_LENGTH },
-  { name: 'contact_email', required: true, max: MAX_SHORT_ANSWER_LENGTH },
-  { name: 'contact_handle', required: false, max: MAX_SHORT_ANSWER_LENGTH },
-  { name: 'timezone_name', required: true, max: MAX_SHORT_ANSWER_LENGTH },
-  { name: 'commitment_intent', required: true, max: MAX_LONG_ANSWER_LENGTH },
-  { name: 'dynasty_experience', required: true, max: MAX_LONG_ANSWER_LENGTH },
-  {
-    name: 'salary_cap_experience',
-    required: true,
-    max: MAX_LONG_ANSWER_LENGTH
-  },
-  {
-    name: 'contract_mechanics_comfort',
-    required: true,
-    max: MAX_LONG_ANSWER_LENGTH
-  },
-  { name: 'offseason_activity', required: true, max: MAX_LONG_ANSWER_LENGTH },
-  { name: 'rules_tolerance', required: true, max: MAX_LONG_ANSWER_LENGTH },
-  {
-    name: 'commissioner_disagreement',
-    required: true,
-    max: MAX_LONG_ANSWER_LENGTH
-  },
-  { name: 'prior_league_history', required: true, max: MAX_LONG_ANSWER_LENGTH },
-  { name: 'requested_seat', required: false, max: MAX_SHORT_ANSWER_LENGTH }
-]
+//
+// The field list is IMPORTED rather than restated here. When it was a local
+// constant it had to agree with the form's copy and with the table's columns by
+// hand, which is three places to keep in step for a thing that gets edited
+// between rounds.
 
 // Deliberately loose. The email is a contact route the Commissioner will reply
 // to by hand, not a login, so the only failure worth refusing is one that
@@ -57,11 +33,6 @@ const FIELDS = [
 // addresses, which on a form whose scarce resource is COMPLETION costs more
 // than it saves.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-// A hidden field no human ever fills. A form-filling bot populates every input
-// it finds, so a non-empty value is a bot with no false-positive path -- unlike
-// a timing floor or a content heuristic, both of which refuse real people.
-const HONEYPOT_FIELD = 'league_website'
 
 export const SUBMISSIONS_PER_DAY = 5
 
@@ -86,6 +57,16 @@ const submit_rate_limiter = rate_limit({
   message: { error: 'Too many submissions from this address today' }
 })
 
+// Returns the trimmed value, or null when the field was absent or blank. An
+// absent optional answer is stored as null rather than as an empty string so
+// the reading surface can tell "left blank" from "answered with nothing"
+// without a second convention.
+const read_answer = (body, name) => {
+  const raw = body[name]
+  const value = typeof raw === 'string' ? raw.trim() : ''
+  return value || null
+}
+
 /**
  * @swagger
  * /waitlist:
@@ -95,6 +76,11 @@ const submit_rate_limiter = rate_limit({
  *       Public and unauthenticated. Accepts one prospective manager's answers
  *       to the vetting questionnaire, which feed the league's waiting-list
  *       ranking vote. Rate limited per IP.
+ *
+ *       The accepted body keys are the contact field columns plus one key per
+ *       question id, both defined in
+ *       libs-shared/manager-waitlist-questions.mjs. Question answers are stored
+ *       in the `responses` jsonb column keyed by question id.
  *     tags:
  *       - Waitlist
  *     requestBody:
@@ -107,14 +93,7 @@ const submit_rate_limiter = rate_limit({
  *               - candidate_name
  *               - contact_email
  *               - timezone_name
- *               - commitment_intent
- *               - dynasty_experience
- *               - salary_cap_experience
- *               - contract_mechanics_comfort
- *               - offseason_activity
- *               - rules_tolerance
- *               - commissioner_disagreement
- *               - prior_league_history
+ *               - has_affirmed_commitment
  *             properties:
  *               candidate_name:
  *                 type: string
@@ -124,24 +103,11 @@ const submit_rate_limiter = rate_limit({
  *                 type: string
  *               timezone_name:
  *                 type: string
- *               commitment_intent:
- *                 type: string
- *               dynasty_experience:
- *                 type: string
- *               salary_cap_experience:
- *                 type: string
- *               contract_mechanics_comfort:
- *                 type: string
- *               offseason_activity:
- *                 type: string
- *               rules_tolerance:
- *                 type: string
- *               commissioner_disagreement:
- *                 type: string
- *               prior_league_history:
- *                 type: string
  *               requested_seat:
  *                 type: string
+ *               has_affirmed_commitment:
+ *                 type: boolean
+ *                 description: Must be true. The form states the commitment and takes an explicit affirmation rather than asking for it as a question.
  *     responses:
  *       200:
  *         description: The submission was recorded
@@ -153,7 +119,7 @@ const submit_rate_limiter = rate_limit({
  *                 success:
  *                   type: boolean
  *       400:
- *         description: A required answer is missing or an answer is too long
+ *         description: A required answer is missing, an answer is too long, or the commitment was not affirmed
  *       429:
  *         description: Too many submissions from this address
  */
@@ -163,37 +129,83 @@ router.post('/', submit_rate_limiter, async (req, res) => {
     // Answered honeypot: accept it as far as the caller can see. Telling a bot
     // which field gave it away is free information for the next attempt, and
     // there is no human on the other end to mislead.
-    if (req.body[HONEYPOT_FIELD]) {
+    if (req.body[honeypot_field_name]) {
       return res.send({ success: true })
     }
 
-    const submission = {}
+    const submission = {
+      questionnaire_version: manager_waitlist_questionnaire_version
+    }
 
-    for (const field of FIELDS) {
-      const raw = req.body[field.name]
-      const value = typeof raw === 'string' ? raw.trim() : ''
+    for (const field of contact_fields) {
+      const value = read_answer(req.body, field.column)
 
       if (!value) {
         if (field.required) {
-          return res.status(400).send({ error: `Missing ${field.name}` })
+          return res.status(400).send({ error: `Missing ${field.column}` })
         }
-        // An absent optional answer is stored as NULL rather than as an empty
-        // string, so the reading surface can tell "left blank" from "answered
-        // with nothing" without a second convention.
-        submission[field.name] = null
+        submission[field.column] = null
         continue
       }
 
       if (value.length > field.max) {
-        return res.status(400).send({ error: `${field.name} is too long` })
+        return res.status(400).send({ error: `${field.column} is too long` })
       }
 
-      submission[field.name] = value
+      submission[field.column] = value
     }
 
     if (!EMAIL_RE.test(submission.contact_email)) {
       return res.status(400).send({ error: 'Invalid contact_email' })
     }
+
+    // Strict `!== true` rather than a truthy check: the affirmation is the one
+    // field where a caller sending the string 'false' must not be read as yes.
+    if (req.body.has_affirmed_commitment !== true) {
+      return res
+        .status(400)
+        .send({ error: `You must confirm: ${commitment_affirmation_label}` })
+    }
+    submission.has_affirmed_commitment = true
+
+    const responses = {}
+    for (const question of questions) {
+      const value = read_answer(req.body, question.id)
+
+      if (!value) {
+        if (question.required) {
+          return res.status(400).send({ error: `Missing ${question.id}` })
+        }
+        continue
+      }
+
+      // A question with `options` is a closed vocabulary, so the value has to
+      // be one of them. Without this the select is only a client-side
+      // suggestion -- anyone posting by hand could put arbitrary prose into a
+      // field the managers' page presents as a comparable range, which is the
+      // one thing these two questions exist to avoid.
+      if (question.options) {
+        if (!question.options.includes(value)) {
+          return res
+            .status(400)
+            .send({ error: `${question.id} is not one of the choices` })
+        }
+        responses[question.id] = value
+        continue
+      }
+
+      if (value.length > question.max) {
+        return res.status(400).send({ error: `${question.id} is too long` })
+      }
+
+      responses[question.id] = value
+    }
+
+    // Only keys the current question set defines are stored. An unrecognised
+    // key in the body is dropped rather than written through, so a stale client
+    // -- or anyone posting by hand -- cannot put arbitrary content into a
+    // schemaless column that the managers' page then renders.
+    submission.responses = JSON.stringify(responses)
 
     await req.app.locals.db('manager_waitlist_submissions').insert(submission)
 

@@ -168,21 +168,13 @@
   &.down
     color #c62828
 
-// What the assets DID, as against what they were worth. Muted and beneath the
-// market figures because it answers a different question, not a lesser one.
+// What the assets DID, as against what they were worth. Beneath the market
+// figures because it answers a different question, not a lesser one.
 .trade-review-trade__production
-  align-items baseline
-  color #757575
-  cursor help
   display flex
   flex-wrap wrap
   font-size 12px
-  gap 4px
-
-.trade-review-trade__production-value
-  color $textColor
-  font-variant-numeric tabular-nums
-  font-weight 600
+  gap 2px 8px
 
 // The trade as a whole, which is the reading the two side columns cannot give:
 // a deal can grow or shrink the value both rosters hold together.
@@ -215,9 +207,7 @@
     color #c62828
 
 .trade-review-trade__combined-production
-  color #757575
   font-size 12px
-  font-variant-numeric tabular-nums
 
 // Deliberately styled as prose rather than as a number: the absence has to read
 // as "we do not know", not as a small or neutral value.
@@ -384,12 +374,36 @@
   min-width 0
 
 .trade-review-trade__step-stats
-  color #9e9e9e
   display flex
   flex-wrap wrap
   font-size 12px
+  gap 2px 8px
+
+.trade-review-trade__step-idle
+  color #9e9e9e
+  font-style italic
+
+// A figure and the noun it counts, always in that order and always together.
+// The number carries the weight and the noun stays muted, which is what lets a
+// row of these be scanned without reading every word of it.
+.trade-review-trade__stat-chip
+  align-items baseline
+  cursor help
+  display inline-flex
+  gap 3px
+
+  & + &::before
+    color #d5d5d5
+    content '·'
+    margin-right 5px
+
+.trade-review-trade__stat-chip-value
+  color $textColor
   font-variant-numeric tabular-nums
-  gap 10px
+  font-weight 600
+
+.trade-review-trade__stat-chip-label
+  color #9e9e9e
 
 .trade-review-trade__step-end
   color #616161
