@@ -23,12 +23,14 @@ import './admission-vote.styl'
 // and a Manager arriving after the close should not have to know that the page
 // he ranked on is not the page the totals are on.
 //
-// NOTHING RENDERS AN INDIVIDUAL BALLOT, including the caller's own. A Manager
-// replacing his ballot re-ranks from scratch rather than editing a rendered
-// copy of what he submitted before. That is the confidentiality rule stated
-// absolutely rather than stated with an exception, and the exception is the
-// part that would later be argued about. The API does not return the ranking
-// either, so this is not a display choice the page could quietly reverse.
+// NOTHING RENDERS ANOTHER TEAM'S BALLOT. His own is rendered, and the form is
+// seeded from it, so replacing a ballot is an edit rather than a re-entry.
+// Section 10(e) forbids disclosing how a Team voted to OTHERS and says nothing
+// about a Manager reading his own; the absolute reading held until 2026-08-15
+// and was a design property rather than a constitutional requirement. The API
+// enforces the half that matters -- it keys the returned ranking on the
+// caller's own team -- so this page could not reach another Team's ballot even
+// if it tried.
 //
 // NO REACTIONS AND NO COMMENTS on the Candidate panels. A visible opinion on a
 // named person's application recreates exactly the public verdict the
@@ -149,8 +151,14 @@ Decision.propTypes = {
 }
 
 const Ballot = ({ vote, candidates, on_submit, is_submitting, viewer }) => {
+  // Seeded from his own ranking, so replacing a ballot is an edit rather than a
+  // re-entry. Keyed on the ranking itself: the page reloads the vote after a
+  // submit, and without the key the slots would keep the pre-submit state.
   const [slots, set_slots] = React.useState(() =>
-    Array.from({ length: vote.maximum_ranked_candidates }, () => '')
+    Array.from(
+      { length: vote.maximum_ranked_candidates },
+      (unused, index) => viewer.ranked_candidate_ids[index] ?? ''
+    )
   )
 
   const set_slot = (index, value) =>
@@ -179,7 +187,7 @@ const Ballot = ({ vote, candidates, on_submit, is_submitting, viewer }) => {
         scores {vote.maximum_ranked_candidates}, your second one fewer, and so
         on. Ranking fewer does not weaken your first choice.
         {viewer.has_submitted_ballot &&
-          ' You have already voted; submitting again replaces your ballot entirely.'}
+          ' Your ballot is shown below as you submitted it. Changing it and submitting replaces it entirely, as often as you like while the vote is open.'}
       </p>
 
       {slots.map((value, index) => (
@@ -343,7 +351,13 @@ export default function AdmissionVotePage() {
             {error_message && (
               <p className='admission-vote__error'>{error_message}</p>
             )}
+            {/* Keyed on the ranking the server holds, so the form resyncs when
+                that changes underneath it -- a ballot the commissioner
+                transcribed, or one cast from another device. A useState
+                initializer runs on mount alone and would otherwise strand the
+                slots on whatever they held when the page first loaded. */}
             <Ballot
+              key={viewer.ranked_candidate_ids.join('-')}
               vote={vote}
               candidates={candidates}
               viewer={viewer}

@@ -24,17 +24,21 @@ const router = express.Router()
 // rather than another predicate to get right.
 //
 // CONFIDENTIALITY, Section 10(e). "He shall not disclose how a Team voted."
-// Nothing here returns a per-Team ranking to anyone, the Commissioner included:
-// the only read onto the tally is get_admission_vote_totals, which selects from
-// admission_vote_candidates alone, and the viewer block reports only whether
-// the CALLER'S OWN Team has a ballot -- never which Teams have voted and never
-// what any Team ranked. Reaching an individual ballot takes a deliberate query
-// against the database.
+// What that forbids is disclosing a Team's ballot to OTHERS, so the rule here
+// is ANOTHER Team's ranking, never any ranking at all: the only read onto the
+// tally is get_admission_vote_totals, which selects from
+// admission_vote_candidates alone, and the viewer block reports the caller's
+// OWN ranking and nothing about any other Team -- never which Teams have voted
+// and never what one of them ranked. Reaching another Team's ballot takes a
+// deliberate query against the database.
 //
-// A Manager replacing his own ballot re-ranks from scratch rather than editing
-// a rendered copy of his prior one. That follows from the same rule stated
-// absolutely -- no surface renders an individual ballot for any caller -- and
-// costs him a re-entry rather than costing anyone confidentiality.
+// The caller's own ranking IS returned, keyed on a team_id derived from his own
+// users_teams rows rather than from anything he sends, so a Manager replacing
+// his ballot edits a rendered copy instead of re-ranking from scratch. This was
+// absolute until 2026-08-15 -- no surface rendered an individual ballot for any
+// caller -- which was a design property rather than a constitutional
+// requirement, and the operator reversed it. The Commissioner gains nothing by
+// it: he reaches his own ballot by the same path as anyone and no other.
 
 /**
  * Who the caller is in this league, for the CURRENT season.
@@ -147,9 +151,10 @@ const validate_ranking = ({ ranked_candidate_ids, vote, candidate_ids }) => {
  *     summary: Read the current Amendment XLIII admission vote
  *     description: |
  *       Restricted to the league's sitting managers. Returns the Notice (every
- *       Candidate and his Sponsors), the caller's own ballot state, and — once
- *       the vote has closed — the per-Candidate point totals Section 10(e)
- *       discloses. Never returns a per-Team ranking to any caller.
+ *       Candidate and his Sponsors), the caller's own ballot state including
+ *       his own team's ranking, and — once the vote has closed — the
+ *       per-Candidate point totals Section 10(e) discloses. Never returns
+ *       another team's ranking to any caller, the commissioner included.
  *     tags:
  *       - Admission votes
  *     security:
@@ -261,6 +266,33 @@ router.get('/', async (req, res) => {
           .first('submitted_at', 'commissioner_entered_reason')
       : null
 
+    // THE CALLER'S OWN RANKING, and his own Team's alone.
+    //
+    // Section 10(e) says "He shall not disclose how a Team voted." That binds
+    // the Commissioner against disclosing a Team's ballot to OTHERS; it says
+    // nothing about a Manager reading his own. The absolute reading -- no
+    // surface renders an individual ballot for any caller -- was a design
+    // property rather than a constitutional requirement, and it made replacing
+    // a ballot mean re-ranking from scratch. The operator reversed it.
+    //
+    // The predicate is `viewer_team_id`, which is derived from the CALLER'S
+    // OWN users_teams rows and never from a request parameter, so there is no
+    // team_id an attacker could supply to read someone else's ranking. The
+    // Commissioner reaches this by exactly the same path and so sees his own
+    // ballot and no other -- being the Commissioner grants nothing extra here,
+    // which is the property the confidentiality rule actually turns on.
+    //
+    // Not gated on the vote being open. It is not a disclosure, so the sealing
+    // status check that governs the tally has nothing to say about it, and a
+    // Manager reading back what he himself submitted after the close is the
+    // same act it was before.
+    const viewer_preferences = viewer_ballot
+      ? await db('admission_vote_ballot_preferences')
+          .where({ admission_vote_id, team_id: viewer_team_id })
+          .orderBy('preference_rank', 'asc')
+          .pluck('admission_vote_candidate_id')
+      : []
+
     res.send({
       vote: {
         ...vote,
@@ -291,9 +323,11 @@ router.get('/', async (req, res) => {
         is_eligible: Boolean(
           viewer_team_id && eligible_team_ids.has(viewer_team_id)
         ),
-        // Whether, not what. The ranking itself is never rendered back.
         has_submitted_ballot: Boolean(viewer_ballot),
         submitted_at: viewer_ballot ? viewer_ballot.submitted_at : null,
+        // His own ranking, in preference order, so replacing a ballot is an
+        // edit rather than a re-entry. Empty when he has not voted.
+        ranked_candidate_ids: viewer_preferences,
         is_commissioner_entered: Boolean(
           viewer_ballot && viewer_ballot.commissioner_entered_reason
         )

@@ -207,7 +207,7 @@ describe('ADMISSION VOTE BALLOT', function () {
 
     // Section 10(e). The response is where this is enforced: a per-Team key
     // here would be the disclosure the section forbids.
-    it('never returns a per-team ranking to any caller', async () => {
+    it('never returns another team’s ranking to any caller', async () => {
       const { admission_vote_id, candidate_ids } = await seed_vote()
       await submit_ballot({
         admission_vote_id,
@@ -215,25 +215,53 @@ describe('ADMISSION VOTE BALLOT', function () {
         ranked_candidate_ids: [candidate_ids.Bob, candidate_ids.Alice]
       })
 
-      for (const token of [manager_token, commissioner_token]) {
-        const response = await read_vote({ token })
-        const payload = JSON.stringify(response.body)
+      // A SECOND ballot, so the leak this case is named for is detectable at
+      // all. With only one ballot in the vote, a handler returning every team's
+      // preferences returns exactly the caller's own and the case passes over
+      // it -- the fixture, not the assertion, is what gives this its teeth.
+      await write_admission_vote_ballot({
+        admission_vote_id,
+        team_id: 4,
+        ranked_candidate_ids: [candidate_ids.Carol]
+      })
+
+      // The manager reads his own back, and nothing of team 4's.
+      const own = await read_vote({ token: manager_token })
+      expect(own.body.viewer.ranked_candidate_ids).to.deep.equal([
+        candidate_ids.Bob,
+        candidate_ids.Alice
+      ])
+      expect(own.body.viewer.ranked_candidate_ids).to.not.include(
+        candidate_ids.Carol
+      )
+
+      // The commissioner's own team cast nothing, so he reads an empty ranking
+      // rather than either of theirs — being commissioner grants no reach.
+      const other = await read_vote({ token: commissioner_token })
+      expect(other.body.viewer.ranked_candidate_ids).to.deep.equal([])
+
+      for (const response of [own, other]) {
+        const { viewer, ...rest } = response.body
+        const payload = JSON.stringify(rest)
 
         expect(payload).to.not.include('preference_rank')
         expect(payload).to.not.include('ranked_candidate_ids')
-        expect(response.body.ballot_count).to.equal(1)
+        expect(response.body.ballot_count).to.equal(2)
         // Turnout is an aggregate. It says how many Teams voted, never which.
         expect(response.body).to.not.have.property('ballots')
       }
     })
 
-    it('reports the caller his own ballot state without the ranking', async () => {
+    it('reports the caller his own ballot state and his own ranking', async () => {
       const { admission_vote_id, candidate_ids } = await seed_vote()
 
       const before_submission = await read_vote()
       expect(before_submission.body.viewer.team_id).to.equal(manager_team_id)
       expect(before_submission.body.viewer.is_eligible).to.equal(true)
       expect(before_submission.body.viewer.has_submitted_ballot).to.equal(false)
+      expect(before_submission.body.viewer.ranked_candidate_ids).to.deep.equal(
+        []
+      )
 
       await submit_ballot({
         admission_vote_id,
@@ -244,9 +272,47 @@ describe('ADMISSION VOTE BALLOT', function () {
       const after_submission = await read_vote()
       expect(after_submission.body.viewer.has_submitted_ballot).to.equal(true)
       expect(after_submission.body.viewer.submitted_at).to.exist
-      expect(after_submission.body.viewer).to.not.have.property(
-        'ranked_candidate_ids'
-      )
+      expect(after_submission.body.viewer.ranked_candidate_ids).to.deep.equal([
+        candidate_ids.Alice
+      ])
+    })
+
+    // WHY THE RANKING IS RETURNED AT ALL. Replacing a ballot was already
+    // unlimited -- the writer deletes and re-inserts in one transaction -- but
+    // with no ranking rendered it meant re-entering the whole thing from
+    // scratch. This is the round trip that makes it an edit, and the ORDER is
+    // what has to survive it: a ranking read back in the wrong order would
+    // silently invert a manager's preferences on his next submission.
+    it('reads back a replaced ranking in preference order', async () => {
+      const { admission_vote_id, candidate_ids } = await seed_vote()
+
+      await submit_ballot({
+        admission_vote_id,
+        token: manager_token,
+        ranked_candidate_ids: [candidate_ids.Alice, candidate_ids.Bob]
+      })
+
+      const first = await read_vote()
+      expect(first.body.viewer.ranked_candidate_ids).to.deep.equal([
+        candidate_ids.Alice,
+        candidate_ids.Bob
+      ])
+
+      // Same two candidates, opposite order. Nothing but the order changes, so
+      // a read that ignored preference_rank would return the identical array
+      // and pass the previous assertion.
+      await submit_ballot({
+        admission_vote_id,
+        token: manager_token,
+        ranked_candidate_ids: [candidate_ids.Bob, candidate_ids.Alice]
+      })
+
+      const second = await read_vote()
+      expect(second.body.viewer.ranked_candidate_ids).to.deep.equal([
+        candidate_ids.Bob,
+        candidate_ids.Alice
+      ])
+      expect(second.body.ballot_count).to.equal(1)
     })
   })
 

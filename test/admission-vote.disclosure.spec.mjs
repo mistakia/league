@@ -204,37 +204,92 @@ describe('ADMISSION VOTE DISCLOSURE', function () {
     }
   })
 
-  // Section 10(e): "He shall not disclose how a Team voted." Swept over the
-  // WHOLE payload rather than over the fields the page reads, so a field added
-  // later that carried a ranking would fail here rather than ship.
-  it('carries no per-team ranking anywhere in the payload', async () => {
+  // Section 10(e): "He shall not disclose how a Team voted." That forbids
+  // disclosure to OTHERS, so what the payload must not carry is ANOTHER team's
+  // ranking. The caller's own is returned deliberately, so replacing a ballot
+  // is an edit rather than a re-entry — the operator settled that on
+  // 2026-08-15, reversing the absolute rule this file used to pin.
+  //
+  // The two teams are given DIFFERENT rankings and each caller is checked
+  // against his own, which is what gives this teeth: a handler that returned
+  // one fixed team's ranking to everybody would satisfy any assertion that
+  // merely looked for a ranking being present.
+  it('carries the caller’s own ranking and no other team’s', async () => {
     const { admission_vote_id, candidate_ids } = await seed_vote()
+
+    // Commissioner is user1 and holds team 1; the ordinary manager is user2 and
+    // holds team 2.
+    const team_1_ranking = [candidate_ids.Carol, candidate_ids.Alice]
+    const team_2_ranking = [candidate_ids.Alice]
 
     await seed_ballot({
       admission_vote_id,
       team_id: 1,
-      ranked_candidate_ids: [candidate_ids.Carol, candidate_ids.Alice]
+      ranked_candidate_ids: team_1_ranking
     })
     await seed_ballot({
       admission_vote_id,
       team_id: 2,
-      ranked_candidate_ids: [candidate_ids.Alice]
+      ranked_candidate_ids: team_2_ranking
     })
 
     await close_admission_vote({ admission_vote_id })
 
-    for (const token of [manager_token, commissioner_token]) {
+    const expectations = [
+      { token: commissioner_token, own: team_1_ranking, other: team_2_ranking },
+      { token: manager_token, own: team_2_ranking, other: team_1_ranking }
+    ]
+
+    for (const { token, own, other } of expectations) {
       const response = await read_vote({ token })
-      const payload = JSON.stringify(response.body)
+
+      // His own ranking, in preference order.
+      expect(response.body.viewer.ranked_candidate_ids).to.deep.equal(own)
+      // ...and it is HIS, not a fixed team's handed to every caller.
+      expect(response.body.viewer.ranked_candidate_ids).to.not.deep.equal(other)
+
+      // Nothing outside the viewer block carries a ranking at all. Swept over
+      // the WHOLE payload with the viewer block removed, rather than over the
+      // fields the page reads, so a field added later that carried another
+      // team's ranking fails here rather than shipping.
+      const { viewer, ...rest } = response.body
+      const payload = JSON.stringify(rest)
 
       expect(payload).to.not.include('preference_rank')
       expect(payload).to.not.include('ballots')
       expect(payload).to.not.include('ranked_candidate_ids')
+
+      // The viewer block itself names no team but the caller's own.
+      expect(viewer.team_id).to.equal(token === commissioner_token ? 1 : 2)
 
       // Turnout is an aggregate and stays one. Which teams voted is not in the
       // payload, only how many.
       expect(response.body.ballot_count).to.equal(2)
       expect(response.body).to.not.have.property('voted_team_ids')
     }
+  })
+
+  // The Commissioner is the caller this rule is really about: he is the one
+  // Section 10(e) binds, and he reaches his own ballot by the same predicate as
+  // anyone else. Being commissioner grants no extra reach.
+  it('gives the commissioner no ranking but his own', async () => {
+    const { admission_vote_id, candidate_ids } = await seed_vote()
+
+    // Team 4 votes; the commissioner's own team 1 does not.
+    await seed_ballot({
+      admission_vote_id,
+      team_id: 4,
+      ranked_candidate_ids: [candidate_ids.Bob, candidate_ids.Carol]
+    })
+
+    await close_admission_vote({ admission_vote_id })
+
+    const response = await read_vote({ token: commissioner_token })
+
+    // He cast no ballot, so there is nothing of his own to render — and team
+    // 4's ranking is not his to see.
+    expect(response.body.viewer.has_submitted_ballot).to.equal(false)
+    expect(response.body.viewer.ranked_candidate_ids).to.deep.equal([])
+    expect(response.body.ballot_count).to.equal(1)
   })
 })

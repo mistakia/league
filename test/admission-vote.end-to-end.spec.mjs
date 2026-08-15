@@ -286,23 +286,62 @@ describe('ADMISSION VOTE END TO END', function () {
   })
 
   // The standing confidentiality check, run against a full vote rather than a
-  // two-ballot fixture: five ballots exist, one of them transcribed, and no
-  // caller can reach any of them.
-  it('renders no individual ballot and no per-team row to any caller', async () => {
-    for (const token of [
-      commissioner_token,
-      team2_token,
-      team3_token,
-      team4_token,
-      team5_token
-    ]) {
+  // two-ballot fixture: five ballots exist, one of them transcribed, every one
+  // of them different, and each caller reaches his own and no other.
+  //
+  // Five distinct rankings is what makes this sharp. A handler leaking a fixed
+  // team's ranking, or returning the whole set, fails on the first caller —
+  // whereas an assertion that merely looked for a ranking being present would
+  // pass over both.
+  it('renders each caller his own ballot and no other team’s', async () => {
+    const own_ranking_by_token = [
+      { token: commissioner_token, team_id: 1, ranking: [candidate_ids.Alice] },
+      { token: team2_token, team_id: 2, ranking: [candidate_ids.Bob] },
+      {
+        token: team3_token,
+        team_id: 3,
+        ranking: [candidate_ids.Alice, candidate_ids.Carol, candidate_ids.Dave]
+      },
+      // Transcribed by the commissioner. It is still this manager's ballot, so
+      // he reads it back — but never the reason it was transcribed.
+      {
+        token: team4_token,
+        team_id: 4,
+        ranking: [candidate_ids.Bob, candidate_ids.Dave]
+      },
+      { token: team5_token, team_id: 5, ranking: [candidate_ids.Carol] }
+    ]
+
+    for (const { token, team_id, ranking } of own_ranking_by_token) {
       const response = await read_vote({ token })
-      const payload = JSON.stringify(response.body)
+
+      expect(response.body.viewer.team_id).to.equal(team_id)
+      expect(response.body.viewer.ranked_candidate_ids).to.deep.equal(ranking)
+
+      // Nothing outside the viewer block carries a ranking, and the reason a
+      // ballot was transcribed reaches nobody at all — including the manager
+      // it was transcribed for, and including the commissioner who wrote it.
+      const { viewer, ...rest } = response.body
+      const payload = JSON.stringify(rest)
 
       expect(payload).to.not.include('preference_rank')
-      expect(payload).to.not.include('commissioner_entered_reason')
-      expect(payload).to.not.include('sent his ranking by text')
+      expect(payload).to.not.include('ranked_candidate_ids')
+      expect(JSON.stringify(response.body)).to.not.include(
+        'commissioner_entered_reason'
+      )
+      expect(JSON.stringify(response.body)).to.not.include(
+        'sent his ranking by text'
+      )
       expect(response.body).to.not.have.property('ballots')
+
+      // No caller's own ranking is any other caller's, so the per-caller
+      // keying is doing real work rather than the fixture agreeing by chance.
+      for (const other of own_ranking_by_token) {
+        if (other.token === token) continue
+        expect(response.body.viewer.ranked_candidate_ids).to.not.deep.equal(
+          other.ranking
+        )
+      }
     }
   })
 

@@ -28,10 +28,12 @@ import './admission-vote-commissioner.styl'
 // commissioner's discretion, so every candidate sharing the top total is
 // offered and whichever he picks is the highest ranked once he has ranked them.
 //
-// NO SURFACE HERE RENDERS AN INDIVIDUAL BALLOT EITHER. He sees how many teams
-// voted and how many he transcribed, never which team voted or what any of them
-// ranked. That is not a courtesy to the managers — the whole design rests on
-// the tally being the only thing anyone reads, including him.
+// NO SURFACE HERE RENDERS A BALLOT. He sees how many teams voted and how many
+// he transcribed, never which team voted or what any of them ranked. That is
+// not a courtesy to the managers — the whole design rests on the tally being
+// the only thing anyone reads about OTHER teams, including him. He reads his
+// own ballot where every manager does, on the manager page, by the same
+// own-team predicate and with no privilege attached to being commissioner.
 
 const format_moment = (value) =>
   value ? dayjs(value).format('MMM D, YYYY h:mm A') : null
