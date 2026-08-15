@@ -37,6 +37,15 @@ export const page_routes = [
     og_type: 'article'
   },
   {
+    // The one conversion surface on the site, and the destination of the
+    // landing page's primary call to action — so it is deliberately indexable
+    // and carries real copy rather than a bare noun.
+    pattern: '/waitlist',
+    title: 'Join the Waitlist',
+    description:
+      'Apply for the open manager seat in the GENESIS LEAGUE: a ten-team, half-PPR, superflex dynasty league with a salary cap, running since 2020.'
+  },
+  {
     pattern: '/glossary',
     title: 'Glossary',
     description:
@@ -188,6 +197,14 @@ export const page_routes = [
     pattern: '/leagues/:lid/teams/:tid',
     title: 'Team',
     description: 'Team roster, cap space, and draft picks.'
+  },
+  {
+    // Candidate PII, so it stays out of an index regardless of the fact that
+    // the API refuses anyone who does not manage a team in the league.
+    pattern: '/leagues/:lid/waitlist-submissions',
+    title: 'Waitlist Applications',
+    description: 'Prospective manager applications for the open seat.',
+    robots: private_robots
   },
   {
     pattern: '/leagues/:lid/settings',

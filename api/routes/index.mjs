@@ -22,6 +22,8 @@ import shorten_url from './shorten-url.mjs'
 import docs from './docs.mjs'
 import selection_combinations from './selection-combinations.mjs'
 import context_docs from './context-docs.mjs'
+import waitlist from './waitlist.mjs'
+import waitlist_submissions from './waitlist-submissions.mjs'
 
 export default {
   auth,
@@ -47,5 +49,7 @@ export default {
   shorten_url,
   docs,
   selection_combinations,
-  context_docs
+  context_docs,
+  waitlist,
+  waitlist_submissions
 }

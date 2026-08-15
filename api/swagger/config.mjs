@@ -41,6 +41,35 @@ const options = {
         }
       },
       schemas: {
+        // The vetting questionnaire's stored response. Defined here rather than
+        // in a route's JSDoc so there is exactly one definition -- swagger-jsdoc
+        // MERGES two definitions of one name silently, which has already left
+        // two schemas in this file whose properties live in a file nobody
+        // reading them would open. The property set is the column set of
+        // manager_waitlist_submissions, which is what lets gate 2 of
+        // check-api-response-shapes compare it against db/schema.postgres.sql.
+        WaitlistSubmission: {
+          type: 'object',
+          properties: {
+            submission_id: { type: 'integer' },
+            questionnaire_version: { type: 'integer' },
+            submitted_at: { type: 'string', format: 'date-time' },
+            candidate_name: { type: 'string' },
+            contact_email: { type: 'string' },
+            contact_handle: { type: 'string', nullable: true },
+            timezone_name: { type: 'string' },
+            commitment_intent: { type: 'string' },
+            dynasty_experience: { type: 'string' },
+            salary_cap_experience: { type: 'string' },
+            contract_mechanics_comfort: { type: 'string' },
+            offseason_activity: { type: 'string' },
+            rules_tolerance: { type: 'string' },
+            commissioner_disagreement: { type: 'string' },
+            prior_league_history: { type: 'string' },
+            requested_seat: { type: 'string', nullable: true }
+          }
+        },
+
         // Base ID schemas
         EntityId: {
           type: 'integer',

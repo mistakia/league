@@ -148,6 +148,10 @@ api.use('/api/data-views', routes.data_views)
 api.use('/api/u', speed_limiter, routes.shorten_url)
 api.use('/api/wagers', routes.wagers)
 api.use('/api/selection-combinations', routes.selection_combinations)
+// Public, unauthenticated write: a prospective manager has no account. This
+// router carries the submit route and nothing else -- its read side is mounted
+// below the guard, so no handler here reads user-owned rows.
+api.use('/api/waitlist', routes.waitlist)
 
 api.use('/api/*', (req, res, next) => {
   if (req.method !== 'OPTIONS' && !req.auth) {
@@ -158,6 +162,10 @@ api.use('/api/*', (req, res, next) => {
 api.use('/api/scoreboard', routes.scoreboard)
 api.use('/api/me', routes.me)
 api.use('/api/settings', routes.settings)
+// Candidate PII, readable only by the league's sitting managers. Mounted here
+// rather than beside /api/waitlist so the blanket guard above refuses an
+// anonymous caller before any handler runs.
+api.use('/api/waitlist-submissions', routes.waitlist_submissions)
 // `fallthrough: false` so a MISSING bundle asset 404s here instead of reaching
 // the SPA catch-all below. With fallthrough the catch-all answered every absent
 // chunk with `200 text/html` and index.html's body, so the browser parsed

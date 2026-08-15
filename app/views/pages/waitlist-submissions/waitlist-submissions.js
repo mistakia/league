@@ -1,0 +1,152 @@
+/* global fetch */
+import React from 'react'
+import PropTypes from 'prop-types'
+import { useSelector } from 'react-redux'
+import { useParams } from 'react-router-dom'
+import dayjs from 'dayjs'
+
+import PageLayout from '@layouts/page'
+import { get_app } from '@core/selectors'
+import { API_URL } from '@core/constants'
+
+import { questions, seat_field } from '@pages/waitlist/waitlist-content'
+
+import './waitlist-submissions.styl'
+
+// What the league's managers read before the Article IV waiting-list ranking
+// vote. Restricted to managers of the league by GET /api/waitlist-submissions,
+// which mounts below the blanket auth guard.
+//
+// ONE CANDIDATE PER CARD, EVERY ANSWER SHOWN. This is not a data view and must
+// not become one: the vote is a judgement about people, and a sortable table of
+// truncated cells is the shape that makes ten paragraphs of prose unreadable.
+// There are a handful of candidates, so the whole set fits on one page.
+//
+// It reuses the questionnaire's own content module for the prompts, so a
+// question reworded on the form cannot drift from the label it is read under.
+const QUESTION_LABELS = [...questions, seat_field]
+
+const Submission = ({ submission }) => (
+  <article className='waitlist-submissions__card'>
+    <header className='waitlist-submissions__card-header'>
+      <h2 className='waitlist-submissions__name'>
+        {submission.candidate_name}
+      </h2>
+      <div className='waitlist-submissions__meta'>
+        {dayjs(submission.submitted_at).format('MMM D, YYYY')}
+        {' — '}
+        {submission.timezone_name}
+      </div>
+      <div className='waitlist-submissions__meta'>
+        <a href={`mailto:${submission.contact_email}`}>
+          {submission.contact_email}
+        </a>
+        {submission.contact_handle && ` — ${submission.contact_handle}`}
+      </div>
+    </header>
+
+    {QUESTION_LABELS.map((question) => {
+      const answer = submission[question.name]
+      // An unanswered optional question is rendered as nothing rather than as
+      // an empty heading, so a short card reads as short rather than as broken.
+      if (!answer) {
+        return null
+      }
+      return (
+        <div className='waitlist-submissions__answer' key={question.name}>
+          <h3 className='waitlist-submissions__question'>{question.label}</h3>
+          <p className='waitlist-submissions__response'>{answer}</p>
+        </div>
+      )
+    })}
+  </article>
+)
+
+Submission.propTypes = {
+  submission: PropTypes.object
+}
+
+export default function WaitlistSubmissionsPage() {
+  const { lid } = useParams()
+  const app = useSelector(get_app)
+  const { token } = app
+
+  const [submissions, set_submissions] = React.useState([])
+  const [is_loading, set_is_loading] = React.useState(true)
+  const [error_message, set_error_message] = React.useState(null)
+
+  // Keyed on the route's league and on the token, not on mount. A page whose
+  // fetch runs once at mount renders the league the app happened to hold when
+  // it was first constructed, which is the defect that made the landing page's
+  // only call to action open the wrong league.
+  React.useEffect(() => {
+    if (!token || !lid) {
+      return
+    }
+
+    let is_current = true
+    set_is_loading(true)
+
+    const load = async () => {
+      try {
+        const response = await fetch(
+          `${API_URL}/waitlist-submissions?league_id=${lid}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        if (!response.ok) {
+          throw new Error(
+            response.status === 403
+              ? 'Only this league’s managers can read the applications.'
+              : 'Could not load the applications.'
+          )
+        }
+        const data = await response.json()
+        if (is_current) {
+          set_submissions(data)
+          set_error_message(null)
+        }
+      } catch (error) {
+        if (is_current) {
+          set_error_message(error.message)
+        }
+      } finally {
+        if (is_current) {
+          set_is_loading(false)
+        }
+      }
+    }
+
+    load()
+
+    return () => {
+      is_current = false
+    }
+  }, [lid, token])
+
+  let content
+
+  if (is_loading) {
+    content = <p>Loading.</p>
+  } else if (error_message) {
+    content = <p className='waitlist-submissions__error'>{error_message}</p>
+  } else if (!submissions.length) {
+    content = <p>No applications yet.</p>
+  } else {
+    content = submissions.map((submission) => (
+      <Submission key={submission.submission_id} submission={submission} />
+    ))
+  }
+
+  const body = (
+    <div className='waitlist-submissions'>
+      <h1 className='waitlist-submissions__title'>Waitlist applications</h1>
+      <p className='waitlist-submissions__intro'>
+        Everyone who has applied for the open seat, newest first. These feed the
+        Article IV waiting list vote — read them, then rank.
+      </p>
+      {content}
+    </div>
+  )
+
+  return <PageLayout body={body} scroll />
+}

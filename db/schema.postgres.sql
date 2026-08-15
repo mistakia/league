@@ -162,6 +162,7 @@ DROP INDEX IF EXISTS public.nfl_plays_current_week_def_personnel_counts_idx;
 DROP INDEX IF EXISTS public.nfl_games_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_games_nflverse_game_id;
 DROP INDEX IF EXISTS public.nfl_game_coaches_team;
+DROP INDEX IF EXISTS public.manager_waitlist_submissions_submitted_at_index;
 DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_tid_season_year_idx;
 DROP INDEX IF EXISTS public.league_team_player_seasonlogs_lid_pid_season_year_idx;
 DROP INDEX IF EXISTS public.league_scoring_formats_config_digest_unique;
@@ -570,6 +571,7 @@ ALTER TABLE IF EXISTS ONLY public.nfl_games_changelog DROP CONSTRAINT IF EXISTS 
 ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl_game_coaches_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_coaches DROP CONSTRAINT IF EXISTS nfl_coaches_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_coaches DROP CONSTRAINT IF EXISTS nfl_coaches_pfr_coach_id_unique;
+ALTER TABLE IF EXISTS ONLY public.manager_waitlist_submissions DROP CONSTRAINT IF EXISTS manager_waitlist_submissions_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_pkey;
@@ -908,6 +910,7 @@ DROP TABLE IF EXISTS public.nfl_draft_rankings_history;
 DROP TABLE IF EXISTS public.nfl_coaches;
 DROP SEQUENCE IF EXISTS public.matchups_uid_seq;
 DROP TABLE IF EXISTS public.matchups;
+DROP TABLE IF EXISTS public.manager_waitlist_submissions;
 DROP SEQUENCE IF EXISTS public.leagues_uid_seq;
 DROP TABLE IF EXISTS public.leagues;
 DROP TABLE IF EXISTS public.league_user_careerlogs;
@@ -4704,6 +4707,51 @@ CREATE SEQUENCE public.leagues_uid_seq
 --
 
 ALTER SEQUENCE public.leagues_uid_seq OWNED BY public.leagues.uid;
+
+
+--
+-- Name: manager_waitlist_submissions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.manager_waitlist_submissions (
+    submission_id bigint NOT NULL,
+    questionnaire_version smallint DEFAULT 1 NOT NULL,
+    submitted_at timestamp with time zone DEFAULT now() NOT NULL,
+    candidate_name text NOT NULL,
+    contact_email text NOT NULL,
+    contact_handle text,
+    timezone_name text NOT NULL,
+    commitment_intent text NOT NULL,
+    dynasty_experience text NOT NULL,
+    salary_cap_experience text NOT NULL,
+    contract_mechanics_comfort text NOT NULL,
+    offseason_activity text NOT NULL,
+    rules_tolerance text NOT NULL,
+    commissioner_disagreement text NOT NULL,
+    prior_league_history text NOT NULL,
+    requested_seat text
+);
+
+
+--
+-- Name: TABLE manager_waitlist_submissions; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.manager_waitlist_submissions IS 'Prospective manager questionnaire responses feeding the Article IV waiting-list ranking vote. Candidate PII: the API exposes it only to the league''s sitting managers, but league_reader can read it directly via pg_read_all_data. Deleted when the recruiting round closes.';
+
+
+--
+-- Name: manager_waitlist_submissions_submission_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.manager_waitlist_submissions ALTER COLUMN submission_id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.manager_waitlist_submissions_submission_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
 
 
 --
@@ -28722,6 +28770,14 @@ ALTER TABLE ONLY public.league_user_careerlogs
 
 
 --
+-- Name: manager_waitlist_submissions manager_waitlist_submissions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.manager_waitlist_submissions
+    ADD CONSTRAINT manager_waitlist_submissions_pkey PRIMARY KEY (submission_id);
+
+
+--
 -- Name: nfl_coaches nfl_coaches_pfr_coach_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -31925,6 +31981,13 @@ CREATE INDEX league_team_player_seasonlogs_lid_pid_season_year_idx ON public.lea
 --
 
 CREATE INDEX league_team_player_seasonlogs_lid_tid_season_year_idx ON public.league_team_player_seasonlogs USING btree (lid, tid, season_year);
+
+
+--
+-- Name: manager_waitlist_submissions_submitted_at_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX manager_waitlist_submissions_submitted_at_index ON public.manager_waitlist_submissions USING btree (submitted_at DESC);
 
 
 --
@@ -58020,6 +58083,13 @@ GRANT SELECT ON TABLE public.leagues TO league_reader;
 --
 
 GRANT SELECT ON SEQUENCE public.leagues_uid_seq TO league_reader;
+
+
+--
+-- Name: SEQUENCE manager_waitlist_submissions_submission_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.manager_waitlist_submissions_submission_id_seq TO league_reader;
 
 
 --

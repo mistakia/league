@@ -44,6 +44,10 @@ const UserSettingsPage = lazy(() => import('@pages/user-settings'))
 const ErrorTest = lazy(() => import('@components/error-test'))
 const ShortUrlResolverPage = lazy(() => import('@pages/short-url-resolver'))
 const LandingPage = lazy(() => import('@pages/landing'))
+const WaitlistPage = lazy(() => import('@pages/waitlist'))
+const WaitlistSubmissionsPage = lazy(
+  () => import('@pages/waitlist-submissions')
+)
 
 const map_state_to_props = createSelector(get_app, (app) => ({ app }))
 
@@ -89,6 +93,10 @@ const Routes = ({ app }) => {
       <Route path='/reset-password' element={<ResetPasswordPage />} />
       {app.userId && <Route path='/lineups' element={<LineupsPage />} />}
       {app.userId && <Route path='/trade' element={<TradePage />} />}
+      {/* The questionnaire is for people with no account, so it is not gated
+          on userId — the whole point is that a stranger can reach it from the
+          landing page. */}
+      <Route path='/waitlist' element={<WaitlistPage />} />
       <Route path='/data-views' element={<DataViewsPage />} />
       <Route path='/data-views/:view_id' element={<DataViewsPage />} />
       <Route path='/plays' element={<PlaysPage />} />
@@ -137,6 +145,13 @@ const Routes = ({ app }) => {
         <Route
           path='/leagues/:lid/trade-review/:trade_uid'
           element={<TradeReviewPage />}
+        />
+        {/* Candidate PII. The API refuses anyone who does not manage a team
+            in this league, so this route being reachable renders an error
+            rather than the applications. */}
+        <Route
+          path='/leagues/:lid/waitlist-submissions'
+          element={<WaitlistSubmissionsPage />}
         />
         <Route path='/leagues/:lid/settings' element={<LeagueSettingsPage />} />
         <Route path='/leagues/:lid' element={<LeagueHomePage />} />

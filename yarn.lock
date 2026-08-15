@@ -5794,7 +5794,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-rate-limit@npm:7":
+"express-rate-limit@npm:7, express-rate-limit@npm:^7.5.1":
   version: 7.5.1
   resolution: "express-rate-limit@npm:7.5.1"
   peerDependencies:
@@ -10366,6 +10366,7 @@ __metadata:
     eslint-plugin-react-hooks: "npm:^5.1.0"
     express: "npm:^4.21.2"
     express-jwt: "npm:^8.5.1"
+    express-rate-limit: "npm:^7.5.1"
     express-slow-down: "npm:^2.0.3"
     fastest-validator: "npm:^1.19.0"
     fetch-h2: "npm:^3.0.2"
