@@ -17,7 +17,7 @@ if (!process.env.DEBUG) {
 
 // Expand positions to include all equivalent positions for matching
 // Also normalizes positions (e.g., HB -> RB, C -> OL) before expanding
-const expand_position = (pos) => {
+export const expand_position = (pos) => {
   const normalized_pos = pos.toUpperCase()
 
   // First normalize the position
