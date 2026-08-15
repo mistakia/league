@@ -94,6 +94,9 @@ DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.player_fantasypoints_id_unique;
 DROP INDEX IF EXISTS public.play_changelog_natural_key;
 DROP INDEX IF EXISTS public.pff_unresolved_players_season_year_idx;
+DROP INDEX IF EXISTS public.pff_player_gamelogs_season_year_index;
+DROP INDEX IF EXISTS public.pff_player_gamelogs_pff_player_id_index;
+DROP INDEX IF EXISTS public.pff_player_gamelogs_esbid_index;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_season_year_facet_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_pid_season_year_idx;
 DROP INDEX IF EXISTS public.pff_player_facet_seasonlogs_pff_team_season_year_facet_idx;
@@ -564,6 +567,7 @@ ALTER TABLE IF EXISTS ONLY public.pff_team_gamelogs DROP CONSTRAINT IF EXISTS pf
 ALTER TABLE IF EXISTS ONLY public.pff_team_gamelogs DROP CONSTRAINT IF EXISTS pff_team_gamelogs_nfl_team_season_year_week_key;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_changelog_pkey;
+ALTER TABLE IF EXISTS ONLY public.pff_player_gamelogs DROP CONSTRAINT IF EXISTS pff_player_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_facet_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_facet_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_facet_gamelogs DROP CONSTRAINT IF EXISTS pff_player_facet_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pkey;
@@ -843,6 +847,7 @@ DROP TABLE IF EXISTS public.pff_team_gamelogs;
 DROP SEQUENCE IF EXISTS public.pff_team_gamelogs_uid_seq;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs_changelog;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs;
+DROP TABLE IF EXISTS public.pff_player_gamelogs;
 DROP TABLE IF EXISTS public.pff_player_facet_seasonlogs;
 DROP TABLE IF EXISTS public.pff_player_facet_gamelogs;
 DROP TABLE IF EXISTS public.percentiles;
@@ -19178,6 +19183,208 @@ CREATE TABLE public.pff_player_facet_seasonlogs (
 
 
 --
+-- Name: pff_player_gamelogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.pff_player_gamelogs (
+    pid character varying(25) NOT NULL,
+    esbid character varying(20) NOT NULL,
+    season_year smallint NOT NULL,
+    pff_game_id bigint,
+    pff_player_id integer,
+    pff_team_id smallint,
+    nfl_team character varying(3),
+    player_position character varying(5),
+    grade_offense numeric(4,1),
+    grade_offense_penalty numeric(4,1),
+    grade_defense numeric(4,1),
+    grade_defense_penalty numeric(4,1),
+    grade_pass numeric(4,1),
+    grade_run numeric(4,1),
+    grade_pass_block numeric(4,1),
+    grade_run_block numeric(4,1),
+    grade_pass_route numeric(4,1),
+    grade_hands_drop numeric(4,1),
+    grade_hands_fumble numeric(4,1),
+    grade_coverage_defense numeric(4,1),
+    grade_pass_rush_defense numeric(4,1),
+    grade_run_defense numeric(4,1),
+    grade_tackle numeric(4,1),
+    grade_punter numeric(4,1),
+    penalties smallint,
+    declined_penalties smallint,
+    routes smallint,
+    yards_per_route_run numeric(5,2),
+    scrambles smallint,
+    snaps_offense_total smallint,
+    snaps_offense_pass smallint,
+    snaps_offense_run smallint,
+    snaps_offense_total_pass smallint,
+    snaps_offense_total_run smallint,
+    snaps_pass_block smallint,
+    snaps_run_block smallint,
+    snaps_pass_route smallint,
+    passing_snaps smallint,
+    passing_dropbacks smallint,
+    passing_attempts smallint,
+    passing_completions smallint,
+    passing_yards smallint,
+    passing_touchdowns smallint,
+    passing_interceptions smallint,
+    passing_first_downs smallint,
+    passing_aimed_passes smallint,
+    passing_batted_passes smallint,
+    passing_big_time_throws smallint,
+    passing_big_time_throw_rate numeric(4,1),
+    passing_turnover_worthy_plays smallint,
+    passing_turnover_worthy_play_rate numeric(4,1),
+    passing_accuracy_percentage numeric(4,1),
+    passing_completion_percentage numeric(4,1),
+    passing_drops smallint,
+    passing_drop_rate numeric(4,1),
+    passing_hit_as_threw smallint,
+    passing_sacks smallint,
+    passing_sack_percentage numeric(4,1),
+    passing_spikes smallint,
+    passing_throwaways smallint,
+    passing_defense_generated_pressures smallint,
+    passing_pressure_to_sack_rate numeric(4,1),
+    passing_quarterback_rating numeric(4,1),
+    passing_average_depth_of_target numeric(4,1),
+    passing_average_time_to_throw numeric(4,2),
+    passing_yards_per_attempt numeric(4,1),
+    receiving_targets smallint,
+    receiving_receptions smallint,
+    receiving_yards smallint,
+    receiving_touchdowns smallint,
+    receiving_first_downs smallint,
+    receiving_longest smallint,
+    receiving_drops smallint,
+    receiving_drop_rate numeric(4,1),
+    receiving_fumbles smallint,
+    receiving_interceptions smallint,
+    receiving_caught_percentage numeric(4,1),
+    receiving_contested_targets smallint,
+    receiving_contested_receptions smallint,
+    receiving_contested_catch_rate numeric(4,1),
+    receiving_avoided_tackles smallint,
+    receiving_yards_after_catch smallint,
+    receiving_yards_after_catch_per_reception numeric(4,1),
+    receiving_yards_per_reception numeric(4,1),
+    receiving_average_depth_of_target numeric(4,1),
+    receiving_targeted_quarterback_rating numeric(4,1),
+    receiving_pass_plays smallint,
+    receiving_pass_blocks smallint,
+    receiving_pass_block_rate numeric(4,1),
+    receiving_route_rate numeric(4,1),
+    receiving_inline_snaps smallint,
+    receiving_inline_rate numeric(4,1),
+    receiving_slot_snaps smallint,
+    receiving_slot_rate numeric(4,1),
+    receiving_wide_snaps smallint,
+    receiving_wide_rate numeric(4,1),
+    rushing_run_plays smallint,
+    rushing_attempts smallint,
+    rushing_yards smallint,
+    rushing_touchdowns smallint,
+    rushing_first_downs smallint,
+    rushing_longest smallint,
+    rushing_fumbles smallint,
+    rushing_drops smallint,
+    rushing_designed_yards smallint,
+    rushing_scramble_yards smallint,
+    rushing_total_touches smallint,
+    rushing_explosive smallint,
+    rushing_gap_attempts smallint,
+    rushing_zone_attempts smallint,
+    rushing_avoided_tackles smallint,
+    rushing_breakaway_attempts smallint,
+    rushing_breakaway_yards smallint,
+    rushing_breakaway_percentage numeric(4,1),
+    rushing_elusive_rating numeric(6,1),
+    rushing_elusive_receiving_missed_tackles_forced smallint,
+    rushing_elusive_rushing_missed_tackles_forced smallint,
+    rushing_elusive_yards_after_contact smallint,
+    rushing_yards_after_contact smallint,
+    rushing_yards_after_contact_per_attempt numeric(5,2),
+    rushing_yards_per_attempt numeric(4,1),
+    rushing_targets smallint,
+    rushing_receptions smallint,
+    rushing_receiving_yards smallint,
+    defense_snaps smallint,
+    defense_snaps_box smallint,
+    defense_snaps_corner smallint,
+    defense_snaps_coverage smallint,
+    defense_snaps_defensive_line smallint,
+    defense_snaps_center_guard_gap smallint,
+    defense_snaps_guard_tackle_gap smallint,
+    defense_snaps_defensive_line_outside_tackle smallint,
+    defense_snaps_defensive_line_over_tackle smallint,
+    defense_snaps_free_safety smallint,
+    defense_snaps_second_level smallint,
+    defense_snaps_pass_rush smallint,
+    defense_snaps_run_defense smallint,
+    defense_snaps_slot smallint,
+    defense_tackles smallint,
+    defense_assists smallint,
+    defense_missed_tackles smallint,
+    defense_missed_tackle_rate numeric(4,1),
+    defense_tackles_for_loss smallint,
+    defense_stops smallint,
+    defense_sacks smallint,
+    defense_hits smallint,
+    defense_hurries smallint,
+    defense_total_pressures smallint,
+    defense_batted_passes smallint,
+    defense_pass_breakups smallint,
+    defense_interceptions smallint,
+    defense_interception_touchdowns smallint,
+    defense_forced_fumbles smallint,
+    defense_fumble_recoveries smallint,
+    defense_fumble_recovery_touchdowns smallint,
+    defense_safeties smallint,
+    defense_targets_allowed smallint,
+    defense_receptions_allowed smallint,
+    defense_yards_allowed smallint,
+    defense_touchdowns_allowed smallint,
+    defense_yards_after_catch_allowed smallint,
+    defense_yards_per_reception_allowed numeric(4,1),
+    defense_longest_reception_allowed smallint,
+    defense_catch_rate_allowed numeric(4,1),
+    defense_quarterback_rating_against numeric(4,1),
+    punting_snaps smallint,
+    punting_attempts smallint,
+    punting_yards smallint,
+    punting_blocks smallint,
+    punting_touchbacks smallint,
+    punting_inside_twenty_yard_line smallint,
+    punting_downed smallint,
+    punting_out_of_bounds smallint,
+    punting_fair_catches smallint,
+    punting_returns smallint,
+    punting_return_yards smallint,
+    punting_longest_punt smallint,
+    punting_total_net_yards smallint,
+    punting_average_net_yards numeric(5,2),
+    punting_average_yards_per_attempt numeric(5,2),
+    punting_average_yards_per_return numeric(4,1),
+    punting_percentage_returned numeric(4,1),
+    punting_attempts_with_hangtime smallint,
+    punting_total_hangtime numeric(5,2),
+    punting_average_hangtime numeric(4,2),
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT pff_player_gamelogs_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
+);
+
+
+--
+-- Name: TABLE pff_player_gamelogs; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.pff_player_gamelogs IS 'PFF player measurements at game grain, merged from the six PFF game-level summary facets. Every column is PFF''s own number; nothing here is reconciled against nfl_plays, player_gamelogs or NGS-derived tables. Where PFF and another vendor measure the same concept (routes), the two are separately named and separately sourced by design.';
+
+
+--
 -- Name: pff_player_seasonlogs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -29165,6 +29372,14 @@ ALTER TABLE ONLY public.pff_player_facet_gamelogs
 
 ALTER TABLE ONLY public.pff_player_facet_seasonlogs
     ADD CONSTRAINT pff_player_facet_seasonlogs_pkey PRIMARY KEY (pid, season_year, facet);
+
+
+--
+-- Name: pff_player_gamelogs pff_player_gamelogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pff_player_gamelogs
+    ADD CONSTRAINT pff_player_gamelogs_pkey PRIMARY KEY (pid, esbid);
 
 
 --
@@ -43003,6 +43218,27 @@ CREATE INDEX pff_player_facet_seasonlogs_pid_season_year_idx ON public.pff_playe
 --
 
 CREATE INDEX pff_player_facet_seasonlogs_season_year_facet_idx ON public.pff_player_facet_seasonlogs USING btree (season_year, facet);
+
+
+--
+-- Name: pff_player_gamelogs_esbid_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX pff_player_gamelogs_esbid_index ON public.pff_player_gamelogs USING btree (esbid);
+
+
+--
+-- Name: pff_player_gamelogs_pff_player_id_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX pff_player_gamelogs_pff_player_id_index ON public.pff_player_gamelogs USING btree (pff_player_id);
+
+
+--
+-- Name: pff_player_gamelogs_season_year_index; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX pff_player_gamelogs_season_year_index ON public.pff_player_gamelogs USING btree (season_year);
 
 
 --
@@ -59067,6 +59303,13 @@ GRANT SELECT ON TABLE public.pff_player_facet_gamelogs TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.pff_player_facet_seasonlogs TO league_reader;
+
+
+--
+-- Name: TABLE pff_player_gamelogs; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.pff_player_gamelogs TO league_reader;
 
 
 --
