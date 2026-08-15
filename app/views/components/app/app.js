@@ -31,6 +31,7 @@ hotkeys('control+command+w', () => {
 
 export default function App({
   init,
+  select_league,
   isPending,
   isCommish,
   is_hosted,
@@ -49,6 +50,17 @@ export default function App({
     }
     onLoad()
   }, [init]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The effect above runs once, so on its own a client-side navigation into a
+  // league route never moves the connected league — the landing page's link to
+  // /leagues/1 rendered the default league's data and a menu that still read
+  // "League not connected". Selecting the route's league here makes an in-app
+  // navigation land in the same state as a full page load of the same URL.
+  const route_league_id = match ? Number(match.params.leagueId) || 0 : null
+  useEffect(() => {
+    if (route_league_id === null) return
+    select_league({ leagueId: route_league_id })
+  }, [route_league_id, select_league])
 
   if (isPending) {
     return <Loading loading={isPending} />
@@ -96,6 +108,7 @@ export default function App({
 
 App.propTypes = {
   init: PropTypes.func,
+  select_league: PropTypes.func,
   isPending: PropTypes.bool,
   isCommish: PropTypes.bool,
   is_hosted: PropTypes.bool,

@@ -10,7 +10,11 @@ const initial_state = new Map({
   // trade_uid -> Map({ perspectives, has_chains, is_pending }), in the order
   // the API returned, which is oldest trade first.
   trades: new OrderedMap(),
-  is_pending: false
+  is_pending: false,
+  // A refused request and a league with no trades both leave `trades` empty,
+  // and the page must not report the first as the second -- the route is
+  // member-only, so every anonymous visitor lands here.
+  is_failed: false
 })
 
 // The API returns one record per team per trade, two per trade, already sorted
@@ -35,15 +39,16 @@ const group_by_trade = (records) => {
 export function trade_review_reducer(state = initial_state, { payload, type }) {
   switch (type) {
     case trade_review_actions.GET_TRADE_REVIEW_PENDING:
-      return state.merge({ is_pending: true })
+      return state.merge({ is_pending: true, is_failed: false })
 
     case trade_review_actions.GET_TRADE_REVIEW_FAILED:
-      return state.merge({ is_pending: false })
+      return state.merge({ is_pending: false, is_failed: true })
 
     case trade_review_actions.GET_TRADE_REVIEW_FULFILLED:
       return state.merge({
         trades: group_by_trade(payload.data),
-        is_pending: false
+        is_pending: false,
+        is_failed: false
       })
 
     // Guarded rather than a bare setIn: a deep link fetches one trade before

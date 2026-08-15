@@ -13,7 +13,9 @@ export default function TradeReviewPage({
   load_trade_review,
   load_trade_review_trade,
   trades,
-  is_pending
+  is_pending,
+  is_failed,
+  is_logged_in
 }) {
   const { lid, trade_uid: trade_uid_param } = useParams()
   const navigate = useNavigate()
@@ -72,6 +74,17 @@ export default function TradeReviewPage({
   let trade_body
   if (is_pending) {
     trade_body = <Loading loading />
+  } else if (is_failed) {
+    // The route is member-only, so a refusal is the ordinary outcome for a
+    // visitor who is not signed in. Reporting it as an empty league would tell
+    // them something false about the league's history.
+    trade_body = (
+      <div className='trade-review__empty'>
+        {is_logged_in
+          ? 'Trade history could not be loaded.'
+          : 'Trade history is only visible to league members. Sign in to view it.'}
+      </div>
+    )
   } else if (!trades.size) {
     trade_body = (
       <div className='trade-review__empty'>
@@ -114,5 +127,7 @@ TradeReviewPage.propTypes = {
   load_trade_review: PropTypes.func,
   load_trade_review_trade: PropTypes.func,
   trades: ImmutablePropTypes.orderedMap,
-  is_pending: PropTypes.bool
+  is_pending: PropTypes.bool,
+  is_failed: PropTypes.bool,
+  is_logged_in: PropTypes.bool
 }

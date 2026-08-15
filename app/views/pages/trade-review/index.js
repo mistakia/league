@@ -1,16 +1,19 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { get_trade_review_state } from '@core/selectors'
+import { get_app, get_trade_review_state } from '@core/selectors'
 import { trade_review_actions } from '@core/trade-review'
 
 import TradeReviewPage from './trade-review'
 
 const map_state_to_props = createSelector(
   get_trade_review_state,
-  (trade_review) => ({
+  get_app,
+  (trade_review, app) => ({
     trades: trade_review.get('trades'),
-    is_pending: trade_review.get('is_pending')
+    is_pending: trade_review.get('is_pending'),
+    is_failed: trade_review.get('is_failed'),
+    is_logged_in: Boolean(app.userId)
   })
 )
 

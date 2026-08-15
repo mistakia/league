@@ -26,6 +26,20 @@ export const app_actions = {
     }
   }),
 
+  // A client-side navigation into a league route must land the app in the same
+  // state a full page load of that URL would, and INIT_APP fires once on mount
+  // — so the route is the only thing that can move the connected league after
+  // it. Without this, following a link to /leagues/1 leaves the app on
+  // whichever league it started with and renders that one's data under the new
+  // URL.
+  SELECT_LEAGUE: 'SELECT_LEAGUE',
+  select_league: ({ leagueId }) => ({
+    type: app_actions.SELECT_LEAGUE,
+    payload: {
+      leagueId
+    }
+  }),
+
   LOGIN: 'LOGIN',
   login: ({ email_or_username, password }) => ({
     type: app_actions.LOGIN,

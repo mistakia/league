@@ -102,17 +102,23 @@ export default function AppMenu({
               {league.uid ? (
                 <div className='league__title'>{league.name}</div>
               ) : (
-                <div className='league__warning'>
-                  League not connected
-                  <button
-                    type='button'
-                    className='menu__icon-button'
-                    title='Using the default 12 team half-ppr superflex league settings. Account needed to view league connected pages and player views.'
-                    aria-label='League info'
-                  >
-                    <Icon d={ICON_INFO} size={15} />
-                  </button>
-                </div>
+                // Only a signed-in user can connect a league, so the warning is
+                // actionable for them and reads as site breakage to everyone
+                // else — it is the first thing an anonymous prospect sees in
+                // the sidebar on the landing page.
+                is_logged_in && (
+                  <div className='league__warning'>
+                    League not connected
+                    <button
+                      type='button'
+                      className='menu__icon-button'
+                      title='Using the default 12 team half-ppr superflex league settings. Account needed to view league connected pages and player views.'
+                      aria-label='League info'
+                    >
+                      <Icon d={ICON_INFO} size={15} />
+                    </button>
+                  </div>
+                )
               )}
               {Boolean(league.uid) && <LeagueSchedule />}
               <div
@@ -136,7 +142,7 @@ export default function AppMenu({
                   </>
                 )}
                 <NavLink to={`/leagues/${leagueId}/players`}>Players</NavLink>
-                <NavLink to='/data-views'>Data Views (Beta)</NavLink>
+                <NavLink to='/data-views'>Data Views</NavLink>
                 <NavLink to='/plays'>Plays</NavLink>
                 {Boolean(leagueId) && (
                   <>

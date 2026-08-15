@@ -65,7 +65,10 @@ const Routes = ({ app }) => {
   // league already connected has no use for it and goes straight to their
   // league, matching what UnmatchedRoute does for every other unknown path.
   const RootRoute = () => {
-    if (app.leagueId) {
+    // Gated on the session, not just the connected league: an anonymous
+    // visitor picks up a league id by browsing into one, and the pitch has to
+    // stay reachable at / after they have looked around.
+    if (app.userId && app.leagueId) {
       return <Navigate to={`/leagues/${app.leagueId}`} replace />
     }
 

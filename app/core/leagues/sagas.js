@@ -67,6 +67,14 @@ export function* watch_load_league() {
   yield takeLatest(league_actions.LOAD_LEAGUE, load_league)
 }
 
+// A client-side navigation into a different league selects it without any
+// route's own load action having fetched it, so the league record has to be
+// pulled here or every league-scoped surface renders the previous league's
+// settings under the new URL.
+export function* watch_select_league() {
+  yield takeLatest(app_actions.SELECT_LEAGUE, load_league)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -78,5 +86,6 @@ export const league_sagas = [
   fork(watch_load_rosters),
   fork(watch_load_teams),
   fork(watch_auth_fulfilled),
-  fork(watch_load_league)
+  fork(watch_load_league),
+  fork(watch_select_league)
 ]

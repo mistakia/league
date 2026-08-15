@@ -64,6 +64,16 @@ export function app_reducer(state = initialState(), { payload, type }) {
         if (!team) state.set('teamId', null)
       })
 
+    // teamId belongs to the league it was resolved in, so a league change must
+    // drop it rather than render another league's team. This matches what a
+    // full page load of the new league's URL does: AUTH_FULFILLED only adopts a
+    // teamId when the route's league is the user's first one.
+    case app_actions.SELECT_LEAGUE: {
+      const leagueId = payload.leagueId
+      if (leagueId === state.get('leagueId')) return state
+      return state.merge({ leagueId, teamId: undefined })
+    }
+
     case app_actions.LOGOUT:
       return initialState().merge({ isPending: false })
 

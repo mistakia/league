@@ -42,7 +42,8 @@ const map_state_to_props = createSelector(
 )
 
 const map_dispatch_to_props = {
-  init: app_actions.init
+  init: app_actions.init,
+  select_league: app_actions.select_league
 }
 
 export default connect(map_state_to_props, map_dispatch_to_props)(App)
