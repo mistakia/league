@@ -17,10 +17,23 @@ export const create_render_html_middleware = ({ dist_path, origin }) => {
   const template_path = path.join(dist_path, 'index.html')
 
   let cached_template = null
+  let cached_mtime_ms = null
 
+  // Keyed on mtime rather than cached outright, because `yarn deploy:all`
+  // reloads pm2 BEFORE it rsyncs `dist` — so a process that caches the
+  // template on first read holds the PREVIOUS build's HTML for its whole life.
+  // That is not a stale-copy problem: the bundle is content-hashed and
+  // `deploy:dist` deletes the old file, so the served HTML points at an asset
+  // that no longer exists and the `/dist` mount answers 404 (it is
+  // `fallthrough: false`). Every visitor whose edge cache lacks the old chunk
+  // gets a blank app. Shipped and hit in production on 2026-08-14; a `pm2
+  // reload` after the rsync was the manual recovery.
   const load_template = () => {
-    if (cached_template) return cached_template
+    const { mtimeMs } = fs.statSync(template_path)
+    if (cached_template && cached_mtime_ms === mtimeMs) return cached_template
+
     cached_template = fs.readFileSync(template_path, 'utf8')
+    cached_mtime_ms = mtimeMs
     return cached_template
   }
 
