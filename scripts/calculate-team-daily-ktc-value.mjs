@@ -114,6 +114,12 @@ const get_keeptradecut_value = ({ keeptradecut_index, pid, date }) => {
   return player.values[previous_date]
 }
 
+const remove_player_from_every_roster = ({ teams_index, pid }) => {
+  for (const team of Object.values(teams_index)) {
+    delete team.players[pid]
+  }
+}
+
 const get_team = ({ teams_index, tid, transaction, site }) => {
   const team = teams_index[tid]
   if (!team) {
@@ -361,7 +367,23 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
       case transaction_types.PRACTICE_ADD:
       case transaction_types.DRAFT:
       case transaction_types.POACHED:
-        // add player to roster
+        // A player is on at most one roster at a time, and the replay has to
+        // ENFORCE that rather than trust the log to record every departure. A
+        // poach is written only against the team that GAINS the player --
+        // nothing names the team that loses him -- so without this he stayed on
+        // his old roster for the rest of history, contributing his full value to
+        // a team that no longer held him. At the 2026-08-11 snapshot that left
+        // the replay carrying 291 players against the 243 actually rostered, and
+        // moved a team's deposit by up to 37 dollars in a 2,000 dollar pool.
+        //
+        // Written as the invariant rather than as a POACHED-only removal,
+        // because the same hole exists for any future add whose matching
+        // departure the log does not state. It is a no-op wherever the log is
+        // complete, which is every other add type today.
+        remove_player_from_every_roster({
+          teams_index,
+          pid: transaction.pid
+        })
         get_team({
           teams_index,
           tid: tran_tid,
