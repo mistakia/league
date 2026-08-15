@@ -100,7 +100,8 @@ export const page_routes = [
     title: 'Data Views Guide',
     description:
       'How to build a custom data view: choosing columns, filtering, splitting by season or week, and saving a view.',
-    og_type: 'article'
+    og_type: 'article',
+    ...data_views_card
   },
   {
     // The SPA redirects /about to the landing page, so the canonical is the
