@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined'
 import CheckIcon from '@mui/icons-material/Check'
 
+import { DISCORD_URL } from '@core/constants'
 import './error-view.styl'
 import '@styles/button.styl'
 
@@ -39,15 +40,11 @@ const ErrorView = ({ error, info }) => {
         <h1>Something unexpected happened</h1>
         <p>This error has been automatically captured and reported.</p>
         <p>
-          If it keeps happening, the details below are worth{' '}
-          <a
-            href='https://github.com/mistakia/league/issues/new'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            opening an issue
-          </a>{' '}
-          with.
+          If you'd like to talk to someone, you can visit our{' '}
+          <a href={DISCORD_URL} target='_blank' rel='noopener noreferrer'>
+            Discord
+          </a>
+          .
         </p>
         <div className='error_details'>
           <h3>Error Details</h3>
