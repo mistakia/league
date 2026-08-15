@@ -33,7 +33,7 @@ export const MAX_LONG_ANSWER_LENGTH = 4000
 // what the league actually expects and requiring an explicit yes is both
 // shorter and harder to fake.
 export const commitment_terms = [
-  'This is a dynasty league. Rosters carry over every year, so a manager who leaves mid-rebuild takes the value of somebody else’s trade with them. Joining means planning to be here for several seasons, not one.',
+  'This is a dynasty league. Rosters carry over, and trades are made years ahead — someone will give up a good player now for a pick that only pays off two seasons from now, and they are counting on you still being here when it does. Joining means planning to be here for several seasons, not one.',
   'The offseason is most of the year and is not optional. Restricted free agency runs about two weeks in May or June, the rookie draft follows on a pick clock and takes a month or more, and the free agency auction is in the days before the season starts.'
 ]
 
