@@ -276,8 +276,22 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
 
   const keeptradecut_index = build_keeptradecut_index(ktc_values)
 
-  const team_daily_value_inserts = []
-  const day_coverage = []
+  // Keyed by date, and a re-emission REPLACES the whole day rather than merging
+  // into it. One date can legitimately be emitted twice in a run: the
+  // interpolation loop below walks forward from a transaction and can step onto
+  // a day that a later transaction then causes to be emitted again as an
+  // end-of-day roster. The second emission is the correct one, because
+  // transactions are processed in ascending order, so a date's final emission is
+  // always the one taken after every transaction of that date has been applied.
+  //
+  // Replacing per TEAM instead of per DAY is what produced league 1's only
+  // over-100-percent day. On 2023-05-21 the interpolated emission ran against
+  // the 2022 twelve-team index and the end-of-day emission against the 2023
+  // ten-team index, so the two decommissioned teams kept their first-emission
+  // rows -- computed against a twelve-team denominator -- beside ten rows
+  // computed against a ten-team one, and the day's shares summed to 1.15.
+  const day_inserts_by_date = new Map()
+  const coverage_by_date = new Map()
   const processed_trades_index = {}
   const ignored_tran_types = new Set()
   let last_date = null
@@ -292,10 +306,8 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
       date,
       observed_at
     })
-    day_coverage.push(coverage)
-    for (const insert of day_inserts) {
-      team_daily_value_inserts.push(insert)
-    }
+    coverage_by_date.set(date, coverage)
+    day_inserts_by_date.set(date, day_inserts)
   }
 
   log(`processing ${transactions.length} transactions`)
@@ -447,8 +459,15 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     }
 
     // check if next tran date is larger than the max interval
-    const next_tran_date = dayjs(transactions[i + 1]?.occurred_at)
+    //
+    // The trailing gap to the present day belongs to the block after this loop,
+    // so a missing next transaction is not one. Without the guard
+    // `dayjs(undefined)` is the current time and both blocks walk the same
+    // trailing days.
+    const next_transaction = transactions[i + 1]
+    const next_tran_date = dayjs(next_transaction?.occurred_at)
     if (
+      next_transaction &&
       next_tran_date.diff(transaction.occurred_at, 'day') > max_day_interval
     ) {
       // calculate team daily keeptradecut value for days in between based on max_day_interval
@@ -488,27 +507,32 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   log(`ignored ${ignored_tran_types.size} transaction types`)
   log(ignored_tran_types)
 
-  const unique_team_daily_value_inserts = Array.from(
-    new Map(
-      team_daily_value_inserts.map((item) => [
-        `${item.lid}_${item.tid}_${item.date}`,
-        item
-      ])
-    ).values()
-  )
+  const team_daily_value_inserts = Array.from(
+    day_inserts_by_date.values()
+  ).flat()
+  const day_coverage = Array.from(coverage_by_date.values())
 
-  if (unique_team_daily_value_inserts.length) {
-    await batch_insert({
-      items: unique_team_daily_value_inserts,
-      save: (items) =>
-        db('league_team_daily_values')
-          .insert(items)
-          .onConflict(['lid', 'tid', 'date'])
-          .merge(),
-      batch_size: 5000
+  // The replay is the sole writer of this league's series and recomputes it
+  // whole on every run, so the table's rows for a league are exactly the rows
+  // the run produced -- a row this run did not emit is a row from an older
+  // replay whose date grid or team population has since moved, and nothing else
+  // would ever remove it. League 1 carried 42 such rows across four dates,
+  // stranded with null pick_value and total_share because they predate that
+  // column pair.
+  //
+  // Delete and insert share one transaction so a failed insert cannot leave the
+  // series empty.
+  if (team_daily_value_inserts.length) {
+    await db.transaction(async (trx) => {
+      await trx('league_team_daily_values').where({ lid }).del()
+      await batch_insert({
+        items: team_daily_value_inserts,
+        save: (items) => trx('league_team_daily_values').insert(items),
+        batch_size: 5000
+      })
     })
   }
-  log(`inserted ${unique_team_daily_value_inserts.length} team daily values`)
+  log(`inserted ${team_daily_value_inserts.length} team daily values`)
 
   const shortfalls = []
 
@@ -589,6 +613,39 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
       `staleness: max(date)=${max_date} is ${stale_days}d > max_day_interval=${max_day_interval} for lid=${lid}`
     )
   }
+
+  // Share oracle: `total_share` is the Article XXII deposit divisor, so a day
+  // whose shares do not sum to one is a day that would price somebody's entry
+  // wrong. It reads the TABLE rather than the in-memory rows on purpose --
+  // in memory each day's shares are one by construction, and every defect this
+  // oracle exists to catch (a stale row surviving the write, two emissions of a
+  // day landing side by side, a denominator taken over the wrong population)
+  // is visible only in what was actually stored.
+  const share_tolerance = 0.0001
+  const unbalanced_days = await db('league_team_daily_values')
+    .where({ lid })
+    .select(db.raw("TO_CHAR(date, 'YYYY-MM-DD') AS date"))
+    .sum({ ktc_share_total: 'ktc_share' })
+    .sum({ total_share_total: 'total_share' })
+    .groupBy('date')
+    .havingRaw(
+      'abs(coalesce(sum(ktc_share), 1) - 1) > ? or abs(coalesce(sum(total_share), 1) - 1) > ?',
+      [share_tolerance, share_tolerance]
+    )
+    .orderBy('date')
+  if (unbalanced_days.length) {
+    const detail = unbalanced_days
+      .slice(0, 10)
+      .map(
+        (day) =>
+          `${day.date} ktc_share=${Number(day.ktc_share_total).toFixed(5)} total_share=${Number(day.total_share_total).toFixed(5)}`
+      )
+      .join(', ')
+    shortfalls.push(
+      `shares do not sum to 1 on ${unbalanced_days.length} day(s) for lid=${lid}: ${detail}`
+    )
+  }
+
   return { lid, shortfall: shortfalls.length ? shortfalls.join('; ') : null }
 }
 
