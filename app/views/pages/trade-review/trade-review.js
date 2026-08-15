@@ -110,12 +110,6 @@ export default function TradeReviewPage({
 
   const body = (
     <div className='league-container trade-review-container'>
-      <div className='trade-review__intro'>
-        Every accepted trade in league history. Figures are market value from
-        the first team's view — positive means that team came out ahead, and the
-        other side is the exact mirror. Expand a trade to follow every asset
-        through later trades, pick conversions, extensions and releases.
-      </div>
       <div className='trade-review__body'>{trade_body}</div>
     </div>
   )
