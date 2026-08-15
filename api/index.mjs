@@ -21,6 +21,7 @@ import db from '#db'
 import sockets from './sockets/index.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
 import { create_error_handler } from '#libs-server/middleware/error-handler.mjs'
+import { create_render_html_middleware } from '#libs-server/middleware/render-html.mjs'
 
 const logger = debug('api')
 const morgan_logger = debug('api')
@@ -229,17 +230,16 @@ api.use(
 // Markdown context documents served at human-path + `.md` (not under /api).
 // Mounted after the static handlers and before the SPA catch-all.
 api.use('/', routes.context_docs)
-api.use('/*', (req, res, next) => {
-  res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'), (err) => {
-    if (err) {
-      if (!res.headersSent) {
-        res.status(404).send('Page not found')
-      } else {
-        next(err)
-      }
-    }
+// SPA fallback. Serves the built bundle with a per-route `<head>` filled in —
+// see libs-server/middleware/render-html.mjs for why that cannot happen at
+// build time.
+api.use(
+  '/*',
+  create_render_html_middleware({
+    dist_path: path.join(__dirname, '../', 'dist'),
+    origin: config.url
   })
-})
+)
 
 // Error middleware: emits log_error signals and returns a sanitized response.
 // Mounted last so it captures next(err) from any preceding route.

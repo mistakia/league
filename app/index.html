@@ -2,53 +2,37 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>xo.football — a dynasty league and the platform it runs on</title>
+    <!-- The double-brace tokens below are filled PER REQUEST by the API's SPA
+         fallback (libs-server/middleware/render-html.mjs), not at build time —
+         one bundle serves every route, so the head has to be assembled per
+         path. A crawler never runs the app, so this is the only head it reads.
+         Copy and route table live in libs-shared/page-routes.mjs.
 
-    <!-- One template serves every route, so these tags describe the site as a
-         whole rather than the current page. They exist because a recruiting
-         link shared in Discord, Reddit or iMessage renders from the raw HTML,
-         which crawlers read without running the SPA. -->
-    <meta
-      name="description"
-      content="A ten-team dynasty league with a published constitution, verifiable random draws, and a custom-built platform. One seat is open for 2026."
-    />
-    <link rel="canonical" href="https://xo.football/" />
+         Under webpack-dev-server nothing fills them and the raw tokens show
+         until the SPA's page-head effect mounts. That is dev-only: in
+         production the API serves this file. -->
+    <title>{{PAGE_TITLE}}</title>
 
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="xo.football" />
-    <meta property="og:url" content="https://xo.football/" />
-    <meta
-      property="og:title"
-      content="xo.football — a dynasty league and the platform it runs on"
-    />
-    <meta
-      property="og:description"
-      content="A ten-team dynasty league with a published constitution, verifiable random draws, and a custom-built platform. One seat is open for 2026."
-    />
-    <meta
-      property="og:image"
-      content="https://xo.football/static/images/landing/social-card.png"
-    />
-    <meta
-      property="og:image:alt"
-      content="Chart of team market value across the league from 2020 to 2026"
-    />
+    <meta name="description" content="{{META_DESCRIPTION}}" />
+    <meta name="robots" content="{{META_ROBOTS}}" />
+    <link rel="canonical" href="{{CANONICAL_URL}}" />
+
+    <meta property="og:type" content="{{OG_TYPE}}" />
+    <meta property="og:site_name" content="{{SITE_NAME}}" />
+    <meta property="og:url" content="{{OG_URL}}" />
+    <meta property="og:title" content="{{OG_TITLE}}" />
+    <meta property="og:description" content="{{OG_DESCRIPTION}}" />
+    <meta property="og:image" content="{{OG_IMAGE}}" />
+    <meta property="og:image:alt" content="{{OG_IMAGE_ALT}}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="xo.football — a dynasty league and the platform it runs on"
-    />
-    <meta
-      name="twitter:description"
-      content="A ten-team dynasty league with a published constitution, verifiable random draws, and a custom-built platform. One seat is open for 2026."
-    />
-    <meta
-      name="twitter:image"
-      content="https://xo.football/static/images/landing/social-card.png"
-    />
+    <meta name="twitter:card" content="{{TWITTER_CARD}}" />
+    <meta name="twitter:title" content="{{TWITTER_TITLE}}" />
+    <meta name="twitter:description" content="{{TWITTER_DESCRIPTION}}" />
+    <meta name="twitter:image" content="{{TWITTER_IMAGE}}" />
+    <meta name="twitter:image:alt" content="{{OG_IMAGE_ALT}}" />
 
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="xo.football" />

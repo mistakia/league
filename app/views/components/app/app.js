@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import hotkeys from 'hotkeys-js'
 
 import Menu from '@components/menu'
+import PageHead from '@components/page-head'
 import LeaguePauseNotice from '@components/league-pause-notice'
 import Routes from '@views/routes'
 import Loading from '@components/loading'
@@ -65,6 +66,10 @@ export default function App({
 
   return (
     <main className={classNames.join(' ')}>
+      {/* Renders nothing. Keeps the document title and meta tags in step with
+          the route after a client-side navigation, which never reaches the
+          server that filled them for the initial load. */}
+      <PageHead />
       <Menu {...{ menu_open, set_menu_open }} />
       {/* A sibling of <Routes /> rather than inside the league routes: this is
           the only every-route surface, since the parent <Route

@@ -8,10 +8,20 @@
 # data that populates public pages. Unactionable client errors from crawlers are
 # already dropped server-side at /api/errors, so robots.txt is for SEO, not noise
 # suppression.
+#
+# This list must agree with the per-route `robots` field in
+# libs-shared/page-routes.mjs, which is what puts a `noindex` meta tag on the
+# served HTML. The two are complementary rather than redundant: a Disallow stops
+# the fetch, and the meta tag covers a page reached by a link the crawler
+# already had.
 
 User-agent: *
 Allow: /
 Disallow: /error-test
 Disallow: /login
+Disallow: /forgot-password
+Disallow: /reset-password
 Disallow: /settings
+Disallow: /lineups
+Disallow: /trade
 Disallow: /u/
