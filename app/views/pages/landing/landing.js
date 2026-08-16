@@ -12,6 +12,7 @@ import {
 import {
   league_founding_year,
   league_name,
+  league_season_phrase,
   site_name
 } from '@libs-shared/social-sharing.mjs'
 
@@ -46,9 +47,17 @@ export default function LandingPage() {
               demonstrates it. The claims that support it come underneath, as
               facts with dates on them. */}
           <h1 className='landing__lede'>a home dynasty league.</h1>
+          {/* The season count is DERIVED, never typed. It goes in the deck
+              rather than the headline, which states what this is and stops —
+              but a league's age is the first thing that separates a real one
+              from a league founded last week, so the page has to say it.
+              test/libs-shared.social-meta-copy.spec.mjs asserts both halves:
+              that this file reads league_season_phrase, and that no season
+              count is hardcoded anywhere in the landing copy. */}
           <p className='landing__deck'>
-            Founded in {league_founding_year}. The constitution, the full
-            transaction record and the platform that enforces them are public.
+            Founded in {league_founding_year}, now in {league_season_phrase}.
+            The constitution, the full transaction record and the platform that
+            enforces them are public.
           </p>
           {/* The waitlist is the primary action and the league link is proof,
               so they are not peers: one filled button, one quiet one. */}
