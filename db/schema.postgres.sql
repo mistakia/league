@@ -5012,6 +5012,13 @@ CREATE TABLE public.nfl_draft_rankings_history (
 
 
 --
+-- Name: TABLE nfl_draft_rankings_history; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.nfl_draft_rankings_history IS 'Point-in-time NFL draft rankings (big-board and positional, per mock draft source), keyed (pid, source_id, season_year). RETAINED DELIBERATELY: dead per operator ruling 2026-07-22, retained as-is -- it has no consumers and that is expected -- do not read the absence of readers as evidence the table is abandoned. See db/adhoc/2026-07-22-conform-misc-timeseries.sql and db/adhoc/2026-08-15-comment-retained-unused-tables.sql.';
+
+
+--
 -- Name: nfl_draft_rankings_index; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -5026,6 +5033,13 @@ CREATE TABLE public.nfl_draft_rankings_index (
     draft_ranking_type public.draft_ranking_type DEFAULT 'BIG_BOARD'::public.draft_ranking_type NOT NULL,
     CONSTRAINT nfl_draft_rankings_index_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
+
+
+--
+-- Name: TABLE nfl_draft_rankings_index; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.nfl_draft_rankings_index IS 'Point-in-time NFL draft rankings (big-board and positional, per mock draft source), keyed (pid, source_id, season_year). RETAINED DELIBERATELY: dead per operator ruling 2026-07-22, retained as-is -- it has no consumers and that is expected -- do not read the absence of readers as evidence the table is abandoned. See db/adhoc/2026-07-22-conform-misc-timeseries.sql and db/adhoc/2026-08-15-comment-retained-unused-tables.sql.';
 
 
 --
@@ -6671,7 +6685,7 @@ CREATE TABLE public.nfl_plays_player (
 -- Name: TABLE nfl_plays_player; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON TABLE public.nfl_plays_player IS 'Per-player play-by-play participation detail covering every participant rather than a single named role, keyed (esbid, play_id, season_year, gsis_it_player_id). RETAINED DELIBERATELY: this is per-player play-by-play data to be expanded once the data pipeline supports it. It has no analytics consumer today and that is expected -- do not read the absence of readers, or sparse season coverage, as evidence the table is abandoned. Written by scripts/process-nfl-plays-player.mjs. See db/adhoc/2026-08-15-comment-play-participant-tables.sql.';
+COMMENT ON TABLE public.nfl_plays_player IS 'Per-player play-by-play participation detail covering every participant rather than a single named role, keyed (esbid, play_id, season_year, gsis_it_player_id). RETAINED DELIBERATELY: this is per-player play-by-play data to be expanded once the data pipeline supports it. It has no analytics consumer today and that is expected -- do not read the absence of readers, or sparse season coverage, as evidence the table is abandoned. See db/adhoc/2026-08-15-comment-play-participant-tables.sql.';
 
 
 --
