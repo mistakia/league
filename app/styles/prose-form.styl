@@ -206,12 +206,23 @@ prose_button_secondary()
 
 // A message the page is making, set off by a bar rather than a box. The accent
 // bar is the error; the plain one is ordinary confirmation.
-prose_message()
+// The shared block typography, split out so the error does not have to UNDO a
+// border it never wanted. A note and an error differ in what carries the
+// signal, not in how the text is set.
+prose_message_block()
   padding 12px 14px
   font-size 0.9375em
+
+// A standing note. The rule is what marks it as set apart from the form, since
+// its text is the same weight and colour as everything around it.
+prose_message()
+  prose_message_block()
   color $textColorDark
   border-left 3px solid $borderColor
 
+// An error carries its signal in the COLOUR, so it needs no rule — a red rule
+// beside red text states the same thing twice, and a form that is quiet
+// everywhere else does not need two markers to be noticed.
 prose_error()
-  prose_message()
-  border-left-color $accentColor
+  prose_message_block()
+  color $accentColor

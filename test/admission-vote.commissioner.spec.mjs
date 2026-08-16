@@ -180,11 +180,11 @@ describe('ADMISSION VOTE COMMISSIONER', function () {
     it('derives the ranking maximum from the candidate count', async () => {
       const response = await open_vote({
         candidates: [
-          { candidate_name: 'Alice' },
-          { candidate_name: 'Bob' },
-          { candidate_name: 'Carol' },
-          { candidate_name: 'Dave' },
-          { candidate_name: 'Erin' }
+          { candidate_name: 'Alice', sponsor_team_ids: [1] },
+          { candidate_name: 'Bob', sponsor_team_ids: [2] },
+          { candidate_name: 'Carol', sponsor_team_ids: [4] },
+          { candidate_name: 'Dave', sponsor_team_ids: [1] },
+          { candidate_name: 'Erin', sponsor_team_ids: [2] }
         ],
         maximum_ranked_candidates: 1
       })
@@ -194,6 +194,32 @@ describe('ADMISSION VOTE COMMISSIONER', function () {
         .where({ admission_vote_id: response.body.admission_vote_id })
         .first()
       expect(vote.maximum_ranked_candidates).to.equal(5)
+    })
+
+    // Section 9: an individual is a Candidate only by being nominated by a
+    // Manager, his Sponsor. A vote cannot be held over someone nobody
+    // nominated. The 9(e) direct admission is the exception and never runs a
+    // vote, so it does not reach this route.
+    it('refuses a candidate with no sponsor', async () => {
+      const response = await open_vote({
+        candidates: [
+          { candidate_name: 'Alice', sponsor_team_ids: [1] },
+          { candidate_name: 'Bob', sponsor_team_ids: [] }
+        ]
+      })
+      response.should.have.status(400)
+      expect(response.body.error).to.include('at least one sponsor')
+
+      const votes = await knex('admission_votes')
+      expect(votes).to.have.length(0)
+    })
+
+    it('refuses a candidate whose sponsors key is absent entirely', async () => {
+      const response = await open_vote({
+        candidates: [{ candidate_name: 'Alice' }]
+      })
+      response.should.have.status(400)
+      expect(response.body.error).to.include('at least one sponsor')
     })
 
     it('refuses a vote with no candidates', async () => {
@@ -261,7 +287,11 @@ describe('ADMISSION VOTE COMMISSIONER', function () {
       it('records the submission a candidate was picked from', async () => {
         const response = await open_vote({
           candidates: [
-            { candidate_name: 'Dana Whitfield', submission_id },
+            {
+              candidate_name: 'Dana Whitfield',
+              submission_id,
+              sponsor_team_ids: [2]
+            },
             { candidate_name: 'Typed By Name', sponsor_team_ids: [1] }
           ]
         })
@@ -287,7 +317,11 @@ describe('ADMISSION VOTE COMMISSIONER', function () {
       it('refuses a submission_id that does not exist', async () => {
         const response = await open_vote({
           candidates: [
-            { candidate_name: 'Dana Whitfield', submission_id: 999999 }
+            {
+              candidate_name: 'Dana Whitfield',
+              submission_id: 999999,
+              sponsor_team_ids: [1]
+            }
           ]
         })
         response.should.have.status(400)
@@ -303,8 +337,12 @@ describe('ADMISSION VOTE COMMISSIONER', function () {
       it('refuses two candidates sharing one application', async () => {
         const response = await open_vote({
           candidates: [
-            { candidate_name: 'Dana Whitfield', submission_id },
-            { candidate_name: 'Dana W', submission_id }
+            {
+              candidate_name: 'Dana Whitfield',
+              submission_id,
+              sponsor_team_ids: [1]
+            },
+            { candidate_name: 'Dana W', submission_id, sponsor_team_ids: [2] }
           ]
         })
         response.should.have.status(400)

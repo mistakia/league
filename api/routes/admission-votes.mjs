@@ -713,7 +713,20 @@ router.post('/', async (req, res) => {
       ) {
         return res.status(400).send({ error: 'every candidate needs a name' })
       }
-      for (const team_id of candidate.sponsor_team_ids || []) {
+
+      // Section 9: "no individual shall be admitted to the LEAGUE except as a
+      // Candidate nominated by a Manager, his Sponsor". A Candidate with no
+      // Sponsor is not a Candidate, so a vote cannot be held over one. The
+      // exception in 9(e) is the Commissioner admitting someone directly when
+      // NOBODY was nominated, which bypasses the Admission Vote entirely and
+      // so never reaches this route.
+      const sponsor_team_ids = candidate.sponsor_team_ids || []
+      if (!sponsor_team_ids.length) {
+        return res
+          .status(400)
+          .send({ error: 'every candidate needs at least one sponsor' })
+      }
+      for (const team_id of sponsor_team_ids) {
         if (!league_team_ids.has(Number(team_id))) {
           return res
             .status(400)

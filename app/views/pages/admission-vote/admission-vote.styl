@@ -63,8 +63,28 @@
   select
     prose_select()
 
+// The ordinal, its point value and the optional marker read left to right on
+// one line, so `prose_label()` is given a flex row rather than being wrapped in
+// one — the mixin sets the type and nothing about layout.
 .admission-vote__slot-label
   prose_label()
+  display flex
+  align-items baseline
+  gap 8px
+
+// Set apart from the ordinal rather than beside it in the same weight: this is
+// the number a manager is choosing BETWEEN slots on, so it has to be findable
+// while scanning down the column, and it is not part of the label's sentence.
+.admission-vote__slot-points
+  font-weight 400
+  color $textColor
+
+// Quieter still than the points. It says a slot may be skipped, which is worth
+// stating on every one of them and worth nobody reading twice.
+.admission-vote__slot-optional
+  font-weight 400
+  font-style italic
+  color lighten($textColor, 20)
 
 // Points per candidate and nothing else. Section 10(e) discloses this figure
 // for each Candidate; a per-team row is the thing it forbids, so there is

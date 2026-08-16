@@ -181,15 +181,15 @@ const Ballot = ({ vote, candidates, on_submit, is_submitting, viewer }) => {
         on_submit(ranked_candidate_ids)
       }}
     >
-      {/* The count is the size of the field, so "rank as many as you like" and
-          the old "rank up to N" describe the same ballot — but only the first
-          says the thing a manager needs to know, which is that leaving someone
-          off is a choice rather than the default the form pushed him toward. */}
+      {/* The per-slot labels below carry the scoring, so this says only what
+          they cannot: that stopping early is allowed and costs nothing. The
+          arithmetic used to live here as "your first choice scores N, your
+          second one fewer, and so on", which made a manager at preference four
+          of six work out a number the form already knew. */}
       <p className='admission-vote__ballot-intro'>
-        Rank as many as you like. Your first choice scores{' '}
-        {vote.maximum_ranked_candidates}, your second one fewer, and so on.
-        Anyone you leave off scores nothing from you, and ranking fewer does not
-        weaken your first choice.
+        Rank as many as you like — only your first choice is required. Anyone
+        you leave off scores nothing from you, and ranking fewer does not weaken
+        your first choice.
         {viewer.has_submitted_ballot &&
           ' Your ballot is shown below as you submitted it. Changing it and submitting replaces it entirely, as often as you like while the vote is open.'}
       </p>
@@ -198,6 +198,19 @@ const Ballot = ({ vote, candidates, on_submit, is_submitting, viewer }) => {
         <label className='admission-vote__slot' key={index}>
           <span className='admission-vote__slot-label'>
             Preference {index + 1}
+            {/* The points this slot is worth, stated where the choice is made.
+                A ballot is a judgement about how much MORE you want someone
+                than the next person, and that is exactly the quantity a
+                manager cannot see while reading a bare ordinal. */}
+            <span className='admission-vote__slot-points'>
+              {vote.maximum_ranked_candidates - index} point
+              {vote.maximum_ranked_candidates - index === 1 ? '' : 's'}
+            </span>
+            {/* Every slot but the first, because N identical blanks read as N
+                things to fill in no matter what the paragraph above says. */}
+            {index > 0 && (
+              <span className='admission-vote__slot-optional'>optional</span>
+            )}
           </span>
           <select
             value={value}
