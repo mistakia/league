@@ -187,9 +187,10 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
   bottom 0
   width $menuWidth
   // The same surface the app body sits on, so the drawer reads as part of the
-  // page rather than as a panel laid over it. That leaves no edge where the
-  // two meet, which is what the seam border in the desktop media query below
-  // is for — it is load-bearing here, not decoration.
+  // page rather than as a panel laid over it. Deliberately no seam border down
+  // the right edge: the section cards are what mark the drawer's extent, and a
+  // rule there just draws attention to a join the matching surface exists to
+  // hide.
   background $backgroundColor
   z-index $z_overlay_panel
   overflow hidden
@@ -268,9 +269,6 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
   font-size 10px
 
 @media (min-width 800px)
-  .menu__drawer--persistent
-    border-right 1px solid lighten($borderColor, 30%)
-
   .auction__live .main__menu-button
     bottom $auctionHeightDesktop + 8px
 
