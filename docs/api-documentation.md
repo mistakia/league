@@ -70,11 +70,13 @@ from whichever answers last:
 - `paused_at` — when the open pause began, null when the league is live. This
   is what the every-route pause banner renders and what freezes the rookie
   draft clocks.
-- `draft_pause_periods` — the pause intervals overlapping the rookie draft, as
-  `{paused_at, resumed_at}` with `resumed_at` null while a pause is open. The
-  draft window calculator credits the open time back to the pick clock; they
-  are intervals rather than a total so the credit can be clipped to each pick's
-  own reference.
+- `resumed_at` — when the latest COMPLETED pause ended, null only when the
+  league has never finished a pause. It is independent of `paused_at`: a league
+  paused again after an earlier resume carries both. The draft window
+  calculator reads it as a single scalar — a resume voids the standing
+  publication, so no pick has a window and none can be passed until the next
+  daily boundary at or after it. It replaced a `draft_pause_periods` interval
+  array, which credited the open time back to the pick clock.
 
 The commissioner's free-text `pause_reason` is deliberately absent from both
 payloads and is served only from the authenticated pause route.
