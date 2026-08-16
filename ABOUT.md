@@ -584,12 +584,36 @@ observations:
     [bug] 2026-08-15 The login page's login/register mode switch was a div with an onClick, so it
     was unreachable by keyboard and announced nothing, and no field on any of the three auth pages
     had a real label element. Both fixed in 7449c5f91.
+  - >-
+    [change] ddc4394db restyled the three menu buttons (.main__menu-button, .menu__collapse-button,
+    .menu__icon-button) off imitation Material — MUI default #1976d2, the three-layer elevation
+    shadow, the 0.4/0/0.2/1 easing, Button typography at 0.02857em tracking, and the
+    24px-pill/40px-circle FAB geometry — onto prose-form.styl ink fill, accent hover, mono label
+    type and 3px radius, with no MUI component involved at any point.
+  - >-
+    [gotcha] The floating menu button renders over every surface in the app, so $prose_ink is the
+    paint that works on all of them — every app surface is light, so an ink fill is the darkest
+    thing on each and needs no revisit if the prose and chrome surfaces are unified, whereas any
+    outlined or white treatment dissolves into paper.
+  - >-
+    [gotcha] A button whose hover repaints to $prose_accent cannot take an accent focus ring, since
+    the ring vanishes for anyone who tabs to a control the pointer is resting on; .main__menu-button
+    therefore rings in $prose_ink while its two quieter siblings ring in accent.
+  - >-
+    [gotcha] menu.js sizes the floating menu button hamburger at 20px against an 11px label, which
+    reads as two objects at two scales; menu.styl constrains .menu__icon to 14px inside that button
+    rather than changing the markup.
+  - >-
+    [bug] The .auction__live .main__menu-button bottom offset in menu.styl is dead because menu.js
+    sets bottom through an inline style object, which beats any stylesheet rule, so the auction
+    never lifts the floating menu button clear of its controls; not repaired in ddc4394db and the
+    fix belongs in menu.js.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-16T04:00:56.567Z'
+updated_at: '2026-08-16T04:24:43.765Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
