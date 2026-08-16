@@ -1,0 +1,26 @@
+{
+  "name": "as_of_month_day is ignored under a week row axis because the week branch wins",
+  "description": "Under both axes the week branch of keeptradecut_join takes the boundary, so a well-formed as_of_month_day reaches params and does not affect the emitted boundary: the SQL must carry to_timestamp(nfl_year_week_timestamp.week_timestamp) and no make_date at all, and no recency floor, which is year-axis only. This is the accepted-and-ignored shape recorded in the plan -- accepted only because the client control hides itself under a week axis, so the state is reachable solely by removing a year axis from a saved view. The alias still differs from the unset one, so a stale param emits an identical join under a different alias: wasteful, not wrong. A MALFORMED value is a different case and throws.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "as_of_month_day": "03-01"
+        }
+      }
+    ],
+    "row_axes": ["year", "week"],
+    "limit": 10
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year) select \"player\".\"pid\", player.first_name, player.last_name, \"tb4a345a0f5715a2d923e41fe875984ae\".\"keeptradecut_value\" AS \"player_keeptradecut_value_0\", \"player_years_weeks\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years_weeks\".\"year\" left join \"nfl_year_week_timestamp\" on \"nfl_year_week_timestamp\".\"year\" = \"player_years_weeks\".\"year\" and \"nfl_year_week_timestamp\".\"week\" = \"player_years_weeks\".\"week\" inner join \"keeptradecut_valuations\" as \"tb4a345a0f5715a2d923e41fe875984ae\" on \"tb4a345a0f5715a2d923e41fe875984ae\".\"pid\" = \"player\".\"pid\" and \"tb4a345a0f5715a2d923e41fe875984ae\".\"is_superflex\" = true and \"tb4a345a0f5715a2d923e41fe875984ae\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= to_timestamp(nfl_year_week_timestamp.week_timestamp)) group by player.first_name, player.last_name, \"tb4a345a0f5715a2d923e41fe875984ae\".\"keeptradecut_value\", \"player_years_weeks\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 10",
+  "tags": [
+    "keeptradecut",
+    "as_of_month_day",
+    "row_axes",
+    "week",
+    "year",
+    "parameters"
+  ]
+}

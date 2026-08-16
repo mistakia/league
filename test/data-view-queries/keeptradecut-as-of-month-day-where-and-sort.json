@@ -1,0 +1,46 @@
+{
+  "name": "a param-bearing where clause separates from the column, and the sort follows the column",
+  "description": "get_table_name passes params into table_alias for where clauses as well as for columns, so a where clause carrying a different as_of_month_day than the column separates aliases identically -- two joins, two anchors (03-01 for the column, 09-01 for the filter). The second half is what a grep cannot check: the sort must resolve to the COLUMN's select alias and not the where clause's, so the ordinal in the ORDER BY has to point at the 03-01 join. A build that shared one alias across the two would sort on the filter's boundary while displaying the column's.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "as_of_month_day": "03-01"
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "operator": ">",
+        "value": 2000,
+        "params": {
+          "as_of_month_day": "09-01"
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "as_of_month_day": "03-01"
+        },
+        "desc": true
+      }
+    ],
+    "row_axes": ["year"],
+    "limit": 10
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.first_name, player.last_name, \"t1606bedd0652fc85d71c5b4375b5eead\".\"keeptradecut_value\" AS \"player_keeptradecut_value_0\", \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" inner join \"keeptradecut_valuations\" as \"t8ed8cad75993b9321a6b6af58902027d\" on \"t8ed8cad75993b9321a6b6af58902027d\".\"pid\" = \"player\".\"pid\" and \"t8ed8cad75993b9321a6b6af58902027d\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"t8ed8cad75993b9321a6b6af58902027d\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(LEAST(make_date((opening_days.year) + 0, 9, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 9, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) and \"observed_at\" > (LEAST(LEAST(make_date((opening_days.year) + 0, 9, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 9, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days')) left join \"keeptradecut_valuations\" as \"t1606bedd0652fc85d71c5b4375b5eead\" on \"t1606bedd0652fc85d71c5b4375b5eead\".\"pid\" = \"player\".\"pid\" and \"t1606bedd0652fc85d71c5b4375b5eead\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"t1606bedd0652fc85d71c5b4375b5eead\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(LEAST(make_date((opening_days.year) + 0, 3, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 3, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) and \"observed_at\" > (LEAST(LEAST(make_date((opening_days.year) + 0, 3, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 3, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days')) where t8ed8cad75993b9321a6b6af58902027d.keeptradecut_value > '2000' group by player.first_name, player.last_name, \"t1606bedd0652fc85d71c5b4375b5eead\".\"keeptradecut_value\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 10",
+  "tags": [
+    "keeptradecut",
+    "as_of_month_day",
+    "filters",
+    "sorting",
+    "table_alias",
+    "row_axes",
+    "year"
+  ]
+}

@@ -50,6 +50,17 @@ Test files are JSON in `test/data-view-queries/` with the following structure:
 }
 ```
 
+## Environment
+
+**Every command below needs `NODE_ENV` and a database, and the CLI gives a bad error without them.** Run bare it dies in `config/index.mjs` on `ENOENT ... config/config-undefined.json`, which reads as a broken checkout rather than a missing variable. Some fixtures also resolve a scoring format through `#db`, so the connection is not optional even though most of the work is `.toString()` on a query builder.
+
+```bash
+export LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=5433 \
+  LEAGUE_DB_DATABASE=league_test_<slug> NODE_ENV=test TZ=America/New_York
+```
+
+Start the database with `yarn test:db:up` (Postgres 16 on :5433). Give yourself a private database rather than sharing `league_test` — the container is a shared singleton and a sibling's run drops every table mid-run.
+
 ## Creating a Test
 
 ### 1. Generate Test File with CLI
@@ -99,11 +110,39 @@ Edit the JSON file to:
 node scripts/data-view-test-cli.mjs --all
 
 # Update all failing tests (use with caution)
-node scripts/data-view-test-cli.mjs --all --update
+node scripts/data-view-test-cli.mjs --all --update   # blesses whatever the emitter currently produces -- see the warning above
 
 # Run full test suite with yarn
 yarn test --reporter min --grep "data view"
 ```
+
+## What a query-match test CANNOT check
+
+**Both comparison paths normalize table-alias hashes away.** `normalize_sql_for_comparison` (this CLI) and `test/utils/compare-queries.mjs` (the mocha spec) each rewrite every distinct 32-character hash to a positional `table_0`, `table_1`, ... before comparing. So:
+
+- **Caught:** join count, join order, boundary expressions, predicates, projections, sort ordinals — an alias COLLAPSE, where two columns fall onto one join, changes the count and turns the test red.
+- **NOT caught:** an alias hash that merely MOVES. That silently invalidates every cached redis entry and saved view keyed on it, and `--all` prints `✓ Queries match!` straight over it.
+
+To pin that a hash did not move, assert the literal alias in a spec (see `test/data-views.keeptradecut-as-of-month-day.spec.mjs`) or diff the emitted SQL against a worktree pinned to an explicit pre-change hash. Same family as `skip_query_match`: the fixture looks like coverage while the property you care about was never compared.
+
+## Result equivalence: when a query-match test is not enough
+
+A query-match test pins the SQL TEXT and never executes it, so it cannot see semantics that valid SQL gets wrong — a boundary resolving the wrong observation, a filter that matches nothing. For those, add a `result_equivalence` block, which seeds rows in a rolled-back transaction and compares executed output against an oracle:
+
+```json
+"result_equivalence": {
+  "seed": ["INSERT INTO ...", "REFRESH MATERIALIZED VIEW opening_days"],
+  "expected_rows": [{ "some_column_0": 3000 }],
+  "compare_columns": ["some_column_0"]
+}
+```
+
+Exactly one of `expected_rows` or `reference_sql` is the oracle. Four things to get right:
+
+1. **Seeds isolate on `primary_position: 'MLB'`** and the request filters on it; the harness asserts no shared fixture player claims that value.
+2. **Derive expected values from the seed, never from current output** — a value copied out of a passing run is a screenshot, not an oracle. `update-data-view-snapshots.mjs` only rewrites `expected_query`, so a wrong oracle can never be repaired by regenerating.
+3. **Row order does not matter** (`normalize_rows` sorts), but every projected row must be distinguishable.
+4. **Prove it can go red.** Mutate the code the fixture exists to catch and confirm it fails; a fixture never seen red is not coverage.
 
 ## Best Practices
 

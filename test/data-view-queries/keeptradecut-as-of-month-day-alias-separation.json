@@ -1,0 +1,47 @@
+{
+  "name": "as_of_month_day crossed with qb yields four distinct keeptradecut joins",
+  "description": "generate_table_alias must fold as_of_month_day into its hash key. The file's own history is the reason: omitting is_superflex from that key once collapsed two columns onto one alias and rendered the 1QB value under the superflex column, silently and with no error. This requests the same metric four times across two anchors (03-01, 09-01) and two qb values, and the emitted SQL must carry four distinct table aliases and four separate joins. A build that dropped as_of_month_day from the key emits two.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "as_of_month_day": "03-01"
+        }
+      },
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "as_of_month_day": "09-01"
+        }
+      },
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "as_of_month_day": "03-01",
+          "qb": 1
+        }
+      },
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "as_of_month_day": "09-01",
+          "qb": 1
+        }
+      }
+    ],
+    "row_axes": ["year"],
+    "limit": 10
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.first_name, player.last_name, \"t1606bedd0652fc85d71c5b4375b5eead\".\"keeptradecut_value\" AS \"player_keeptradecut_value_0\", \"t8ed8cad75993b9321a6b6af58902027d\".\"keeptradecut_value\" AS \"player_keeptradecut_value_1\", \"t443f24595b28c38f8973fe75b4966209\".\"keeptradecut_value\" AS \"player_keeptradecut_value_2\", \"t7fbf5caae4f4b5dd065e4e58fcbf8e95\".\"keeptradecut_value\" AS \"player_keeptradecut_value_3\", \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_valuations\" as \"t1606bedd0652fc85d71c5b4375b5eead\" on \"t1606bedd0652fc85d71c5b4375b5eead\".\"pid\" = \"player\".\"pid\" and \"t1606bedd0652fc85d71c5b4375b5eead\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"t1606bedd0652fc85d71c5b4375b5eead\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(LEAST(make_date((opening_days.year) + 0, 3, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 3, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) and \"observed_at\" > (LEAST(LEAST(make_date((opening_days.year) + 0, 3, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 3, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days')) left join \"keeptradecut_valuations\" as \"t8ed8cad75993b9321a6b6af58902027d\" on \"t8ed8cad75993b9321a6b6af58902027d\".\"pid\" = \"player\".\"pid\" and \"t8ed8cad75993b9321a6b6af58902027d\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"t8ed8cad75993b9321a6b6af58902027d\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(LEAST(make_date((opening_days.year) + 0, 9, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 9, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) and \"observed_at\" > (LEAST(LEAST(make_date((opening_days.year) + 0, 9, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 9, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days')) left join \"keeptradecut_valuations\" as \"t443f24595b28c38f8973fe75b4966209\" on \"t443f24595b28c38f8973fe75b4966209\".\"pid\" = \"player\".\"pid\" and \"t443f24595b28c38f8973fe75b4966209\".\"is_superflex\" = false and opening_days.year = (player_years.year) and \"t443f24595b28c38f8973fe75b4966209\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = false and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(LEAST(make_date((opening_days.year) + 0, 3, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 3, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) and \"observed_at\" > (LEAST(LEAST(make_date((opening_days.year) + 0, 3, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 3, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days')) left join \"keeptradecut_valuations\" as \"t7fbf5caae4f4b5dd065e4e58fcbf8e95\" on \"t7fbf5caae4f4b5dd065e4e58fcbf8e95\".\"pid\" = \"player\".\"pid\" and \"t7fbf5caae4f4b5dd065e4e58fcbf8e95\".\"is_superflex\" = false and opening_days.year = (player_years.year) and \"t7fbf5caae4f4b5dd065e4e58fcbf8e95\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = false and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(LEAST(make_date((opening_days.year) + 0, 9, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 9, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) and \"observed_at\" > (LEAST(LEAST(make_date((opening_days.year) + 0, 9, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 9, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days')) group by player.first_name, player.last_name, \"t1606bedd0652fc85d71c5b4375b5eead\".\"keeptradecut_value\", \"t8ed8cad75993b9321a6b6af58902027d\".\"keeptradecut_value\", \"t443f24595b28c38f8973fe75b4966209\".\"keeptradecut_value\", \"t7fbf5caae4f4b5dd065e4e58fcbf8e95\".\"keeptradecut_value\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 10",
+  "tags": [
+    "keeptradecut",
+    "as_of_month_day",
+    "table_alias",
+    "parameters",
+    "joins",
+    "row_axes",
+    "year"
+  ]
+}
