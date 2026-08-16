@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 import { DISCORD_URL } from '@core/constants'
 import { league_url } from '@pages/landing/landing-content'
@@ -47,8 +47,6 @@ export default function AppMenu({
   league,
   is_commish
 }) {
-  const location = useLocation()
-  const isAuction = location.pathname === '/auction'
   const isMobile = window.innerWidth < 800
   const is_hosted = Boolean(league.is_hosted)
   // The home dynasty league is the one league_url points at, and its menu
@@ -68,11 +66,6 @@ export default function AppMenu({
     return () => window.removeEventListener('keydown', on_key)
   }, [menu_open, isMobile, set_menu_open])
 
-  const button_style = {
-    bottom: isAuction ? 204 : 16,
-    [isMobile ? 'right' : 'left']: 16
-  }
-
   const drawer_classes = ['menu__drawer']
   if (isMobile) drawer_classes.push('menu__drawer--temporary')
   else drawer_classes.push('menu__drawer--persistent')
@@ -85,7 +78,6 @@ export default function AppMenu({
       <button
         type='button'
         className='main__menu-button'
-        style={button_style}
         onClick={() => set_menu_open(true)}
       >
         <Icon d={ICON_MENU} size={20} />

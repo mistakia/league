@@ -38,6 +38,15 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
 // named from the same variables, rather than a shim over the mixin.
 .main__menu-button
   position fixed
+  // POSITION LIVES HERE, NOT IN A STYLE OBJECT. menu.js used to set bottom and
+  // left/right inline, and an inline style beats a stylesheet rule — so the
+  // .auction__live offsets at the foot of this file could never apply and the
+  // button sat over the auction controls. The side is a media query rather
+  // than a JS width test for the same class of reason: the old isMobile was
+  // read once at render with no resize listener, so the button stayed on the
+  // wrong edge until something else re-rendered it.
+  bottom 16px
+  left 16px
   display inline-flex
   align-items center
   gap 10px
@@ -48,7 +57,10 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
   padding 0 20px 0 22px
   border none
   border-radius 3px
-  background $prose_ink
+  // $prose_action, the same graphite as the landing call to action and every
+  // prose submit — a filled block wants a lighter paint than a letterform, so
+  // this is deliberately not the near-black $prose_ink.
+  background $prose_action
   color $prose_paper
   // The site's label voice — prose_eyebrow()'s mono at small size with wide
   // tracking — rather than MUI Button's sans at 14px. Uppercase survives the
@@ -74,8 +86,8 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
   // Ink rather than the accent ring the other two get, because THIS button
   // repaints to the accent on hover — an accent ring on an accent fill is no
   // ring at all for anyone who tabs to a button the pointer is resting on. The
-  // offset leaves a gap of page showing, so the ink ring reads against the ink
-  // fill as well as against the surface.
+  // offset leaves a gap of surface showing, so the ring reads in every state:
+  // against the graphite fill, against the accent one, and against the page.
   &:focus-visible
     outline 2px solid $prose_ink
     outline-offset 3px
@@ -259,6 +271,13 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
     bottom $auctionHeightDesktop + 8px
 
 @media (max-width 799px)
+  // The drawer comes in from the right on a phone, so the button that opens it
+  // sits on that edge too — and under the thumb rather than across the screen
+  // from it. Same specificity as the base rule, so it wins on source order.
+  .main__menu-button
+    left auto
+    right 16px
+
   .auction__live .main__menu-button
     bottom $auctionHeightMobile + 8px
 
