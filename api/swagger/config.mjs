@@ -56,6 +56,13 @@ const options = {
             submission_id: { type: 'integer' },
             questionnaire_version: { type: 'integer' },
             submitted_at: { type: 'string', format: 'date-time' },
+            edited_at: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
+              description:
+                'When the candidate last replaced his answers through his emailed edit link. Null means never edited — deliberately not defaulted to submitted_at, which would make every untouched application read as revised.'
+            },
             candidate_name: { type: 'string' },
             contact_email: { type: 'string' },
             contact_handle: { type: 'string', nullable: true },

@@ -816,6 +816,30 @@ describe('WAITLIST', function () {
       other.candidate_name.should.equal('Someone Else')
     })
 
+    // The managers' card renders this, and it is the only way a Manager who
+    // read an application last week learns it was rewritten since. NULL rather
+    // than submitted_at on an untouched row, so "never edited" and "edited the
+    // instant it arrived" stay distinguishable.
+    it('stamps edited_at on an edit and leaves it null on a new submission', async function () {
+      const token = await submit_and_read_token()
+
+      const before = await knex('manager_waitlist_submissions').first()
+      expect(before.edited_at).to.equal(null)
+
+      const response = await edit({
+        ...valid_submission,
+        token,
+        candidate_name: 'Revised Name'
+      })
+      response.should.have.status(200)
+
+      const after = await knex('manager_waitlist_submissions').first()
+      expect(after.edited_at).to.not.equal(null)
+      // submitted_at is when he applied and must not move -- the managers' list
+      // is ordered by it.
+      after.submitted_at.getTime().should.equal(before.submitted_at.getTime())
+    })
+
     // Once the managers are ranking the answers, they are no longer the
     // candidate's to change -- a vote on text that moved underneath it is not a
     // vote on anything.

@@ -291,6 +291,11 @@ const english_words = [
   'early',
   'earned',
   'edge',
+  // A real word, and the same lifecycle-participle class the list already
+  // carries in announced / created / deleted / processed / submitted / updated
+  // -- it was simply missing, which is the inversion this vocabulary is designed
+  // to produce rather than a finding about the column.
+  'edited',
   'effective',
   'efficiency',
   'eligible',

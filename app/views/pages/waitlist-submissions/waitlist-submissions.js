@@ -51,6 +51,18 @@ const Submission = ({ submission }) => (
       </h2>
       <div className='waitlist-submissions__meta'>
         {dayjs(submission.submitted_at).format('MMM D, YYYY')}
+        {/* A candidate can rewrite every answer through his emailed link until
+            he is named on an admission vote, and submitted_at does not move when
+            he does. Without this the card of a rewritten application is
+            indistinguishable from one nobody has touched, so a Manager who read
+            it a week ago has no reason to read it again. Shown only when it
+            happened -- an "edited" line on every card would say nothing. */}
+        {submission.edited_at && (
+          <>
+            {' — edited '}
+            {dayjs(submission.edited_at).format('MMM D, YYYY')}
+          </>
+        )}
         {' — '}
         {submission.timezone_name}
       </div>

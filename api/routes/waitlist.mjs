@@ -696,9 +696,14 @@ router.put('/', edit_rate_limiter, async (req, res) => {
       return res.status(400).send({ error })
     }
 
+    // STAMPED HERE RATHER THAN DEFAULTED ON THE COLUMN, so it marks the act of
+    // editing rather than the row being touched. The managers' card shows it,
+    // because the vote lock protects the BALLOT and this protects the reading
+    // that happens before one opens: a manager who read these answers on Tuesday
+    // has no other way to learn they were rewritten on Wednesday.
     await db('manager_waitlist_submissions')
       .where({ submission_id })
-      .update(submission)
+      .update({ ...submission, edited_at: new Date() })
 
     res.send({ success: true })
   } catch (error) {

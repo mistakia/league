@@ -22,11 +22,27 @@ const RESEND_API_PREFIX = 'https://api.resend.com/'
 const original_fetch = globalThis.fetch
 let sent_emails = []
 
+// Set by the enumeration case to make the provider REFUSE. Resend answers 422
+// with an error body for an unusable key, an unverified sending domain or a
+// rejected recipient, and its SDK RESOLVES that as `{ error }` rather than
+// throwing -- which is why sendEmail inspects the result and throws itself.
+let is_email_provider_refusing = false
+
 const install_email_capture = () => {
   sent_emails = []
+  is_email_provider_refusing = false
   globalThis.fetch = async (resource, options) => {
     if (!String(resource).startsWith(RESEND_API_PREFIX)) {
       return original_fetch(resource, options)
+    }
+    if (is_email_provider_refusing) {
+      return new Response(
+        JSON.stringify({
+          name: 'validation_error',
+          message: 'The recipient was refused'
+        }),
+        { status: 422, headers: { 'content-type': 'application/json' } }
+      )
     }
     sent_emails.push(JSON.parse(options.body))
     return new Response(JSON.stringify({ id: 'captured-by-test' }), {
@@ -39,6 +55,7 @@ const install_email_capture = () => {
 const restore_email_capture = () => {
   globalThis.fetch = original_fetch
   sent_emails = []
+  is_email_provider_refusing = false
 }
 
 // A JWT is three base64url segments. Anchoring on that shape rather than on a
@@ -387,6 +404,35 @@ describe('API /auth', function () {
         .send({ email: 'no-such-user-anywhere@email.com' })
 
       sent_emails.should.have.lengthOf(1)
+    })
+
+    // THE ENUMERATION CASE. Only an account that EXISTS reaches the send at all
+    // -- an unknown one returns the generic message without attempting one -- so
+    // if a refused send changes the status code, the status code answers "is
+    // this address registered?" for anybody who asks while the mail provider is
+    // unhealthy. That is the oracle the generic message exists to close, and it
+    // was briefly open: sendEmail began throwing on a refusal and the throw
+    // reached the handler's catch, which answers 500.
+    it('answers a refused send exactly as it answers an unknown account', async () => {
+      is_email_provider_refusing = true
+
+      const known = await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({ email: 'user1@email.com' })
+
+      const unknown = await chai_request
+        .execute(server)
+        .post('/api/auth/reset-password')
+        .send({ email: 'no-such-user-anywhere@email.com' })
+
+      is_email_provider_refusing = false
+
+      known.status.should.equal(200)
+      known.status.should.equal(unknown.status)
+      JSON.stringify(known.body).should.equal(JSON.stringify(unknown.body))
+      // And the provider's own error text must not reach the caller either.
+      JSON.stringify(known.body).should.not.include('refused')
     })
 
     it('should return error for missing username and email', async () => {

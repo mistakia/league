@@ -4,8 +4,16 @@ import bcrypt from 'bcrypt'
 
 import { getLeague, sendEmail, validators } from '#libs-server'
 import { current_season } from '#constants'
+import { create_logger } from '#libs-shared/log.mjs'
 
 const router = express.Router()
+
+// `req.app.locals.logger` is a bare debug namespace, which reaches nobody. This
+// is the structured one, used where a failure needs to leave the process and
+// find an operator -- see the refused-send path in POST /reset-password.
+const auth_error_logger = create_logger('api:auth', {
+  service: 'league-server'
+})
 
 // A password reset token is signed with the jwt secret CONCATENATED WITH the
 // user's current bcrypt hash, which makes it self-invalidating without any
@@ -377,11 +385,36 @@ router.post('/reset-password', async (req, res) => {
 
     const reset_link = `${config.url}/reset-password?token=${reset_token}`
 
-    await sendEmail({
-      to: user.email,
-      subject: 'Password Reset Request',
-      message: `Click the following link to reset your password: ${reset_link}. If you did not request a password reset, please ignore this email.`
-    })
+    // A REFUSED SEND MUST NOT CHANGE THE STATUS CODE. sendEmail throws on a
+    // provider refusal as of 61bb435b4, which was right -- resend resolves a
+    // refusal as `{ error }` rather than throwing, so a dead key or an
+    // unverified domain used to read as success. But letting that throw reach
+    // the handler's catch answered 500, and only an account that EXISTS ever
+    // reaches this line: an unknown one returned the generic 200 above without
+    // attempting a send. So a refusing provider turned the status code into the
+    // user-enumeration oracle the generic message exists to prevent -- 500 means
+    // "this address is registered", 200 means it is not.
+    //
+    // The objection behind 61bb435b4 was never that the CALLER must see a
+    // failure; it was that the failing path and the healthy path had the same
+    // observable. This gives them different observables on the channel that
+    // should carry the difference: the caller gets the same sentence either way,
+    // and the operator gets a signal. Deliberately no email address in it -- a
+    // signal is synced and indexed, and the address is the thing this route is
+    // careful about.
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Password Reset Request',
+        message: `Click the following link to reset your password: ${reset_link}. If you did not request a password reset, please ignore this email.`
+      })
+    } catch (email_error) {
+      auth_error_logger.error(email_error, {
+        severity: 'high',
+        fingerprint_override: 'auth-reset-password-send-refused',
+        context: { user_id: user.id }
+      })
+    }
 
     res.json({
       message: 'If an account exists, a password reset email has been sent'

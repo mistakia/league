@@ -4906,7 +4906,8 @@ CREATE TABLE public.manager_waitlist_submissions (
     timezone_name text NOT NULL,
     has_affirmed_commitment boolean NOT NULL,
     requested_seat text,
-    responses jsonb DEFAULT '{}'::jsonb NOT NULL
+    responses jsonb DEFAULT '{}'::jsonb NOT NULL,
+    edited_at timestamp with time zone
 );
 
 
@@ -4922,6 +4923,13 @@ COMMENT ON TABLE public.manager_waitlist_submissions IS 'Prospective manager que
 --
 
 COMMENT ON COLUMN public.manager_waitlist_submissions.responses IS 'Question id -> answer text. The id set is defined in libs-shared/manager-waitlist-questions.mjs; an id is a stored key and must not be reused for a different question.';
+
+
+--
+-- Name: COLUMN manager_waitlist_submissions.edited_at; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.manager_waitlist_submissions.edited_at IS 'When the candidate last replaced his answers through his emailed edit link. NULL means the application has never been edited.';
 
 
 --
