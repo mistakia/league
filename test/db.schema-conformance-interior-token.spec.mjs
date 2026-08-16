@@ -42,12 +42,18 @@ CREATE TABLE public.nfl_plays (
     passing_yards integer,
     completion_percentage numeric,
     receiving_touchdowns integer,
-    solo_tackle_1_pid character varying(25)
+    solo_tackle_1_pid character varying(25),
+    -- The role-pid exemption set is validated against the audited schema, so the
+    -- synthetic schema must carry the real exemption columns or the run fails on
+    -- a "stale exemption" before it can report findings.
+    qb_pid character varying(25)
 );
 
 CREATE TABLE public.nfl_games (
     nflverse_game_id character varying(36),
-    field_goals_made_0_19_yards integer
+    field_goals_made_0_19_yards integer,
+    away_qb_pid character varying(25),
+    home_qb_pid character varying(25)
 );
 
 CREATE TABLE public.league_formats (

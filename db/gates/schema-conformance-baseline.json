@@ -1,7 +1,7 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-15T13:44:03.388Z",
-  "count": 664,
+  "generated_at": "2026-08-16T21:54:33.212Z",
+  "count": 670,
   "violations": [
     {
       "table": "adp_format",
@@ -19,11 +19,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "composite_market_value_blend_weights",
-      "column": "ktc_weight",
-      "rule": "shorthand"
-    },
-    {
       "table": "composite_market_value_daily",
       "column": "adp_value",
       "rule": "shorthand"
@@ -31,11 +26,6 @@
     {
       "table": "composite_market_value_daily",
       "column": "cmv_row_id",
-      "rule": "shorthand"
-    },
-    {
-      "table": "composite_market_value_daily",
-      "column": "ktc_value",
       "rule": "shorthand"
     },
     {
@@ -65,6 +55,16 @@
     },
     {
       "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "mid_zone_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "mid_zone_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
       "column": "pass_points_allowed_per_game_rb",
       "rule": "shorthand"
     },
@@ -145,12 +145,47 @@
     },
     {
       "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "second_and_mid_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "second_and_mid_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
       "column": "team_rb_yards_rank",
       "rule": "shorthand"
     },
     {
       "table": "dvoa_team_unit_seasonlogs_history",
       "column": "team_rb_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "team_rush_mid_guard_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "team_rush_mid_guard_yards_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "team_rush_mid_guard_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "third_and_mid_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "third_and_mid_dvoa",
       "rule": "shorthand"
     },
     {
@@ -165,6 +200,16 @@
     },
     {
       "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "mid_zone_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "mid_zone_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
       "column": "pass_points_allowed_per_game_rb",
       "rule": "shorthand"
     },
@@ -245,6 +290,16 @@
     },
     {
       "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "second_and_mid_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "second_and_mid_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
       "column": "team_rb_yards_rank",
       "rule": "shorthand"
     },
@@ -254,18 +309,33 @@
       "rule": "shorthand"
     },
     {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "team_rush_mid_guard_percentage",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "team_rush_mid_guard_yards_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "team_rush_mid_guard_yards",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "third_and_mid_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "third_and_mid_dvoa",
+      "rule": "shorthand"
+    },
+    {
       "table": "espn_receiving_metrics_history",
       "column": "espn_rtm_recv_yds",
-      "rule": "shorthand"
-    },
-    {
-      "table": "espn_receiving_metrics_history",
-      "column": "espn_rtm_routes",
-      "rule": "shorthand"
-    },
-    {
-      "table": "espn_receiving_metrics_history",
-      "column": "espn_rtm_targets",
       "rule": "shorthand"
     },
     {
@@ -314,16 +384,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "keeptradecut_pick",
-      "column": "ktc_player_id",
-      "rule": "shorthand"
-    },
-    {
-      "table": "keeptradecut_pick",
-      "column": "ktc_player_name",
-      "rule": "shorthand"
-    },
-    {
       "table": "league_format_player_projection_values_history",
       "column": "pts_added",
       "rule": "shorthand"
@@ -341,6 +401,16 @@
     {
       "table": "league_formats",
       "column": "num_teams",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "sqbrbwrte",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "srbwrte",
       "rule": "shorthand"
     },
     {
@@ -419,16 +489,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "league_team_daily_values",
-      "column": "ktc_share",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_team_daily_values",
-      "column": "ktc_value",
-      "rule": "shorthand"
-    },
-    {
       "table": "league_team_player_seasonlogs",
       "column": "pts_added_earned_optimal",
       "rule": "shorthand"
@@ -489,6 +549,16 @@
       "rule": "shorthand"
     },
     {
+      "table": "league_user_careerlogs",
+      "column": "userid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "leagues",
+      "column": "commishid",
+      "rule": "shorthand"
+    },
+    {
       "table": "nfl_game_coaches",
       "column": "def_play_caller_id",
       "rule": "shorthand"
@@ -496,16 +566,6 @@
     {
       "table": "nfl_game_coaches",
       "column": "off_play_caller_id",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_games",
-      "column": "away_qb_pid",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_games",
-      "column": "home_qb_pid",
       "rule": "shorthand"
     },
     {
@@ -691,66 +751,6 @@
     {
       "table": "nfl_plays_current_week",
       "column": "intp_gsis",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_dropback",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_fault_sack",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_hit",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_hurry",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_kneel",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_left_pocket",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_pressure_tracking",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_pressure",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_rush",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_scramble",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_sneak",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "is_qb_spike",
       "rule": "shorthand"
     },
     {
@@ -1094,11 +1094,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "nfl_plays_passer",
-      "column": "player_esbid",
-      "rule": "shorthand"
-    },
-    {
       "table": "nfl_plays_player",
       "column": "in_play_dist",
       "rule": "shorthand"
@@ -1115,11 +1110,6 @@
     },
     {
       "table": "nfl_plays_player",
-      "column": "player_esbid",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_player",
       "column": "player_get_off",
       "rule": "shorthand"
     },
@@ -1131,16 +1121,6 @@
     {
       "table": "nfl_plays_player",
       "column": "time_to_qb_hurry",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_receiver",
-      "column": "player_esbid",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_rusher",
-      "column": "player_esbid",
       "rule": "shorthand"
     },
     {
@@ -1385,66 +1365,6 @@
     },
     {
       "table": "nfl_plays",
-      "column": "is_qb_dropback",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_fault_sack",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_hit",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_hurry",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_kneel",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_left_pocket",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_pressure_tracking",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_pressure",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_rush",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_scramble",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_sneak",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "is_qb_spike",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
       "column": "kickoff_yds",
       "rule": "shorthand"
     },
@@ -1601,11 +1521,6 @@
     {
       "table": "nfl_plays",
       "column": "qb_epa",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_pid",
       "rule": "shorthand"
     },
     {
@@ -2334,6 +2249,11 @@
       "rule": "shorthand"
     },
     {
+      "table": "placed_wagers",
+      "column": "userid",
+      "rule": "shorthand"
+    },
+    {
       "table": "player_adp_history",
       "column": "adp_format_id",
       "rule": "shorthand"
@@ -2969,18 +2889,38 @@
       "rule": "shorthand"
     },
     {
-      "table": "player_seasonlogs",
-      "column": "espn_rtm_routes",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_seasonlogs",
-      "column": "espn_rtm_targets",
-      "rule": "shorthand"
-    },
-    {
       "table": "players_status",
       "column": "exp_return",
+      "rule": "shorthand"
+    },
+    {
+      "table": "poach_releases",
+      "column": "poachid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "poaches",
+      "column": "userid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "projections_history",
+      "column": "sourceid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "projections_history",
+      "column": "userid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "projections_index",
+      "column": "sourceid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "projections_index",
+      "column": "userid",
       "rule": "shorthand"
     },
     {
@@ -3165,7 +3105,22 @@
     },
     {
       "table": "props",
+      "column": "sourceid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "props",
       "column": "u_am",
+      "rule": "shorthand"
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "userid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "ros_projections",
+      "column": "sourceid",
       "rule": "shorthand"
     },
     {
@@ -3211,11 +3166,6 @@
     {
       "table": "roster_asset_holding",
       "column": "weeks_cov",
-      "rule": "shorthand"
-    },
-    {
-      "table": "roster_asset_transformation",
-      "column": "trade_uid",
       "rule": "shorthand"
     },
     {
@@ -3289,6 +3239,11 @@
       "rule": "shorthand"
     },
     {
+      "table": "seasons",
+      "column": "tddate",
+      "rule": "shorthand"
+    },
+    {
       "table": "selection_combination_odds_history",
       "column": "is_sgp",
       "rule": "shorthand"
@@ -3304,8 +3259,83 @@
       "rule": "shorthand"
     },
     {
-      "table": "trades_slots",
-      "column": "trade_uid",
+      "table": "trade_releases",
+      "column": "tradeid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "trades_picks",
+      "column": "pickid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "trades_picks",
+      "column": "tradeid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "trades_players",
+      "column": "tradeid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "trades_transactions",
+      "column": "tradeid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "trades_transactions",
+      "column": "transactionid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "trades",
+      "column": "userid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "transactions",
+      "column": "userid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "transactions",
+      "column": "waiverid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "users_sources",
+      "column": "sourceid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "users_sources",
+      "column": "userid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "users_teams",
+      "column": "userid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "users",
+      "column": "lastvisit",
+      "rule": "shorthand"
+    },
+    {
+      "table": "users",
+      "column": "vbaseline",
+      "rule": "shorthand"
+    },
+    {
+      "table": "waiver_releases",
+      "column": "waiverid",
+      "rule": "shorthand"
+    },
+    {
+      "table": "waivers",
+      "column": "userid",
       "rule": "shorthand"
     },
     {

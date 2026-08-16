@@ -53,7 +53,17 @@ CREATE TABLE public.pff_player_seasonlogs (
 
 CREATE TABLE public.nfl_games (
     esbid character varying(36) NOT NULL,
-    stad_nfl_id integer
+    stad_nfl_id integer,
+    away_qb_pid character varying(25),
+    home_qb_pid character varying(25)
+);
+
+-- The audit validates the role-pid exemption set against the audited schema
+-- (a stale entry fails the run), so the synthetic schema must carry every
+-- exempted table.column or it dies on a "stale conformance exemption" before
+-- it can report external-id findings.
+CREATE TABLE public.nfl_plays (
+    qb_pid character varying(25)
 );
 `
 

@@ -504,7 +504,6 @@ const english_words = [
   'message',
   'method',
   'metric',
-  'mid',
   'middle',
   'migration',
   'min',
@@ -1060,6 +1059,11 @@ const ratified_system_names = [
   'ftn',
   'gsis',
   'keeptradecut',
+  // Abbreviations of a vendor brand, ratified 2026-08-15: `ktc` IS KeepTradeCut
+  // (the full name already sits in this list) and `rtm` is the ESPN source
+  // product prefix on `espn_rtm_*`. Operator ruling: "vendor brand and source
+  // product, consistent with the `keeptradecut_` and `espn_` prefixes."
+  'ktc',
   'llm',
   'mfl',
   'nffc',
@@ -1072,6 +1076,7 @@ const ratified_system_names = [
   'pfr',
   'rotowire',
   'rotoworld',
+  'rtm',
   'rts',
   'sis',
   'sportradar',
@@ -1088,7 +1093,13 @@ const ratified_system_names = [
 // /_pid$/), so flagging `pid` in token position would have this audit report
 // as shorthand a name another of its own rules ratifies. Admitting it here is
 // a mechanical consequence of that existing ruling rather than a new one.
-const ratified_identifier_tokens = ['pid']
+//
+// `esbid` and `uid` join under operator ruling 2026-08-15, the app-key
+// interior-token ratification: both are allowlisted bare (allowlisted_identifiers),
+// and the qualified `{entity}_{key}` form (`player_esbid`, `trade_uid`) is what
+// the external-id rule asks for, so flagging the key in token position would
+// contradict a key this audit already certifies clean at the bare position.
+const ratified_identifier_tokens = ['pid', 'esbid', 'uid']
 
 // Published third-party metric names, accepted in TOKEN position by operator
 // ruling 2026-08-15. These are the names their publishers use -- Football
@@ -1100,8 +1111,10 @@ const ratified_identifier_tokens = ['pid']
 //
 // Deliberately narrow, and the boundary is whether the token abbreviates an
 // ORDINARY ENGLISH PHRASE. Position abbreviations (`qb`, `rb`, `te`, `wr`) stay
-// flagged under the same ruling, as do `adp`, `faab`, `cpoe`, `ktc` and `fpg` --
-// each expands to plain English, so the standard applies to them unchanged.
+// flagged under the same ruling, as do `adp`, `faab`, `cpoe` and `fpg` -- each
+// expands to plain English, so the standard applies to them unchanged. (`ktc`
+// moved OUT of this list on 2026-08-15: it is the KeepTradeCut brand, ratified
+// into ratified_system_names with `rtm`.)
 const ratified_metric_names = [
   'dave',
   'dvoa',
@@ -1148,6 +1161,13 @@ export const culled_dictionary_words = new Set([
   'dev',
   'hist',
   'los',
+  // A real gap, closed 2026-08-16: `mid` carries three unrelated meanings on
+  // one table -- medium distance-to-go (`second_and_mid`), the mid-zone blocking
+  // scheme (`mid_zone`), and the interior gap (`team_rush_mid_guard`) -- which
+  // is the ambiguity the globally-unique rule targets. Removed from
+  // `english_words` so the 18 DVOA team-unit columns flag, pending the
+  // drop-vs-rename decision on those tables.
+  'mid',
   'n',
   'o',
   'oe',

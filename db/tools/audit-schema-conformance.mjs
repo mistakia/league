@@ -24,7 +24,10 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import { parse_partition_children } from './schema-partitions.mjs'
-import { nonconforming_tokens } from './schema-token-vocabulary.mjs'
+import {
+  nonconforming_tokens,
+  is_vocabulary_token
+} from './schema-token-vocabulary.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const schema_path = path.join(__dirname, '..', 'schema.postgres.sql')
@@ -219,11 +222,10 @@ const accepted_short_words = new Set([
 // an ordinary English phrase, so the standard applies to them unchanged.
 const proprietary_metric_names = new Set(['epa', 'iqr'])
 
-// A bare name of five characters or fewer that is not a recognised word, not a
-// canonical app key, and not already covered by a more specific rule.
+// A bare name that is not a recognised word, not a canonical app key, and not
+// already covered by a more specific rule.
 function is_bare_shorthand(name) {
   if (name.includes('_')) return false
-  if (name.length > 5) return false
   if (accepted_short_words.has(name)) return false
   if (proprietary_metric_names.has(name)) return false
   if (allowlisted_identifiers.has(name)) return false
@@ -232,6 +234,16 @@ function is_bare_shorthand(name) {
   // team rule actually claimed this column (see non_team_columns).
   if (season_grain_columns.has(name)) return false
   if (reserved_word_columns.has(name)) return false
+  // A name of five characters or fewer is governed by the closed lists above,
+  // which is this rule's historical scope. A LONGER bare name was previously
+  // unreachable by any branch -- the length cap returned here and the
+  // interior-token branch requiring an underscore -- so the glued app keys
+  // (`userid`, `tradeid`, `commishid`) and compound shorthand (`tddate`,
+  // `vbaseline`, `srbwrte`) were invisible to the audit. Judge them against the
+  // same positive vocabulary as interior tokens: `username`, `password` and the
+  // compound English words the schema legitimately spells stay clean because
+  // they are members, and a glued key that is not a word flags.
+  if (name.length > 5) return !is_vocabulary_token(name)
   return true
 }
 
@@ -266,6 +278,23 @@ function is_unprefixed_boolean(col) {
   if (/^(is|has)_/.test(name)) return false
   if (/_(is|has)_/.test(name)) return false
   return true
+}
+
+// The is_qb_* charting booleans are ratified by SHAPE rather than by token
+// (operator ruling 2026-08-15). "QB hit", "QB pressure", "QB scramble" etc. are
+// the published charting stat names -- the closed-list test is whether the
+// ABBREVIATION is the term in actual use, and `qb` is. Ratifying the token `qb`
+// in the vocabulary instead would also stop the gate flagging `starter_slots_qb`
+// and `max_roster_qb`, the league-format/settings class this plan most wants it
+// to hold. So the exemption is the shape -- a BOOLEAN named is_qb_<event> --
+// which keeps the ruling narrow and lets a charting boolean added later conform
+// on arrival, the same reasoning as the `_is_`/`_has_` qualified-predicate
+// exemption above. A non-boolean is_qb_* column is NOT exempt: the is_ prefix
+// promises boolean semantics, so a column failing that promise stays flagged on
+// its `qb` token.
+function is_qb_charting_boolean(col) {
+  if (!/^boolean\b/.test(col.type.trim().toLowerCase())) return false
+  return /^is_qb_[a-z0-9_]+$/.test(col.name.toLowerCase())
 }
 
 // Season-grain naming: the standard is `season_year` + `season_type`, so a bare
@@ -326,6 +355,21 @@ const accepted_non_timestamp_columns = new Set([
   'nfl_plays.punt_hang_time',
   'nfl_plays.pocket_time',
   'nfl_plays_passer.air_time'
+])
+
+// Role-pid columns carrying a position token, ratified by operator ruling
+// 2026-08-15. The `{role}_pid` pattern is already conformed schema-wide
+// (`ball_carrier_pid`, `passer_pid`, `target_pid`, `interceptor_pid`, the
+// tackle-attribution family), and `qb` in these three is the ROLE rather than
+// shorthand, so the interior-token rule flagging them contradicts an existing
+// settled ruling. Keyed table.column, precedented by
+// `accepted_non_timestamp_columns`, so the exemption cannot widen silently --
+// and validated in main() so an entry naming a column the schema does not have
+// fails the run rather than sitting stale.
+const accepted_role_pid_columns = new Set([
+  'nfl_plays.qb_pid',
+  'nfl_games.away_qb_pid',
+  'nfl_games.home_qb_pid'
 ])
 
 // External-id columns that end in _id but do not follow {system}_{entitytype}_id.
@@ -611,14 +655,24 @@ function check_column(table, col, entity_type_vocabulary) {
     // branches take precedence for the same reason -- a name the abbreviation
     // map can NAME gets the map's concrete full-word hint, which is strictly
     // more useful than a token list.
-    const offending_tokens = nonconforming_tokens(lower)
-    if (offending_tokens.length) {
-      findings.push({
-        rule: 'shorthand',
-        table,
-        column: col.name,
-        token: offending_tokens.join(', ')
-      })
+    // Two operator-ruled exemptions, neither expressible as a vocabulary entry:
+    // the is_qb_* charting booleans are a SHAPE carve-out (ratifying `qb`
+    // would also stop the gate flagging the format/settings position codes),
+    // and the role-pid columns are keyed table.column because `qb` there is the
+    // role rather than shorthand.
+    if (
+      !is_qb_charting_boolean(col) &&
+      !accepted_role_pid_columns.has(`${table}.${lower}`)
+    ) {
+      const offending_tokens = nonconforming_tokens(lower)
+      if (offending_tokens.length) {
+        findings.push({
+          rule: 'shorthand',
+          table,
+          column: col.name,
+          token: offending_tokens.join(', ')
+        })
+      }
     }
   }
 
@@ -842,6 +896,23 @@ function audit(tables, partition_children, filter) {
   return all
 }
 
+// An exemption entry that names a column the schema does not have would sit
+// silent forever, so it fails the run rather than decaying into a stale
+// exemption -- the same stale-adjudication backstop the consumer gates apply.
+function validate_role_pid_exemptions(tables) {
+  for (const key of accepted_role_pid_columns) {
+    const dot = key.indexOf('.')
+    const table = key.slice(0, dot)
+    const column = key.slice(dot + 1)
+    const columns = tables.get(table)
+    if (!columns || !columns.some((c) => c.name === column)) {
+      throw new Error(
+        `stale conformance exemption ${key}: schema has no such column`
+      )
+    }
+  }
+}
+
 function main() {
   const argv = yargs(hideBin(process.argv))
     .option('table', { type: 'string', description: 'Audit one table only' })
@@ -862,6 +933,7 @@ function main() {
   const sql = fs.readFileSync(argv.schemaFile || schema_path, 'utf8')
   const tables = parse_schema(sql)
   const partition_children = parse_partition_children(sql)
+  validate_role_pid_exemptions(tables)
   const findings = audit(tables, partition_children, argv.table)
   const logical_table_count = tables.size - partition_children.size
 
