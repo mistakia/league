@@ -644,12 +644,17 @@ observations:
     putting them on paper left the menu drawer reading as a grey panel against a white page, and a
     document opened from the menu sits beside the menu. Landing and auth keep paper as the site
     front door.
+  - >-
+    [gotcha] Clearing an eslint no-unused-vars failure by DELETING the import can defeat a
+    source-scan spec that requires the symbol to be READ: landing.js lost league_season_phrase that
+    way and turned master red on libs-shared.social-meta-copy, so check for a spec asserting the
+    symbol before removing it rather than after.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-16T04:53:38.748Z'
+updated_at: '2026-08-16T05:21:34.923Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
