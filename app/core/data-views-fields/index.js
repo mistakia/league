@@ -22,6 +22,7 @@ import keeptradecut_table_fields from './keeptradecut-table-fields'
 import player_games_played_table_fields from './player-games-played-table-fields'
 import player_contract_table_fields from './player-contract-table-fields'
 import player_pff_seasonlogs_table_fields from './player-pff-seasonlogs-table-fields'
+import player_pff_facet_seasonlogs_table_fields from './player-pff-facet-seasonlogs-table-fields'
 import player_seasonlogs_table_fields from './player-seasonlogs-table-fields'
 import player_rankings_table_fields from './player-rankings-table-fields'
 import player_adp_table_fields from './player-adp-table-fields'
@@ -123,6 +124,10 @@ export function PlayerTableFields({
     ),
     ...with_row_grains(
       player_pff_seasonlogs_table_fields({ is_logged_in }),
+      PLAYER_ROW_GRAINS
+    ),
+    ...with_row_grains(
+      player_pff_facet_seasonlogs_table_fields({ is_logged_in }),
       PLAYER_ROW_GRAINS
     ),
     ...with_row_grains(player_seasonlogs_table_fields(), PLAYER_ROW_GRAINS),

@@ -994,6 +994,38 @@ export default {
   player_pff_meets_snap_minimum:
     'Whether the player meets the minimum snap threshold for PFF rankings',
 
+  // Player PFF facet-seasonlogs detail (offense/pass_blocking, passing/pressure,
+  // signature/passing/time_in_pocket, signature/defense/slot_coverage facets).
+  player_pff_pressures_allowed:
+    'The number of pressures the player allowed as a pass blocker, per PFF',
+  player_pff_hurries_allowed:
+    'The number of hurries the player allowed as a pass blocker, per PFF',
+  player_pff_hits_allowed:
+    'The number of hits the player allowed as a pass blocker, per PFF',
+  player_pff_sacks_allowed:
+    'The number of sacks the player allowed as a pass blocker, per PFF',
+  player_pff_pass_blocking_efficiency:
+    "PFF's pass blocking efficiency rating for the player",
+  player_pff_pass_block_percent:
+    "PFF's pass block win percentage for the player",
+  player_pff_true_pass_set_snaps:
+    'The number of true pass set snaps the player faced, per PFF',
+  player_pff_true_pass_set_grade:
+    "PFF's grade for the player on true pass set snaps",
+  player_pff_true_pass_set_pressures_allowed:
+    'The number of pressures the player allowed on true pass set snaps, per PFF',
+  player_pff_pressure_percentage:
+    "PFF's pressure percentage for the player (the pressure rate their dropbacks faced)",
+  player_pff_time_in_pocket: "PFF's average time in pocket for the player",
+  player_pff_slot_coverage_targets:
+    'The number of targets the player allowed in slot coverage, per PFF',
+  player_pff_slot_coverage_receptions:
+    'The number of receptions the player allowed in slot coverage, per PFF',
+  player_pff_slot_coverage_yards:
+    'The number of yards the player allowed in slot coverage, per PFF',
+  player_pff_slot_coverage_touchdowns:
+    'The number of touchdowns the player allowed in slot coverage, per PFF',
+
   // Player External IDs
   player_nfl_id: "Player's ID in the NFL database",
   player_esbid: "Player's ESB (Elias Sports Bureau) ID",

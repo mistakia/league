@@ -65,6 +65,9 @@ import player_practice_column_definitions from '#libs-server/data-views-column-d
 import pff_player_seasonlogs_column_definitions, {
   PFF_PLAYER_RANGE_OFFSET_AGGREGATE as pff_player_seasonlogs_range_offset_aggregate
 } from '#libs-server/data-views-column-definitions/player-pff-seasonlogs-column-definitions.mjs'
+import pff_player_facet_seasonlogs_column_definitions, {
+  PFF_PLAYER_FACET_RANGE_OFFSET_AGGREGATE as pff_player_facet_seasonlogs_range_offset_aggregate
+} from '#libs-server/data-views-column-definitions/player-pff-facet-seasonlogs-column-definitions.mjs'
 import all_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import data_view_fields_index from '#libs-shared/data-view-fields-index.mjs'
 
@@ -92,6 +95,14 @@ const pff_seasonlogs_fields_source = fs.readFileSync(
   path.resolve(
     __dirname,
     '../app/core/data-views-fields/player-pff-seasonlogs-table-fields.js'
+  ),
+  'utf8'
+)
+
+const pff_facet_seasonlogs_fields_source = fs.readFileSync(
+  path.resolve(
+    __dirname,
+    '../app/core/data-views-fields/player-pff-facet-seasonlogs-table-fields.js'
   ),
   'utf8'
 )
@@ -410,6 +421,72 @@ describe('data view pff seasonlogs field parity', function () {
     )
     const orphaned = Object.keys(
       pff_player_seasonlogs_range_offset_aggregate
+    ).filter((key) => !column_names.has(key))
+
+    expect(
+      orphaned,
+      `aggregate overrides keyed on a column that does not exist, so they silently default to SUM: ${orphaned.join(', ')}`
+    ).to.deep.equal([])
+  })
+})
+
+// The PFF facet-seasonlogs family (2026-08-15): the OL / pressure / signature
+// detail. Unlike the pff seasonlog family it omits the value-path assertion --
+// none of these fields carries a player_value_path, because the measurements
+// live only on pff_player_facet_seasonlogs and never on the player object, so a
+// path would render a blank cell.
+describe('data view pff facet seasonlogs field parity', function () {
+  const frontend_fields = parse_frontend_fields(
+    pff_facet_seasonlogs_fields_source
+  )
+  const server_column_ids = Object.keys(
+    pff_player_facet_seasonlogs_column_definitions
+  )
+
+  it('parses the frontend field file', function () {
+    // Positive control: a parser matching nothing passes everything below by
+    // vacuous iteration.
+    expect(frontend_fields.size).to.be.greaterThan(10)
+    expect(frontend_fields.has('player_pff_pressures_allowed')).to.equal(true)
+  })
+
+  it('registers every server column in the frontend field file', function () {
+    const missing = server_column_ids.filter(
+      (column_id) => !frontend_fields.has(column_id)
+    )
+    expect(
+      missing,
+      `pff facet seasonlog columns with no frontend field (unselectable in the UI, and fatal to a saved view holding one): ${missing.join(', ')}`
+    ).to.deep.equal([])
+  })
+
+  it('describes every server column in the shared fields index', function () {
+    const missing = server_column_ids.filter(
+      (column_id) => !data_view_fields_index[column_id]
+    )
+    expect(
+      missing,
+      `pff facet seasonlog columns with no description: ${missing.join(', ')}`
+    ).to.deep.equal([])
+  })
+
+  it('backs every frontend field with a server column definition', function () {
+    expect(
+      find_orphaned_frontend_fields(frontend_fields),
+      'pff facet seasonlog frontend fields with no server column definition'
+    ).to.deep.equal([])
+  })
+
+  it('keys every aggregate override on a real column name', function () {
+    const column_names = new Set(
+      server_column_ids
+        .map(
+          (id) => pff_player_facet_seasonlogs_column_definitions[id].column_name
+        )
+        .filter(Boolean)
+    )
+    const orphaned = Object.keys(
+      pff_player_facet_seasonlogs_range_offset_aggregate
     ).filter((key) => !column_names.has(key))
 
     expect(
