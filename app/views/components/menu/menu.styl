@@ -49,12 +49,16 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
   left 16px
   display inline-flex
   align-items center
-  gap 10px
   height 46px
+  // The label is the whole control — there is no hamburger beside it. A mark
+  // and a word both saying "menu" is the same thing twice, and at label scale
+  // the glyph was the larger of the two, so the word was arguing with an icon
+  // that outweighed it.
+  //
   // Asymmetric on purpose: the wide tracking below leaves a trailing space
   // after the final letter, which sits the label left of the button's centre
   // under equal padding.
-  padding 0 20px 0 22px
+  padding 0 24px 0 26px
   border none
   border-radius 3px
   // $prose_action, the same graphite as the landing call to action and every
@@ -91,13 +95,6 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
   &:focus-visible
     outline 2px solid $prose_ink
     outline-offset 3px
-  // menu.js asks the icon for 20px, which is more than twice the 11px label's
-  // height and reads as two objects at two scales rather than as one label.
-  // Sized down here rather than in the markup, which a sibling session is
-  // holding uncommitted.
-  .menu__icon
-    width 14px
-    height 14px
 
 // TIER THREE, bare. The quietest control in the menu: an info affordance
 // beside a warning, which should not read as a button until it is reached for.

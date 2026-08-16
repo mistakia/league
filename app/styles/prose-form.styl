@@ -18,11 +18,13 @@
 $prose_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
 $prose_mono = 'IBM Plex Mono', monospace
 
-// THE PROSE PALETTE IS ITS OWN, and deliberately not the app's. The app is
-// chrome around a table: mid-grey ink on a #f0f0f0 field, which is right for a
-// dense surface read in glances and wrong for one read in paragraphs. These
-// pages get paper and near-black ink, so the only things carrying colour are
-// the one call to action and an error.
+// THE PROSE INK PALETTE IS ITS OWN, and deliberately not the app's. The app is
+// chrome around a table: mid-grey ink, which is right for a dense surface read
+// in glances and wrong for one read in paragraphs. These pages share the app's
+// GROUND (see prose_surface) and set their text in near-black ink on it, so the
+// only things carrying colour are the one call to action and an error.
+// $prose_paper is the palette's white and is what cards and controls take; it
+// is not the page's background.
 $prose_paper = #ffffff
 $prose_ink = #17181a
 $prose_body = #3d4045
@@ -50,17 +52,21 @@ $prose_action = #636a73
 // in particular reads as a smudge. See the font comment in app/index.html.
 $prose_bold = 600
 
-// The paper. A prose page paints the WHOLE body rather than sitting as a white
-// column on the app's grey, which would read as a card and put a hard edge down
+// The surface. A prose page paints the WHOLE body rather than sitting as its
+// own colour in a column, which would read as a card and put a hard edge down
 // both sides of the measure. Call this on a wrapper around prose_page().
 //
-// PAPER, NOT THE APP'S SURFACE. bae8f8a11 unified these pages onto
-// $backgroundColor and that is reverted here on the operator's call: a page
-// read in paragraphs wants a different ground from a page of tables read in
-// glances, which is the distinction the palette comment above states.
+// ONE SURFACE ACROSS THE SITE. This is $backgroundColor — the same ground the
+// app body, the menu drawer and the document pages carry — so no page differs
+// from the chrome that frames it. The alternative was tried: paper here made
+// the landing page the only surface on the site that did not match the menu
+// beside it, which reads as the menu being wrong rather than as the page being
+// paper. Paper is still the palette's own colour and is what the CARDS and
+// CONTROLS on these pages take ($prose_paper below); it is the ground that is
+// shared, not every element on it.
 prose_surface()
   min-height 100%
-  background $prose_paper
+  background $backgroundColor
 
 // The measure. One across every prose page: these are read one after another by
 // the same person, and a measure that changes between them reads as a different

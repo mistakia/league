@@ -30,7 +30,6 @@ Icon.propTypes = {
   size: PropTypes.number
 }
 
-const ICON_MENU = 'M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z'
 const ICON_INFO =
   'M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z'
 const ICON_NAV_BEFORE =
@@ -80,7 +79,6 @@ export default function AppMenu({
         className='main__menu-button'
         onClick={() => set_menu_open(true)}
       >
-        <Icon d={ICON_MENU} size={20} />
         <span>Menu</span>
       </button>
       {isMobile && menu_open && (
