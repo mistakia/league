@@ -164,9 +164,16 @@ const Routes = ({ app }) => {
           path='/leagues/:lid/admission-vote/commissioner'
           element={<AdmissionVoteCommissionerPage />}
         />
+        {/* Confidential ballots, and the page serves this league's managers
+            only. The API refuses anyone who does not manage a team here, so
+            the page is gated on the session before it is even reached: an
+            anonymous visitor is sent to the homepage rather than shown a
+            refusal. */}
         <Route
           path='/leagues/:lid/admission-vote'
-          element={<AdmissionVotePage />}
+          element={
+            app.userId ? <AdmissionVotePage /> : <Navigate to='/' replace />
+          }
         />
         <Route path='/leagues/:lid/settings' element={<LeagueSettingsPage />} />
         <Route path='/leagues/:lid' element={<LeagueHomePage />} />
