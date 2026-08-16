@@ -1,7 +1,11 @@
 [
   {
     "check_id": "pfr-gamelog-agreement",
-    "grain": { "season_year": 2022, "week": 8, "stat": "receptions" },
+    "grain": {
+      "season_year": 2022,
+      "week": 8,
+      "stat": "receptions"
+    },
     "disposition": "adjudicated",
     "reason": "One reception PFR credits that our feed does not, in a week otherwise matching exactly. Verified against the game book rather than inferred from the aggregate.",
     "evidence": "635 ours against 636 PFR, a ratio of 0.9984 — the tightest disagreement in the whole 2022 season.",
@@ -9,7 +13,11 @@
   },
   {
     "check_id": "pfr-gamelog-agreement",
-    "grain": { "season_year": 2022, "week": 8, "stat": "targets" },
+    "grain": {
+      "season_year": 2022,
+      "week": 8,
+      "stat": "targets"
+    },
     "disposition": "adjudicated",
     "reason": "The target paired with the week 8 reception disagreement above — the same play, counted once on each side of the ledger.",
     "evidence": "913 ours against 914 PFR.",
@@ -17,7 +25,11 @@
   },
   {
     "check_id": "pfr-gamelog-agreement",
-    "grain": { "season_year": 2022, "week": 8, "stat": "receiving_yards" },
+    "grain": {
+      "season_year": 2022,
+      "week": 8,
+      "stat": "receiving_yards"
+    },
     "disposition": "adjudicated",
     "reason": "The yardage carried by the same week 8 reception, which is why all three week 8 entries move together rather than independently.",
     "evidence": "7097 ours against 7104 PFR, a seven-yard gap on a single play.",
@@ -25,7 +37,11 @@
   },
   {
     "check_id": "pfr-gamelog-agreement",
-    "grain": { "season_year": 2022, "week": 10, "stat": "rushing_attempts" },
+    "grain": {
+      "season_year": 2022,
+      "week": 10,
+      "stat": "rushing_attempts"
+    },
     "disposition": "adjudicated",
     "reason": "PFR counts one quarterback kneel-down as a rushing attempt that our feed classifies separately. A rule difference, stable across seasons.",
     "evidence": "816 ours against 817 PFR.",
@@ -33,7 +49,10 @@
   },
   {
     "check_id": "nickname-legal-name-duplicate-rows",
-    "grain": { "pid": "RICH-SAUL-014018", "duplicate_pid": "RONA-SAUL-014155" },
+    "grain": {
+      "pid": "RICH-SAUL-014018",
+      "duplicate_pid": "RONA-SAUL-014155"
+    },
     "disposition": "adjudicated",
     "reason": "Rich and Ron Saul are twin brothers, both of whom played in the NFL. Two people, so the rows must stay apart.",
     "evidence": "Michigan State, 1970 entry, birth date 1948-02-05 on both rows — the anchor and the birth date agree because they are twins, which is exactly why an agreeing birth date cannot be read as same-person evidence here. They played different positions (C and G).",
@@ -41,7 +60,10 @@
   },
   {
     "check_id": "nickname-legal-name-duplicate-rows",
-    "grain": { "pid": "RALE-MCKE-019193", "duplicate_pid": "REGI-MCKE-023172" },
+    "grain": {
+      "pid": "RALE-MCKE-019193",
+      "duplicate_pid": "REGI-MCKE-023172"
+    },
     "disposition": "adjudicated",
     "reason": "Raleigh and Reggie McKenzie are identical twin brothers, both of whom played in the NFL. Two people.",
     "evidence": "Tennessee, 1985 entry, birth date 1963-02-08 on both rows — an agreeing date is the twin signature here rather than corroboration. The discriminators are position (OL and LB) and draft_overall_pick, which is 290 on the Raleigh row and null on the Reggie row, so the two were not one selection.",
@@ -49,7 +71,10 @@
   },
   {
     "check_id": "nickname-legal-name-duplicate-rows",
-    "grain": { "pid": "HARO-SHOE-021140", "duplicate_pid": "HERB-SHOE-011342" },
+    "grain": {
+      "pid": "HARO-SHOE-021140",
+      "duplicate_pid": "HERB-SHOE-011342"
+    },
     "disposition": "adjudicated",
     "reason": "Harold and Herbert Shoener are brothers, both of whom played in the NFL. Two people.",
     "evidence": "Iowa, 1947 entry, birth date 1923-01-02 on both rows — an agreeing date is the twin signature here rather than corroboration. They played different positions (TE and DE) and neither row carries a draft_overall_pick, so there is no shared selection to read as one person.",
@@ -57,10 +82,214 @@
   },
   {
     "check_id": "nickname-legal-name-duplicate-rows",
-    "grain": { "pid": "COLT-TAYL-019782", "duplicate_pid": "DYLA-TAYL-020394" },
+    "grain": {
+      "pid": "COLT-TAYL-019782",
+      "duplicate_pid": "DYLA-TAYL-020394"
+    },
     "disposition": "adjudicated",
     "reason": "Colton Taylor and Dylan Taylor are two different Texas A&M players in the same class. NO veto can reach this pair, because both rows carry the 0000-00-00 sentinel, so there is no birth date to disagree on and no identifier held on both sides.",
     "evidence": "Texas A&M, 2021 entry, different positions (QB and WR), and neither row carries a draft_overall_pick. It is the reason this class is a detector rather than a mint-time attach rule — an attach would have merged them silently. Note it is not the only both-sentinel pair the check returns (Daijun/Sevarian Edwards is the other, and is an open finding rather than an adjudicated one); it is the pair known to be two people.",
     "validated_at": "2026-08-15"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "ANTH-CHIC-005743"
+    },
+    "disposition": "adjudicated",
+    "reason": "Anthony Chickillo Sr, NT, born 1960-07-08, entered 1983, and Anthony Chickillo, DL, born 1992-12-10, drafted 2015 pick 212. Father and son, both Miami (Fla.).",
+    "evidence": "32 years between the birth dates, and the son carries a draft pick the father does not.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "ANTH-DORS-005314"
+    },
+    "disposition": "adjudicated",
+    "reason": "Anthony Dorsett Sr, RB, born 1954-04-07, entered 1977, and Anthony Dorsett Jr, S, born 1973-09-14, drafted 1996 pick 177. Father and son, both Pittsburgh.",
+    "evidence": "19 years between the birth dates and different positions on offense and defense.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "ARTH-JONE-005199"
+    },
+    "disposition": "adjudicated",
+    "reason": "Arthur Jones, DB, born 1919-06-13, entered 1941, and Arthur Jones, DT, entered 2010 at 301 pounds. Two people 69 years apart.",
+    "evidence": "The 1941 row is 192 pounds at defensive back; the 2010 row is 301 pounds at defensive tackle.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "BRIA-SMIT-010600"
+    },
+    "disposition": "adjudicated",
+    "reason": "Brian Smith, DE, born 1983-09-16, Missouri, entered 2007, and Brian Smith, LB, born 1989-01-08, entered 2011. Two people.",
+    "evidence": "Birth dates five years apart. The twin carries no college, which is why the college veto could not fire.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "CHAR-JOHN-008165"
+    },
+    "disposition": "adjudicated",
+    "reason": "Charles Johnson, NT, born 1952-02-17, entered 1977, and Charles Johnson, WR, born 1972-01-03, drafted 1994 pick 17. Two people, both Colorado.",
+    "evidence": "20 years between the birth dates, 266 pounds at nose tackle against 205 at receiver.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "CHRI-JONE-019714"
+    },
+    "disposition": "adjudicated",
+    "reason": "Christopher Jones, WR, born 1971-08-07, Miami (Fla.), entered 1995, and Christopher Jones, WR, born 1982-07-17, entered 2005. Two people.",
+    "evidence": "Eleven years between the birth dates. The twin holds no college, so the college veto could not fire — and the same twin is joined by a second, unrelated shell (CHRI-JONE-019749, Clemson).",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "CHRI-JONE-019749"
+    },
+    "disposition": "adjudicated",
+    "reason": "Christopher Jones, LB, born 1976-09-30, Clemson, entered 1999, and Christopher Jones, WR, born 1982-07-17, entered 2005. Two people.",
+    "evidence": "Different positions and six years between the birth dates. This shell and CHRI-JONE-019714 both join the SAME twin, which alone proves the join is not identity.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "CLAR-WILL-019775"
+    },
+    "disposition": "adjudicated",
+    "reason": "Clarence Williams, DB, born 1942-09-24, entered 1965, and Clarence Williams, TE, born 1969-08-07, drafted 1993 pick 169. Two people, both Washington State.",
+    "evidence": "27 years between the birth dates, 194 pounds at defensive back against 240 at tight end.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "CURT-YOUN-019847"
+    },
+    "disposition": "adjudicated",
+    "reason": "Curtis Young, TE, born 1968-05-29, entered 1991, and Curtis Young, T, born 1988-01-26, entered 2011. Two people, both Michigan State.",
+    "evidence": "20 years between the birth dates and a 28-pound, 2-inch difference.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "DANI-GRAY-012020"
+    },
+    "disposition": "adjudicated",
+    "reason": "Daniel Gray, DT, born 1956-01-29, Rutgers, entered 1978, and Daniel Gray, DB, born 1994-05-13, entered 2017. Two people.",
+    "evidence": "38 years between the birth dates; 78 inches and 240 pounds against 70 inches and 190.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "DAVI-JONE-008821"
+    },
+    "disposition": "adjudicated",
+    "reason": "David Jones, DE, born 1938-12-09, South Carolina State, entered 1961 — this is Deacon Jones — and David Jones, T, born 1988-05-08, entered 2011. Two people.",
+    "evidence": "50 years between the birth dates. The twin holds no college, so the college veto could not fire.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "DAVI-JONE-008822"
+    },
+    "disposition": "adjudicated",
+    "reason": "David Jones, WR, born 1947-08-10, Kansas State, entered 1969, and David Jones, T, born 1988-05-08, entered 2011. Two people.",
+    "evidence": "41 years between the birth dates, 192 pounds at receiver against 310 at tackle. This shell and DAVI-JONE-008821 both join the SAME twin.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "GARY-JOHN-012209"
+    },
+    "disposition": "adjudicated",
+    "reason": "Gary Johnson, DE, born 1955-10-02, Baylor, entered 1980, and Gary Johnson, LB, born 1996-08-02, entered 2019. Two people.",
+    "evidence": "41 years between the birth dates.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "MICH-HOLM-013452"
+    },
+    "disposition": "adjudicated",
+    "reason": "Michael Holmes, DB, born 1950-11-18, Texas Southern, entered 1973, and Michael Holmes, DB, born 1989-06-01, entered 2011. Two people.",
+    "evidence": "39 years between the birth dates. Same position, which is why nothing but the date separates them.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "MICH-ZORD-013513"
+    },
+    "disposition": "adjudicated",
+    "reason": "Michael Zordich Sr, S, born 1963-10-12, entered 1986, and Michael Zordich Jr, RB, born 1989-10-29, entered 2013. Father and son, both Penn State.",
+    "evidence": "26 years between the birth dates and opposite sides of the ball.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "REGI-JONE-023090"
+    },
+    "disposition": "adjudicated",
+    "reason": "Reginald Jones, DB, born 1969-01-11, Memphis, entered 1991, and Reginald Jones, DB, born 1986-03-15, entered 2009. Two people.",
+    "evidence": "17 years between the birth dates.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "STEV-JACK-014426"
+    },
+    "disposition": "adjudicated",
+    "reason": "Steven Jackson, DB, born 1969-04-08, Purdue, entered 1991, and Steven Jackson, FB, born 1984-05-11, entered 2006. Two people.",
+    "evidence": "15 years between the birth dates; 68 inches and 188 pounds against 74 inches and 260.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "THOM-GRAH-014723"
+    },
+    "disposition": "adjudicated",
+    "reason": "Thomas Graham, LB, born 1950-04-15, entered 1972, and Thomas Graham Jr, DB, born 1999-06-26, drafted 2021 pick 228. Two people, both Oregon.",
+    "evidence": "49 years between the birth dates, 235 pounds at linebacker against 192 at defensive back.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "duplicate-person-rows",
+    "grain": {
+      "pid": "WILL-GLAS-024423"
+    },
+    "disposition": "adjudicated",
+    "reason": "William Glass, DE, born 1935-08-16, entered 1957, and William Glass, G, born 1957-12-21, drafted 1980 pick 86. Two people, both Baylor.",
+    "evidence": "22 years between the birth dates — the younger row was born the year the elder entered the league.",
+    "validated_at": "2026-08-16"
+  },
+  {
+    "check_id": "nickname-legal-name-duplicate-rows",
+    "grain": {
+      "pid": "JOSH-JOHN-017834",
+      "duplicate_pid": "TYLE-JOHN-024181"
+    },
+    "disposition": "adjudicated",
+    "reason": "Josh Johnson and Tyler Johnson are two different Louisiana-Monroe players in the same class. Two people.",
+    "evidence": "Louisiana-Monroe, 2021 entry. A 69-inch 209-pound running back against a 75-inch 295-pound lineman — six inches and 86 pounds apart, the widest measurable gap in the whole finding set. Only one row carries a birth date, so the birth-date veto could not fire.",
+    "validated_at": "2026-08-16"
   }
 ]
