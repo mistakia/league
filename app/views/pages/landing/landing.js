@@ -12,8 +12,6 @@ import {
 import {
   league_founding_year,
   league_name,
-  league_season_phrase,
-  league_team_count,
   site_name
 } from '@libs-shared/social-sharing.mjs'
 
@@ -47,9 +45,7 @@ export default function LandingPage() {
               league is serious; a slogan argues that and a plain declaration
               demonstrates it. The claims that support it come underneath, as
               facts with dates on them. */}
-          <h1 className='landing__lede'>
-            a home dynasty league.
-          </h1>
+          <h1 className='landing__lede'>a home dynasty league.</h1>
           <p className='landing__deck'>
             Founded in {league_founding_year}. The constitution, the full
             transaction record and the platform that enforces them are public.
