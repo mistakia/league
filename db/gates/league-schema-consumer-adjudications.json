@@ -55,7 +55,7 @@
       "table": "prop_market_selections_index",
       "column": "esbid",
       "kind": "history",
-      "reason": "Cites a defect this gate's own EXPLAIN half found \u2014 a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
+      "reason": "Cites a defect this gate's own EXPLAIN half found — a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
     },
     {
       "gate": 1,
@@ -423,6 +423,38 @@
       "column": "machine_registry",
       "kind": "not_a_column",
       "reason": "Not the league config table. This is a shell comment in user-base describing BASE's own config, whose machine_registry key is empty under NODE_ENV=test -- the environment validator-seams.mjs injects around. The league schema happens to carry a table called `config`, which is the only reason the prose pair rule binds the two halves together."
+    },
+    {
+      "gate": 1,
+      "path": "CLAUDE.md",
+      "table": "config",
+      "column": "url",
+      "kind": "not_a_column",
+      "reason": "config.url is a property of this app's runtime config object (config.js, loaded per NODE_ENV), not the league config table -- that table is a key/value store whose only columns are key, config_value and updated_at. The sentence describes which base URL the emailed reset link is built from."
+    },
+    {
+      "gate": 1,
+      "path": "home-dynasty-league/league-operations/ABOUT.md",
+      "table": "config",
+      "column": "discord",
+      "kind": "not_a_column",
+      "reason": "config.discord.channels is a dotted path into the USER-BASE config JSON, unrelated to the league database. The league config table is a key/value store (key, config_value, updated_at). Gate 1 binds the first two tokens because 'config' is also a real league table name."
+    },
+    {
+      "gate": 1,
+      "path": "home-dynasty-league/league-operations/discord-channels.md",
+      "table": "config",
+      "column": "discord",
+      "kind": "not_a_column",
+      "reason": "config.discord.channels / config.discord.server_id are dotted paths into the USER-BASE config JSON consumed by extension/discord/lib/fetch-messages.mjs, not league columns. The league config table is a key/value store (key, config_value, updated_at)."
+    },
+    {
+      "gate": 1,
+      "path": "nfl/league/database-schema-standards.md",
+      "table": "leagues",
+      "column": "groupme_id",
+      "kind": "history",
+      "reason": "Cited as one of five RECORDED INSTANCES of an audit rule missing a column -- history, not live instruction. The column has since been dropped from leagues (no %group% column remains), which does not falsify the example: the point being made is about the vocabulary gap in the audit rule, not about the column existing."
     }
   ]
 }
