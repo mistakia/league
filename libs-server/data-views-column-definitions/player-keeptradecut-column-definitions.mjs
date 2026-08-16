@@ -224,10 +224,29 @@ const year_axis_opening_day_boundary = ({
 // interval '1 year' yields 2024-02-28 -- verified -- which contradicts this
 // feature's own semantic of the same calendar day within each row's year.
 //
-// The outer LEAST against now() is the existing future clamp, unchanged in
-// intent. make_date yields a `date`, which resolves against a timestamptz in
-// the SESSION timezone exactly as date_trunc('day', opening_day) does today,
-// so this preserves that dependence rather than fixing it.
+// There is deliberately NO outer LEAST(..., now()) here, and that is the one
+// place this boundary diverges from the opening-day one.
+//
+// The future clamp exists because opening day is a boundary the SYSTEM picks:
+// nobody asked for it, so a season whose opening day has not arrived yet would
+// blank the column for every player, and falling back to "or as of today" is
+// what a reader meant. `as_of_month_day` is the opposite -- the reader named
+// the day. Clamping it substitutes a different day than the one requested,
+// silently, and makes the column non-deterministic (its value drifts daily
+// until the day arrives) while the chip still reads as a fixed date.
+//
+// Concretely, on 2026-08-16 a view carrying 09-10 and 12-31 on year 2026
+// rendered BYTE-IDENTICAL values in both columns across all 500 rows, because
+// both clamped to now(). Unclamped the two disagree as they should: 09-10
+// resolves for 509 of 889 players (the latest observation, 2026-08-15, falls
+// inside its 30-day window) and 12-31 is empty for all of them, which is the
+// truthful answer to a question about a window that holds no observations.
+// Blank here is the same blank any other empty window produces, not a new
+// failure mode.
+//
+// make_date yields a `date`, which resolves against a timestamptz in the
+// SESSION timezone exactly as date_trunc('day', opening_day) does, so this
+// preserves that dependence rather than fixing it.
 const year_axis_month_day_boundary = ({
   year_sql,
   year_offset_single,
@@ -242,8 +261,8 @@ const year_axis_month_day_boundary = ({
   })
   const first_of_month = `make_date((${year_sql}) + ${offset}, ${month}, 1)`
   return (
-    `LEAST(LEAST(${first_of_month} + (${day} - 1) * interval '1 day', ` +
-    `${first_of_month} + interval '1 month' - interval '1 day')::timestamptz, now())`
+    `LEAST(${first_of_month} + (${day} - 1) * interval '1 day', ` +
+    `${first_of_month} + interval '1 month' - interval '1 day')::timestamptz`
   )
 }
 

@@ -1,0 +1,60 @@
+{
+  "name": "two as_of_month_day columns on the same year row resolve different observations (executed-result parity)",
+  "description": "The reported production symptom was two KeepTradeCut columns differing only by as_of_month_day rendering byte-identical values on every row (/u/f8d929780fc3378dd7e69978153bf03c, measured 2026-08-16: 500 of 500 rows identical). No query-match fixture can see that class -- the SQL was valid and structurally correct in both the broken and the fixed world, with two distinct joins and two distinct boundary expressions; only the executed VALUES differed. keeptradecut-as-of-month-day-alias-separation.json pins that the two columns get separate joins, which is a necessary and NOT sufficient condition, and it stayed green throughout. This fixture pins the sufficient one: on a single year row, two different MM-DD anchors must select two different observations. Column _0 anchors at 2025-03-01 with a window of (2025-01-30, 2025-03-01] and must resolve 1100; column _1 anchors at 2025-09-10 with a window of (2025-08-11, 2025-09-10] and must resolve 2200. Each seeded observation sits inside exactly one window: 2025-02-25 is before _1's recency floor, and 2025-09-05 is after _0's boundary. The 2025-06-01 decoy at 9999 falls in NEITHER window, so a fixture that has lost its floor or its boundary reads 9999 on one side rather than merely swapping values. Goes red if the two columns ever collapse onto one alias, if the anchor stops varying with the param, or if any future rewrite makes both columns resolve a shared boundary.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "year": [2025],
+          "as_of_month_day": "03-01"
+        }
+      },
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "year": [2025],
+          "as_of_month_day": "09-10"
+        }
+      }
+    ],
+    "row_axes": ["year"],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["MLB"]
+      }
+    ]
+  },
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTCD-950001', 'Test', 'Ktcda', 'T.Ktcda', 'Test Ktcda', 'MLB', 'MLB', '2000-01-01', 2020, 'ZFA')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (970992, 2025, 1, 'REG', 'ZFA', 'ZFX', '2025-09-04')",
+      "REFRESH MATERIALIZED VIEW opening_days",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCD-950001', true, '2025-02-25T12:00:00Z', 1100)",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCD-950001', true, '2025-09-05T12:00:00Z', 2200)",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCD-950001', true, '2025-06-01T12:00:00Z', 9999)"
+    ],
+    "expected_rows": [
+      {
+        "player_keeptradecut_value_0": 1100,
+        "player_keeptradecut_value_1": 2200
+      }
+    ],
+    "compare_columns": [
+      "player_keeptradecut_value_0",
+      "player_keeptradecut_value_1"
+    ]
+  },
+  "tags": [
+    "keeptradecut",
+    "as-of",
+    "as_of_month_day",
+    "year_split",
+    "alias-separation",
+    "result-equivalence"
+  ],
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.primary_position IN ('MLB')) select \"player\".\"pid\", player.first_name, player.last_name, \"t79e9056dc19af859a0aec60da8cf69ac\".\"keeptradecut_value\" AS \"player_keeptradecut_value_0\", \"ta0f51d3b65a15ea4c1c9f21fb14ae75e\".\"keeptradecut_value\" AS \"player_keeptradecut_value_1\", \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_valuations\" as \"t79e9056dc19af859a0aec60da8cf69ac\" on \"t79e9056dc19af859a0aec60da8cf69ac\".\"pid\" = \"player\".\"pid\" and \"t79e9056dc19af859a0aec60da8cf69ac\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"t79e9056dc19af859a0aec60da8cf69ac\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(make_date((opening_days.year) + 0, 3, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 3, 1) + interval '1 month' - interval '1 day')::timestamptz and \"observed_at\" > (LEAST(make_date((opening_days.year) + 0, 3, 1) + (1 - 1) * interval '1 day', make_date((opening_days.year) + 0, 3, 1) + interval '1 month' - interval '1 day')::timestamptz - interval '30 days')) left join \"keeptradecut_valuations\" as \"ta0f51d3b65a15ea4c1c9f21fb14ae75e\" on \"ta0f51d3b65a15ea4c1c9f21fb14ae75e\".\"pid\" = \"player\".\"pid\" and \"ta0f51d3b65a15ea4c1c9f21fb14ae75e\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"ta0f51d3b65a15ea4c1c9f21fb14ae75e\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(make_date((opening_days.year) + 0, 9, 1) + (10 - 1) * interval '1 day', make_date((opening_days.year) + 0, 9, 1) + interval '1 month' - interval '1 day')::timestamptz and \"observed_at\" > (LEAST(make_date((opening_days.year) + 0, 9, 1) + (10 - 1) * interval '1 day', make_date((opening_days.year) + 0, 9, 1) + interval '1 month' - interval '1 day')::timestamptz - interval '30 days')) where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"t79e9056dc19af859a0aec60da8cf69ac\".\"keeptradecut_value\", \"ta0f51d3b65a15ea4c1c9f21fb14ae75e\".\"keeptradecut_value\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}
