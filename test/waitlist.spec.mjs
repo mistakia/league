@@ -4,6 +4,7 @@ import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import jwt from 'jsonwebtoken'
+import { createHash } from 'crypto'
 
 import server from '#api'
 import knex from '#db'
@@ -149,10 +150,10 @@ describe('WAITLIST', function () {
   })
 
   beforeEach(async function () {
-    // A candidate named on an Admission Vote is referenced with ON DELETE
-    // RESTRICT, so those rows have to go first or the submission delete below
-    // fails. Scoped to candidates that name a submission, which is what the
-    // lock case creates.
+    // Candidates that name a submission are cleared first. The foreign key is
+    // ON DELETE SET NULL as of 2026-08-16, so the submission delete below no
+    // longer depends on this -- but leaving the rows would accumulate orphaned
+    // candidates across cases, and one case asserts on exactly that orphaning.
     await knex('admission_vote_candidates').whereNotNull('submission_id').del()
     // manager_waitlist_submissions is not league-scoped, so it is deliberately
     // absent from db/fixtures/reset-league-tables.mjs -- which means clearing it
@@ -360,6 +361,24 @@ describe('WAITLIST', function () {
       rows.length.should.equal(0)
     })
 
+    // The honeypot response must be INDISTINGUISHABLE from a real one, which is
+    // what "a bot cannot learn which field caught it" actually requires. It
+    // returned a bare `{ success: true }`, so the missing `is_edit_link_sent`
+    // told a bot it had been caught -- and told the PAGE to render the not-sent
+    // copy, which reassures the reader that "your application is saved". Nothing
+    // was saved. A password manager can reach an off-screen input, so that
+    // sentence was reachable by a real candidate.
+    it('answers a honeypot submission exactly as it answers a real one', async function () {
+      const trapped = await submit({
+        ...valid_submission,
+        league_website: 'http://spam.example.com'
+      })
+      const real = await submit(valid_submission)
+
+      trapped.status.should.equal(real.status)
+      JSON.stringify(trapped.body).should.equal(JSON.stringify(real.body))
+    })
+
     // The emailed link is the whole identity mechanism: the form is anonymous,
     // so possession of the address is the only thing that distinguishes the
     // candidate from anyone else who can post here. The token is deliberately
@@ -464,6 +483,61 @@ describe('WAITLIST', function () {
       sent_emails[0].to.should.equal(valid_submission.contact_email)
     })
 
+    // Gmail threads on subject plus participants, and every message here shares
+    // a sender and a recipient -- so a fixed subject collapsed every link a
+    // candidate ever received into one conversation (measured against a real
+    // mailbox: three messages, one thread). The token has no expiry, so an older
+    // link in that thread still opens the OLDER application, and a candidate who
+    // applied twice can edit the one nobody is reading. Keying the subject on
+    // the submission keeps re-sends of one application together and splits
+    // different applications apart.
+    // Deliberately submits both applications back to back, because the first
+    // version of this keyed the subject on the submission DATE and a same-day
+    // correction -- which is the likeliest way anyone ends up with two
+    // applications at all -- collided straight back into one thread. Anything
+    // coarser than the submission itself fails this case.
+    it('gives two applications from one address different subjects', async function () {
+      await submit(valid_submission)
+      await submit({ ...valid_submission, candidate_name: 'Second Attempt' })
+
+      const subjects = sent_emails.map((email) => email.subject)
+      subjects.length.should.equal(2)
+      subjects[0].should.not.equal(subjects[1])
+    })
+
+    // The reference must not be the submission id in disguise. It is a small
+    // sequential integer, so a subject line carrying it -- or carrying anything
+    // an observer can invert back to it -- publishes a running count of how many
+    // people have applied to a league whose whole recruiting process is private.
+    it('puts no recoverable submission id in the subject', async function () {
+      await submit(valid_submission)
+
+      const row = await knex('manager_waitlist_submissions').first()
+      const subject = sent_emails[sent_emails.length - 1].subject
+
+      subject.should.not.include(String(row.submission_id))
+      // ...and not a bare digest of it either, which is reversible by trying the
+      // first few integers.
+      const bare_digest = createHash('sha256')
+        .update(String(row.submission_id))
+        .digest('hex')
+      subject.should.not.include(bare_digest.slice(0, 6))
+    })
+
+    // The complement, and the reason the subject is keyed on the submission
+    // rather than on a nonce: two requests for the SAME application are the same
+    // link, so they should stay in one conversation.
+    it('keeps re-sends for one application on the same subject', async function () {
+      await submit(valid_submission)
+      await request_edit_link({
+        contact_email: valid_submission.contact_email
+      })
+
+      const subjects = sent_emails.map((email) => email.subject)
+      subjects.length.should.equal(2)
+      subjects[0].should.equal(subjects[1])
+    })
+
     it('emails the newest application when an address applied twice', async function () {
       await submit(valid_submission)
       await submit({ ...valid_submission, candidate_name: 'Second Attempt' })
@@ -505,6 +579,52 @@ describe('WAITLIST', function () {
       const response = await request_edit_link({})
       response.should.have.status(400)
       response.body.error.should.equal('Missing contact_email')
+    })
+
+    // THE CASE THAT WAS BROKEN, and the reason it had to be a spec rather than
+    // a note: this route answers identically whether or not it found a row, so
+    // an address that fails to match produces no observable at all on the
+    // response. The mailbox is the only oracle. A candidate who applied from a
+    // phone -- which capitalises the first letter -- and later typed his address
+    // in lowercase was told the link was on its way, forever, and no support
+    // reply could have told him otherwise.
+    it('finds the application when the address differs only by case', async function () {
+      await submit({
+        ...valid_submission,
+        contact_email: 'Casey.Rivera@Example.com'
+      })
+      sent_emails = []
+
+      const response = await request_edit_link({
+        contact_email: 'casey.rivera@example.com'
+      })
+      response.should.have.status(200)
+
+      sent_emails.length.should.equal(1)
+      const token = extract_edit_token(sent_emails[0])
+      const read = await read_submission(token)
+      read.should.have.status(200)
+      read.body.candidate_name.should.equal(valid_submission.candidate_name)
+    })
+
+    // The other half of the same rule. Storing the address as typed would make
+    // the row findable by one spelling only, so the normalisation has to happen
+    // on the WRITE as well -- and the stored value is what the managers' page
+    // and every reply-by-hand uses.
+    it('stores the address in one case, whatever case it was typed in', async function () {
+      await submit({
+        ...valid_submission,
+        contact_email: 'MiXeD.CaSe@Example.COM'
+      })
+
+      const row = await knex('manager_waitlist_submissions')
+        .orderBy('submission_id', 'desc')
+        .first()
+
+      row.contact_email.should.equal('mixed.case@example.com')
+      sent_emails[sent_emails.length - 1].to.should.equal(
+        'mixed.case@example.com'
+      )
     })
 
     it('refuses link requests past the daily cap from one address', async function () {
@@ -735,6 +855,57 @@ describe('WAITLIST', function () {
       const read = await read_submission(token)
       read.should.have.status(200)
       read.body.is_locked.should.equal(true)
+
+      await knex('admission_vote_candidates')
+        .where({ admission_vote_id: vote.admission_vote_id })
+        .del()
+      await knex('admission_votes')
+        .where({ admission_vote_id: vote.admission_vote_id })
+        .del()
+    })
+
+    // THE TOKEN'S ONLY REVOCATION. It carries no expiry on purpose, and what
+    // makes that safe is that closing a recruiting round empties the table --
+    // after which the token names nothing and the route answers 404. Under the
+    // original ON DELETE RESTRICT that delete FAILED for exactly the rows that
+    // most needed revoking, the candidates who had reached a ballot, so the
+    // design's one safeguard could not be exercised. SET NULL severs the link
+    // while leaving the vote itself readable, which is why this asserts the
+    // vote row survives rather than merely that the delete succeeded.
+    it('lets a closing round purge an application that reached a ballot', async function () {
+      const token = await submit_and_read_token()
+      const submission = await knex('manager_waitlist_submissions').first()
+
+      const [vote] = await knex('admission_votes')
+        .insert({
+          league_id,
+          season_year: current_season.year,
+          opened_at: new Date(),
+          closes_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          maximum_ranked_candidates: 3,
+          vote_status: 'open'
+        })
+        .returning('admission_vote_id')
+
+      await knex('admission_vote_candidates').insert({
+        admission_vote_id: vote.admission_vote_id,
+        candidate_name: submission.candidate_name,
+        submission_id: submission.submission_id
+      })
+
+      // The round closes. This threw a foreign-key violation before the
+      // constraint was changed.
+      await knex('manager_waitlist_submissions').del()
+
+      const read = await read_submission(token)
+      read.should.have.status(404)
+
+      // The managers' record of what they did outlives the application.
+      const candidate = await knex('admission_vote_candidates')
+        .where({ admission_vote_id: vote.admission_vote_id })
+        .first()
+      candidate.candidate_name.should.equal(submission.candidate_name)
+      expect(candidate.submission_id).to.equal(null)
 
       await knex('admission_vote_candidates')
         .where({ admission_vote_id: vote.admission_vote_id })

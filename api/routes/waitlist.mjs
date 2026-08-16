@@ -1,6 +1,7 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
 import rate_limit, { MemoryStore } from 'express-rate-limit'
+import { createHmac } from 'crypto'
 
 import { sendEmail } from '#libs-server'
 import {
@@ -43,6 +44,22 @@ const router = express.Router()
 // addresses, which on a form whose scarce resource is COMPLETION costs more
 // than it saves.
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// THE ONE SPELLING OF AN ADDRESS. Every address is lowercased before it is
+// stored and before it is looked up, through this single function, because the
+// two paths silently disagreeing is unrecoverable for the candidate rather than
+// merely wrong: POST /waitlist/edit-link answers identically whether or not it
+// found a row, so somebody who applied as `Kia@Example.com` and later asks for
+// his link as `kia@example.com` is told the link is on its way, gets no mail,
+// and has no way to find out why. Mail domains are case-insensitive and mobile
+// keyboards capitalise the first letter, so this is an ordinary path, not an
+// adversarial one.
+//
+// Normalising on WRITE rather than comparing case-insensitively on read keeps
+// the column directly indexable -- a `lower(contact_email)` predicate would not
+// use a plain index, and this table had no index on the column at all.
+const normalize_email = (value) =>
+  typeof value === 'string' ? value.trim().toLowerCase() : value
 
 export const SUBMISSIONS_PER_DAY = 5
 export const EDIT_LINK_REQUESTS_PER_DAY = 5
@@ -167,10 +184,35 @@ const send_edit_link = async ({ config, submission }) => {
   })
   const edit_link = `${config.url}/waitlist?token=${token}`
 
+  // THE SUBJECT NAMES THE APPLICATION, which is what stops Gmail collapsing
+  // links for DIFFERENT applications into one conversation. Gmail threads on
+  // subject plus participants, and every message here shares a sender and a
+  // recipient, so a fixed subject put every link a candidate ever received into
+  // a single thread -- measured against a real mailbox, three messages, one
+  // thread. That matters because the token has no expiry: an older link in that
+  // thread still works and still names the OLDER submission, so a candidate who
+  // applied twice can reopen and edit the application nobody is reading.
+  //
+  // NOT THE DATE. The first version of this used the submission's date, which
+  // collides for the single most likely case there is -- the code above calls a
+  // second submission "a correction", and a correction is sent the same day. It
+  // is a per-submission REFERENCE instead, so it is exactly stable across
+  // re-sends of one application (they are the same link, and belong in one
+  // conversation) and distinct for a second application however close together
+  // the two were sent.
+  //
+  // Keyed rather than a bare hash of the id: submission_id is a small sequential
+  // integer, so an unkeyed digest of it is trivially reversible and would put a
+  // running count of how many people have applied into a mail subject line.
+  const application_reference = createHmac('sha256', config.jwt.secret)
+    .update(`waitlist-application-${submission.submission_id}`)
+    .digest('hex')
+    .slice(0, 6)
+
   const { is_sent } = await sendEmail({
     to: submission.contact_email,
-    subject: 'Your application to the league',
-    message: `Thanks for applying. If you want to change any of your answers before the managers vote, this link opens your application:\n\n${edit_link}\n\nKeep it to yourself -- anyone holding it can edit what you submitted. If you did not apply, ignore this.`
+    subject: `Your application to the league (${application_reference})`,
+    message: `Thanks for applying. If you want to change any of your answers before the managers vote, this link opens your application:\n\n${edit_link}\n\nThis link opens application ${application_reference}. If you have applied more than once, each application has its own link and its own reference, and the managers read the most recent one.\n\nKeep it to yourself -- anyone holding it can edit what you submitted. If you did not apply, ignore this.`
   })
 
   return Boolean(is_sent)
@@ -206,6 +248,10 @@ const read_submission_from_body = (body) => {
   if (!EMAIL_RE.test(submission.contact_email)) {
     return { error: 'Invalid contact_email' }
   }
+
+  // Validated in whatever case the candidate typed, stored in one. Done after
+  // the pattern check so the refusal above still reads against his own input.
+  submission.contact_email = normalize_email(submission.contact_email)
 
   // Strict `!== true` rather than a truthy check: the affirmation is the one
   // field where a caller sending the string 'false' must not be read as yes.
@@ -332,10 +378,20 @@ router.post('/', submit_rate_limiter, async (req, res) => {
   const { db, config, logger } = req.app.locals
   try {
     // Answered honeypot: accept it as far as the caller can see. Telling a bot
-    // which field gave it away is free information for the next attempt, and
-    // there is no human on the other end to mislead.
+    // which field gave it away is free information for the next attempt.
+    //
+    // IT MUST MATCH THE SUCCESS SHAPE EXACTLY, `is_edit_link_sent` included.
+    // Returning a bare `{ success: true }` made this response DISTINGUISHABLE
+    // from a real one, which defeats the stated intent twice over: a bot can
+    // read the missing key as "you were caught", and the page -- which branches
+    // on that key -- rendered the not-sent copy, whose whole point is to
+    // reassure the reader that "your application is saved". Nothing was saved
+    // here, so that was the one claim the server must not make. The field is
+    // off-screen rather than `display: none` so that bots fill it, and password
+    // managers fill off-screen fields too, so a real candidate reaching this
+    // branch is unlikely but not impossible.
     if (req.body[honeypot_field_name]) {
-      return res.send({ success: true })
+      return res.send({ success: true, is_edit_link_sent: true })
     }
 
     const { submission, error } = read_submission_from_body(req.body)
@@ -427,7 +483,9 @@ router.post('/', submit_rate_limiter, async (req, res) => {
 router.post('/edit-link', edit_link_rate_limiter, async (req, res) => {
   const { db, config, logger } = req.app.locals
   try {
-    const contact_email = read_answer(req.body, 'contact_email')
+    const contact_email = normalize_email(
+      read_answer(req.body, 'contact_email')
+    )
 
     if (!contact_email) {
       return res.status(400).send({ error: 'Missing contact_email' })

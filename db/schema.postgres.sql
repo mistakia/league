@@ -342,6 +342,7 @@ DROP INDEX IF EXISTS public.idx_nfl_games_season_year_season_type_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_nfl_week_id;
 DROP INDEX IF EXISTS public.idx_matchups_simulation_timestamp;
 DROP INDEX IF EXISTS public.idx_matchups_lid;
+DROP INDEX IF EXISTS public.idx_manager_waitlist_submissions_contact_email;
 DROP INDEX IF EXISTS public.idx_lf_player_projection_values_history_natural_key;
 DROP INDEX IF EXISTS public.idx_lf_player_projection_values_history_as_of;
 DROP INDEX IF EXISTS public.idx_leagues_commishid;
@@ -31286,6 +31287,13 @@ CREATE UNIQUE INDEX idx_lf_player_projection_values_history_natural_key ON publi
 
 
 --
+-- Name: idx_manager_waitlist_submissions_contact_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_manager_waitlist_submissions_contact_email ON public.manager_waitlist_submissions USING btree (contact_email);
+
+
+--
 -- Name: idx_matchups_lid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -57657,7 +57665,7 @@ ALTER TABLE ONLY public.admission_vote_candidates
 --
 
 ALTER TABLE ONLY public.admission_vote_candidates
-    ADD CONSTRAINT admission_vote_candidates_submission_id_fkey FOREIGN KEY (submission_id) REFERENCES public.manager_waitlist_submissions(submission_id) ON DELETE RESTRICT;
+    ADD CONSTRAINT admission_vote_candidates_submission_id_fkey FOREIGN KEY (submission_id) REFERENCES public.manager_waitlist_submissions(submission_id) ON DELETE SET NULL;
 
 
 --

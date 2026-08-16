@@ -512,12 +512,17 @@ export default function WaitlistPage() {
             ))}
 
             {/* Hidden from people, visible to form-filling bots. Positioned off
-                screen rather than `display: none`, which some bots skip. */}
+                screen rather than `display: none`, which some bots skip --
+                which also means a password manager can reach it, and answering
+                it silently discards the application. `aria-hidden` keeps it away
+                from assistive technology and from the autofill heuristics that
+                read a field's accessible name. */}
             <input
               className='waitlist__honeypot'
               type='text'
               name={honeypot_field_name}
               tabIndex={-1}
+              aria-hidden='true'
               autoComplete='off'
               value={values[honeypot_field_name] || ''}
               onChange={handle_change}
