@@ -125,6 +125,12 @@ yarn test --reporter min --grep "data view"
 
 To pin that a hash did not move, assert the literal alias in a spec (see `test/data-views.keeptradecut-as-of-month-day.spec.mjs`) or diff the emitted SQL against a worktree pinned to an explicit pre-change hash. Same family as `skip_query_match`: the fixture looks like coverage while the property you care about was never compared.
 
+**An alias-separation fixture proves a NECESSARY condition, never a sufficient one — do not read it as covering "these two columns show different numbers".** Two columns getting two joins is what makes different values POSSIBLE; it does not make them different. The two properties come apart whenever the divergence is semantic rather than structural, and then the query-match fixture is green over a live defect by construction, because the SQL is valid and correctly shaped in both worlds.
+
+That is not hypothetical. `keeptradecut-as-of-month-day-alias-separation.json` pins that two `as_of_month_day` anchors emit four distinct aliases and four separate joins, and it stayed green throughout a production defect where two such columns rendered byte-identical values on all 500 rows (`/u/f8d929780fc3378dd7e69978153bf03c`, 2026-08-16): each column had its own alias, its own join and its own `make_date` anchor, and an outer `LEAST(..., now())` then mapped both anchors onto the same instant. Nothing structural was wrong.
+
+So when a param's whole purpose is to make two columns differ, the coverage has to be a `result_equivalence` fixture asserting they resolve DIFFERENT seeded observations — `keeptradecut-as-of-month-day-two-days-diverge-result-equivalence.json` is the worked example. Pair it with the alias fixture rather than choosing between them: one catches a collapse, the other catches a collapse-in-value.
+
 ## Result equivalence: when a query-match test is not enough
 
 A query-match test pins the SQL TEXT and never executes it, so it cannot see semantics that valid SQL gets wrong — a boundary resolving the wrong observation, a filter that matches nothing. For those, add a `result_equivalence` block, which seeds rows in a rolled-back transaction and compares executed output against an oracle:
