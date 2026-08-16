@@ -1,7 +1,5 @@
 $hoverBackground = rgba(255, 255, 255, 0.8)
 $menuBackgroundColor = darken($backgroundColor, 5%)
-$primaryColor = #1976d2
-$primaryColorDark = #115293
 
 .main__menu
   absolute left 0 right 0 top 0 bottom 0
@@ -14,32 +12,85 @@ $primaryColorDark = #115293
   fill currentColor
   vertical-align middle
 
+// THE THREE MENU BUTTONS ARE ONE FAMILY IN THREE TIERS — filled, outlined,
+// bare — and they now speak the prose language (app/styles/prose-form.styl)
+// rather than imitating Material. What they carried until 2026-08-16 was MUI's
+// default primary (#1976d2) and its dark variant, its three-layer elevation
+// shadow, its standard easing curve (0.4, 0, 0.2, 1), its Button typography
+// down to the seven-decimal 0.02857em tracking, and its FAB geometry: a 24px
+// pill and a 40px circle. None of those five appears anywhere else on this
+// site, and there was no MUI component underneath any of it.
+//
+// THE FLOATING BUTTON'S REAL CONSTRAINT IS THAT IT FLOATS OVER EVERYTHING —
+// tables, the auction, the players list and the prose pages, all on the same
+// #f0f0f0 surface. That is exactly what makes $prose_ink the one paint that
+// works: a filled ink rectangle is the darkest thing on the surface, so it
+// neither washes out nor shouts. Every lighter treatment fails — an outlined
+// or white button dissolves into the surface — and the accent red is the site's
+// ONE accent, which cannot be spent on a control that is on screen at all
+// times. The accent goes on HOVER instead, which is what prose_action_fill()
+// already does for the landing call to action and for every prose submit
+// button.
+//
+// prose_action_fill() itself is deliberately not called here. Half of it fits
+// and half does not: a floating action button carries fixed positioning, a
+// shadow, an icon slot and label-scale type, so calling the mixin would emit
+// four declarations this rule immediately overrides. It is the same paint,
+// named from the same variables, rather than a shim over the mixin.
 .main__menu-button
   position fixed
   display inline-flex
   align-items center
-  gap 8px
-  height 48px
-  padding 0 20px
+  gap 10px
+  height 46px
+  // Asymmetric on purpose: the wide tracking below leaves a trailing space
+  // after the final letter, which sits the label left of the button's centre
+  // under equal padding.
+  padding 0 20px 0 22px
   border none
-  border-radius 24px
-  background $primaryColor
-  color #fff
-  font-family inherit
-  font-size 14px
-  font-weight 500
-  letter-spacing 0.02857em
+  border-radius 3px
+  background $prose_ink
+  color $prose_paper
+  // The site's label voice — prose_eyebrow()'s mono at small size with wide
+  // tracking — rather than MUI Button's sans at 14px. Uppercase survives the
+  // rewrite because it belongs to both languages; the face, the size and the
+  // tracking are what separated them.
+  font-family $prose_mono
+  font-size 11px
+  font-weight $prose_bold
+  letter-spacing 0.16em
   text-transform uppercase
   cursor pointer
   z-index $z_floating_action
-  box-shadow 0 3px 5px -1px rgba(0,0,0,0.2), 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12)
-  transition background-color 250ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1)
+  // ONE layer, not Material's three. The contrast against both surfaces is
+  // already doing the separating, so the shadow only has to lift the object
+  // off the page.
+  box-shadow 0 6px 20px rgba(23, 24, 26, 0.18)
+  transition background 120ms ease, box-shadow 120ms ease, transform 120ms ease
   &:hover
-    background $primaryColorDark
+    background $prose_accent
+    box-shadow 0 8px 24px rgba(193, 18, 31, 0.24)
+  &:active
+    transform translateY(1px)
+  // Ink rather than the accent ring the other two get, because THIS button
+  // repaints to the accent on hover — an accent ring on an accent fill is no
+  // ring at all for anyone who tabs to a button the pointer is resting on. The
+  // offset leaves a gap of page showing, so the ink ring reads against the ink
+  // fill as well as against the surface.
   &:focus-visible
-    outline 2px solid $primaryColorDark
-    outline-offset 2px
+    outline 2px solid $prose_ink
+    outline-offset 3px
+  // menu.js asks the icon for 20px, which is more than twice the 11px label's
+  // height and reads as two objects at two scales rather than as one label.
+  // Sized down here rather than in the markup, which a sibling session is
+  // holding uncommitted.
+  .menu__icon
+    width 14px
+    height 14px
 
+// TIER THREE, bare. The quietest control in the menu: an info affordance
+// beside a warning, which should not read as a button until it is reached for.
+// It had no focus style at all before.
 .menu__icon-button
   display inline-flex
   align-items center
@@ -49,28 +100,40 @@ $primaryColorDark = #115293
   padding 0
   margin 0 0 0 4px
   border none
+  border-radius 3px
   background transparent
-  color inherit
+  color $prose_muted
   cursor pointer
-  border-radius 50%
+  transition color 120ms ease
   &:hover
-    background rgba(0, 0, 0, 0.04)
+    color $prose_accent
+  &:focus-visible
+    outline 2px solid $prose_accent
+    outline-offset 2px
 
+// TIER TWO, outlined. It closes the menu it sits in, so it is an exit rather
+// than the point of the surface — filling it would put two solid ink blocks on
+// screen at once and make the drawer argue with the button that opened it. A
+// square at the family's 3px radius, not Material's 40px circle.
 .menu__collapse-button
   display inline-flex
   align-items center
   justify-content center
-  width 40px
-  height 40px
-  border none
-  border-radius 50%
-  background $primaryColor
-  color #fff
+  width 36px
+  height 36px
+  padding 0
+  border 1px solid $prose_rule_strong
+  border-radius 3px
+  background transparent
+  color $prose_ink
   cursor pointer
-  box-shadow 0 3px 5px -1px rgba(0,0,0,0.2), 0 6px 10px 0 rgba(0,0,0,0.14), 0 1px 18px 0 rgba(0,0,0,0.12)
-  transition background-color 250ms cubic-bezier(0.4, 0, 0.2, 1)
+  transition border-color 120ms ease, color 120ms ease
   &:hover
-    background $primaryColorDark
+    border-color $prose_ink
+    color $prose_accent
+  &:focus-visible
+    outline 2px solid $prose_accent
+    outline-offset 2px
 
 .league__menu
   display flex
@@ -206,6 +269,16 @@ $primaryColorDark = #115293
     border-color rgba(0, 0, 0, 0.23)
     background $hoverBackground
     box-shadow $box_shadow
+
+// The three buttons above are the only things in this file that move on their
+// own. The drawer's own slide is untouched here, since it predates this rule.
+@media (prefers-reduced-motion: reduce)
+  .main__menu-button
+  .menu__icon-button
+  .menu__collapse-button
+    transition none
+  .main__menu-button:active
+    transform none
 
 @media (max-width 500px)
   .menu__links a
