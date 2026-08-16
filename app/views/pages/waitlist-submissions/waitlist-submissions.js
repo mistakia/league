@@ -36,6 +36,19 @@ const seat_field = contact_fields.find(
   (field) => field.column === 'requested_seat'
 )
 
+// THE CARD IS SPLIT BY WHAT THE ANSWER IS FOR, and the split is derived from
+// the question rather than listed here. A closed-vocabulary question is
+// COMPARABLE across candidates -- that is the whole reason those two are ranges
+// rather than prose -- so its answer belongs in a line the eye can run down
+// while comparing people. Prose has nothing comparable to lift, so it stays in
+// the body where it is read one candidate at a time.
+//
+// Before this split both sat in the answer list between two long paragraphs,
+// where the one thing on the card a Manager might want to compare was the
+// hardest thing on it to find.
+const summary_questions = questions.filter((question) => question.options)
+const prose_questions = questions.filter((question) => !question.options)
+
 const Submission = ({ submission }) => (
   <article className='waitlist-submissions__card'>
     <header className='waitlist-submissions__card-header'>
@@ -63,6 +76,29 @@ const Submission = ({ submission }) => (
           ? 'Affirmed the commitment'
           : 'DID NOT affirm the commitment'}
       </div>
+
+      {/* The comparable answers, on one line under the name. An unanswered one
+          is dropped rather than shown empty, so the line stays a list of facts
+          the candidate actually gave. */}
+      <dl className='waitlist-submissions__summary'>
+        {summary_questions.map((question) => {
+          const answer = submission.responses?.[question.id]
+          if (!answer) {
+            return null
+          }
+          return (
+            <div
+              className='waitlist-submissions__summary-item'
+              key={question.id}
+            >
+              <dt className='waitlist-submissions__summary-label'>
+                {question.summary_label || question.label}
+              </dt>
+              <dd className='waitlist-submissions__summary-value'>{answer}</dd>
+            </div>
+          )
+        })}
+      </dl>
     </header>
 
     {submission.requested_seat && (
@@ -74,7 +110,7 @@ const Submission = ({ submission }) => (
       </div>
     )}
 
-    {questions.map((question) => {
+    {prose_questions.map((question) => {
       const answer = submission.responses?.[question.id]
       // An unanswered optional question is rendered as nothing rather than as
       // an empty heading, so a short card reads as short rather than as broken.

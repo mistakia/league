@@ -30,41 +30,107 @@ $waitlist_submissions_mono = 'IBM Plex Mono', monospace
 // A rule above each card rather than a box around it: the cards are long, and a
 // border that has to be followed down two screens reads as a container the eye
 // keeps checking. A line at the top is enough to say a new person starts here.
+// The gap between two candidates has to beat the 40px between two answers, or
+// the boundary that matters most on the page is the one that reads weakest.
 .waitlist-submissions__card
-  padding-top 32px
-  margin-top 40px
+  padding-top 48px
+  margin-top 72px
   border-top 1px solid $borderColor
 
 .waitlist-submissions__card-header
-  margin-bottom 24px
+  margin-bottom 40px
 
+// Sized up so it wins against the answer text below it. A card runs several
+// screens, so the name is what tells a Manager scrolling back whose answers he
+// is reading; at 1.25em it was competing with its own prose.
 .waitlist-submissions__name
-  margin 0 0 0.25em
+  margin 0 0 0.35em
   font-family $waitlist_submissions_mono
-  font-size 1.25em
+  font-size 1.5em
+  line-height 1.2
   color $textColorDark
 
 .waitlist-submissions__meta
   font-size 0.875em
   color $textColor
 
-.waitlist-submissions__answer
-  margin-bottom 20px
+// The comparable answers, laid out as label-over-value columns rather than as a
+// sentence. Wrapping flex rather than a grid because the number of closed
+// vocabulary questions is a property of the question set and will change.
+.waitlist-submissions__summary
+  display flex
+  flex-wrap wrap
+  gap 8px 32px
+  margin 16px 0 0
+  padding-top 16px
+  border-top 1px solid $borderColor
 
+.waitlist-submissions__summary-item
+  display flex
+  flex-direction column
+  gap 2px
+
+.waitlist-submissions__summary-label
+  font-family $waitlist_submissions_mono
+  font-size 0.75em
+  letter-spacing 0.02em
+  color lighten($textColor, 20)
+
+// Deliberately the same size and weight as the body text rather than larger.
+// These are facts worth finding, not a scoreboard -- the vote is decided on the
+// prose below, and setting them big would say otherwise.
+.waitlist-submissions__summary-value
+  margin 0
+  color $textColorDark
+
+// 40px between answers against 20px before, because the separator between one
+// answer and the next question is SPACE and nothing else. At 20px a paragraph
+// ending mid-measure sat closer to the following question than to its own, so
+// long answers ran together into one column of text.
+// CAPPED IN `em`, NOT AT THE CONTAINER WIDTH, and capped on the BLOCK so the
+// question and its answer share one measure. The card is 720px so the header
+// and the summary line have room, but 720px of 16px sans is ~82 characters per
+// line, well past the 60-75 that prose is comfortable at -- and this page is
+// nothing but long prose read end to end. 34em tracks the font size instead of
+// fighting it and lands at 65.
+//
+// Capping only the answer looks right in isolation and is worse than not
+// capping at all: several questions are two-line sentences, so they then set
+// the widest line in the block and the eye returns to a margin the answer never
+// uses.
+.waitlist-submissions__answer
+  max-width 34em
+  margin-bottom 40px
+
+// The questions are full sentences, several of them two lines, so they are the
+// bulkiest thing on the card that nobody needs to READ -- a Manager reads each
+// one once and then wants the answers. Set quieter than the answer rather than
+// louder: same mono, but lighter and at the page's smallest size, which makes
+// the answer the first thing the eye lands on inside each block while the
+// question stays available as the label it is.
 .waitlist-submissions__question
-  margin 0 0 0.35em
+  margin 0 0 0.5em
   font-family $waitlist_submissions_mono
   font-size 0.8125em
   font-weight 700
   letter-spacing 0.02em
-  line-height 1.4
-  color $textColor
+  line-height 1.45
+  // Derived rather than a literal, matching $textColorDark above. Held at 20%
+  // so it stays around 4.6:1 on the page background -- quieter than the answer
+  // without dropping under the contrast floor, which for a 13px label is the
+  // binding constraint rather than taste.
+  color lighten($textColor, 20)
 
 // `pre-wrap` so a candidate's own paragraph breaks survive. They wrote prose in
 // a textarea; collapsing it into one block loses the shape of the answer.
+//
+// `overflow-wrap` because the video answer is a candidate-supplied url rendered
+// as a link, and an unbroken one longer than the measure would otherwise run
+// out of the card rather than wrap.
 .waitlist-submissions__response
   margin 0
   white-space pre-wrap
+  overflow-wrap anywhere
   color $textColorDark
 
 .waitlist-submissions__error

@@ -129,6 +129,11 @@ export const questions = [
     // a candidate to self-report a trait the page had already said it required.
     id: 'weekly_time_commitment',
     label: 'How much time a week do you expect to give this league?',
+    // The managers' reading page lifts every closed-vocabulary answer into a
+    // scannable line under the candidate's name, where the full question is far
+    // too long to serve as a label. Only a question with `options` needs one:
+    // prose has nothing comparable to lift.
+    summary_label: 'Time a week',
     help: 'Averaged over a year, offseason included. Nobody is held to it — we ask because the honest answers cluster, and a league that expects more than someone has is how people quietly stop showing up.',
     options: [
       'Under an hour',
@@ -145,6 +150,7 @@ export const questions = [
     // is telling you something different from someone in one.
     id: 'active_league_count',
     label: 'How many fantasy leagues are you in right now?',
+    summary_label: 'Leagues now',
     options: [
       'This would be my first',
       '1 or 2',
