@@ -3,6 +3,7 @@ import debug from 'debug'
 import db from '#db'
 import { is_main, report_job } from '#libs-server'
 import { get_half } from '#libs-server/play-enrichment/fixed-drive-enrichment.mjs'
+import { is_administrative_play } from '#libs-server/play-enrichment/enrichment-helpers.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -49,11 +50,20 @@ const KNOWN_VIOLATION_BASELINE = {
   // Repaired 2026-07-28 by
   // db/adhoc/2026-07-25-repair-drive-seq-mixed-authority-splice.sql, which
   // carries forward the neighboring source-supplied anchor: 16 of 22 resolved.
-  // The residual 6 (2001092311, 2014110209, 2021101013, 2023121005,
-  // 2025101902, 2026010300) are unresolved BY DESIGN, not by defect -- two
-  // distinct mechanisms, a block-level Sportradar coverage drop across a
-  // contiguous run of real plays and isolated single-anchor corruption.
-  other: 6
+  //
+  // Lowered from 6 to 3 on 2026-08-16. The residual was never 6: this check
+  // counted administrative markers as drive members until that date, and three
+  // of the six carried no cross-half real play at all -- 2001092311 and
+  // 2026010300 are an END QUARTER 2 marker holding the next drive's number,
+  // and 2021101013 is a weather-suspension COMMENT pair (the game was
+  // suspended and resumed in half 2). They were misfiled as corruption in the
+  // 2026-07-28 round and need no repair.
+  //
+  // The genuine 3 (2014110209, 2023121005, 2025101902) each carry a real play
+  // on both sides of halftime under one drive_seq -- isolated single-anchor
+  // corruption, a half-1 drive with a stray half-2 extra point or rush. These
+  // are real merged drives and remain open for repair.
+  other: 3
 }
 
 /**
@@ -77,6 +87,12 @@ export const classify_drive_seq_coherence = (rows) => {
   for (const row of rows) {
     if (row.drive_seq === null || row.drive_seq === undefined) continue
     if (row.quarter === null || row.quarter === undefined) continue
+    // An administrative marker is not a drive and does not confer half
+    // membership. NFL's feed stamps END QUARTER 2 with the sequence of the
+    // drive about to start, which puts a half-2 drive number on a half-1 row
+    // and diverges the two counts below with no real drive merged. Excluding
+    // them is what separates a boundary artifact from a genuine merge.
+    if (is_administrative_play(row)) continue
 
     if (!games.has(row.esbid)) {
       games.set(row.esbid, {
@@ -155,8 +171,20 @@ export const find_drive_seq_coherence_violations = async () => {
   // own should_count_play tests JS truthiness, so NULL counts as not-deleted
   // there; `is_deleted = false` here would silently exclude those rows and
   // undercount.
+  // play_type_nfl / play_type / is_passing_play / is_rushing_play are here for
+  // is_administrative_play, which decides whether a row confers half
+  // membership. They widen the distinct set beyond one row per drive per
+  // quarter, but only by the handful of play shapes each drive contains.
   const rows = await db('nfl_plays')
-    .distinct('esbid', 'quarter', 'drive_seq')
+    .distinct(
+      'esbid',
+      'quarter',
+      'drive_seq',
+      'play_type_nfl',
+      'play_type',
+      'is_passing_play',
+      'is_rushing_play'
+    )
     .whereNotNull('drive_seq')
     .whereNotNull('quarter')
     .whereRaw('is_deleted is not true')
