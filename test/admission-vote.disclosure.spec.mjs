@@ -20,7 +20,7 @@ const league_id = 1
 const commissioner_token = user1
 const manager_token = user2
 
-// THE SECTION 10(e) DISCLOSURE, which is a constitutional right rather than a
+// THE SECTION 10(d) DISCLOSURE, which is a constitutional right rather than a
 // convenience: the Commissioner "shall show to any Manager upon request the
 // number of points recorded for each Candidate". Its two limits are what this
 // file pins. It is EVERY Candidate's total, not the winner's alone. And it is
@@ -204,7 +204,7 @@ describe('ADMISSION VOTE DISCLOSURE', function () {
     }
   })
 
-  // Section 10(e): "He shall not disclose how a Team voted." That forbids
+  // Section 10(d): "He shall not disclose how a Team voted." That forbids
   // disclosure to OTHERS, so what the payload must not carry is ANOTHER team's
   // ranking. The caller's own is returned deliberately, so replacing a ballot
   // is an edit rather than a re-entry — the operator settled that on
@@ -270,7 +270,7 @@ describe('ADMISSION VOTE DISCLOSURE', function () {
   })
 
   // The Commissioner is the caller this rule is really about: he is the one
-  // Section 10(e) binds, and he reaches his own ballot by the same predicate as
+  // Section 10(d) binds, and he reaches his own ballot by the same predicate as
   // anyone else. Being commissioner grants no extra reach.
   it('gives the commissioner no ranking but his own', async () => {
     const { admission_vote_id, candidate_ids } = await seed_vote()

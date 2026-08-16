@@ -258,7 +258,7 @@ export const page_routes = [
     robots: private_robots
   },
   {
-    // Confidential ballots under Amendment XLIII Section 10(e), so private
+    // Confidential ballots under Amendment XLIII Section 10(d), so private
     // robots for the same reason as the applications above.
     pattern: '/leagues/:lid/admission-vote',
     title: 'Admission Vote',

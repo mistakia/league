@@ -25,7 +25,7 @@ import './admission-vote.styl'
 //
 // NOTHING RENDERS ANOTHER TEAM'S BALLOT. His own is rendered, and the form is
 // seeded from it, so replacing a ballot is an edit rather than a re-entry.
-// Section 10(e) forbids disclosing how a Team voted to OTHERS and says nothing
+// Section 10(d) forbids disclosing how a Team voted to OTHERS and says nothing
 // about a Manager reading his own; the absolute reading held until 2026-08-15
 // and was a design property rather than a constitutional requirement. The API
 // enforces the half that matters -- it keys the returned ranking on the
@@ -393,7 +393,7 @@ export default function AdmissionVotePage() {
           </section>
         )}
 
-        {/* Section 10(e): the point totals are shown to any Manager on request,
+        {/* Section 10(d): the point totals are shown to any Manager on request,
             and nothing at all is shown while the vote is open. That is enforced
             server-side by a status check rather than here. */}
         {!is_open && (

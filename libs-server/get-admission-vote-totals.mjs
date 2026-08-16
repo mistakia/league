@@ -3,7 +3,7 @@ import db from '#db'
 import { admission_vote_statuses } from '#libs-shared/constants/admission-vote-constants.mjs'
 
 /**
- * The Section 10(e) disclosure: "the number of points recorded for each
+ * The Section 10(d) disclosure: "the number of points recorded for each
  * Candidate", ranked by most points.
  *
  * Two properties are decisions rather than defaults.
@@ -16,7 +16,7 @@ import { admission_vote_statuses } from '#libs-shared/constants/admission-vote-c
  * function deliberately cannot answer.
  *
  * THIS IS THE ONLY READ PATH ONTO THE TALLY, and it selects from
- * `admission_vote_candidates` alone. Section 10(e) forbids disclosing how a
+ * `admission_vote_candidates` alone. Section 10(d) forbids disclosing how a
  * Team voted, so no per-Team row can reach a caller through here: the ballot
  * and preference tables are not joined, and there is no argument that would
  * make them be. Reaching an individual ballot takes a deliberate query against

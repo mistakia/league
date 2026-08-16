@@ -83,7 +83,7 @@ const cast_ballot = async ({
 
 describe('ADMISSION VOTE TALLY', function () {
   describe('calculate_admission_vote_points', function () {
-    it('scores a full ballot down from the stated maximum', function () {
+    it('scores a full ballot down from the candidate count', function () {
       const points = calculate_admission_vote_points({
         preferences: [
           { admission_vote_candidate_id: 10, preference_rank: 1 },
@@ -98,11 +98,11 @@ describe('ADMISSION VOTE TALLY', function () {
       expect(points.get(30)).to.equal(1)
     })
 
-    // Section 10(b) pegs points to the stated maximum, never to ballot length.
+    // Section 10(b) pegs points to the candidate count, never to ballot length.
     // A Team that ranks two must not give its favourite less weight than a Team
-    // that ranks six, which is the whole reason the maximum comes off the vote
+    // that ranks six, which is the whole reason the count comes off the vote
     // row rather than off the rows in hand.
-    it('gives a short ballot its first preference the full stated maximum', function () {
+    it('gives a short ballot its first preference the full candidate count', function () {
       const short_ballot = calculate_admission_vote_points({
         preferences: [
           { admission_vote_candidate_id: 10, preference_rank: 1 },
@@ -127,9 +127,10 @@ describe('ADMISSION VOTE TALLY', function () {
       expect(short_ballot.get(10)).to.equal(full_ballot.get(10))
     })
 
-    // "A Candidate whom a Team ... ranks below the number stated in that
-    // Notice, receives no points from that Team."
-    it('scores a preference beyond the stated maximum at nothing', function () {
+    // Section 10(b) gives points only down to the candidate count, so a rank
+    // past it is worth nothing. The submit route refuses such a row; this pins
+    // what the scorer does if one ever reaches it.
+    it('scores a preference beyond the candidate count at nothing', function () {
       const points = calculate_admission_vote_points({
         preferences: [
           { admission_vote_candidate_id: 10, preference_rank: 1 },
@@ -141,7 +142,7 @@ describe('ADMISSION VOTE TALLY', function () {
 
       expect(points.get(10)).to.equal(2)
       expect(points.get(20)).to.equal(1)
-      // present at zero rather than absent -- Section 10(e) discloses a figure
+      // present at zero rather than absent -- Section 10(d) discloses a figure
       // for each Candidate, and a missing key is not a figure
       expect(points.get(30)).to.equal(0)
     })
@@ -158,9 +159,11 @@ describe('ADMISSION VOTE TALLY', function () {
       expect(points.get(30)).to.equal(0)
     })
 
-    // Section 10's floor. A stated maximum of zero would score every Candidate
-    // at zero and hand the whole ranking to the Commissioner.
-    it('refuses a stated maximum below one', function () {
+    // Section 10 holds an Admission Vote only where one or more Candidates were
+    // nominated, so a count of zero is unreachable. The guard stays because a
+    // zero would score every Candidate at zero and hand the Commissioner a
+    // ranking the Teams never made.
+    it('refuses a candidate count below one', function () {
       expect(() =>
         calculate_admission_vote_points({
           preferences: [],
@@ -274,7 +277,7 @@ describe('ADMISSION VOTE TALLY', function () {
       expect(totals[0].admission_vote_candidate_id).to.equal(alice)
     })
 
-    // Section 10(e) discloses the points recorded for each Candidate and
+    // Section 10(d) discloses the points recorded for each Candidate and
     // nothing else. The response shape is the enforcement: a per-Team key here
     // would be the disclosure the section forbids.
     it('carries no per-team field in the disclosed rows', async () => {

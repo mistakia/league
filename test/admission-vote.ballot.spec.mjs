@@ -205,7 +205,7 @@ describe('ADMISSION VOTE BALLOT', function () {
       expect(alice.submission_id).to.equal(null)
     })
 
-    // Section 10(e). The response is where this is enforced: a per-Team key
+    // Section 10(d). The response is where this is enforced: a per-Team key
     // here would be the disclosure the section forbids.
     it('never returns another team’s ranking to any caller', async () => {
       const { admission_vote_id, candidate_ids } = await seed_vote()
@@ -373,7 +373,7 @@ describe('ADMISSION VOTE BALLOT', function () {
       expect(refused.body.error).to.include('not entitled to a ballot')
     })
 
-    it('refuses a ranking longer than the stated maximum', async () => {
+    it('refuses a ranking longer than the candidate count', async () => {
       const { admission_vote_id, candidate_ids } = await seed_vote({
         maximum_ranked_candidates: 2
       })

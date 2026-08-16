@@ -23,7 +23,7 @@ const router = express.Router()
 // confidential rows in this schema, so they get the structural protection
 // rather than another predicate to get right.
 //
-// CONFIDENTIALITY, Section 10(e). "He shall not disclose how a Team voted."
+// CONFIDENTIALITY, Section 10(d). "He shall not disclose how a Team voted."
 // What that forbids is disclosing a Team's ballot to OTHERS, so the rule here
 // is ANOTHER Team's ranking, never any ranking at all: the only read onto the
 // tally is get_admission_vote_totals, which selects from
@@ -112,7 +112,7 @@ const is_deemed_passed = (vote) =>
  * Validate a submitted ranking against the vote's own terms.
  *
  * The bound is enforced here so the scoring function never has to discard a
- * row: Section 10(b) says a Candidate ranked below the stated number scores
+ * row: Section 10(b) scores a Candidate ranked beyond the candidate count at
  * nothing, and a row that can never score is a row that should not have been
  * accepted.
  *
@@ -153,7 +153,7 @@ const validate_ranking = ({ ranked_candidate_ids, vote, candidate_ids }) => {
  *       Restricted to the league's sitting managers. Returns the Notice (every
  *       Candidate and his Sponsors), the caller's own ballot state including
  *       his own team's ranking, and — once the vote has closed — the
- *       per-Candidate point totals Section 10(e) discloses. Never returns
+ *       per-Candidate point totals Section 10(d) discloses. Never returns
  *       another team's ranking to any caller, the commissioner included.
  *     tags:
  *       - Admission votes
@@ -268,7 +268,7 @@ router.get('/', async (req, res) => {
 
     // THE CALLER'S OWN RANKING, and his own Team's alone.
     //
-    // Section 10(e) says "He shall not disclose how a Team voted." That binds
+    // Section 10(d) says "He shall not disclose how a Team voted." That binds
     // the Commissioner against disclosing a Team's ballot to OTHERS; it says
     // nothing about a Manager reading his own. The absolute reading -- no
     // surface renders an individual ballot for any caller -- was a design
