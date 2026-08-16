@@ -19156,8 +19156,6 @@ CREATE TABLE public.pff_player_facet_seasonlogs (
     receptions integer,
     facet_yards integer,
     facet_touchdowns integer,
-    routes integer,
-    targets_per_route numeric(6,3),
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT pff_player_facet_seasonlogs_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
