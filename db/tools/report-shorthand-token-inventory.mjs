@@ -17,7 +17,6 @@
 //   node db/tools/report-shorthand-token-inventory.mjs
 //   node db/tools/report-shorthand-token-inventory.mjs --token qb   # one token
 
-import fs from 'fs'
 import path from 'path'
 import { spawnSync } from 'child_process'
 import { fileURLToPath } from 'url'
