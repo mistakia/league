@@ -48,8 +48,7 @@ export default function LandingPage() {
               demonstrates it. The claims that support it come underneath, as
               facts with dates on them. */}
           <h1 className='landing__lede'>
-            A {league_team_count}-team home dynasty league, entering{' '}
-            {league_season_phrase}.
+            a home dynasty league.
           </h1>
           <p className='landing__deck'>
             Founded in {league_founding_year}. The constitution, the full
