@@ -312,7 +312,7 @@ const registry = [
     // percent of headroom against a reading that would mean the table is gone.
     min_denominator: 25000,
     repair_command:
-      'Adjudicate each pair on date_of_birth (nfl_draft_year is corrupt on exactly these rows and cannot discriminate), then write a dated merge file under db/adhoc/ following the shape of 2026-08-05-dedupe-residual-round-4.sql'
+      'MOST FINDINGS HERE ARE NOT DUPLICATES — measured 2026-08-16, 19 of 24 were different people, overwhelmingly father/son and namesake pairs decades apart (Chickillo, Dorsett and Zordich Sr/Jr; Deacon Jones against a 2011 tackle). Adjudicate every pair on date_of_birth before merging anything (nfl_draft_year is corrupt on exactly these rows and cannot discriminate); a gap of more than a few years is a different person. Park those in db/checks/parked.json as adjudicated. Merge only the remainder, in a dated file under db/adhoc/ following the shape of 2026-08-16-dedupe-duplicate-person-rows-round-5.sql — round 5 rather than round 4, whose hand-written column list names three columns a later conform renamed away and silently drops any column added since it was written.'
   },
 
   {
@@ -452,7 +452,7 @@ const registry = [
     // reading that would mean an anchor leg stopped being populated.
     min_denominator: 25000,
     repair_command:
-      'Adjudicate each pair before merging anything. The strongest positive same-person evidence available here is the same draft_overall_pick on both rows — within one anchor group, since the column is NOT unique per year across the table (96 year/pick groups hold more than one row, 40 of them with differing last names). A shared birth date is NOT evidence, because brothers share one. Park a genuine two-person pair in db/checks/parked.json; merge the rest in a dated file under db/adhoc/ following 2026-08-05-dedupe-residual-round-4.sql'
+      'Adjudicate each pair before merging anything. The strongest positive same-person evidence available here is the same draft_overall_pick on both rows — within one anchor group, since the column is NOT unique per year across the table (96 year/pick groups hold more than one row, 40 of them with differing last names). A shared birth date is NOT evidence, because brothers share one. Park a genuine two-person pair in db/checks/parked.json; merge the rest in a dated file under db/adhoc/ following 2026-08-16-dedupe-duplicate-person-rows-round-5.sql — round 5 rather than round 4, whose hand-written column list names three columns a later conform renamed away and silently drops any column added since it was written. Note this class is HARDER to merge than the sibling one, and needs a stronger oracle: there the donor is always a shell holding no identifier and no gamelog, so a wrong merge costs little and reverses cleanly, while here BOTH rows routinely carry identifiers and gamelogs and a wrong merge collides them.'
   }
 ]
 
