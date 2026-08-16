@@ -187,11 +187,23 @@ const YEAR_AXIS_AS_OF_WINDOW = '30 days'
 // boundary already carried before this clamp existed (production resolves it at
 // New York local midnight, the test container at UTC), so this changes nothing
 // about it. The clamped branch is TZ-independent outright, since now() is now().
+// year_offset lands INSIDE a quoted interval literal here, so an unsanitized
+// value carrying a single quote closes the literal and injects arbitrary SQL.
+// POST /api/data-views/search sits ahead of the blanket auth guard and its
+// params schema declares only `output`, so this was a direct anonymous
+// request-to-SQL path -- confirmed executable, not merely a syntax error.
+// sql_integer_param returns a number, so a valid offset emits byte-identical
+// text to what this splice produced before the guard existed.
 const year_axis_opening_day_boundary = ({
   opening_day_sql,
   year_offset_single
-}) =>
-  `LEAST(date_trunc('day', ${opening_day_sql}) + interval '${year_offset_single} year', now())`
+}) => {
+  const offset = sql_integer_param({
+    value: year_offset_single,
+    param_name: 'year_offset'
+  })
+  return `LEAST(date_trunc('day', ${opening_day_sql}) + interval '${offset} year', now())`
+}
 
 // The same boundary anchored on a chosen calendar day within the row's own
 // year rather than on that year's opening day. Selected by the
@@ -358,11 +370,17 @@ const keeptradecut_join = ({
       // on both DST sides against the epoch column, and translating it onto a
       // timestamptz would introduce a four-hour shift where none exists, so it
       // is deleted rather than carried forward.
+      // params.date is a binding; year_offset_single is spliced into the same
+      // quoted interval literal as the year-axis boundary above and needs the
+      // same guard for the same reason.
+      const offset = sql_integer_param({
+        value: year_offset_single,
+        param_name: 'year_offset'
+      })
       boundary_sql = db
-        .raw(
-          `(to_timestamp(?, 'YYYY-MM-DD') + interval '${year_offset_single} year')`,
-          [params.date]
-        )
+        .raw(`(to_timestamp(?, 'YYYY-MM-DD') + interval '${offset} year')`, [
+          params.date
+        ])
         .toString()
     }
 
