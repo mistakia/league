@@ -1,19 +1,42 @@
-$markdown_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
-$markdown_mono = 'IBM Plex Mono', monospace
+// THE DOCUMENT PAGES: /about (the repo README), /resources, /glossary,
+// /constitution and /guides/data-views. Five pages, one stylesheet, and all of
+// them are long-form reading rather than app chrome — which is exactly what
+// app/styles/prose-form.styl is for, so they now speak that language instead of
+// carrying their own near-copy of it.
+//
+// What that replaced, since each item is a thing not to reintroduce: private
+// $markdown_sans / $markdown_mono tokens duplicating $prose_sans / $prose_mono;
+// the app's mid-grey $textColor as body ink on a page read in paragraphs; links
+// in pure `red` at weight 700, a weight this site does not load, so every link
+// on every document rendered as a synthesized bold; and a three-layer Material
+// elevation shadow under every table, which is the same fingerprint the menu
+// buttons were taken off.
+//
+// The serif constitution below is the one part that stays its own thing, and
+// its reason is at that rule.
+
 // Legal documents read as serif; system faces only — no extra webfont payload.
 $markdown_serif = 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, 'Times New Roman', serif
 
+// THESE PAGES DO NOT PAINT A SURFACE, deliberately. They take the app's
+// $backgroundColor from body, which is the same surface the menu drawer
+// carries — a document page briefly went to paper here and the drawer then sat
+// as a grey panel against a white page, which reads as the menu being broken
+// rather than as the page being paper. The landing and auth pages can afford
+// paper because they are the site's front door; a document opened from the
+// menu sits beside the menu.
 .markdown
-  padding 16px
-  margin 0 auto 150px
-  font 400 16px/1.7 $markdown_sans
-  color $textColor
+  prose_page()
+  // prose_page() paints no background of its own, so body shows through.
+  // prose_page() sets the 680px prose measure, which is right for a page of
+  // pure text and too narrow for these: the glossary and the data-views guide
+  // are mostly tables, and a table forced to 680px wraps every cell. The
+  // authored two-column documents get the full width; everything else gets a
+  // measure a little past prose, wide enough for a table and a code block.
   max-width 1300px
 
-  // Plain docs (constitution, rules) have no authored two-column layout; keep
-  // them in a single readable column rather than the full 1300px.
   &:not(:has(.table-of-contents))
-    max-width 860px
+    max-width 820px
 
   // The first block sits directly under the page chrome; its heading margin
   // would otherwise open a large gap above the title.
@@ -29,12 +52,17 @@ $markdown_serif = 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqu
     line-height inherit
     letter-spacing normal
 
+  // COMMA-SEPARATED ON ONE LINE, NOT A SELECTOR PER LINE. Stylus reads a
+  // newline-separated group correctly only while each line is a SINGLE token:
+  // give it two lines that each carry a descendant selector and it silently
+  // emits the last one alone. `ul ul` / `ol ol` written on two lines compiled
+  // to `.markdown ol ol` and nothing else, so nested bullet lists never got
+  // these margins — a real defect in this file, not a hypothetical.
   ul
   ol
     margin 0 0 1em
     padding-left 1.5em
-    ul
-    ol
+    ul, ol
       margin-top 0.5em
       margin-bottom 0.5em
 
@@ -47,21 +75,75 @@ $markdown_serif = 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqu
   li
     margin-bottom 0.4em
 
-  // The table of contents is a navigation column, not prose — markers would
-  // compete with the link text.
+  // THE TABLE OF CONTENTS IS AN INDEX, NOT PROSE. It is authored in the
+  // document itself (docs/glossary.md, docs/resources.md and the data-views
+  // guide each open with a .table-of-contents div), so everything in it would
+  // otherwise inherit the body treatment: bullet markers competing with the
+  // link text, prose_page()'s mono-600-with-a-rule on every entry, and the
+  // heading scale on its own label. At forty-odd entries that reads as a
+  // second document stacked in front of the first.
   .table-of-contents
+    // Its label is a label, not a heading — the same small tracked mono the
+    // rest of the site uses to name a region.
+    h1
+    h2
+    h3
+    h4
+    h5
+    h6
+      prose_section_title()
+      margin 0 0 14px
+      font-size 0.6875em
+
     ul
     ol
       list-style-type none
-      padding-left 1em
+      margin 0
+      padding-left 0
 
-  a
-    color $accentColor
-    font-weight 700
-    font-family $markdown_mono
-    border-bottom none
-    &:hover
-      border-bottom 1px solid $accentColor
+    li
+      margin 0
+
+    // marked wraps a list item that has children in a <p>, so a top-level
+    // entry arrives as `<li><p><a>` while its children are bare `<li><a>`.
+    // That paragraph carries the body's 1em bottom margin and opened a gap
+    // under every parent entry.
+    li > p
+      margin 0
+
+    // Depth is carried by a rule as well as by indent, so a nested entry is
+    // placed at a glance in a list this long. Comma-separated for the reason
+    // given on the nested-list rule above.
+    ul ul, ol ol
+      margin 4px 0 10px
+      padding-left 14px
+      border-left 1px solid $prose_rule_strong
+
+    a
+      display block
+      padding 4px 0
+      font-family $prose_sans
+      font-weight 400
+      font-size 0.8125em
+      line-height 1.45
+      border-bottom none
+      color $prose_muted
+      transition color 120ms ease
+      &:hover
+        color $prose_accent
+      &:focus-visible
+        outline 2px solid $prose_accent
+        outline-offset 2px
+
+    // The top level is the document's own sections and everything beneath it is
+    // a subsection; without a weight difference a forty-entry index is one flat
+    // list and the reader cannot see the document's shape in it.
+    > ul > li > p > a, > ul > li > a
+      color $prose_ink
+      font-weight $prose_bold
+
+  // Anchors outside the index inherit prose_page()'s treatment: ink, mono, 600,
+  // a rule underneath, accent on hover. Nothing to restate here.
 
   h1
   h2
@@ -69,91 +151,113 @@ $markdown_serif = 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqu
   h4
   h5
   h6
-    font-family $markdown_mono
-    color $textColorDark
+    font-family $prose_mono
+    font-weight $prose_bold
+    color $prose_ink
     line-height 1.25
+    letter-spacing -0.01em
     margin 1.6em 0 0.5em
 
   h1
-    font-size 2.125em
+    font-size 2em
     margin-top 1em
+    letter-spacing -0.02em
   h2
-    font-size 1.625em
+    font-size 1.5em
   h3
-    font-size 1.3125em
+    font-size 1.25em
   h4
-    font-size 1.125em
+    font-size 1.0625em
   h5
     font-size 1em
   h6
     font-size 0.9375em
+    color $prose_muted
 
   blockquote
     margin 0 0 1em
     padding 0.25em 0 0.25em 1.25em
-    border-left 3px solid $borderColor
-    color lighten($textColor, 15%)
+    border-left 3px solid $prose_rule_strong
+    color $prose_muted
 
+  // A table is data, so it is ruled rather than boxed: hairlines and the paper
+  // it already sits on, with no fill and no shadow. The elevation shadow that
+  // used to be here was Material's three-layer one.
   table
     width 100%
-    padding 8px
-    font-family $markdown_sans
+    border-collapse collapse
+    font-family $prose_sans
     font-size 0.9375em
-    margin 0 auto 16px
-    background white
-    box-shadow 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 1px 3px 0px rgba(0, 0, 0, 0.12)
-    border-radius 3px
+    margin 0 0 1.5em
 
     code
       white-space nowrap
 
-  tr
-    min-height 30px
-
   th
     text-align start
-    padding 4px 16px
-    border-bottom 1px solid $borderColor
-    font-family $markdown_mono
-    font-weight 700
+    padding 8px 14px 8px 0
+    border-bottom 1px solid $prose_rule_strong
+    font-family $prose_mono
+    font-weight $prose_bold
+    font-size 0.8125em
+    letter-spacing 0.06em
+    text-transform uppercase
+    color $prose_muted
 
   td
-    padding 4px 16px
-    border-bottom 1px solid $borderColor
-    height 36px
+    padding 8px 14px 8px 0
+    border-bottom 1px solid $prose_rule
+    vertical-align top
+
+  // Last column runs to the measure's edge rather than carrying trailing
+  // padding that reads as a ragged right rule.
+  th:last-child
+  td:last-child
+    padding-right 0
 
   pre
-    background white
-    border 1px solid $borderColor
-    border-radius 8px
-    padding 16px 0 16px 16px
-    margin 16px 0
-    overflow-x scroll
+    background $prose_paper
+    border 1px solid $prose_rule
+    border-radius 3px
+    padding 14px 16px
+    margin 0 0 1.5em
+    overflow-x auto
     white-space break-spaces
+    font-family $prose_mono
     font-size 0.875em
+    line-height 1.6
+    color $prose_ink
 
   code:not(pre > code)
-    background white
-    border 1px solid $borderColor
-    border-radius 6px
-    padding 2px 4px
+    font-family $prose_mono
+    background $prose_paper
+    border 1px solid $prose_rule
+    border-radius 3px
+    padding 1px 5px
     font-size 0.875em
     white-space nowrap
 
   hr
     border none
-    border-top 1px solid $borderColor
-    margin 2em 0
+    border-top 1px solid $prose_rule
+    margin 2.5em 0
 
   // Constitution — styled as a legal instrument: serif text, centered article
   // headings, and lettered subsections. The document references its own
   // subsections by letter ("Article III, Section 2, Subsection f"), so the
   // nested ordered lists must be lettered rather than numbered to match.
+  //
+  // This is the one document that does NOT take the prose faces, and the one
+  // place 700 is still correct: $prose_bold is 600 because Inter and IBM Plex
+  // Mono are loaded at 600 and not at 700, but the serif stack here is entirely
+  // system faces, which carry a real 700. Asking for it costs no payload and
+  // gets a drawn bold rather than a synthesized one.
   &.markdown__constitution
     max-width 800px
     font-family $markdown_serif
     font-size 17px
     line-height 1.75
+    color $prose_ink
 
     p
     li
@@ -167,6 +271,7 @@ $markdown_serif = 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqu
     h5
     h6
       font-family $markdown_serif
+      letter-spacing normal
 
     h1
       margin 0.5em 0 0.25em
@@ -182,8 +287,8 @@ $markdown_serif = 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqu
       margin-bottom 2em
       text-align center
       font-style italic
-      color lighten($textColor, 25%)
-      border-bottom 4px double darken($borderColor, 25%)
+      color $prose_muted
+      border-bottom 4px double $prose_rule_strong
       padding-bottom 1.25em
 
     // "Article I"
@@ -230,11 +335,26 @@ $markdown_serif = 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqu
 
     // Schedules and the amendment history are tabular data, not prose.
     table
-      font-family $markdown_sans
+      font-family $prose_sans
       text-align left
 
+    // The link rule reads as a foreign mark in a justified serif column, so it
+    // carries the serif and marks itself with weight instead.
     a
       font-family $markdown_serif
+      font-weight 700
+      border-bottom none
+      &:hover
+        border-bottom 1px solid $prose_accent
+
+// Below this width the index is a block at the head of the document rather
+// than a column beside it, so it needs a foot rule to close it off — without
+// one it runs straight into the first section and reads as the opening list.
+@media (max-width: 959px)
+  .markdown .table-of-contents
+    margin 0 0 2.5em
+    padding-bottom 1.5em
+    border-bottom 1px solid $prose_rule
 
 @media (min-width: 960px)
   .markdown:has(.table-of-contents)
@@ -244,11 +364,16 @@ $markdown_serif = 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqu
 
     .table-of-contents
       position fixed
-      top 0
+      // Clear of the app banner when one is showing, the same variable the nav
+      // drawer anchors to, rather than a fixed inset that the banner overlaps.
+      top var(--app-banner-height, 0px)
       bottom 0
-      overflow-y scroll
-      width 256px
-      padding-top 48px
+      // `auto`, not `scroll`: a short index under `scroll` renders a dead
+      // scrollbar gutter down the column for its whole height.
+      overflow-y auto
+      width 240px
+      padding 88px 0 48px 24px
+      border-left 1px solid $prose_rule
 
     .body
       margin-right 288px
