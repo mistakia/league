@@ -41,7 +41,6 @@ const valid_submission = {
   contact_email: 'casey@example.com',
   contact_handle: 'casey#1234',
   timezone_name: 'America/Denver',
-  requested_seat: 'Whichever is open.',
   has_affirmed_commitment: true,
   // A choice question only accepts its own vocabulary, so the fixture answers
   // each one with a real option rather than prose.
@@ -113,15 +112,28 @@ describe('WAITLIST', function () {
 
     it('stores an absent optional answer as null', async function () {
       const without_optionals = { ...valid_submission }
-      delete without_optionals.requested_seat
       delete without_optionals.contact_handle
 
       const response = await submit(without_optionals)
       response.should.have.status(200)
 
       const rows = await knex('manager_waitlist_submissions')
-      expect(rows[0].requested_seat).to.equal(null)
       expect(rows[0].contact_handle).to.equal(null)
+    })
+
+    // requested_seat was retired from the form, so a stale client or a hand
+    // poster sending it must not write it. The column still exists for
+    // historical rows, which is why the assertion is on a stored null rather
+    // than on the column being absent.
+    it('drops the retired requested_seat key', async function () {
+      const response = await submit({
+        ...valid_submission,
+        requested_seat: 'Should not be stored'
+      })
+      response.should.have.status(200)
+
+      const rows = await knex('manager_waitlist_submissions')
+      expect(rows[0].requested_seat).to.equal(null)
     })
 
     // A contact field and a question fail an omission DIFFERENTLY, and both

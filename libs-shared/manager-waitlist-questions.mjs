@@ -105,13 +105,6 @@ export const contact_fields = [
     help: 'Draft picks run on a clock during waking hours Eastern, so this is really a question about whether that works for you.',
     required: true,
     max: MAX_SHORT_ANSWER_LENGTH
-  },
-  {
-    column: 'requested_seat',
-    label: 'Is there a particular team you are interested in?',
-    help: 'Optional. If a seat comes free we will come back to you.',
-    required: false,
-    max: MAX_SHORT_ANSWER_LENGTH
   }
 ]
 

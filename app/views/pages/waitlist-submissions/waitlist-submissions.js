@@ -9,10 +9,7 @@ import PageLayout from '@layouts/page'
 import { get_app } from '@core/selectors'
 import { API_URL } from '@core/constants'
 
-import {
-  contact_fields,
-  questions
-} from '@libs-shared/manager-waitlist-questions.mjs'
+import { questions } from '@libs-shared/manager-waitlist-questions.mjs'
 
 import './waitlist-submissions.styl'
 
@@ -32,9 +29,6 @@ import './waitlist-submissions.styl'
 // recorded under an EARLIER question set simply has no key for a question added
 // since -- which renders as an absent block rather than as an error. That is
 // the intended behaviour and the reason `questionnaire_version` is shown.
-const seat_field = contact_fields.find(
-  (field) => field.column === 'requested_seat'
-)
 
 // THE CARD IS SPLIT BY WHAT THE ANSWER IS FOR, and the split is derived from
 // the question rather than listed here. A closed-vocabulary question is
@@ -100,15 +94,6 @@ const Submission = ({ submission }) => (
         })}
       </dl>
     </header>
-
-    {submission.requested_seat && (
-      <div className='waitlist-submissions__answer'>
-        <h3 className='waitlist-submissions__question'>{seat_field.label}</h3>
-        <p className='waitlist-submissions__response'>
-          {submission.requested_seat}
-        </p>
-      </div>
-    )}
 
     {prose_questions.map((question) => {
       const answer = submission.responses?.[question.id]

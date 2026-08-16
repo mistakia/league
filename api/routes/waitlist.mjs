@@ -103,8 +103,6 @@ const read_answer = (body, name) => {
  *                 type: string
  *               timezone_name:
  *                 type: string
- *               requested_seat:
- *                 type: string
  *               has_affirmed_commitment:
  *                 type: boolean
  *                 description: Must be true. The form states the commitment and takes an explicit affirmation rather than asking for it as a question.
