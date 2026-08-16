@@ -629,12 +629,27 @@ observations:
     prose-form.styl in this shared tree, leaving it declared and unused on master until 7da4ce9d0
     used it — an explicit pathspec isolates a commit across FILES, never within one, so a concurrent
     edit to the same file rides along under your message.
+  - >-
+    [bug] markdown.styl had never applied nested-list margins: its ul/ol group was written
+    newline-separated with two-token selectors, which stylus collapsed to .markdown ol ol alone, so
+    every nested bullet list in every document page lost its spacing. Fixed in a39bb3deb by
+    comma-separating both groups.
+  - >-
+    [change] a39bb3deb typeset the five MarkdownPage documents (/about, /resources, /glossary,
+    /constitution, /guides/data-views) in the prose language and rebuilt the table of contents; it
+    removed private markdown font tokens, pure-red weight-700 links and a three-layer Material
+    elevation shadow under every table.
+  - >-
+    [decision] The document pages paint no surface of their own and take body $backgroundColor:
+    putting them on paper left the menu drawer reading as a grey panel against a white page, and a
+    document opened from the menu sits beside the menu. Landing and auth keep paper as the site
+    front door.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-16T04:34:52.222Z'
+updated_at: '2026-08-16T04:53:38.748Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
