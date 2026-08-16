@@ -1,0 +1,41 @@
+{
+  "name": "player_keeptradecut_value as_of_month_day derives each per-offset boundary from the MM-DD anchor (executed-result parity)",
+  "description": "The bespoke main_select_string_year_offset_range emits its own correlated subquery per offset rather than reading the join, so it needs the param wired independently -- and it is where a NaN interpolation defect already shipped once. Requests as_of_month_day 03-01 with year 2023 and year_offset [0,1], so the two per-offset boundaries are make_date(2023+0,3,1) and make_date(2023+1,3,1). Seeds one observation inside each offset's 30-day window (2023-02-25 at 1000 and 2024-02-25 at 2000) plus a decoy at 2023-09-15 that neither window reaches, and the AVG must be 1500. The oracle re-derives the average through an independent value threshold rather than the date-window logic. Goes red when the year_offset term is dropped from the boundary: both offsets then resolve 2023-03-01, both pick 1000, and the average is 1000. Goes red when the anchor year's nfl_games row is removed, because `FROM opening_days od_o WHERE od_o.year = 2023` still drives the subselect even though the boundary no longer reads opening_day -- an anchor year with no opening_days row yields NULL for every offset. The REFRESH is required for exactly that reason.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "year": [2023],
+          "year_offset": [0, 1],
+          "as_of_month_day": "03-01"
+        }
+      }
+    ],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+    ]
+  },
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTCR-940001', 'Test', 'Ktcra', 'T.Ktcra', 'Test Ktcra', 'MLB', 'MLB', '2000-01-01', 2020, 'ZFA')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (970980, 2023, 1, 'REG', 'ZFA', 'ZFX', '2023-09-07')",
+      "REFRESH MATERIALIZED VIEW opening_days",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCR-940001', true, '2023-02-25T12:00:00Z', 1000)",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCR-940001', true, '2024-02-25T12:00:00Z', 2000)",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCR-940001', true, '2023-09-15T12:00:00Z', 9999)"
+    ],
+    "reference_sql": "SELECT AVG(keeptradecut_value) AS player_keeptradecut_value_0 FROM keeptradecut_valuations WHERE pid = 'TEST-KTCR-940001' AND is_superflex = true AND keeptradecut_value < 9000",
+    "compare_columns": ["player_keeptradecut_value_0"]
+  },
+  "tags": [
+    "keeptradecut",
+    "as-of",
+    "as_of_month_day",
+    "year_offset",
+    "range",
+    "result-equivalence"
+  ],
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT AVG(offset_value) FROM opening_days od_o CROSS JOIN LATERAL (VALUES ((SELECT ktc_o.keeptradecut_value FROM keeptradecut_valuations ktc_o WHERE ktc_o.pid = player.pid AND ktc_o.is_superflex = true AND ktc_o.keeptradecut_value IS NOT NULL AND ktc_o.observed_at <= LEAST(LEAST(make_date((od_o.year) + 0, 3, 1) + (1 - 1) * interval '1 day', make_date((od_o.year) + 0, 3, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) AND ktc_o.observed_at > (LEAST(LEAST(make_date((od_o.year) + 0, 3, 1) + (1 - 1) * interval '1 day', make_date((od_o.year) + 0, 3, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days') ORDER BY ktc_o.observed_at DESC LIMIT 1)), ((SELECT ktc_o.keeptradecut_value FROM keeptradecut_valuations ktc_o WHERE ktc_o.pid = player.pid AND ktc_o.is_superflex = true AND ktc_o.keeptradecut_value IS NOT NULL AND ktc_o.observed_at <= LEAST(LEAST(make_date((od_o.year) + 1, 3, 1) + (1 - 1) * interval '1 day', make_date((od_o.year) + 1, 3, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) AND ktc_o.observed_at > (LEAST(LEAST(make_date((od_o.year) + 1, 3, 1) + (1 - 1) * interval '1 day', make_date((od_o.year) + 1, 3, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days') ORDER BY ktc_o.observed_at DESC LIMIT 1))) AS offsets(offset_value) WHERE od_o.year = 2023) AS \"player_keeptradecut_value_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}

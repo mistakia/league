@@ -5,6 +5,7 @@ import { data_view_fields_index } from '@libs-shared'
 import { current_season } from '@constants'
 import ColumnParamNflWeekSelector from '@components/column-param-nfl-week-selector/column-param-nfl-week-selector.js'
 import ColumnParamOutput from '@components/column-param-output/column-param-output.js'
+import ColumnParamMonthDay from '@components/column-param-month-day/column-param-month-day.js'
 import { resolve_column_fixed } from '@core/data-views/resolve-column-formatter.mjs'
 
 import betting_market_table_fields from './betting-market-table-fields'
@@ -183,6 +184,9 @@ export function PlayerTableFields({
     if (value.column_params?.single_nfl_week_id) {
       fields[key].column_params.single_nfl_week_id.component =
         ColumnParamNflWeekSelector
+    }
+    if (value.column_params?.as_of_month_day) {
+      fields[key].column_params.as_of_month_day.component = ColumnParamMonthDay
     }
     // Decimals on an output-capable column depend on the params of the
     // instance, so `fixed` becomes a resolver closed over whatever the column

@@ -1,0 +1,53 @@
+.column-param-month-day-chip
+  .table-filter-item-selection
+    max-width 160px
+    overflow hidden
+    text-overflow ellipsis
+    white-space nowrap
+
+.column-param-month-day
+  display flex
+  flex-direction column
+  min-width 240px
+
+.column-param-month-day-selects
+  display flex
+  gap 10px
+  padding 10px 12px
+
+.column-param-month-day-field
+  display flex
+  flex-direction column
+  gap 4px
+  flex 1
+
+  > span
+    font-size 0.625rem
+    font-weight 700
+    color lighten($textColor, 40%)
+    text-transform uppercase
+    letter-spacing 0.04em
+
+  // `select` keeps its native rendering -- the global
+  // `input { -webkit-appearance: none }` in app/styles/normalize.css names
+  // `input` only -- so this supplies border and type alone.
+  > select
+    padding 4px 6px
+    font-size 0.75rem
+    color $textColor
+    border 1px solid #e0e0e0
+    border-radius 4px
+    background #fff
+
+    &:disabled
+      opacity 0.5
+
+.column-param-month-day-note
+  font-size 0.625rem
+  color lighten($textColor, 40%)
+  font-style italic
+  line-height 1.4
+  margin 0 12px 10px
+  padding 4px 6px
+  background rgba(25, 118, 210, 0.04)
+  border-radius 2px

@@ -1,0 +1,60 @@
+{
+  "name": "player_keeptradecut_value as_of_month_day anchors each year row on the chosen calendar day (executed-result parity)",
+  "description": "The as_of_month_day param replaces the NFL opening day as the year-axis as-of boundary, resolving to the same calendar day within each row's own year. Anchor selection, the 30-day recency floor and the outer future clamp are all the same expression feeding one lookup, so one seeded population covers all three. Two columns differing only by year_offset supply the past and future anchors: column _0 anchors at 2025-06-15 (past) and column _1 at 2055-06-15, which the outer LEAST(..., now()) must clamp to now. The offset is what makes the future arm time-robust -- a literal future YEAR is unreachable, because the row-axis year list is capped at the current season, and LEAGUE_MOCK_DATE cannot move this boundary either since the clamp compares against Postgres now() rather than the JS clock. Two pids: 920001 carries an observation 5 days inside the 2025 anchor window AND one 5 days before now, so it resolves on both columns; 920002's ONLY observation predates the 2025 window by 75 days, so it must read NULL on both. The second pid is what makes the floor mutation falsifiable -- with both observations on one pid, MAX(observed_at) <= boundary selects the in-window row whether or not the floor is applied, and that mutation would stay green. Goes red under three separate mutations: dropping as_of_month_day from the request (column _0's anchor reverts to the 2025-09-04 opening day, so 920001 reads NULL instead of 3000), removing the two lower_bound_sql lines (920002 reads 1500 instead of NULL on column _0), and removing the outer LEAST(..., now()) (column _1's boundary stays at 2055-06-15 and 920001 reads NULL instead of 4000).",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": { "year": [2025], "as_of_month_day": "06-15" }
+      },
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "year": [2025],
+          "as_of_month_day": "06-15",
+          "year_offset": 30
+        }
+      }
+    ],
+    "row_axes": ["year"],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+    ]
+  },
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTCA-920001', 'Test', 'Ktcaa', 'T.Ktcaa', 'Test Ktcaa', 'MLB', 'MLB', '2000-01-01', 2020, 'ZFA')",
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTCA-920002', 'Test', 'Ktcab', 'T.Ktcab', 'Test Ktcab', 'MLB', 'MLB', '2001-01-01', 2021, 'ZFA')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (970990, 2025, 1, 'REG', 'ZFA', 'ZFX', '2025-09-04')",
+      "REFRESH MATERIALIZED VIEW opening_days",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCA-920001', true, '2025-06-10T12:00:00Z', 3000)",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCA-920001', true, now() - interval '5 days', 4000)",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCA-920002', true, '2025-04-01T12:00:00Z', 1500)"
+    ],
+    "expected_rows": [
+      {
+        "player_keeptradecut_value_0": 3000,
+        "player_keeptradecut_value_1": 4000
+      },
+      {
+        "player_keeptradecut_value_0": null,
+        "player_keeptradecut_value_1": null
+      }
+    ],
+    "compare_columns": [
+      "player_keeptradecut_value_0",
+      "player_keeptradecut_value_1"
+    ]
+  },
+  "tags": [
+    "keeptradecut",
+    "as-of",
+    "as_of_month_day",
+    "year_split",
+    "recency-floor",
+    "future-clamp",
+    "result-equivalence"
+  ],
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.primary_position IN ('MLB')) select \"player\".\"pid\", player.first_name, player.last_name, \"t9ae9262e0b508274c6c6a6a16d144d4f\".\"keeptradecut_value\" AS \"player_keeptradecut_value_0\", \"t7e78e097a99d708fd6d26606971fd0b8\".\"keeptradecut_value\" AS \"player_keeptradecut_value_1\", \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_valuations\" as \"t9ae9262e0b508274c6c6a6a16d144d4f\" on \"t9ae9262e0b508274c6c6a6a16d144d4f\".\"pid\" = \"player\".\"pid\" and \"t9ae9262e0b508274c6c6a6a16d144d4f\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"t9ae9262e0b508274c6c6a6a16d144d4f\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(LEAST(make_date((opening_days.year) + 0, 6, 1) + (15 - 1) * interval '1 day', make_date((opening_days.year) + 0, 6, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) and \"observed_at\" > (LEAST(LEAST(make_date((opening_days.year) + 0, 6, 1) + (15 - 1) * interval '1 day', make_date((opening_days.year) + 0, 6, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days')) left join \"keeptradecut_valuations\" as \"t7e78e097a99d708fd6d26606971fd0b8\" on \"t7e78e097a99d708fd6d26606971fd0b8\".\"pid\" = \"player\".\"pid\" and \"t7e78e097a99d708fd6d26606971fd0b8\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"t7e78e097a99d708fd6d26606971fd0b8\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(LEAST(make_date((opening_days.year) + 30, 6, 1) + (15 - 1) * interval '1 day', make_date((opening_days.year) + 30, 6, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) and \"observed_at\" > (LEAST(LEAST(make_date((opening_days.year) + 30, 6, 1) + (15 - 1) * interval '1 day', make_date((opening_days.year) + 30, 6, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days')) where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"t9ae9262e0b508274c6c6a6a16d144d4f\".\"keeptradecut_value\", \"t7e78e097a99d708fd6d26606971fd0b8\".\"keeptradecut_value\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}

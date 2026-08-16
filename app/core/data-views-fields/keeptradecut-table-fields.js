@@ -3,6 +3,7 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import COLUMN_GROUPS from './column-groups'
 import { common_column_params } from '@libs-shared'
 import { current_season } from '@constants'
+import { format_month_day } from './month-day.mjs'
 
 const { single_year, single_year_offset } = common_column_params
 
@@ -24,7 +25,20 @@ const shared_properties = {
       default_value: current_season.year,
       enable_on_row_axes: ['year']
     },
-    year_offset: single_year_offset
+    year_offset: single_year_offset,
+    // Year-axis only: under a week axis the week branch of the join wins and
+    // this is ignored, so the control hides itself there too. Stored as a bare
+    // `MM-DD`; format_value is what renders `03-01` as `Mar 1` rather than
+    // falling through format_column_params to String(value). The component is
+    // assigned in ./index.js -- no fields file imports React.
+    as_of_month_day: {
+      label: 'As of month/day',
+      short_label: 'As of',
+      default_label: 'Opening day',
+      enable_on_row_axes: ['year'],
+      show_key_in_short: true,
+      format_value: ({ value }) => format_month_day(value) || String(value)
+    }
   },
   row_axes: ['year']
 }

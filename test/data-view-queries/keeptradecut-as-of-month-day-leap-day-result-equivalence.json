@@ -1,0 +1,55 @@
+{
+  "name": "player_keeptradecut_value as_of_month_day 02-29 clamps to the month's last day in a non-leap year (executed-result parity)",
+  "description": "make_date RAISES rather than returning null on February 29 of a non-leap year -- `select make_date(2023,2,29)` is `date field value out of range: 2023-02-29` -- and that aborts the whole statement, so the inner LEAST clamp is load-bearing rather than defensive. This is the highest-severity case for the param, because an unclamped build does not return a wrong value, it fails the entire request. Requests 02-29 across a non-leap year (2023) and a leap year (2024), seeding observations around February 28/29. The leap year must resolve the February 29 observation (200); the non-leap year must clamp its boundary to 2023-02-28 and resolve that day's observation (300); and no error may be raised. Goes red against a build whose boundary is a bare make_date(<year>, 2, 29) with no inner LEAST: the 2023 row raises 22008 and the request never returns. Note the boundary is MIDNIGHT at the start of the anchor day, exactly as date_trunc('day', opening_day) is on the opening-day branch, so each year's qualifying observation is seeded at or before that instant rather than during the anchor day.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "year": [2023, 2024],
+          "as_of_month_day": "02-29"
+        }
+      }
+    ],
+    "row_axes": ["year"],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["MLB"]
+      }
+    ]
+  },
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-KTCL-930001', 'Test', 'Ktcla', 'T.Ktcla', 'Test Ktcla', 'MLB', 'MLB', '2000-01-01', 2020, 'ZFA')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (970970, 2023, 1, 'REG', 'ZFA', 'ZFX', '2023-09-07')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team, date) VALUES (970971, 2024, 1, 'REG', 'ZFA', 'ZFX', '2024-09-05')",
+      "REFRESH MATERIALIZED VIEW opening_days",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCL-930001', true, '2023-02-27T12:00:00Z', 300)",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCL-930001', true, '2024-02-28T12:00:00Z', 100)",
+      "INSERT INTO keeptradecut_valuations (pid, is_superflex, observed_at, keeptradecut_value) VALUES ('TEST-KTCL-930001', true, '2024-02-29T00:00:00Z', 200)"
+    ],
+    "expected_rows": [
+      {
+        "year": 2023,
+        "player_keeptradecut_value_0": 300
+      },
+      {
+        "year": 2024,
+        "player_keeptradecut_value_0": 200
+      }
+    ],
+    "compare_columns": ["year", "player_keeptradecut_value_0"]
+  },
+  "tags": [
+    "keeptradecut",
+    "as-of",
+    "as_of_month_day",
+    "year_split",
+    "leap-day",
+    "result-equivalence"
+  ],
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.primary_position IN ('MLB')) select \"player\".\"pid\", player.first_name, player.last_name, \"t5ee70a3ae6d50a4083248c37b51a1df3\".\"keeptradecut_value\" AS \"player_keeptradecut_value_0\", \"player_years\".\"year\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_valuations\" as \"t5ee70a3ae6d50a4083248c37b51a1df3\" on \"t5ee70a3ae6d50a4083248c37b51a1df3\".\"pid\" = \"player\".\"pid\" and \"t5ee70a3ae6d50a4083248c37b51a1df3\".\"is_superflex\" = true and opening_days.year = (player_years.year) and \"t5ee70a3ae6d50a4083248c37b51a1df3\".\"observed_at\" = (select MAX(observed_at) from \"keeptradecut_valuations\" where \"pid\" = player.pid and \"is_superflex\" = true and \"keeptradecut_value\" is not null and \"observed_at\" <= LEAST(LEAST(make_date((opening_days.year) + 0, 2, 1) + (29 - 1) * interval '1 day', make_date((opening_days.year) + 0, 2, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) and \"observed_at\" > (LEAST(LEAST(make_date((opening_days.year) + 0, 2, 1) + (29 - 1) * interval '1 day', make_date((opening_days.year) + 0, 2, 1) + interval '1 month' - interval '1 day')::timestamptz, now()) - interval '30 days')) where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"t5ee70a3ae6d50a4083248c37b51a1df3\".\"keeptradecut_value\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}

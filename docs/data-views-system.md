@@ -345,6 +345,22 @@ The `points` columns (`player_{week,season,rest_of_season}_projected_points`) al
 
 The other three computed projection columns (`points_added`, `market_salary`, `salary_adjusted_points_added`) are derived into `league_format_*`/`league_*` valuation tables that carry no `sourceid` dimension and do **not** accept the param. `ros_projections` selection is wired but currently inert — only the AVERAGE source is materialized there today.
 
+#### KeepTradeCut `as_of_month_day` param
+
+The three KeepTradeCut columns (`player_keeptradecut_value`, `player_keeptradecut_overall_rank`, `player_keeptradecut_position_rank`) accept a column-scoped `as_of_month_day` param, stored as a bare `MM-DD` string. Under a **year row axis** it replaces the NFL opening day as the per-row as-of boundary, so each row resolves to the same calendar day within its own year — which is what lets a view author compare a player across seasons at a fixed anchor rather than at each season's opener. Unset, the emitter is byte-identical to its pre-param form, so no existing saved view or cached entry moves.
+
+It is year-axis only. Under a week axis the week branch of the join wins and the param is ignored; the control hides itself there rather than offering a setting that does nothing.
+
+Three properties of the boundary are load-bearing:
+
+- **Leap-day clamp.** `make_date` RAISES rather than returning null on a day the month does not have (`make_date(2023,2,29)` is `date field value out of range`), and that aborts the whole statement. An inner `LEAST` resolves the anchor to the month's last day when the requested day overruns it, so `02-29` yields 2023-02-28 in a non-leap year and 2024-02-29 in a leap one. This is why the param is a bare `MM-DD` and not a DatePicker — a picker is bound to a concrete year and cannot express February 29 in a non-leap year at all.
+- **`year_offset` folds into `make_date`'s year argument**, not into an interval added after the clamp. That ordering is what makes the clamp resolve in the target year: anchor `02-29` on row year 2023 with offset +1 is 2024-02-29, where clamping first and adding a year would give 2024-02-28.
+- **Future clamp and recency floor are unchanged.** The outer `LEAST(..., now())` still prevents a boundary in the future, and the 30-day recency floor is still derived from the clamped boundary.
+
+**A malformed value throws; it does not degrade.** Validation is three steps — an `MM-DD` shape regex, then `sql_integer_param` on each half, then a month 1-12 / day 1-31 range check — and all three are required, since `sql_integer_param` carries no range check and `13-01` would otherwise reach `make_date` and raise at execution. The throw sets `is_invalid_param`, which the four data-view routes map to 400; over the websocket (the SPA's actual transport) it surfaces as a `DATA_VIEW_ERROR`. This matches the shipped behaviour for a malformed `year` on the same column.
+
+The param participates in the KeepTradeCut table-alias hash, so two columns differing only by it resolve to two independent joins rather than collapsing onto one alias. It also forces the six-hour cache TTL whenever it is set: `get_cache_info` never receives `row_axes`, so it cannot tell a year-split request from any other and no longer TTL can be justified.
+
 #### Saved-View Migration
 
 The `scripts/migrate-data-views-single-nfl-week.mjs` script performs column-scoped rewrites on `user_data_views.table_state` and `user_plays_views.table_state` rows:

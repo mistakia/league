@@ -14,7 +14,7 @@
 // the boundary lives here instead, at the point of use, and each splice site
 // declares the shape it actually needs.
 
-const invalid_param = ({ param_name }) => {
+export const invalid_param = ({ param_name }) => {
   const error = new Error(`invalid data view param: ${param_name}`)
   // Routes map this to 400 rather than 500 -- it is a bad request, not a
   // server fault. The offending value is deliberately not echoed back.

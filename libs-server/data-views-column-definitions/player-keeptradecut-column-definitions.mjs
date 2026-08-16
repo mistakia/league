@@ -4,6 +4,10 @@ import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { resolve_year_offset_range } from '#libs-server/data-views/param-utils.mjs'
 import {
+  invalid_param,
+  sql_integer_param
+} from '#libs-server/data-views/sanitize-sql-param.mjs'
+import {
   create_date_based_cache_info,
   CACHE_TTL
 } from '#libs-server/data-views/cache-info-utils.mjs'
@@ -36,6 +40,43 @@ const METRIC_COLUMNS = {
   position_rank: 'position_rank'
 }
 
+// A bare recurring calendar day, stored as `MM-DD`. Under a year row axis it
+// replaces the NFL opening day as the per-row as-of boundary, resolving to the
+// same calendar day within each row's own year.
+//
+// Validation is three steps and all three are load-bearing. The shape regex
+// pins two-digit halves, so `9-1` is rejected rather than silently accepted as
+// September 1. sql_integer_param is the house boundary for a value spliced
+// into SQL text -- see its header for why bindings are unavailable on this
+// path. And the range check is NOT redundant with it: sql_integer_param
+// carries no range, so `13-01` otherwise splits into two valid integers and
+// reaches make_date(<year>, 13, 1), which raises `date field value out of
+// range` at EXECUTION -- a Postgres error surfaced to the user in place of a
+// clean invalid_param.
+const AS_OF_MONTH_DAY_PATTERN = /^(\d{2})-(\d{2})$/
+
+const parse_as_of_month_day = (value) => {
+  const raw = Array.isArray(value) ? value[0] : value
+  if (raw === null || raw === undefined) {
+    return null
+  }
+
+  const param_name = 'as_of_month_day'
+  const match =
+    typeof raw === 'string' ? raw.match(AS_OF_MONTH_DAY_PATTERN) : null
+  if (!match) {
+    invalid_param({ param_name })
+  }
+
+  const month = sql_integer_param({ value: match[1], param_name })
+  const day = sql_integer_param({ value: match[2], param_name })
+  if (month < 1 || month > 12 || day < 1 || day > 31) {
+    invalid_param({ param_name })
+  }
+
+  return { month, day }
+}
+
 const get_default_params = ({ params = {} } = {}) => {
   const date = params.date || null
   const year = Array.isArray(params.year)
@@ -45,14 +86,27 @@ const get_default_params = ({ params = {} } = {}) => {
   const year_offset_single = Array.isArray(params.year_offset)
     ? params.year_offset[0]
     : params.year_offset || 0
-  return { date, year, year_offset_single }
+  const as_of_month_day = parse_as_of_month_day(params.as_of_month_day)
+  return { date, year, year_offset_single, as_of_month_day }
 }
 
 const is_superflex_from_params = (params = {}) => Number(params.qb || 2) === 2
 
 const get_cache_info_for_keeptradecut = create_date_based_cache_info({
   get_date_params: ({ params = {} } = {}) => get_default_params({ params }),
-  calculate_ttl: ({ date, year }) => {
+  calculate_ttl: ({ date, year, as_of_month_day }) => {
+    // get_cache_info is invoked as get_cache_info({ params }) at both call
+    // sites in get-data-view-results.mjs, so it never receives row_axes and
+    // cannot tell whether a year axis is active. params.year does not scope a
+    // year-split request either -- the axis does. So no long TTL can be
+    // justified for any param-bearing request and this forces the short one
+    // unconditionally, including for requests whose result cannot change (a
+    // year axis over 2015-2020, or a week axis where the param is ignored
+    // outright). That cost is accepted; narrowing it needs row_axes in the
+    // cache-info contract.
+    if (as_of_month_day) {
+      return CACHE_TTL.SIX_HOURS
+    }
     if (date) {
       return CACHE_TTL.THIRTY_DAYS
     }
@@ -63,7 +117,8 @@ const get_cache_info_for_keeptradecut = create_date_based_cache_info({
 })
 
 const generate_table_alias = ({ type, params = {}, row_axes = [] } = {}) => {
-  const { date, year, year_offset_single } = get_default_params({ params })
+  const { date, year, year_offset_single, as_of_month_day } =
+    get_default_params({ params })
   // row_axes participates in the alias because the same column at the same
   // params emits a different boundary per axis; without it a week-split and a
   // year-split request for one column would collide on one alias.
@@ -75,7 +130,16 @@ const generate_table_alias = ({ type, params = {}, row_axes = [] } = {}) => {
   // Derived rather than read raw, so qb absent and qb=2 share an alias exactly
   // as they share a predicate.
   const is_superflex = is_superflex_from_params(params)
-  const key = `keeptradecut_${type}_data_${date || ''}_year_${year || ''}_year_offset_${year_offset_single || ''}_axes_${axes}_superflex_${is_superflex}`
+  // as_of_month_day is appended only when set, so a column that does not carry
+  // it hashes exactly as it did before the param existed and no cached entry
+  // or saved view moves. It has to participate at all for the same reason
+  // is_superflex does: it changes the emitted boundary, so two columns
+  // differing only by it would otherwise collapse onto one alias and render
+  // each other's values.
+  const as_of_month_day_key = as_of_month_day
+    ? `_as_of_month_day_${as_of_month_day.month}-${as_of_month_day.day}`
+    : ''
+  const key = `keeptradecut_${type}_data_${date || ''}_year_${year || ''}_year_offset_${year_offset_single || ''}_axes_${axes}_superflex_${is_superflex}${as_of_month_day_key}`
   return get_table_hash(key)
 }
 
@@ -123,8 +187,53 @@ const YEAR_AXIS_AS_OF_WINDOW = '30 days'
 // boundary already carried before this clamp existed (production resolves it at
 // New York local midnight, the test container at UTC), so this changes nothing
 // about it. The clamped branch is TZ-independent outright, since now() is now().
-const year_axis_boundary = ({ opening_day_sql, year_offset_single }) =>
+const year_axis_opening_day_boundary = ({
+  opening_day_sql,
+  year_offset_single
+}) =>
   `LEAST(date_trunc('day', ${opening_day_sql}) + interval '${year_offset_single} year', now())`
+
+// The same boundary anchored on a chosen calendar day within the row's own
+// year rather than on that year's opening day. Selected by the
+// `as_of_month_day` param; everything downstream of it -- the recency floor,
+// the single as-of lookup -- is unchanged.
+//
+// The inner LEAST is the February 29 clamp. make_date RAISES rather than
+// returning null on a day the month does not have (`select make_date(2023,2,29)`
+// is `date field value out of range`), and that aborts the whole statement, so
+// the clamp is load-bearing rather than defensive: it resolves to the month's
+// last day whenever the requested day overruns it. `+ interval '1 month' -
+// interval '1 day'` crosses the year correctly for December.
+//
+// year_offset folds into make_date's YEAR argument rather than being added as
+// an interval afterwards, and that ordering is what makes the clamp resolve in
+// the TARGET year: anchor 02-29 on row year 2023 with offset +1 yields
+// 2024-02-29, because 2024 is a leap year. Clamping first and adding
+// interval '1 year' yields 2024-02-28 -- verified -- which contradicts this
+// feature's own semantic of the same calendar day within each row's year.
+//
+// The outer LEAST against now() is the existing future clamp, unchanged in
+// intent. make_date yields a `date`, which resolves against a timestamptz in
+// the SESSION timezone exactly as date_trunc('day', opening_day) does today,
+// so this preserves that dependence rather than fixing it.
+const year_axis_month_day_boundary = ({
+  year_sql,
+  year_offset_single,
+  as_of_month_day
+}) => {
+  const { month, day } = as_of_month_day
+  // The offset lands in raw arithmetic position here rather than inside an
+  // interval literal, so it is sanitized at this splice site.
+  const offset = sql_integer_param({
+    value: year_offset_single,
+    param_name: 'year_offset'
+  })
+  const first_of_month = `make_date((${year_sql}) + ${offset}, ${month}, 1)`
+  return (
+    `LEAST(LEAST(${first_of_month} + (${day} - 1) * interval '1 day', ` +
+    `${first_of_month} + interval '1 month' - interval '1 day')::timestamptz, now())`
+  )
+}
 
 // The single as-of lookup every axis uses: the most recent observation at or
 // before `boundary_sql` that actually carries `metric_column`. A null boundary
@@ -166,7 +275,7 @@ const keeptradecut_join = ({
   const join_func = get_join_func(
     row_axes.includes('week') ? 'INNER' : join_type
   )
-  const { year_offset_single } = get_default_params({ params })
+  const { year_offset_single, as_of_month_day } = get_default_params({ params })
 
   if (row_axes.includes('year') && !data_view_options.opening_days_joined) {
     query.leftJoin(
@@ -212,10 +321,19 @@ const keeptradecut_join = ({
       // deletes this cast.
       boundary_sql = 'to_timestamp(nfl_year_week_timestamp.week_timestamp)'
     } else if (row_axes.includes('year')) {
-      boundary_sql = year_axis_boundary({
-        opening_day_sql: 'opening_days.opening_day',
-        year_offset_single
-      })
+      // The opening_days join stays on both branches. The month/day boundary
+      // reads opening_days.year rather than opening_days.opening_day, which is
+      // the same joined row and keeps both year predicates below meaningful.
+      boundary_sql = as_of_month_day
+        ? year_axis_month_day_boundary({
+            year_sql: 'opening_days.year',
+            year_offset_single,
+            as_of_month_day
+          })
+        : year_axis_opening_day_boundary({
+            opening_day_sql: 'opening_days.opening_day',
+            year_offset_single
+          })
       // Recency floor -- see YEAR_AXIS_AS_OF_WINDOW. Without it a delisted
       // player's final rank is carried into every later season.
       lower_bound_sql = `(${boundary_sql} - interval '${YEAR_AXIS_AS_OF_WINDOW}')`
@@ -295,9 +413,10 @@ const keeptradecut_year_offset_range_select =
     // "nan" -- a 42703 on any year_offset range request that omits year. Default
     // to the current season, matching get_default_params and every other year
     // basis in this file.
+    const { year, as_of_month_day } = get_default_params({ params })
     const anchor = data_view_options.year_reference
       ? `(${data_view_options.year_reference})`
-      : get_default_params({ params }).year
+      : year
 
     const per_offset_selects = []
     for (let off = min_off; off <= max_off; off++) {
@@ -305,10 +424,16 @@ const keeptradecut_year_offset_range_select =
       // year axis, reduced across a range of offsets. An unbounded reach would
       // reintroduce the delisted-player tail one offset at a time, and an
       // unclamped boundary would empty every offset landing past today.
-      const boundary = year_axis_boundary({
-        opening_day_sql: 'od_o.opening_day',
-        year_offset_single: off
-      })
+      const boundary = as_of_month_day
+        ? year_axis_month_day_boundary({
+            year_sql: 'od_o.year',
+            year_offset_single: off,
+            as_of_month_day
+          })
+        : year_axis_opening_day_boundary({
+            opening_day_sql: 'od_o.opening_day',
+            year_offset_single: off
+          })
       per_offset_selects.push(
         `(SELECT ktc_o.${metric_column} FROM keeptradecut_valuations ktc_o ` +
           `WHERE ktc_o.pid = ${pid_reference} AND ktc_o.is_superflex = ${is_superflex} ` +
