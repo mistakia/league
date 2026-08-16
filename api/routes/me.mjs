@@ -215,9 +215,11 @@ router.get('/?', async (req, res) => {
       .whereIn('leagues.uid', leagueIds)
 
     // The SPA's league store is populated from this payload on auth, so a
-    // league missing its pause state here renders no banner and freezes no
-    // clock — see get_pause_state_by_league_id. `pause_reason` stays off the
-    // wire, as it does on GET /leagues/:leagueId.
+    // league missing its pause state here renders no banner, freezes no clock,
+    // and — since `resumed_at` is what voids the draft's standing publication —
+    // shows draft windows the resume already cancelled. See
+    // get_pause_state_by_league_id. `pause_reason` stays off the wire, as it
+    // does on GET /leagues/:leagueId.
     const pause_state = await get_pause_state_by_league_id({ leagues, db })
     for (const league of leagues) {
       Object.assign(league, pause_state[Number(league.uid)])

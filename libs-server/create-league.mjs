@@ -95,6 +95,13 @@ export default async function ({ lid, commishid, ...params } = {}) {
     draft_pick_interval: league_params.draft_pick_interval,
     draft_hour_min: league_params.draft_hour_min,
     draft_hour_max: league_params.draft_hour_max,
+    // Required alongside `draft_start` by
+    // `seasons_rookie_draft_end_at_set_with_start`: a season that schedules a
+    // draft has to say when it hard-closes, because the end is announced now
+    // rather than projected from the cadence.
+    rookie_draft_end_at: epoch_to_timestamptz(
+      league_params.rookie_draft_end_at
+    ),
 
     free_agency_live_auction_start: epoch_to_timestamptz(
       league_params.free_agency_live_auction_start

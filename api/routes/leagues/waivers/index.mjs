@@ -9,7 +9,6 @@ import {
   isSantuaryPeriod,
   get_free_agent_period
 } from '#libs-shared'
-import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import {
   current_season,
   roster_slot_types,
@@ -427,14 +426,6 @@ router.post('/?', async (req, res) => {
         }
 
         if (type === waiver_types.FREE_AGENCY_PRACTICE) {
-          const picks = await db('draft')
-            .where({
-              season_year: current_season.year,
-              lid: leagueId
-            })
-            .orderBy('pick', 'asc')
-          const last_pick = picks[picks.length - 1]
-
           // Get the season data to check for explicit completion timestamp
           const season = await db('seasons')
             .where({
@@ -444,11 +435,7 @@ router.post('/?', async (req, res) => {
             .first()
 
           const draft_dates = getDraftDates({
-            ...get_draft_window_config(league),
-            total_picks: last_pick?.pick, // highest pick number anchors the final window
-            last_selection_timestamp: last_pick
-              ? last_pick.selection_timestamp
-              : null,
+            rookie_draft_end_at: season ? season.rookie_draft_end_at : null,
             rookie_draft_completed_at: season
               ? season.rookie_draft_completed_at
               : null

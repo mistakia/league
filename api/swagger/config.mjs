@@ -388,24 +388,13 @@ const options = {
                 'When the league pause opened; null when the league is live. The commissioner reason is NOT on this payload — it is served from the authenticated pause route.',
               example: null
             },
-            draft_pause_periods: {
-              type: 'array',
+            resumed_at: {
+              type: 'string',
+              format: 'date-time',
+              nullable: true,
               description:
-                'Pause intervals overlapping the rookie draft, credited back to the pick clock. Intervals rather than a total, so a live pause is measured against the reader own clock; resumed_at is null while open.',
-              items: {
-                type: 'object',
-                properties: {
-                  paused_at: {
-                    type: 'string',
-                    format: 'date-time'
-                  },
-                  resumed_at: {
-                    type: 'string',
-                    format: 'date-time',
-                    nullable: true
-                  }
-                }
-              }
+                'When the league was most recently resumed; null if it has never been. A resume voids the rookie draft standing publication, so no pick has a window until the next daily publication boundary at or after this instant.',
+              example: null
             },
             espn_league_id: {
               type: 'integer',

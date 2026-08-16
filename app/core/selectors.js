@@ -18,7 +18,6 @@ import {
   getDraftDates,
   get_free_agent_period,
   getDraftWindow,
-  is_within_daily_window,
   get_draft_clock_now,
   groupBy,
   fixTeam,
@@ -432,15 +431,13 @@ export const getPicks = createSelector(
           return p
         }
 
-        // A jump pick is only active inside the daily window hours; an
-        // in-sequence pick (previousSelected) stays active at any time.
+        // A pick whose predecessor is made (previousSelected) is on the clock
+        // at any time. Otherwise it takes someone jumping it, which needs its
+        // published slot to have passed. No daily-band check: every window IS
+        // a slot inside the band now, and a null window -- between a resume
+        // and the next publication -- is not after anything.
         const isActive =
-          previousSelected ||
-          (draft_clock_now.isAfter(p.draftWindow) &&
-            is_within_daily_window(
-              draft_clock_now,
-              get_draft_window_config(league)
-            ))
+          previousSelected || draft_clock_now.isAfter(p.draftWindow)
 
         previousNotActive = !isActive && previousActive
         // This pick is the first one off the clock, so it is the first of the
@@ -485,43 +482,22 @@ export function is_player_drafted(state, { pid, player_map = new Map() }) {
   return drafted.includes(pid)
 }
 
+// The announced hard end, read rather than projected. There is nothing left to
+// derive here: `rookie_draft_completed_at` records that the draft actually
+// ended and `rookie_draft_end_at` is the cutoff it would otherwise run to, and
+// the completion path writes the first in the same request that makes the last
+// pick. Projecting off the final pick's own day -- what this selector used to
+// fall back to -- is unavailable under the published slate anyway, since that
+// projection is a function of the current publication and moves every midnight.
 export const get_rookie_draft_end = createSelector(
-  (state) => state.getIn(['app', 'leagueId']),
-  (state) => state.get('leagues'),
   get_current_league,
-  get_rookie_draft_last_pick,
-  get_draft_state,
-  (league_id, leagues, current_league, last_pick, draft) => {
-    if (!last_pick) {
-      return null
-    }
-
-    const league = leagues.get(league_id, new League())
-
-    // Prioritize explicit completion timestamp when available
-    const rookie_draft_completed_at = current_league.rookie_draft_completed_at
-    if (rookie_draft_completed_at) {
-      return dayjs(rookie_draft_completed_at).tz('America/New_York')
-    }
-
-    // Fallback to existing calculation logic
-    if (last_pick.selection_timestamp) {
-      // timestamptz as of the 2026-08-07 conformance pass, so it arrives as an
-      // ISO string through JSON; dayjs.unix() on one yields an Invalid Date,
-      // which silently made every downstream draft-end comparison false.
-      return dayjs(last_pick.selection_timestamp)
-        .tz('America/New_York')
-        .endOf('day')
-    }
-
-    const { picks } = draft
-    const rookie_draft_end = getDraftWindow({
-      ...get_draft_window_config(league),
-      draft_picks: picks.toJS(),
-      pick_number: last_pick.pick + 1
+  (league) => {
+    const { draftEnd } = getDraftDates({
+      rookie_draft_end_at: league.rookie_draft_end_at,
+      rookie_draft_completed_at: league.rookie_draft_completed_at
     })
 
-    return rookie_draft_end
+    return draftEnd
   }
 )
 
@@ -561,9 +537,8 @@ export const get_rookie_draft_next_pick = createSelector(
   (draft, app, lastPick, league) => {
     if (lastPick) {
       const draftDates = getDraftDates({
-        ...get_draft_window_config(league),
-        total_picks: lastPick.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
-        last_selection_timestamp: lastPick.selection_timestamp
+        rookie_draft_end_at: league.rookie_draft_end_at,
+        rookie_draft_completed_at: league.rookie_draft_completed_at
       })
 
       if (current_season.now.isAfter(draftDates.draftEnd)) {
@@ -742,9 +717,8 @@ export const get_league_events = createSelector(
 
       if (lastPick) {
         const draftDates = getDraftDates({
-          ...get_draft_window_config(league),
-          total_picks: lastPick.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
-          last_selection_timestamp: lastPick.selection_timestamp
+          rookie_draft_end_at: league.rookie_draft_end_at,
+          rookie_draft_completed_at: league.rookie_draft_completed_at
         })
 
         if (now.isBefore(draftDates.draftEnd)) {

@@ -28,10 +28,13 @@ describe('LIBS-SERVER get_top_practice_squad_waiver postseason', function () {
       before(async function () {
         this.timeout(60 * 1000)
         await clear_nfl_games({})
-        // Draft window is long past by POST; seed with draft_start two weeks ago
-        // so the waiver-window early-return paths do not short-circuit.
+        // Draft window is long past by POST; seed with draft_start two weeks
+        // ago AND a hard end behind us, so the waiver-window early-return
+        // paths do not short-circuit. The end has to be stated: it is a column
+        // now, so it no longer follows `draft_start` on its own.
         await league_seed(knex, {
-          draft_start: Math.round(Date.now() / 1000) - 14 * 24 * 60 * 60
+          draft_start: Math.round(Date.now() / 1000) - 14 * 24 * 60 * 60,
+          rookie_draft_end_at: Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60
         })
         await seed_nfl_games({})
       })

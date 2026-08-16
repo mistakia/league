@@ -2,23 +2,14 @@ import dayjs from 'dayjs'
 
 import db from '#db'
 import { getDraftDates } from '#libs-shared'
-import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import { current_season, waiver_types, transaction_types } from '#constants'
 import getLeague from './get-league.mjs'
 import apply_nfl_games_current_week_join from './data-views/join-nfl-games-current-week.mjs'
 
 export default async function (lid) {
   const league = await getLeague({ lid })
-  const picks = await db('draft')
-    .where({
-      season_year: current_season.year,
-      lid
-    })
-    .orderBy('pick', 'asc')
-
-  const last_pick = picks[picks.length - 1]
-
-  // Get the season data to check for explicit completion timestamp
+  // Get the season data: the announced hard end, and the explicit completion
+  // timestamp that overrides it once the draft actually finishes.
   const season = await db('seasons')
     .where({
       lid,
@@ -27,9 +18,7 @@ export default async function (lid) {
     .first()
 
   const draft_dates = getDraftDates({
-    ...get_draft_window_config(league),
-    total_picks: last_pick?.pick, // highest pick number anchors the final window
-    last_selection_timestamp: last_pick ? last_pick.selection_timestamp : null,
+    rookie_draft_end_at: season ? season.rookie_draft_end_at : null,
     rookie_draft_completed_at: season ? season.rookie_draft_completed_at : null
   })
 

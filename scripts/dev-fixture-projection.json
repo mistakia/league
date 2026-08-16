@@ -329,6 +329,7 @@
       "wildcard_round": "keep",
       "championship_round": "keep",
       "rookie_draft_completed_at": "keep",
+      "rookie_draft_end_at": "keep",
       "is_free_agency_auction_slow_mode": "keep",
       "season_finalized_at": "keep",
       "scoring_format_id": "keep",

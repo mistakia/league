@@ -2,7 +2,6 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 
-import getDraftWindow from './get-draft-window.mjs'
 import { DRAFT_TIMEZONE } from './draft-daily-window.mjs'
 
 dayjs.extend(utc)
@@ -11,46 +10,39 @@ dayjs.extend(timezone)
 const WAIVER_HOURS_AFTER_COMPLETION = 24
 
 /**
- * Calculates when the draft closes and when the post-draft waiver period on
+ * Reads when the draft closes and when the post-draft waiver period on
  * undrafted rookies ends.
  *
  * `draftEnd` is a hard cutoff: the draft route refuses selections past it, so
  * any pick still unmade is forfeited and its rookies fall to practice-squad
- * waivers. It is derived from the same cadence as the individual windows —
- * the end of the day the pick *after* the last one would have opened.
+ * waivers.
+ *
+ * It is READ from `seasons.rookie_draft_end_at` rather than projected from the
+ * cadence, and that is forced by the published-slate rule rather than merely
+ * tidier. The old projection was the end of the day `window(total_picks + 1)`
+ * fell on, and under the slate that expression is a function of the CURRENT
+ * publication — so a derived end would move every midnight, which is not
+ * something a hard cutoff may do.
  *
  * @param {Object} args
- * @param {number} args.draft_start_timestamp - Unix timestamp (seconds) the draft opens.
- * @param {number} args.total_picks - Pick number of the final pick (the highest pick on
- *   the board) — the pick after it opens the last window that sets the draft end.
- * @param {string} [args.cadence_unit] - 'hour' or 'day'; what one step is measured in.
- * @param {number} [args.cadence_interval] - Units of `cadence_unit` between consecutive windows.
- * @param {number} [args.daily_window_start_hour] - First hour a window may open (inclusive).
- * @param {number} [args.daily_window_end_hour] - Hour windows stop opening (exclusive).
- * `last_selection_timestamp` and `rookie_draft_completed_at` are timestamptz as
- * of the 2026-08-07 conformance pass (`draft.selection_timestamp` and
- * `seasons.rookie_draft_completed_at`). Both are always DB-sourced, so they are
- * taken as instants here rather than converted at each of the eleven callers.
- * `draft_start_timestamp` stays epoch seconds because getDraftWindow does
- * arithmetic on it.
+ * @param {Date|string} [args.rookie_draft_end_at] - The hard cutoff, timestamptz.
+ *   Null only for a league with no draft configured, whose callers all guard on
+ *   `draft_start` first; a season that HAS a `draft_start` is guaranteed to
+ *   carry one by `seasons_rookie_draft_end_at_set_with_start`.
+ * @param {Date|string} [args.rookie_draft_completed_at] - Explicit completion
+ *   timestamp, if recorded. Authoritative when present: it records that the
+ *   draft actually ended, rather than when it was scheduled to.
  *
- * @param {Date|string} [args.last_selection_timestamp] - Selection time of the final pick, once made.
- * @param {Date|string} [args.rookie_draft_completed_at] - Explicit completion timestamp, if recorded.
+ * Both are timestamptz as of the 2026-08-07 conformance pass and both are
+ * always DB-sourced, so they are taken as instants here rather than converted
+ * at each caller.
  *
- * @returns {{ draftEnd: import('dayjs').Dayjs, waiverEnd: import('dayjs').Dayjs }}
+ * @returns {{ draftEnd: import('dayjs').Dayjs|null, waiverEnd: import('dayjs').Dayjs|null }}
  */
 export default function getDraftDates({
-  draft_start_timestamp,
-  total_picks,
-  cadence_unit,
-  cadence_interval,
-  daily_window_start_hour,
-  daily_window_end_hour,
-  last_selection_timestamp,
+  rookie_draft_end_at,
   rookie_draft_completed_at
 }) {
-  // An explicit completion timestamp is authoritative — it records that the
-  // draft actually ended, rather than projecting when it would have.
   if (rookie_draft_completed_at) {
     const draftEnd = dayjs(rookie_draft_completed_at).tz(DRAFT_TIMEZONE)
     const waiverEnd = draftEnd
@@ -60,24 +52,11 @@ export default function getDraftDates({
     return { draftEnd, waiverEnd }
   }
 
-  // A league with no picks on the board has nothing to project past, so the
-  // draft closes at the end of the day its first window would have opened.
-  // Guarding here keeps a missing count from reaching getDraftWindow as NaN.
-  const has_picks = Number.isInteger(total_picks) && total_picks > 0
-  const window_after_last_pick = has_picks ? total_picks + 1 : 1
+  if (!rookie_draft_end_at) {
+    return { draftEnd: null, waiverEnd: null }
+  }
 
-  const final_window = last_selection_timestamp
-    ? dayjs(last_selection_timestamp).tz(DRAFT_TIMEZONE)
-    : getDraftWindow({
-        draft_start_timestamp,
-        pick_number: window_after_last_pick,
-        cadence_unit,
-        cadence_interval,
-        daily_window_start_hour,
-        daily_window_end_hour
-      })
-
-  const draftEnd = final_window.endOf('day')
+  const draftEnd = dayjs(rookie_draft_end_at).tz(DRAFT_TIMEZONE)
   const waiverEnd = draftEnd.add(1, 'day')
 
   return { draftEnd, waiverEnd }

@@ -1,6 +1,6 @@
 import getDraftWindow, {
-  is_within_daily_window,
-  get_next_daily_window_entry
+  get_draft_pass_window,
+  get_next_publication_boundary
 } from './get-draft-window.mjs'
 import { current_season } from '#constants'
 
@@ -167,18 +167,21 @@ export const debounce = (callback, wait) => {
 /**
  * Whether a pick is currently jumpable (eligible to be taken out of order).
  *
- * The window moment having passed is necessary and no longer sufficient: once
- * a jump window's moment has passed it stays passed, so without the daily-window
- * gate a team stalled on the clock since the previous day could be jumped at
- * 6am — before the daily window opens. A jump is allowed only when the current
- * time is also inside the daily window hours.
+ * The daily-window half of this gate is GONE, and its absence is the point.
+ * It existed because a passed window stayed passed: under the old re-anchoring
+ * rule a window could land at any minute of the day, so a team stalled since
+ * yesterday could otherwise be jumped at 6am. Under the published slate every
+ * window IS a slot inside the band, and every boundary pushes the schedule
+ * forward, so `is_within_daily_window` can no longer change an answer — a
+ * window outside the band is not constructible.
+ *
+ * A null window is not open. `getDraftWindow` returns literal null between a
+ * resume and the next publication boundary, and for a pick already made as of
+ * the boundary; `dayjs().isAfter(null)` is false, which is the answer both
+ * cases want.
  */
-export const isDraftWindowOpen = (params) => {
-  const now = current_season.now
-  return (
-    now.isAfter(getDraftWindow(params)) && is_within_daily_window(now, params)
-  )
-}
+export const isDraftWindowOpen = (params) =>
+  current_season.now.isAfter(getDraftWindow(params))
 
 export const uuidv4 = () =>
   ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
@@ -188,4 +191,4 @@ export const uuidv4 = () =>
     ).toString(16)
   )
 
-export { getDraftWindow, is_within_daily_window, get_next_daily_window_entry }
+export { getDraftWindow, get_draft_pass_window, get_next_publication_boundary }

@@ -1,4 +1,5 @@
 import { createLeague } from '#libs-server'
+import { default_rookie_draft_end_at } from './league.mjs'
 import { current_season } from '#constants'
 import reset_league_tables from './reset-league-tables.mjs'
 
@@ -19,11 +20,16 @@ export default async function (knex) {
   await knex.raw('ALTER SEQUENCE rosters_uid_seq RESTART WITH 1')
 
   const userId = 1
+  const draft_start_timestamp = Math.round(Date.now() / 1000)
   await createLeague({
     commishid: userId,
     lid: 1,
     is_hosted: 1,
-    draft_start: Math.round(Date.now() / 1000),
+    draft_start: draft_start_timestamp,
+    // Required alongside `draft_start` by
+    // `seasons_rookie_draft_end_at_set_with_start`; same value the league
+    // fixture uses, for the same reason.
+    rookie_draft_end_at: default_rookie_draft_end_at(draft_start_timestamp),
     free_agency_live_auction_start: current_season.regular_season_start
       .add(1, 'week')
       .subtract(5, 'days')

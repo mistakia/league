@@ -3,9 +3,8 @@ import { createSelector } from 'reselect'
 
 import { current_season } from '@constants'
 import {
-  getDraftWindow,
+  get_draft_pass_window,
   getDraftDates,
-  is_within_daily_window,
   get_draft_clock_now
 } from '@libs-shared'
 import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
@@ -17,7 +16,6 @@ import {
   get_draft_state,
   getPicks,
   get_rookie_draft_next_pick,
-  get_rookie_draft_last_pick,
   getRookiePlayers
 } from '@core/selectors'
 import { player_actions } from '@core/players'
@@ -35,50 +33,41 @@ const map_state_to_props = createSelector(
   getPicks,
   get_current_league,
   get_app,
-  get_rookie_draft_last_pick,
-  (
-    players,
-    selectedPlayerMap,
-    nextPick,
-    draft,
-    picks,
-    league,
-    app,
-    last_pick
-  ) => {
+  (players, selectedPlayerMap, nextPick, draft, picks, league, app) => {
     // Every clock on this page reads one value, so a pause freezes all of them
-    // together. It is also the credit's upper bound, without which a paused
-    // team's remaining time would grow rather than hold.
+    // together, and every publication boundary resolves against that same
+    // frozen clock rather than wall time.
     const is_paused = Boolean(league.paused_at)
     const draft_clock_now = get_draft_clock_now({
       paused_at: league.paused_at,
       now: current_season.now
     })
 
-    const windowEnd = nextPick
-      ? getDraftWindow({
-          ...get_draft_window_config(league),
-          draft_picks: picks.toJS(),
-          pick_number: nextPick.pick + 1,
-          until: draft_clock_now
-        })
-      : null
+    // When the pick on the clock becomes passable: the slot of the SECOND
+    // outstanding pick. Asking for `nextPick.pick + 1` is what this used to
+    // do, and on a board with a gap that names a pick that is already MADE,
+    // for which the calculator correctly returns null.
+    const windowEnd = get_draft_pass_window({
+      ...get_draft_window_config(league),
+      draft_picks: picks.toJS(),
+      until: draft_clock_now
+    })
 
-    const isWindowOpen =
-      nextPick &&
-      draft_clock_now.isAfter(nextPick.draftWindow) &&
-      is_within_daily_window(draft_clock_now, get_draft_window_config(league))
+    // No daily-band check: every window is a slot inside the band, so the
+    // band could no longer change the answer. A null window -- between a
+    // resume and the next publication -- is not after anything, which is what
+    // "no pick can be passed yet" means.
+    const isWindowOpen = Boolean(
+      nextPick && draft_clock_now.isAfter(nextPick.draftWindow)
+    )
 
-    let is_draft_complete = false
-    if (last_pick) {
-      const draftDates = getDraftDates({
-        ...get_draft_window_config(league),
-        total_picks: last_pick.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
-        last_selection_timestamp: last_pick.selection_timestamp
-      })
-
-      is_draft_complete = draft_clock_now.isAfter(draftDates.draftEnd)
-    }
+    const { draftEnd } = getDraftDates({
+      rookie_draft_end_at: league.rookie_draft_end_at,
+      rookie_draft_completed_at: league.rookie_draft_completed_at
+    })
+    const is_draft_complete = Boolean(
+      draftEnd && draft_clock_now.isAfter(draftEnd)
+    )
 
     return {
       windowEnd,

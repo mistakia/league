@@ -3,7 +3,7 @@ import { current_season } from '#constants'
 import { create_default_league } from '#libs-shared'
 import {
   get_open_league_pause,
-  get_draft_pause_periods
+  get_latest_league_resume
 } from './league-pause.mjs'
 
 async function get_league_divisions({ lid, year }) {
@@ -50,10 +50,7 @@ export default async function ({ lid, year = current_season.year } = {}) {
 
   if (league) {
     const divisions = await get_league_divisions({ lid, year })
-    const pause_state = await get_league_pause_state({
-      lid,
-      draft_start: league.draft_start
-    })
+    const pause_state = await get_league_pause_state({ lid })
     return { ...league, ...divisions, ...pause_state }
   }
 
@@ -75,19 +72,19 @@ export default async function ({ lid, year = current_season.year } = {}) {
  * `is_paused` is not sent either: it is `Boolean(paused_at)` at the one
  * component that needs it, and a second field is a second thing to disagree.
  *
- * Intervals rather than a precomputed total, because the SPA measures a LIVE
- * pause against its own clock. A scalar snapshot would leave every countdown
- * ticking down during a pause and jumping backward on the next refetch.
+ * `paused_at` travels because the SPA freezes its whole display clock off it
+ * (`libs-shared/get-draft-clock-now.mjs`), so a live pause holds every countdown
+ * still instead of ticking it down and jumping it backward on the next refetch.
+ * `resumed_at` travels because it is what voids the draft's standing
+ * publication: without it the SPA would render windows from a slate the resume
+ * already cancelled.
  */
-async function get_league_pause_state({ lid, draft_start }) {
+async function get_league_pause_state({ lid }) {
   const open_pause = await get_open_league_pause({ league_id: lid })
-  const draft_pause_periods = await get_draft_pause_periods({
-    league_id: lid,
-    draft_start
-  })
+  const resumed_at = await get_latest_league_resume({ league_id: lid })
 
   return {
     paused_at: open_pause ? open_pause.paused_at : null,
-    draft_pause_periods
+    resumed_at
   }
 }
