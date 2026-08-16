@@ -267,6 +267,12 @@ export default {
   // changing the number they display. COLUMN_ID_RENAMES in
   // libs-shared/data-views-saved-view-migration.mjs carries the old id forward.
   player_pff_pass_plays: create_field_from_pff_player_seasonlogs('pass_plays'),
+  // `player_pff_routes` is the PFF season route total, populated every season
+  // 2006-2025. The play-by-play alternative is `player_routes` (a PASS-play
+  // count off nfl_plays_receiver, PlayerProfiler), which spans 2023-2024 only
+  // and adds the game and sub-game periods PFF cannot serve; the two are
+  // different measurements from different vendors and are deliberately not
+  // reconciled.
   player_pff_routes: create_field_from_pff_player_seasonlogs('routes'),
   player_pff_weight: create_field_from_pff_player_seasonlogs('weight'),
   player_pff_overall_snaps:

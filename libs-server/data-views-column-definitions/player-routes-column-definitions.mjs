@@ -47,6 +47,13 @@ const player_routes_source = {
 }
 
 export default {
+  // `player_routes` is the play-by-play route count: a count of PASS plays off
+  // nfl_plays_receiver (PlayerProfiler) per period. It spans 2023-2024 ONLY --
+  // a view built on it and back-tested before 2023 returns blank cells, not an
+  // error, because the play-row source has no earlier rows. The season-only
+  // alternative is `player_pff_routes` (pff_player_seasonlogs.routes, PFF,
+  // 2006-2025); the two are different measurements from different vendors and
+  // are deliberately not reconciled.
   player_routes: {
     table_alias: get_per_player_route_cte_table_name,
     source: player_routes_source,
