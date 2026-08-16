@@ -71,6 +71,37 @@ const options = {
           }
         },
 
+        // What a CANDIDATE holding an edit link reads back about his own
+        // application. A separate schema rather than a reuse of the one above,
+        // because that one is the table's column set -- which is what lets gate
+        // 2 of check-api-response-shapes compare it against the schema file --
+        // while this one is hand-built, omits columns the candidate has no
+        // business reading, and carries a field that is not a column at all.
+        WaitlistSubmissionForCandidate: {
+          type: 'object',
+          properties: {
+            submission_id: { type: 'integer' },
+            questionnaire_version: { type: 'integer' },
+            submitted_at: { type: 'string', format: 'date-time' },
+            candidate_name: { type: 'string' },
+            contact_email: { type: 'string' },
+            contact_handle: { type: 'string', nullable: true },
+            timezone_name: { type: 'string' },
+            has_affirmed_commitment: { type: 'boolean' },
+            responses: {
+              type: 'object',
+              additionalProperties: { type: 'string' },
+              description:
+                'Question id -> answer text. The id set is defined in libs-shared/manager-waitlist-questions.mjs.'
+            },
+            is_locked: {
+              type: 'boolean',
+              description:
+                'True once the application is named as a candidate on an admission vote, after which it can be read but not edited.'
+            }
+          }
+        },
+
         // Base ID schemas
         EntityId: {
           type: 'integer',

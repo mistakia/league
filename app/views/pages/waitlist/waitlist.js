@@ -1,7 +1,7 @@
 /* global fetch */
 import React from 'react'
 import PropTypes from 'prop-types'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useSearchParams } from 'react-router-dom'
 
 import PageLayout from '@layouts/page'
 import { API_URL } from '@core/constants'
@@ -37,7 +37,17 @@ import './waitlist.styl'
 // api_request, and action types exported without their creators -- none of
 // which can fail a build or a test. A plain fetch with local state has none of
 // them and is legible in one screen.
+//
+// EDITING. The same page renders the edit of a past application, reached by the
+// `token` in the link the API emails on submit. It is one page rather than two
+// because the form IS the application: a separate edit page would restate every
+// question, every length cap and every control choice, and the two would drift
+// the first time a question changed. What the token changes is where the values
+// come from and which verb sends them back.
 const submit_url = `${API_URL}/waitlist`
+const edit_link_url = `${API_URL}/waitlist/edit-link`
+const read_submission_url = (token) =>
+  `${API_URL}/waitlist/submission?token=${encodeURIComponent(token)}`
 
 const Field = ({
   name,
@@ -112,12 +122,160 @@ Field.propTypes = {
   on_change: PropTypes.func
 }
 
+// The way back for somebody who has applied and lost the link. It asks for the
+// address and says nothing about whether one was found, because the API
+// deliberately answers the same either way — an "unknown address" message here
+// would put the leak back on the page after the route was written to avoid it.
+const EditLinkRequest = () => {
+  const [contact_email, set_contact_email] = React.useState('')
+  const [is_sending, set_is_sending] = React.useState(false)
+  const [is_sent, set_is_sent] = React.useState(false)
+  const [error_message, set_error_message] = React.useState(null)
+
+  const handle_submit = async (event) => {
+    event.preventDefault()
+    set_is_sending(true)
+    set_error_message(null)
+
+    try {
+      const response = await fetch(edit_link_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact_email })
+      })
+
+      if (!response.ok) {
+        throw new Error(
+          response.status === 429
+            ? 'That is several link requests from your connection today. Email the commissioner instead.'
+            : 'Something went wrong sending that. Please try again.'
+        )
+      }
+
+      set_is_sent(true)
+    } catch (error) {
+      set_error_message(error.message)
+    } finally {
+      set_is_sending(false)
+    }
+  }
+
+  if (is_sent) {
+    return (
+      <section className='waitlist__intro-section'>
+        <h2 className='waitlist__intro-title'>Already applied?</h2>
+        <p>
+          If we have an application under that address, the link to it is on its
+          way.
+        </p>
+      </section>
+    )
+  }
+
+  return (
+    <section className='waitlist__intro-section'>
+      <h2 className='waitlist__intro-title'>Already applied?</h2>
+      <p>
+        You can change your answers up until the managers start voting. Give us
+        the address you applied with and we will email you the link.
+      </p>
+      <form className='waitlist__form' onSubmit={handle_submit}>
+        <Field
+          name='edit_link_contact_email'
+          label='Email'
+          type='email'
+          required
+          value={contact_email}
+          on_change={(event) => set_contact_email(event.target.value)}
+        />
+        {error_message && (
+          <div className='waitlist__error'>{error_message}</div>
+        )}
+        <button
+          className='waitlist__submit'
+          type='submit'
+          disabled={is_sending}
+        >
+          {is_sending ? 'Sending' : 'Email me the link'}
+        </button>
+      </form>
+    </section>
+  )
+}
+
+// The stored row, as the form's own value map. Contact details are columns and
+// answers live under their question id, and a null column becomes an empty
+// string because a controlled input given null is an uncontrolled input.
+const values_from_submission = (submission) => {
+  const values = { ...(submission.responses || {}) }
+
+  for (const field of contact_fields) {
+    values[field.column] = submission[field.column] || ''
+  }
+
+  return values
+}
+
 export default function WaitlistPage() {
+  const [search_params] = useSearchParams()
+  const token = search_params.get('token')
+
   const [values, set_values] = React.useState({})
   const [has_affirmed, set_has_affirmed] = React.useState(false)
   const [is_submitting, set_is_submitting] = React.useState(false)
   const [is_submitted, set_is_submitted] = React.useState(false)
   const [error_message, set_error_message] = React.useState(null)
+  const [is_loading, set_is_loading] = React.useState(Boolean(token))
+  const [load_error_message, set_load_error_message] = React.useState(null)
+  const [is_locked, set_is_locked] = React.useState(false)
+
+  // Keyed on the token rather than on mount, so a candidate who opens a second
+  // link in the same tab reads the application that link names.
+  React.useEffect(() => {
+    if (!token) {
+      return
+    }
+
+    let is_current = true
+    set_is_loading(true)
+
+    const load = async () => {
+      try {
+        const response = await fetch(read_submission_url(token))
+
+        if (!response.ok) {
+          throw new Error(
+            response.status === 404
+              ? 'That application is closed — the round it belongs to is over.'
+              : 'That link does not work any more. Ask for a new one below.'
+          )
+        }
+
+        const submission = await response.json()
+
+        if (is_current) {
+          set_values(values_from_submission(submission))
+          set_has_affirmed(Boolean(submission.has_affirmed_commitment))
+          set_is_locked(Boolean(submission.is_locked))
+          set_load_error_message(null)
+        }
+      } catch (error) {
+        if (is_current) {
+          set_load_error_message(error.message)
+        }
+      } finally {
+        if (is_current) {
+          set_is_loading(false)
+        }
+      }
+    }
+
+    load()
+
+    return () => {
+      is_current = false
+    }
+  }, [token])
 
   const handle_change = (event) => {
     const { name, value } = event.target
@@ -131,24 +289,36 @@ export default function WaitlistPage() {
 
     try {
       const response = await fetch(submit_url, {
-        method: 'POST',
+        // PUT with a token REPLACES the named application; POST creates one.
+        // The body is otherwise identical, because the API validates an edit
+        // exactly as it validates a new submission.
+        method: token ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         // The affirmation is sent as a real boolean because the API checks it
         // with `!== true` — a checkbox serialized as a string would be refused.
         body: JSON.stringify({
           ...values,
+          ...(token ? { token } : {}),
           has_affirmed_commitment: has_affirmed
         })
       })
 
       if (!response.ok) {
-        // 429 is the rate limiter and is worth naming, because a candidate who
-        // hits it after a failed first attempt would otherwise read the generic
-        // message as the form being broken.
+        // Each of these is worth naming, because the generic message would
+        // otherwise read as the form being broken: 429 is the rate limiter, 409
+        // is the vote having started, and 401 is a link that no longer works.
+        if (response.status === 409) {
+          set_is_locked(true)
+        }
+
         throw new Error(
           response.status === 429
-            ? 'That is several submissions from your connection today. Email the commissioner instead and we will sort it out.'
-            : 'Something went wrong sending that. Please try again.'
+            ? 'That is several attempts from your connection today. Email the commissioner instead and we will sort it out.'
+            : response.status === 409
+              ? 'The managers have started voting on your application, so it can no longer be changed.'
+              : response.status === 401
+                ? 'That link does not work any more. Ask for a new one from the waitlist page.'
+                : 'Something went wrong sending that. Please try again.'
         )
       }
 
@@ -160,21 +330,78 @@ export default function WaitlistPage() {
     }
   }
 
+  const is_editing = Boolean(token)
+
   let body
 
-  if (is_submitted) {
+  if (is_editing && is_loading) {
+    body = (
+      <div className='waitlist-surface'>
+        <div className='waitlist'>
+          <p className='waitlist__deck'>Loading your application.</p>
+        </div>
+      </div>
+    )
+  } else if (is_editing && load_error_message) {
     body = (
       <div className='waitlist-surface'>
         <div className='waitlist'>
           <p className='waitlist__eyebrow'>
             {league_name} <span aria-hidden='true'>&middot;</span> {site_name}
           </p>
-          <h1 className='waitlist__title'>Thank you</h1>
-          <p className='waitlist__deck'>
-            That is everything we need. The current managers read the answers
-            and vote, so a reply takes days rather than hours — you will hear
-            back either way.
+          <h1 className='waitlist__title'>That link did not open</h1>
+          <p className='waitlist__deck'>{load_error_message}</p>
+          <EditLinkRequest />
+        </div>
+      </div>
+    )
+  } else if (is_editing && is_locked) {
+    // Read-only rather than a form that would be refused on send. A candidate
+    // who has been put on a ballot is past the point where his answers are his
+    // to change, and finding that out after rewriting five of them is worse
+    // than being told first.
+    body = (
+      <div className='waitlist-surface'>
+        <div className='waitlist'>
+          <p className='waitlist__eyebrow'>
+            {league_name} <span aria-hidden='true'>&middot;</span> {site_name}
           </p>
+          <h1 className='waitlist__title'>
+            Your application is with the managers
+          </h1>
+          <p className='waitlist__deck'>
+            They are voting on it as it stands, so it can no longer be changed.
+            If something in it is wrong, email the commissioner and he will sort
+            it out.
+          </p>
+          <p>
+            <NavLink to='/leagues/1'>Look at the league</NavLink> in the
+            meantime.
+          </p>
+        </div>
+      </div>
+    )
+  } else if (is_submitted) {
+    body = (
+      <div className='waitlist-surface'>
+        <div className='waitlist'>
+          <p className='waitlist__eyebrow'>
+            {league_name} <span aria-hidden='true'>&middot;</span> {site_name}
+          </p>
+          <h1 className='waitlist__title'>
+            {is_editing ? 'Saved' : 'Thank you'}
+          </h1>
+          <p className='waitlist__deck'>
+            {is_editing
+              ? 'The managers will read this version. You can come back to the same link and change it again until they start voting.'
+              : 'That is everything we need. The current managers read the answers and vote, so a reply takes days rather than hours — you will hear back either way.'}
+          </p>
+          {!is_editing && (
+            <p>
+              We have emailed you a link back to your answers — keep it, and use
+              it if you want to change anything before the managers vote.
+            </p>
+          )}
           <p>
             <NavLink to='/leagues/1'>Look at the league</NavLink> in the
             meantime.
@@ -189,10 +416,13 @@ export default function WaitlistPage() {
           <p className='waitlist__eyebrow'>
             {league_name} <span aria-hidden='true'>&middot;</span> {site_name}
           </p>
-          <h1 className='waitlist__title'>Join the waitlist</h1>
+          <h1 className='waitlist__title'>
+            {is_editing ? 'Your application' : 'Join the waitlist'}
+          </h1>
           <p className='waitlist__deck'>
-            The current managers read every answer and vote on it. Allow about
-            ten minutes, and read the two sections below before you begin.
+            {is_editing
+              ? 'Change whatever you want and send it again. What you save here is what the managers read.'
+              : 'The current managers read every answer and vote on it. Allow about ten minutes, and read the two sections below before you begin.'}
           </p>
 
           {/* Two sections, in this order on purpose: what the league requires
@@ -283,9 +513,17 @@ export default function WaitlistPage() {
               type='submit'
               disabled={is_submitting}
             >
-              {is_submitting ? 'Sending' : 'Send it'}
+              {is_submitting
+                ? 'Sending'
+                : is_editing
+                  ? 'Save changes'
+                  : 'Send it'}
             </button>
           </form>
+
+          {/* Only on the blank form. Somebody who arrived on a working link is
+              already holding the thing this section hands out. */}
+          {!is_editing && <EditLinkRequest />}
         </div>
       </div>
     )
