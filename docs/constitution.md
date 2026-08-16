@@ -6,7 +6,7 @@
 
 **FORMATION AND DURATION OF CONSTITUTION**
 
-This GENESIS LEAGUE (LEAGUE) Constitution constitutes an agreement among the LEAGUE Football Teams, as identified herein, each of which shall be entitled to the benefits of and shall be bound by all the terms and provisions hereof, and it shall remain in effect indefinitely, except that the provisions of Article III, Section 2 shall expire at such time as the current Commissioner ceases to hold office.
+This GENESIS LEAGUE (LEAGUE) Constitution constitutes an agreement among the LEAGUE Football Teams, as identified herein, each of which shall be entitled to the benefits of and shall be bound by all the terms and provisions hereof, and it shall remain in effect indefinitely. The powers and duties conferred by Article III attach to the Office of the Commissioner and not to its incumbent, and shall not expire.
 
 ## Article II
 
@@ -51,6 +51,18 @@ This GENESIS LEAGUE (LEAGUE) Constitution constitutes an agreement among the LEA
 “Head-to-Head record” shall mean, over a stated period, a Team’s record of wins, losses and ties in the weekly matchups the LEAGUE schedule assigned to it in that period.
 
 “All Play win percentage” shall mean, over a stated period, the win percentage a Team would have recorded had it played every other Team in the LEAGUE in each week of that period. A tie shall count as one half (1/2) of a win.
+
+“Advisory” shall mean, in respect of any expression of the preference of the Teams, of a jury or of an arbitrator, that it informs a Determination of the Commissioner and does not bind it.
+
+“CHAMPION” shall mean the Team that wins the LEAGUE CHAMPIONSHIP in a given season.
+
+“Determination” shall mean a decision, ruling or direction of the Commissioner in respect of any matter arising under this Constitution, which is binding upon the Teams and final subject only to an Override pursuant to Article III, Section 18. The automatic or routine operation of a Process — such as the running of waivers or the processing of a poaching claim — is not a Determination.
+
+“Eligible Team” shall mean, in respect of an Override, every Team no Manager of which is currently serving as the Commissioner or currently exercising the powers and duties of the Office of the Commissioner under Article III, Section 11. For further clarity, where a Team has more than one Manager, that Team is not an Eligible Team if any of its Managers is so serving.
+
+“Override” shall mean the vacating of a Determination by unanimous vote of the Eligible Teams pursuant to Article III, Section 18.
+
+“Process” shall mean any procedure prescribed by this Constitution, including a vote, poll, petition, review, auction, draft, waiver period, poaching claim, the approval of a trade, or a deadline, but does not include an election under Article III, Section 10, an impeachment vote under Article III, Section 13, or an Override vote under Article III, Section 18.
 
 ### Pronouns.
 
@@ -114,50 +126,63 @@ All times of day applied herein shall be computed as being in Eastern Standard T
 
 4.  Decisions of the Commissioner that include penalties to Teams must be posted formally on the Boards.
 
-### Commissioner not to Supersede Authority of Teams.
+### Authority of the Commissioner.
 
-5.  Notwithstanding the provisions of Section 2, above, the Commissioner shall take no action in the best interests of fantasy football, and shall make no amendment to this Constitution or adjustment to the _status quo_ in respect of any matter that requires the Teams to take a vote, as set forth in Article IV, Section 2.
+5.  The Commissioner is the final authority in respect of every matter arising under this Constitution, upon the following terms:
 
-### Procedure to Review and/or Vacate Commissioner’s Decision.
+    1.  Every vote, poll, referendum, petition and recommendation of the Teams, and every jury finding and arbitral award, is Advisory.
 
-6.  Any action of the Commissioner taken pursuant to this Article, regardless of whether or not it is specifically designated as “reviewable”, may be overturned under the following process:
+    2.  Upon the close of any Advisory expression, the Commissioner shall make a Determination, which may adopt it, vary it or depart from it, and that Determination is the act of the LEAGUE.
 
-    1.  Teams interested in the outcome of the Commissioner’s decision (i.e., the Team that would receive the direct benefit of an overturned vote and any other Team(s) directly involved in the challenged transaction and/or act) are deemed Interested Parties and are not eligible to participate in a vote to overturn that decision.
+    3.  The Commissioner may make an amendment to this Constitution, or an adjustment to the _status quo_, in respect of any matter, including a matter upon which the Teams have taken or may take a vote under Article IV, Section 2.
 
-        1.  For further clarity, each Team’s interest in the general competitiveness of each other Team shall not constitute an “interest” in the outcome of a decision for the purposes of subsection (a).
+### Procedure to Petition the Commissioner for Reconsideration.
 
-    2.  One-third of Teams eligible to cast a vote to overturn must agree to a petition for reconsideration or a vote upon the challenged decision. That petition must be made within one week of the formal posting of the challenged decision on the Boards.
+6.  A Determination of the Commissioner may be reconsidered under the following process:
 
-        1.  For further clarity, without such a petition being made, there shall be no review of a Commissioner’s decision.
+    1.  Teams interested in the outcome of the Determination (i.e., the Team that would receive the direct benefit of a vacated Determination and any other Team(s) directly involved in the challenged transaction and/or act) are deemed Interested Parties. Any Team, including an Interested Party, may join a petition for reconsideration.
 
-    3.  If the Commissioner does not reconsider the decision, a vote shall be held.
+        1.  For further clarity, each Team’s interest in the general competitiveness of each other Team shall not constitute an “interest” in the outcome of a Determination for the purposes of subsection (a).
 
-    4.  The Commissioner and all Interested Parties may make such representations to the Teams as they may wish in support of their preferred outcome.
+    2.  One-third of Teams must agree to a petition for reconsideration, made within one week of the Notice of the Determination or, where the Determination concerns a transaction posted on the Boards, within one week of that posting. Without such a petition there shall be no reconsideration.
 
-    5.  The decision of the Commissioner may be overturned only upon a two-thirds majority vote of eligible Teams.
+    3.  Upon a petition, the Commissioner shall reconsider the Determination and may, in his exclusive discretion, confirm it, vary it or vacate it.
 
-    6.  If such a majority is not achieved, the decision of the Commissioner stands.
+    4.  The Commissioner may put the matter to an Advisory vote of the Teams. He is not required to do so, and he is not bound by the result.
 
-    7.  If such a majority is achieved, the decision of the Commissioner is vacated.
-        1.  For further clarity, this shall not preclude further action by the Commissioner upon the same challenged act.
+    5.  The Determination stands unless the Commissioner vacates it.
 
-Interpretive note: _For example, the Commissioner may decide pursuant to Article III, Section (3), Subsection (g) that Team X is suspended permanently from the LEAGUE due to abusive behaviour against the best interests of fantasy football. That decision is posted on the Boards at 5:35 PM EST on a Tuesday. One-third of Teams (which do not include the abusive Team, because it is an Interested Party) petition the Commissioner for reconsideration or a re-vote, pursuant to Article III, Section 6, Subsection (b), and do so before the deadline at 5:35 PM EST the following Tuesday._
+    6.  A petition under this Section is not a precondition to an Override under Section 18, and does not preclude one.
 
-_The Commissioner refuses to reconsider, and a vote is therefore held. More than two-thirds of Teams vote that the decision should be vacated. There is therefore, at this point, no longer any decision of the Commissioner in respect of the challenged abusive acts. The Commissioner then decides pursuant to Article III, Section (3), Subsection (d) that the abusive Team shall forfeit a rookie draft pick instead. Only two Teams petition for a reconsideration of that decision. Because that is an insufficient number to form a petition, that decision stands and the abusive Team forfeits a rookie draft pick in the following Offseason._
+### Tenure and Elections.
 
-### Term Limits and Elections.
-
-7.  The Commissioner shall hold office for a minimum term of two (2) years or for such longer term as shall be voted by the Teams in a given offseason.
+7.  The Commissioner shall hold office without term, and shall continue in office until the Office of the Commissioner becomes vacant under Section 11.
 
 8.  The Commissioner shall not be subject to a term limit and may succeed himself indefinitely.
 
-9.  With the exception of an election pursuant to Section 11, no election of a Commissioner shall take place less than sixty (60) days prior to the LEAGUE draft.
+9.  An election of a Commissioner shall be held only to fill a vacancy in the Office of the Commissioner arising under Section 11.
 
 10. The election of a Commissioner shall be by simple majority, and each Team shall have one (1) vote. In the event of a tie, another election shall take place at least once per week until a Commissioner is elected.
 
-### Incapacity.
+### Vacancy.
 
-11. In the event that the Commissioner is unable or unwilling to continue in his role, a vote shall be held immediately to replace him from among the ranks of the Team managers following the above process. In the event that the Commissioner disagrees that he is unable to continue, that decision shall be reviewable pursuant to Section 6.
+11. The Office of the Commissioner becomes vacant, and shall be filled, upon the following terms:
+
+    1.  The Office becomes vacant only where the Commissioner resigns the Office by Notice, is removed from Office on Impeachment pursuant to Sections 13 and 14, or is absent within the meaning of subsection (b).
+
+    2.  The Commissioner is absent where, for sixty (60) consecutive days, he has given no Notice and has made no Determination, and, after that period, does neither within a further fourteen (14) days of a written demand posted by Notice by any Manager. The Office becomes vacant upon the expiry of that further period.
+
+    3.  Upon a vacancy an election shall be held pursuant to Section 10. A Commissioner need not be a Manager.
+
+    4.  Until the Office is filled, its powers and duties are exercised by the person the Commissioner has designated by Notice, who need not be a Manager. A designation may be revoked or replaced by Notice at any time.
+
+    5.  Failing a designation, they are exercised by the person elected upon a single ballot of the Teams, held within seven (7) days of the vacancy, by simple majority, each Team having one (1) vote.
+
+    6.  Failing a simple majority upon that ballot, they are exercised by the CHAMPION of the preceding season.
+
+    7.  A person exercising those powers under subsections (d), (e) or (f) may not amend this Constitution, nor make or revoke a designation.
+
+    8.  The result of an election under Section 10, and of a ballot under subsection (e), is determined by the votes cast and requires no ruling.
 
 ### Impartiality.
 
@@ -165,7 +190,15 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
 ### Impeachment.
 
-13. A two-thirds majority vote of Teams is needed to Impeach the Commissioner.
+13. The Commissioner may be Impeached only upon the following terms:
+
+    1.  A written charge shall first be posted by Notice, specifying which of the grounds in Section 14 is alleged and the conduct relied upon.
+
+    2.  No vote to Impeach may be called within seven (7) days of the posting of the charge, during which period the Commissioner may answer it by Notice.
+
+    3.  Impeachment requires that every Team other than a Team managed by the Commissioner cast an affirmative vote. A Team that does not cast a vote is deemed to vote against Impeachment.
+
+    4.  The result of a vote upon a charge is determined by the votes cast and requires no ruling. Article IV, Section 2 does not apply to it.
 
 14. The Commissioner shall be removed from Office on Impeachment for Bribery, Maladministration or other High Crimes and Misdemeanors.
 
@@ -174,6 +207,48 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
     2.  behavior incompatible with the function and purpose of the office; and
 
     3.  misusing the office for an improper purpose or for personal gain.
+
+### Determination Upon Inaction or Indecision.
+
+15. Where a Process fails to produce a result, the Commissioner may make a Determination of the matter directly, and that Determination shall have the same force as a result produced by that Process. A Process fails to produce a result where:
+
+    1.  its window closes without any Team having cast a vote;
+
+    2.  it produces a tie;
+
+    3.  no Team takes a step the Process requires of the Teams within seven (7) days of Notice, or within such other period as this Constitution prescribes for that step;
+
+    4.  it cannot be completed as written.
+
+Otherwise, a Process that closes with votes cast has produced a result, whether or not the threshold it requires was reached.
+
+16. A Determination under Section 15 may be made at any time after the failure arises. The Commissioner is not required to call a Process, or to re-run one, before making it.
+
+### Finality.
+
+17. A Determination of the Commissioner is final and binding upon the Teams, subject only to an Override under Section 18. Except by Override, and despite any other provision of this Constitution, a Determination shall stand and shall not be appealed, overturned, nullified or set aside by the Teams. A Determination imposing a penalty under Section 3, made during a Regular Season, shall stand for the remainder of that Regular Season unless the Commissioner vacates it or it is vacated by Override.
+
+### Override.
+
+18. A Determination may be vacated by the Teams only by Override, upon the following terms and upon no others:
+
+    1.  An Override vote may be called by Notice by any Eligible Team within one (1) week of the Notice of the Determination or, where the Determination concerns a transaction posted on the Boards, within one (1) week of that posting.
+
+    2.  The vote shall be by means of a poll on the Boards and shall remain open for three (3) days after the creation of the poll.
+
+    3.  An Override requires that every Eligible Team cast an affirmative vote. A Team that does not cast a vote within the voting window is deemed to vote against the Override.
+
+    4.  No more than one (1) Override vote may be called in respect of the same Determination or amendment.
+
+    5.  The result of an Override vote is determined by the votes cast and requires no ruling. Article IV, Section 2 does not apply to it, and Sections 5 and 15 do not apply to an Override vote or to its result.
+
+    6.  Upon a successful Override, the Determination or amendment is vacated and of no effect, and the Commissioner shall give effect to the Override and restore the _status quo ante_ so far as practicable.
+
+    7.  Following a successful Override, the Commissioner shall not make a further Determination, or adopt an amendment, substantially to the same effect as the vacated Determination or amendment, except upon a material change in circumstances.
+
+    8.  An amendment to this Constitution made by the Commissioner pursuant to Article III, Section 5, Subsection (c) may be vacated by Override as if it were a Determination, provided that the Override vote is called within fourteen (14) days of the Notice of the amendment. An amendment not vacated within that period stands and is not subject to an Override.
+
+19. Where any provision of this Constitution, other than Sections 10, 11, 13, 14 and 18 and Article IV, Sections 9, 10 and 11, confers upon the Teams a vote, an approval, a right of review or any other authority over a matter, that provision shall be read subject to Sections 5, 15, 17 and 18, and in the event of a conflict those Sections prevail.
 
 ## Article IV
 
@@ -209,11 +284,11 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
     1.  Referenda or opinion polls as required by the Commissioner for his or her own guidance; and
 
-    2.  Reviews of the Commissioner’s decisions within the Regular Season, as set out in [Article III, Section 6](#article-iii).
+    2.  Advisory votes upon a petition for reconsideration, as set out in [Article III, Section 6](#article-iii).
 
 ### No Contentious Constitutional Amendments During the Regular Season.
 
-4.  This Constitution may not be amended during the Regular Season except by unanimous vote of the Teams by means of a poll on the Boards. All votes will remain open for 3 days after the creation of the poll. Upon expiration of the voting window all votes will be counted and a ruling will be made by the Commissioner pursuant to the authority granted him in [Article III, Section 2, Subsection f](#article-iii).
+4.  This Constitution may not be amended during the Regular Season except by unanimous vote of the Teams by means of a poll on the Boards, or by the Commissioner pursuant to Article III, Section 5. All votes will remain open for 3 days after the creation of the poll. Upon expiration of the voting window all votes will be counted and a ruling will be made by the Commissioner pursuant to the authority granted him in [Article III, Section 2, Subsection (f)](#article-iii).
 
 ### Minimum Voting Requirements.
 
@@ -221,19 +296,55 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 
 ### Withdrawal of Managers / Teams.
 
-6.  Managers may withdraw from the LEAGUE at any time between the commencement of the Offseason and the NFL Rookie Draft within that offseason without penalty. They shall report their decision to the Commissioner, in writing, who will in-turn alert the other members of the League and begin to contact individuals on the League’s Waiting List in search of a replacement. Their Teams will persist and a replacement Manager(s) may be appointed from the Waiting List.
+6.  Managers may withdraw from the LEAGUE at any time between the commencement of the Offseason and the NFL Rookie Draft within that offseason without penalty. They shall report their decision to the Commissioner, in writing, who shall give Notice of the withdrawal and open a nomination period pursuant to Section 9. Their Teams shall persist, and a replacement Manager may be admitted pursuant to Sections 9 through 11.
 
 7.  Any Manager withdrawing between the NFL Rookie Draft and the commencement of the following Offseason in a given year shall forfeit his Buy-In funds.
 
 8.  New Managers will have the opportunity to rename a Team from which all Managers have withdrawn.
 
-### Waiting List & Addition to the League.
+### Admission of Managers.
 
-9.  The Waiting List shall be composed of those individuals that wish to gain entry to the League. The members of the list shall be voted on by the current members of the League to determine the ranking order of the list (when a spot or potential spot opens).
+9.  Except as provided in Subsection (e), no individual shall be admitted to the LEAGUE except as a Candidate nominated by a Manager, his "Sponsor", during a nomination period.
 
-10. When a vacancy in the League develops a final vote on the League Waiting List order will be administered. The highest ranked individual will be offered admission into the League.
+    1.  A "Vacancy" exists where a Team has no Manager. A Manager who is removed, or suspended permanently, pursuant to Article III, Section 3, Subsection (g) ceases to be the Manager of his Team; a suspension that is not permanent does not create a Vacancy. A Manager who has announced his retirement pursuant to Article XVIII, Section 1 remains the Manager of his Team until the conclusion of the Regular Season in which he announced it, or ceases to be its Manager immediately where he announced it during an Offseason. A Team Orphaned by abandonment alone, pursuant to Article XVIII, Section 3, Subsection (b), is not a Vacancy unless its Manager is removed.
 
-11. If at any time a new Manager joins the League in order to replace a Manager that left, each new Manager will take over the departing Team’s roster. If multiple teams are available, the person that was highest on the waiting list, or the first to say they want in AND hand over money if there is no current list, gets to pick which Manager-less team to choose first.
+    2.  A Team subject to a Vacancy is an Orphaned Team for the purposes of Article XVIII and Article XXI.
+
+    3.  Upon a Vacancy, whether it arises during the Regular Season or the Offseason, the Commissioner shall give Notice opening a nomination period, the length of which he shall set and which shall be not less than three (3) days, during which any Manager may nominate one (1) or more Candidates. An individual nominated by more than one (1) Manager is one (1) Candidate, and each Manager who nominated him is a Sponsor.
+
+    4.  No Manager may be a Candidate.
+
+    5.  Where no Candidate is nominated within the nomination period, the Commissioner may, notwithstanding Article III, Section 5, admit to the Vacancy an individual of his choosing who is not a Manager, and shall give Notice of that admission and of his reason for it. Where he does not, no admission occurs, and he may open a further nomination period pursuant to Section 9. An individual so admitted is treated as an admitted Candidate for the purposes of Section 11, Subsections (d) through (h), so far as they are applicable, and the admission is reviewable pursuant to Article III, Section 6.
+
+10. At the close of a nomination period in which one (1) or more Candidates were nominated, the Commissioner shall give Notice of every Candidate and his Sponsors, and shall hold the Admission Vote, which shall remain open three (3) days.
+
+    1.  Each Team may rank the Candidates in order of preference, and may rank as few or as many of them as it wishes.
+
+    2.  The Candidate a Team ranks first receives points equal to the number of Candidates, the Candidate it ranks second one (1) fewer, and so on. A Candidate whom a Team does not rank receives no points from that Team.
+
+    3.  A Team without a Manager shall not vote. The Commissioner’s Team votes as any other Team.
+
+    4.  Ballots in the Admission Vote are confidential, notwithstanding any requirement of this Article that a vote be conducted by poll on the Boards. The Commissioner shall give Notice of the admitted Candidate alone, or of the fact that he has passed, and shall show to any Manager upon request the number of points recorded for each Candidate. He shall not disclose how a Team voted.
+
+11. At the close of the Admission Vote the Commissioner shall rank the Candidates by most points; among Candidates tied on points, as the Commissioner shall determine.
+
+    1.  Notwithstanding Article III, Section 5, the Commissioner may admit the highest ranked Candidate, or may pass. He shall admit or pass within seven (7) days of the close of the Admission Vote, and where he does neither he is deemed to have passed.
+
+    2.  Where the Commissioner passes, no Candidate is admitted in that Admission Vote. He shall give Notice of the pass and of his reason for it, and shall open a further nomination period pursuant to Section 9.
+
+    3.  The following are in the exclusive discretion of the Commissioner and are not reviewable pursuant to Article III, Section 6: the length of a nomination period pursuant to Section 9; the ranking of Candidates tied under this Section; and the election to admit or to pass.
+
+    4.  Admission is conditional upon the Candidate depositing the Team Deposit Value for his Team pursuant to Article XXII, Section 3, and upon his submitting the Buy-In for the current year where his Team has not already submitted it, in each case within seven (7) days of the Notice of his admission, or within such longer time as the Commissioner shall allow. Notwithstanding Article XXII, Section 3, a departing Manager’s Team Deposit Value may be withdrawn before that deposit is made, and Article V, Section 11 does not apply to a Candidate within the period this Subsection allows him.
+
+    5.  Where a Candidate fails to satisfy Subsection (d), his admission is void and the Commissioner shall give Notice of it. Transactions made by that Candidate before the admission was voided stand. Notwithstanding the period in Subsection (a), the Commissioner may within seven (7) days of that Notice admit the highest ranked remaining Candidate of the same Admission Vote, or open a further nomination period pursuant to Section 9; where he does neither he is deemed to have passed.
+
+    6.  An admitted Manager assumes the roster, contracts, draft picks and obligations of the Team to which he is admitted and, notwithstanding Article XVIII, Section 4, assumes management of it upon admission, the Commissioner’s management of an Orphaned Team under that Section continuing only until a Manager is admitted to it.
+
+    7.  An admitted Manager is a "Provisional Manager" until the close of the first Offseason to follow a Regular Season during which he was the Manager of his Team for at least seven (7) weeks of the Qualifying Season, whereupon he is confirmed without further action. A Provisional Manager is in all other respects a Manager, and his Team votes, trades and transacts without restriction.
+
+    8.  The Commissioner may terminate a Provisional Manager, and is not required to find an offence under Article XIX in order to do so. He shall give Notice of the termination, which creates a Vacancy and is reviewable pursuant to Article III, Section 6. A terminated Provisional Manager’s Team Deposit Value is returned to him pursuant to Article XXII, Section 3, and he shall not be nominated again except with the leave of the Commissioner.
+
+    9.  A Vacancy that is not filled under these Sections does not remove a Team from the LEAGUE.
 
 ### Team Names.
 
@@ -264,6 +375,10 @@ _The Commissioner refuses to reconsider, and a vote is therefore held. More than
 ### Enforcement of Team Names.
 
 16. A Manager who fails to submit a compliant Team name by the deadline in Section 14, and who is not exempt under Section 13, shall have his Team renamed by the CHAMPION of the preceding season, who may select a name of his choosing, including a name intended to embarrass the noncompliant Manager. A name assigned under this Section shall stand for the entire season and shall not be appealed.
+
+### Entrenched Provisions.
+
+17. Notwithstanding Sections 2 and 4, no amendment to Article I, to Article II, to Article III, or to this Section, and no amendment that would defeat the effect of any of them, shall have effect unless, in addition to any vote otherwise required, the Commissioner consents to it in writing by Notice. Further, no amendment to Article III, Section 18, to the terms "Override" or "Eligible Team" defined in Article II, or to this sentence, and no amendment that would defeat the effect of any of them, shall have effect — whether made by vote of the Teams, by the Commissioner, or otherwise — unless it is also approved by unanimous vote of the Eligible Teams by means of a poll on the Boards. This Section shall not be amended, suspended or repealed except upon both that consent and that approval. Consent under this Section may be given only by a Commissioner elected under Article III, Section 10, and not by a person exercising the powers and duties of the Commissioner under Article III, Section 11.
 
 ## Article V
 
@@ -851,9 +966,9 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 ### Arbitrators and Juries.
 
-8.  The Commissioner is specifically empowered under [Article III, Section 2(d)](#article-iii) to appoint a neutral arbitrator or a jury if he, in his exclusive discretion, deems it necessary; and must do so if he is an Interested Party in an alleged offence. Despite [Article III, Section 6](#article-iii), the decision to appoint an arbitrator or jury is not reviewable.
+8.  The Commissioner is specifically empowered under Article III, Section 2, Subsection (d) to appoint a neutral arbitrator or a jury if he, in his exclusive discretion, deems it necessary, including where he is an Interested Party in an alleged offence. The decision to appoint an arbitrator or a jury, and the decision not to appoint one, is not reviewable.
 
-9.  A jury vote is not binding but is advisory only.
+9.  A jury vote is Advisory.
 
 10. Jury votes may not be secret.
 
@@ -966,6 +1081,7 @@ The current Buy-In rate, Buy-In due date, and Commissioner contact information a
 | XL        | Division Format                                           | 2026-08-02 | 2026-08-09 |
 | XLI       | Mandatory Annual Team Rebranding                          | 2026-08-07 | 2026-08-09 |
 | XLII      | Restricted Free Agency Reveal-and-Match                   |            |            |
-| XLIII     | Admission of Managers                                     | 2026-08-15 |            |
+| XLIII     | Admission of Managers                                     | 2026-08-16 | 2026-08-16 |
+| XLV       | Commissioner Entrenchment                                 | 2026-08-16 | 2026-08-16 |
 
 Amendments are folded into the articles above as they are ratified; this appendix records the amendment history. Amendments VII and XXXVI were drafted but never ratified.
