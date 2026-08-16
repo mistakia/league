@@ -5252,8 +5252,8 @@ CREATE TABLE public.nfl_plays (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -5261,9 +5261,9 @@ CREATE TABLE public.nfl_plays (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -5283,21 +5283,21 @@ CREATE TABLE public.nfl_plays (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -5313,8 +5313,8 @@ CREATE TABLE public.nfl_plays (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -5356,30 +5356,30 @@ CREATE TABLE public.nfl_plays (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -5433,14 +5433,14 @@ CREATE TABLE public.nfl_plays (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -5459,8 +5459,8 @@ CREATE TABLE public.nfl_plays (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -5469,18 +5469,18 @@ CREATE TABLE public.nfl_plays (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -5489,9 +5489,9 @@ CREATE TABLE public.nfl_plays (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -5503,7 +5503,7 @@ CREATE TABLE public.nfl_plays (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -5615,8 +5615,8 @@ CREATE TABLE public.nfl_plays (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -5650,9 +5650,9 @@ CREATE TABLE public.nfl_plays (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint
 )
 PARTITION BY RANGE (season_year);
 
@@ -6008,17 +6008,17 @@ COMMENT ON COLUMN public.nfl_plays.is_drive_score IS 'Binary indicator the drive
 
 
 --
--- Name: COLUMN nfl_plays.drive_start_qtr; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.drive_start_quarter; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.drive_start_qtr IS 'Numeric value indicating in which quarter the given drive has started.';
+COMMENT ON COLUMN public.nfl_plays.drive_start_quarter IS 'Numeric value indicating in which quarter the given drive has started.';
 
 
 --
--- Name: COLUMN nfl_plays.drive_end_qtr; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.drive_end_quarter; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.drive_end_qtr IS 'Numeric value indicating in which quarter the given drive has ended.';
+COMMENT ON COLUMN public.nfl_plays.drive_end_quarter IS 'Numeric value indicating in which quarter the given drive has ended.';
 
 
 --
@@ -6190,31 +6190,31 @@ COMMENT ON COLUMN public.nfl_plays.is_epa_successful IS 'Play success based on E
 
 
 --
--- Name: COLUMN nfl_plays.home_to_rem; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.home_timeouts_remaining; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.home_to_rem IS 'Numeric timeouts remaining in the half for the home team';
-
-
---
--- Name: COLUMN nfl_plays.away_to_rem; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.away_to_rem IS 'Numeric timeouts remaining in the half for the away team';
+COMMENT ON COLUMN public.nfl_plays.home_timeouts_remaining IS 'Numeric timeouts remaining in the half for the home team';
 
 
 --
--- Name: COLUMN nfl_plays.pos_to_rem; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.away_timeouts_remaining; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.pos_to_rem IS 'Number of timeouts remaining for the possession team';
+COMMENT ON COLUMN public.nfl_plays.away_timeouts_remaining IS 'Numeric timeouts remaining in the half for the away team';
 
 
 --
--- Name: COLUMN nfl_plays.def_to_rem; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.pos_timeouts_remaining; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.def_to_rem IS 'Number of timeouts remaining for the team on defense';
+COMMENT ON COLUMN public.nfl_plays.pos_timeouts_remaining IS 'Number of timeouts remaining for the possession team';
+
+
+--
+-- Name: COLUMN nfl_plays.def_timeouts_remaining; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.def_timeouts_remaining IS 'Number of timeouts remaining for the team on defense';
 
 
 --
@@ -6259,8 +6259,8 @@ CREATE TABLE public.nfl_plays_current_week (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -6268,9 +6268,9 @@ CREATE TABLE public.nfl_plays_current_week (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -6290,21 +6290,21 @@ CREATE TABLE public.nfl_plays_current_week (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -6320,8 +6320,8 @@ CREATE TABLE public.nfl_plays_current_week (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -6362,30 +6362,30 @@ CREATE TABLE public.nfl_plays_current_week (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result character varying(100),
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -6440,14 +6440,14 @@ CREATE TABLE public.nfl_plays_current_week (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -6466,8 +6466,8 @@ CREATE TABLE public.nfl_plays_current_week (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -6476,20 +6476,20 @@ CREATE TABLE public.nfl_plays_current_week (
     fg_result character varying(10),
     kick_distance integer,
     ep_result character varying(10),
-    tp_result character varying(10),
+    two_point_result character varying(10),
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -6498,9 +6498,9 @@ CREATE TABLE public.nfl_plays_current_week (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -6512,7 +6512,7 @@ CREATE TABLE public.nfl_plays_current_week (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -6566,9 +6566,9 @@ CREATE TABLE public.nfl_plays_current_week (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_current_week_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_current_week_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_current_week_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -6804,8 +6804,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -6813,9 +6813,9 @@ CREATE TABLE public.nfl_plays_year_2000 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -6835,21 +6835,21 @@ CREATE TABLE public.nfl_plays_year_2000 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -6865,8 +6865,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -6908,30 +6908,30 @@ CREATE TABLE public.nfl_plays_year_2000 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -6985,14 +6985,14 @@ CREATE TABLE public.nfl_plays_year_2000 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -7011,8 +7011,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -7021,18 +7021,18 @@ CREATE TABLE public.nfl_plays_year_2000 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -7041,9 +7041,9 @@ CREATE TABLE public.nfl_plays_year_2000 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -7055,7 +7055,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -7167,8 +7167,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -7202,9 +7202,9 @@ CREATE TABLE public.nfl_plays_year_2000 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2000_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2000_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2000_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -7237,8 +7237,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -7246,9 +7246,9 @@ CREATE TABLE public.nfl_plays_year_2001 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -7268,21 +7268,21 @@ CREATE TABLE public.nfl_plays_year_2001 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -7298,8 +7298,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -7341,30 +7341,30 @@ CREATE TABLE public.nfl_plays_year_2001 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -7418,14 +7418,14 @@ CREATE TABLE public.nfl_plays_year_2001 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -7444,8 +7444,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -7454,18 +7454,18 @@ CREATE TABLE public.nfl_plays_year_2001 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -7474,9 +7474,9 @@ CREATE TABLE public.nfl_plays_year_2001 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -7488,7 +7488,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -7600,8 +7600,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -7635,9 +7635,9 @@ CREATE TABLE public.nfl_plays_year_2001 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2001_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2001_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2001_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -7670,8 +7670,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -7679,9 +7679,9 @@ CREATE TABLE public.nfl_plays_year_2002 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -7701,21 +7701,21 @@ CREATE TABLE public.nfl_plays_year_2002 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -7731,8 +7731,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -7774,30 +7774,30 @@ CREATE TABLE public.nfl_plays_year_2002 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -7851,14 +7851,14 @@ CREATE TABLE public.nfl_plays_year_2002 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -7877,8 +7877,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -7887,18 +7887,18 @@ CREATE TABLE public.nfl_plays_year_2002 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -7907,9 +7907,9 @@ CREATE TABLE public.nfl_plays_year_2002 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -7921,7 +7921,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -8033,8 +8033,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -8068,9 +8068,9 @@ CREATE TABLE public.nfl_plays_year_2002 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2002_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2002_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2002_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -8103,8 +8103,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -8112,9 +8112,9 @@ CREATE TABLE public.nfl_plays_year_2003 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -8134,21 +8134,21 @@ CREATE TABLE public.nfl_plays_year_2003 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -8164,8 +8164,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -8207,30 +8207,30 @@ CREATE TABLE public.nfl_plays_year_2003 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -8284,14 +8284,14 @@ CREATE TABLE public.nfl_plays_year_2003 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -8310,8 +8310,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -8320,18 +8320,18 @@ CREATE TABLE public.nfl_plays_year_2003 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -8340,9 +8340,9 @@ CREATE TABLE public.nfl_plays_year_2003 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -8354,7 +8354,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -8466,8 +8466,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -8501,9 +8501,9 @@ CREATE TABLE public.nfl_plays_year_2003 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2003_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2003_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2003_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -8536,8 +8536,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -8545,9 +8545,9 @@ CREATE TABLE public.nfl_plays_year_2004 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -8567,21 +8567,21 @@ CREATE TABLE public.nfl_plays_year_2004 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -8597,8 +8597,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -8640,30 +8640,30 @@ CREATE TABLE public.nfl_plays_year_2004 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -8717,14 +8717,14 @@ CREATE TABLE public.nfl_plays_year_2004 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -8743,8 +8743,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -8753,18 +8753,18 @@ CREATE TABLE public.nfl_plays_year_2004 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -8773,9 +8773,9 @@ CREATE TABLE public.nfl_plays_year_2004 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -8787,7 +8787,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -8899,8 +8899,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -8934,9 +8934,9 @@ CREATE TABLE public.nfl_plays_year_2004 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2004_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2004_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2004_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -8969,8 +8969,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -8978,9 +8978,9 @@ CREATE TABLE public.nfl_plays_year_2005 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -9000,21 +9000,21 @@ CREATE TABLE public.nfl_plays_year_2005 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -9030,8 +9030,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -9073,30 +9073,30 @@ CREATE TABLE public.nfl_plays_year_2005 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -9150,14 +9150,14 @@ CREATE TABLE public.nfl_plays_year_2005 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -9176,8 +9176,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -9186,18 +9186,18 @@ CREATE TABLE public.nfl_plays_year_2005 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -9206,9 +9206,9 @@ CREATE TABLE public.nfl_plays_year_2005 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -9220,7 +9220,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -9332,8 +9332,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -9367,9 +9367,9 @@ CREATE TABLE public.nfl_plays_year_2005 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2005_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2005_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2005_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -9402,8 +9402,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -9411,9 +9411,9 @@ CREATE TABLE public.nfl_plays_year_2006 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -9433,21 +9433,21 @@ CREATE TABLE public.nfl_plays_year_2006 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -9463,8 +9463,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -9506,30 +9506,30 @@ CREATE TABLE public.nfl_plays_year_2006 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -9583,14 +9583,14 @@ CREATE TABLE public.nfl_plays_year_2006 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -9609,8 +9609,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -9619,18 +9619,18 @@ CREATE TABLE public.nfl_plays_year_2006 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -9639,9 +9639,9 @@ CREATE TABLE public.nfl_plays_year_2006 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -9653,7 +9653,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -9765,8 +9765,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -9800,9 +9800,9 @@ CREATE TABLE public.nfl_plays_year_2006 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2006_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2006_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2006_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -9835,8 +9835,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -9844,9 +9844,9 @@ CREATE TABLE public.nfl_plays_year_2007 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -9866,21 +9866,21 @@ CREATE TABLE public.nfl_plays_year_2007 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -9896,8 +9896,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -9939,30 +9939,30 @@ CREATE TABLE public.nfl_plays_year_2007 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -10016,14 +10016,14 @@ CREATE TABLE public.nfl_plays_year_2007 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -10042,8 +10042,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -10052,18 +10052,18 @@ CREATE TABLE public.nfl_plays_year_2007 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -10072,9 +10072,9 @@ CREATE TABLE public.nfl_plays_year_2007 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -10086,7 +10086,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -10198,8 +10198,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -10233,9 +10233,9 @@ CREATE TABLE public.nfl_plays_year_2007 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2007_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2007_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2007_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -10268,8 +10268,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -10277,9 +10277,9 @@ CREATE TABLE public.nfl_plays_year_2008 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -10299,21 +10299,21 @@ CREATE TABLE public.nfl_plays_year_2008 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -10329,8 +10329,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -10372,30 +10372,30 @@ CREATE TABLE public.nfl_plays_year_2008 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -10449,14 +10449,14 @@ CREATE TABLE public.nfl_plays_year_2008 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -10475,8 +10475,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -10485,18 +10485,18 @@ CREATE TABLE public.nfl_plays_year_2008 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -10505,9 +10505,9 @@ CREATE TABLE public.nfl_plays_year_2008 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -10519,7 +10519,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -10631,8 +10631,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -10666,9 +10666,9 @@ CREATE TABLE public.nfl_plays_year_2008 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2008_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2008_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2008_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -10701,8 +10701,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -10710,9 +10710,9 @@ CREATE TABLE public.nfl_plays_year_2009 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -10732,21 +10732,21 @@ CREATE TABLE public.nfl_plays_year_2009 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -10762,8 +10762,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -10805,30 +10805,30 @@ CREATE TABLE public.nfl_plays_year_2009 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -10882,14 +10882,14 @@ CREATE TABLE public.nfl_plays_year_2009 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -10908,8 +10908,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -10918,18 +10918,18 @@ CREATE TABLE public.nfl_plays_year_2009 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -10938,9 +10938,9 @@ CREATE TABLE public.nfl_plays_year_2009 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -10952,7 +10952,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -11064,8 +11064,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -11099,9 +11099,9 @@ CREATE TABLE public.nfl_plays_year_2009 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2009_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2009_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2009_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -11134,8 +11134,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -11143,9 +11143,9 @@ CREATE TABLE public.nfl_plays_year_2010 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -11165,21 +11165,21 @@ CREATE TABLE public.nfl_plays_year_2010 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -11195,8 +11195,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -11238,30 +11238,30 @@ CREATE TABLE public.nfl_plays_year_2010 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -11315,14 +11315,14 @@ CREATE TABLE public.nfl_plays_year_2010 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -11341,8 +11341,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -11351,18 +11351,18 @@ CREATE TABLE public.nfl_plays_year_2010 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -11371,9 +11371,9 @@ CREATE TABLE public.nfl_plays_year_2010 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -11385,7 +11385,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -11497,8 +11497,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -11532,9 +11532,9 @@ CREATE TABLE public.nfl_plays_year_2010 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2010_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2010_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2010_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -11567,8 +11567,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -11576,9 +11576,9 @@ CREATE TABLE public.nfl_plays_year_2011 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -11598,21 +11598,21 @@ CREATE TABLE public.nfl_plays_year_2011 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -11628,8 +11628,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -11671,30 +11671,30 @@ CREATE TABLE public.nfl_plays_year_2011 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -11748,14 +11748,14 @@ CREATE TABLE public.nfl_plays_year_2011 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -11774,8 +11774,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -11784,18 +11784,18 @@ CREATE TABLE public.nfl_plays_year_2011 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -11804,9 +11804,9 @@ CREATE TABLE public.nfl_plays_year_2011 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -11818,7 +11818,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -11930,8 +11930,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -11965,9 +11965,9 @@ CREATE TABLE public.nfl_plays_year_2011 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2011_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2011_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2011_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -12000,8 +12000,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -12009,9 +12009,9 @@ CREATE TABLE public.nfl_plays_year_2012 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -12031,21 +12031,21 @@ CREATE TABLE public.nfl_plays_year_2012 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -12061,8 +12061,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -12104,30 +12104,30 @@ CREATE TABLE public.nfl_plays_year_2012 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -12181,14 +12181,14 @@ CREATE TABLE public.nfl_plays_year_2012 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -12207,8 +12207,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -12217,18 +12217,18 @@ CREATE TABLE public.nfl_plays_year_2012 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -12237,9 +12237,9 @@ CREATE TABLE public.nfl_plays_year_2012 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -12251,7 +12251,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -12363,8 +12363,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -12398,9 +12398,9 @@ CREATE TABLE public.nfl_plays_year_2012 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2012_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2012_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2012_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -12433,8 +12433,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -12442,9 +12442,9 @@ CREATE TABLE public.nfl_plays_year_2013 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -12464,21 +12464,21 @@ CREATE TABLE public.nfl_plays_year_2013 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -12494,8 +12494,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -12537,30 +12537,30 @@ CREATE TABLE public.nfl_plays_year_2013 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -12614,14 +12614,14 @@ CREATE TABLE public.nfl_plays_year_2013 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -12640,8 +12640,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -12650,18 +12650,18 @@ CREATE TABLE public.nfl_plays_year_2013 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -12670,9 +12670,9 @@ CREATE TABLE public.nfl_plays_year_2013 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -12684,7 +12684,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -12796,8 +12796,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -12831,9 +12831,9 @@ CREATE TABLE public.nfl_plays_year_2013 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2013_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2013_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2013_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -12866,8 +12866,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -12875,9 +12875,9 @@ CREATE TABLE public.nfl_plays_year_2014 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -12897,21 +12897,21 @@ CREATE TABLE public.nfl_plays_year_2014 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -12927,8 +12927,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -12970,30 +12970,30 @@ CREATE TABLE public.nfl_plays_year_2014 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -13047,14 +13047,14 @@ CREATE TABLE public.nfl_plays_year_2014 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -13073,8 +13073,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -13083,18 +13083,18 @@ CREATE TABLE public.nfl_plays_year_2014 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -13103,9 +13103,9 @@ CREATE TABLE public.nfl_plays_year_2014 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -13117,7 +13117,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -13229,8 +13229,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -13264,9 +13264,9 @@ CREATE TABLE public.nfl_plays_year_2014 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2014_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2014_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2014_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -13299,8 +13299,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -13308,9 +13308,9 @@ CREATE TABLE public.nfl_plays_year_2015 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -13330,21 +13330,21 @@ CREATE TABLE public.nfl_plays_year_2015 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -13360,8 +13360,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -13403,30 +13403,30 @@ CREATE TABLE public.nfl_plays_year_2015 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -13480,14 +13480,14 @@ CREATE TABLE public.nfl_plays_year_2015 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -13506,8 +13506,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -13516,18 +13516,18 @@ CREATE TABLE public.nfl_plays_year_2015 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -13536,9 +13536,9 @@ CREATE TABLE public.nfl_plays_year_2015 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -13550,7 +13550,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -13662,8 +13662,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -13697,9 +13697,9 @@ CREATE TABLE public.nfl_plays_year_2015 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2015_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2015_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2015_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -13732,8 +13732,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -13741,9 +13741,9 @@ CREATE TABLE public.nfl_plays_year_2016 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -13763,21 +13763,21 @@ CREATE TABLE public.nfl_plays_year_2016 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -13793,8 +13793,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -13836,30 +13836,30 @@ CREATE TABLE public.nfl_plays_year_2016 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -13913,14 +13913,14 @@ CREATE TABLE public.nfl_plays_year_2016 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -13939,8 +13939,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -13949,18 +13949,18 @@ CREATE TABLE public.nfl_plays_year_2016 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -13969,9 +13969,9 @@ CREATE TABLE public.nfl_plays_year_2016 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -13983,7 +13983,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -14095,8 +14095,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -14130,9 +14130,9 @@ CREATE TABLE public.nfl_plays_year_2016 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2016_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2016_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2016_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -14165,8 +14165,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -14174,9 +14174,9 @@ CREATE TABLE public.nfl_plays_year_2017 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -14196,21 +14196,21 @@ CREATE TABLE public.nfl_plays_year_2017 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -14226,8 +14226,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -14269,30 +14269,30 @@ CREATE TABLE public.nfl_plays_year_2017 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -14346,14 +14346,14 @@ CREATE TABLE public.nfl_plays_year_2017 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -14372,8 +14372,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -14382,18 +14382,18 @@ CREATE TABLE public.nfl_plays_year_2017 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -14402,9 +14402,9 @@ CREATE TABLE public.nfl_plays_year_2017 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -14416,7 +14416,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -14528,8 +14528,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -14563,9 +14563,9 @@ CREATE TABLE public.nfl_plays_year_2017 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2017_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2017_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2017_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -14598,8 +14598,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -14607,9 +14607,9 @@ CREATE TABLE public.nfl_plays_year_2018 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -14629,21 +14629,21 @@ CREATE TABLE public.nfl_plays_year_2018 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -14659,8 +14659,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -14702,30 +14702,30 @@ CREATE TABLE public.nfl_plays_year_2018 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -14779,14 +14779,14 @@ CREATE TABLE public.nfl_plays_year_2018 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -14805,8 +14805,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -14815,18 +14815,18 @@ CREATE TABLE public.nfl_plays_year_2018 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -14835,9 +14835,9 @@ CREATE TABLE public.nfl_plays_year_2018 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -14849,7 +14849,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -14961,8 +14961,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -14996,9 +14996,9 @@ CREATE TABLE public.nfl_plays_year_2018 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2018_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2018_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2018_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -15031,8 +15031,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -15040,9 +15040,9 @@ CREATE TABLE public.nfl_plays_year_2019 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -15062,21 +15062,21 @@ CREATE TABLE public.nfl_plays_year_2019 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -15092,8 +15092,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -15135,30 +15135,30 @@ CREATE TABLE public.nfl_plays_year_2019 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -15212,14 +15212,14 @@ CREATE TABLE public.nfl_plays_year_2019 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -15238,8 +15238,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -15248,18 +15248,18 @@ CREATE TABLE public.nfl_plays_year_2019 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -15268,9 +15268,9 @@ CREATE TABLE public.nfl_plays_year_2019 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -15282,7 +15282,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -15394,8 +15394,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -15429,9 +15429,9 @@ CREATE TABLE public.nfl_plays_year_2019 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2019_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2019_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2019_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -15464,8 +15464,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -15473,9 +15473,9 @@ CREATE TABLE public.nfl_plays_year_2020 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -15495,21 +15495,21 @@ CREATE TABLE public.nfl_plays_year_2020 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -15525,8 +15525,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -15568,30 +15568,30 @@ CREATE TABLE public.nfl_plays_year_2020 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -15645,14 +15645,14 @@ CREATE TABLE public.nfl_plays_year_2020 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -15671,8 +15671,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -15681,18 +15681,18 @@ CREATE TABLE public.nfl_plays_year_2020 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -15701,9 +15701,9 @@ CREATE TABLE public.nfl_plays_year_2020 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -15715,7 +15715,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -15827,8 +15827,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -15862,9 +15862,9 @@ CREATE TABLE public.nfl_plays_year_2020 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2020_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2020_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2020_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -15897,8 +15897,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -15906,9 +15906,9 @@ CREATE TABLE public.nfl_plays_year_2021 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -15928,21 +15928,21 @@ CREATE TABLE public.nfl_plays_year_2021 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -15958,8 +15958,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -16001,30 +16001,30 @@ CREATE TABLE public.nfl_plays_year_2021 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -16078,14 +16078,14 @@ CREATE TABLE public.nfl_plays_year_2021 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -16104,8 +16104,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -16114,18 +16114,18 @@ CREATE TABLE public.nfl_plays_year_2021 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -16134,9 +16134,9 @@ CREATE TABLE public.nfl_plays_year_2021 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -16148,7 +16148,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -16260,8 +16260,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -16295,9 +16295,9 @@ CREATE TABLE public.nfl_plays_year_2021 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2021_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2021_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2021_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -16330,8 +16330,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -16339,9 +16339,9 @@ CREATE TABLE public.nfl_plays_year_2022 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -16361,21 +16361,21 @@ CREATE TABLE public.nfl_plays_year_2022 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -16391,8 +16391,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -16434,30 +16434,30 @@ CREATE TABLE public.nfl_plays_year_2022 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -16511,14 +16511,14 @@ CREATE TABLE public.nfl_plays_year_2022 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -16537,8 +16537,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -16547,18 +16547,18 @@ CREATE TABLE public.nfl_plays_year_2022 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -16567,9 +16567,9 @@ CREATE TABLE public.nfl_plays_year_2022 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -16581,7 +16581,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -16693,8 +16693,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -16728,9 +16728,9 @@ CREATE TABLE public.nfl_plays_year_2022 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2022_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2022_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2022_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -16763,8 +16763,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -16772,9 +16772,9 @@ CREATE TABLE public.nfl_plays_year_2023 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -16794,21 +16794,21 @@ CREATE TABLE public.nfl_plays_year_2023 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -16824,8 +16824,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -16867,30 +16867,30 @@ CREATE TABLE public.nfl_plays_year_2023 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -16944,14 +16944,14 @@ CREATE TABLE public.nfl_plays_year_2023 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -16970,8 +16970,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -16980,18 +16980,18 @@ CREATE TABLE public.nfl_plays_year_2023 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -17000,9 +17000,9 @@ CREATE TABLE public.nfl_plays_year_2023 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -17014,7 +17014,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -17126,8 +17126,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -17161,9 +17161,9 @@ CREATE TABLE public.nfl_plays_year_2023 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2023_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2023_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2023_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -17196,8 +17196,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -17205,9 +17205,9 @@ CREATE TABLE public.nfl_plays_year_2024 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -17227,21 +17227,21 @@ CREATE TABLE public.nfl_plays_year_2024 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -17257,8 +17257,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -17300,30 +17300,30 @@ CREATE TABLE public.nfl_plays_year_2024 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -17377,14 +17377,14 @@ CREATE TABLE public.nfl_plays_year_2024 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -17403,8 +17403,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -17413,18 +17413,18 @@ CREATE TABLE public.nfl_plays_year_2024 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -17433,9 +17433,9 @@ CREATE TABLE public.nfl_plays_year_2024 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -17447,7 +17447,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -17559,8 +17559,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -17594,9 +17594,9 @@ CREATE TABLE public.nfl_plays_year_2024 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2024_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2024_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2024_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -17629,8 +17629,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -17638,9 +17638,9 @@ CREATE TABLE public.nfl_plays_year_2025 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -17660,21 +17660,21 @@ CREATE TABLE public.nfl_plays_year_2025 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -17690,8 +17690,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -17733,30 +17733,30 @@ CREATE TABLE public.nfl_plays_year_2025 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -17810,14 +17810,14 @@ CREATE TABLE public.nfl_plays_year_2025 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -17836,8 +17836,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -17846,18 +17846,18 @@ CREATE TABLE public.nfl_plays_year_2025 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -17866,9 +17866,9 @@ CREATE TABLE public.nfl_plays_year_2025 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -17880,7 +17880,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -17992,8 +17992,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -18027,9 +18027,9 @@ CREATE TABLE public.nfl_plays_year_2025 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2025_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2025_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2025_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -18062,8 +18062,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    ydl_num integer,
-    ydl_side character varying(10),
+    yard_line_num integer,
+    yard_line_side character varying(10),
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
@@ -18071,9 +18071,9 @@ CREATE TABLE public.nfl_plays_year_2026 (
     ngs_pass_rushers integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
-    drive_seq integer,
-    ydl_end character varying(10),
-    ydl_start character varying(10),
+    drive_sequence integer,
+    yard_line_end character varying(10),
+    yard_line_start character varying(10),
     is_first_down boolean,
     is_goal_to_go boolean,
     next_play_type character varying(36),
@@ -18093,21 +18093,21 @@ CREATE TABLE public.nfl_plays_year_2026 (
     offense_nfl_team character varying(3),
     defense_nfl_team character varying(3),
     play_type public.nfl_play_type,
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
+    fumble_lost_pid character varying(25),
+    fumble_lost_gsis_player_id character varying(36),
     ball_carrier_pid character varying(25),
-    bc_gsis character varying(36),
+    ball_carrier_gsis_player_id character varying(36),
     passer_pid character varying(25),
-    psr_gsis character varying(36),
+    passer_gsis_player_id character varying(36),
     target_pid character varying(25),
-    trg_gsis character varying(36),
+    target_gsis_player_id character varying(36),
     interceptor_pid character varying(25),
-    intp_gsis character varying(36),
+    interceptor_gsis_player_id character varying(36),
     yds_gained smallint,
     depth_of_target integer,
     yards_after_catch integer,
     yards_after_any_contact integer,
-    ret_yds integer,
+    return_yds integer,
     is_qb_pressure boolean,
     is_qb_hit boolean,
     is_qb_hurry boolean,
@@ -18123,8 +18123,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     is_completion boolean,
     is_touchdown boolean,
     is_return_touchdown boolean,
-    td_tm character varying(5),
-    ret_tm character varying(5),
+    td_nfl_team character varying(5),
+    return_nfl_team character varying(5),
     has_charting_data boolean,
     yards_from_own_goal integer,
     true_air_yards smallint,
@@ -18166,30 +18166,30 @@ CREATE TABLE public.nfl_plays_year_2026 (
     coverage_on_target smallint,
     cov_type_charted character varying(3),
     receiver_separation character varying(3),
-    ydl_100 integer,
+    yard_line_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
-    drive_fds integer,
+    drive_first_downs integer,
     is_drive_inside_20 boolean,
     is_drive_score boolean,
-    drive_start_qtr smallint,
-    drive_end_qtr smallint,
+    drive_start_quarter smallint,
+    drive_end_quarter smallint,
     drive_yds_penalized integer,
     drive_start_transition character varying(30),
     drive_end_transition character varying(30),
     drive_game_clock_start character varying(10),
     drive_game_clock_end character varying(10),
-    drive_start_ydl character varying(10),
-    drive_end_ydl character varying(10),
+    drive_start_yard_line character varying(10),
+    drive_end_yard_line character varying(10),
     drive_start_play_id integer,
     drive_end_play_id integer,
-    series_seq integer,
+    series_sequence integer,
     is_series_successful boolean,
     series_result public.series_result,
     game_clock_end character varying(10),
-    sec_rem_qtr integer,
-    sec_rem_half integer,
-    sec_rem_gm integer,
+    seconds_remaining_quarter integer,
+    seconds_remaining_half integer,
+    seconds_remaining_game integer,
     is_fumble boolean,
     is_incompletion boolean,
     is_touchback boolean,
@@ -18243,14 +18243,14 @@ CREATE TABLE public.nfl_plays_year_2026 (
     total_away_raw_yac_epa numeric(16,12),
     win_probability numeric(16,12),
     win_probability_added numeric(16,12),
-    home_wp numeric(16,12),
-    away_wp numeric(16,12),
+    home_win_probability numeric(16,12),
+    away_win_probability numeric(16,12),
     vegas_wpa numeric(16,12),
     vegas_home_wpa numeric(16,12),
-    home_wp_post numeric(16,12),
-    away_wp_post numeric(16,12),
-    vegas_wp numeric(16,12),
-    vegas_home_wp numeric(16,12),
+    home_win_probability_post numeric(16,12),
+    away_win_probability_post numeric(16,12),
+    vegas_win_probability numeric(16,12),
+    vegas_home_win_probability numeric(16,12),
     total_home_rush_wpa numeric(16,12),
     total_away_rush_wpa numeric(16,12),
     total_home_pass_wpa numeric(16,12),
@@ -18269,8 +18269,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     total_away_raw_yac_wpa numeric(16,12),
     xyac_mean_yds numeric(16,12),
     xyac_median_yds numeric(16,12),
-    xyac_succ_prob numeric(16,12),
-    xyac_fd_prob numeric(16,12),
+    xyac_success_prob numeric(16,12),
+    xyac_first_down_prob numeric(16,12),
     is_extra_point_attempt boolean,
     is_two_point_conversion_attempt boolean,
     is_field_goal_attempt boolean,
@@ -18279,18 +18279,18 @@ CREATE TABLE public.nfl_plays_year_2026 (
     kick_distance integer,
     ep_result public.nfl_kick_result,
     is_punt_blocked boolean,
-    home_to_rem smallint,
-    away_to_rem smallint,
-    pos_to_rem smallint,
-    def_to_rem smallint,
+    home_timeouts_remaining smallint,
+    away_timeouts_remaining smallint,
+    pos_timeouts_remaining smallint,
+    def_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
     pos_score smallint,
     def_score smallint,
-    score_diff smallint,
+    score_difference smallint,
     pos_score_post smallint,
     def_score_post smallint,
-    score_diff_post smallint,
+    score_difference_post smallint,
     no_score_prob numeric(16,12),
     opp_fg_prob numeric(16,12),
     opp_safety_prob numeric(16,12),
@@ -18299,9 +18299,9 @@ CREATE TABLE public.nfl_plays_year_2026 (
     safety_prob numeric(16,12),
     td_prob numeric(16,12),
     extra_point_prob numeric(16,12),
-    two_conv_prob numeric(16,12),
+    two_conversion_prob numeric(16,12),
     xpass_prob numeric(16,12),
-    pass_oe numeric(16,12),
+    pass_over_expected numeric(16,12),
     completion_probability numeric(16,12),
     completion_percentage_over_expected numeric(16,12),
     air_yards numeric(8,4),
@@ -18313,7 +18313,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
-    n_offense_backfield numeric,
+    number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
     is_motion boolean,
@@ -18425,8 +18425,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     is_fake_field_goal boolean,
     is_blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result,
-    desc_nflfastr text,
+    two_point_result public.nfl_two_point_result,
+    play_description_nflfastr text,
     nfl_week_id character varying(20) GENERATED ALWAYS AS ((((((season_year)::text || '_'::text) || (season_type)::text) || '_WEEK_'::text) || (week)::text)) STORED,
     epa_charting numeric(16,12),
     dropback_depth numeric(8,4),
@@ -18460,9 +18460,9 @@ CREATE TABLE public.nfl_plays_year_2026 (
     def_personnel_dl_count smallint,
     def_personnel_lb_count smallint,
     def_personnel_db_count smallint,
-    off_personnel_rb_count_pp smallint,
-    off_personnel_te_count_pp smallint,
-    off_personnel_wr_count_pp smallint,
+    off_personnel_rb_count_per_play smallint,
+    off_personnel_te_count_per_play smallint,
+    off_personnel_wr_count_per_play smallint,
     CONSTRAINT nfl_plays_year_2026_def_personnel_db_count_range_chk CHECK (((def_personnel_db_count IS NULL) OR ((def_personnel_db_count >= 0) AND (def_personnel_db_count <= 9)))),
     CONSTRAINT nfl_plays_year_2026_def_personnel_dl_count_range_chk CHECK (((def_personnel_dl_count IS NULL) OR ((def_personnel_dl_count >= 0) AND (def_personnel_dl_count <= 9)))),
     CONSTRAINT nfl_plays_year_2026_def_personnel_lb_count_range_chk CHECK (((def_personnel_lb_count IS NULL) OR ((def_personnel_lb_count >= 0) AND (def_personnel_lb_count <= 9)))),
@@ -31405,7 +31405,7 @@ CREATE INDEX idx_nfl_plays_catchable_ball ON ONLY public.nfl_plays USING btree (
 -- Name: idx_nfl_plays_drive_seq_coherence; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_drive_seq_coherence ON ONLY public.nfl_plays USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX idx_nfl_plays_drive_seq_coherence ON ONLY public.nfl_plays USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -31426,21 +31426,21 @@ CREATE INDEX idx_nfl_plays_esbid ON ONLY public.nfl_plays USING btree (esbid);
 -- Name: idx_nfl_plays_fantasy; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_fantasy ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX idx_nfl_plays_fantasy ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
 -- Name: idx_nfl_plays_fantasy_points; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_fantasy_points ON ONLY public.nfl_plays USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX idx_nfl_plays_fantasy_points ON ONLY public.nfl_plays USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
 -- Name: idx_nfl_plays_fuml_pid_week_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_fuml_pid_week_year ON ONLY public.nfl_plays USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX idx_nfl_plays_fuml_pid_week_year ON ONLY public.nfl_plays USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -31489,7 +31489,7 @@ CREATE INDEX idx_nfl_plays_passer_pid ON ONLY public.nfl_plays USING btree (pass
 -- Name: idx_nfl_plays_pid_types; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_pid_types ON ONLY public.nfl_plays USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX idx_nfl_plays_pid_types ON ONLY public.nfl_plays USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -31566,7 +31566,7 @@ CREATE UNIQUE INDEX idx_nfl_plays_season_year_esbid_play_id ON ONLY public.nfl_p
 -- Name: idx_nfl_plays_series_seq; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_series_seq ON ONLY public.nfl_plays USING btree (series_seq);
+CREATE INDEX idx_nfl_plays_series_seq ON ONLY public.nfl_plays USING btree (series_sequence);
 
 
 --
@@ -31629,7 +31629,7 @@ CREATE INDEX idx_nfl_plays_target_pid ON ONLY public.nfl_plays USING btree (targ
 -- Name: idx_nfl_plays_ydl_100; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_ydl_100 ON ONLY public.nfl_plays USING btree (ydl_100);
+CREATE INDEX idx_nfl_plays_ydl_100 ON ONLY public.nfl_plays USING btree (yard_line_100);
 
 
 --
@@ -31657,7 +31657,7 @@ CREATE INDEX idx_nfl_plays_year_seas_type_play_type_bc_trg_pid ON ONLY public.nf
 -- Name: idx_nfl_plays_year_seas_type_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_player_fuml_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_play_type_player_fuml_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -31692,7 +31692,7 @@ CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_bc_pid ON ONLY public.n
 -- Name: idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ON ONLY public.nfl_plays USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -32623,7 +32623,7 @@ CREATE INDEX nfl_plays_year_2000_bc_pid_idx ON public.nfl_plays_year_2000 USING 
 -- Name: nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2000 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2000 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -32665,7 +32665,7 @@ CREATE INDEX nfl_plays_year_2000_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2000_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_ds_coherence_idx ON public.nfl_plays_year_2000 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2000_ds_coherence_idx ON public.nfl_plays_year_2000 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -32756,7 +32756,7 @@ CREATE INDEX nfl_plays_year_2000_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2000_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2000 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2000_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2000 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -32798,7 +32798,7 @@ CREATE INDEX nfl_plays_year_2000_seas_type_idx ON public.nfl_plays_year_2000 USI
 -- Name: nfl_plays_year_2000_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_series_seq_idx ON public.nfl_plays_year_2000 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2000_series_seq_idx ON public.nfl_plays_year_2000 USING btree (series_sequence);
 
 
 --
@@ -32875,7 +32875,7 @@ CREATE INDEX nfl_plays_year_2000_trg_pid_idx ON public.nfl_plays_year_2000 USING
 -- Name: nfl_plays_year_2000_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_ydl_100_idx ON public.nfl_plays_year_2000 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2000_ydl_100_idx ON public.nfl_plays_year_2000 USING btree (yard_line_100);
 
 
 --
@@ -32910,7 +32910,7 @@ CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -32924,7 +32924,7 @@ CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -32945,7 +32945,7 @@ CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2000_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -32966,7 +32966,7 @@ CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -33008,7 +33008,7 @@ CREATE INDEX nfl_plays_year_2001_bc_pid_idx ON public.nfl_plays_year_2001 USING 
 -- Name: nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2001 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2001 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -33050,7 +33050,7 @@ CREATE INDEX nfl_plays_year_2001_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2001_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_ds_coherence_idx ON public.nfl_plays_year_2001 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2001_ds_coherence_idx ON public.nfl_plays_year_2001 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -33141,7 +33141,7 @@ CREATE INDEX nfl_plays_year_2001_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2001_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2001 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2001_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2001 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -33183,7 +33183,7 @@ CREATE INDEX nfl_plays_year_2001_seas_type_idx ON public.nfl_plays_year_2001 USI
 -- Name: nfl_plays_year_2001_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_series_seq_idx ON public.nfl_plays_year_2001 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2001_series_seq_idx ON public.nfl_plays_year_2001 USING btree (series_sequence);
 
 
 --
@@ -33260,7 +33260,7 @@ CREATE INDEX nfl_plays_year_2001_trg_pid_idx ON public.nfl_plays_year_2001 USING
 -- Name: nfl_plays_year_2001_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_ydl_100_idx ON public.nfl_plays_year_2001 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2001_ydl_100_idx ON public.nfl_plays_year_2001 USING btree (yard_line_100);
 
 
 --
@@ -33295,7 +33295,7 @@ CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -33309,7 +33309,7 @@ CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -33330,7 +33330,7 @@ CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2001_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -33351,7 +33351,7 @@ CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -33393,7 +33393,7 @@ CREATE INDEX nfl_plays_year_2002_bc_pid_idx ON public.nfl_plays_year_2002 USING 
 -- Name: nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2002 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2002 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -33435,7 +33435,7 @@ CREATE INDEX nfl_plays_year_2002_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2002_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_ds_coherence_idx ON public.nfl_plays_year_2002 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2002_ds_coherence_idx ON public.nfl_plays_year_2002 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -33526,7 +33526,7 @@ CREATE INDEX nfl_plays_year_2002_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2002_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2002 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2002_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2002 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -33568,7 +33568,7 @@ CREATE INDEX nfl_plays_year_2002_seas_type_idx ON public.nfl_plays_year_2002 USI
 -- Name: nfl_plays_year_2002_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_series_seq_idx ON public.nfl_plays_year_2002 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2002_series_seq_idx ON public.nfl_plays_year_2002 USING btree (series_sequence);
 
 
 --
@@ -33645,7 +33645,7 @@ CREATE INDEX nfl_plays_year_2002_trg_pid_idx ON public.nfl_plays_year_2002 USING
 -- Name: nfl_plays_year_2002_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_ydl_100_idx ON public.nfl_plays_year_2002 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2002_ydl_100_idx ON public.nfl_plays_year_2002 USING btree (yard_line_100);
 
 
 --
@@ -33680,7 +33680,7 @@ CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -33694,7 +33694,7 @@ CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -33715,7 +33715,7 @@ CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2002_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -33736,7 +33736,7 @@ CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -33778,7 +33778,7 @@ CREATE INDEX nfl_plays_year_2003_bc_pid_idx ON public.nfl_plays_year_2003 USING 
 -- Name: nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2003 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2003 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -33820,7 +33820,7 @@ CREATE INDEX nfl_plays_year_2003_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2003_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_ds_coherence_idx ON public.nfl_plays_year_2003 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2003_ds_coherence_idx ON public.nfl_plays_year_2003 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -33911,7 +33911,7 @@ CREATE INDEX nfl_plays_year_2003_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2003_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2003 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2003_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2003 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -33953,7 +33953,7 @@ CREATE INDEX nfl_plays_year_2003_seas_type_idx ON public.nfl_plays_year_2003 USI
 -- Name: nfl_plays_year_2003_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_series_seq_idx ON public.nfl_plays_year_2003 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2003_series_seq_idx ON public.nfl_plays_year_2003 USING btree (series_sequence);
 
 
 --
@@ -34030,7 +34030,7 @@ CREATE INDEX nfl_plays_year_2003_trg_pid_idx ON public.nfl_plays_year_2003 USING
 -- Name: nfl_plays_year_2003_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_ydl_100_idx ON public.nfl_plays_year_2003 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2003_ydl_100_idx ON public.nfl_plays_year_2003 USING btree (yard_line_100);
 
 
 --
@@ -34065,7 +34065,7 @@ CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -34079,7 +34079,7 @@ CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -34100,7 +34100,7 @@ CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2003_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -34121,7 +34121,7 @@ CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -34163,7 +34163,7 @@ CREATE INDEX nfl_plays_year_2004_bc_pid_idx ON public.nfl_plays_year_2004 USING 
 -- Name: nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2004 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2004 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -34205,7 +34205,7 @@ CREATE INDEX nfl_plays_year_2004_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2004_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_ds_coherence_idx ON public.nfl_plays_year_2004 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2004_ds_coherence_idx ON public.nfl_plays_year_2004 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -34296,7 +34296,7 @@ CREATE INDEX nfl_plays_year_2004_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2004_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2004 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2004_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2004 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -34338,7 +34338,7 @@ CREATE INDEX nfl_plays_year_2004_seas_type_idx ON public.nfl_plays_year_2004 USI
 -- Name: nfl_plays_year_2004_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_series_seq_idx ON public.nfl_plays_year_2004 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2004_series_seq_idx ON public.nfl_plays_year_2004 USING btree (series_sequence);
 
 
 --
@@ -34415,7 +34415,7 @@ CREATE INDEX nfl_plays_year_2004_trg_pid_idx ON public.nfl_plays_year_2004 USING
 -- Name: nfl_plays_year_2004_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_ydl_100_idx ON public.nfl_plays_year_2004 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2004_ydl_100_idx ON public.nfl_plays_year_2004 USING btree (yard_line_100);
 
 
 --
@@ -34450,7 +34450,7 @@ CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -34464,7 +34464,7 @@ CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -34485,7 +34485,7 @@ CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2004_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -34506,7 +34506,7 @@ CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -34548,7 +34548,7 @@ CREATE INDEX nfl_plays_year_2005_bc_pid_idx ON public.nfl_plays_year_2005 USING 
 -- Name: nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2005 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2005 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -34590,7 +34590,7 @@ CREATE INDEX nfl_plays_year_2005_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2005_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_ds_coherence_idx ON public.nfl_plays_year_2005 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2005_ds_coherence_idx ON public.nfl_plays_year_2005 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -34681,7 +34681,7 @@ CREATE INDEX nfl_plays_year_2005_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2005_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2005 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2005_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2005 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -34723,7 +34723,7 @@ CREATE INDEX nfl_plays_year_2005_seas_type_idx ON public.nfl_plays_year_2005 USI
 -- Name: nfl_plays_year_2005_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_series_seq_idx ON public.nfl_plays_year_2005 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2005_series_seq_idx ON public.nfl_plays_year_2005 USING btree (series_sequence);
 
 
 --
@@ -34800,7 +34800,7 @@ CREATE INDEX nfl_plays_year_2005_trg_pid_idx ON public.nfl_plays_year_2005 USING
 -- Name: nfl_plays_year_2005_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_ydl_100_idx ON public.nfl_plays_year_2005 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2005_ydl_100_idx ON public.nfl_plays_year_2005 USING btree (yard_line_100);
 
 
 --
@@ -34835,7 +34835,7 @@ CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -34849,7 +34849,7 @@ CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -34870,7 +34870,7 @@ CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2005_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -34891,7 +34891,7 @@ CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -34933,7 +34933,7 @@ CREATE INDEX nfl_plays_year_2006_bc_pid_idx ON public.nfl_plays_year_2006 USING 
 -- Name: nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2006 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2006 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -34975,7 +34975,7 @@ CREATE INDEX nfl_plays_year_2006_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2006_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_ds_coherence_idx ON public.nfl_plays_year_2006 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2006_ds_coherence_idx ON public.nfl_plays_year_2006 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -35066,7 +35066,7 @@ CREATE INDEX nfl_plays_year_2006_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2006_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2006 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2006_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2006 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -35108,7 +35108,7 @@ CREATE INDEX nfl_plays_year_2006_seas_type_idx ON public.nfl_plays_year_2006 USI
 -- Name: nfl_plays_year_2006_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_series_seq_idx ON public.nfl_plays_year_2006 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2006_series_seq_idx ON public.nfl_plays_year_2006 USING btree (series_sequence);
 
 
 --
@@ -35185,7 +35185,7 @@ CREATE INDEX nfl_plays_year_2006_trg_pid_idx ON public.nfl_plays_year_2006 USING
 -- Name: nfl_plays_year_2006_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_ydl_100_idx ON public.nfl_plays_year_2006 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2006_ydl_100_idx ON public.nfl_plays_year_2006 USING btree (yard_line_100);
 
 
 --
@@ -35220,7 +35220,7 @@ CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -35234,7 +35234,7 @@ CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -35255,7 +35255,7 @@ CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2006_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -35276,7 +35276,7 @@ CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -35318,7 +35318,7 @@ CREATE INDEX nfl_plays_year_2007_bc_pid_idx ON public.nfl_plays_year_2007 USING 
 -- Name: nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2007 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2007 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -35360,7 +35360,7 @@ CREATE INDEX nfl_plays_year_2007_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2007_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_ds_coherence_idx ON public.nfl_plays_year_2007 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2007_ds_coherence_idx ON public.nfl_plays_year_2007 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -35451,7 +35451,7 @@ CREATE INDEX nfl_plays_year_2007_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2007_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2007 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2007_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2007 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -35493,7 +35493,7 @@ CREATE INDEX nfl_plays_year_2007_seas_type_idx ON public.nfl_plays_year_2007 USI
 -- Name: nfl_plays_year_2007_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_series_seq_idx ON public.nfl_plays_year_2007 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2007_series_seq_idx ON public.nfl_plays_year_2007 USING btree (series_sequence);
 
 
 --
@@ -35570,7 +35570,7 @@ CREATE INDEX nfl_plays_year_2007_trg_pid_idx ON public.nfl_plays_year_2007 USING
 -- Name: nfl_plays_year_2007_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_ydl_100_idx ON public.nfl_plays_year_2007 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2007_ydl_100_idx ON public.nfl_plays_year_2007 USING btree (yard_line_100);
 
 
 --
@@ -35605,7 +35605,7 @@ CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -35619,7 +35619,7 @@ CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -35640,7 +35640,7 @@ CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2007_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -35661,7 +35661,7 @@ CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -35703,7 +35703,7 @@ CREATE INDEX nfl_plays_year_2008_bc_pid_idx ON public.nfl_plays_year_2008 USING 
 -- Name: nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2008 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2008 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -35745,7 +35745,7 @@ CREATE INDEX nfl_plays_year_2008_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2008_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_ds_coherence_idx ON public.nfl_plays_year_2008 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2008_ds_coherence_idx ON public.nfl_plays_year_2008 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -35836,7 +35836,7 @@ CREATE INDEX nfl_plays_year_2008_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2008_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2008 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2008_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2008 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -35878,7 +35878,7 @@ CREATE INDEX nfl_plays_year_2008_seas_type_idx ON public.nfl_plays_year_2008 USI
 -- Name: nfl_plays_year_2008_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_series_seq_idx ON public.nfl_plays_year_2008 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2008_series_seq_idx ON public.nfl_plays_year_2008 USING btree (series_sequence);
 
 
 --
@@ -35955,7 +35955,7 @@ CREATE INDEX nfl_plays_year_2008_trg_pid_idx ON public.nfl_plays_year_2008 USING
 -- Name: nfl_plays_year_2008_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_ydl_100_idx ON public.nfl_plays_year_2008 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2008_ydl_100_idx ON public.nfl_plays_year_2008 USING btree (yard_line_100);
 
 
 --
@@ -35990,7 +35990,7 @@ CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -36004,7 +36004,7 @@ CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -36025,7 +36025,7 @@ CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2008_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -36046,7 +36046,7 @@ CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -36088,7 +36088,7 @@ CREATE INDEX nfl_plays_year_2009_bc_pid_idx ON public.nfl_plays_year_2009 USING 
 -- Name: nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2009 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2009 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -36130,7 +36130,7 @@ CREATE INDEX nfl_plays_year_2009_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2009_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_ds_coherence_idx ON public.nfl_plays_year_2009 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2009_ds_coherence_idx ON public.nfl_plays_year_2009 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -36221,7 +36221,7 @@ CREATE INDEX nfl_plays_year_2009_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2009_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2009 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2009_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2009 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -36263,7 +36263,7 @@ CREATE INDEX nfl_plays_year_2009_seas_type_idx ON public.nfl_plays_year_2009 USI
 -- Name: nfl_plays_year_2009_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_series_seq_idx ON public.nfl_plays_year_2009 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2009_series_seq_idx ON public.nfl_plays_year_2009 USING btree (series_sequence);
 
 
 --
@@ -36340,7 +36340,7 @@ CREATE INDEX nfl_plays_year_2009_trg_pid_idx ON public.nfl_plays_year_2009 USING
 -- Name: nfl_plays_year_2009_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_ydl_100_idx ON public.nfl_plays_year_2009 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2009_ydl_100_idx ON public.nfl_plays_year_2009 USING btree (yard_line_100);
 
 
 --
@@ -36375,7 +36375,7 @@ CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -36389,7 +36389,7 @@ CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -36410,7 +36410,7 @@ CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2009_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -36431,7 +36431,7 @@ CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -36473,7 +36473,7 @@ CREATE INDEX nfl_plays_year_2010_bc_pid_idx ON public.nfl_plays_year_2010 USING 
 -- Name: nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2010 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2010 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -36515,7 +36515,7 @@ CREATE INDEX nfl_plays_year_2010_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2010_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_ds_coherence_idx ON public.nfl_plays_year_2010 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2010_ds_coherence_idx ON public.nfl_plays_year_2010 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -36606,7 +36606,7 @@ CREATE INDEX nfl_plays_year_2010_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2010_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2010 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2010_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2010 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -36648,7 +36648,7 @@ CREATE INDEX nfl_plays_year_2010_seas_type_idx ON public.nfl_plays_year_2010 USI
 -- Name: nfl_plays_year_2010_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_series_seq_idx ON public.nfl_plays_year_2010 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2010_series_seq_idx ON public.nfl_plays_year_2010 USING btree (series_sequence);
 
 
 --
@@ -36725,7 +36725,7 @@ CREATE INDEX nfl_plays_year_2010_trg_pid_idx ON public.nfl_plays_year_2010 USING
 -- Name: nfl_plays_year_2010_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_ydl_100_idx ON public.nfl_plays_year_2010 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2010_ydl_100_idx ON public.nfl_plays_year_2010 USING btree (yard_line_100);
 
 
 --
@@ -36760,7 +36760,7 @@ CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -36774,7 +36774,7 @@ CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -36795,7 +36795,7 @@ CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2010_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -36816,7 +36816,7 @@ CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -36858,7 +36858,7 @@ CREATE INDEX nfl_plays_year_2011_bc_pid_idx ON public.nfl_plays_year_2011 USING 
 -- Name: nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2011 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2011 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -36900,7 +36900,7 @@ CREATE INDEX nfl_plays_year_2011_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2011_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_ds_coherence_idx ON public.nfl_plays_year_2011 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2011_ds_coherence_idx ON public.nfl_plays_year_2011 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -36991,7 +36991,7 @@ CREATE INDEX nfl_plays_year_2011_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2011_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2011 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2011_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2011 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -37033,7 +37033,7 @@ CREATE INDEX nfl_plays_year_2011_seas_type_idx ON public.nfl_plays_year_2011 USI
 -- Name: nfl_plays_year_2011_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_series_seq_idx ON public.nfl_plays_year_2011 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2011_series_seq_idx ON public.nfl_plays_year_2011 USING btree (series_sequence);
 
 
 --
@@ -37110,7 +37110,7 @@ CREATE INDEX nfl_plays_year_2011_trg_pid_idx ON public.nfl_plays_year_2011 USING
 -- Name: nfl_plays_year_2011_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_ydl_100_idx ON public.nfl_plays_year_2011 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2011_ydl_100_idx ON public.nfl_plays_year_2011 USING btree (yard_line_100);
 
 
 --
@@ -37145,7 +37145,7 @@ CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -37159,7 +37159,7 @@ CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -37180,7 +37180,7 @@ CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2011_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -37201,7 +37201,7 @@ CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -37243,7 +37243,7 @@ CREATE INDEX nfl_plays_year_2012_bc_pid_idx ON public.nfl_plays_year_2012 USING 
 -- Name: nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2012 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2012 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -37285,7 +37285,7 @@ CREATE INDEX nfl_plays_year_2012_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2012_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_ds_coherence_idx ON public.nfl_plays_year_2012 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2012_ds_coherence_idx ON public.nfl_plays_year_2012 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -37376,7 +37376,7 @@ CREATE INDEX nfl_plays_year_2012_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2012_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2012 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2012_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2012 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -37418,7 +37418,7 @@ CREATE INDEX nfl_plays_year_2012_seas_type_idx ON public.nfl_plays_year_2012 USI
 -- Name: nfl_plays_year_2012_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_series_seq_idx ON public.nfl_plays_year_2012 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2012_series_seq_idx ON public.nfl_plays_year_2012 USING btree (series_sequence);
 
 
 --
@@ -37495,7 +37495,7 @@ CREATE INDEX nfl_plays_year_2012_trg_pid_idx ON public.nfl_plays_year_2012 USING
 -- Name: nfl_plays_year_2012_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_ydl_100_idx ON public.nfl_plays_year_2012 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2012_ydl_100_idx ON public.nfl_plays_year_2012 USING btree (yard_line_100);
 
 
 --
@@ -37530,7 +37530,7 @@ CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -37544,7 +37544,7 @@ CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -37565,7 +37565,7 @@ CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2012_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -37586,7 +37586,7 @@ CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -37628,7 +37628,7 @@ CREATE INDEX nfl_plays_year_2013_bc_pid_idx ON public.nfl_plays_year_2013 USING 
 -- Name: nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2013 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2013 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -37670,7 +37670,7 @@ CREATE INDEX nfl_plays_year_2013_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2013_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_ds_coherence_idx ON public.nfl_plays_year_2013 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2013_ds_coherence_idx ON public.nfl_plays_year_2013 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -37761,7 +37761,7 @@ CREATE INDEX nfl_plays_year_2013_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2013_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2013 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2013_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2013 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -37803,7 +37803,7 @@ CREATE INDEX nfl_plays_year_2013_seas_type_idx ON public.nfl_plays_year_2013 USI
 -- Name: nfl_plays_year_2013_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_series_seq_idx ON public.nfl_plays_year_2013 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2013_series_seq_idx ON public.nfl_plays_year_2013 USING btree (series_sequence);
 
 
 --
@@ -37880,7 +37880,7 @@ CREATE INDEX nfl_plays_year_2013_trg_pid_idx ON public.nfl_plays_year_2013 USING
 -- Name: nfl_plays_year_2013_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_ydl_100_idx ON public.nfl_plays_year_2013 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2013_ydl_100_idx ON public.nfl_plays_year_2013 USING btree (yard_line_100);
 
 
 --
@@ -37915,7 +37915,7 @@ CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -37929,7 +37929,7 @@ CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -37950,7 +37950,7 @@ CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2013_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -37971,7 +37971,7 @@ CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -38013,7 +38013,7 @@ CREATE INDEX nfl_plays_year_2014_bc_pid_idx ON public.nfl_plays_year_2014 USING 
 -- Name: nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2014 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2014 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -38055,7 +38055,7 @@ CREATE INDEX nfl_plays_year_2014_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2014_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_ds_coherence_idx ON public.nfl_plays_year_2014 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2014_ds_coherence_idx ON public.nfl_plays_year_2014 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -38146,7 +38146,7 @@ CREATE INDEX nfl_plays_year_2014_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2014_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2014 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2014_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2014 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -38188,7 +38188,7 @@ CREATE INDEX nfl_plays_year_2014_seas_type_idx ON public.nfl_plays_year_2014 USI
 -- Name: nfl_plays_year_2014_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_series_seq_idx ON public.nfl_plays_year_2014 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2014_series_seq_idx ON public.nfl_plays_year_2014 USING btree (series_sequence);
 
 
 --
@@ -38265,7 +38265,7 @@ CREATE INDEX nfl_plays_year_2014_trg_pid_idx ON public.nfl_plays_year_2014 USING
 -- Name: nfl_plays_year_2014_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_ydl_100_idx ON public.nfl_plays_year_2014 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2014_ydl_100_idx ON public.nfl_plays_year_2014 USING btree (yard_line_100);
 
 
 --
@@ -38300,7 +38300,7 @@ CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -38314,7 +38314,7 @@ CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -38335,7 +38335,7 @@ CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2014_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -38356,7 +38356,7 @@ CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -38398,7 +38398,7 @@ CREATE INDEX nfl_plays_year_2015_bc_pid_idx ON public.nfl_plays_year_2015 USING 
 -- Name: nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2015 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2015 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -38440,7 +38440,7 @@ CREATE INDEX nfl_plays_year_2015_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2015_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_ds_coherence_idx ON public.nfl_plays_year_2015 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2015_ds_coherence_idx ON public.nfl_plays_year_2015 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -38531,7 +38531,7 @@ CREATE INDEX nfl_plays_year_2015_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2015_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2015 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2015_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2015 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -38573,7 +38573,7 @@ CREATE INDEX nfl_plays_year_2015_seas_type_idx ON public.nfl_plays_year_2015 USI
 -- Name: nfl_plays_year_2015_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_series_seq_idx ON public.nfl_plays_year_2015 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2015_series_seq_idx ON public.nfl_plays_year_2015 USING btree (series_sequence);
 
 
 --
@@ -38650,7 +38650,7 @@ CREATE INDEX nfl_plays_year_2015_trg_pid_idx ON public.nfl_plays_year_2015 USING
 -- Name: nfl_plays_year_2015_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_ydl_100_idx ON public.nfl_plays_year_2015 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2015_ydl_100_idx ON public.nfl_plays_year_2015 USING btree (yard_line_100);
 
 
 --
@@ -38685,7 +38685,7 @@ CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -38699,7 +38699,7 @@ CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -38720,7 +38720,7 @@ CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2015_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -38741,7 +38741,7 @@ CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -38783,7 +38783,7 @@ CREATE INDEX nfl_plays_year_2016_bc_pid_idx ON public.nfl_plays_year_2016 USING 
 -- Name: nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2016 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2016 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -38825,7 +38825,7 @@ CREATE INDEX nfl_plays_year_2016_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2016_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_ds_coherence_idx ON public.nfl_plays_year_2016 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2016_ds_coherence_idx ON public.nfl_plays_year_2016 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -38916,7 +38916,7 @@ CREATE INDEX nfl_plays_year_2016_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2016_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2016 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2016_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2016 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -38958,7 +38958,7 @@ CREATE INDEX nfl_plays_year_2016_seas_type_idx ON public.nfl_plays_year_2016 USI
 -- Name: nfl_plays_year_2016_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_series_seq_idx ON public.nfl_plays_year_2016 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2016_series_seq_idx ON public.nfl_plays_year_2016 USING btree (series_sequence);
 
 
 --
@@ -39035,7 +39035,7 @@ CREATE INDEX nfl_plays_year_2016_trg_pid_idx ON public.nfl_plays_year_2016 USING
 -- Name: nfl_plays_year_2016_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_ydl_100_idx ON public.nfl_plays_year_2016 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2016_ydl_100_idx ON public.nfl_plays_year_2016 USING btree (yard_line_100);
 
 
 --
@@ -39070,7 +39070,7 @@ CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -39084,7 +39084,7 @@ CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -39105,7 +39105,7 @@ CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2016_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -39126,7 +39126,7 @@ CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -39168,7 +39168,7 @@ CREATE INDEX nfl_plays_year_2017_bc_pid_idx ON public.nfl_plays_year_2017 USING 
 -- Name: nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2017 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2017 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -39210,7 +39210,7 @@ CREATE INDEX nfl_plays_year_2017_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2017_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_ds_coherence_idx ON public.nfl_plays_year_2017 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2017_ds_coherence_idx ON public.nfl_plays_year_2017 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -39301,7 +39301,7 @@ CREATE INDEX nfl_plays_year_2017_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2017_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2017 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2017_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2017 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -39343,7 +39343,7 @@ CREATE INDEX nfl_plays_year_2017_seas_type_idx ON public.nfl_plays_year_2017 USI
 -- Name: nfl_plays_year_2017_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_series_seq_idx ON public.nfl_plays_year_2017 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2017_series_seq_idx ON public.nfl_plays_year_2017 USING btree (series_sequence);
 
 
 --
@@ -39420,7 +39420,7 @@ CREATE INDEX nfl_plays_year_2017_trg_pid_idx ON public.nfl_plays_year_2017 USING
 -- Name: nfl_plays_year_2017_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_ydl_100_idx ON public.nfl_plays_year_2017 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2017_ydl_100_idx ON public.nfl_plays_year_2017 USING btree (yard_line_100);
 
 
 --
@@ -39455,7 +39455,7 @@ CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -39469,7 +39469,7 @@ CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -39490,7 +39490,7 @@ CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2017_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -39511,7 +39511,7 @@ CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -39553,7 +39553,7 @@ CREATE INDEX nfl_plays_year_2018_bc_pid_idx ON public.nfl_plays_year_2018 USING 
 -- Name: nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2018 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2018 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -39595,7 +39595,7 @@ CREATE INDEX nfl_plays_year_2018_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2018_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_ds_coherence_idx ON public.nfl_plays_year_2018 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2018_ds_coherence_idx ON public.nfl_plays_year_2018 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -39686,7 +39686,7 @@ CREATE INDEX nfl_plays_year_2018_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2018_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2018 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2018_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2018 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -39728,7 +39728,7 @@ CREATE INDEX nfl_plays_year_2018_seas_type_idx ON public.nfl_plays_year_2018 USI
 -- Name: nfl_plays_year_2018_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_series_seq_idx ON public.nfl_plays_year_2018 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2018_series_seq_idx ON public.nfl_plays_year_2018 USING btree (series_sequence);
 
 
 --
@@ -39805,7 +39805,7 @@ CREATE INDEX nfl_plays_year_2018_trg_pid_idx ON public.nfl_plays_year_2018 USING
 -- Name: nfl_plays_year_2018_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_ydl_100_idx ON public.nfl_plays_year_2018 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2018_ydl_100_idx ON public.nfl_plays_year_2018 USING btree (yard_line_100);
 
 
 --
@@ -39840,7 +39840,7 @@ CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -39854,7 +39854,7 @@ CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -39875,7 +39875,7 @@ CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2018_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -39896,7 +39896,7 @@ CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -39938,7 +39938,7 @@ CREATE INDEX nfl_plays_year_2019_bc_pid_idx ON public.nfl_plays_year_2019 USING 
 -- Name: nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2019 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2019 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -39980,7 +39980,7 @@ CREATE INDEX nfl_plays_year_2019_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2019_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_ds_coherence_idx ON public.nfl_plays_year_2019 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2019_ds_coherence_idx ON public.nfl_plays_year_2019 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -40071,7 +40071,7 @@ CREATE INDEX nfl_plays_year_2019_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2019_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2019 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2019_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2019 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -40113,7 +40113,7 @@ CREATE INDEX nfl_plays_year_2019_seas_type_idx ON public.nfl_plays_year_2019 USI
 -- Name: nfl_plays_year_2019_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_series_seq_idx ON public.nfl_plays_year_2019 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2019_series_seq_idx ON public.nfl_plays_year_2019 USING btree (series_sequence);
 
 
 --
@@ -40190,7 +40190,7 @@ CREATE INDEX nfl_plays_year_2019_trg_pid_idx ON public.nfl_plays_year_2019 USING
 -- Name: nfl_plays_year_2019_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_ydl_100_idx ON public.nfl_plays_year_2019 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2019_ydl_100_idx ON public.nfl_plays_year_2019 USING btree (yard_line_100);
 
 
 --
@@ -40225,7 +40225,7 @@ CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -40239,7 +40239,7 @@ CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -40260,7 +40260,7 @@ CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2019_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -40281,7 +40281,7 @@ CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -40323,7 +40323,7 @@ CREATE INDEX nfl_plays_year_2020_bc_pid_idx ON public.nfl_plays_year_2020 USING 
 -- Name: nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2020 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2020 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -40365,7 +40365,7 @@ CREATE INDEX nfl_plays_year_2020_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2020_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_ds_coherence_idx ON public.nfl_plays_year_2020 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2020_ds_coherence_idx ON public.nfl_plays_year_2020 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -40456,7 +40456,7 @@ CREATE INDEX nfl_plays_year_2020_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2020_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2020 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2020_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2020 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -40498,7 +40498,7 @@ CREATE INDEX nfl_plays_year_2020_seas_type_idx ON public.nfl_plays_year_2020 USI
 -- Name: nfl_plays_year_2020_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_series_seq_idx ON public.nfl_plays_year_2020 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2020_series_seq_idx ON public.nfl_plays_year_2020 USING btree (series_sequence);
 
 
 --
@@ -40575,7 +40575,7 @@ CREATE INDEX nfl_plays_year_2020_trg_pid_idx ON public.nfl_plays_year_2020 USING
 -- Name: nfl_plays_year_2020_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_ydl_100_idx ON public.nfl_plays_year_2020 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2020_ydl_100_idx ON public.nfl_plays_year_2020 USING btree (yard_line_100);
 
 
 --
@@ -40610,7 +40610,7 @@ CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -40624,7 +40624,7 @@ CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -40645,7 +40645,7 @@ CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2020_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -40666,7 +40666,7 @@ CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -40708,7 +40708,7 @@ CREATE INDEX nfl_plays_year_2021_bc_pid_idx ON public.nfl_plays_year_2021 USING 
 -- Name: nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2021 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2021 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -40750,7 +40750,7 @@ CREATE INDEX nfl_plays_year_2021_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2021_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_ds_coherence_idx ON public.nfl_plays_year_2021 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2021_ds_coherence_idx ON public.nfl_plays_year_2021 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -40841,7 +40841,7 @@ CREATE INDEX nfl_plays_year_2021_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2021_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2021 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2021_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2021 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -40883,7 +40883,7 @@ CREATE INDEX nfl_plays_year_2021_seas_type_idx ON public.nfl_plays_year_2021 USI
 -- Name: nfl_plays_year_2021_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_series_seq_idx ON public.nfl_plays_year_2021 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2021_series_seq_idx ON public.nfl_plays_year_2021 USING btree (series_sequence);
 
 
 --
@@ -40960,7 +40960,7 @@ CREATE INDEX nfl_plays_year_2021_trg_pid_idx ON public.nfl_plays_year_2021 USING
 -- Name: nfl_plays_year_2021_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_ydl_100_idx ON public.nfl_plays_year_2021 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2021_ydl_100_idx ON public.nfl_plays_year_2021 USING btree (yard_line_100);
 
 
 --
@@ -40995,7 +40995,7 @@ CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -41009,7 +41009,7 @@ CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -41030,7 +41030,7 @@ CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2021_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -41051,7 +41051,7 @@ CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -41093,7 +41093,7 @@ CREATE INDEX nfl_plays_year_2022_bc_pid_idx ON public.nfl_plays_year_2022 USING 
 -- Name: nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2022 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2022 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -41135,7 +41135,7 @@ CREATE INDEX nfl_plays_year_2022_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2022_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_ds_coherence_idx ON public.nfl_plays_year_2022 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2022_ds_coherence_idx ON public.nfl_plays_year_2022 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -41226,7 +41226,7 @@ CREATE INDEX nfl_plays_year_2022_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2022_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2022 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2022_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2022 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -41268,7 +41268,7 @@ CREATE INDEX nfl_plays_year_2022_seas_type_idx ON public.nfl_plays_year_2022 USI
 -- Name: nfl_plays_year_2022_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_series_seq_idx ON public.nfl_plays_year_2022 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2022_series_seq_idx ON public.nfl_plays_year_2022 USING btree (series_sequence);
 
 
 --
@@ -41345,7 +41345,7 @@ CREATE INDEX nfl_plays_year_2022_trg_pid_idx ON public.nfl_plays_year_2022 USING
 -- Name: nfl_plays_year_2022_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_ydl_100_idx ON public.nfl_plays_year_2022 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2022_ydl_100_idx ON public.nfl_plays_year_2022 USING btree (yard_line_100);
 
 
 --
@@ -41380,7 +41380,7 @@ CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -41394,7 +41394,7 @@ CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -41415,7 +41415,7 @@ CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2022_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -41436,7 +41436,7 @@ CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -41478,7 +41478,7 @@ CREATE INDEX nfl_plays_year_2023_bc_pid_idx ON public.nfl_plays_year_2023 USING 
 -- Name: nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2023 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2023 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -41520,7 +41520,7 @@ CREATE INDEX nfl_plays_year_2023_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2023_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_ds_coherence_idx ON public.nfl_plays_year_2023 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2023_ds_coherence_idx ON public.nfl_plays_year_2023 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -41611,7 +41611,7 @@ CREATE INDEX nfl_plays_year_2023_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2023_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2023 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2023_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2023 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -41653,7 +41653,7 @@ CREATE INDEX nfl_plays_year_2023_seas_type_idx ON public.nfl_plays_year_2023 USI
 -- Name: nfl_plays_year_2023_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_series_seq_idx ON public.nfl_plays_year_2023 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2023_series_seq_idx ON public.nfl_plays_year_2023 USING btree (series_sequence);
 
 
 --
@@ -41730,7 +41730,7 @@ CREATE INDEX nfl_plays_year_2023_trg_pid_idx ON public.nfl_plays_year_2023 USING
 -- Name: nfl_plays_year_2023_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_ydl_100_idx ON public.nfl_plays_year_2023 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2023_ydl_100_idx ON public.nfl_plays_year_2023 USING btree (yard_line_100);
 
 
 --
@@ -41765,7 +41765,7 @@ CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -41779,7 +41779,7 @@ CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -41800,7 +41800,7 @@ CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2023_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -41821,7 +41821,7 @@ CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -41863,7 +41863,7 @@ CREATE INDEX nfl_plays_year_2024_bc_pid_idx ON public.nfl_plays_year_2024 USING 
 -- Name: nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2024 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2024 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -41905,7 +41905,7 @@ CREATE INDEX nfl_plays_year_2024_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2024_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_ds_coherence_idx ON public.nfl_plays_year_2024 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2024_ds_coherence_idx ON public.nfl_plays_year_2024 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -41996,7 +41996,7 @@ CREATE INDEX nfl_plays_year_2024_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2024_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2024 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2024_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2024 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -42038,7 +42038,7 @@ CREATE INDEX nfl_plays_year_2024_seas_type_idx ON public.nfl_plays_year_2024 USI
 -- Name: nfl_plays_year_2024_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_series_seq_idx ON public.nfl_plays_year_2024 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2024_series_seq_idx ON public.nfl_plays_year_2024 USING btree (series_sequence);
 
 
 --
@@ -42115,7 +42115,7 @@ CREATE INDEX nfl_plays_year_2024_trg_pid_idx ON public.nfl_plays_year_2024 USING
 -- Name: nfl_plays_year_2024_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_ydl_100_idx ON public.nfl_plays_year_2024 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2024_ydl_100_idx ON public.nfl_plays_year_2024 USING btree (yard_line_100);
 
 
 --
@@ -42150,7 +42150,7 @@ CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -42164,7 +42164,7 @@ CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -42185,7 +42185,7 @@ CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2024_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -42206,7 +42206,7 @@ CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -42248,7 +42248,7 @@ CREATE INDEX nfl_plays_year_2025_bc_pid_idx ON public.nfl_plays_year_2025 USING 
 -- Name: nfl_plays_year_2025_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2025 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2025_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2025 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -42290,7 +42290,7 @@ CREATE INDEX nfl_plays_year_2025_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2025_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_ds_coherence_idx ON public.nfl_plays_year_2025 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2025_ds_coherence_idx ON public.nfl_plays_year_2025 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -42381,7 +42381,7 @@ CREATE INDEX nfl_plays_year_2025_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2025_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2025 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2025_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2025 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -42423,7 +42423,7 @@ CREATE INDEX nfl_plays_year_2025_seas_type_idx ON public.nfl_plays_year_2025 USI
 -- Name: nfl_plays_year_2025_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_series_seq_idx ON public.nfl_plays_year_2025 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2025_series_seq_idx ON public.nfl_plays_year_2025 USING btree (series_sequence);
 
 
 --
@@ -42500,7 +42500,7 @@ CREATE INDEX nfl_plays_year_2025_trg_pid_idx ON public.nfl_plays_year_2025 USING
 -- Name: nfl_plays_year_2025_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_ydl_100_idx ON public.nfl_plays_year_2025 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2025_ydl_100_idx ON public.nfl_plays_year_2025 USING btree (yard_line_100);
 
 
 --
@@ -42535,7 +42535,7 @@ CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -42549,7 +42549,7 @@ CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -42570,7 +42570,7 @@ CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2025_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -42591,7 +42591,7 @@ CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2025_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
@@ -42633,7 +42633,7 @@ CREATE INDEX nfl_plays_year_2026_bc_pid_idx ON public.nfl_plays_year_2026 USING 
 -- Name: nfl_plays_year_2026_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2026 USING btree (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2026_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2026 USING btree (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid);
 
 
 --
@@ -42675,7 +42675,7 @@ CREATE INDEX nfl_plays_year_2026_def_personnel_dl_count_idx ON public.nfl_plays_
 -- Name: nfl_plays_year_2026_ds_coherence_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_ds_coherence_idx ON public.nfl_plays_year_2026 USING btree (esbid, quarter, drive_seq) INCLUDE (is_deleted);
+CREATE INDEX nfl_plays_year_2026_ds_coherence_idx ON public.nfl_plays_year_2026 USING btree (esbid, quarter, drive_sequence) INCLUDE (is_deleted);
 
 
 --
@@ -42766,7 +42766,7 @@ CREATE INDEX nfl_plays_year_2026_play_type_seas_type_trg_pid_off_esbid_idx ON pu
 -- Name: nfl_plays_year_2026_player_fuml_pid_week_year_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2026 USING btree (player_fuml_pid, week, season_year) WHERE ((player_fuml_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
+CREATE INDEX nfl_plays_year_2026_player_fuml_pid_week_year_idx ON public.nfl_plays_year_2026 USING btree (fumble_lost_pid, week, season_year) WHERE ((fumble_lost_pid IS NOT NULL) AND (play_type <> 'NOPL'::public.nfl_play_type));
 
 
 --
@@ -42808,7 +42808,7 @@ CREATE INDEX nfl_plays_year_2026_seas_type_idx ON public.nfl_plays_year_2026 USI
 -- Name: nfl_plays_year_2026_series_seq_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_series_seq_idx ON public.nfl_plays_year_2026 USING btree (series_seq);
+CREATE INDEX nfl_plays_year_2026_series_seq_idx ON public.nfl_plays_year_2026 USING btree (series_sequence);
 
 
 --
@@ -42885,7 +42885,7 @@ CREATE INDEX nfl_plays_year_2026_trg_pid_idx ON public.nfl_plays_year_2026 USING
 -- Name: nfl_plays_year_2026_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_ydl_100_idx ON public.nfl_plays_year_2026 USING btree (ydl_100);
+CREATE INDEX nfl_plays_year_2026_ydl_100_idx ON public.nfl_plays_year_2026 USING btree (yard_line_100);
 
 
 --
@@ -42920,7 +42920,7 @@ CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, player_fuml_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yds, is_rushing_touchdown, pass_yds, is_passing_touchdown, is_interception, recv_yds, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -42934,7 +42934,7 @@ CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_trg_pid_idx ON 
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type, fumble_lost_pid);
 
 
 --
@@ -42955,7 +42955,7 @@ CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_trg_pid_idx ON public.
 -- Name: nfl_plays_year_2026_year_seas_type_week_bc_pid_psr_pid_trg__idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, player_fuml_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_week_bc_pid_psr_pid_trg__idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, week, ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid) WHERE (play_type <> 'NOPL'::public.nfl_play_type);
 
 
 --
@@ -42976,7 +42976,7 @@ CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_idx ON public.nfl
 -- Name: nfl_plays_year_2026_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, week, play_type, player_fuml_pid);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, week, play_type, fumble_lost_pid);
 
 
 --
