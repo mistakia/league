@@ -608,12 +608,33 @@ observations:
     sets bottom through an inline style object, which beats any stylesheet rule, so the auction
     never lifts the floating menu button clear of its controls; not repaired in ddc4394db and the
     fix belongs in menu.js.
+  - >-
+    [bug] The floating menu button auction offset had never applied: menu.js set bottom through an
+    inline style object, which beats any stylesheet rule, so both .auction__live rules in menu.styl
+    were dead and the button sat at a hardcoded 204px — 32px too high on desktop and 19px too low on
+    mobile, where it overlapped the auction controls. Repaired in 7da4ce9d0 by moving position into
+    the stylesheet.
+  - >-
+    [gotcha] menu.js keyed its auction offset on location.pathname === /auction while the
+    .auction__live class in app.js keys on a live auction plus a signed-in visitor, so the two
+    disagreed about when an offset was wanted at all; the stylesheet class is the single condition
+    as of 7da4ce9d0.
+  - >-
+    [decision] The filled action across the site is $prose_action (#3f4348), a graphite, rather than
+    the near-black $prose_ink — ink is a text colour and reads as a hole punched in the page at
+    button size; one token keeps the landing call to action, every prose submit and the floating
+    menu button in step.
+  - >-
+    [gotcha] A sibling commit (bae8f8a11) swept the uncommitted $prose_action declaration out of
+    prose-form.styl in this shared tree, leaving it declared and unused on master until 7da4ce9d0
+    used it — an explicit pathspec isolates a commit across FILES, never within one, so a concurrent
+    edit to the same file rides along under your message.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-16T04:24:43.765Z'
+updated_at: '2026-08-16T04:34:52.222Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
