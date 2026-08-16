@@ -18,51 +18,107 @@
 $prose_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
 $prose_mono = 'IBM Plex Mono', monospace
 
-// The page itself. One measure across all three pages: these are read one
-// after another by the same person, and a measure that changes between them
-// reads as a different site rather than as a different page.
+// THE PROSE PALETTE IS ITS OWN, and deliberately not the app's. The app is
+// chrome around a table: mid-grey ink on a #f0f0f0 field, which is right for a
+// dense surface read in glances and wrong for one read in paragraphs. These
+// pages get paper and near-black ink, so the only things carrying colour are
+// the one call to action and an error.
+$prose_paper = #ffffff
+$prose_ink = #17181a
+$prose_body = #3d4045
+$prose_muted = #6b7075
+$prose_rule = #e3e4e6
+$prose_rule_strong = #c9cbcf
+// A deep red rather than the app's pure `red`, which is the one colour on the
+// page and so the one that cannot afford to look like a default.
+$prose_accent = #c1121f
+
+// 600 rather than 700 everywhere below: IBM Plex Mono and Inter are both loaded
+// at 600, and 700 is not — asking for it gets a synthesized bold, which on mono
+// in particular reads as a smudge. See the font comment in app/index.html.
+$prose_bold = 600
+
+// The paper. A prose page paints the WHOLE body rather than sitting as a white
+// column on the app's grey, which would read as a card and put a hard edge down
+// both sides of the measure. Call this on a wrapper around prose_page().
+prose_surface()
+  min-height 100%
+  background $prose_paper
+
+// The measure. One across every prose page: these are read one after another by
+// the same person, and a measure that changes between them reads as a different
+// site rather than as a different page. 680px at 17px holds a line near 72
+// characters — past that the eye loses the start of the next line, which is the
+// failure these pages can least afford, since their whole job is being read.
 prose_page()
-  max-width 660px
-  margin 0 auto 80px
-  padding 24px 16px
+  max-width 680px
+  margin 0 auto
+  padding 88px 32px 120px
   font 400 17px/1.7 $prose_sans
-  color $textColor
+  color $prose_body
+  -webkit-font-smoothing antialiased
 
   p
     margin 0 0 1em
 
   a
-    color $textColorDark
-    font-weight 700
+    color $prose_ink
+    font-weight $prose_bold
     font-family $prose_mono
-    border-bottom 1px solid $borderColor
+    border-bottom 1px solid $prose_rule_strong
+    transition border-color 120ms ease, color 120ms ease
     &:hover
-      border-bottom 1px solid $accentColor
+      color $prose_accent
+      border-bottom-color $prose_accent
+    &:focus-visible
+      outline 2px solid $prose_accent
+      outline-offset 3px
 
-prose_title()
-  margin 0 0 0.75em
+  @media (max-width 640px)
+    padding 48px 22px 80px
+
+// The line above a title: what this is, before what it says. Mono and tiny, so
+// it reads as a label rather than as the first sentence of the page.
+prose_eyebrow()
+  margin 0 0 20px
   font-family $prose_mono
-  font-size 1.5em
-  line-height 1.25
-  color $textColorDark
+  font-weight 500
+  font-size 0.75em
+  letter-spacing 0.16em
+  text-transform uppercase
+  color $prose_muted
+
+// The page's one large piece of type. Mono is the signature on these pages —
+// the argument they make is that the league runs on software that is public —
+// so the title is set in it rather than in the body face. Mono sets loose by
+// construction, so it takes negative tracking and tight leading at this size or
+// it reads as a terminal dump rather than as a headline.
+prose_title()
+  margin 0 0 0.6em
+  font-family $prose_mono
+  font-weight $prose_bold
+  font-size clamp(30px, 4.4vw, 40px)
+  line-height 1.15
+  letter-spacing -0.02em
+  color $prose_ink
 
 // A section heading inside the page. Small, uppercase and spaced rather than
 // large: the page has no rules or boxes, so weight and spacing are what
 // separate one part from the next.
 prose_section_title()
-  margin 0 0 0.75em
+  margin 0 0 0.9em
   font-family $prose_mono
+  font-weight $prose_bold
   font-size 0.8125em
-  font-weight 700
-  letter-spacing 0.08em
+  letter-spacing 0.14em
   text-transform uppercase
-  color $textColor
+  color $prose_muted
 
 prose_form()
   display flex
   flex-direction column
-  gap 32px
-  margin-top 48px
+  gap 36px
+  margin-top 56px
 
 // A field is a block: prompt, then the reason it is being asked, then the box.
 // The gap carries the separation — a form that looks like paperwork gets
@@ -70,39 +126,77 @@ prose_form()
 prose_field()
   display flex
   flex-direction column
-  gap 8px
+  gap 10px
 
 prose_label()
   font-family $prose_mono
-  font-weight 700
+  font-weight $prose_bold
   font-size 0.9375em
   line-height 1.4
-  color $textColorDark
+  letter-spacing -0.01em
+  color $prose_ink
 
 prose_help()
-  font-size 0.875em
-  line-height 1.5
-  color $textColor
+  font-size 0.9375em
+  line-height 1.55
+  color $prose_muted
 
+// 17px is not a preference — a control under 16px makes iOS Safari zoom the
+// page on focus, and it does not zoom back out.
 prose_input()
   width 100%
-  padding 10px 12px
+  padding 13px 14px
   font 400 17px/1.5 $prose_sans
-  color $textColorDark
-  background transparent
-  border 1px solid $borderColor
-  border-radius 2px
+  color $prose_ink
+  background $prose_paper
+  border 1px solid $prose_rule_strong
+  border-radius 3px
   box-sizing border-box
+  transition border-color 120ms ease, box-shadow 120ms ease
+  &::placeholder
+    color $prose_muted
+  &:hover
+    border-color $prose_muted
+  // The ring is the focus indicator rather than a colour swap alone: a border
+  // that only changes hue is invisible to anyone who cannot separate the two.
   &:focus
     outline none
-    border-color $accentColor
+    border-color $prose_ink
+    box-shadow 0 0 0 3px rgba(23, 24, 26, 0.08)
 
-// A select keeps its native arrow — normalize.css strips appearance from
-// `input` only, not from `select`, so unlike the checkbox below there is a real
-// control here to inherit. It only needs the page's border and type.
+// THE NATIVE ARROW IS DROPPED AND REDRAWN. normalize.css strips appearance
+// from `input` only, so a select keeps the platform control — and the platform
+// control is a chunky OS-blue button jammed against the right border, drawn at
+// a size and colour nothing else on the page shares. It is the one element that
+// makes a typeset page look like a form built out of defaults.
+//
+// Unlike the checkbox below, dropping appearance here is safe: a select renders
+// its own text, so removing the arrow costs the arrow and nothing else. The
+// replacement is a chevron drawn in the page's ink, with padding on the right
+// to reserve room for it — without that padding a long option collides with it.
+//
+// background-position and background-size are their own declarations rather
+// than the `center / w h` half of the shorthand: stylus reads that slash as
+// DIVISION once either side is an expression, and the parse error it raises is
+// reported against every OTHER stylesheet in the app, since this file is
+// injected into all of them.
 prose_select()
   prose_input()
   cursor pointer
+  appearance none
+  -webkit-appearance none
+  -moz-appearance none
+  padding-right 44px
+  background-image url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2317181a' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M4 6.5l4 4 4-4'/%3E%3C/svg%3E")
+  background-repeat no-repeat
+  background-position right 15px center
+  background-size 13px 13px
+  // Safari and Firefox both indent the text of an appearance-none select by a
+  // few pixels of their own; zeroing it puts the value on the same left edge as
+  // every text input above and below it.
+  text-indent 0
+  &::-ms-expand
+    display none
 
 // THE BOX IS DRAWN HERE BECAUSE THERE IS NO NATIVE ONE TO STYLE.
 // app/styles/normalize.css carries a global `input { -webkit-appearance: none }`,
@@ -116,19 +210,19 @@ prose_select()
 // page did not, and shipped a 0x0 control that toggled correctly and was
 // invisible, which read as team selection being broken. Call this rather than
 // styling a checkbox by hand.
-prose_checkbox(size = 18px, tick = 12px)
+prose_checkbox(size = 20px, tick = 13px)
   flex-shrink 0
   width size
   height size
   margin 0
-  border 1px solid $borderColor
-  border-radius 2px
-  background transparent
+  border 1px solid $prose_rule_strong
+  border-radius 3px
+  background $prose_paper
   cursor pointer
   transition background 120ms ease, border-color 120ms ease
 
   &:hover
-    border-color $textColorDark
+    border-color $prose_ink
 
   // Checked state has to supply its own mark. The tick is an inline SVG
   // background rather than a pseudo-element: `input` is a void element, and
@@ -141,12 +235,12 @@ prose_checkbox(size = 18px, tick = 12px)
   // reported against every OTHER stylesheet in the app, since this file is
   // injected into all of them.
   &:checked
-    background $textColorDark url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-6'/%3E%3C/svg%3E") center no-repeat
+    background $prose_ink url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-6'/%3E%3C/svg%3E") center no-repeat
     background-size tick tick
-    border-color $textColorDark
+    border-color $prose_ink
 
   &:focus-visible
-    outline 2px solid $accentColor
+    outline 2px solid $prose_accent
     outline-offset 2px
 
 // A checkbox with its label beside it, which is how every one of these pages
@@ -160,25 +254,32 @@ prose_checkbox_label()
 
 prose_submit()
   align-self flex-start
-  padding 14px 24px
+  padding 16px 30px
   font-family $prose_mono
-  font-weight 700
+  font-weight $prose_bold
   font-size 0.9375em
   letter-spacing 0.02em
-  color white
-  background $textColorDark
+  color $prose_paper
+  background $prose_ink
   border none
-  border-radius 2px
+  border-radius 3px
   cursor pointer
-  transition background 120ms ease
+  transition background 120ms ease, transform 120ms ease
   &:hover
-    background $accentColor
+    background $prose_accent
+  &:active
+    transform translateY(1px)
   &:focus-visible
-    outline 2px solid $accentColor
+    outline 2px solid $prose_accent
     outline-offset 3px
   &:disabled
-    opacity 0.5
+    opacity 0.45
     cursor default
+  // Full width on a phone: a left-aligned button at the end of a long form is
+  // easy to miss, and a thumb reaches the middle of the screen, not its edge.
+  @media (max-width 640px)
+    align-self stretch
+    text-align center
 
 // The quieter of the two buttons — an action that is not the point of the page
 // (adding another candidate row, closing a vote). Outlined rather than filled,
@@ -187,18 +288,18 @@ prose_button_secondary()
   align-self flex-start
   padding 10px 18px
   font-family $prose_mono
-  font-weight 700
+  font-weight $prose_bold
   font-size 0.875em
-  color $textColorDark
+  color $prose_ink
   background transparent
-  border 1px solid $borderColor
-  border-radius 2px
+  border 1px solid $prose_rule_strong
+  border-radius 3px
   cursor pointer
   transition border-color 120ms ease, color 120ms ease
   &:hover
-    border-color $textColorDark
+    border-color $prose_ink
   &:focus-visible
-    outline 2px solid $accentColor
+    outline 2px solid $prose_accent
     outline-offset 2px
   &:disabled
     opacity 0.5
@@ -217,12 +318,13 @@ prose_message_block()
 // its text is the same weight and colour as everything around it.
 prose_message()
   prose_message_block()
-  color $textColorDark
-  border-left 3px solid $borderColor
+  color $prose_ink
+  border-left 3px solid $prose_rule_strong
 
 // An error carries its signal in the COLOUR, so it needs no rule — a red rule
 // beside red text states the same thing twice, and a form that is quiet
 // everywhere else does not need two markers to be noticed.
 prose_error()
   prose_message_block()
-  color $accentColor
+  padding-left 0
+  color $prose_accent

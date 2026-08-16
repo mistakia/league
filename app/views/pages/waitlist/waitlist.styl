@@ -1,16 +1,34 @@
 // The questionnaire is read by the same person who just read the landing page,
-// so it carries the same measure and the same two fonts. Anything that looks
-// like the app's dense chrome would read as a different site.
+// so it carries the same measure, the same paper and the same two fonts.
+// Anything that looks like the app's dense chrome would read as a different
+// site.
 //
 // The form language itself lives in app/styles/prose-form.styl, shared with the
 // admission vote pages — this page originated it, and the mixins are what stop
 // the three from drifting apart again.
 
+.waitlist-surface
+  prose_surface()
+
 .waitlist
   prose_page()
 
+// Qualified with the element: prose_page()'s own `p` reset is (0,1,1) and wins
+// over a bare class, so an unqualified rule here loses its margin silently.
+.waitlist p.waitlist__eyebrow
+  prose_eyebrow()
+
 .waitlist__title
   prose_title()
+
+// One line under the title saying what this costs and who reads it. A form is
+// the one page where the reader's first question is how long this will take,
+// and answering it up front is cheaper than losing him at question four.
+.waitlist p.waitlist__deck
+  margin 0
+  font-size 1.125em
+  line-height 1.55
+  color $prose_body
 
 // The two disclosure sections that come before the form. They are the part of
 // the page where the league talks rather than asks, and a reader who is out
@@ -18,7 +36,10 @@
 // alone sets them apart — the page has no rules or boxes anywhere else, and one
 // here read as a pull quote rather than as terms.
 .waitlist__intro-section
-  margin-top 40px
+  margin-top 52px
+
+  @media (max-width 640px)
+    margin-top 40px
 
 .waitlist__intro-title
   prose_section_title()
@@ -27,19 +48,25 @@
   prose_form()
 
 // Sits at the top of the form rather than beside the submit button: it gates
-// everything below it, so agreeing to it is the first act, not the last.
+// everything below it, so agreeing to it is the first act, not the last. The
+// hairline above it is the seam between reading and answering, and it is the
+// only rule inside the form.
 .waitlist__affirmation
   prose_checkbox_label()
   align-items flex-start
-  gap 12px
+  gap 14px
+  padding-top 36px
+  border-top 1px solid $prose_rule
   font-family $prose_mono
-  font-weight 700
-  line-height 1.4
-  color $textColorDark
+  font-weight $prose_bold
+  font-size 1em
+  line-height 1.45
+  letter-spacing -0.01em
+  color $prose_ink
 
   input[type='checkbox']
     prose_checkbox()
-    // The label's first line is ~22px tall against an 18px box, so this centers
+    // The label's first line is ~25px tall against a 20px box, so this centers
     // the box on that line rather than hanging it off the top.
     margin 2px 0 0
 
@@ -51,7 +78,7 @@
 
 .waitlist__optional
   font-weight 400
-  color $textColor
+  color $prose_muted
 
 .waitlist__help
   prose_help()
@@ -61,9 +88,11 @@
 
 .waitlist__input--multiline
   resize vertical
+  min-height 130px
+  line-height 1.6
 
 .waitlist__input--select
-  cursor pointer
+  prose_select()
 
 // Off screen rather than `display: none` or `visibility: hidden`, both of which
 // a bot can cheaply detect and skip. `tabIndex={-1}` and `autoComplete='off'` at

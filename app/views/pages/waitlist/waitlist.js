@@ -5,6 +5,7 @@ import { NavLink } from 'react-router-dom'
 
 import PageLayout from '@layouts/page'
 import { API_URL } from '@core/constants'
+import { league_name, site_name } from '@libs-shared/social-sharing.mjs'
 import {
   commitment_affirmation_label,
   commitment_terms,
@@ -163,112 +164,129 @@ export default function WaitlistPage() {
 
   if (is_submitted) {
     body = (
-      <div className='waitlist'>
-        <h1 className='waitlist__title'>Thank you</h1>
-        <p>
-          That is everything we need. The current managers read the answers and
-          vote, so a reply takes days rather than hours — you will hear back
-          either way.
-        </p>
-        <p>
-          <NavLink to='/leagues/1'>Look at the league</NavLink> in the meantime.
-        </p>
+      <div className='waitlist-surface'>
+        <div className='waitlist'>
+          <p className='waitlist__eyebrow'>
+            {league_name} <span aria-hidden='true'>&middot;</span> {site_name}
+          </p>
+          <h1 className='waitlist__title'>Thank you</h1>
+          <p className='waitlist__deck'>
+            That is everything we need. The current managers read the answers
+            and vote, so a reply takes days rather than hours — you will hear
+            back either way.
+          </p>
+          <p>
+            <NavLink to='/leagues/1'>Look at the league</NavLink> in the
+            meantime.
+          </p>
+        </div>
       </div>
     )
   } else {
     body = (
-      <div className='waitlist'>
-        <h1 className='waitlist__title'>Join the waitlist</h1>
+      <div className='waitlist-surface'>
+        <div className='waitlist'>
+          <p className='waitlist__eyebrow'>
+            {league_name} <span aria-hidden='true'>&middot;</span> {site_name}
+          </p>
+          <h1 className='waitlist__title'>Join the waitlist</h1>
+          <p className='waitlist__deck'>
+            The current managers read every answer and vote on it. Allow about
+            ten minutes, and read the two sections below before you begin.
+          </p>
 
-        {/* Two sections, in this order on purpose: what the league requires
-            comes before what it hopes for, so a reader who is out on the
-            commitment never has to read the pitch. */}
-        <section className='waitlist__intro-section'>
-          <h2 className='waitlist__intro-title'>What you are signing up for</h2>
-          {commitment_terms.map((term) => (
-            <p key={term}>{term}</p>
-          ))}
-        </section>
+          {/* Two sections, in this order on purpose: what the league requires
+              comes before what it hopes for, so a reader who is out on the
+              commitment never has to read the pitch. */}
+          <section className='waitlist__intro-section'>
+            <h2 className='waitlist__intro-title'>
+              What you are signing up for
+            </h2>
+            {commitment_terms.map((term) => (
+              <p key={term}>{term}</p>
+            ))}
+          </section>
 
-        <section className='waitlist__intro-section'>
-          <h2 className='waitlist__intro-title'>What we are looking for</h2>
-          {what_we_look_for.map((quality) => (
-            <p key={quality}>{quality}</p>
-          ))}
-        </section>
+          <section className='waitlist__intro-section'>
+            <h2 className='waitlist__intro-title'>What we are looking for</h2>
+            {what_we_look_for.map((quality) => (
+              <p key={quality}>{quality}</p>
+            ))}
+          </section>
 
-        <form className='waitlist__form' onSubmit={handle_submit}>
-          <label
-            className='waitlist__affirmation'
-            htmlFor='has_affirmed_commitment'
-          >
+          <form className='waitlist__form' onSubmit={handle_submit}>
+            <label
+              className='waitlist__affirmation'
+              htmlFor='has_affirmed_commitment'
+            >
+              <input
+                id='has_affirmed_commitment'
+                name='has_affirmed_commitment'
+                type='checkbox'
+                checked={has_affirmed}
+                onChange={(event) => set_has_affirmed(event.target.checked)}
+                required
+              />
+              <span>{commitment_affirmation_label}</span>
+            </label>
+
+            {contact_fields.map((field) => (
+              <Field
+                key={field.column}
+                name={field.column}
+                label={field.label}
+                help={field.help}
+                type={field.type}
+                required={Boolean(field.required)}
+                value={values[field.column] || ''}
+                on_change={handle_change}
+              />
+            ))}
+
+            {questions.map((question) => (
+              <Field
+                key={question.id}
+                name={question.id}
+                label={question.label}
+                help={question.help}
+                required={Boolean(question.required)}
+                options={question.options}
+                type={question.type}
+                // A textarea is the default because most questions here want
+                // paragraphs, but a question carrying an explicit `type` is
+                // asking for a one-line control of that type -- a url in a
+                // four-row box invites a paragraph nobody wants to write.
+                multiline={!question.options && !question.type}
+                value={values[question.id] || ''}
+                on_change={handle_change}
+              />
+            ))}
+
+            {/* Hidden from people, visible to form-filling bots. Positioned off
+                screen rather than `display: none`, which some bots skip. */}
             <input
-              id='has_affirmed_commitment'
-              name='has_affirmed_commitment'
-              type='checkbox'
-              checked={has_affirmed}
-              onChange={(event) => set_has_affirmed(event.target.checked)}
-              required
+              className='waitlist__honeypot'
+              type='text'
+              name={honeypot_field_name}
+              tabIndex={-1}
+              autoComplete='off'
+              value={values[honeypot_field_name] || ''}
+              onChange={handle_change}
             />
-            <span>{commitment_affirmation_label}</span>
-          </label>
 
-          {contact_fields.map((field) => (
-            <Field
-              key={field.column}
-              name={field.column}
-              label={field.label}
-              help={field.help}
-              type={field.type}
-              required={Boolean(field.required)}
-              value={values[field.column] || ''}
-              on_change={handle_change}
-            />
-          ))}
+            {error_message && (
+              <div className='waitlist__error'>{error_message}</div>
+            )}
 
-          {questions.map((question) => (
-            <Field
-              key={question.id}
-              name={question.id}
-              label={question.label}
-              help={question.help}
-              required={Boolean(question.required)}
-              options={question.options}
-              type={question.type}
-              // A textarea is the default because most questions here want
-              // paragraphs, but a question carrying an explicit `type` is
-              // asking for a one-line control of that type -- a url in a
-              // four-row box invites a paragraph nobody wants to write.
-              multiline={!question.options && !question.type}
-              value={values[question.id] || ''}
-              on_change={handle_change}
-            />
-          ))}
-
-          {/* Hidden from people, visible to form-filling bots. Positioned off
-              screen rather than `display: none`, which some bots skip. */}
-          <input
-            className='waitlist__honeypot'
-            type='text'
-            name={honeypot_field_name}
-            tabIndex={-1}
-            autoComplete='off'
-            value={values[honeypot_field_name] || ''}
-            onChange={handle_change}
-          />
-
-          {error_message && (
-            <div className='waitlist__error'>{error_message}</div>
-          )}
-
-          <button
-            className='waitlist__submit'
-            type='submit'
-            disabled={is_submitting}
-          >
-            {is_submitting ? 'Sending' : 'Send it'}
-          </button>
-        </form>
+            <button
+              className='waitlist__submit'
+              type='submit'
+              disabled={is_submitting}
+            >
+              {is_submitting ? 'Sending' : 'Send it'}
+            </button>
+          </form>
+        </div>
       </div>
     )
   }

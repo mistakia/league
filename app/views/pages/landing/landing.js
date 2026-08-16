@@ -11,10 +11,10 @@ import {
 } from './landing-content'
 import {
   league_founding_year,
-  league_last_season_count,
+  league_name,
   league_season_phrase,
   league_team_count,
-  league_this_season_ordinal
+  site_name
 } from '@libs-shared/social-sharing.mjs'
 
 import './landing.styl'
@@ -33,93 +33,95 @@ Section.propTypes = {
 
 export default function LandingPage() {
   const body = (
-    <div className='landing'>
-      <header className='landing__hero'>
-        <p className='landing__lede'>
-          A {league_team_count}-team dynasty league going into{' '}
-          {league_season_phrase}. I built the platform it runs on, and
-          everything it does is public.
-        </p>
-        {/* The waitlist is the primary action and the league link is proof,
-            so they are not peers: one filled button, one quiet one. */}
-        <div className='landing__hero-actions'>
+    <div className='landing-surface'>
+      <div className='landing'>
+        <header className='landing__hero'>
+          {/* The league has a name and the site has one, and a reader arriving
+              cold knows neither. It goes above the sentence rather than inside
+              it, so the sentence can stay the argument. */}
+          <p className='landing__eyebrow'>
+            {league_name} <span aria-hidden='true'>&middot;</span> {site_name}
+          </p>
+          {/* A statement of what this is, in the register of a masthead rather
+              than a pitch. The reader arriving here is deciding whether a
+              league is serious; a slogan argues that and a plain declaration
+              demonstrates it. The claims that support it come underneath, as
+              facts with dates on them. */}
+          <h1 className='landing__lede'>
+            A {league_team_count}-team home dynasty league, entering{' '}
+            {league_season_phrase}.
+          </h1>
+          <p className='landing__deck'>
+            Founded in {league_founding_year}. The constitution, the full
+            transaction record and the platform that enforces them are public.
+          </p>
+          {/* The waitlist is the primary action and the league link is proof,
+              so they are not peers: one filled button, one quiet one. */}
+          <div className='landing__hero-actions'>
+            <NavLink className='landing__cta' to={questionnaire_path}>
+              Join the waitlist
+            </NavLink>
+            <NavLink
+              className='landing__cta landing__cta--secondary'
+              to={league_url}
+            >
+              Look at the league
+            </NavLink>
+          </div>
+        </header>
+
+        <Section title='The league'>
+          {league_format.map((group) => (
+            <div className='landing__group' key={group.title}>
+              <h3 className='landing__group-title'>{group.title}</h3>
+              <ul className='landing__list'>
+                {group.items.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </Section>
+
+        <section className='landing__section'>
+          <div className='landing__trust'>
+            <div className='landing__trust-item'>
+              <h3>The constitution and every amendment to it</h3>
+              <p>
+                Adopted in {league_founding_year}. Each amendment is recorded
+                with the date it was introduced and the date it passed,
+                including those that were drafted and never ratified.
+              </p>
+              <NavLink to='/constitution'>Read the constitution</NavLink>
+            </div>
+
+            <div className='landing__trust-item'>
+              <h3>The platform is open source</h3>
+              <p>
+                I wrote this site for this league and its source is public. The
+                transaction rules, the cap arithmetic and the scoring are all
+                readable, so what the software does with a roster can be
+                inspected before you hold one.
+              </p>
+              <a
+                href='https://github.com/mistakia/league'
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                Read the source on GitHub
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* The reader who gets this far has read the whole argument, and the
+            hero button is now several screens behind him. */}
+        <section className='landing__closing'>
           <NavLink className='landing__cta' to={questionnaire_path}>
             Join the waitlist
           </NavLink>
-          <NavLink
-            className='landing__cta landing__cta--secondary'
-            to={league_url}
-          >
-            Look at the league
-          </NavLink>
-        </div>
-      </header>
-
-      <Section title='The league'>
-        {league_format.map((group) => (
-          <div className='landing__group' key={group.title}>
-            <h3 className='landing__group-title'>{group.title}</h3>
-            <ul className='landing__list'>
-              {group.items.map((item, index) => (
-                <li key={index}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </Section>
-
-      <section className='landing__section'>
-        <div className='landing__trust'>
-          <div className='landing__trust-item'>
-            <h3>{league_last_season_count} seasons with the same people</h3>
-            <p>
-              The league has played {league_last_season_count} seasons since{' '}
-              {league_founding_year} and is about to play its{' '}
-              {league_this_season_ordinal}. Twelve managers hold the{' '}
-              {league_team_count} teams, and every one of them has been here
-              since the first year. Three people have left in that time, and
-              nobody new has been seated since the league was founded.
-            </p>
-          </div>
-
-          <div className='landing__trust-item'>
-            <h3>The rules and every change to them</h3>
-            <p>
-              The constitution was adopted in 2020. Each amendment is listed
-              with the date it was introduced and the date it passed, including
-              the ones that were drafted and never ratified.
-            </p>
-            <NavLink to='/constitution'>Read the constitution</NavLink>
-          </div>
-
-          <div className='landing__trust-item'>
-            <h3>The schedule is drawn, not set by me</h3>
-            <p>
-              Which five teams you play twice is decided by the hash of an
-              Ethereum block that had not been mined when the draw was
-              announced. Nobody can grind the outcome, me included, and anyone
-              can run it again and get the same schedule.
-            </p>
-          </div>
-
-          <div className='landing__trust-item'>
-            <h3>The source is public</h3>
-            <p>
-              I wrote this site for our league and it is open source. The
-              transaction rules, the cap math and the scoring are all readable,
-              so you can see what the software does with a roster before you
-              have one.
-            </p>
-            <a
-              href='https://github.com/mistakia/league'
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              Read the source on GitHub
-            </a>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   )
 

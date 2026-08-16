@@ -1,24 +1,23 @@
 // The landing page is read by people with no account and no context, so it is
 // a single readable column of prose rather than the dense app chrome the rest
-// of the site uses. Fonts follow the markdown pages: mono for headings, sans
-// for body copy.
-$landing_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
-$landing_mono = 'IBM Plex Mono', monospace
+// of the site uses. It shares its page language — measure, paper, type scale,
+// buttons — with the questionnaire it hands the reader to, because the two are
+// read one after another and a change of measure between them reads as a
+// change of site. That language lives in app/styles/prose-form.styl.
 
-// 660px at 17px holds the copy near 70 characters a line. Wider than this and
-// the eye loses the start of the next line on the long paragraphs.
+.landing-surface
+  prose_surface()
+
 .landing
-  max-width 660px
-  margin 0 auto 80px
-  padding 24px 16px
-  font 400 17px/1.7 $landing_sans
-  color $textColor
+  prose_page()
 
   h2
   h3
-    font-family $landing_mono
-    color $textColorDark
+    font-family $prose_mono
+    font-weight $prose_bold
+    color $prose_ink
     line-height 1.25
+    letter-spacing -0.01em
 
   p
     margin 0 0 1em
@@ -26,103 +25,179 @@ $landing_mono = 'IBM Plex Mono', monospace
     line-height inherit
     letter-spacing normal
 
-  // Links carry the body ink with a standing underline. Accent red is spent on
-  // the call to action alone, so nothing competes with it for the eye.
-  a
-    color $textColorDark
-    font-weight 700
-    font-family $landing_mono
-    border-bottom 1px solid $borderColor
-    &:hover
-      border-bottom 1px solid $accentColor
+// Qualified with the element, like the lede and the deck below: the `.landing
+// p` reset above is (0,1,1) and silently wins over a bare class, which is what
+// had the eyebrow rendering in the body face instead of the mono.
+.landing p.landing__eyebrow
+  prose_eyebrow()
 
 .landing__hero
-  padding-bottom 32px
-  border-bottom 1px solid $borderColor
+  padding-bottom 48px
+  border-bottom 1px solid $prose_rule
 
-// Mono ties the opening sentence to the section headings below it, so the page
-// starts on something that reads as a beginning rather than as body copy.
-// Qualified with the element so it wins over the `.landing p` reset above,
-// which would otherwise take back the family and the line height.
-.landing p.landing__lede
+// The opening sentence is the page's headline, not its first paragraph: set at
+// display size in the mono that is this site's signature, at a measure short
+// enough to be taken in rather than read. Mono sets loose and even, so at this
+// size it needs negative tracking and tight leading — without them it reads as
+// a terminal dump, which is the failure mode of every mono headline.
+.landing h1.landing__lede
   margin 0
-  font-family $landing_mono
-  font-size 1.25em
-  line-height 1.4
-  color $textColorDark
+  max-width 26ch
+  font-family $prose_mono
+  font-weight $prose_bold
+  font-size clamp(25px, 3.1vw, 34px)
+  line-height 1.3
+  letter-spacing -0.025em
+  color $prose_ink
+
+  @media (max-width 640px)
+    max-width none
+
+// The qualifying facts, in the body face so they read as the explanation of
+// the headline rather than as a second headline.
+.landing p.landing__deck
+  margin 26px 0 0
+  max-width 46ch
+  font-size 1.125em
+  line-height 1.55
+  letter-spacing normal
+  color $prose_body
+
+  @media (max-width 640px)
+    margin-top 20px
+    font-size 1.0625em
 
 .landing__hero-actions
   display flex
   flex-wrap wrap
   align-items center
-  gap 16px
-  margin-top 28px
+  gap 14px
+  margin-top 40px
 
 // The single call to action, and the one obvious next step on a page that is
 // otherwise all prose and links. Qualified with the page class so it wins over
 // the generic `.landing a` rules above.
 .landing a.landing__cta
-  display inline-block
-  padding 14px 24px
-  background $textColorDark
-  color white
-  font-family $landing_mono
-  font-weight 700
+  display inline-flex
+  align-items center
+  justify-content center
+  padding 16px 30px
+  background $prose_ink
+  color $prose_paper
+  font-family $prose_mono
+  font-weight $prose_bold
   font-size 0.9375em
   letter-spacing 0.02em
-  border-radius 2px
+  border-radius 3px
   border-bottom none
-  transition background 120ms ease
+  transition background 120ms ease, transform 120ms ease
   &:hover
-    background $accentColor
+    background $prose_accent
+    color $prose_paper
     border-bottom none
+  &:active
+    transform translateY(1px)
   &:focus-visible
-    outline 2px solid $accentColor
+    outline 2px solid $prose_accent
     outline-offset 3px
 
 // The proof link beside the primary action. Same size and weight so the pair
 // reads as one row, ink instead of fill so only one of them asks to be clicked.
 .landing a.landing__cta--secondary
   background transparent
-  color $textColorDark
-  box-shadow inset 0 0 0 1px $borderColor
+  color $prose_ink
+  box-shadow inset 0 0 0 1px $prose_rule_strong
   &:hover
     background transparent
-    color $accentColor
-    box-shadow inset 0 0 0 1px $accentColor
+    color $prose_accent
+    box-shadow inset 0 0 0 1px $prose_accent
+
+// Both buttons go full width on a phone. Two inline buttons of different
+// lengths stacked on a narrow screen read as a ragged left edge with no reason
+// for it; equal width states plainly that they are the two ways out of here.
+@media (max-width 640px)
+  .landing__hero-actions
+    display grid
+    grid-template-columns 1fr
+    gap 12px
+
+  .landing a.landing__cta
+    width 100%
 
 // Spacing carries the hierarchy on a page with no rules or boxes: sections are
 // far apart, items within one are closer, lines within an item closer still.
 .landing__section
-  margin-top 60px
+  margin-top 72px
 
+  @media (max-width 640px)
+    margin-top 52px
+
+// The section is the parent of the groups inside it, so it is the larger of
+// the two: a group label set bigger than the section heading above it inverts
+// the hierarchy and the reader stops being able to tell which is which.
 .landing__section-title
-  margin 0 0 0.75em
+  margin 0 0 1.2em
   font-size 1.375em
+  letter-spacing -0.02em
 
 .landing__group
-  margin-bottom 28px
+  margin-bottom 40px
+
+  &:last-child
+    margin-bottom 0
 
 .landing__group-title
-  margin 0 0 0.5em
-  font-size 0.8125em
-  letter-spacing 0.08em
-  text-transform uppercase
-  color $textColor
+  prose_section_title()
 
+// No disc. A filled bullet is a mark the page has no other use for, so the
+// items hang off the measure instead — the indent alone says they are a list,
+// and the text edge stays straight down the left like everything else.
 .landing__list
   margin 0
-  padding-left 1.25em
+  padding 0
+  list-style none
 
   li
-    margin-bottom 0.7em
+    position relative
+    margin-bottom 0.85em
+    padding-left 22px
 
+    &:last-child
+      margin-bottom 0
+
+    &:before
+      content ''
+      position absolute
+      left 0
+      top 0.72em
+      width 10px
+      height 1px
+      background $prose_rule_strong
+
+// The four claims. A hairline above each one separates them without drawing a
+// box around anything, which keeps the page reading as one column of paper.
 .landing__trust-item
-  margin-bottom 40px
+  padding-top 32px
+  margin-top 32px
+  border-top 1px solid $prose_rule
+
+  &:first-child
+    padding-top 0
+    margin-top 0
+    border-top none
 
   h3
     margin 0 0 0.5em
-    font-size 1.1875em
+    font-size 1.125em
 
   p
-    margin-bottom 0.5em
+    margin-bottom 0.6em
+
+.landing__closing
+  display flex
+  margin-top 72px
+  padding-top 40px
+  border-top 1px solid $prose_rule
+
+  @media (max-width 640px)
+    margin-top 52px
