@@ -32,7 +32,7 @@ This GENESIS LEAGUE (LEAGUE) Constitution constitutes an agreement among the LEA
 
 “GENESIS LEAGUE” shall mean the fantasy football league to which this Constitution pertains.
 
-“LEAGUE” shall mean the fantasy football league to which this Constitution pertains
+“LEAGUE” shall mean the fantasy football league to which this Constitution pertains.
 
 “LEAGUE CHAMPIONSHIP” shall mean the championship round between the four finalists in the fantasy league.
 
@@ -186,7 +186,7 @@ All times of day applied herein shall be computed as being in Eastern Standard T
 
 ### Impartiality.
 
-12. The Commissioner vows to remain impartial and unbiased when making decisions involving the League and its Players.
+12. The Commissioner vows to remain impartial and unbiased when making decisions involving the LEAGUE and its players.
 
 ### Impeachment.
 
@@ -296,7 +296,7 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 
 ### Withdrawal of Managers / Teams.
 
-6.  Managers may withdraw from the LEAGUE at any time between the commencement of the Offseason and the NFL Rookie Draft within that offseason without penalty. They shall report their decision to the Commissioner, in writing, who shall give Notice of the withdrawal and open a nomination period pursuant to Section 9. Their Teams shall persist, and a replacement Manager may be admitted pursuant to Sections 9 through 11.
+6.  Managers may withdraw from the LEAGUE at any time between the commencement of the Offseason and the NFL Rookie Draft within that Offseason without penalty. They shall report their decision to the Commissioner, in writing, who shall give Notice of the withdrawal and open a nomination period pursuant to Section 9. Their Teams shall persist, and a replacement Manager may be admitted pursuant to Sections 9 through 11.
 
 7.  Any Manager withdrawing between the NFL Rookie Draft and the commencement of the following Offseason in a given year shall forfeit his Buy-In funds.
 
@@ -494,7 +494,7 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 
 ### Wins and Tiebreakers.
 
-6.  Weekly Head-to-Head matchups are won by the team with the higher point total for that given week
+6.  Weekly Head-to-Head matchups are won by the Team with the higher point total for that given week.
 
 7.  Matchups that end in a tie are recorded as a tie with the exception of WILDCARD Round and CHAMPIONSHIP Round as described herein.
 
@@ -559,7 +559,7 @@ Interpretive Note: _Note that a two-week period of Inactivity, under the Offence
 
 ### Extensions.
 
-1.  At the beginning of each year, Team’s can keep any combination of players whose combined values are under $200. Player values increase on each extension by +$5 per consumed extension step, applied as `new_value = current_value + (extensions + 1) * $5`:
+1.  At the beginning of each year, Teams can keep any combination of players whose combined values are under $200. Player values increase on each extension by +$5 per consumed extension step, applied as `new_value = current_value + (extensions + 1) * $5`:
 
     1.  1st extension: +$5
 
@@ -583,7 +583,7 @@ Interpretive Note: _Note that a two-week period of Inactivity, under the Offence
 
 ### Extension Deadline.
 
-5.  Extensions will be applied to all active roster players at the extension deadline, the first deadline in the OFFSEASON.
+5.  Extensions will be applied to all active roster players at the extension deadline, the first deadline in the Offseason.
 
 ## Article IX
 
@@ -756,7 +756,7 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 4.  During the Regular Season, once you move a player from the PS to the active roster you may not move him back to the PS.
 
-5.  Poached PS players will be placed directly into the active roster and will lose PS eligibility until they are released and clear waivers (Article XIV subsection 2).
+5.  Poached PS players will be placed directly into the active roster and will lose PS eligibility until they are released and clear waivers ([Article XIV, Section 2](#article-xiv)).
 
 6.  When an offer is made to poach a player, the PS player may not be released or traded from the team unless brought up to the activated roster first.
 
@@ -764,11 +764,11 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 8.  Any PS-eligible player that is acquired by waivers or free agency during the Regular Season must be placed onto the PS within 48 hours of the acquisition or remain on the active roster.
 
-9.  The Manager of poached PS player will be awarded a Compensatory draft pick
+9.  The Manager of a poached PS player will be awarded a Compensatory draft pick.
 
-10. Releasing a player that was poached during the same Offseason will result in a Salary Cap penalty equal to the salary of the released poached player. Similarly, releasing a poached player during the same Regular Season will result in a Free Agent Auction Budget penalty equal to the salary of the released player or five dollars ($5), whichever is greater. The Commissioner may, in his discretion, levy any penalties available under Article III Subsection (3) if it is deemed the poach and subsequent release was done frivolously.
+10. Releasing a player that was poached during the same Offseason will result in a Salary Cap penalty equal to the salary of the released poached player. Similarly, releasing a poached player during the same Regular Season will result in a Free Agent Auction Budget penalty equal to the salary of the released player or five dollars ($5), whichever is greater. The Commissioner may, in his discretion, levy any penalties available under [Article III, Section 3](#article-iii) if it is deemed the poach and subsequent release was done frivolously.
 
-11. At any time during the Regular Season, Manager’s may elect to designate practice squad players as protected when a player has no outstanding poaching claim. Protected practice squad players can not be activated, released or poached during the Regular Season. They can only be traded. Traded players will arrive without a designation and can be designated in the future. A protected designation can not be reversed and will expire at the extension deadline the following Offseason.
+11. At any time during the Regular Season, Managers may elect to designate practice squad players as protected when a player has no outstanding poaching claim. Protected practice squad players can not be activated, released or poached during the Regular Season. They can only be traded. Traded players will arrive without a designation and can be designated in the future. A protected designation can not be reversed and will expire at the extension deadline the following Offseason.
 
 12. Reserve players with a poaching claim since being acquired are ineligible for the practice squad.
 
@@ -840,7 +840,7 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 ### Timing.
 
-2.  The wildcard round shall begin on Week 15 of the NFL regular season.
+2.  The WILDCARD ROUND shall begin on Week 15 of the NFL regular season.
 
 ### Participation.
 
@@ -872,7 +872,7 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 ### Timing.
 
-2.  The championship shall begin on Week 16 of the NFL regular season.
+2.  The CHAMPIONSHIP shall begin on Week 16 of the NFL regular season.
 
 ### Participation.
 
@@ -894,9 +894,9 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
 7.  Payouts shall be made as follows:
 
-    1.  LEAGUE Championship Champion: 62% of total yearly buy-in
+    1.  LEAGUE CHAMPIONSHIP Champion: 62% of total yearly Buy-In
 
-    2.  LEAGUE Championship Runner-Up: 10% of total yearly buy-in
+    2.  LEAGUE CHAMPIONSHIP Runner-Up: 10% of total yearly Buy-In
 
 ## Article XVIII
 
@@ -916,7 +916,7 @@ The Potential Points and All-Play Losses are each min-max normalized across all 
 
     2.  Abandoning Team: A team is considered abandoned during the season if a Manager fails to set a lineup for two consecutive games;
 
-    3.  Removal of a Manager;
+    3.  Removal of a Manager.
 
 ### Lineup Management.
 
@@ -978,7 +978,7 @@ Interpretive Note: _While the Commissioner is the dispute resolution officer of 
 
 ## Article XX
 
-CANCELLED OR RESCHEDULED NFL GAMES
+**CANCELLED OR RESCHEDULED NFL GAMES**
 
 ### Rescheduled.
 
