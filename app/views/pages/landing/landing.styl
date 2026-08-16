@@ -78,28 +78,16 @@
 // otherwise all prose and links. Qualified with the page class so it wins over
 // the generic `.landing a` rules above.
 .landing a.landing__cta
+  prose_action_fill()
+  // The three things an ANCHOR needs that the shared paint does not carry: a
+  // box that centres its own label, and the removal of the underline
+  // prose_page() gives every link. A submit button needs none of them.
   display inline-flex
   align-items center
   justify-content center
-  padding 16px 30px
-  background $prose_ink
-  color $prose_paper
-  font-family $prose_mono
-  font-weight $prose_bold
-  font-size 0.9375em
-  letter-spacing 0.02em
-  border-radius 3px
   border-bottom none
-  transition background 120ms ease, transform 120ms ease
   &:hover
-    background $prose_accent
-    color $prose_paper
     border-bottom none
-  &:active
-    transform translateY(1px)
-  &:focus-visible
-    outline 2px solid $prose_accent
-    outline-offset 3px
 
 // The proof link beside the primary action. Same size and weight so the pair
 // reads as one row, ink instead of fill so only one of them asks to be clicked.

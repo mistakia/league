@@ -1,12 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-import TextField from '@mui/material/TextField'
 
-import Button from '@components/button'
 import PageLayout from '@layouts/page'
 
-import './forgot-password.styl'
+import '../auth/auth.styl'
 
 // The entry point of the password reset flow: collects an email or username
 // and asks POST /auth/reset-password to send the link that /reset-password
@@ -17,6 +15,10 @@ import './forgot-password.styl'
 // renders ONE acknowledgement for every successful request and never reports
 // "no such account" — a per-account message here would reopen the user
 // enumeration oracle the API closed.
+//
+// Typeset in the shared auth vocabulary (../auth/auth.styl) rather than in its
+// own: this page is reached FROM /login and returns TO it, so a reader crosses
+// the seam twice in one sitting and would see the type change under them.
 const ForgotPasswordPage = ({
   request_password_reset,
   is_updating,
@@ -41,60 +43,72 @@ const ForgotPasswordPage = ({
     })
   }
 
-  let body
+  let content
 
   if (is_submitted && is_password_reset_requested) {
-    body = (
-      <div className='forgot-password'>
-        <div className='forgot-password__main'>
-          <div className='forgot-password__message'>
-            If an account exists, a password reset email has been sent. The link
-            expires in one hour.
-          </div>
-          <Link to='/login'>Back to login</Link>
+    content = (
+      <>
+        <h1 className='auth__title'>Check your email</h1>
+        <p className='auth__deck'>
+          If an account exists for that email or username, a reset link is on
+          its way. The link expires in one hour.
+        </p>
+        <div className='auth__footer'>
+          <Link to='/login'>Back to sign in</Link>
         </div>
-      </div>
+      </>
     )
   } else {
-    body = (
-      <div className='forgot-password'>
-        <div className='forgot-password__main'>
-          <form id='forgot-password' onSubmit={handle_submit}>
-            <div className='forgot-password__message'>
-              Enter your email or username and we will send you a link to reset
-              your password.
+    content = (
+      <>
+        <h1 className='auth__title'>Reset your password</h1>
+        <p className='auth__deck'>
+          Enter your email or username and we will send you a link to set a new
+          password.
+        </p>
+        <form
+          className='auth__form'
+          id='forgot-password'
+          onSubmit={handle_submit}
+        >
+          {auth_error && (
+            <div className='auth__error'>
+              The reset email could not be sent. Try again in a moment.
             </div>
-            {auth_error && (
-              <div className='forgot-password__error'>
-                Something went wrong sending the reset email. Please try again.
-              </div>
-            )}
-            <TextField
-              error={Boolean(auth_error)}
+          )}
+          <label className='auth__field' htmlFor='email_or_username'>
+            <span className='auth__label'>Email or username</span>
+            <input
+              className='auth__input'
               id='email_or_username'
-              label='Email/Username'
+              name='email_or_username'
               type='text'
-              inputRef={email_or_username_ref}
-              variant='outlined'
+              ref={email_or_username_ref}
+              autoComplete='username'
               required
             />
-            <Button
-              type='submit'
-              isLoading={is_updating}
-              className='forgot-password__button'
-            >
-              Send Reset Link
-            </Button>
-          </form>
-          <div className='forgot-password__toggle'>
-            <Link to='/login'>Back to login</Link>
-          </div>
+          </label>
+          <button className='auth__submit' type='submit' disabled={is_updating}>
+            {is_updating ? 'Sending link' : 'Send reset link'}
+          </button>
+        </form>
+        <div className='auth__footer'>
+          <Link to='/login'>Back to sign in</Link>
         </div>
-      </div>
+      </>
     )
   }
 
-  return <PageLayout body={body} />
+  const body = (
+    <div className='auth-surface'>
+      <div className='auth'>
+        <p className='auth__eyebrow'>Genesis League &middot; xo.football</p>
+        {content}
+      </div>
+    </div>
+  )
+
+  return <PageLayout body={body} scroll />
 }
 
 ForgotPasswordPage.propTypes = {

@@ -2,13 +2,16 @@ import React from 'react'
 import queryString from 'query-string'
 import PropTypes from 'prop-types'
 import { useLocation, Link } from 'react-router-dom'
-import TextField from '@mui/material/TextField'
 
-import Button from '@components/button'
 import PageLayout from '@layouts/page'
 
-import './reset-password.styl'
+import '../auth/auth.styl'
 
+// The far end of the password reset flow: consumes the token /forgot-password
+// emailed and sets a new password.
+//
+// Typeset in the shared auth vocabulary (../auth/auth.styl); see the note in
+// forgot-password.js for why all three auth pages share one stylesheet.
 const ResetPasswordPageWrapper = (Component) => {
   return function WrappedResetPasswordPage(props) {
     const location = useLocation()
@@ -47,80 +50,102 @@ const ResetPasswordPage = ({
     )
   }
 
-  let body
+  let content
 
   if (!token) {
-    body = (
-      <div className='reset-password'>
-        <div className='reset-password__main'>
-          <div className='reset-password__message'>
-            This password reset link is missing its token. Request a new one
-            from the login page.
-          </div>
-          <Link to='/login'>Back to login</Link>
+    content = (
+      <>
+        <h1 className='auth__title'>This link is incomplete</h1>
+        <p className='auth__deck'>
+          The reset link is missing its token, which usually means it was cut
+          short by an email client. Request a new one and open it directly.
+        </p>
+        <div className='auth__footer'>
+          <Link to='/forgot-password'>Request a new link</Link>
+          <Link to='/login'>Back to sign in</Link>
         </div>
-      </div>
+      </>
     )
   } else if (is_password_reset) {
-    body = (
-      <div className='reset-password'>
-        <div className='reset-password__main'>
-          <div className='reset-password__message'>
-            Your password has been reset.
-          </div>
-          <Link to='/login'>Login</Link>
+    content = (
+      <>
+        <h1 className='auth__title'>Password set</h1>
+        <p className='auth__deck'>
+          Your new password is active. Sign in with it.
+        </p>
+        <div className='auth__footer'>
+          <Link to='/login'>Sign in</Link>
         </div>
-      </div>
+      </>
     )
   } else {
-    body = (
-      <div className='reset-password'>
-        <div className='reset-password__main'>
-          <form id='reset-password' onSubmit={handle_submit}>
-            {auth_error && (
-              <div className='reset-password__error'>
-                This reset link is invalid or has expired. Request a new one
-                from the login page.
-              </div>
-            )}
-            <TextField
-              error={Boolean(auth_error || password_error)}
+    content = (
+      <>
+        <h1 className='auth__title'>Set a new password</h1>
+        <p className='auth__deck'>
+          Choose a new password for your account. You will be signed in with it
+          from now on.
+        </p>
+        <form
+          className='auth__form'
+          id='reset-password'
+          onSubmit={handle_submit}
+        >
+          {auth_error && (
+            <div className='auth__error'>
+              This reset link is invalid or has expired. Request a new one.
+            </div>
+          )}
+          <label className='auth__field' htmlFor='password'>
+            <span className='auth__label'>New password</span>
+            <input
+              className='auth__input'
               id='password'
-              label='New Password'
+              name='password'
               type='password'
-              inputRef={password_ref}
+              ref={password_ref}
               onChange={handle_change}
-              variant='outlined'
+              autoComplete='new-password'
               required
             />
-            <TextField
-              error={Boolean(auth_error || password_error)}
-              helperText={password_error && 'Password does not match'}
+          </label>
+          <label className='auth__field' htmlFor='password2'>
+            <span className='auth__label'>Confirm new password</span>
+            <input
+              className='auth__input'
               id='password2'
-              label='Confirm New Password'
+              name='password2'
               type='password'
-              inputRef={password2_ref}
+              ref={password2_ref}
               onChange={handle_change}
-              variant='outlined'
+              autoComplete='new-password'
               required
             />
-            <Button
-              type='submit'
-              isLoading={is_updating}
-              className='reset-password__button'
-            >
-              Reset Password
-            </Button>
-          </form>
-          <div className='reset-password__toggle'>
-            <Link to='/login'>Back to login</Link>
-          </div>
+          </label>
+          {password_error && (
+            <div className='auth__error'>The two passwords do not match.</div>
+          )}
+          <button className='auth__submit' type='submit' disabled={is_updating}>
+            {is_updating ? 'Setting password' : 'Set password'}
+          </button>
+        </form>
+        <div className='auth__footer'>
+          <Link to='/login'>Back to sign in</Link>
         </div>
-      </div>
+      </>
     )
   }
 
-  return <PageLayout body={body} />
+  const body = (
+    <div className='auth-surface'>
+      <div className='auth'>
+        <p className='auth__eyebrow'>Genesis League &middot; xo.football</p>
+        {content}
+      </div>
+    </div>
+  )
+
+  return <PageLayout body={body} scroll />
 }
 
 ResetPasswordPage.propTypes = {

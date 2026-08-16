@@ -1,35 +1,114 @@
+// THE AUTH SURFACE: /login, /forgot-password and /reset-password.
+//
+// ONE STYLESHEET FOR ALL THREE, imported by each of their components. They are
+// one surface a person moves through in a single sitting — sign in, fail,
+// request a link, follow it, set a password, sign in — so they cannot be three
+// vocabularies. They were: auth.styl, forgot-password.styl and
+// reset-password.styl each carried their own copy of the same four rules, and
+// the message/error pair in the latter two was duplicated verbatim.
+//
+// The form language itself lives in app/styles/prose-form.styl, shared with the
+// waiting list and the admission vote. Nothing here redefines a control; every
+// rule below either calls a mixin or positions something the mixins do not
+// cover. If a control needs a property the mixin does not give it, the property
+// belongs in the mixin.
+
+.auth-surface
+  prose_surface()
+
 .auth
+  prose_page()
+
+// Qualified with the element: prose_page()'s own `p` reset is (0,1,1) and wins
+// over a bare class, so an unqualified rule here loses its margin silently.
+// Same reason the questionnaire qualifies its own eyebrow and deck.
+.auth p.auth__eyebrow
+  prose_eyebrow()
+
+.auth__title
+  prose_title()
+
+.auth p.auth__deck
+  margin 0
+  font-size 1.125em
+  line-height 1.55
+  color $prose_body
+
+// The invitation a commissioner's link carries, stated as a sentence. It is the
+// one piece of the page that is about THIS reader rather than about the site,
+// so it gets the rule that marks a standing note.
+.auth p.auth__invitation
+  prose_message()
+  margin 28px 0 0
+  font-family $prose_mono
+  font-weight $prose_bold
+  letter-spacing -0.01em
+
+.auth__form
+  prose_form()
+  // Tighter than the questionnaire's 36px. That page asks fifteen questions and
+  // needs air between them; this one asks two, and the same gap leaves the
+  // submit button below the fold on a phone.
+  gap 26px
+
+.auth__field
+  prose_field()
+
+.auth__label
+  prose_label()
+
+.auth__optional
+  font-weight 400
+  color $prose_muted
+
+.auth__help
+  prose_help()
+
+.auth__input
+  prose_input()
+
+.auth__error
+  prose_error()
+
+.auth__message
+  prose_message()
+
+.auth__submit
+  prose_submit()
+
+// The two ways off this page, on one line: the other mode of the form, and the
+// reset link. Set in mono at the eyebrow's size so they read as navigation
+// rather than as a third thing to fill in.
+.auth__footer
   display flex
-  height 100%
-  justify-content center
-  align-items center
-  font-family 'IBM Plex Mono'
+  flex-wrap wrap
+  gap 12px 28px
+  margin-top 40px
+  padding-top 28px
+  border-top 1px solid $prose_rule
+  font-family $prose_mono
+  font-size 0.875em
 
-.auth__main
-  flex 2
-  display flex
-  flex-direction column
-  height 100%
-  justify-content center
-  align-items center
-
-.auth__forgot
-  margin-top 16px
-  font-weight 500
-
-.auth__toggle
-  margin-top 16px
+// A button rather than a link, because it changes the form in place and goes
+// nowhere. Styled to match the anchor beside it so the pair reads as one row —
+// the alternative, an anchor with a click handler and no href, is a link that
+// lies about being one.
+.auth__switch
+  padding 0
+  font-family inherit
+  font-size inherit
+  font-weight $prose_bold
+  color $prose_ink
+  background none
+  border none
+  border-bottom 1px solid $prose_rule_strong
   cursor pointer
-  font-weight 500
+  transition border-color 120ms ease, color 120ms ease
 
   &:hover
-    color $accentColor
-    border-bottom 1px solid $accentColor
+    color $prose_accent
+    border-bottom-color $prose_accent
 
-form#auth
-  display flex
-  flex-direction column
-  width 250px
-  .MuiFormControl-root
-  button
-    margin-top 16px
+  &:focus-visible
+    outline 2px solid $prose_accent
+    outline-offset 3px

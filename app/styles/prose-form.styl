@@ -252,8 +252,17 @@ prose_checkbox_label()
   font-size 0.9375em
   cursor pointer
 
-prose_submit()
-  align-self flex-start
+// THE FILLED ACTION, paint and type only, with no opinion about how it sits in
+// its parent. Split out from prose_submit() because the landing page's call to
+// action is an ANCHOR in a flex row rather than a submit button in a column: it
+// wants every declaration below and none of the three that follow them, and it
+// had been carrying its own copy of all thirteen. A form's submit and a page's
+// call to action are the same object wearing different layout.
+//
+// `color` is restated on :hover because prose_page() gives every anchor an
+// accent hover colour, which would otherwise repaint the label of a filled
+// button against its accent background. On a `button` the line is inert.
+prose_action_fill()
   padding 16px 30px
   font-family $prose_mono
   font-weight $prose_bold
@@ -267,11 +276,20 @@ prose_submit()
   transition background 120ms ease, transform 120ms ease
   &:hover
     background $prose_accent
+    color $prose_paper
   &:active
     transform translateY(1px)
   &:focus-visible
     outline 2px solid $prose_accent
     outline-offset 3px
+
+// The disabled state lives HERE and not in the fill above, because only a
+// control that can be disabled can have one — an anchor cannot, so putting it
+// in the shared paint emitted four lines of CSS the landing page's call to
+// action could never match.
+prose_submit()
+  prose_action_fill()
+  align-self flex-start
   &:disabled
     opacity 0.45
     cursor default

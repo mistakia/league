@@ -2,19 +2,77 @@ import React from 'react'
 import queryString from 'query-string'
 import PropTypes from 'prop-types'
 import { useLocation, Link } from 'react-router-dom'
-import TextField from '@mui/material/TextField'
 
-import Button from '@components/button'
 import Loading from '@components/loading'
 import PageLayout from '@layouts/page'
 
 import './auth.styl'
+
+// The sign-in page, typeset in the shared prose language rather than in MUI.
+//
+// IT IS THE PAGE AFTER THE WAITING LIST. A manager who is admitted reads the
+// landing page, then the questionnaire, then this — three pages in a row from
+// the same site, so this one carries the same paper, the same measure and the
+// same two fonts. It was a pair of default outlined MUI fields floating in the
+// middle of the app's grey chrome, with no title saying what the page was.
+//
+// The controls are native `input` elements calling app/styles/prose-form.styl,
+// not `@mui/material/TextField`. That is what makes the type, the focus ring
+// and the error colour the same here as on every other prose page; a MUI field
+// brings its own type scale, its own floating label and its own focus colour,
+// none of which this page can override without fighting emotion specificity.
 
 const AuthPageWrapper = (Component) => {
   return function WrappedAuthPage(props) {
     const location = useLocation()
     return <Component location={location} {...props} />
   }
+}
+
+// A field is a block: prompt, then the reason it is being asked, then the box.
+// `name` is what makes `event.target.<name>.value` resolve in handle_submit —
+// the previous MUI fields were reached by `id`, which also works, but a native
+// form wants the name.
+const Field = ({
+  name,
+  label,
+  help,
+  type = 'text',
+  required,
+  optional,
+  input_ref,
+  on_change,
+  auto_complete
+}) => (
+  <label className='auth__field' htmlFor={name}>
+    <span className='auth__label'>
+      {label}
+      {optional && <span className='auth__optional'> (optional)</span>}
+    </span>
+    {help && <span className='auth__help'>{help}</span>}
+    <input
+      className='auth__input'
+      id={name}
+      name={name}
+      type={type}
+      required={required}
+      ref={input_ref}
+      onChange={on_change}
+      autoComplete={auto_complete}
+    />
+  </label>
+)
+
+Field.propTypes = {
+  name: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  help: PropTypes.string,
+  type: PropTypes.string,
+  required: PropTypes.bool,
+  optional: PropTypes.bool,
+  input_ref: PropTypes.object,
+  on_change: PropTypes.func,
+  auto_complete: PropTypes.string
 }
 
 const AuthPage = ({
@@ -55,6 +113,9 @@ const AuthPage = ({
     }
   }
 
+  // A button rather than the div this used to be: a div with an onClick is not
+  // reachable by keyboard and announces nothing, and switching between signing
+  // in and registering is the page's second action.
   const handle_click = () => {
     set_password_error(false)
     set_menu(menu === 'login' ? 'register' : 'login')
@@ -77,108 +138,119 @@ const AuthPage = ({
   }
 
   const { leagueId, teamId } = queryString.parse(location.search)
+  const is_login = menu === 'login'
+
+  // The invitation, stated as a sentence. These arrive in the query string of
+  // a link a commissioner sends, and they used to render as two DISABLED MUI
+  // text fields labelled `League Id` and `Team Id` — a database column shown
+  // to a person, in a control that looks editable and is not. Neither is a
+  // form value: handle_submit reads both straight off the query string.
+  const invitation = leagueId && (
+    <p className='auth__invitation'>
+      {teamId
+        ? `Invitation to league ${leagueId}, team ${teamId}.`
+        : `Invitation to league ${leagueId}.`}
+    </p>
+  )
 
   const body = (
-    <div className='auth'>
-      <div className='auth__main'>
-        <form id='auth' onSubmit={handle_submit}>
-          {auth_error}
-          {leagueId && (
-            <TextField
-              disabled
-              label='League Id'
-              variant='outlined'
-              value={leagueId}
-            />
-          )}
-          {teamId && (
-            <TextField
-              disabled
-              label='Team Id'
-              variant='outlined'
-              value={teamId}
-            />
-          )}
-          {menu === 'login' ? (
-            <TextField
-              id='email_or_username'
-              label='Email/Username'
-              type='text'
-              error={Boolean(auth_error)}
-              variant='outlined'
+    <div className='auth-surface'>
+      <div className='auth'>
+        <p className='auth__eyebrow'>Genesis League &middot; xo.football</p>
+        <h1 className='auth__title'>
+          {is_login ? 'Sign in' : 'Create an account'}
+        </h1>
+        <p className='auth__deck'>
+          {is_login
+            ? 'For managers who already have an account. If you are not in the league yet, the waiting list is the way in.'
+            : 'Registration needs an invite code. Contributors and testers can request one on Discord.'}
+        </p>
+
+        {invitation}
+
+        <form className='auth__form' id='auth' onSubmit={handle_submit}>
+          {auth_error && <div className='auth__error'>{auth_error}</div>}
+
+          {is_login ? (
+            <Field
+              name='email_or_username'
+              label='Email or username'
+              auto_complete='username'
+              required
             />
           ) : (
             <>
-              <TextField
-                id='invite_code'
-                label='Invite Code'
-                type='text'
-                error={Boolean(auth_error)}
-                variant='outlined'
-                helperText='Available for contributors and testers. Request via discord'
+              <Field
+                name='invite_code'
+                label='Invite code'
+                help='Available to contributors and testers. Ask for one on Discord.'
                 required
               />
-              <TextField
-                id='username'
+              <Field
+                name='username'
                 label='Username'
-                type='text'
-                error={Boolean(auth_error)}
-                variant='outlined'
+                auto_complete='username'
                 required
               />
-              <TextField
-                id='email'
+              <Field
+                name='email'
                 label='Email'
                 type='email'
-                error={Boolean(auth_error)}
-                variant='outlined'
-                helperText='Used for account recovery (Optional)'
+                help='Used to recover the account if the password is lost.'
+                auto_complete='email'
+                optional
               />
             </>
           )}
-          <TextField
-            error={Boolean(auth_error || password_error)}
-            helperText={password_error && 'Password does not match'}
-            id='password'
+
+          <Field
+            name='password'
             label='Password'
             type='password'
-            inputRef={password_ref}
-            onChange={handle_change}
-            variant='outlined'
+            input_ref={password_ref}
+            on_change={handle_change}
+            auto_complete={is_login ? 'current-password' : 'new-password'}
+            required
           />
-          {menu === 'register' && (
-            <TextField
-              error={Boolean(auth_error || password_error)}
-              helperText={password_error && 'Password does not match'}
-              id='password2'
-              label='Confirm Password'
+
+          {!is_login && (
+            <Field
+              name='password2'
+              label='Confirm password'
               type='password'
-              inputRef={password2_ref}
-              onChange={handle_change}
-              variant='outlined'
+              input_ref={password2_ref}
+              on_change={handle_change}
+              auto_complete='new-password'
+              required
             />
           )}
-          <Button
-            type='submit'
-            isLoading={is_updating}
-            className='auth__button'
-          >
-            {menu}
-          </Button>
+
+          {password_error && (
+            <div className='auth__error'>The two passwords do not match.</div>
+          )}
+
+          <button className='auth__submit' type='submit' disabled={is_updating}>
+            {is_updating
+              ? is_login
+                ? 'Signing in'
+                : 'Creating account'
+              : is_login
+                ? 'Sign in'
+                : 'Create account'}
+          </button>
         </form>
-        {menu === 'login' && (
-          <div className='auth__forgot'>
-            <Link to='/forgot-password'>Forgot password?</Link>
-          </div>
-        )}
-        <div className='auth__toggle' onClick={handle_click}>
-          {menu === 'register' ? 'Login' : 'Create account'}
+
+        <div className='auth__footer'>
+          <button className='auth__switch' type='button' onClick={handle_click}>
+            {is_login ? 'Create an account' : 'Sign in instead'}
+          </button>
+          {is_login && <Link to='/forgot-password'>Forgot your password?</Link>}
         </div>
       </div>
     </div>
   )
 
-  return <PageLayout body={body} />
+  return <PageLayout body={body} scroll />
 }
 
 AuthPage.propTypes = {
