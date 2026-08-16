@@ -15,8 +15,9 @@ body
   height 100%
   width 100%
   overflow hidden
-  // used as ios web app status bar background
-  background-color #1976d2
+  // The whole site sits on one surface, so body carries it too — #root covers
+  // everything else, and this doubles as the ios web app status bar background.
+  background-color $backgroundColor
 
 main
 #root

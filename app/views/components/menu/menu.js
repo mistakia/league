@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import { DISCORD_URL } from '@core/constants'
+import { league_url } from '@pages/landing/landing-content'
 import TeamName from '@components/team-name'
 import LeagueSchedule from '@components/league-schedule'
 
@@ -50,6 +51,12 @@ export default function AppMenu({
   const isAuction = location.pathname === '/auction'
   const isMobile = window.innerWidth < 800
   const is_hosted = Boolean(league.is_hosted)
+  // The home dynasty league is the one league_url points at, and its menu
+  // section is visible exactly when the connected league is that one — the
+  // separate button must not duplicate it. Keyed on the league, not the route:
+  // a client-side navigation off the league pages leaves app.leagueId in place,
+  // so the section stays visible and the button must stay hidden with it.
+  const is_genesis_league = leagueId === Number(league_url.split('/').pop())
   const drawer_ref = useRef(null)
 
   useEffect(() => {
@@ -196,6 +203,23 @@ export default function AppMenu({
                 )}
               </div>
             </div>
+            {/* The home dynasty league is publicly readable without an
+                account, so an anonymous visitor anywhere else gets a path back
+                to it. Once the league section is showing it, the league links
+                above already cover every league page, so a separate link would
+                be noise. */}
+            {!is_logged_in && !is_genesis_league && (
+              <div className='menu__section'>
+                <div
+                  className='menu__links'
+                  onClick={() => isMobile && set_menu_open(false)}
+                >
+                  <NavLink to={league_url} end>
+                    Genesis League
+                  </NavLink>
+                </div>
+              </div>
+            )}
             {Boolean(teamId) && is_hosted && (
               <div className='menu__section'>
                 <div className='menu__heading'>

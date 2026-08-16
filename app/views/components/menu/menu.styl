@@ -1,5 +1,4 @@
 $hoverBackground = rgba(255, 255, 255, 0.8)
-$menuBackgroundColor = darken($backgroundColor, 5%)
 
 .main__menu
   absolute left 0 right 0 top 0 bottom 0
@@ -150,7 +149,9 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
 
 .menu__collapse
   position absolute
-  right 4px
+  // Tucked into the drawer's own left corner, so it sits under the section
+  // cards rather than in the seam beside them.
+  left 4px
   bottom 16px
 
 .menu__sections
@@ -173,7 +174,9 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   top var(--app-banner-height, 0px)
   bottom 0
   width $menuWidth
-  background $menuBackgroundColor
+  // The drawer is the same surface the body and every page sit on, so the
+  // section cards are the only thing that reads as chrome here.
+  background $backgroundColor
   z-index $z_overlay_panel
   overflow hidden
   display flex
@@ -199,7 +202,10 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
 .menu__section
   border-radius 4px
   min-width 136px
-  background lighten($menuBackgroundColor, 40%)
+  // A card on the drawer surface, which is the same $backgroundColor as the
+  // body — the cards are the only chrome in here now, so they sit white
+  // against it.
+  background lighten($backgroundColor, 100%)
   flex 1
   margin 8px
   transition background-color $smooth_transition,box-shadow $smooth_transition,border $smooth_transition
@@ -249,9 +255,6 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   font-size 10px
 
 @media (min-width 800px)
-  .menu__drawer--persistent
-    border-right 1px solid lighten($borderColor, 30%)
-
   .auction__live .main__menu-button
     bottom $auctionHeightDesktop + 8px
 
