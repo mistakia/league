@@ -41,7 +41,7 @@ export const map_passing_stats = async ({
     })
     if (passer) {
       mapped.passer_pid = passer.pid
-      mapped.psr_gsis = passer.gsisid
+      mapped.passer_gsis_player_id = passer.gsisid
     }
   }
 
@@ -98,7 +98,7 @@ export const map_receiving_stats = async ({
     })
     if (receiver) {
       mapped.target_pid = receiver.pid
-      mapped.trg_gsis = receiver.gsisid
+      mapped.target_gsis_player_id = receiver.gsisid
     }
   }
 
@@ -142,7 +142,7 @@ export const map_rushing_stats = async ({
     })
     if (ball_carrier) {
       mapped.ball_carrier_pid = ball_carrier.pid
-      mapped.bc_gsis = ball_carrier.gsisid
+      mapped.ball_carrier_gsis_player_id = ball_carrier.gsisid
     }
   }
 
@@ -318,7 +318,7 @@ export const map_return_stats = async ({
   }
 
   // Return metrics
-  mapped.ret_yds = return_stats.yards || null
+  mapped.return_yds = return_stats.yards || null
   mapped.is_return_touchdown = return_stats.touchdown === 1
   mapped.is_touchback = return_stats.touchback === 1
   mapped.is_punt_fair_catch = return_stats.faircatch === 1
@@ -333,7 +333,7 @@ export const map_return_stats = async ({
     })
     if (intercepter) {
       mapped.interceptor_pid = intercepter.pid
-      mapped.intp_gsis = intercepter.gsisid
+      mapped.interceptor_gsis_player_id = intercepter.gsisid
     }
   }
 

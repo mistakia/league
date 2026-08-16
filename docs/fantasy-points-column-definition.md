@@ -15,7 +15,7 @@ A single NFL play can generate fantasy points for multiple players:
 - **Ball carrier (ball_carrier_pid)**: Rush yards, rush touchdowns, fumbles
 - **Passer (passer_pid)**: Pass yards, pass touchdowns, interceptions
 - **Target receiver (target_pid)**: Receiving yards, receptions, receiving touchdowns
-- **Fumbler (player_fuml_pid)**: Fumble lost points
+- **Fumbler (fumble_lost_pid)**: Fumble lost points
 
 This is handled through a UNION ALL structure that processes each player type separately.
 
@@ -42,7 +42,7 @@ WHERE (
   (ball_carrier_pid IS NOT NULL AND (rush_yds > 0 OR is_rushing_touchdown = true)) OR
   (passer_pid IS NOT NULL AND (pass_yds > 0 OR is_passing_touchdown = true OR is_interception = true)) OR
   (target_pid IS NOT NULL AND (recv_yds > 0 OR is_completion = true)) OR
-  player_fuml_pid IS NOT NULL
+  fumble_lost_pid IS NOT NULL
 )
 ```
 

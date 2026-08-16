@@ -13,7 +13,7 @@ const log = debug('play-enrichment:player-identification')
  * - Passer (passer_pid)
  * - Target receiver (target_pid)
  * - Interceptor (interceptor_pid)
- * - Fumbler (player_fuml_pid)
+ * - Fumbler (fumble_lost_pid)
  * - Solo tacklers (tacklers_solo arrays)
  * - Tacklers with assists (tacklers_with_assisters arrays)
  * - Tackle assisters (tackle_assisters arrays)
@@ -181,25 +181,37 @@ export const enrich_player_identifications = (
   // evidence is an omitted statId (see below). Keep these in lockstep with
   // libs-shared/get-play-from-play-stats.mjs.
   const owned_single_player_families = [
-    { gsis: 'bc_gsis', pid: 'ball_carrier_pid', stat_ids: [10, 11] },
-    // psr_gsis is set by statIds 14/15/16 (incomplete/complete/TD passes), 19
+    {
+      gsis: 'ball_carrier_gsis_player_id',
+      pid: 'ball_carrier_pid',
+      stat_ids: [10, 11]
+    },
+    // passer_gsis_player_id is set by statIds 14/15/16 (incomplete/complete/TD passes), 19
     // (interception), 20 (sack, 2023+ feed omits 14/15/16), and 111/112 (air
     // yards complete/incomplete). Omitting 19 wiped the passer on every
     // interception; omitting 111/112 wiped air-yards-only pass rows.
     {
-      gsis: 'psr_gsis',
+      gsis: 'passer_gsis_player_id',
       pid: 'passer_pid',
       stat_ids: [14, 15, 16, 19, 20, 111, 112]
     },
-    // trg_gsis is set by statIds 21/22 (reception/TD), 113 (yards after catch),
+    // target_gsis_player_id is set by statIds 21/22 (reception/TD), 113 (yards after catch),
     // and 115 (target/intended receiver -- the ONLY target stat present on
     // incompletions). Omitting 113/115 collapsed targets-from-plays to
     // receptions, since incomplete-pass targets carry only statId 115.
-    { gsis: 'trg_gsis', pid: 'target_pid', stat_ids: [21, 22, 113, 115] },
-    { gsis: 'intp_gsis', pid: 'interceptor_pid', stat_ids: [25, 26] },
     {
-      gsis: 'player_fuml_gsis',
-      pid: 'player_fuml_pid',
+      gsis: 'target_gsis_player_id',
+      pid: 'target_pid',
+      stat_ids: [21, 22, 113, 115]
+    },
+    {
+      gsis: 'interceptor_gsis_player_id',
+      pid: 'interceptor_pid',
+      stat_ids: [25, 26]
+    },
+    {
+      gsis: 'fumble_lost_gsis_player_id',
+      pid: 'fumble_lost_pid',
       stat_ids: [52, 53, 54, 106]
     }
   ]

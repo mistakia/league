@@ -282,10 +282,13 @@ const map_contextual_data = ({
   // Time data
   if (play.clock) {
     mapped.game_clock_start = normalize_game_clock(play.clock)
-    const sec_rem_qtr = parse_clock_to_seconds(play.clock)
+    const seconds_remaining_quarter = parse_clock_to_seconds(play.clock)
     Object.assign(
       mapped,
-      calculate_time_remaining(game_context.period_number, sec_rem_qtr)
+      calculate_time_remaining(
+        game_context.period_number,
+        seconds_remaining_quarter
+      )
     )
   }
 
@@ -311,10 +314,10 @@ const map_contextual_data = ({
       mapped.possession_nfl_team
     )
     Object.assign(mapped, {
-      ydl_side: start_ydl.ydl_side,
-      ydl_num: start_ydl.ydl_num,
-      ydl_100: start_ydl.ydl_100,
-      ydl_start: start_ydl.ydl_str
+      yard_line_side: start_ydl.yard_line_side,
+      yard_line_num: start_ydl.yard_line_num,
+      yard_line_100: start_ydl.yard_line_100,
+      yard_line_start: start_ydl.ydl_str
     })
   }
 
@@ -323,7 +326,7 @@ const map_contextual_data = ({
       play.end_situation.location,
       mapped.possession_nfl_team
     )
-    mapped.ydl_end = end_ydl.ydl_str
+    mapped.yard_line_end = end_ydl.ydl_str
   }
 
   // Score
@@ -381,11 +384,11 @@ const map_drive_data = ({ drive_context }) => {
   if (!drive_context) return {}
 
   const mapped = {
-    drive_seq: drive_context.sequence,
+    drive_sequence: drive_context.sequence,
     drive_play_count: drive_context.play_count,
     drive_top: normalize_drive_duration(drive_context.duration),
     drive_yds: drive_context.gain,
-    drive_fds: drive_context.first_downs,
+    drive_first_downs: drive_context.first_downs,
     drive_yds_penalized: drive_context.penalty_yards
   }
 
@@ -505,8 +508,8 @@ const map_sportradar_play_to_nfl_play = async ({
   Object.assign(mapped, stats_mapped)
 
   // Calculate goal_to_go after all field position data is available
-  if (mapped.ydl_100 !== null && mapped.yards_to_go !== null) {
-    mapped.is_goal_to_go = mapped.ydl_100 + mapped.yards_to_go >= 100
+  if (mapped.yard_line_100 !== null && mapped.yards_to_go !== null) {
+    mapped.is_goal_to_go = mapped.yard_line_100 + mapped.yards_to_go >= 100
   }
 
   const broken_tackles_rush = mapped.broken_tackles_rush || 0
@@ -560,15 +563,15 @@ const build_match_criteria = (game_esbid, mapped_play) => {
   }
 
   if (mapped_play.play_type !== 'KOFF' && mapped_play.play_type !== 'CONV') {
-    criteria.ydl_100 = mapped_play.ydl_100
+    criteria.yard_line_100 = mapped_play.yard_line_100
   }
 
   // Special teams plays need time-based matching
   if (
     SPECIAL_TEAMS_TYPES.includes(mapped_play.play_type) &&
-    mapped_play.sec_rem_qtr != null
+    mapped_play.seconds_remaining_quarter != null
   ) {
-    criteria.sec_rem_qtr = mapped_play.sec_rem_qtr
+    criteria.seconds_remaining_quarter = mapped_play.seconds_remaining_quarter
 
     if (mapped_play.play_type === 'KOFF' || mapped_play.play_type === 'PUNT') {
       criteria.sec_rem_qtr_tolerance = FUZZY_TIME_TOLERANCE_KICKOFF_PUNT
@@ -598,10 +601,10 @@ const build_match_criteria = (game_esbid, mapped_play) => {
 
 const find_time_matches = (db_plays, sportradar_sec_rem) => {
   return db_plays
-    .filter((p) => p.sec_rem_qtr != null)
+    .filter((p) => p.seconds_remaining_quarter != null)
     .map((p) => ({
       play: p,
-      time_diff: Math.abs(p.sec_rem_qtr - sportradar_sec_rem)
+      time_diff: Math.abs(p.seconds_remaining_quarter - sportradar_sec_rem)
     }))
     .filter((m) => m.time_diff <= TIME_TOLERANCE_SECONDS)
     .sort((a, b) => a.time_diff - b.time_diff)
@@ -641,8 +644,8 @@ const resolve_multiple_matches = ({
   }
 
   // Strategy 2: fuzzy time match
-  if (mapped_play.sec_rem_qtr != null) {
-    const sportradar_sec_rem = mapped_play.sec_rem_qtr
+  if (mapped_play.seconds_remaining_quarter != null) {
+    const sportradar_sec_rem = mapped_play.seconds_remaining_quarter
     const time_matches = find_time_matches(db_plays, sportradar_sec_rem)
 
     if (time_matches.length === 1) {
@@ -713,10 +716,10 @@ const log_unresolved_matches = ({
     play_type: mapped_play.play_type,
     qtr: mapped_play.qtr,
     game_clock_start: mapped_play.game_clock_start,
-    sec_rem_qtr: mapped_play.sec_rem_qtr,
+    seconds_remaining_quarter: mapped_play.seconds_remaining_quarter,
     dwn: mapped_play.dwn,
     yards_to_go: mapped_play.yards_to_go,
-    ydl_100: mapped_play.ydl_100,
+    yard_line_100: mapped_play.yard_line_100,
     offense_nfl_team: mapped_play.offense_nfl_team,
     defense_nfl_team: mapped_play.defense_nfl_team,
     description: sportradar_play.description
@@ -730,10 +733,10 @@ const log_unresolved_matches = ({
       play_type: play.play_type,
       qtr: play.qtr,
       game_clock_start: play.game_clock_start,
-      sec_rem_qtr: play.sec_rem_qtr,
+      seconds_remaining_quarter: play.seconds_remaining_quarter,
       dwn: play.dwn,
       yards_to_go: play.yards_to_go,
-      ydl_100: play.ydl_100,
+      yard_line_100: play.yard_line_100,
       offense_nfl_team: play.offense_nfl_team,
       defense_nfl_team: play.defense_nfl_team
     }
@@ -801,13 +804,13 @@ const try_fuzzy_match_ydl_100 = (
   mapped_play,
   sportradar_play
 ) => {
-  if (match_criteria.ydl_100 == null) return null
+  if (match_criteria.yard_line_100 == null) return null
 
   // Generate offsets from -tolerance to +tolerance, excluding 0
   const offsets = []
   for (let i = -FUZZY_YDL_TOLERANCE; i <= FUZZY_YDL_TOLERANCE; i++) {
     if (i !== 0) {
-      offsets.push({ field: 'ydl_100', value: i })
+      offsets.push({ field: 'yard_line_100', value: i })
     }
   }
 
@@ -819,7 +822,10 @@ const try_fuzzy_match_combined = (
   mapped_play,
   sportradar_play
 ) => {
-  if (match_criteria.yards_to_go == null || match_criteria.ydl_100 == null) {
+  if (
+    match_criteria.yards_to_go == null ||
+    match_criteria.yard_line_100 == null
+  ) {
     return null
   }
 
@@ -828,7 +834,7 @@ const try_fuzzy_match_combined = (
       const combined_criteria = {
         ...match_criteria,
         yards_to_go: match_criteria.yards_to_go + ytg_offset,
-        ydl_100: match_criteria.ydl_100 + ydl_offset
+        yard_line_100: match_criteria.yard_line_100 + ydl_offset
       }
       const fuzzy_matches = find_play({
         ...combined_criteria,
@@ -850,7 +856,7 @@ const try_fuzzy_match_combined = (
 
       if (db_play) {
         log(
-          `Combined fuzzy match: ytg ${match_criteria.yards_to_go} -> ${combined_criteria.yards_to_go}, ydl_100 ${match_criteria.ydl_100} -> ${combined_criteria.ydl_100}`
+          `Combined fuzzy match: ytg ${match_criteria.yards_to_go} -> ${combined_criteria.yards_to_go}, yard_line_100 ${match_criteria.yard_line_100} -> ${combined_criteria.yard_line_100}`
         )
         return db_play
       }
@@ -1039,7 +1045,7 @@ const format_unmatched_play_details = (unmatched_plays_details) => {
       log(`  Game: ${detail.esbid} Q${detail.qtr} ${detail.clock}`)
       log(`  Desc: ${detail.description.substring(0, 80)}`)
       log(
-        `  Criteria: dwn=${detail.dwn} ytg=${detail.yards_to_go} ydl=${detail.ydl_100}`
+        `  Criteria: dwn=${detail.dwn} ytg=${detail.yards_to_go} ydl=${detail.yard_line_100}`
       )
       log(`  Teams: ${detail.offense_nfl_team} vs ${detail.defense_nfl_team}`)
       log('')
@@ -1244,7 +1250,7 @@ const process_play = async ({
       clock: mapped_play.game_clock_start,
       dwn: mapped_play.dwn,
       yards_to_go: mapped_play.yards_to_go,
-      ydl_100: mapped_play.ydl_100,
+      yard_line_100: mapped_play.yard_line_100,
       offense_nfl_team: mapped_play.offense_nfl_team,
       defense_nfl_team: mapped_play.defense_nfl_team,
       match_criteria

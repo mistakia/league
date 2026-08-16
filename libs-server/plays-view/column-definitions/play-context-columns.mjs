@@ -7,10 +7,10 @@ function join_nfl_games({ query, join_state }) {
 
 export default {
   play_score_diff: {
-    column_name: 'score_diff',
+    column_name: 'score_difference',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.score_diff as play_score_diff'],
-    main_where: () => 'nfl_plays.score_diff'
+    main_select: () => ['nfl_plays.score_difference as play_score_diff'],
+    main_where: () => 'nfl_plays.score_difference'
   },
   play_home_score: {
     column_name: 'home_score',
@@ -25,16 +25,18 @@ export default {
     main_where: () => 'nfl_plays.away_score'
   },
   play_sec_rem_half: {
-    column_name: 'sec_rem_half',
+    column_name: 'seconds_remaining_half',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.sec_rem_half as play_sec_rem_half'],
-    main_where: () => 'nfl_plays.sec_rem_half'
+    main_select: () => [
+      'nfl_plays.seconds_remaining_half as play_sec_rem_half'
+    ],
+    main_where: () => 'nfl_plays.seconds_remaining_half'
   },
   play_sec_rem_gm: {
-    column_name: 'sec_rem_gm',
+    column_name: 'seconds_remaining_game',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.sec_rem_gm as play_sec_rem_gm'],
-    main_where: () => 'nfl_plays.sec_rem_gm'
+    main_select: () => ['nfl_plays.seconds_remaining_game as play_sec_rem_gm'],
+    main_where: () => 'nfl_plays.seconds_remaining_game'
   },
   play_home_team: {
     column_name: 'home_nfl_team',

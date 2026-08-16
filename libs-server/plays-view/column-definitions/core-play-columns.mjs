@@ -73,11 +73,12 @@ export default {
     use_having: true
   },
   play_ydl_100: {
-    column_name: 'ydl_100',
+    column_name: 'yard_line_100',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.ydl_100 as play_ydl_100'],
-    main_where: () => 'nfl_plays.ydl_100',
-    aggregate_select: () => db.raw('AVG(nfl_plays.ydl_100) as play_ydl_100'),
+    main_select: () => ['nfl_plays.yard_line_100 as play_ydl_100'],
+    main_where: () => 'nfl_plays.yard_line_100',
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.yard_line_100) as play_ydl_100'),
     use_having: true
   },
   play_quarter: {

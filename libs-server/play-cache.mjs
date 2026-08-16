@@ -98,11 +98,11 @@ class PlayCache {
    * @param {number} params.down_number - Down
    * @param {number} params.yards_to_go - Yards to go
    * @param {string} params.play_type - Play type
-   * @param {number} params.ydl_num - Yardline number
-   * @param {string} params.ydl_side - Yardline side
-   * @param {number} params.ydl_100 - Yardline from 0-100
-   * @param {number} params.sec_rem_qtr - Seconds remaining in quarter
-   * @param {number} params.sec_rem_qtr_tolerance - Tolerance for sec_rem_qtr matching (default: 0 for exact match)
+   * @param {number} params.yard_line_num - Yardline number
+   * @param {string} params.yard_line_side - Yardline side
+   * @param {number} params.yard_line_100 - Yardline from 0-100
+   * @param {number} params.seconds_remaining_quarter - Seconds remaining in quarter
+   * @param {number} params.sec_rem_qtr_tolerance - Tolerance for seconds_remaining_quarter matching (default: 0 for exact match)
    * @param {string} params.desc_contains - String that must be contained in play description (optional)
    * @param {string} params.timeout_team - Timeout team abbreviation (optional)
    * @param {number} params.home_score - Home team score (optional, for kickoff disambiguation)
@@ -124,10 +124,10 @@ class PlayCache {
     down_number,
     yards_to_go,
     play_type,
-    ydl_num,
-    ydl_side,
-    ydl_100,
-    sec_rem_qtr,
+    yard_line_num,
+    yard_line_side,
+    yard_line_100,
+    seconds_remaining_quarter,
     sec_rem_qtr_tolerance,
     desc_contains,
     timeout_team,
@@ -148,15 +148,15 @@ class PlayCache {
         quarter,
         down_number,
         yards_to_go,
-        ydl_100,
+        yard_line_100,
         offense_nfl_team,
         defense_nfl_team,
-        sec_rem_qtr,
+        seconds_remaining_quarter,
         sec_rem_qtr_tolerance,
         game_clock_start,
         play_type,
-        ydl_num,
-        ydl_side,
+        yard_line_num,
+        yard_line_side,
         desc_contains,
         timeout_team,
         home_score,
@@ -268,7 +268,7 @@ class PlayCache {
         play.quarter !== null &&
         play.down_number !== null &&
         play.yards_to_go !== null &&
-        play.ydl_100 !== null
+        play.yard_line_100 !== null
 
       if (has_required_fields) {
         const context_key = this._create_context_key(
@@ -276,7 +276,7 @@ class PlayCache {
           play.quarter,
           play.down_number,
           play.yards_to_go,
-          play.ydl_100
+          play.yard_line_100
         )
 
         if (!this.plays_by_game_context.has(context_key)) {
@@ -293,19 +293,19 @@ class PlayCache {
    * @param {number} quarter - Quarter
    * @param {number} down_number - Down
    * @param {number} yards_to_go - Yards to go
-   * @param {number} ydl_100 - Yardline from 0-100
+   * @param {number} yard_line_100 - Yardline from 0-100
    * @returns {string} Context key
    * @private
    */
-  _create_context_key(esbid, quarter, down_number, yards_to_go, ydl_100) {
-    return `${esbid}_${quarter}_${down_number}_${yards_to_go}_${ydl_100}`
+  _create_context_key(esbid, quarter, down_number, yards_to_go, yard_line_100) {
+    return `${esbid}_${quarter}_${down_number}_${yards_to_go}_${yard_line_100}`
   }
 
   /**
    * Checks if all required context fields are defined (not null or undefined)
    * @private
    */
-  _has_context_fields(quarter, down_number, yards_to_go, ydl_100) {
+  _has_context_fields(quarter, down_number, yards_to_go, yard_line_100) {
     return (
       quarter !== undefined &&
       quarter !== null &&
@@ -313,8 +313,8 @@ class PlayCache {
       down_number !== null &&
       yards_to_go !== undefined &&
       yards_to_go !== null &&
-      ydl_100 !== undefined &&
-      ydl_100 !== null
+      yard_line_100 !== undefined &&
+      yard_line_100 !== null
     )
   }
 
@@ -327,15 +327,15 @@ class PlayCache {
     quarter,
     down_number,
     yards_to_go,
-    ydl_100,
+    yard_line_100,
     offense_nfl_team,
     defense_nfl_team,
-    sec_rem_qtr,
+    seconds_remaining_quarter,
     sec_rem_qtr_tolerance,
     game_clock_start,
     play_type,
-    ydl_num,
-    ydl_side,
+    yard_line_num,
+    yard_line_side,
     desc_contains,
     timeout_team,
     home_score,
@@ -346,7 +346,7 @@ class PlayCache {
       quarter,
       down_number,
       yards_to_go,
-      ydl_100
+      yard_line_100
     )
 
     // Try indexed lookup first (fastest)
@@ -356,7 +356,7 @@ class PlayCache {
         quarter,
         down_number,
         yards_to_go,
-        ydl_100
+        yard_line_100
       )
       const indexed_plays = this.plays_by_game_context.get(context_key) || []
 
@@ -364,12 +364,12 @@ class PlayCache {
         const additional_filters = {
           offense_nfl_team,
           defense_nfl_team,
-          sec_rem_qtr,
+          seconds_remaining_quarter,
           sec_rem_qtr_tolerance,
           game_clock_start,
           play_type,
-          ydl_num,
-          ydl_side,
+          yard_line_num,
+          yard_line_side,
           desc_contains,
           timeout_team,
           home_score,
@@ -393,15 +393,15 @@ class PlayCache {
         quarter,
         down_number,
         yards_to_go,
-        ydl_100,
+        yard_line_100,
         offense_nfl_team,
         defense_nfl_team,
-        sec_rem_qtr,
+        seconds_remaining_quarter,
         sec_rem_qtr_tolerance,
         game_clock_start,
         play_type,
-        ydl_num,
-        ydl_side,
+        yard_line_num,
+        yard_line_side,
         desc_contains,
         timeout_team,
         home_score,
@@ -465,7 +465,7 @@ class PlayCache {
       log(`Multiple plays matched (${matching_plays.length}):`)
       matching_plays.forEach((play, index) => {
         log(
-          `  [${index + 1}] esbid=${play.esbid} play_id=${play.play_id} quarter=${play.quarter} down_number=${play.down_number} ytg=${play.yards_to_go} ydl=${play.ydl_100}`
+          `  [${index + 1}] esbid=${play.esbid} play_id=${play.play_id} quarter=${play.quarter} down_number=${play.down_number} ytg=${play.yards_to_go} ydl=${play.yard_line_100}`
         )
       })
       throw new MultiplePlayMatchError(
@@ -503,7 +503,10 @@ class PlayCache {
       play.yards_to_go,
       filters.yards_to_go
     )
-    const ydl_match = this._matches_numeric_field(play.ydl_100, filters.ydl_100)
+    const ydl_match = this._matches_numeric_field(
+      play.yard_line_100,
+      filters.yard_line_100
+    )
     const off_match = this._matches_team_field(
       play.offense_nfl_team,
       filters.offense_nfl_team
@@ -513,8 +516,8 @@ class PlayCache {
       filters.defense_nfl_team
     )
     const time_match = this._matches_time_field(
-      play.sec_rem_qtr,
-      filters.sec_rem_qtr,
+      play.seconds_remaining_quarter,
+      filters.seconds_remaining_quarter,
       filters.sec_rem_qtr_tolerance
     )
     const clock_match = this._matches_string_field(
@@ -526,12 +529,12 @@ class PlayCache {
       filters.play_type
     )
     const ydl_num_match = this._matches_numeric_field(
-      play.ydl_num,
-      filters.ydl_num
+      play.yard_line_num,
+      filters.yard_line_num
     )
     const ydl_side_match = this._matches_team_field(
-      play.ydl_side,
-      filters.ydl_side
+      play.yard_line_side,
+      filters.yard_line_side
     )
     const desc_match = this._matches_desc_contains(
       play.play_description,
@@ -611,8 +614,8 @@ class PlayCache {
 
   /**
    * Checks if time field matches filter with optional tolerance
-   * @param {number} play_value - Play's sec_rem_qtr value
-   * @param {number} filter_value - Filter sec_rem_qtr value
+   * @param {number} play_value - Play's seconds_remaining_quarter value
+   * @param {number} filter_value - Filter seconds_remaining_quarter value
    * @param {number} tolerance - Tolerance in seconds (default: 0 for exact match)
    * @returns {boolean} True if matches within tolerance
    * @private

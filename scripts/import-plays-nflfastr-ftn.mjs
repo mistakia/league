@@ -89,7 +89,8 @@ const format_play = (play) => ({
   ftn_play_id: format_number(play.ftn_play_id),
   starting_hash: format_starting_hash(play.starting_hash) || null,
   qb_position: format_qb_position(play.qb_location) || null,
-  n_offense_backfield: format_number(play.n_offense_backfield) || null,
+  number_offense_backfield:
+    format_number(play.number_offense_backfield) || null,
   is_no_huddle: format_boolean(play.is_no_huddle),
   is_motion: format_boolean(play.is_motion),
   is_play_action: format_boolean(play.is_play_action),

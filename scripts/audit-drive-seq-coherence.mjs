@@ -14,11 +14,11 @@ const signal_log = create_logger('audit-drive-seq-coherence', {
   service: 'league-host'
 })
 
-// drive_seq numbering is game-continuous everywhere in this system: nflfastR's
+// drive_sequence numbering is game-continuous everywhere in this system: nflfastR's
 // fixed_drive, NFL's driveSequenceNumber, Sportradar, and (since the 2026-07
 // fix) the fixed-drive enrichment fallback all number 1..N across a whole game
 // rather than restarting each half. Five consumers depend on it -- the
-// `${esbid}_${drive_seq}` key in drive-play-count-enrichment.mjs, three
+// `${esbid}_${drive_sequence}` key in drive-play-count-enrichment.mjs, three
 // data-views rate-type denominators, and one team-stats column definition --
 // and all five silently merge two drives into one when the invariant breaks.
 //
@@ -28,7 +28,7 @@ const signal_log = create_logger('audit-drive-seq-coherence', {
 //
 // Contiguity (values forming an unbroken 1..N) is deliberately NOT asserted. It
 // measures play-coverage gaps rather than the numbering invariant: five games
-// including 2004091200 have legitimately non-contiguous drive_seq because plays
+// including 2004091200 have legitimately non-contiguous drive_sequence because plays
 // are missing from the feed, and folding that in would leave the check
 // permanently red on games that are not broken.
 //
@@ -60,7 +60,7 @@ const KNOWN_VIOLATION_BASELINE = {
   // 2026-07-28 round and need no repair.
   //
   // The genuine 3 (2014110209, 2023121005, 2025101902) each carry a real play
-  // on both sides of halftime under one drive_seq -- isolated single-anchor
+  // on both sides of halftime under one drive_sequence -- isolated single-anchor
   // corruption, a half-1 drive with a stray half-2 extra point or rush. These
   // are real merged drives and remain open for repair.
   other: 3
@@ -73,19 +73,20 @@ const KNOWN_VIOLATION_BASELINE = {
  * same predicate the weekly job runs against production can be exercised
  * directly from a test fixture.
  *
- * The invariant: for any game, the number of distinct (esbid, drive_seq) pairs
- * must equal the number of distinct (esbid, half, drive_seq) triples. They
- * diverge exactly when one drive_seq value spans both halves, which is what
+ * The invariant: for any game, the number of distinct (esbid, drive_sequence) pairs
+ * must equal the number of distinct (esbid, half, drive_sequence) triples. They
+ * diverge exactly when one drive_sequence value spans both halves, which is what
  * makes the drive key address two drives at once.
  *
- * @param {Array} rows - Rows carrying esbid, quarter, and drive_seq
+ * @param {Array} rows - Rows carrying esbid, quarter, and drive_sequence
  * @returns {Object} games_checked, violations, violation_counts_by_class
  */
 export const classify_drive_seq_coherence = (rows) => {
   const games = new Map()
 
   for (const row of rows) {
-    if (row.drive_seq === null || row.drive_seq === undefined) continue
+    if (row.drive_sequence === null || row.drive_sequence === undefined)
+      continue
     if (row.quarter === null || row.quarter === undefined) continue
     // An administrative marker is not a drive and does not confer half
     // membership. NFL's feed stamps END QUARTER 2 with the sequence of the
@@ -108,18 +109,18 @@ export const classify_drive_seq_coherence = (rows) => {
     // the auditor and the writer can never disagree about where halftime is.
     const half = get_half(row)
 
-    game.drive_seqs.add(row.drive_seq)
-    game.half_drive_seqs.add(`${half}_${row.drive_seq}`)
+    game.drive_seqs.add(row.drive_sequence)
+    game.half_drive_seqs.add(`${half}_${row.drive_sequence}`)
 
     if (half === 1) {
       game.first_half_max = Math.max(
         game.first_half_max ?? -Infinity,
-        row.drive_seq
+        row.drive_sequence
       )
     } else {
       game.second_half_min = Math.min(
         game.second_half_min ?? Infinity,
-        row.drive_seq
+        row.drive_sequence
       )
     }
   }
@@ -162,7 +163,7 @@ export const classify_drive_seq_coherence = (rows) => {
 }
 
 /**
- * Read the distinct (esbid, quarter, drive_seq) triples from nfl_plays and classify
+ * Read the distinct (esbid, quarter, drive_sequence) triples from nfl_plays and classify
  * them. One row per drive per quarter -- roughly 200k rows, not 1.5M plays.
  */
 export const find_drive_seq_coherence_violations = async () => {
@@ -179,13 +180,13 @@ export const find_drive_seq_coherence_violations = async () => {
     .distinct(
       'esbid',
       'quarter',
-      'drive_seq',
+      'drive_sequence',
       'play_type_nfl',
       'play_type',
       'is_passing_play',
       'is_rushing_play'
     )
-    .whereNotNull('drive_seq')
+    .whereNotNull('drive_sequence')
     .whereNotNull('quarter')
     .whereRaw('is_deleted is not true')
 
@@ -194,7 +195,7 @@ export const find_drive_seq_coherence_violations = async () => {
   // coherent and the check permanently, silently green.
   if (!rows.length) {
     throw new Error(
-      'no drive_seq rows resolved from nfl_plays; coherence check cannot assert anything'
+      'no drive_sequence rows resolved from nfl_plays; coherence check cannot assert anything'
     )
   }
 
@@ -206,7 +207,7 @@ const audit_drive_seq_coherence = async () => {
     await find_drive_seq_coherence_violations()
 
   log(
-    `Checked ${games_checked} games: ${violations.length} carry a drive_seq value spanning both halves`
+    `Checked ${games_checked} games: ${violations.length} carry a drive_sequence value spanning both halves`
   )
   log(
     `  restart_at_1: ${violation_counts_by_class.restart_at_1} (baseline ${KNOWN_VIOLATION_BASELINE.restart_at_1})`
@@ -230,7 +231,7 @@ const audit_drive_seq_coherence = async () => {
     }))
 
   if (!regressions.length) {
-    log('No drive_seq coherence regression against the recorded baseline')
+    log('No drive_sequence coherence regression against the recorded baseline')
     return
   }
 
@@ -243,7 +244,7 @@ const audit_drive_seq_coherence = async () => {
 
   const emitted = signal_log.error(
     new Error(
-      `drive_seq cross-half coherence regressed (${summary}). A drive_seq value spanning both halves makes the esbid+drive_seq drive key address two drives at once, inflating per-drive rate denominators and corrupting drive_play_count.`
+      `drive_sequence cross-half coherence regressed (${summary}). A drive_sequence value spanning both halves makes the esbid+drive_sequence drive key address two drives at once, inflating per-drive rate denominators and corrupting drive_play_count.`
     ),
     {
       severity: 'high',
@@ -259,7 +260,7 @@ const audit_drive_seq_coherence = async () => {
     await emitted.promise
   }
 
-  throw new Error(`drive_seq coherence regressed: ${summary}`)
+  throw new Error(`drive_sequence coherence regressed: ${summary}`)
 }
 
 const main = async () => {

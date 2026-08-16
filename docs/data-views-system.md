@@ -1569,7 +1569,7 @@ Authoritative columns (parsed from the NFL-feed `off_personnel` / `def_personnel
 
 PlayerProfiler-source columns (preserved snap-classification counts, not used by the filter):
 
-- `off_personnel_rb_count_pp`, `off_personnel_te_count_pp`, `off_personnel_wr_count_pp`
+- `off_personnel_rb_count_per_play`, `off_personnel_te_count_per_play`, `off_personnel_wr_count_per_play`
 
 Per-partition composite indexes cover `(off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count)` and `(def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count)`.
 

@@ -45,7 +45,7 @@ export const SPORTRADAR_PROTECTED_FIELDS = new Set([
   'read_thrown', // read_thrown
   'qb_position', // qb_location — FTN pre-snap formation is authoritative
   'starting_hash', // starting_hash — FTN pre-snap formation is authoritative
-  'n_offense_backfield', // n_offense_backfield
+  'number_offense_backfield', // number_offense_backfield
   'blitzers', // n_blitzers
   'pass_rushers', // n_pass_rushers
 

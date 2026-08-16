@@ -34,7 +34,7 @@ const backfill_penalty_type = async ({
       'esbid',
       'play_id',
       'play_description',
-      'desc_nflfastr',
+      'play_description_nflfastr',
       'pen_team',
       'offense_nfl_team'
     )
@@ -60,7 +60,7 @@ const backfill_penalty_type = async ({
   for (const play of penalty_plays) {
     const penalty_type = get_canonical_penalty_type({
       desc: play.play_description,
-      desc_nflfastr: play.desc_nflfastr,
+      play_description_nflfastr: play.play_description_nflfastr,
       pen_team: play.pen_team,
       off_team: play.offense_nfl_team
     })

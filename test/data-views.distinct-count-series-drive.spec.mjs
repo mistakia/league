@@ -27,7 +27,7 @@ describe('data-views distinct-count series/drive per-game', () => {
       ]
     })
     expect(sql).to.match(
-      /COUNT\(DISTINCT CONCAT\(nfl_plays.esbid, '_', series_seq\)\)/
+      /COUNT\(DISTINCT CONCAT\(nfl_plays.esbid, '_', series_sequence\)\)/
     )
     expect(sql).to.not.match(/SUM\(DISTINCT/)
     // a per-game divisor: the rate_type_total_count denominator CTE
@@ -44,7 +44,7 @@ describe('data-views distinct-count series/drive per-game', () => {
       ]
     })
     expect(sql).to.match(
-      /COUNT\(DISTINCT CONCAT\(nfl_plays.esbid, '_', series_seq\)\)/
+      /COUNT\(DISTINCT CONCAT\(nfl_plays.esbid, '_', series_sequence\)\)/
     )
     expect(sql).to.not.match(/SUM\(DISTINCT/)
     expect(sql).to.match(/rate_type_total_count/)
@@ -61,7 +61,7 @@ describe('data-views distinct-count series/drive per-game', () => {
       ]
     })
     expect(sql).to.match(
-      /COUNT\(DISTINCT CONCAT\(nfl_plays.esbid, '_', drive_seq\)\)/
+      /COUNT\(DISTINCT CONCAT\(nfl_plays.esbid, '_', drive_sequence\)\)/
     )
     expect(sql).to.not.match(/SUM\(DISTINCT/)
     expect(sql).to.match(/rate_type_total_count/)

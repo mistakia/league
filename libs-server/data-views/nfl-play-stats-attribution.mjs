@@ -93,7 +93,7 @@ const create_play_stats_attribution = ({
 // own-fumble recovery TD (56), own-fumble recovery TD after a lateral (58),
 // opponent-fumble recovery TD (60), and opponent-fumble recovery TD after a
 // lateral (62). The recoverer is a different player from
-// nfl_plays.player_fuml_pid (the fumbler), and nfl_plays carries no usable
+// nfl_plays.fumble_lost_pid (the fumbler), and nfl_plays carries no usable
 // column for them -- fumble_recovered_1_pid is NULL even on plays that do have
 // a stat_id 56 row.
 export const FUMBLE_RETURN_TOUCHDOWN_STAT_IDS = stat_ids_for_role(
@@ -101,7 +101,7 @@ export const FUMBLE_RETURN_TOUCHDOWN_STAT_IDS = stat_ids_for_role(
 )
 
 // Fumble Lost (106) is the stat_id the gamelogs path increments
-// fumbles_lost on. nfl_plays.player_fuml_pid is NOT equivalent: it is set on
+// fumbles_lost on. nfl_plays.fumble_lost_pid is NOT equivalent: it is set on
 // every play carrying a fumble at all, including aborted snaps and own-fumble
 // recoveries where no fumble was lost to the opponent. Scoring the penalty off
 // that column over-charged 15,870 REG plays against the gamelogs path's 7,968
@@ -191,7 +191,7 @@ export const extra_point_attribution = create_play_stats_attribution({
 export const fumble_lost_attribution = create_play_stats_attribution({
   stat_ids: FUMBLE_LOST_STAT_IDS,
   alias_prefix: 'fumble_lost',
-  // The registry maps 106 -> player_fuml_pid, and it is the same value
+  // The registry maps 106 -> fumble_lost_pid, and it is the same value
   // generate-player-gamelogs.mjs patches from. The fumble-return-TD stat_ids
   // carry null there, which is why only this role gets a fallback.
   fallback_pid_column: fallback_pid_column_for_role('fumble_lost')

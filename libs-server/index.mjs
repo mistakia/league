@@ -177,7 +177,7 @@ export { process_expected_query } from './process-expected-query.mjs'
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
     .select(
-      'nfl_plays.player_fuml_pid',
+      'nfl_plays.fumble_lost_pid',
       'nfl_plays.is_fumble_lost',
       'nfl_plays.offense_nfl_team',
       'nfl_plays.play_type',
@@ -214,7 +214,7 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_games.nfl_week_id',
       'nfl_plays.cov_type',
       'nfl_plays.receiver_separation',
-      'nfl_plays.ydl_100'
+      'nfl_plays.yard_line_100'
     )
     .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
     .whereNot('nfl_plays.play_type', 'NOPL')
@@ -233,8 +233,8 @@ const fields = [
   'nfl_plays_current_week.quarter',
   'nfl_plays_current_week.yards_to_go',
   'nfl_plays_current_week.game_clock_start',
-  'nfl_plays_current_week.ydl_end',
-  'nfl_plays_current_week.ydl_start',
+  'nfl_plays_current_week.yard_line_end',
+  'nfl_plays_current_week.yard_line_start',
   'nfl_plays_current_week.is_first_down',
   'nfl_plays_current_week.is_goal_to_go',
   'nfl_plays_current_week.drive_play_count',

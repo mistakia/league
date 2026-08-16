@@ -67,7 +67,8 @@ export default function ScoreboardPlay({ play, style, playerMaps }) {
         </div>
         <div className='scoreboard__play-info-play'>
           {play.play.dwn}
-          {nth(play.play.dwn)} & {play.play.yards_to_go} - {play.play.ydl_start}
+          {nth(play.play.dwn)} & {play.play.yards_to_go} -{' '}
+          {play.play.yard_line_start}
         </div>
       </div>
       <div className='scoreboard__play-description'>

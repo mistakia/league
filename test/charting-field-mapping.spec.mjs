@@ -37,26 +37,26 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
   })
 
   describe('convert_field_position_to_ydl_100', function () {
-    it('converts own territory (negative) to ydl_100', () => {
+    it('converts own territory (negative) to yard_line_100', () => {
       // -25 means own 25 yard line = 75 yards to opponent end zone
       expect(convert_field_position_to_ydl_100(-25)).to.equal(75)
     })
 
-    it('converts opponent territory (positive) to ydl_100', () => {
+    it('converts opponent territory (positive) to yard_line_100', () => {
       // +25 means opponent 25 = 25 yards to opponent end zone
       expect(convert_field_position_to_ydl_100(25)).to.equal(25)
     })
 
-    it('converts midfield (0) to ydl_100', () => {
+    it('converts midfield (0) to yard_line_100', () => {
       expect(convert_field_position_to_ydl_100(0)).to.equal(50)
     })
 
-    it('converts own goal line (-50) to ydl_100', () => {
+    it('converts own goal line (-50) to yard_line_100', () => {
       // Own 50 = midfield from own side = 50 yards to opponent end zone
       expect(convert_field_position_to_ydl_100(-50)).to.equal(50)
     })
 
-    it('converts opponent goal line (+50) to ydl_100', () => {
+    it('converts opponent goal line (+50) to yard_line_100', () => {
       // Opponent 50 = midfield from opponent side = 50 yards to their end zone
       expect(convert_field_position_to_ydl_100(50)).to.equal(50)
     })
@@ -195,7 +195,7 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       const result = map_charting_play_to_db_fields(source)
       expect(result.fg_result).to.equal('made')
       expect(result.ep_result).to.equal('missed')
-      expect(result.tp_result).to.equal(null)
+      expect(result.two_point_result).to.equal(null)
       expect(result.home_score).to.equal(14)
       expect(result.away_score).to.equal(7)
     })
@@ -265,23 +265,23 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       expect(result.charting_penalty_outcome).to.equal('DECLINED')
     })
 
-    it('maps fieldPosition to ydl_100', () => {
+    it('maps fieldPosition to yard_line_100', () => {
       const source = {
         fieldPosition: -25
       }
 
       const result = map_charting_play_to_db_fields(source)
       // -25 = own 25 yard line = 75 yards to opponent end zone
-      expect(result.ydl_100).to.equal(75)
+      expect(result.yard_line_100).to.equal(75)
     })
 
-    it('maps clock to sec_rem_qtr', () => {
+    it('maps clock to seconds_remaining_quarter', () => {
       const source = {
         clock: '0:02:00'
       }
 
       const result = map_charting_play_to_db_fields(source)
-      expect(result.sec_rem_qtr).to.equal(120)
+      expect(result.seconds_remaining_quarter).to.equal(120)
     })
 
     it('maps runSide to run_location', () => {

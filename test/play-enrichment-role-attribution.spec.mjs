@@ -235,13 +235,13 @@ describe('enrich_player_identifications single-player family ownership', functio
   const esbid = 1
   const play_id = 100
 
-  it('bc family: stat_id 10 attributes bc_gsis/ball_carrier_pid; no overwrite gate', () => {
+  it('bc family: stat_id 10 attributes ball_carrier_gsis_player_id/ball_carrier_pid; no overwrite gate', () => {
     // Existing stale ball_carrier_pid on the play row; new play_stats names a
     // different ball-carrier. Owned writer must overwrite, not short-circuit.
     const play_row = {
       esbid,
       play_id,
-      bc_gsis: 'GSIS_OLD',
+      ball_carrier_gsis_player_id: 'GSIS_OLD',
       ball_carrier_pid: 'PID_OLD'
     }
     const stats = [
@@ -254,7 +254,7 @@ describe('enrich_player_identifications single-player family ownership', functio
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
 
-    expect(enriched.bc_gsis).to.equal('GSIS_NEW')
+    expect(enriched.ball_carrier_gsis_player_id).to.equal('GSIS_NEW')
     expect(enriched.ball_carrier_pid).to.equal('PID_NEW')
   })
 
@@ -264,7 +264,7 @@ describe('enrich_player_identifications single-player family ownership', functio
     const play_row = {
       esbid,
       play_id,
-      psr_gsis: 'GSIS_QB',
+      passer_gsis_player_id: 'GSIS_QB',
       passer_pid: 'PID_QB'
     }
     const stats = [
@@ -274,7 +274,7 @@ describe('enrich_player_identifications single-player family ownership', functio
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
 
-    expect(enriched.psr_gsis).to.equal(null)
+    expect(enriched.passer_gsis_player_id).to.equal(null)
     expect(enriched.passer_pid).to.equal(null)
   })
 
@@ -294,14 +294,14 @@ describe('enrich_player_identifications single-player family ownership', functio
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
 
-    expect(enriched.trg_gsis).to.equal('GSIS_TRG')
+    expect(enriched.target_gsis_player_id).to.equal('GSIS_TRG')
     expect(enriched.target_pid).to.equal('PID_TRG')
-    expect(enriched.intp_gsis).to.equal('GSIS_INTP')
+    expect(enriched.interceptor_gsis_player_id).to.equal('GSIS_INTP')
     expect(enriched.interceptor_pid).to.equal('PID_INTP')
-    expect(enriched.player_fuml_gsis).to.equal('GSIS_FUML')
-    expect(enriched.player_fuml_pid).to.equal('PID_FUML')
+    expect(enriched.fumble_lost_gsis_player_id).to.equal('GSIS_FUML')
+    expect(enriched.fumble_lost_pid).to.equal('PID_FUML')
     // bc family is owned (has_any_play_stats) but no stat_id 10/11 -> cleared.
-    expect(enriched.bc_gsis).to.equal(null)
+    expect(enriched.ball_carrier_gsis_player_id).to.equal(null)
     expect(enriched.ball_carrier_pid).to.equal(null)
   })
 
@@ -318,7 +318,7 @@ describe('enrich_player_identifications single-player family ownership', functio
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
 
-    expect(enriched.trg_gsis).to.equal('GSIS_TRG')
+    expect(enriched.target_gsis_player_id).to.equal('GSIS_TRG')
     expect(enriched.target_pid).to.equal('PID_TRG')
   })
 
@@ -346,7 +346,7 @@ describe('enrich_player_identifications single-player family ownership', functio
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
 
-    expect(enriched.psr_gsis).to.equal('GSIS_QB')
+    expect(enriched.passer_gsis_player_id).to.equal('GSIS_QB')
     expect(enriched.passer_pid).to.equal('PID_QB')
   })
 
@@ -363,13 +363,13 @@ describe('enrich_player_identifications single-player family ownership', functio
   })
 
   it('sportradar interaction: sportradar-written passer_pid is overwritten when play_stats lands a different passer', () => {
-    // Sportradar wrote {psr_gsis: GSIS_SR, passer_pid: PID_SR} before play_stats
+    // Sportradar wrote {passer_gsis_player_id: GSIS_SR, passer_pid: PID_SR} before play_stats
     // imported. play_stats arrives with a different passer (stat_id 14).
     // Owned writer overwrites both columns without --overwrite-existing.
     const play_row = {
       esbid,
       play_id,
-      psr_gsis: 'GSIS_SR',
+      passer_gsis_player_id: 'GSIS_SR',
       passer_pid: 'PID_SR'
     }
     const stats = [
@@ -382,7 +382,7 @@ describe('enrich_player_identifications single-player family ownership', functio
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
 
-    expect(enriched.psr_gsis).to.equal('GSIS_REAL')
+    expect(enriched.passer_gsis_player_id).to.equal('GSIS_REAL')
     expect(enriched.passer_pid).to.equal('PID_REAL')
   })
 
@@ -410,18 +410,18 @@ describe('enrich_player_identifications single-player family ownership', functio
     const play_row = {
       esbid,
       play_id,
-      bc_gsis: 'GSIS_BC',
+      ball_carrier_gsis_player_id: 'GSIS_BC',
       ball_carrier_pid: 'PID_BC',
-      psr_gsis: 'GSIS_QB',
+      passer_gsis_player_id: 'GSIS_QB',
       passer_pid: 'PID_QB'
     }
     const cache = make_player_cache({ GSIS_BC: 'PID_BC', GSIS_QB: 'PID_QB' })
 
     const [enriched] = enrich_player_identifications([play_row], [], cache)
 
-    expect(enriched.bc_gsis).to.equal('GSIS_BC')
+    expect(enriched.ball_carrier_gsis_player_id).to.equal('GSIS_BC')
     expect(enriched.ball_carrier_pid).to.equal('PID_BC')
-    expect(enriched.psr_gsis).to.equal('GSIS_QB')
+    expect(enriched.passer_gsis_player_id).to.equal('GSIS_QB')
     expect(enriched.passer_pid).to.equal('PID_QB')
   })
 })
@@ -467,7 +467,7 @@ describe('enrich_player_identifications snap-roster fallback (source NULL gsis_p
       roster
     )
 
-    expect(enriched.bc_gsis).to.equal('00-0039757')
+    expect(enriched.ball_carrier_gsis_player_id).to.equal('00-0039757')
     expect(enriched.ball_carrier_pid).to.equal('TERR-JENN')
   })
 
@@ -492,7 +492,7 @@ describe('enrich_player_identifications snap-roster fallback (source NULL gsis_p
       roster
     )
 
-    expect(enriched.bc_gsis).to.equal(null)
+    expect(enriched.ball_carrier_gsis_player_id).to.equal(null)
     expect(enriched.ball_carrier_pid).to.equal(null)
   })
 
@@ -518,7 +518,7 @@ describe('enrich_player_identifications snap-roster fallback (source NULL gsis_p
     const play_row = {
       esbid,
       play_id,
-      bc_gsis: 'GSIS_STALE',
+      ball_carrier_gsis_player_id: 'GSIS_STALE',
       ball_carrier_pid: 'PID_STALE'
     }
     const stats = [named_stat({ stat_id: 10, player_name: 'T.Jennings' })]
@@ -526,7 +526,7 @@ describe('enrich_player_identifications snap-roster fallback (source NULL gsis_p
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
 
-    expect(enriched.bc_gsis).to.equal(null)
+    expect(enriched.ball_carrier_gsis_player_id).to.equal(null)
     expect(enriched.ball_carrier_pid).to.equal(null)
   })
 
@@ -556,7 +556,7 @@ describe('enrich_player_identifications snap-roster fallback (source NULL gsis_p
       roster
     )
 
-    expect(enriched.bc_gsis).to.equal('00-0039757')
+    expect(enriched.ball_carrier_gsis_player_id).to.equal('00-0039757')
     expect(enriched.ball_carrier_pid).to.equal('TERR-JENN')
   })
 })
@@ -587,7 +587,7 @@ describe('enrich_player_identifications psr family sack-row attribution', functi
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
 
-    expect(enriched.psr_gsis).to.equal('GSIS_QB')
+    expect(enriched.passer_gsis_player_id).to.equal('GSIS_QB')
     expect(enriched.passer_pid).to.equal('PID_QB')
   })
 
@@ -603,7 +603,7 @@ describe('enrich_player_identifications psr family sack-row attribution', functi
 
     const [enriched] = enrich_player_identifications([play_row], stats, cache)
 
-    expect(enriched.psr_gsis).to.equal('GSIS_QB')
+    expect(enriched.passer_gsis_player_id).to.equal('GSIS_QB')
     expect(enriched.passer_pid).to.equal('PID_QB')
   })
 })
@@ -632,7 +632,7 @@ describe('yardage-stat-enrichment _gsis emission contract', function () {
     )
     const esbid = 1
     const play_id = 100
-    // stat_id 11 is rushing yards (bc). Pre-Task-11 this would have emitted bc_gsis.
+    // stat_id 11 is rushing yards (bc). Pre-Task-11 this would have emitted ball_carrier_gsis_player_id.
     const stat = play_stat({
       esbid,
       play_id,
@@ -643,10 +643,10 @@ describe('yardage-stat-enrichment _gsis emission contract', function () {
 
     const [enriched] = enrich_yardage_stats([{ esbid, play_id }], [stat])
 
-    expect(enriched).to.not.have.property('bc_gsis')
-    expect(enriched).to.not.have.property('psr_gsis')
-    expect(enriched).to.not.have.property('trg_gsis')
-    expect(enriched).to.not.have.property('intp_gsis')
-    expect(enriched).to.not.have.property('player_fuml_gsis')
+    expect(enriched).to.not.have.property('ball_carrier_gsis_player_id')
+    expect(enriched).to.not.have.property('passer_gsis_player_id')
+    expect(enriched).to.not.have.property('target_gsis_player_id')
+    expect(enriched).to.not.have.property('interceptor_gsis_player_id')
+    expect(enriched).to.not.have.property('fumble_lost_gsis_player_id')
   })
 })

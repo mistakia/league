@@ -5,6 +5,7 @@ import * as chai from 'chai'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import {
   BOOLEAN_PREFIX_PARAM_RENAMES,
+  PLAYS_LOCAL_PARAM_RENAMES,
   SHORTHAND_PARAM_RENAMES,
   migrate_column_entry,
   migrate_table_state
@@ -290,6 +291,52 @@ describe('data-views saved-view migrator', () => {
         params: { qtr: [1], quarter: [4] }
       })
       expect(result.params).to.deep.equal({ quarter: [4] })
+    })
+  })
+
+  describe('plays-local param renames (2026-08-16 conform sweep)', () => {
+    // Same failure mode and gate structure as the shorthand block: assertion
+    // one proves each rule lands on a key the registry still carries, assertion
+    // two proves no legacy key survived, and the count catches a rule DELETED
+    // from the map. 28 of the 91 renamed plays-local columns were also registry
+    // keys, and the registry key IS the persisted key.
+    it('migrates every legacy key to a key the registry still carries', () => {
+      for (const [legacy_key, current_key] of Object.entries(
+        PLAYS_LOCAL_PARAM_RENAMES
+      )) {
+        const result = migrate_column_entry({
+          column_id: 'player_pass_attempts_from_plays',
+          params: { [legacy_key]: [1] }
+        })
+        expect(result.changed, legacy_key).to.equal(true)
+        expect(result.params, legacy_key).to.deep.equal({ [current_key]: [1] })
+        expect(
+          Object.prototype.hasOwnProperty.call(
+            nfl_plays_column_params,
+            current_key
+          ),
+          `${current_key} is not a registry key`
+        ).to.equal(true)
+      }
+    })
+
+    it('leaves no renamed key still present in the registry', () => {
+      const stranded = Object.keys(PLAYS_LOCAL_PARAM_RENAMES).filter((key) =>
+        Object.prototype.hasOwnProperty.call(nfl_plays_column_params, key)
+      )
+      expect(stranded).to.deep.equal([])
+    })
+
+    it('carries a rule for each of the 28 registry keys that moved', () => {
+      expect(Object.keys(PLAYS_LOCAL_PARAM_RENAMES)).to.have.lengthOf(28)
+    })
+
+    it('keeps the current key when a view carries both', () => {
+      const result = migrate_column_entry({
+        column_id: 'player_pass_attempts_from_plays',
+        params: { sec_rem_qtr: [30], seconds_remaining_quarter: [60] }
+      })
+      expect(result.params).to.deep.equal({ seconds_remaining_quarter: [60] })
     })
   })
 

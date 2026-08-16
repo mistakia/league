@@ -179,6 +179,48 @@ export const SHORTHAND_PARAM_RENAMES = {
   wpa: 'win_probability_added'
 }
 
+// Play-filter param keys renamed alongside their columns by the plays-local
+// token conform (db/adhoc/2026-08-16-conform-plays-local-tokens.sql). 28 of the
+// 91 renamed columns were also registry keys, and the registry key IS the
+// persisted key, so every saved view carrying one would silently lose its filter
+// -- the same failure mode the three maps above record, which is why these rules
+// ship in the same change as the DDL rather than after it.
+//
+// No column ID moves in this batch: the from-plays data-view ids are semantic
+// stat_names (team_pass_rate_over_expected_from_plays) and the plays-view ids
+// are the play_* spellings, neither of which embeds a renamed physical column.
+// Only the param keys below rename.
+export const PLAYS_LOCAL_PARAM_RENAMES = {
+  away_to_rem: 'away_timeouts_remaining',
+  away_wp: 'away_win_probability',
+  away_wp_post: 'away_win_probability_post',
+  def_to_rem: 'def_timeouts_remaining',
+  drive_end_qtr: 'drive_end_quarter',
+  drive_fds: 'drive_first_downs',
+  drive_seq: 'drive_sequence',
+  drive_start_qtr: 'drive_start_quarter',
+  home_to_rem: 'home_timeouts_remaining',
+  home_wp: 'home_win_probability',
+  home_wp_post: 'home_win_probability_post',
+  n_offense_backfield: 'number_offense_backfield',
+  pass_oe: 'pass_over_expected',
+  pos_to_rem: 'pos_timeouts_remaining',
+  ret_yds: 'return_yds',
+  score_diff: 'score_difference',
+  score_diff_post: 'score_difference_post',
+  sec_rem_gm: 'seconds_remaining_game',
+  sec_rem_half: 'seconds_remaining_half',
+  sec_rem_qtr: 'seconds_remaining_quarter',
+  series_seq: 'series_sequence',
+  two_conv_prob: 'two_conversion_prob',
+  vegas_home_wp: 'vegas_home_win_probability',
+  vegas_wp: 'vegas_win_probability',
+  xyac_fd_prob: 'xyac_first_down_prob',
+  xyac_succ_prob: 'xyac_success_prob',
+  ydl_100: 'yard_line_100',
+  ydl_num: 'yard_line_num'
+}
+
 // scoring_format_hash -> scoring_format_id, stranded by the format-id migration
 // (44cf7fd9 code-side, db/adhoc/2026-05-28-format-id-migration.sql). Unlike the
 // renames above this needs a VALUE mapping, not just a key rename: the persisted
@@ -372,7 +414,8 @@ export const apply_column_id_rename = (column_id) =>
 const PARAM_KEY_RENAMES = {
   ...PLAY_FILTER_PARAM_RENAMES,
   ...BOOLEAN_PREFIX_PARAM_RENAMES,
-  ...SHORTHAND_PARAM_RENAMES
+  ...SHORTHAND_PARAM_RENAMES,
+  ...PLAYS_LOCAL_PARAM_RENAMES
 }
 
 // Every legacy param key this module rewrites at read time, exported so

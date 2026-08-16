@@ -66,11 +66,11 @@ const generate_player_snaps_for_week = async ({
       'nfl_plays.offense_nfl_team',
       'nfl_plays.defense_nfl_team',
       'nfl_plays.play_type',
-      'nfl_plays.ydl_100',
-      'nfl_plays.score_diff',
+      'nfl_plays.yard_line_100',
+      'nfl_plays.score_difference',
       'nfl_plays.win_probability',
       'nfl_plays.is_no_huddle',
-      'nfl_plays.sec_rem_half',
+      'nfl_plays.seconds_remaining_half',
       'nfl_plays.yards_to_go',
       'nfl_plays.down_number',
       'nfl_plays.quarter'
@@ -108,11 +108,11 @@ const generate_player_snaps_for_week = async ({
       offense_nfl_team: off,
       defense_nfl_team: def,
       play_type,
-      ydl_100,
-      score_diff,
+      yard_line_100,
+      score_difference,
       win_probability,
       is_no_huddle,
-      sec_rem_half,
+      seconds_remaining_half,
       yards_to_go,
       down_number,
       quarter
@@ -166,20 +166,21 @@ const generate_player_snaps_for_week = async ({
       if (play_type === 'PASS') team_totals[off].off.snaps_pass.add(play_key)
       if (play_type === 'RUSH') team_totals[off].off.snaps_rush.add(play_key)
 
-      if (ydl_100 <= 5)
+      if (yard_line_100 <= 5)
         team_totals[off].off.snaps_inside_five_yards.add(play_key)
-      if (ydl_100 <= 10)
+      if (yard_line_100 <= 10)
         team_totals[off].off.snaps_inside_ten_yards.add(play_key)
-      if (ydl_100 <= 20)
+      if (yard_line_100 <= 20)
         team_totals[off].off.snaps_inside_twenty_yards.add(play_key)
-      if (score_diff > 0) team_totals[off].off.snaps_leading.add(play_key)
-      if (score_diff < 0) team_totals[off].off.snaps_trailing.add(play_key)
+      if (score_difference > 0) team_totals[off].off.snaps_leading.add(play_key)
+      if (score_difference < 0)
+        team_totals[off].off.snaps_trailing.add(play_key)
       if (win_probability > 0.2 && win_probability < 0.8)
         team_totals[off].off.snaps_neutral.add(play_key)
       if (is_no_huddle) team_totals[off].off.snaps_no_huddle.add(play_key)
-      if (sec_rem_half <= 120)
+      if (seconds_remaining_half <= 120)
         team_totals[off].off.snaps_under_two_minutes.add(play_key)
-      if (sec_rem_half <= 300)
+      if (seconds_remaining_half <= 300)
         team_totals[off].off.snaps_under_five_minutes.add(play_key)
       if (win_probability < 0.2)
         team_totals[off].off.snaps_low_prob.add(play_key)
@@ -278,18 +279,21 @@ const generate_player_snaps_for_week = async ({
           if (play.play_type === 'PASS') player_snaps.pass.add(play_key)
           if (play.play_type === 'RUSH') player_snaps.rush.add(play_key)
 
-          if (play.ydl_100 <= 5) player_snaps.inside_five_yards.add(play_key)
-          if (play.ydl_100 <= 10) player_snaps.inside_ten_yards.add(play_key)
-          if (play.ydl_100 <= 20) player_snaps.inside_twenty_yards.add(play_key)
-          if (play.score_diff > 0) player_snaps.leading.add(play_key)
-          if (play.score_diff < 0) player_snaps.trailing.add(play_key)
+          if (play.yard_line_100 <= 5)
+            player_snaps.inside_five_yards.add(play_key)
+          if (play.yard_line_100 <= 10)
+            player_snaps.inside_ten_yards.add(play_key)
+          if (play.yard_line_100 <= 20)
+            player_snaps.inside_twenty_yards.add(play_key)
+          if (play.score_difference > 0) player_snaps.leading.add(play_key)
+          if (play.score_difference < 0) player_snaps.trailing.add(play_key)
           if (play.win_probability > 0.2 && play.win_probability < 0.8)
             player_snaps.neutral.add(play_key)
           if (play.is_no_huddle) player_snaps.no_huddle.add(play_key)
 
-          if (play.sec_rem_half <= 120)
+          if (play.seconds_remaining_half <= 120)
             player_snaps.under_two_minutes.add(play_key)
-          if (play.sec_rem_half <= 300)
+          if (play.seconds_remaining_half <= 300)
             player_snaps.under_five_minutes.add(play_key)
 
           if (play.win_probability < 0.2) player_snaps.low_prob.add(play_key)

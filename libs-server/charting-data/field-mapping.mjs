@@ -17,7 +17,7 @@ const parse_clock_to_seconds = (clock_string) => {
 const convert_field_position_to_ydl_100 = (field_position) => {
   // fieldPosition: negative = own yardline number (e.g., -28 = own 28)
   //                positive = opponent yardline number (e.g., 22 = opponent's 22)
-  // ydl_100 = yards remaining to opponent's end zone
+  // yard_line_100 = yards remaining to opponent's end zone
   if (field_position === null || field_position === undefined) return null
   const fp = Number(field_position)
   if (Number.isNaN(fp)) return null
@@ -159,16 +159,16 @@ export function map_charting_play_to_db_fields(source_play) {
 
   // Transformation mappings
 
-  // fieldPosition -> ydl_100
+  // fieldPosition -> yard_line_100
   if ('fieldPosition' in source_play) {
-    result.ydl_100 = convert_field_position_to_ydl_100(
+    result.yard_line_100 = convert_field_position_to_ydl_100(
       source_play.fieldPosition
     )
   }
 
-  // clock -> sec_rem_qtr
+  // clock -> seconds_remaining_quarter
   if ('clock' in source_play) {
-    result.sec_rem_qtr = parse_clock_to_seconds(source_play.clock)
+    result.seconds_remaining_quarter = parse_clock_to_seconds(source_play.clock)
   }
 
   // coverageScheme -> coverage_type (enum: COVER_0, COVER_1, COVER_2, COVER_2_MAN, etc.)
@@ -236,9 +236,11 @@ export function map_charting_play_to_db_fields(source_play) {
     result.ep_result = map_boolean_to_kick_result(source_play.extraPointMade)
   }
 
-  // twoPointMade -> tp_result
+  // twoPointMade -> two_point_result
   if ('twoPointMade' in source_play) {
-    result.tp_result = map_boolean_to_two_point_result(source_play.twoPointMade)
+    result.two_point_result = map_boolean_to_two_point_result(
+      source_play.twoPointMade
+    )
   }
 
   // Score fields (API uses homeScoreAtStartOfPlay / awayScoreAtStartOfPlay)

@@ -255,9 +255,9 @@ export const print_collision_summary = ({ all_collisions }) => {
     for (const ex of examples) {
       // For timing fields, show existing vs new values in the description
       const timing_note = [
-        'sec_rem_qtr',
-        'sec_rem_half',
-        'sec_rem_gm'
+        'seconds_remaining_quarter',
+        'seconds_remaining_half',
+        'seconds_remaining_game'
       ].includes(field)
         ? ` [${ex.existing} → ${ex.new}]`
         : ''

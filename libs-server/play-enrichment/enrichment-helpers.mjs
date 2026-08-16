@@ -20,7 +20,7 @@ const ADMINISTRATIVE_PLAY_TYPES_NFL = [
  * Whether a play is a clock or administrative marker rather than football.
  *
  * These rows are not drives and do not belong to one -- a source that supplies
- * drive_seq numbers them anyway, and NFL's feed stamps an end-of-quarter marker
+ * drive_sequence numbers them anyway, and NFL's feed stamps an end-of-quarter marker
  * with the sequence of the drive that is about to START. That makes the marker
  * a member of the previous half carrying the next half's drive number, which is
  * why the cross-half coherence auditor has to exclude them before it can tell a

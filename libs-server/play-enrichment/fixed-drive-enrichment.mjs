@@ -111,14 +111,16 @@ const get_effective_posteam = (play) => {
 /**
  * Checks whether a touchdown was scored by the defense.
  *
- * Requires td_tm to be populated -- an unattributed touchdown is treated as
+ * Requires td_nfl_team to be populated -- an unattributed touchdown is treated as
  * not-defensive rather than defensive, so that plays with a missing scoring
  * team fall through to the ordinary possession-change rule instead of
  * suppressing every drive boundary that follows a touchdown.
  */
 const is_defensive_td = (play) =>
   Boolean(
-    play.is_touchdown && play.td_tm && play.offense_nfl_team !== play.td_tm
+    play.is_touchdown &&
+      play.td_nfl_team &&
+      play.offense_nfl_team !== play.td_nfl_team
   )
 
 /**
@@ -250,14 +252,14 @@ const is_timeout_or_warning = (play) => {
 export const get_half = (play) => (play.quarter <= 2 ? 1 : 2)
 
 /**
- * Calculates drive_seq for all plays using nflfastr's fixed_drive methodology.
+ * Calculates drive_sequence for all plays using nflfastr's fixed_drive methodology.
  *
  * Numbering is game-continuous: the counter runs from 1 to N across the whole
  * game and does NOT reset at halftime. This is the convention every other
  * source in the system uses (nflfastR's fixed_drive, NFL's
- * driveSequenceNumber, Sportradar), and it is what makes the `${esbid}_${drive_seq}`
+ * driveSequenceNumber, Sportradar), and it is what makes the `${esbid}_${drive_sequence}`
  * drive key in drive-play-count-enrichment.mjs -- and the equivalent
- * COUNT(DISTINCT CONCAT(esbid, drive_seq)) denominators in the data-views rate
+ * COUNT(DISTINCT CONCAT(esbid, drive_sequence)) denominators in the data-views rate
  * types -- address a single drive rather than merging one drive per half.
  *
  * Halves are still grouped, but only for boundary detection and lookback
@@ -265,7 +267,7 @@ export const get_half = (play) => (play.quarter <= 2 ? 1 : 2)
  * prev_play lookback must not reach back across the break.
  *
  * All-or-nothing per game: if any play in the incoming batch for a game already
- * carries a drive_seq, the enrichment declines to write for that game entirely.
+ * carries a drive_sequence, the enrichment declines to write for that game entirely.
  * A populated value came from a different numbering authority (NFL or
  * Sportradar), which draws drive boundaries differently than nflfastR does.
  * Filling only the gaps splices two methodologies into one sequence that is
@@ -276,10 +278,10 @@ export const get_half = (play) => (play.quarter <= 2 ? 1 : 2)
  * database state, and that distinction is load-bearing. This module is pure and
  * does no database access; a database-scoped check would see the partial state
  * written by the first poll of a live game and decline forever after, freezing
- * drive_seq at whatever that first partial write contained.
+ * drive_sequence at whatever that first partial write contained.
  *
  * @param {Array} plays - Array of play objects, one or more games
- * @returns {Array} Plays with drive_seq set where the game had none
+ * @returns {Array} Plays with drive_sequence set where the game had none
  */
 export const enrich_fixed_drives = (plays) => {
   log(`Starting fixed drive enrichment for ${plays.length} plays`)
@@ -302,11 +304,14 @@ export const enrich_fixed_drives = (plays) => {
 
   for (const [esbid, game_plays] of games_map.entries()) {
     const has_existing_drive_seq = game_plays.some(
-      (play) => play.drive_seq !== null && play.drive_seq !== undefined
+      (play) =>
+        play.drive_sequence !== null && play.drive_sequence !== undefined
     )
 
     if (has_existing_drive_seq) {
-      log(`${esbid}: drive_seq already populated by another source, skipping`)
+      log(
+        `${esbid}: drive_sequence already populated by another source, skipping`
+      )
       enriched_plays.push(...game_plays.map((play) => ({ ...play })))
       continue
     }
@@ -343,7 +348,7 @@ export const enrich_fixed_drives = (plays) => {
 
         enriched_plays.push({
           ...play,
-          drive_seq: drive_number
+          drive_sequence: drive_number
         })
       }
     }

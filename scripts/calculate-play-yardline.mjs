@@ -12,38 +12,39 @@ const calculate_play_yardline = async () => {
     .select(
       'play_id',
       'esbid',
-      'ydl_num',
-      'ydl_side',
+      'yard_line_num',
+      'yard_line_side',
       'possession_nfl_team',
       'season_year'
     )
-    .whereNull('ydl_100')
-    .whereNotNull('ydl_num')
-  log(`loaded ${plays.length} with missing ydl_100`)
+    .whereNull('yard_line_100')
+    .whereNotNull('yard_line_num')
+  log(`loaded ${plays.length} with missing yard_line_100`)
 
   const inserts = []
   for (const {
     play_id: playId,
     esbid,
-    ydl_num,
-    ydl_side,
+    yard_line_num,
+    yard_line_side,
     possession_nfl_team: pos_team,
     season_year: year
   } of plays) {
-    let ydl_100
+    let yard_line_100
 
-    if (ydl_num === 50) {
-      ydl_100 = 50
-    } else if (ydl_side && pos_team) {
-      ydl_100 = ydl_side === pos_team ? 100 - ydl_num : ydl_num
+    if (yard_line_num === 50) {
+      yard_line_100 = 50
+    } else if (yard_line_side && pos_team) {
+      yard_line_100 =
+        yard_line_side === pos_team ? 100 - yard_line_num : yard_line_num
     }
 
-    if (ydl_100) {
+    if (yard_line_100) {
       inserts.push({
         season_year: year,
         play_id: playId,
         esbid,
-        ydl_100,
+        yard_line_100,
         updated: timestamp
       })
     }

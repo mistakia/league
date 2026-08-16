@@ -1,21 +1,21 @@
 import db from '#db'
 
 /**
- * Build the ON CONFLICT update set for a plays upsert, protecting drive_seq
+ * Build the ON CONFLICT update set for a plays upsert, protecting drive_sequence
  * from being erased by a null.
  *
  * The live worker re-polls the full playlist for an in-progress game every 60
- * seconds and re-upserts every play, and getPlayData always sets the drive_seq
+ * seconds and re-upserts every play, and getPlayData always sets the drive_sequence
  * key -- null for any play the NFL feed has not yet tagged with a
  * driveSequenceNumber. A blanket .merge() therefore writes those nulls over
  * whatever is already stored, so a value the enrichment (or an earlier poll)
  * had correctly computed is destroyed on the next poll. That is live data loss,
  * not a stale read.
  *
- * Every other column keeps blanket-merge semantics; only drive_seq resolves as
- * COALESCE(EXCLUDED.drive_seq, <table>.drive_seq), which makes the write
+ * Every other column keeps blanket-merge semantics; only drive_sequence resolves as
+ * COALESCE(EXCLUDED.drive_sequence, <table>.drive_sequence), which makes the write
  * monotonic: a real value may replace a null, never the reverse. A genuine
- * renumber still lands, because a source supplying drive_seq supplies a
+ * renumber still lands, because a source supplying drive_sequence supplies a
  * non-null value.
  *
  * This lives here rather than in scripts/import-plays-nfl-v1.mjs so it can be
@@ -42,7 +42,7 @@ export const build_plays_merge = (table, rows) => {
   const merge = {}
   for (const column of columns) {
     merge[column] =
-      column === 'drive_seq'
+      column === 'drive_sequence'
         ? db.raw('coalesce(EXCLUDED.??, ??.??)', [column, table, column])
         : db.raw('EXCLUDED.??', [column])
   }

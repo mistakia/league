@@ -65,7 +65,8 @@ export const enrich_yardage_stats = (plays, play_stats) => {
       enrichment_data.recv_yds = stats_data.recv_yds
     if (stats_data.yds_gained != null)
       enrichment_data.yds_gained = stats_data.yds_gained
-    if (stats_data.ret_yds != null) enrichment_data.ret_yds = stats_data.ret_yds
+    if (stats_data.return_yds != null)
+      enrichment_data.return_yds = stats_data.return_yds
 
     // Completion and outcome fields
     if (stats_data.is_completion != null)
@@ -96,8 +97,10 @@ export const enrich_yardage_stats = (plays, play_stats) => {
     // task/league/redesign-role-attribution-ownership.md Phase B.
 
     // Scoring team
-    if (stats_data.td_tm != null) enrichment_data.td_tm = stats_data.td_tm
-    if (stats_data.ret_tm != null) enrichment_data.ret_tm = stats_data.ret_tm
+    if (stats_data.td_nfl_team != null)
+      enrichment_data.td_nfl_team = stats_data.td_nfl_team
+    if (stats_data.return_nfl_team != null)
+      enrichment_data.return_nfl_team = stats_data.return_nfl_team
 
     // Only count as enriched if we actually got yardage data
     if (

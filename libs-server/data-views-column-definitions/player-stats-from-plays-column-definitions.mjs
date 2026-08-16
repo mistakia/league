@@ -423,7 +423,7 @@ export default {
   // TODO set the `qb_pid` for each play
   // player_pass_rate_over_expected_from_plays: player_stat_from_plays({
   //   pid_columns: ['qb_pid'],
-  //   with_select_string: `AVG(pass_oe)`,
+  //   with_select_string: `AVG(pass_over_expected)`,
   //   stat_name: 'pass_rate_over_expected_from_plays'
   // }),
   player_pass_touchdowns_from_plays: player_stat_from_plays({
@@ -749,7 +749,7 @@ export default {
     pid_columns: ['ball_carrier_pid', 'target_pid'],
     measure: {
       kind: 'additive',
-      expr: `CASE WHEN nfl_plays.ydl_100 <= 20 AND ball_carrier_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND target_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND ball_carrier_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND target_pid IS NOT NULL THEN 1.43 ELSE 0 END`,
+      expr: `CASE WHEN nfl_plays.yard_line_100 <= 20 AND ball_carrier_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.yard_line_100 <= 20 AND target_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.yard_line_100 > 20 AND ball_carrier_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.yard_line_100 > 20 AND target_pid IS NOT NULL THEN 1.43 ELSE 0 END`,
       decimals: 2
     },
     stat_name: 'weighted_opportunity_from_plays'
@@ -758,7 +758,7 @@ export default {
     pid_columns: ['ball_carrier_pid', 'target_pid'],
     measure: {
       kind: 'additive',
-      expr: `CASE WHEN (ball_carrier_pid IS NOT NULL AND ydl_100 <= 10) OR (target_pid IS NOT NULL AND is_completion = true) THEN 1 ELSE 0 END`
+      expr: `CASE WHEN (ball_carrier_pid IS NOT NULL AND yard_line_100 <= 10) OR (target_pid IS NOT NULL AND is_completion = true) THEN 1 ELSE 0 END`
     },
     stat_name: 'high_value_touches_from_plays'
   }),
@@ -818,28 +818,28 @@ export default {
   }),
 
   player_fumbles_from_plays: player_stat_from_plays({
-    pid_columns: ['player_fuml_pid'],
+    pid_columns: ['fumble_lost_pid'],
     measure: {
       kind: 'additive',
-      expr: `CASE WHEN player_fuml_pid IS NOT NULL THEN 1 ELSE 0 END`
+      expr: `CASE WHEN fumble_lost_pid IS NOT NULL THEN 1 ELSE 0 END`
     },
     stat_name: 'fumbles_from_plays'
   }),
 
   player_fumbles_lost_from_plays: player_stat_from_plays({
-    pid_columns: ['player_fuml_pid'],
+    pid_columns: ['fumble_lost_pid'],
     measure: {
       kind: 'additive',
-      expr: `CASE WHEN player_fuml_pid IS NOT NULL AND is_fumble_lost = true THEN 1 ELSE 0 END`
+      expr: `CASE WHEN fumble_lost_pid IS NOT NULL AND is_fumble_lost = true THEN 1 ELSE 0 END`
     },
     stat_name: 'fumbles_lost_from_plays'
   }),
 
   player_fumble_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['ball_carrier_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN player_fuml_pid = ball_carrier_pid THEN 1 ELSE 0 END) / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
+    with_select_string: `CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN fumble_lost_pid = ball_carrier_pid THEN 1 ELSE 0 END) / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'fumble_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN player_fuml_pid = ball_carrier_pid THEN 1 ELSE 0 END)`,
+    numerator_select: `SUM(CASE WHEN fumble_lost_pid = ball_carrier_pid THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     is_percentage: true,

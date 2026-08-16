@@ -388,13 +388,24 @@ const options = {
                 'When the league pause opened; null when the league is live. The commissioner reason is NOT on this payload — it is served from the authenticated pause route.',
               example: null
             },
-            resumed_at: {
-              type: 'string',
-              format: 'date-time',
-              nullable: true,
+            draft_pause_periods: {
+              type: 'array',
               description:
-                'When the league was most recently resumed; null if it has never been. A resume voids the rookie draft standing publication, so no pick has a window until the next daily publication boundary at or after this instant.',
-              example: null
+                'Pause intervals overlapping the rookie draft, credited back to the pick clock. Intervals rather than a total, so a live pause is measured against the reader own clock; resumed_at is null while open.',
+              items: {
+                type: 'object',
+                properties: {
+                  paused_at: {
+                    type: 'string',
+                    format: 'date-time'
+                  },
+                  resumed_at: {
+                    type: 'string',
+                    format: 'date-time',
+                    nullable: true
+                  }
+                }
+              }
             },
             espn_league_id: {
               type: 'integer',
@@ -1550,7 +1561,7 @@ const options = {
                   description: 'Quarter number (1-4)',
                   example: 1
                 },
-                player_fuml_pid: {
+                fumble_lost_pid: {
                   type: 'string',
                   nullable: true,
                   description: 'Player ID who fumbled',
@@ -1718,7 +1729,7 @@ const options = {
                   description: 'Separation distance',
                   example: 2.5
                 },
-                ydl_100: {
+                yard_line_100: {
                   type: 'integer',
                   nullable: true,
                   description: 'Yards from own goal line (100-yard field)',

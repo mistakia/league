@@ -66,7 +66,7 @@ export const scoring_stat_roles = [
   },
   {
     // Credits the RECOVERING player, who is a different player from
-    // nfl_plays.player_fuml_pid (the fumbler). Own-fumble recovery TD (56) and
+    // nfl_plays.fumble_lost_pid (the fumbler). Own-fumble recovery TD (56) and
     // after a lateral (58); opponent-fumble recovery TD (60) and after a
     // lateral (62).
     name: 'fumble_return_touchdown',
@@ -77,7 +77,7 @@ export const scoring_stat_roles = [
   },
   {
     // 106 is the only id the gamelogs path counts a lost fumble on.
-    // nfl_plays.player_fuml_pid is NOT equivalent -- it is set on every play
+    // nfl_plays.fumble_lost_pid is NOT equivalent -- it is set on every play
     // carrying a fumble at all, including aborted snaps and own-fumble
     // recoveries where nothing was lost, which over-penalized 15,870 REG plays
     // against this path's 7,968. It is still the right FALLBACK identity for a
@@ -86,7 +86,7 @@ export const scoring_stat_roles = [
     stat_ids: [106],
     increments: ['fumbles_lost'],
     alias_prefix: 'fumble_lost',
-    fallback_pid_column: 'player_fuml_pid'
+    fallback_pid_column: 'fumble_lost_pid'
   },
   {
     // Rush (75), pass (77) and reception (104) all credit the same column. The

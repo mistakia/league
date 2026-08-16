@@ -70,7 +70,7 @@ describe('libs-shared/scoring-stat-roles', function () {
     })
 
     it('supplies the gamelog generator its fallback pid columns', function () {
-      stat_role_fallback_pid_columns.should.eql({ 106: 'player_fuml_pid' })
+      stat_role_fallback_pid_columns.should.eql({ 106: 'fumble_lost_pid' })
     })
   })
 

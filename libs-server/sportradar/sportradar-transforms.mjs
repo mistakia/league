@@ -125,27 +125,32 @@ export const parse_clock_to_seconds = (clock_string) => {
 /**
  * Calculate seconds remaining in game
  */
-export const calculate_time_remaining = (qtr, sec_rem_qtr) => {
-  if (!qtr || sec_rem_qtr === null || sec_rem_qtr === undefined) {
+export const calculate_time_remaining = (qtr, seconds_remaining_quarter) => {
+  if (
+    !qtr ||
+    seconds_remaining_quarter === null ||
+    seconds_remaining_quarter === undefined
+  ) {
     return {
-      sec_rem_qtr: null,
-      sec_rem_half: null,
-      sec_rem_gm: null
+      seconds_remaining_quarter: null,
+      seconds_remaining_half: null,
+      seconds_remaining_game: null
     }
   }
 
   const is_first_half = qtr <= 2
   const quarters_remaining = 4 - qtr
-  const sec_rem_half = is_first_half
-    ? sec_rem_qtr + (2 - qtr) * 900
-    : sec_rem_qtr + (4 - qtr) * 900
+  const seconds_remaining_half = is_first_half
+    ? seconds_remaining_quarter + (2 - qtr) * 900
+    : seconds_remaining_quarter + (4 - qtr) * 900
 
-  const sec_rem_gm = sec_rem_qtr + quarters_remaining * 900
+  const seconds_remaining_game =
+    seconds_remaining_quarter + quarters_remaining * 900
 
   return {
-    sec_rem_qtr,
-    sec_rem_half,
-    sec_rem_gm
+    seconds_remaining_quarter,
+    seconds_remaining_half,
+    seconds_remaining_game
   }
 }
 
@@ -155,24 +160,25 @@ export const calculate_time_remaining = (qtr, sec_rem_qtr) => {
 export const parse_yardline = (location, pos_team) => {
   if (!location || !location.yardline) return {}
 
-  const ydl_num = location.yardline
-  const ydl_side = location.alias
+  const yard_line_num = location.yardline
+  const yard_line_side = location.alias
 
   // Normalize team abbreviation (JAC → JAX, etc.) for comparison
-  const normalized_ydl_side = fixTeam(ydl_side)
+  const normalized_ydl_side = fixTeam(yard_line_side)
 
   // Calculate 100-yard scale per nflfastR convention:
   // 0 = at opponent's goal line, 100 = at own goal line
-  const ydl_100 = normalized_ydl_side === pos_team ? 100 - ydl_num : ydl_num
+  const yard_line_100 =
+    normalized_ydl_side === pos_team ? 100 - yard_line_num : yard_line_num
 
   // Build raw yardline string
   const raw_ydl_str =
-    ydl_num === 50 ? '50' : `${normalized_ydl_side} ${ydl_num}`
+    yard_line_num === 50 ? '50' : `${normalized_ydl_side} ${yard_line_num}`
 
   return {
-    ydl_side: ydl_num === 50 ? null : normalized_ydl_side,
-    ydl_num,
-    ydl_100,
+    yard_line_side: yard_line_num === 50 ? null : normalized_ydl_side,
+    yard_line_num,
+    yard_line_100,
     ydl_str: normalize_yardline(raw_ydl_str)
   }
 }

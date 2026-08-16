@@ -322,7 +322,7 @@ export const job_title_by_id = {
   126: 'Import NFL Gamebook Starters',
   127: 'Import Underdog Best Ball ADP',
   128: 'Verify Format Data Coverage',
-  129: 'Audit drive_seq Coherence',
+  129: 'Audit drive_sequence Coherence',
   130: 'Import Sleeper External League Trades',
   131: 'Import Players (FantasyPoints)',
   132: 'Generate DST Market Projections',

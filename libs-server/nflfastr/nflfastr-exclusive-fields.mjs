@@ -7,7 +7,7 @@
  */
 export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   // Play Description
-  'desc_nflfastr', // nflfastr play description (complete, unlike NGS truncated desc)
+  'play_description_nflfastr', // nflfastr play description (complete, unlike NGS truncated desc)
 
   // Play Characteristics
   // Note: 'is_incompletion' is shared with Sportradar - both pipelines report physical outcome
@@ -51,14 +51,14 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   // Core Win Probability Metrics
   'win_probability', // Win probability pre-play
   'win_probability_added', // Win Probability Added
-  'home_wp', // Home team win probability
-  'away_wp', // Away team win probability
+  'home_win_probability', // Home team win probability
+  'away_win_probability', // Away team win probability
   'vegas_wpa', // Vegas-adjusted WPA
   'vegas_home_wpa', // Vegas-adjusted WPA for home team
-  'home_wp_post', // Post-play home win probability
-  'away_wp_post', // Post-play away win probability
-  'vegas_wp', // Vegas-adjusted win probability
-  'vegas_home_wp', // Vegas-adjusted home win probability
+  'home_win_probability_post', // Post-play home win probability
+  'away_win_probability_post', // Post-play away win probability
+  'vegas_win_probability', // Vegas-adjusted win probability
+  'vegas_home_win_probability', // Vegas-adjusted home win probability
 
   // WPA Component Metrics
   'air_wpa', // WPA from air yards
@@ -85,8 +85,8 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   // Expected Yardage (XYAC) Metrics
   'xyac_mean_yds', // Expected mean yards after catch
   'xyac_median_yds', // Expected median yards after catch
-  'xyac_succ_prob', // Expected YAC success probability
-  'xyac_fd_prob', // Expected probability of first down with YAC
+  'xyac_success_prob', // Expected YAC success probability
+  'xyac_first_down_prob', // Expected probability of first down with YAC
 
   // Scoring Probability Metrics
   'no_score_prob', // Probability of no score on drive
@@ -97,18 +97,18 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   'safety_prob', // Probability of safety
   'td_prob', // Probability of touchdown
   'extra_point_prob', // Probability of successful extra point
-  'two_conv_prob', // Probability of successful two-point conversion
+  'two_conversion_prob', // Probability of successful two-point conversion
 
   // Play Type Probability Metrics
   'xpass_prob', // Expected pass play probability (pass over run decision value)
-  'pass_oe', // Pass play over expected
+  'pass_over_expected', // Pass play over expected
 
   // Completion Probability Metrics
   'completion_probability', // Completion probability
   'completion_percentage_over_expected', // Completion percentage over expected
 
   // Series Data
-  'series_seq', // Series sequence number
+  'series_sequence', // Series sequence number
   'is_series_successful', // Series success indicator
   'series_result' // How series ended (FIELD_GOAL, TOUCHDOWN, TURNOVER, etc.)
 ])

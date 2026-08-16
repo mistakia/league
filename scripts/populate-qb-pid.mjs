@@ -66,7 +66,7 @@ const populate_qb_pid = async ({
         ORDER BY
           CASE WHEN p2.pid = (
             SELECT gp.passer_pid FROM nfl_plays gp
-            WHERE gp.esbid = np.esbid AND gp.drive_seq = np.drive_seq
+            WHERE gp.esbid = np.esbid AND gp.drive_sequence = np.drive_sequence
               AND gp.passer_pid IS NOT NULL AND gp.season_year = :year
             LIMIT 1
           ) THEN 0 ELSE 1 END

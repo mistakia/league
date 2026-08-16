@@ -248,7 +248,7 @@ export const compute_play_changes = ({
  * @param {number} play_id - Play ID (alternative to play_row)
  * @param {Object} update - Field updates to apply
  * @param {boolean} overwrite_existing - If true, overwrite all existing values
- * @param {Array<string>} overwrite_fields - Specific fields to overwrite (e.g., ['game_clock_end', 'sec_rem_qtr'])
+ * @param {Array<string>} overwrite_fields - Specific fields to overwrite (e.g., ['game_clock_end', 'seconds_remaining_quarter'])
  * @param {Set<string>} protected_fields - Fields a more-authoritative source owns; never
  *   overwritten once set, even under overwrite_existing/overwrite_fields (fill-when-empty still allowed)
  * @returns {number} Number of fields changed

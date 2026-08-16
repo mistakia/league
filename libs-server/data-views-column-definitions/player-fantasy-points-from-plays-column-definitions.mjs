@@ -169,7 +169,7 @@ const fantasy_points_from_plays_with = async ({
       this.whereNotNull('nfl_plays.ball_carrier_pid')
         .orWhereNotNull('nfl_plays.passer_pid')
         .orWhereNotNull('nfl_plays.target_pid')
-        .orWhereNotNull('nfl_plays.player_fuml_pid')
+        .orWhereNotNull('nfl_plays.fumble_lost_pid')
       if (stat_sourced_gate_stat_ids.length) {
         this.orWhereExists(function () {
           this.select(db.raw('1'))
@@ -209,10 +209,10 @@ const fantasy_points_from_plays_with = async ({
     select_columns.push('nfl_plays.esbid')
   }
 
-  // The fumble-lost role falls back to nfl_plays.player_fuml_pid for stat rows
+  // The fumble-lost role falls back to nfl_plays.fumble_lost_pid for stat rows
   // carrying no external id, so the CTE has to carry that column too.
   if (scores_fumbles_lost) {
-    select_columns.push('nfl_plays.player_fuml_pid')
+    select_columns.push('nfl_plays.fumble_lost_pid')
   }
 
   // Every stat-sourced subquery joins nfl_play_stats on (esbid, play_id), so

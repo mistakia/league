@@ -64,38 +64,41 @@ describe('LIBS-SHARED penalty_utils', function () {
       expect(extract_penalty_from_desc({ desc })).to.equal(null)
     })
 
-    describe('desc_nflfastr parameter', function () {
-      it('uses desc_nflfastr when provided', () => {
-        const desc_nflfastr =
+    describe('play_description_nflfastr parameter', function () {
+      it('uses play_description_nflfastr when provided', () => {
+        const play_description_nflfastr =
           'R.Succop kicks 65 yards from TEN 35 to end zone, Touchback. PENALTY on TEN-45-J.Fowler, Offside on Free Kick, 5 yards, enforced at IND 25.'
-        expect(extract_penalty_from_desc({ desc_nflfastr })).to.equal(
-          'Offside on Free Kick'
-        )
+        expect(
+          extract_penalty_from_desc({ play_description_nflfastr })
+        ).to.equal('Offside on Free Kick')
       })
 
-      it('falls back to desc when desc_nflfastr is null', () => {
+      it('falls back to desc when play_description_nflfastr is null', () => {
         const desc =
           '(12:12) (Shotgun) J.Herbert pass incomplete. PENALTY on CAR-J.Clowney, Illegal Use of Hands, 5 yards, enforced at CAR 45 - No Play.'
         expect(
-          extract_penalty_from_desc({ desc, desc_nflfastr: null })
+          extract_penalty_from_desc({ desc, play_description_nflfastr: null })
         ).to.equal('Illegal Use of Hands')
       })
 
-      it('prefers desc_nflfastr over desc when both provided', () => {
+      it('prefers play_description_nflfastr over desc when both provided', () => {
         // NGS truncated desc without penalty
         const desc =
           'R.Succop kicks 65 yards from TEN 35 to end zone, Touchback.'
         // nflfastr complete desc with penalty
-        const desc_nflfastr =
+        const play_description_nflfastr =
           'R.Succop kicks 65 yards from TEN 35 to end zone, Touchback. PENALTY on TEN-45-J.Fowler, Offside on Free Kick, 5 yards, enforced at IND 25.'
-        expect(extract_penalty_from_desc({ desc, desc_nflfastr })).to.equal(
-          'Offside on Free Kick'
-        )
+        expect(
+          extract_penalty_from_desc({ desc, play_description_nflfastr })
+        ).to.equal('Offside on Free Kick')
       })
 
-      it('returns null when both desc and desc_nflfastr are null', () => {
+      it('returns null when both desc and play_description_nflfastr are null', () => {
         expect(
-          extract_penalty_from_desc({ desc: null, desc_nflfastr: null })
+          extract_penalty_from_desc({
+            desc: null,
+            play_description_nflfastr: null
+          })
         ).to.equal(null)
       })
     })
@@ -439,43 +442,43 @@ describe('LIBS-SHARED penalty_utils', function () {
       ).to.equal(null)
     })
 
-    describe('desc_nflfastr parameter', function () {
-      it('uses desc_nflfastr when provided', () => {
-        const desc_nflfastr =
+    describe('play_description_nflfastr parameter', function () {
+      it('uses play_description_nflfastr when provided', () => {
+        const play_description_nflfastr =
           'R.Succop kicks 65 yards from TEN 35 to end zone, Touchback. PENALTY on TEN-45-J.Fowler, Offside on Free Kick, 5 yards, enforced at IND 25.'
         expect(
           get_canonical_penalty_type({
-            desc_nflfastr,
+            play_description_nflfastr,
             pen_team: 'TEN',
             off_team: 'TEN'
           })
         ).to.equal('Offside on Free Kick / Defense')
       })
 
-      it('prefers desc_nflfastr over desc when both provided', () => {
+      it('prefers play_description_nflfastr over desc when both provided', () => {
         // NGS truncated desc without penalty
         const desc =
           'R.Succop kicks 65 yards from TEN 35 to end zone, Touchback.'
         // nflfastr complete desc with penalty
-        const desc_nflfastr =
+        const play_description_nflfastr =
           'R.Succop kicks 65 yards from TEN 35 to end zone, Touchback. PENALTY on TEN-45-J.Fowler, Offside on Free Kick, 5 yards, enforced at IND 25.'
         expect(
           get_canonical_penalty_type({
             desc,
-            desc_nflfastr,
+            play_description_nflfastr,
             pen_team: 'TEN',
             off_team: 'TEN'
           })
         ).to.equal('Offside on Free Kick / Defense')
       })
 
-      it('falls back to desc when desc_nflfastr is null', () => {
+      it('falls back to desc when play_description_nflfastr is null', () => {
         const desc =
           '(12:12) (Shotgun) J.Herbert pass incomplete. PENALTY on CAR-J.Clowney, Illegal Use of Hands, 5 yards, enforced at CAR 45 - No Play.'
         expect(
           get_canonical_penalty_type({
             desc,
-            desc_nflfastr: null,
+            play_description_nflfastr: null,
             pen_team: 'CAR',
             off_team: 'LAC'
           })

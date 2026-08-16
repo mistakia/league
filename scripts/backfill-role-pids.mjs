@@ -24,7 +24,12 @@ import {
 const log = debug('backfill-role-pids')
 debug.enable('backfill-role-pids')
 
-const ROLE_COLS = ['psr_gsis', 'passer_pid', 'trg_gsis', 'target_pid']
+const ROLE_COLS = [
+  'passer_gsis_player_id',
+  'passer_pid',
+  'target_gsis_player_id',
+  'target_pid'
+]
 
 const norm = (v) => (v === undefined ? null : v)
 

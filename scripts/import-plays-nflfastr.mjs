@@ -46,7 +46,7 @@ import { add_personnel_counts_to_play_data } from '#libs-server/parse-personnel.
  * --ignore_nflfastr_field_conflicts: Overwrite only nflfastR-exclusive fields
  *   (automatically merged with --overwrite_fields if both are specified)
  * --overwrite_fields: Comma-separated list of specific fields to overwrite
- *                     (e.g., --overwrite_fields="game_clock_end,sec_rem_qtr")
+ *                     (e.g., --overwrite_fields="game_clock_end,seconds_remaining_quarter")
  * -d: Force download of CSV file even if cached
  * --log_conflicts: Log detailed info for each field conflict (play ID, field, values)
  */
@@ -99,7 +99,7 @@ const initialize_cli = () => {
     .option('overwrite_fields', {
       type: 'string',
       description:
-        'Comma-separated list of specific fields to overwrite (e.g., "game_clock_end,sec_rem_qtr")',
+        'Comma-separated list of specific fields to overwrite (e.g., "game_clock_end,seconds_remaining_quarter")',
       default: null
     })
     .option('d', {
@@ -298,14 +298,14 @@ const format_play_context = (play) => {
     : null
 
   // nflfastr yardline_100 is relative to posteam (receiving team on kickoffs).
-  // Since we swap pos_team to the kicking team, convert ydl_100 accordingly.
+  // Since we swap pos_team to the kicking team, convert yard_line_100 accordingly.
   // Standard kickoff from own 35: nflfastr yardline_100=35 (from receiver's
   // perspective) should become 65 (from kicker's perspective).
   // Handle inconsistent raw data: if yardline_100 > 50 on a kickoff, it may
   // already be from the kicker's perspective, so don't double-convert.
-  let ydl_100 = format_number(play.yardline_100)
-  if (is_kickoff && ydl_100 !== null && ydl_100 <= 50) {
-    ydl_100 = 100 - ydl_100
+  let yard_line_100 = format_number(play.yardline_100)
+  if (is_kickoff && yard_line_100 !== null && yard_line_100 <= 50) {
+    yard_line_100 = 100 - yard_line_100
   }
 
   return {
@@ -325,21 +325,21 @@ const format_play_context = (play) => {
       format_boolean(play.two_point_attempt),
       play.desc
     ),
-    ydl_100
+    yard_line_100
   }
 }
 
 const format_drive_data = (play) => ({
   // TODO this might not match the drive sequence number in nfl/ngs system
-  drive_seq: format_number(play.fixed_drive),
+  drive_sequence: format_number(play.fixed_drive),
   drive_play_count: format_number(play.drive_play_count),
   drive_result: play.fixed_drive_result || null,
   drive_top: play.drive_time_of_possession || null,
-  drive_fds: format_number(play.drive_first_downs) || null,
+  drive_first_downs: format_number(play.drive_first_downs) || null,
   is_drive_inside_20: format_boolean(play.drive_inside20),
   is_drive_score: format_boolean(play.drive_ended_with_score),
-  drive_start_qtr: format_number(play.drive_quarter_start),
-  drive_end_qtr: format_number(play.drive_quarter_end),
+  drive_start_quarter: format_number(play.drive_quarter_start),
+  drive_end_quarter: format_number(play.drive_quarter_end),
   drive_yds_penalized: format_number(play.drive_yards_penalized),
   drive_start_transition: normalize_drive_start_transition(
     play.drive_start_transition
@@ -349,20 +349,20 @@ const format_drive_data = (play) => ({
   ),
   drive_game_clock_start: normalize_game_clock(play.drive_game_clock_start),
   drive_game_clock_end: normalize_game_clock(play.drive_game_clock_end),
-  drive_start_ydl: play.drive_start_yard_line || null,
-  drive_end_ydl: play.drive_end_yard_line || null,
+  drive_start_yard_line: play.drive_start_yard_line || null,
+  drive_end_yard_line: play.drive_end_yard_line || null,
   drive_start_play_id: format_number(play.drive_play_id_started),
   drive_end_play_id: format_number(play.drive_play_id_ended)
 })
 
 const format_series_data = (play) => ({
-  series_seq: format_number(play.series),
+  series_sequence: format_number(play.series),
   is_series_successful: format_boolean(play.series_success),
   series_result: format_series_result(play.series_result)
 })
 
-const derive_game_clock_start = (sec_rem_qtr) => {
-  const seconds = format_number(sec_rem_qtr)
+const derive_game_clock_start = (seconds_remaining_quarter) => {
+  const seconds = format_number(seconds_remaining_quarter)
   if (seconds == null) return null
   const minutes = Math.floor(seconds / 60)
   const secs = seconds % 60
@@ -372,9 +372,9 @@ const derive_game_clock_start = (sec_rem_qtr) => {
 const format_game_clock = (play) => ({
   game_clock_start: derive_game_clock_start(play.quarter_seconds_remaining),
   game_clock_end: normalize_game_clock(play.end_clock_time),
-  sec_rem_qtr: format_number(play.quarter_seconds_remaining),
-  sec_rem_half: format_number(play.half_seconds_remaining),
-  sec_rem_gm: format_number(play.game_seconds_remaining)
+  seconds_remaining_quarter: format_number(play.quarter_seconds_remaining),
+  seconds_remaining_half: format_number(play.half_seconds_remaining),
+  seconds_remaining_game: format_number(play.game_seconds_remaining)
 })
 
 const format_play_events = (play) => {
@@ -505,18 +505,20 @@ const format_wpa_data = (play) => {
   return {
     wp: format_number(is_kickoff && play.wp != null ? 1 - play.wp : play.wp),
     wpa: format_number(is_kickoff && play.wpa != null ? -play.wpa : play.wpa),
-    home_wp: format_number(play.home_wp),
-    away_wp: format_number(play.away_wp),
+    home_win_probability: format_number(play.home_win_probability),
+    away_win_probability: format_number(play.away_win_probability),
     vegas_wpa: format_number(
       is_kickoff && play.vegas_wpa != null ? -play.vegas_wpa : play.vegas_wpa
     ),
     vegas_home_wpa: format_number(play.vegas_home_wpa),
-    home_wp_post: format_number(play.home_wp_post),
-    away_wp_post: format_number(play.away_wp_post),
-    vegas_wp: format_number(
-      is_kickoff && play.vegas_wp != null ? 1 - play.vegas_wp : play.vegas_wp
+    home_win_probability_post: format_number(play.home_win_probability_post),
+    away_win_probability_post: format_number(play.away_win_probability_post),
+    vegas_win_probability: format_number(
+      is_kickoff && play.vegas_win_probability != null
+        ? 1 - play.vegas_win_probability
+        : play.vegas_win_probability
     ),
-    vegas_home_wp: format_number(play.vegas_home_wp),
+    vegas_home_win_probability: format_number(play.vegas_home_win_probability),
     total_home_rush_wpa: format_number(play.total_home_rush_wpa),
     total_away_rush_wpa: format_number(play.total_away_rush_wpa),
     total_home_pass_wpa: format_number(play.total_home_pass_wpa),
@@ -551,8 +553,8 @@ const format_wpa_data = (play) => {
 const format_xyac_data = (play) => ({
   xyac_mean_yds: format_number(play.xyac_mean_yardage),
   xyac_median_yds: format_number(play.xyac_median_yardage),
-  xyac_succ_prob: format_number(play.xyac_success),
-  xyac_fd_prob: format_number(play.xyac_fd)
+  xyac_success_prob: format_number(play.xyac_success),
+  xyac_first_down_prob: format_number(play.xyac_fd)
 })
 
 const format_special_teams = (play) => ({
@@ -564,21 +566,21 @@ const format_special_teams = (play) => ({
   fg_result: standardize_kick_result(play.field_goal_result),
   kick_distance: format_number(play.kick_distance),
   ep_result: standardize_kick_result(play.extra_point_result),
-  tp_result: standardize_two_point_result(play.two_point_conv_result),
+  two_point_result: standardize_two_point_result(play.two_point_conv_result),
   is_punt_blocked: format_boolean(play.punt_blocked)
 })
 
 const format_timeout_data = (play) => {
   const is_kickoff = play.play_type === 'kickoff'
   return {
-    home_to_rem: format_number(play.home_timeouts_remaining),
-    away_to_rem: format_number(play.away_timeouts_remaining),
-    pos_to_rem: format_number(
+    home_timeouts_remaining: format_number(play.home_timeouts_remaining),
+    away_timeouts_remaining: format_number(play.away_timeouts_remaining),
+    pos_timeouts_remaining: format_number(
       is_kickoff
         ? play.defteam_timeouts_remaining
         : play.posteam_timeouts_remaining
     ),
-    def_to_rem: format_number(
+    def_timeouts_remaining: format_number(
       is_kickoff
         ? play.posteam_timeouts_remaining
         : play.defteam_timeouts_remaining
@@ -599,7 +601,7 @@ const format_score_data = (play) => {
     def_score: format_number(
       is_kickoff ? play.posteam_score : play.defteam_score
     ),
-    score_diff: format_number(
+    score_difference: format_number(
       is_kickoff ? -play.score_differential : play.score_differential
     ),
     pos_score_post: format_number(
@@ -608,7 +610,7 @@ const format_score_data = (play) => {
     def_score_post: format_number(
       is_kickoff ? play.posteam_score_post : play.defteam_score_post
     ),
-    score_diff_post: format_number(
+    score_difference_post: format_number(
       is_kickoff ? -play.score_differential_post : play.score_differential_post
     )
   }
@@ -629,16 +631,16 @@ const format_probability_data = (play) => {
     ),
     td_prob: format_number(is_kickoff ? play.opp_td_prob : play.td_prob),
     extra_point_prob: format_number(play.extra_point_prob),
-    two_conv_prob: format_number(play.two_conv_prob),
+    two_conversion_prob: format_number(play.two_conversion_prob),
     xpass_prob: format_number(play.xpass),
-    pass_oe: format_number(play.pass_oe),
+    pass_over_expected: format_number(play.pass_over_expected),
     completion_probability: format_number(play.cp),
     completion_percentage_over_expected: format_number(play.cpoe)
   }
 }
 
 const format_play = (play) => ({
-  desc_nflfastr: play.desc || null,
+  play_description_nflfastr: play.desc || null,
   ...format_play_context(play),
   ...format_drive_data(play),
   ...format_series_data(play),
@@ -819,8 +821,10 @@ const log_match_criteria = (match_criteria) => {
   log(`    offense_nfl_team: ${match_criteria.offense_nfl_team}`)
   log(`    defense_nfl_team: ${match_criteria.defense_nfl_team}`)
   log(`    play_type: ${match_criteria.play_type}`)
-  log(`    ydl_100: ${match_criteria.ydl_100}`)
-  log(`    sec_rem_qtr: ${match_criteria.sec_rem_qtr}`)
+  log(`    yard_line_100: ${match_criteria.yard_line_100}`)
+  log(
+    `    seconds_remaining_quarter: ${match_criteria.seconds_remaining_quarter}`
+  )
 }
 
 // ============================================================================
@@ -992,7 +996,7 @@ const run = async ({
         log(`  Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
         log(`    ${play.item.desc}`)
         log(
-          `    Q${play.match_criteria.qtr} | ${play.match_criteria.dwn || 'N/A'} & ${play.match_criteria.yards_to_go || 'N/A'} | YDL: ${play.match_criteria.ydl_100 || 'N/A'} | Time: ${play.match_criteria.sec_rem_qtr}s`
+          `    Q${play.match_criteria.qtr} | ${play.match_criteria.dwn || 'N/A'} & ${play.match_criteria.yards_to_go || 'N/A'} | YDL: ${play.match_criteria.yard_line_100 || 'N/A'} | Time: ${play.match_criteria.seconds_remaining_quarter}s`
         )
         log(`    DB Play ID: ${play.db_play.play_id}`)
       }
@@ -1212,7 +1216,7 @@ const main = async () => {
     const log_conflicts = argv.log_conflicts
 
     // Parse overwrite_fields argument (comma-separated field names)
-    // Example: --overwrite_fields="game_clock_end,sec_rem_qtr"
+    // Example: --overwrite_fields="game_clock_end,seconds_remaining_quarter"
     let overwrite_fields = argv.overwrite_fields
       ? argv.overwrite_fields.split(',').map((f) => f.trim())
       : []

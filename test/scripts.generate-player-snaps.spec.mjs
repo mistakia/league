@@ -57,9 +57,9 @@ describe('SCRIPTS generate-player-snaps', function () {
   //
   // `quarter` and `down_number` are given DISTINCT distributions on purpose --
   // see the plays table below. Every other field is held at a value that keeps
-  // the buckets this file does not assert on stable: ydl_100 50 (outside all
-  // three field-position bands), score_diff 0 (neither leading nor trailing),
-  // sec_rem_half 900 (outside both clock bands), yards_to_go 10 (neutral_long
+  // the buckets this file does not assert on stable: yard_line_100 50 (outside all
+  // three field-position bands), score_difference 0 (neither leading nor trailing),
+  // seconds_remaining_half 900 (outside both clock bands), yards_to_go 10 (neutral_long
   // rather than neutral_short, so the down split is what varies).
   const play_row = ({
     play_id,
@@ -76,11 +76,11 @@ describe('SCRIPTS generate-player-snaps', function () {
     offense_nfl_team,
     defense_nfl_team,
     play_type,
-    ydl_100: 50,
-    score_diff: 0,
+    yard_line_100: 50,
+    score_difference: 0,
     win_probability,
     is_no_huddle: false,
-    sec_rem_half: 900,
+    seconds_remaining_half: 900,
     yards_to_go: 10,
     down_number,
     quarter

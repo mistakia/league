@@ -41,7 +41,7 @@ describe('data-views group_by rate denominator grain', () => {
 
     expect(sql).to.match(/rate_type_total_count/)
     // the dimension lives inside the denominator count, not a GROUP BY / join
-    expect(sql).to.match(/count\(distinct concat\([^)]*drive_seq/i)
+    expect(sql).to.match(/count\(distinct concat\([^)]*drive_sequence/i)
     // the removed join branch referenced a phantom player_games alias
     expect(sql).to.not.match(/player_games/)
   })
@@ -52,7 +52,7 @@ describe('data-views group_by rate denominator grain', () => {
     )
     const sql = query.toString()
 
-    expect(sql).to.match(/count\(distinct concat\([^)]*series_seq/i)
+    expect(sql).to.match(/count\(distinct concat\([^)]*series_sequence/i)
     expect(sql).to.not.match(/player_games/)
   })
 })

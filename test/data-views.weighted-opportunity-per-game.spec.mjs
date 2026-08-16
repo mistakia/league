@@ -32,6 +32,6 @@ describe('data-views weighted-opportunity per-game regression', () => {
       /ROUND\(\s*CAST\(MAX\([^)]+\) AS DECIMAL\)\s*\/ NULLIF\(\s*CAST\(MAX\([^)]+\.rate_type_total_count\) AS DECIMAL\),\s*0\),\s*2\)\s* AS weighted_opportunity_from_plays_0/
     )
     // the additive numerator CTE re-materializes the weighted-opportunity CASE
-    expect(sql).to.match(/SUM\(CASE WHEN nfl_plays\.ydl_100 <= 20/)
+    expect(sql).to.match(/SUM\(CASE WHEN nfl_plays\.yard_line_100 <= 20/)
   })
 })

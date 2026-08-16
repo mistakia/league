@@ -104,10 +104,12 @@ export const add_per_team_play_cte = ({
         count_expression = 'COUNT(DISTINCT CONCAT(nfl_plays.esbid, quarter))'
         break
       case 'drive':
-        count_expression = 'COUNT(DISTINCT CONCAT(nfl_plays.esbid, drive_seq))'
+        count_expression =
+          'COUNT(DISTINCT CONCAT(nfl_plays.esbid, drive_sequence))'
         break
       case 'series':
-        count_expression = 'COUNT(DISTINCT CONCAT(nfl_plays.esbid, series_seq))'
+        count_expression =
+          'COUNT(DISTINCT CONCAT(nfl_plays.esbid, series_sequence))'
         break
     }
   }

@@ -84,7 +84,7 @@ Alternatively for any saved views, you can grab a API URL endpoint that will ret
 - once selected the column will appear in the `shown in table` section at the top of the columns controller
 - hover over `Targets (By Play)` in the `shown in the table` section to expand it and display available parameters
 - set the column parameters
-  - `series_seq` to `1 to 1`
+  - `series_sequence` to `1 to 1`
   - `Year` to `2023`
 - apply changes
 - hit `esc` or click away from the columns controller to close it

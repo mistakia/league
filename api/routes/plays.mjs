@@ -43,8 +43,8 @@ const HISTORICAL_PLAYS_FIELDS = [
   'nfl_plays.quarter',
   'nfl_plays.yards_to_go',
   'nfl_plays.game_clock_start',
-  'nfl_plays.ydl_end',
-  'nfl_plays.ydl_start',
+  'nfl_plays.yard_line_end',
+  'nfl_plays.yard_line_start',
   'nfl_plays.is_first_down',
   'nfl_plays.is_goal_to_go',
   'nfl_plays.drive_play_count',
@@ -509,7 +509,7 @@ router.get('/stats', async (req, res) => {
  *                     is_successful_play: true
  *                     down_number: 1
  *                     depth_of_target: 75
- *                     ydl_100: 25
+ *                     yard_line_100: 25
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
  *         examples:

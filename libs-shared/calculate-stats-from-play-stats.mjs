@@ -104,10 +104,10 @@ const calculateStatsFromPlayStats = (playStats) => {
         }
 
         stats.longest_rush = Math.max(stats.longest_rush, playStat.stat_yards)
-        if (playStat.ydl_100 <= 20) {
+        if (playStat.yard_line_100 <= 20) {
           stats.rush_attempts_redzone += 1
         }
-        if (playStat.ydl_100 <= 5) {
+        if (playStat.yard_line_100 <= 5) {
           stats.rush_attempts_goaline += 1
         }
         break
@@ -128,10 +128,10 @@ const calculateStatsFromPlayStats = (playStats) => {
         }
 
         stats.longest_rush = Math.max(stats.longest_rush, playStat.stat_yards)
-        if (playStat.ydl_100 <= 20) {
+        if (playStat.yard_line_100 <= 20) {
           stats.rush_attempts_redzone += 1
         }
-        if (playStat.ydl_100 <= 5) {
+        if (playStat.yard_line_100 <= 5) {
           stats.rush_attempts_goaline += 1
         }
         stats.rushing_touchdowns += 1
@@ -531,7 +531,7 @@ const calculateStatsFromPlayStats = (playStats) => {
         // Target - pass target (intended receiver)
         stats.targets += 1
         stats.targeted_air_yards += playStat.depth_of_target
-        if (playStat.ydl_100 <= 20) {
+        if (playStat.yard_line_100 <= 20) {
           stats.redzone_targets += 1
         }
         break

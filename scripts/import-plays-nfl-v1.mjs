@@ -49,13 +49,13 @@ const initialize_cli = () => {
  * Parse clock time string and calculate time-related fields
  * @param {string} clockTime - Clock time in format "MM:SS" or "M:SS"
  * @param {number} quarter - Quarter number (1-4 for regulation, 5+ for OT)
- * @returns {Object} Time-related fields: sec_rem_qtr, sec_rem_half, sec_rem_gm
+ * @returns {Object} Time-related fields: seconds_remaining_quarter, seconds_remaining_half, seconds_remaining_game
  */
 const parse_clock_time = (clockTime, quarter) => {
   const time_fields = {
-    sec_rem_qtr: null,
-    sec_rem_half: null,
-    sec_rem_gm: null
+    seconds_remaining_quarter: null,
+    seconds_remaining_half: null,
+    seconds_remaining_game: null
   }
 
   if (!clockTime || !quarter) {
@@ -76,7 +76,7 @@ const parse_clock_time = (clockTime, quarter) => {
   }
 
   // Calculate seconds remaining in quarter
-  time_fields.sec_rem_qtr = minutes * 60 + seconds
+  time_fields.seconds_remaining_quarter = minutes * 60 + seconds
 
   // Calculate seconds remaining in half and game
   // Quarter 1-2: First half (each quarter is 900 seconds)
@@ -85,27 +85,31 @@ const parse_clock_time = (clockTime, quarter) => {
 
   if (quarter === 1) {
     // First quarter: add Q2 time (900) to current quarter time
-    time_fields.sec_rem_half = time_fields.sec_rem_qtr + 900
+    time_fields.seconds_remaining_half =
+      time_fields.seconds_remaining_quarter + 900
     // First half: add entire second half (1800) + current half time
-    time_fields.sec_rem_gm = time_fields.sec_rem_half + 1800
+    time_fields.seconds_remaining_game =
+      time_fields.seconds_remaining_half + 1800
   } else if (quarter === 2) {
     // Second quarter: just current quarter time left in half
-    time_fields.sec_rem_half = time_fields.sec_rem_qtr
+    time_fields.seconds_remaining_half = time_fields.seconds_remaining_quarter
     // Add entire second half (1800) to current half time
-    time_fields.sec_rem_gm = time_fields.sec_rem_half + 1800
+    time_fields.seconds_remaining_game =
+      time_fields.seconds_remaining_half + 1800
   } else if (quarter === 3) {
     // Third quarter: add Q4 time (900) to current quarter time
-    time_fields.sec_rem_half = time_fields.sec_rem_qtr + 900
+    time_fields.seconds_remaining_half =
+      time_fields.seconds_remaining_quarter + 900
     // Second half: just current half time left
-    time_fields.sec_rem_gm = time_fields.sec_rem_half
+    time_fields.seconds_remaining_game = time_fields.seconds_remaining_half
   } else if (quarter === 4) {
     // Fourth quarter: just current quarter time left
-    time_fields.sec_rem_half = time_fields.sec_rem_qtr
-    time_fields.sec_rem_gm = time_fields.sec_rem_qtr
+    time_fields.seconds_remaining_half = time_fields.seconds_remaining_quarter
+    time_fields.seconds_remaining_game = time_fields.seconds_remaining_quarter
   } else {
     // Overtime: just quarter time, half and game same as quarter
-    time_fields.sec_rem_half = time_fields.sec_rem_qtr
-    time_fields.sec_rem_gm = time_fields.sec_rem_qtr
+    time_fields.seconds_remaining_half = time_fields.seconds_remaining_quarter
+    time_fields.seconds_remaining_game = time_fields.seconds_remaining_quarter
   }
 
   return time_fields
@@ -123,15 +127,16 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
   // END_GAME should have 0 seconds remaining in regulation (Q4) but preserve actual time in overtime
   if (play_type_nfl === 'GAME_START' && play.quarter === 1) {
     time_fields = {
-      sec_rem_qtr: 900,
-      sec_rem_half: 1800, // 900 + 900 (Q1 + Q2)
-      sec_rem_gm: 3600 // Full game time
+      seconds_remaining_quarter: 900,
+      seconds_remaining_half: 1800, // 900 + 900 (Q1 + Q2)
+      seconds_remaining_game: 3600 // Full game time
     }
   } else if (play_type_nfl === 'END_QUARTER') {
     time_fields = {
-      sec_rem_qtr: 0,
-      sec_rem_half: play.quarter === 2 ? 0 : time_fields.sec_rem_half,
-      sec_rem_gm: time_fields.sec_rem_gm
+      seconds_remaining_quarter: 0,
+      seconds_remaining_half:
+        play.quarter === 2 ? 0 : time_fields.seconds_remaining_half,
+      seconds_remaining_game: time_fields.seconds_remaining_game
     }
   } else if (play_type_nfl === 'END_GAME') {
     // In regulation (Q1-4), END_GAME is at 00:00
@@ -139,10 +144,14 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
     // Preserve the parsed time for overtime, use 0 for regulation
     const is_overtime = play.quarter >= 5
     time_fields = {
-      sec_rem_qtr: is_overtime ? time_fields.sec_rem_qtr : 0,
-      sec_rem_half:
-        play.quarter === 2 || play.quarter === 4 ? 0 : time_fields.sec_rem_half,
-      sec_rem_gm: 0 // Always 0 for END_GAME
+      seconds_remaining_quarter: is_overtime
+        ? time_fields.seconds_remaining_quarter
+        : 0,
+      seconds_remaining_half:
+        play.quarter === 2 || play.quarter === 4
+          ? 0
+          : time_fields.seconds_remaining_half,
+      seconds_remaining_game: 0 // Always 0 for END_GAME
     }
   }
 
@@ -155,14 +164,14 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
     game_clock_start: normalize_game_clock(play.clockTime),
     // Clock-based time fields calculated from game_clock_start
     // These are the source of truth for time matching across data sources
-    sec_rem_qtr: time_fields.sec_rem_qtr,
-    sec_rem_half: time_fields.sec_rem_half,
-    sec_rem_gm: time_fields.sec_rem_gm,
+    seconds_remaining_quarter: time_fields.seconds_remaining_quarter,
+    seconds_remaining_half: time_fields.seconds_remaining_half,
+    seconds_remaining_game: time_fields.seconds_remaining_game,
     // TODO this might not match the drive sequence number in nflfastr
-    drive_seq: play.driveSequenceNumber,
+    drive_sequence: play.driveSequenceNumber,
     drive_yds: play.driveNetYards,
-    ydl_end: normalize_yardline(clean_string(play.endYardLine)),
-    ydl_start: clean_string(play.yardLine),
+    yard_line_end: normalize_yardline(clean_string(play.endYardLine)),
+    yard_line_start: clean_string(play.yardLine),
     is_first_down: play.firstDown,
     is_goal_to_go: play.goalToGo,
     season_year: year,
@@ -210,20 +219,22 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
   if (play.yardLine && data.possession_nfl_team) {
     const cleaned_yard_line = clean_string(play.yardLine)
     if (cleaned_yard_line === '50') {
-      data.ydl_num = 50
-      data.ydl_100 = 50
-      data.ydl_side = null
-      data.ydl_start = '50'
+      data.yard_line_num = 50
+      data.yard_line_100 = 50
+      data.yard_line_side = null
+      data.yard_line_start = '50'
     } else {
       const ydl_parts = cleaned_yard_line.split(' ')
-      data.ydl_num = parseInt(ydl_parts[1], 10)
-      data.ydl_side = fixTeam(clean_string(ydl_parts[0]))
-      data.ydl_100 =
-        data.ydl_side === data.possession_nfl_team
-          ? 100 - data.ydl_num
-          : data.ydl_num
+      data.yard_line_num = parseInt(ydl_parts[1], 10)
+      data.yard_line_side = fixTeam(clean_string(ydl_parts[0]))
+      data.yard_line_100 =
+        data.yard_line_side === data.possession_nfl_team
+          ? 100 - data.yard_line_num
+          : data.yard_line_num
       // Normalize yardline format (handles team abbreviation normalization)
-      data.ydl_start = normalize_yardline(`${data.ydl_side} ${data.ydl_num}`)
+      data.yard_line_start = normalize_yardline(
+        `${data.yard_line_side} ${data.yard_line_num}`
+      )
     }
   }
 

@@ -124,7 +124,7 @@ export const enrich_plays = async ({
 
     // Phase 7: Fixed drive sequences
     // Calculates drive sequence numbers matching nflfastr's fixed_drive methodology
-    // Must run BEFORE drive_play_counts since that depends on drive_seq
+    // Must run BEFORE drive_play_counts since that depends on drive_sequence
     if (fixed_drives) {
       try {
         enriched_plays = enrich_fixed_drives(enriched_plays)

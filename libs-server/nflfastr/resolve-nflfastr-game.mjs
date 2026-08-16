@@ -68,7 +68,7 @@ const game_matchup_key = (game) =>
  *
  *   1. The id resolves to nothing, and the game silently takes no enrichment.
  *   2. The id resolves to a real esbid that is a DIFFERENT game, and that
- *      game's plays take another game's epa, is_qb_dropback and desc_nflfastr.
+ *      game's plays take another game's epa, is_qb_dropback and play_description_nflfastr.
  *
  * Both fired on 2021 REG week 15, the COVID-rescheduling week, where nine games
  * carry an old_game_id that disagrees with our esbid and six of those nine

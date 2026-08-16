@@ -21,10 +21,10 @@ export const add_player_stats_play_by_play_with_statement = ({
 
   const default_params = get_play_by_play_default_params({ params })
 
-  const ordered_pid_columns_string = pid_columns.includes('player_fuml_pid')
+  const ordered_pid_columns_string = pid_columns.includes('fumble_lost_pid')
     ? [
-        'player_fuml_pid',
-        ...pid_columns.filter((col) => col !== 'player_fuml_pid')
+        'fumble_lost_pid',
+        ...pid_columns.filter((col) => col !== 'fumble_lost_pid')
       ].join(', ')
     : pid_columns.join(', ')
 

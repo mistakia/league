@@ -38,16 +38,16 @@
     "CASE WHEN SUM(CASE WHEN completion_probability IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(completion_probability) / NULLIF(SUM(CASE WHEN completion_probability IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE 0 END as expected_pass_comp_pct_from_plays"
   ],
   "player_fumble_percentage_from_plays": [
-    "CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN player_fuml_pid = ball_carrier_pid THEN 1 ELSE 0 END) / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as fumble_pct_from_plays"
+    "CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN fumble_lost_pid = ball_carrier_pid THEN 1 ELSE 0 END) / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as fumble_pct_from_plays"
   ],
   "player_fumbles_from_plays": [
-    "SUM(CASE WHEN player_fuml_pid IS NOT NULL THEN 1 ELSE 0 END) as fumbles_from_plays"
+    "SUM(CASE WHEN fumble_lost_pid IS NOT NULL THEN 1 ELSE 0 END) as fumbles_from_plays"
   ],
   "player_fumbles_lost_from_plays": [
-    "SUM(CASE WHEN player_fuml_pid IS NOT NULL AND is_fumble_lost = true THEN 1 ELSE 0 END) as fumbles_lost_from_plays"
+    "SUM(CASE WHEN fumble_lost_pid IS NOT NULL AND is_fumble_lost = true THEN 1 ELSE 0 END) as fumbles_lost_from_plays"
   ],
   "player_high_value_touches_from_plays": [
-    "SUM(CASE WHEN (ball_carrier_pid IS NOT NULL AND ydl_100 <= 10) OR (target_pid IS NOT NULL AND is_completion = true) THEN 1 ELSE 0 END) as high_value_touches_from_plays"
+    "SUM(CASE WHEN (ball_carrier_pid IS NOT NULL AND yard_line_100 <= 10) OR (target_pid IS NOT NULL AND is_completion = true) THEN 1 ELSE 0 END) as high_value_touches_from_plays"
   ],
   "player_opportunities_from_plays": [
     "SUM(CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL OR (passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false)) THEN 1 ELSE 0 END) as opportunities_from_plays"
@@ -214,7 +214,7 @@
     "AVG(completion_percentage_over_expected) AS team_completion_percentage_over_expected_from_plays"
   ],
   "player_team_drive_count_from_plays": [
-    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', drive_seq)) AS team_drive_count_from_plays"
+    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', drive_sequence)) AS team_drive_count_from_plays"
   ],
   "player_team_expected_points_added_from_plays": [
     "SUM(epa) AS team_ep_added_from_plays"
@@ -240,7 +240,7 @@
     "SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) AS team_pass_comp_from_plays"
   ],
   "player_team_pass_rate_over_expected_from_plays": [
-    "AVG(pass_oe) AS team_pass_rate_over_expected_from_plays"
+    "AVG(pass_over_expected) AS team_pass_rate_over_expected_from_plays"
   ],
   "player_team_pass_touchdowns_from_plays": [
     "SUM(CASE WHEN is_passing_touchdown = true THEN 1 ELSE 0 END) AS team_pass_td_from_plays"
@@ -259,11 +259,11 @@
     "SUM(rush_yds) AS team_rush_yds_from_plays"
   ],
   "player_team_series_conversion_rate_from_plays": [
-    "COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_numerator",
-    "COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_denominator"
+    "COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_sequence) END) as team_series_conversion_rate_from_plays_numerator",
+    "COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_sequence) END) as team_series_conversion_rate_from_plays_denominator"
   ],
   "player_team_series_count_from_plays": [
-    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', series_seq)) AS team_series_count_from_plays"
+    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', series_sequence)) AS team_series_count_from_plays"
   ],
   "player_team_success_rate_from_plays": [
     "SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator",
@@ -291,7 +291,7 @@
     "SUM(CASE WHEN ball_carrier_pid IS NOT NULL OR (target_pid IS NOT NULL AND is_completion = true) THEN 1 ELSE 0 END) as touches_from_plays"
   ],
   "player_weighted_opportunity_from_plays": [
-    "ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND ball_carrier_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND target_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND ball_carrier_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND target_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays"
+    "ROUND(SUM(CASE WHEN nfl_plays.yard_line_100 <= 20 AND ball_carrier_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.yard_line_100 <= 20 AND target_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.yard_line_100 > 20 AND ball_carrier_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.yard_line_100 > 20 AND target_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays"
   ],
   "player_weighted_opportunity_rating_from_plays": null,
   "player_yards_blocked_from_plays": [
@@ -304,7 +304,7 @@
     "AVG(completion_percentage_over_expected) AS team_completion_percentage_over_expected_from_plays"
   ],
   "team_drive_count_from_plays": [
-    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', drive_seq)) AS team_drive_count_from_plays"
+    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', drive_sequence)) AS team_drive_count_from_plays"
   ],
   "team_expected_points_added_from_plays": [
     "SUM(epa) AS team_ep_added_from_plays"
@@ -330,7 +330,7 @@
     "SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) AS team_pass_comp_from_plays"
   ],
   "team_pass_rate_over_expected_from_plays": [
-    "AVG(pass_oe) AS team_pass_rate_over_expected_from_plays"
+    "AVG(pass_over_expected) AS team_pass_rate_over_expected_from_plays"
   ],
   "team_pass_touchdowns_from_plays": [
     "SUM(CASE WHEN is_passing_touchdown = true THEN 1 ELSE 0 END) AS team_pass_td_from_plays"
@@ -345,11 +345,11 @@
   ],
   "team_rush_yards_from_plays": ["SUM(rush_yds) AS team_rush_yds_from_plays"],
   "team_series_conversion_rate_from_plays": [
-    "COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_numerator",
-    "COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_denominator"
+    "COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_sequence) END) as team_series_conversion_rate_from_plays_numerator",
+    "COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_sequence) END) as team_series_conversion_rate_from_plays_denominator"
   ],
   "team_series_count_from_plays": [
-    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', series_seq)) AS team_series_count_from_plays"
+    "COUNT(DISTINCT CONCAT(nfl_plays.esbid, '_', series_sequence)) AS team_series_count_from_plays"
   ],
   "team_success_rate_from_plays": [
     "SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator",

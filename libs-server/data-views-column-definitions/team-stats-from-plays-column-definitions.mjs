@@ -344,12 +344,12 @@ const stat_specs = {
     stat_name: 'team_pass_yds_from_plays'
   },
   team_pass_rate_over_expected_from_plays: {
-    select_string: `AVG(pass_oe)`,
-    // AVG(pass_oe) re-expressed as SUM(pass_oe)/COUNT(non-null) so a multi-year
+    select_string: `AVG(pass_over_expected)`,
+    // AVG(pass_over_expected) re-expressed as SUM(pass_over_expected)/COUNT(non-null) so a multi-year
     // year_offset range pools the dropbacks rather than averaging per-season
     // means. Only emitted in the range path; the season render stays AVG.
-    numerator_select: `SUM(pass_oe)`,
-    denominator_select: `SUM(CASE WHEN pass_oe IS NOT NULL THEN 1 ELSE 0 END)`,
+    numerator_select: `SUM(pass_over_expected)`,
+    denominator_select: `SUM(CASE WHEN pass_over_expected IS NOT NULL THEN 1 ELSE 0 END)`,
     stat_name: 'team_pass_rate_over_expected_from_plays',
     supports_periods: []
   },
@@ -453,14 +453,14 @@ const stat_specs = {
     // the season render and the numerator.
     measure: {
       kind: 'distinct_count',
-      expr: `CONCAT(nfl_plays.esbid, '_', series_seq)`
+      expr: `CONCAT(nfl_plays.esbid, '_', series_sequence)`
     },
     stat_name: 'team_series_count_from_plays'
   },
   team_drive_count_from_plays: {
     measure: {
       kind: 'distinct_count',
-      expr: `CONCAT(nfl_plays.esbid, '_', drive_seq)`
+      expr: `CONCAT(nfl_plays.esbid, '_', drive_sequence)`
     },
     stat_name: 'team_drive_count_from_plays'
   },
@@ -481,8 +481,8 @@ const stat_specs = {
   },
   team_series_conversion_rate_from_plays: {
     rate_with_selects: [
-      `COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_numerator`,
-      `COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_denominator`
+      `COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_sequence) END) as team_series_conversion_rate_from_plays_numerator`,
+      `COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_sequence) END) as team_series_conversion_rate_from_plays_denominator`
     ],
     stat_name: 'team_series_conversion_rate_from_plays',
     is_rate: true,

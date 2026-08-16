@@ -41,8 +41,8 @@ const calculateStatsFromPlays = (plays) => {
 
   plays.forEach((play) => {
     if (play.is_fumble_lost) {
-      addStat(play.player_fuml_pid, 'fumbles_lost', 1)
-      playerToTeam[play.player_fuml_pid] = play.offense_nfl_team
+      addStat(play.fumble_lost_pid, 'fumbles_lost', 1)
+      playerToTeam[play.fumble_lost_pid] = play.offense_nfl_team
     }
 
     switch (play.play_type) {

@@ -13,8 +13,8 @@
 ## verify-named-format-catalog so catalog drift is reported first.
 15 4 * * 0 NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/verify-format-data-coverage.mjs >> /var/log/league/verify-format-data-coverage.log 2>&1
 
-## Every Sunday at 4:45AM — assert drive_seq numbering stays game-continuous: no
-## drive_seq value may appear in both halves of a game. This defect class produces
+## Every Sunday at 4:45AM — assert drive_sequence numbering stays game-continuous: no
+## drive_sequence value may appear in both halves of a game. This defect class produces
 ## wrong numbers rather than missing ones, so exit codes and output freshness are
 ## blind to it; the check measures the invariant directly and signals only when a
 ## violation class exceeds its recorded baseline.

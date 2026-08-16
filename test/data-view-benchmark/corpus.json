@@ -5035,7 +5035,7 @@
           {
             "params": {
               "year": [2022, 2021, 2019],
-              "ydl_100": [0, 20]
+              "yard_line_100": [0, 20]
             },
             "column_id": "player_target_share_from_plays"
           },
@@ -6182,7 +6182,7 @@
               "win_probability": [0.15, 0.85],
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_1"],
-              "sec_rem_half": [112, 1800],
+              "seconds_remaining_half": [112, 1800],
               "cov_type": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
@@ -6197,7 +6197,7 @@
               "win_probability": [0.15, 0.85],
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_2"],
-              "sec_rem_half": [112, 1800],
+              "seconds_remaining_half": [112, 1800],
               "cov_type": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
@@ -6212,7 +6212,7 @@
               "win_probability": [0.15, 0.85],
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_3"],
-              "sec_rem_half": [112, 1800],
+              "seconds_remaining_half": [112, 1800],
               "cov_type": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
@@ -6227,7 +6227,7 @@
               "win_probability": [0.15, 0.85],
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_4"],
-              "sec_rem_half": [112, 1800],
+              "seconds_remaining_half": [112, 1800],
               "cov_type": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
@@ -6242,7 +6242,7 @@
               "win_probability": [0.15, 0.85],
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_5"],
-              "sec_rem_half": [112, 1800],
+              "seconds_remaining_half": [112, 1800],
               "cov_type": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
@@ -6257,7 +6257,7 @@
               "win_probability": [0.15, 0.85],
               "year": [2024],
               "team_unit": ["def"],
-              "sec_rem_half": [112, 1800],
+              "seconds_remaining_half": [112, 1800],
               "cov_type": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",

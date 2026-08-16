@@ -103,7 +103,7 @@ const DB_CONSTRAINTS = {
 // player already lives in dedicated nfl_plays columns like
 // kicker/punter/returner) are intentionally omitted.
 // The roles the stat registry owns contribute their own fallback columns, so
-// 106 -> player_fuml_pid is not repeated here. libs-server's attribution module
+// 106 -> fumble_lost_pid is not repeated here. libs-server's attribution module
 // reads the same registry entry to reproduce this patch in SQL, and the two
 // drifting apart is what makes the from-plays and gamelogs paths credit
 // different players.
@@ -120,9 +120,9 @@ const STAT_ID_TO_ROLE_PID_COLUMN = {
   22: 'target_pid',
   25: 'interceptor_pid',
   26: 'interceptor_pid',
-  52: 'player_fuml_pid',
-  53: 'player_fuml_pid',
-  54: 'player_fuml_pid',
+  52: 'fumble_lost_pid',
+  53: 'fumble_lost_pid',
+  54: 'fumble_lost_pid',
   111: 'passer_pid',
   112: 'passer_pid',
   113: 'target_pid',

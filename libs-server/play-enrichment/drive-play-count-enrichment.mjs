@@ -85,7 +85,7 @@ const should_count_play = (play) => {
  *
  * For incomplete drives (live games), only counts plays that have occurred so far.
  *
- * Plays with null/undefined drive_seq (administrative plays like TIMEOUT,
+ * Plays with null/undefined drive_sequence (administrative plays like TIMEOUT,
  * GAME_START, etc.) receive null for drive_play_count since they don't
  * belong to any meaningful drive.
  *
@@ -96,19 +96,19 @@ export const enrich_drive_play_counts = (plays) => {
   log(`Starting drive play count enrichment for ${plays.length} plays`)
 
   // Group plays by game and drive
-  // Skip plays without drive_seq - they don't belong to any drive
+  // Skip plays without drive_sequence - they don't belong to any drive
   const drives_map = new Map()
   let skipped_null_drive = 0
 
   for (const play of plays) {
-    // Plays without drive_seq are administrative plays (TIMEOUT, GAME_START, etc.)
+    // Plays without drive_sequence are administrative plays (TIMEOUT, GAME_START, etc.)
     // They should not be grouped or counted - they'll receive null drive_play_count
-    if (play.drive_seq === null || play.drive_seq === undefined) {
+    if (play.drive_sequence === null || play.drive_sequence === undefined) {
       skipped_null_drive++
       continue
     }
 
-    const key = `${play.esbid}_${play.drive_seq}`
+    const key = `${play.esbid}_${play.drive_sequence}`
 
     if (!drives_map.has(key)) {
       drives_map.set(key, [])
@@ -118,7 +118,7 @@ export const enrich_drive_play_counts = (plays) => {
   }
 
   log(
-    `Found ${drives_map.size} unique drives (skipped ${skipped_null_drive} plays with null drive_seq)`
+    `Found ${drives_map.size} unique drives (skipped ${skipped_null_drive} plays with null drive_sequence)`
   )
 
   // Calculate play counts for each drive
@@ -129,23 +129,23 @@ export const enrich_drive_play_counts = (plays) => {
     const count = drive_plays.filter(should_count_play).length
     drive_counts.set(drive_key, count)
 
-    const [esbid, drive_seq] = drive_key.split('_')
+    const [esbid, drive_sequence] = drive_key.split('_')
     log(
-      `Drive ${esbid}/${drive_seq}: ${count} countable plays out of ${drive_plays.length} total`
+      `Drive ${esbid}/${drive_sequence}: ${count} countable plays out of ${drive_plays.length} total`
     )
   }
 
   // Enrich all plays with their drive's play count
   const enriched_plays = plays.map((play) => {
-    // Plays without drive_seq get null - they don't belong to any drive
-    if (play.drive_seq === null || play.drive_seq === undefined) {
+    // Plays without drive_sequence get null - they don't belong to any drive
+    if (play.drive_sequence === null || play.drive_sequence === undefined) {
       return {
         ...play,
         drive_play_count: null
       }
     }
 
-    const key = `${play.esbid}_${play.drive_seq}`
+    const key = `${play.esbid}_${play.drive_sequence}`
     const count = drive_counts.get(key)
 
     return {

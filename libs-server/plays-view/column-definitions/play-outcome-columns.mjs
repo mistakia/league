@@ -110,11 +110,12 @@ export default {
     use_having: true
   },
   play_pass_oe: {
-    column_name: 'pass_oe',
+    column_name: 'pass_over_expected',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.pass_oe as play_pass_oe'],
-    main_where: () => 'nfl_plays.pass_oe',
-    aggregate_select: () => db.raw('AVG(nfl_plays.pass_oe) as play_pass_oe'),
+    main_select: () => ['nfl_plays.pass_over_expected as play_pass_oe'],
+    main_where: () => 'nfl_plays.pass_over_expected',
+    aggregate_select: () =>
+      db.raw('AVG(nfl_plays.pass_over_expected) as play_pass_oe'),
     use_having: true
   }
 }

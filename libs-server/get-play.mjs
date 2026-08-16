@@ -16,10 +16,10 @@ export default async function ({
   down_number,
   yards_to_go,
   play_type,
-  ydl_num,
-  ydl_side,
-  ydl_100,
-  sec_rem_qtr
+  yard_line_num,
+  yard_line_side,
+  yard_line_100,
+  seconds_remaining_quarter
 }) {
   const query = db('nfl_plays')
 
@@ -63,24 +63,24 @@ export default async function ({
     query.where({ play_type })
   }
 
-  if (ydl_num) {
-    query.where({ ydl_num })
+  if (yard_line_num) {
+    query.where({ yard_line_num })
   }
 
-  if (ydl_side) {
-    query.where({ ydl_side: fixTeam(ydl_side) })
+  if (yard_line_side) {
+    query.where({ yard_line_side: fixTeam(yard_line_side) })
   }
 
-  if (ydl_100) {
-    query.where({ ydl_100 })
+  if (yard_line_100) {
+    query.where({ yard_line_100 })
   }
 
   if (yards_to_go) {
     query.where({ yards_to_go })
   }
 
-  if (sec_rem_qtr) {
-    query.where({ sec_rem_qtr })
+  if (seconds_remaining_quarter) {
+    query.where({ seconds_remaining_quarter })
   }
 
   const plays = await query

@@ -41,12 +41,12 @@ describe('data-views distinct-count numerator', () => {
     const sql = build([
       {
         alias: 'm_dc',
-        measure_expr: "CONCAT(esbid, '_', series_seq)",
+        measure_expr: "CONCAT(esbid, '_', series_sequence)",
         aggregate: 'count_distinct'
       }
     ])
     expect(sql).to.match(
-      /COUNT\(DISTINCT CONCAT\(esbid, '_', series_seq\)\) AS m_dc/
+      /COUNT\(DISTINCT CONCAT\(esbid, '_', series_sequence\)\) AS m_dc/
     )
   })
 
@@ -55,20 +55,20 @@ describe('data-views distinct-count numerator', () => {
       { alias: 'm_sum', measure_expr: 'rush_yds', aggregate: 'sum' },
       {
         alias: 'm_dc',
-        measure_expr: "CONCAT(esbid, '_', series_seq)",
+        measure_expr: "CONCAT(esbid, '_', series_sequence)",
         aggregate: 'count_distinct'
       }
     ])
     expect(sql).to.match(/SUM\(rush_yds\) AS m_sum/)
     expect(sql).to.match(
-      /COUNT\(DISTINCT CONCAT\(esbid, '_', series_seq\)\) AS m_dc/
+      /COUNT\(DISTINCT CONCAT\(esbid, '_', series_sequence\)\) AS m_dc/
     )
   })
 
   it('build_period_cte single wrapper carries the aggregate selector', () => {
     const sql = build_period_cte({
       measure_source: 'plays',
-      measure_expr: "CONCAT(esbid, '_', drive_seq)",
+      measure_expr: "CONCAT(esbid, '_', drive_sequence)",
       measure_predicate: null,
       pid_columns: ['bc_pid'],
       apply_filters: null,
@@ -79,12 +79,12 @@ describe('data-views distinct-count numerator', () => {
       aggregate: 'count_distinct'
     }).toString()
     expect(sql).to.match(
-      /COUNT\(DISTINCT CONCAT\(esbid, '_', drive_seq\)\) AS measure_total/
+      /COUNT\(DISTINCT CONCAT\(esbid, '_', drive_sequence\)\) AS measure_total/
     )
   })
 
   it('compute_measure_alias distinguishes sum from count_distinct of the same expr', () => {
-    const measure_expr = () => "CONCAT(esbid, '_', series_seq)"
+    const measure_expr = () => "CONCAT(esbid, '_', series_sequence)"
     const sum_alias = compute_measure_alias({
       column_def: {
         column_id: 'c',

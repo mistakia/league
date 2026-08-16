@@ -35,7 +35,7 @@ const ENRICHED_FIELD_NAMES = [
   'passer_pid',
   'target_pid',
   'interceptor_pid',
-  'player_fuml_pid',
+  'fumble_lost_pid',
   'penalty_player_pid',
   'solo_tackle_1_pid',
   'solo_tackle_2_pid',
@@ -55,11 +55,11 @@ const ENRICHED_FIELD_NAMES = [
   'tackle_assist_2_gsis',
   'tackle_assist_3_gsis',
   'tackle_assist_4_gsis',
-  'bc_gsis',
-  'psr_gsis',
-  'trg_gsis',
-  'intp_gsis',
-  'player_fuml_gsis'
+  'ball_carrier_gsis_player_id',
+  'passer_gsis_player_id',
+  'target_gsis_player_id',
+  'interceptor_gsis_player_id',
+  'fumble_lost_gsis_player_id'
 ]
 
 // Columns where enrichment is the authoritative writer and a null value is a
@@ -88,15 +88,15 @@ const role_clearable_fields = new Set([
   'tackle_assist_4_pid',
   'tackle_assist_4_gsis',
   'ball_carrier_pid',
-  'bc_gsis',
+  'ball_carrier_gsis_player_id',
   'passer_pid',
-  'psr_gsis',
+  'passer_gsis_player_id',
   'target_pid',
-  'trg_gsis',
+  'target_gsis_player_id',
   'interceptor_pid',
-  'intp_gsis',
-  'player_fuml_pid',
-  'player_fuml_gsis'
+  'interceptor_gsis_player_id',
+  'fumble_lost_pid',
+  'fumble_lost_gsis_player_id'
 ])
 
 /**

@@ -54,15 +54,17 @@ describe('data-views measure-contract', () => {
         stat_name: 'team_series_count_from_plays',
         measure: {
           kind: 'distinct_count',
-          expr: "CONCAT(esbid, '_', series_seq)"
+          expr: "CONCAT(esbid, '_', series_sequence)"
         },
         supports_periods: TEAM_PERIODS
       })
       expect(result.with_select).to.equal(
-        "COUNT(DISTINCT CONCAT(esbid, '_', series_seq))"
+        "COUNT(DISTINCT CONCAT(esbid, '_', series_sequence))"
       )
       expect(result.aggregate).to.equal('count_distinct')
-      expect(result.measure_expr()).to.equal("CONCAT(esbid, '_', series_seq)")
+      expect(result.measure_expr()).to.equal(
+        "CONCAT(esbid, '_', series_sequence)"
+      )
     })
 
     it('defaults decimals to 2 for the rate render but keeps the season render bare', () => {
@@ -70,7 +72,7 @@ describe('data-views measure-contract', () => {
         stat_name: 'team_drive_count_from_plays',
         measure: {
           kind: 'distinct_count',
-          expr: "CONCAT(esbid, '_', drive_seq)"
+          expr: "CONCAT(esbid, '_', drive_sequence)"
         },
         supports_periods: TEAM_PERIODS
       })
@@ -84,7 +86,7 @@ describe('data-views measure-contract', () => {
         stat_name: 'team_drive_count_from_plays',
         measure: {
           kind: 'distinct_count',
-          expr: "CONCAT(esbid, '_', drive_seq)",
+          expr: "CONCAT(esbid, '_', drive_sequence)",
           decimals: 0
         },
         supports_periods: TEAM_PERIODS

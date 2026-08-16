@@ -590,7 +590,7 @@ export const receiving_position_attribution = (() => {
 
 // Per-row fumble-lost penalty. Like the fumble return touchdown below, this
 // role is sourced from nfl_play_stats (stat_id 106) rather than from
-// nfl_plays.player_fuml_pid, because that column is set on every play carrying
+// nfl_plays.fumble_lost_pid, because that column is set on every play carrying
 // any fumble and so over-charged the penalty by more than 2x against the
 // gamelogs path -- see nfl-play-stats-attribution.mjs. The join restricts the
 // role to the charged plays, so the expression is the flat per-fumble value
@@ -749,7 +749,7 @@ const field_goal_role_scoring = create_field_goal_role_scoring()
 // rather than repeating a near-identical block per role -- the legacy `with`
 // path to build its subqueries and its EXISTS gate, the role-union path to build
 // its roles. `gate_stat_ids` is null for the two fumble roles, whose plays are
-// already reachable through nfl_plays.player_fuml_pid and so need no widening.
+// already reachable through nfl_plays.fumble_lost_pid and so need no widening.
 // `subquery_alias` is the legacy `with` path's UNION-arm alias and is emitted
 // verbatim, so the five pre-existing values are pinned rather than derived --
 // deriving them would rename fuml_stats and change SQL for every format.
