@@ -23,7 +23,7 @@ This is **xo.football**, an open-source fantasy football league management platf
 **Code Quality:**
 
 - `yarn lint` - Run ESLint
-- `yarn prettier` - Format code with Prettier
+- `yarn prettier` - Format code with Prettier. **The script is `prettier --write .` — it rewrites the WHOLE tree and ignores extra args, so `yarn prettier --check <file>` still reformats files you never touched (2026-08-15: dirtied two `scripts/social-cards/*.html` this way).** Scope with the direct binary: `npx prettier --check <files>` / `npx prettier --write <files>`.
 - `yarn test --reporter min` - Run all tests with Mocha
 - `yarn test --reporter min test/filename.spec.mjs` - Run specific test file
 
