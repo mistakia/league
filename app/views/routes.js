@@ -177,11 +177,12 @@ const Routes = ({ app }) => {
         path='/leagues/:lid/team-settings'
         element={<TeamSettingsPage />}
       />
-      {/* /about used to render the repo README, which is written for
-          contributors rather than for anyone deciding whether to join the
-          league. The landing page is now the honest answer to "what is this",
-          so /about points at it rather than keeping a second, worse pitch. */}
-      <Route path='/about' element={<Navigate to='/' replace />} />
+      {/* The repo README, rendered as a page. 1dc9c4fee redirected this to the
+          landing page on the argument that the README is written for
+          contributors rather than for a prospective manager; the two are
+          different audiences and the landing page serves the second, so this
+          serves the first rather than being folded into it. */}
+      <Route path='/about' element={<MarkdownPage path='/README.md' />} />
       <Route
         path='/resources'
         element={<MarkdownPage path='/resources.md' />}

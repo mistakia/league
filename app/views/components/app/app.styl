@@ -15,8 +15,10 @@ body
   height 100%
   width 100%
   overflow hidden
-  // The whole site sits on one surface, so body carries it too — #root covers
-  // everything else, and this doubles as the ios web app status bar background.
+  // Only ever seen as the ios web app status bar and as overscroll, since
+  // #root covers everything else. It was MUI's #1976d2 until bae8f8a11 — the
+  // surface unification is reverted, but that blue is not coming back, since
+  // it is one of the Material defaults this component set was taken off.
   background-color $backgroundColor
 
 main

@@ -18,11 +18,11 @@
 $prose_sans = 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif
 $prose_mono = 'IBM Plex Mono', monospace
 
-// THE PROSE INK PALETTE IS ITS OWN, and deliberately not the app's. The app is
+// THE PROSE PALETTE IS ITS OWN, and deliberately not the app's. The app is
 // chrome around a table: mid-grey ink on a #f0f0f0 field, which is right for a
 // dense surface read in glances and wrong for one read in paragraphs. These
-// pages sit on that same field but set their text in near-black ink, so the
-// only things carrying colour are the one call to action and an error.
+// pages get paper and near-black ink, so the only things carrying colour are
+// the one call to action and an error.
 $prose_paper = #ffffff
 $prose_ink = #17181a
 $prose_body = #3d4045
@@ -37,25 +37,30 @@ $prose_accent = #c1121f
 // text colour: at near-black it is right for a letterform a few pixels wide
 // and too heavy for a solid block several hundred pixels wide, which reads as
 // a hole punched in the page rather than as a control sitting on it. This is a
-// graphite — clearly grey, still the darkest object on the surface, and still
-// past 9:1 against the white label it carries. One token so that every filled
-// action moves together: the landing call to action, every prose submit, and
-// the floating menu button.
-$prose_action = #3f4348
+// mid grey — light enough to read as a considered colour rather than as black,
+// and still 5.47:1 against the white label it carries, which clears AA for the
+// label at this size. That ratio is the floor on going lighter: #6b7075 is
+// 5.0:1 and anything past it fails. One token so that every filled action
+// moves together: the landing call to action, every prose submit, and the
+// floating menu button.
+$prose_action = #636a73
 
 // 600 rather than 700 everywhere below: IBM Plex Mono and Inter are both loaded
 // at 600, and 700 is not — asking for it gets a synthesized bold, which on mono
 // in particular reads as a smudge. See the font comment in app/index.html.
 $prose_bold = 600
 
-// The site surface. A prose page paints the WHOLE body rather than sitting as
-// its own colour, which would read as a card and put a hard edge down both
-// sides of the measure. It is the same #f0f0f0 surface the app body and the
-// menu drawer use, so every page reads as one site. Call this on a wrapper
-// around prose_page().
+// The paper. A prose page paints the WHOLE body rather than sitting as a white
+// column on the app's grey, which would read as a card and put a hard edge down
+// both sides of the measure. Call this on a wrapper around prose_page().
+//
+// PAPER, NOT THE APP'S SURFACE. bae8f8a11 unified these pages onto
+// $backgroundColor and that is reverted here on the operator's call: a page
+// read in paragraphs wants a different ground from a page of tables read in
+// glances, which is the distinction the palette comment above states.
 prose_surface()
   min-height 100%
-  background $backgroundColor
+  background $prose_paper
 
 // The measure. One across every prose page: these are read one after another by
 // the same person, and a measure that changes between them reads as a different

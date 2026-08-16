@@ -186,8 +186,10 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
   top var(--app-banner-height, 0px)
   bottom 0
   width $menuWidth
-  // The drawer is the same surface the body and every page sit on, so the
-  // section cards are the only thing that reads as chrome here.
+  // The same surface the app body sits on, so the drawer reads as part of the
+  // page rather than as a panel laid over it. That leaves no edge where the
+  // two meet, which is what the seam border in the desktop media query below
+  // is for — it is load-bearing here, not decoration.
   background $backgroundColor
   z-index $z_overlay_panel
   overflow hidden
@@ -214,10 +216,9 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
 .menu__section
   border-radius 4px
   min-width 136px
-  // A card on the drawer surface, which is the same $backgroundColor as the
-  // body — the cards are the only chrome in here now, so they sit white
-  // against it.
-  background lighten($backgroundColor, 100%)
+  // Now that the drawer carries the body surface, the cards are the only thing
+  // in here that reads as chrome, so they take paper to sit off it.
+  background $prose_paper
   flex 1
   margin 8px
   transition background-color $smooth_transition,box-shadow $smooth_transition,border $smooth_transition
@@ -267,6 +268,9 @@ $hoverBackground = rgba(255, 255, 255, 0.8)
   font-size 10px
 
 @media (min-width 800px)
+  .menu__drawer--persistent
+    border-right 1px solid lighten($borderColor, 30%)
+
   .auction__live .main__menu-button
     bottom $auctionHeightDesktop + 8px
 
