@@ -124,6 +124,37 @@ describe('WAITLIST', function () {
       expect(rows[0].contact_handle).to.equal(null)
     })
 
+    // A contact field and a question fail an omission DIFFERENTLY, and both
+    // shapes are load-bearing. A contact field is a real column, so it is
+    // written as null; an unanswered question writes no key at all, which is
+    // the same absence a submission from an earlier question set has, and is
+    // what lets the managers' page render both as a skipped block rather than
+    // as an empty heading.
+    it('omits an unanswered optional question from responses', async function () {
+      const optional_questions = questions.filter(
+        (question) => !question.required
+      )
+      expect(optional_questions.length).to.be.above(0)
+
+      const without_optionals = { ...valid_submission }
+      for (const question of optional_questions) {
+        delete without_optionals[question.id]
+      }
+
+      const response = await submit(without_optionals)
+      response.should.have.status(200)
+
+      const rows = await knex('manager_waitlist_submissions')
+      Object.keys(rows[0].responses)
+        .sort()
+        .should.deep.equal(
+          questions
+            .filter((question) => question.required)
+            .map((question) => question.id)
+            .sort()
+        )
+    })
+
     it('refuses a missing required answer', async function () {
       const incomplete = { ...valid_submission }
       delete incomplete[first_question.id]

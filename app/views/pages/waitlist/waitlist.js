@@ -234,7 +234,12 @@ export default function WaitlistPage() {
               help={question.help}
               required={Boolean(question.required)}
               options={question.options}
-              multiline={!question.options}
+              type={question.type}
+              // A textarea is the default because most questions here want
+              // paragraphs, but a question carrying an explicit `type` is
+              // asking for a one-line control of that type -- a url in a
+              // four-row box invites a paragraph nobody wants to write.
+              multiline={!question.options && !question.type}
               value={values[question.id] || ''}
               on_change={handle_change}
             />

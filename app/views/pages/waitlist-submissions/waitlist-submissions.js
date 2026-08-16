@@ -84,7 +84,21 @@ const Submission = ({ submission }) => (
       return (
         <div className='waitlist-submissions__answer' key={question.id}>
           <h3 className='waitlist-submissions__question'>{question.label}</h3>
-          <p className='waitlist-submissions__response'>{answer}</p>
+          <p className='waitlist-submissions__response'>
+            {/* A url answer is rendered as a link because it exists to be
+                followed -- a Manager reading a card should not have to select
+                and paste a video link to watch it. `rel` is set because the
+                target is a candidate-supplied address: `noopener` denies it a
+                handle on this window, and this page is behind the auth guard,
+                so `noreferrer` keeps a member-only url out of its logs. */}
+            {question.type === 'url' ? (
+              <a href={answer} target='_blank' rel='noopener noreferrer'>
+                {answer}
+              </a>
+            ) : (
+              answer
+            )}
+          </p>
         </div>
       )
     })}

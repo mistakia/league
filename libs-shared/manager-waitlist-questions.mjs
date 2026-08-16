@@ -255,6 +255,44 @@ export const questions = [
       'A commissioner makes a ruling you think is wrong. What do you actually do?',
     required: true,
     max: MAX_LONG_ANSWER_LENGTH
+  },
+  // THE LAST TWO ARE THE CANDIDATE'S, NOT OURS. Everything above is a question
+  // the league chose; these two are the only places the candidate decides what
+  // the managers read about him. They sit at the end because a candidate who
+  // has just written five prose answers has already said most of it, and
+  // whatever is still missing at that point is exactly what belongs here.
+  //
+  // BOTH OPTIONAL, AND THAT IS NOT A SOFTENING. A required letter is a sixth
+  // long-form answer on a form whose scarce resource is completion. A required
+  // video is worse: it filters on having a camera, somewhere to host the file,
+  // and the willingness to be on it -- which is a screen on presentation, and
+  // this form's whole design says personality is NOT a criterion. Left
+  // optional, both are volunteered, and who volunteers them is itself a
+  // reading the managers get for free.
+  {
+    id: 'admission_letter',
+    label: 'Anything else you want the managers to know?',
+    help: 'The managers read these and vote, so this is the one part of the form where you decide what they see. Make whatever case you want to make — or skip it.',
+    required: false,
+    max: MAX_LONG_ANSWER_LENGTH
+  },
+  {
+    // `type` renders a single-line url input rather than the textarea every
+    // other free-text question gets, and hands the format check to the browser.
+    // There is deliberately no server-side url pattern: this is a link a
+    // Manager clicks by hand, so a wrong one costs a click, while a regex
+    // strict enough to be worth having rejects real urls on a form that cannot
+    // afford to refuse a completed submission.
+    //
+    // A HOSTED LINK, BECAUSE THERE IS NO ALTERNATIVE. This repo has no upload
+    // infrastructure of any kind, so the only shape a video can take here is
+    // somewhere it already lives.
+    id: 'intro_video_url',
+    label: 'A link to a short video of yourself, if you want to record one.',
+    help: 'Unlisted YouTube, Drive, Loom, whatever is easiest — just make sure the link opens for someone who is not you. A couple of minutes is plenty. Nobody is being judged on production values.',
+    type: 'url',
+    required: false,
+    max: MAX_SHORT_ANSWER_LENGTH
   }
 ]
 
