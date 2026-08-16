@@ -152,10 +152,14 @@ const read_edit_token = ({ config, token }) => {
   }
 }
 
-// Mails the candidate his own edit link. Failures are logged and swallowed by
-// every caller: the submission is already written by the time this runs, and a
-// 500 would tell a candidate who has just spent ten minutes on the form that it
-// did not go through.
+// Mails the candidate his own edit link, and returns whether the provider took
+// it. Failures are logged and swallowed by every caller: the submission is
+// already written by the time this runs, and a 500 would tell a candidate who
+// has just spent ten minutes on the form that it did not go through.
+//
+// ACCEPTED IS NOT DELIVERED. Resend taking the message is all this can learn --
+// a bounce arrives later over a webhook nothing here receives -- so what the
+// caller may report is that the link was sent, never that it landed.
 const send_edit_link = async ({ config, submission }) => {
   const token = sign_edit_token({
     config,
@@ -163,11 +167,13 @@ const send_edit_link = async ({ config, submission }) => {
   })
   const edit_link = `${config.url}/waitlist?token=${token}`
 
-  await sendEmail({
+  const { is_sent } = await sendEmail({
     to: submission.contact_email,
     subject: 'Your application to the league',
     message: `Thanks for applying. If you want to change any of your answers before the managers vote, this link opens your application:\n\n${edit_link}\n\nKeep it to yourself -- anyone holding it can edit what you submitted. If you did not apply, ignore this.`
   })
+
+  return Boolean(is_sent)
 }
 
 // Validates a body against the questionnaire and returns the row to write, or
@@ -314,6 +320,9 @@ const is_named_on_an_admission_vote = async ({ db, submission_id }) => {
  *               properties:
  *                 success:
  *                   type: boolean
+ *                 is_edit_link_sent:
+ *                   type: boolean
+ *                   description: Whether the mail provider accepted the edit link. False means the answers are stored but no link went out, and the page says so rather than promising mail. It is never a claim about delivery, which is decided after the response.
  *       400:
  *         description: A required answer is missing, an answer is too long, or the commitment was not affirmed
  *       429:
@@ -345,8 +354,9 @@ router.post('/', submit_rate_limiter, async (req, res) => {
     // is that he holds the address he gave. Handing the token back here would
     // let anyone who submits a form under someone else's address hold a
     // credential for the row they created.
+    let is_edit_link_sent = false
     try {
-      await send_edit_link({
+      is_edit_link_sent = await send_edit_link({
         config,
         submission: {
           submission_id: row.submission_id,
@@ -357,9 +367,15 @@ router.post('/', submit_rate_limiter, async (req, res) => {
       logger(email_error)
     }
 
-    // The response still carries nothing but the acknowledgement -- there is no
-    // id to hand back and no reason for an anonymous caller to hold one.
-    res.send({ success: true })
+    // WHETHER THE LINK WENT OUT IS REPORTED, because the page says so to the
+    // candidate. Swallowing the failure and printing "we have emailed you a
+    // link" regardless is a promise the server knows to be false, and it costs
+    // the candidate the only route back to his answers while he waits for mail
+    // that is not coming. The answers are stored either way, so this is a note
+    // on the acknowledgement rather than a failure of the submission.
+    //
+    // Still no id and no token here: the link is delivered by mail alone.
+    res.send({ success: true, is_edit_link_sent })
   } catch (error) {
     logger(error)
     // 500, not 400. Nothing reaches this catch that the caller could have
@@ -436,6 +452,11 @@ router.post('/edit-link', edit_link_rate_limiter, async (req, res) => {
     // Answered identically either way, and BEFORE anything about the row
     // reaches the response. The address is somebody's application to a private
     // league; whether one exists is exactly the fact this route must not leak.
+    //
+    // DELIBERATELY NOT `is_edit_link_sent`, unlike the submit route above.
+    // Reporting whether mail went out here reports whether a row was found,
+    // which is the enumeration oracle this route is shaped to avoid -- the
+    // submit route can say it because the caller supplied the row himself.
     res.send({ success: true })
   } catch (error) {
     logger(error)

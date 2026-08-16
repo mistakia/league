@@ -224,6 +224,7 @@ export default function WaitlistPage() {
   const [has_affirmed, set_has_affirmed] = React.useState(false)
   const [is_submitting, set_is_submitting] = React.useState(false)
   const [is_submitted, set_is_submitted] = React.useState(false)
+  const [is_edit_link_sent, set_is_edit_link_sent] = React.useState(false)
   const [error_message, set_error_message] = React.useState(null)
   const [is_loading, set_is_loading] = React.useState(Boolean(token))
   const [load_error_message, set_load_error_message] = React.useState(null)
@@ -322,6 +323,12 @@ export default function WaitlistPage() {
         )
       }
 
+      // What the thank-you screen says about the emailed link is what the
+      // server actually did, not what it intended. The answers are stored
+      // either way, so a link that never went out changes the copy rather than
+      // the outcome.
+      const result = await response.json()
+      set_is_edit_link_sent(Boolean(result.is_edit_link_sent))
       set_is_submitted(true)
     } catch (error) {
       set_error_message(error.message)
@@ -396,12 +403,24 @@ export default function WaitlistPage() {
               ? 'The managers will read this version. You can come back to the same link and change it again until they start voting.'
               : 'That is everything we need. The current managers read the answers and vote, so a reply takes days rather than hours — you will hear back either way.'}
           </p>
-          {!is_editing && (
-            <p>
-              We have emailed you a link back to your answers — keep it, and use
-              it if you want to change anything before the managers vote.
-            </p>
-          )}
+          {!is_editing &&
+            (is_edit_link_sent ? (
+              <p>
+                We have emailed {values.contact_email} a link back to your
+                answers — keep it, and use it if you want to change anything
+                before the managers vote.
+              </p>
+            ) : (
+              // Said plainly rather than dressed up: the answers are safe and
+              // the link is not coming, so the one useful thing is what to do
+              // instead. Promising mail that the server knows it failed to send
+              // costs the candidate the wait plus the route back.
+              <p>
+                We could not email you the link back to your answers just now.
+                Your application is saved — ask for the link again from the
+                waitlist page in a while, or email the commissioner.
+              </p>
+            ))}
           <p>
             <NavLink to='/leagues/1'>Look at the league</NavLink> in the
             meantime.

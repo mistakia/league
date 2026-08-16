@@ -86,6 +86,12 @@ const edit = (body) =>
 const RESEND_API_PREFIX = 'https://api.resend.com/'
 const original_fetch = globalThis.fetch
 let sent_emails = []
+// Set by the delivery cases to make the provider REFUSE. It answers 422 with an
+// error body, which is what Resend really does for an unusable key, an
+// unverified sending domain or a rejected recipient — and the SDK turns that
+// into a resolved `{ error }` rather than a throw, which is the whole reason
+// the route cannot infer delivery from the absence of an exception.
+let is_email_provider_refusing = false
 
 const install_email_capture = () => {
   sent_emails = []
@@ -93,6 +99,17 @@ const install_email_capture = () => {
     if (!String(resource).startsWith(RESEND_API_PREFIX)) {
       return original_fetch(resource, options)
     }
+
+    if (is_email_provider_refusing) {
+      return new Response(
+        JSON.stringify({
+          name: 'validation_error',
+          message: 'The recipient was refused'
+        }),
+        { status: 422, headers: { 'content-type': 'application/json' } }
+      )
+    }
+
     sent_emails.push(JSON.parse(options.body))
     return new Response(JSON.stringify({ id: 'captured-by-test' }), {
       status: 200,
@@ -149,6 +166,7 @@ describe('WAITLIST', function () {
     await edit_link_rate_limit_store.resetAll()
     await edit_rate_limit_store.resetAll()
     sent_emails = []
+    is_email_provider_refusing = false
   })
 
   after(function () {
@@ -354,6 +372,46 @@ describe('WAITLIST', function () {
       sent_emails[0].to.should.equal(valid_submission.contact_email)
       expect(extract_edit_token(sent_emails[0])).to.not.equal(null)
       JSON.stringify(response.body).should.not.include('token')
+      // The page tells the candidate his link is on the way, so the server has
+      // to say whether it is.
+      response.body.is_edit_link_sent.should.equal(true)
+    })
+
+    // THE ONE THAT WOULD OTHERWISE BE A LIE. The provider RESOLVES a refusal
+    // rather than throwing, so a route that awaits the send and reports success
+    // regardless promises mail that was never accepted -- and the candidate
+    // waits for the only route back to his answers.
+    it('reports the link as unsent when the provider refuses it', async function () {
+      is_email_provider_refusing = true
+
+      const response = await submit(valid_submission)
+      response.should.have.status(200)
+      response.body.success.should.equal(true)
+      response.body.is_edit_link_sent.should.equal(false)
+
+      // The application is stored anyway. A failed email must not cost the
+      // candidate ten minutes of answers.
+      const rows = await knex('manager_waitlist_submissions')
+      rows.length.should.equal(1)
+      rows[0].candidate_name.should.equal(valid_submission.candidate_name)
+    })
+
+    // The link stays reachable after a failed send: the candidate asks again
+    // once the provider is working, which is what the page tells him to do.
+    it('emails the link on a later request after a refused send', async function () {
+      is_email_provider_refusing = true
+      await submit(valid_submission)
+      is_email_provider_refusing = false
+
+      const response = await request_edit_link({
+        contact_email: valid_submission.contact_email
+      })
+      response.should.have.status(200)
+
+      sent_emails.length.should.equal(1)
+      const read = await read_submission(extract_edit_token(sent_emails[0]))
+      read.should.have.status(200)
+      read.body.candidate_name.should.equal(valid_submission.candidate_name)
     })
 
     // A honeypot submission writes no row, so there is nothing to email a link
@@ -420,6 +478,27 @@ describe('WAITLIST', function () {
       const read = await read_submission(token)
       read.should.have.status(200)
       read.body.candidate_name.should.equal('Second Attempt')
+    })
+
+    // The submit route reports whether the link went out; this one must not,
+    // because "the send failed" and "there was nobody to send to" would then be
+    // the same answer read two ways. So its response is identical across a
+    // known address, an unknown one, and a provider refusal.
+    it('says nothing about the send, so a refusal is not a lookup', async function () {
+      await submit(valid_submission)
+      is_email_provider_refusing = true
+
+      const known = await request_edit_link({
+        contact_email: valid_submission.contact_email
+      })
+      const unknown = await request_edit_link({
+        contact_email: 'nobody@example.com'
+      })
+
+      known.should.have.status(200)
+      known.status.should.equal(unknown.status)
+      JSON.stringify(known.body).should.equal(JSON.stringify(unknown.body))
+      JSON.stringify(known.body).should.not.include('is_edit_link_sent')
     })
 
     it('refuses a request with no contact_email', async function () {
