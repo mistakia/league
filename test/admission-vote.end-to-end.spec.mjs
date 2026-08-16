@@ -123,7 +123,6 @@ describe('ADMISSION VOTE END TO END', function () {
       path: '/',
       token: commissioner_token,
       body: {
-        maximum_ranked_candidates: 3,
         closes_at: new Date(Date.now() + 3 * day_in_milliseconds).toISOString(),
         eligible_teams: eligible_team_ids.map((team_id) => ({ team_id })),
         candidates: [
@@ -178,7 +177,7 @@ describe('ADMISSION VOTE END TO END', function () {
       })
     ).should.have.status(200)
 
-    // Team 3 ranks the full three.
+    // Team 3 ranks three of the four, leaving Bob off entirely.
     ;(
       await post({
         path: `/${admission_vote_id}/ballot`,
@@ -267,18 +266,19 @@ describe('ADMISSION VOTE END TO END', function () {
       })
     ).should.have.status(200)
 
-    // Alice 3 (Team 1) + 3 (Team 3) = 6
-    // Bob   3 (Team 2) + 3 (Team 4) = 6   <- tied with Alice
-    // Carol 2 (Team 3) + 3 (Team 5) = 5
-    // Dave  1 (Team 3) + 2 (Team 4) = 3
+    // Four Candidates, so a first choice scores 4 and a fourth 1.
+    // Alice 4 (Team 1) + 4 (Team 3) = 8
+    // Bob   4 (Team 2) + 4 (Team 4) = 8   <- tied with Alice
+    // Carol 3 (Team 3) + 4 (Team 5) = 7
+    // Dave  2 (Team 3) + 3 (Team 4) = 5
     const response = await read_vote({ token: team4_token })
     expect(
       response.body.totals.map((row) => [row.candidate_name, row.points_total])
     ).to.deep.equal([
-      ['Alice', 6],
-      ['Bob', 6],
-      ['Carol', 5],
-      ['Dave', 3]
+      ['Alice', 8],
+      ['Bob', 8],
+      ['Carol', 7],
+      ['Dave', 5]
     ])
 
     expect(response.body.ballot_count).to.equal(5)
@@ -383,7 +383,6 @@ describe('ADMISSION VOTE END TO END', function () {
       path: '/',
       token: commissioner_token,
       body: {
-        maximum_ranked_candidates: 2,
         closes_at: new Date(Date.now() + 3 * day_in_milliseconds).toISOString(),
         eligible_teams: eligible_team_ids.map((team_id) => ({ team_id })),
         candidates: [{ candidate_name: 'Erin', sponsor_team_ids: [1] }]

@@ -82,8 +82,6 @@ const OpenVoteForm = ({
   is_working
 }) => {
   const [closes_at, set_closes_at] = React.useState('')
-  const [maximum_ranked_candidates, set_maximum_ranked_candidates] =
-    React.useState(3)
   const [eligible_team_ids, set_eligible_team_ids] = React.useState(
     league_teams.map((team) => team.team_id)
   )
@@ -112,7 +110,6 @@ const OpenVoteForm = ({
         event.preventDefault()
         on_open({
           closes_at: new Date(closes_at).toISOString(),
-          maximum_ranked_candidates: Number(maximum_ranked_candidates),
           eligible_teams: eligible_team_ids.map((team_id) => ({ team_id })),
           candidates: candidates
             .filter((candidate) => candidate.candidate_name.trim())
@@ -134,19 +131,9 @@ const OpenVoteForm = ({
         />
       </label>
 
-      {/* Section 10: the stated number "shall be not less than one (1)", and
-          it is what every ranked candidate scores from — not ballot length. */}
-      <label className='admission-vote-commissioner__field'>
-        <span>Candidates a team may rank</span>
-        <input
-          type='number'
-          min='1'
-          value={maximum_ranked_candidates}
-          onChange={(event) =>
-            set_maximum_ranked_candidates(event.target.value)
-          }
-        />
-      </label>
+      {/* Section 10 states no cap on how many Candidates a Team may rank, so
+          there is nothing to ask for here: a first choice scores the size of
+          the field, which the server derives from the candidates below. */}
 
       {/* Section 10(c): a Team without a Manager shall not vote. Row presence
           in the database cannot answer this, so it is stated here and frozen
@@ -710,10 +697,6 @@ export default function AdmissionVoteCommissionerPage() {
       <h1 className='admission-vote-commissioner__title'>
         Admission vote — commissioner
       </h1>
-      <p className='admission-vote-commissioner__intro'>
-        Ballots are confidential. You see the tally and the turnout, never how a
-        team voted.
-      </p>
       {content}
     </div>
   )

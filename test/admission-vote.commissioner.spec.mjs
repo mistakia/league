@@ -173,12 +173,27 @@ describe('ADMISSION VOTE COMMISSIONER', function () {
       response.should.have.status(403)
     })
 
-    // Section 10: the stated number of Candidates a Team may rank "shall be not
-    // less than one (1)".
-    it('refuses a stated maximum below one', async () => {
-      const response = await open_vote({ maximum_ranked_candidates: 0 })
-      response.should.have.status(400)
-      expect(response.body.error).to.include('at least 1')
+    // Section 10 caps nothing, so the number a first choice scores is the size
+    // of the field. Asserted through a DIFFERENT candidate count than the
+    // default so it cannot pass on a hardcoded 3, and with a value supplied in
+    // the body to pin that a client cannot set it.
+    it('derives the ranking maximum from the candidate count', async () => {
+      const response = await open_vote({
+        candidates: [
+          { candidate_name: 'Alice' },
+          { candidate_name: 'Bob' },
+          { candidate_name: 'Carol' },
+          { candidate_name: 'Dave' },
+          { candidate_name: 'Erin' }
+        ],
+        maximum_ranked_candidates: 1
+      })
+      response.should.have.status(200)
+
+      const vote = await knex('admission_votes')
+        .where({ admission_vote_id: response.body.admission_vote_id })
+        .first()
+      expect(vote.maximum_ranked_candidates).to.equal(5)
     })
 
     it('refuses a vote with no candidates', async () => {

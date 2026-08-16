@@ -181,11 +181,15 @@ const Ballot = ({ vote, candidates, on_submit, is_submitting, viewer }) => {
         on_submit(ranked_candidate_ids)
       }}
     >
+      {/* The count is the size of the field, so "rank as many as you like" and
+          the old "rank up to N" describe the same ballot — but only the first
+          says the thing a manager needs to know, which is that leaving someone
+          off is a choice rather than the default the form pushed him toward. */}
       <p className='admission-vote__ballot-intro'>
-        Rank up to {vote.maximum_ranked_candidates} candidate
-        {vote.maximum_ranked_candidates === 1 ? '' : 's'}. Your first choice
-        scores {vote.maximum_ranked_candidates}, your second one fewer, and so
-        on. Ranking fewer does not weaken your first choice.
+        Rank as many as you like. Your first choice scores{' '}
+        {vote.maximum_ranked_candidates}, your second one fewer, and so on.
+        Anyone you leave off scores nothing from you, and ranking fewer does not
+        weaken your first choice.
         {viewer.has_submitted_ballot &&
           ' Your ballot is shown below as you submitted it. Changing it and submitting replaces it entirely, as often as you like while the vote is open.'}
       </p>

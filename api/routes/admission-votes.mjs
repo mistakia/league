@@ -660,19 +660,6 @@ router.post('/', async (req, res) => {
         .send({ error: 'only the commissioner can open an admission vote' })
     }
 
-    const maximum_ranked_candidates = Number(req.body.maximum_ranked_candidates)
-    // Section 10: the stated number "shall be not less than one (1)". A stated
-    // maximum of zero would score every Candidate at zero and hand the whole
-    // ranking to the Commissioner under a parameter he alone sets.
-    if (
-      !Number.isInteger(maximum_ranked_candidates) ||
-      maximum_ranked_candidates < 1
-    ) {
-      return res
-        .status(400)
-        .send({ error: 'maximum_ranked_candidates must be at least 1' })
-    }
-
     const opened_at = new Date()
     const closes_at = new Date(req.body.closes_at)
     if (Number.isNaN(closes_at.getTime()) || closes_at <= opened_at) {
@@ -771,6 +758,18 @@ router.post('/', async (req, res) => {
         })
       }
     }
+
+    // DERIVED, NEVER SUPPLIED. Section 10 lets a Team rank as many Candidates
+    // as it wishes, so the number a first choice scores is the size of the
+    // field and there is nothing for the Commissioner to state. It stays a
+    // stored column rather than being recomputed at tally time because it is
+    // the scoring basis the vote was actually held under: a Candidate removed
+    // afterwards must not silently restate what every ballot was worth.
+    //
+    // This was a request field until 2026-08-16, when the Commissioner-stated
+    // cap came out of the amendment. Nothing rejects a body that still carries
+    // one; it is ignored, like any other unknown key.
+    const maximum_ranked_candidates = candidates.length
 
     // A partial unique index already bounds a league to one OPEN vote per
     // season, so this is the readable refusal rather than the enforcement.
