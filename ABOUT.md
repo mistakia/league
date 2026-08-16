@@ -560,12 +560,36 @@ observations:
   - >-
     [verification] yarn check:cluster now exits 0 with no BLIND gates, where it had been exiting 1
     on three.
+  - >-
+    [change] 2026-08-15 The three auth pages (/login, /forgot-password, /reset-password) moved off
+    default MUI onto app/styles/prose-form.styl in 7449c5f91, so they read as the same site as / and
+    /waitlist; their three separate stylesheets collapsed to one shared
+    app/views/pages/auth/auth.styl.
+  - >-
+    [refactor] 2026-08-15 prose_submit() split into prose_action_fill() carrying the paint and type,
+    plus the form-column layout and disabled state, because the landing page's call to action is an
+    ANCHOR in a flex row that wanted the first and none of the second and had been carrying its own
+    copy of all thirteen declarations.
+  - >-
+    [gotcha] 2026-08-15 A mixin shared between a button and an anchor must not carry a :disabled
+    rule, since an anchor cannot be disabled and the lines are dead CSS on every link call site;
+    verify such an extraction by comparing the compiled declaration SET per selector against HEAD,
+    because a reordered but equivalent block diffs noisily while a real change hides in that noise.
+  - >-
+    [bug] 2026-08-15 /login rendered the leagueId and teamId from a commissioner's invite link as
+    two DISABLED MUI text fields labelled 'League Id' and 'Team Id', database column names shown to
+    a person in controls that look editable and are not; neither was ever a form value, since
+    handle_submit reads both off the query string. Fixed in 7449c5f91.
+  - >-
+    [bug] 2026-08-15 The login page's login/register mode switch was a div with an onClick, so it
+    was unreachable by keyboard and announced nothing, and no field on any of the three auth pages
+    had a real label element. Both fixed in 7449c5f91.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-14T20:51:05.246Z'
+updated_at: '2026-08-16T04:00:56.567Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
