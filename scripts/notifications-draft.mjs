@@ -12,7 +12,7 @@ import {
   where_outstanding_draft_pick,
   throw_if_shortfall
 } from '#libs-server'
-import { getDraftWindow } from '#libs-shared'
+import { get_draft_pass_window } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
@@ -77,10 +77,9 @@ const run = async () => {
 
     if (!frontier) continue // draft complete for this league
 
-    // The whole board, because it is what places a window: the reference is the
-    // last pick MADE before a given one and the step count is the unmade picks
-    // between, so a pick taken out of order moves the anchor for everything
-    // behind it.
+    // The whole board, because it is what places a window: the published slate
+    // indexes each pick by its position in the outstanding set as of the last
+    // boundary, so a partial board mis-indexes every window on it.
     const draft_picks = await db('draft')
       .where({ lid: league.uid, season_year: current_season.year })
       .orderBy('pick', 'asc')
@@ -88,7 +87,7 @@ const run = async () => {
     // The window opens the instant the preceding pick is made (draft_start when
     // none is), per Article XI Section 8. That timestamp is the true on-clock
     // time and doubles as the stable, unique idempotency key for this pick.
-    // Carried in both units on purpose: getDraftWindow takes the selection as
+    // Carried in both units on purpose: the calculator takes the selection as
     // an instant, while the marker key and the clock arithmetic below are epoch
     // seconds. Read as the last MADE pick rather than `frontier.pick - 1`, which
     // names a pick that may be unmade or absent from the board entirely.
@@ -120,17 +119,32 @@ const run = async () => {
     }
 
     // The deadline is not a standalone setting: it is exactly the moment the
-    // NEXT pick's window opens, because that is when another team may jump
-    // this one. Deriving it from getDraftWindow — the same function the draft
-    // route gates on — keeps the announced deadline and the enforced deadline
-    // from drifting apart, and reports the real length across the overnight
-    // gap, where a slot is worth more than an hour.
-    const deadline = getDraftWindow({
+    // SECOND outstanding pick's slot opens, because that is when another team
+    // may pass this one. Deriving it from the same calculator the draft route
+    // gates on keeps the announced deadline and the enforced deadline from
+    // drifting apart, and reports the real length across the overnight gap,
+    // where a slot is worth more than an hour.
+    //
+    // `get_draft_pass_window` rather than the window of `frontier.pick + 1`:
+    // on a board with a gap that names a pick that is already MADE — on the
+    // live 2026 board the frontier is pick 3 and pick 4 is made — for which
+    // the calculator correctly returns null, and `.unix()` on null throws.
+    const pass_window = get_draft_pass_window({
       ...get_draft_window_config(league),
-      pick_number: frontier.pick + 1,
       draft_picks
-    }).unix()
+    })
 
+    // Null between a resume and the next publication boundary, when nobody can
+    // pass this pick at all. Announcing no deadline is the honest report; the
+    // next cycle picks it up once the slate publishes.
+    if (!pass_window) {
+      log(
+        `league ${lid}: no published slate yet for pick #${frontier.pick}; skipping`
+      )
+      continue
+    }
+
+    const deadline = pass_window.unix()
     const clock_hours = Math.round(((deadline - on_clock_at) / 3600) * 10) / 10
     const message = `${frontier.name} (${frontier.abbreviation}) is now on the clock with the #${frontier.pick} pick in the ${current_season.year} draft. The window closes ${dayjs.unix(deadline).format('ddd MMM D h:mm A')} (${clock_hours} hours).`
 

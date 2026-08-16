@@ -40,43 +40,38 @@ export const get_open_league_pause = async ({ league_id, db = default_db }) => {
 }
 
 /**
- * Every pause interval that overlaps the draft, for the draft clock's credit.
+ * The league's latest resume, for the draft clock.
  *
- * Returns the raw intervals rather than a precomputed total. A scalar would be
- * computed under whatever daily-window bounds were in force when it was
- * written, and -- more importantly -- it cannot be clipped to the window
- * anchor, which is resolved inside `getDraftWindow` and is not known here. See
- * `libs-shared/get-paused-open-seconds.mjs` for why the clip is the whole
- * correctness argument.
+ * A SCALAR, where this used to return the whole interval array. The open-seconds
+ * credit needed intervals because it had to clip each one to a per-pick anchor
+ * resolved inside `getDraftWindow`. The published slate does not credit
+ * anything: a resume simply VOIDS the standing publication, and windows are
+ * read from the first boundary at or after it. Only the latest resume can
+ * matter under that rule — two pauses in a day are equivalent to one — so
+ * anything more than the scalar is a shape for the two sides to disagree over.
  *
- * `resumed_at` is left NULL for an open pause rather than filled with "now".
- * The consumer closes it against its own clock, which is what lets the SPA
- * measure a live pause continuously instead of ticking down between refetches.
- *
- * Intervals that ended before the draft opened are dropped: they cost the draft
- * nothing. Intervals are NOT clipped at the lower bound here, because
- * `getDraftWindow` clips to the resolved reference anyway and a second clip
- * would just be a place for the two to disagree.
+ * Null while a league has never been resumed, INCLUDING while its first pause
+ * is still open. That is correct rather than a gap: an open pause blocks every
+ * league write with a 423, so no window it might have voided is reachable, and
+ * the SPA freezes its display clock off `paused_at` instead.
  *
  * @param {Object} args
  * @param {number} args.league_id
- * @param {Date|string} args.draft_start - timestamptz.
  * @param {Object} [args.db]
- * @returns {Promise<Array<{paused_at: string, resumed_at: string|null}>>}
+ * @returns {Promise<string|Date|null>} The latest `resumed_at`, or null.
  */
-export const get_draft_pause_periods = async ({
+export const get_latest_league_resume = async ({
   league_id,
-  draft_start,
   db = default_db
 }) => {
-  if (!league_id || !draft_start) return []
+  if (!league_id) return null
 
   const pause_state = await get_pause_state_by_league_id({
-    leagues: [{ uid: league_id, draft_start }],
+    leagues: [{ uid: league_id }],
     db
   })
 
-  return pause_state[Number(league_id)].draft_pause_periods
+  return pause_state[Number(league_id)].resumed_at
 }
 
 /**
@@ -88,14 +83,13 @@ export const get_draft_pause_periods = async ({
  * and every frozen clock are inert for exactly the people a pause is for.
  *
  * The two shapes come from ONE implementation on purpose: the single-league
- * reader above delegates here, so the rule for which intervals matter to the
- * draft cannot come to mean different things on the two routes.
+ * reader above delegates here, so which resume voids the draft's publication
+ * cannot come to mean different things on the two routes.
  *
  * @param {Object} args
- * @param {Array<{uid: number, draft_start: Date|string}>} args.leagues
+ * @param {Array<{uid: number}>} args.leagues
  * @param {Object} [args.db]
- * @returns {Promise<Object>} Keyed by league id, each
- *   `{ paused_at, draft_pause_periods }`.
+ * @returns {Promise<Object>} Keyed by league id, each `{ paused_at, resumed_at }`.
  */
 export const get_pause_state_by_league_id = async ({
   leagues,
@@ -117,20 +111,18 @@ export const get_pause_state_by_league_id = async ({
     )
     const open_pause = league_rows.find((pause_row) => !pause_row.resumed_at)
 
+    // Ordered by `paused_at` ascending, so the last CLOSED row is the latest
+    // resume. Reading it off the pause order rather than sorting on
+    // `resumed_at` costs nothing here — pauses cannot overlap, since
+    // `league_pauses_one_open_per_league` allows only one open at a time.
+    let resumed_at = null
+    for (const pause_row of league_rows) {
+      if (pause_row.resumed_at) resumed_at = pause_row.resumed_at
+    }
+
     pause_state[league_id] = {
       paused_at: open_pause ? open_pause.paused_at : null,
-      draft_pause_periods: league.draft_start
-        ? league_rows
-            .filter(
-              (pause_row) =>
-                !pause_row.resumed_at ||
-                new Date(pause_row.resumed_at) > new Date(league.draft_start)
-            )
-            .map((pause_row) => ({
-              paused_at: pause_row.paused_at,
-              resumed_at: pause_row.resumed_at
-            }))
-        : []
+      resumed_at
     }
   }
 

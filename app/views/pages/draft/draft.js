@@ -22,10 +22,7 @@ import {
   fantasy_positions
 } from '@constants'
 import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
-import {
-  is_within_daily_window,
-  get_next_daily_window_entry
-} from '@libs-shared'
+import { get_next_publication_boundary } from '@libs-shared'
 
 dayjs.extend(relativeTime)
 
@@ -115,14 +112,15 @@ export default function DraftPage({
       // is NOT on the clock, and reading `isBefore(draftWindow)` here put the
       // countdown beside a hidden draft button in exactly that state.
       if (!isPreviousSelectionMade && !isDraftWindowOpen) {
-        // `draftWindow` is already in the past in the outside-the-band case,
-        // so the honest target is the next time the band opens.
-        const window_opens_at = draft_clock_now.isBefore(nextPick.draftWindow)
-          ? nextPick.draftWindow
-          : get_next_daily_window_entry(
-              draft_clock_now,
-              get_draft_window_config(league)
-            )
+        // Three states, and the null one is new. A resume voids the standing
+        // publication, so between a resume and the next boundary EVERY pick's
+        // window is null and nobody can be passed -- which is a real fact
+        // about the board, not a missing value, so it gets its own sentence
+        // naming when the next slate publishes.
+        const next_slate_at = get_next_publication_boundary({
+          until: draft_clock_now,
+          ...get_draft_window_config(league)
+        })
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
@@ -130,21 +128,30 @@ export default function DraftPage({
             </div>
             <div>
               {is_paused
-                ? 'Selection window opens when the league resumes'
-                : `Selection window opens ${draft_clock_now.to(window_opens_at)}`}
+                ? 'Selection windows resume when the league resumes'
+                : nextPick.draftWindow
+                  ? `Can be passed ${draft_clock_now.to(nextPick.draftWindow)}`
+                  : `No published schedule — the next slate publishes ${draft_clock_now.to(next_slate_at)}`}
             </div>
           </div>
         )
       } else {
-        const isWindowClosed = draft_clock_now.isAfter(windowEnd)
-        const hours = windowEnd.diff(draft_clock_now, 'hours')
-        const mins = windowEnd.diff(draft_clock_now, 'minutes') % 60
+        // `windowEnd` is when the SECOND outstanding pick's slot opens, which
+        // is the first moment anybody else may pass this one. Null while no
+        // slate is published, and on a board with one pick left, since nobody
+        // can pass the last pick.
+        const isWindowClosed = windowEnd && draft_clock_now.isAfter(windowEnd)
+        const hours = windowEnd ? windowEnd.diff(draft_clock_now, 'hours') : 0
+        const mins = windowEnd
+          ? windowEnd.diff(draft_clock_now, 'minutes') % 60
+          : 0
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
               Pick #{nextPick.pick} ({nextPick.pick_str})
             </div>
-            {!isWindowClosed && (
+            {!windowEnd && <div>Cannot be passed yet</div>}
+            {windowEnd && !isWindowClosed && (
               <div>
                 Time Remaining: {hours}h {mins}m{is_paused ? ' (paused)' : ''}
               </div>
@@ -217,12 +224,11 @@ export default function DraftPage({
       !is_draft_complete &&
       !pick.pid &&
       Boolean(pick.pick) &&
-      (isPreviousSelectionMade ||
-        (draft_clock_now.isAfter(pick.draftWindow) &&
-          is_within_daily_window(
-            draft_clock_now,
-            get_draft_window_config(league)
-          )))
+      // Every pick whose numeric predecessor is made is on the clock, not just
+      // one -- on a board with a gap several are at once. Past those, a pick
+      // is reachable only by jumping the stalled team ahead of it, which needs
+      // its published slot to have passed. A null window is after nothing.
+      (isPreviousSelectionMade || draft_clock_now.isAfter(pick.draftWindow))
 
     const trade_count = pick.trade_count || 0
 

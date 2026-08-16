@@ -3,11 +3,9 @@ import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 
 import timestamptz_to_epoch from './timestamptz-to-epoch.mjs'
-import get_paused_open_seconds from './get-paused-open-seconds.mjs'
 import {
   DRAFT_TIMEZONE,
   HOURS_PER_DAY,
-  is_open_hour,
   resolve_daily_window as resolve_band
 } from './draft-daily-window.mjs'
 
@@ -20,440 +18,542 @@ dayjs.extend(timezone)
 
 export { DRAFT_TIMEZONE }
 
-export const CADENCE_UNITS = Object.freeze(['hour', 'day'])
+export const DEFAULT_PICK_INTERVAL_HOURS = 1
 
-export const DEFAULT_CADENCE_UNIT = 'hour'
-export const DEFAULT_CADENCE_INTERVAL = 1
+const DATE_FORMAT = 'YYYY-MM-DD'
 
 /**
- * Calculates when a given pick's draft window opens.
+ * A timezone-aware instant built fresh from a `(date, hour)` pair.
  *
- * A pick's window is the moment that pick becomes eligible to be taken *out of
- * order* — when its team may select even though an earlier pick is still
- * unmade. A team whose preceding pick has already been made is always on the
- * clock regardless of the window; the window only governs jumping a stalled
- * team ahead of you.
+ * Every slot and every boundary is constructed this way rather than by adding
+ * hours to a previous instant. Hour arithmetic across a DST transition drifts
+ * by the offset change — 24 hours after midnight on a spring-forward date is
+ * 01:00, not midnight — so a schedule built by accumulation walks off the
+ * wall-clock hours it is supposed to publish. Building from the pair pins each
+ * slot to its wall-clock hour on its own date, which is what the notice says.
  *
- * The rule, shared by every cadence:
+ * The one residual is a slot hour that does not EXIST on a spring-forward date;
+ * dayjs resolves it forward to 03:00. No elected band puts a slot there, and
+ * pinning the behavior is tracked on
+ * `user:task/league/fix-draft-window-dst-offset-latching.md`.
+ */
+const instant_at = (date, hour) =>
+  dayjs.tz(`${date} ${String(hour).padStart(2, '0')}:00:00`, DRAFT_TIMEZONE)
+
+/**
+ * The band's close for the draft day starting on `date`.
  *
- *   window(pick_number) = reference advanced by one step per unmade pick between
+ * A close at hour 24 is midnight of the FOLLOWING date — the same instant,
+ * named the way `instant_at` can build it, since there is no hour 24 to
+ * construct.
+ */
+const band_close_at = (date, band) => {
+  if (band.end_hour < HOURS_PER_DAY) return instant_at(date, band.end_hour)
+
+  const next_date = dayjs
+    .tz(`${date} 12:00:00`, DRAFT_TIMEZONE)
+    .add(1, 'day')
+    .format(DATE_FORMAT)
+
+  return instant_at(next_date, band.end_hour % HOURS_PER_DAY)
+}
+
+/**
+ * The wall-clock hours a draft day publishes a slot at.
  *
- * The reference is the selection time of the last pick MADE before this one, or
- * the draft start pre-draft (treated as the completion of a notional pick 0).
- * The immediate next unmade pick therefore opens at "now" — the instant the pick
- * before it landed — and each further unmade pick ahead of it adds a step.
+ * Derived from the band and the interval rather than configured: the first slot
+ * is the band's opening hour and each further slot is one interval later, while
+ * still strictly inside the band. The elected 2026 config — a 3-hour interval
+ * on an 11:00-24:00 band — gives 11, 14, 17, 20 and 23 Eastern.
  *
- * Counting unmade picks rather than pick numbers is what keeps the placement
- * honest once a pick has been taken out of order. A jumped pick is already made,
- * so it consumes no step, and the picks behind it measure from when that jump
- * actually landed rather than from the last gap-free pick at the top of the
- * board — which is a stale anchor the moment anybody jumps. It also absorbs a
- * board whose pick numbering has holes, which is what a decommissioned team's
- * removed pick leaves behind.
+ * Always at least one slot. An interval at or above the band's width leaves
+ * only the opening hour, which is the full-day 24-hour case: one slot a day, at
+ * midnight, which is the Article XI Section 8 rule.
  *
- * A step is `cadence_interval` units of `cadence_unit`, and every step lands on
- * an hour inside the daily window `[daily_window_start_hour,
- * daily_window_end_hour)`; hours outside it are skipped. The two units differ
- * in more than scale: `hour` steps consume open slots and so skip the overnight
- * gap, while `day` steps hold the time of day across the step.
+ * @param {Object} args
+ * @param {number} [args.daily_window_start_hour]
+ * @param {number} [args.daily_window_end_hour]
+ * @param {number} [args.pick_interval_hours]
+ * @returns {Array<number>} Ascending wall-clock hours.
+ */
+export function get_draft_slot_hours({
+  daily_window_start_hour,
+  daily_window_end_hour,
+  pick_interval_hours
+} = {}) {
+  const band = resolve_daily_window({
+    daily_window_start_hour,
+    daily_window_end_hour
+  })
+  const interval = resolve_pick_interval_hours(pick_interval_hours)
+
+  const slot_hours = []
+  for (let hour = band.start_hour; hour < band.end_hour; hour += interval) {
+    slot_hours.push(hour)
+  }
+
+  return slot_hours
+}
+
+/**
+ * The publication boundary governing `until`, or null when none does.
+ *
+ * A boundary is the band's CLOSE — for an 11:00-24:00 band that is midnight
+ * Eastern — plus `draft_start`, which is the initial publication. At each one
+ * the schedule is republished; between two of them it is frozen.
+ *
+ * Two comparisons here are load-bearing and both were ambiguous in the first
+ * draft of this rule.
+ *
+ * The resume comparison is `>=`, not `>`. A resume voids the standing
+ * publication, so a boundary is only usable when it lands at or after the
+ * latest resume — but a boundary landing exactly ON the resume second does
+ * publish. Under a strict `>` a one-second coincidence blacks out a further
+ * whole day for no reason anybody could explain to a manager.
+ *
+ * Returning null is the resume's whole effect: between a resume and the next
+ * boundary there is no publication, so no pick has a window and no pick can be
+ * passed. That is "windows start the following day after an unpause".
+ *
+ * @param {Object} args
+ * @param {number} args.draft_start_timestamp - Unix seconds the draft opens.
+ * @param {Date|string} [args.resumed_at] - The league's LATEST resume, timestamptz.
+ * @param {import('dayjs').Dayjs|Date|string|number} [args.until] - The caller's now.
+ * @param {number} [args.daily_window_start_hour]
+ * @param {number} [args.daily_window_end_hour]
+ * @returns {import('dayjs').Dayjs|null}
+ */
+export function get_publication_boundary({
+  draft_start_timestamp,
+  resumed_at,
+  until,
+  daily_window_start_hour,
+  daily_window_end_hour
+} = {}) {
+  const band = resolve_daily_window({
+    daily_window_start_hour,
+    daily_window_end_hour
+  })
+
+  const now = until
+    ? dayjs(until).tz(DRAFT_TIMEZONE)
+    : dayjs().tz(DRAFT_TIMEZONE)
+  const draft_start = dayjs.unix(draft_start_timestamp).tz(DRAFT_TIMEZONE)
+
+  // The draft has not opened, so there is nothing to publish.
+  if (now.isBefore(draft_start)) return null
+
+  // The latest daily close at or before now. Today's close is tried first and
+  // stepped back a day when it has not happened yet.
+  let latest_close = band_close_at(now.format(DATE_FORMAT), band)
+  if (latest_close.isAfter(now)) {
+    latest_close = band_close_at(
+      now.subtract(1, 'day').format(DATE_FORMAT),
+      band
+    )
+  }
+
+  // `draft_start` counts as a boundary, so the governing one is whichever of
+  // the two is later — the daily close only takes over once one has occurred
+  // since the draft opened.
+  const boundary = latest_close.isAfter(draft_start)
+    ? latest_close
+    : draft_start
+
+  if (resumed_at) {
+    const resume = dayjs(resumed_at).tz(DRAFT_TIMEZONE)
+    if (boundary.isBefore(resume)) return null
+  }
+
+  return boundary
+}
+
+/**
+ * The next publication boundary strictly AFTER `until`.
+ *
+ * The counterpart to `get_publication_boundary`, and the only thing a surface
+ * can honestly say while every window is null: no pick has a slot yet, and the
+ * next slate is published at this instant. Strictly after, because a boundary
+ * landing exactly on now has already published — `get_publication_boundary`
+ * returns it.
+ *
+ * @param {Object} args
+ * @param {import('dayjs').Dayjs|Date|string|number} [args.until] - The caller's now.
+ * @param {number} [args.daily_window_start_hour]
+ * @param {number} [args.daily_window_end_hour]
+ * @returns {import('dayjs').Dayjs}
+ */
+export function get_next_publication_boundary({
+  until,
+  daily_window_start_hour,
+  daily_window_end_hour
+} = {}) {
+  const band = resolve_daily_window({
+    daily_window_start_hour,
+    daily_window_end_hour
+  })
+
+  const now = until
+    ? dayjs(until).tz(DRAFT_TIMEZONE)
+    : dayjs().tz(DRAFT_TIMEZONE)
+
+  const close = band_close_at(now.format(DATE_FORMAT), band)
+
+  return close.isAfter(now)
+    ? close
+    : band_close_at(now.add(1, 'day').format(DATE_FORMAT), band)
+}
+
+/**
+ * The `index`-th slot AT OR AFTER `from`, counting from zero.
+ *
+ * AT OR AFTER, never strictly after, and the difference is not cosmetic. Under
+ * a full-day band the boundary and the day's only slot are the SAME instant, so
+ * the strict reading makes the head pick's window the next boundary — which
+ * republishes it one day further out again, every day, so no window ever opens
+ * for any pick and a genuine stall becomes permanent.
+ *
+ * @param {Object} args
+ * @param {import('dayjs').Dayjs} args.from - Boundary or anchor instant.
+ * @param {number} args.index - Zero-based slot offset.
+ * @param {Array<number>} args.slot_hours - From `get_draft_slot_hours`.
+ * @returns {import('dayjs').Dayjs}
+ */
+export function get_draft_slot_at_index({ from, index, slot_hours }) {
+  let remaining = index
+
+  // Each day contributes at least one slot, so `index + 2` days always covers
+  // the request even when the boundary's own day is fully consumed.
+  for (let day_offset = 0; day_offset <= index + 1; day_offset++) {
+    const date = from.add(day_offset, 'day').format(DATE_FORMAT)
+
+    for (const hour of slot_hours) {
+      const slot = instant_at(date, hour)
+      if (slot.isBefore(from)) continue
+      if (remaining === 0) return slot
+      remaining -= 1
+    }
+  }
+
+  // Unreachable for a non-empty slot list; returned rather than thrown so a
+  // misconfigured band degrades to a late window instead of a crashed page.
+  return from.add(index + 2, 'day')
+}
+
+/**
+ * Calculates when a given pick becomes passable.
+ *
+ * A pick's window is the moment that pick may be taken *out of order* — when
+ * its team may select even though an earlier pick is still unmade. A team whose
+ * preceding pick has already been made is on the clock regardless of the
+ * window; the window governs only jumping a stalled team ahead of you.
+ *
+ * The rule is a published slate with an exclusive-clock floor:
+ *
+ *   window(P) = max(published, floor)
+ *
+ *     boundary    the latest publication boundary at or before now that is also
+ *                 at or after the latest resume; `draft_start` counts as one
+ *     outstanding the picks with no selection AS OF that boundary, in pick order
+ *     index       P's position within `outstanding`
+ *     published   the index-th slot at or after `boundary`
+ *     floor       the first slot at or after (the last selection made before P,
+ *                 plus one interval)
+ *
+ * The published term is what makes the schedule knowable a day ahead. The floor
+ * term is what keeps the exclusive-clock guarantee the 2026-08-02 election
+ * promises — without it the 11:00 pick made at 20:00 puts the next pick on the
+ * clock at an instant when two later windows have already opened, so two teams
+ * can pass it the same second. Taking the LATER of the two is what lets both
+ * hold at once: the floor can only ever delay a window, never pull one forward,
+ * so the published slate remains the earliest anything can happen.
+ *
+ * The outstanding set is computed as of the BOUNDARY, not as of now. A pick made
+ * after the boundary stays in the set and keeps its index, so no later pick's
+ * published slot moves until the next boundary. Filtering the live board
+ * instead would shrink a jumped pick out of the set and pull later windows
+ * EARLIER between boundaries — the freeze is what "publication" means.
+ *
+ * The invariant, stated exactly, because "windows never move up" is false as a
+ * blanket claim: BETWEEN two boundaries `window(P)` is monotone non-decreasing,
+ * since the published term is frozen and the floor reads the last selection
+ * before P, which only ever gets later. AT a boundary a window may move
+ * earlier, because picks made since the last publication shrink P's index. That
+ * is the move-up, it happens once a day, and the slate announces it the night
+ * before.
  *
  * @param {Object} args
  * @param {number} args.draft_start_timestamp - Unix timestamp (seconds) the draft opens.
  * @param {number} args.pick_number - 1-based pick number to calculate the window for.
- * @param {string} [args.cadence_unit='hour'] - 'hour' or 'day'; what one step is measured in.
- * @param {number} [args.cadence_interval=1] - Units of `cadence_unit` between consecutive windows.
- * @param {number} [args.daily_window_start_hour=11] - First hour of the day a window may open (inclusive).
- * @param {number} [args.daily_window_end_hour=16] - Hour of the day windows stop opening (EXCLUSIVE).
- * `draft_picks[].selection_timestamp` is timestamptz as of the 2026-08-07
- * conformance pass (`draft.selection_timestamp`) and is always DB-sourced, so it
- * is taken as an instant here rather than converted at each caller — the same
- * rule `getDraftDates` states for `last_selection_timestamp`.
- * `draft_start_timestamp` stays epoch seconds because this function does
- * arithmetic on it. Passing epoch seconds for a selection throws rather than
- * silently reading as 1970, which is the failure this convention exists to end.
+ * @param {number} [args.pick_interval_hours=1] - Hours between slots, and the
+ *   exclusive-clock floor.
+ * @param {number} [args.daily_window_start_hour=11] - First hour of the day a slot may fall on (inclusive).
+ * @param {number} [args.daily_window_end_hour=16] - Hour of the day the band closes (EXCLUSIVE), and the publication boundary.
+ *
+ * `draft_picks[].selection_timestamp` and `resumed_at` are timestamptz and
+ * always DB-sourced, so they are taken as instants here rather than converted
+ * at each caller. `draft_start_timestamp` stays epoch seconds because this
+ * function does arithmetic on it.
  *
  * @param {Array} [args.draft_picks] - The WHOLE board, as `{ pick, pid,
- *   selection_timestamp }` rows in any order, the selection being a `Date` or ISO
- *   string. A pick counts as made when it carries a `pid`. Omit pre-draft. Passing
- *   a partial board undercounts the steps and so places the window too early.
+ *   selection_timestamp }` rows in any order. Omit pre-draft, in which case
+ *   every pick is outstanding and pick N takes the (N-1)th slot. Passing a
+ *   PARTIAL board mis-indexes the slate and places windows too early.
  *
- * @param {Array} [args.draft_pause_periods] - League pause intervals as
- *   `{ paused_at, resumed_at }`, `resumed_at` null while a pause is open. Paused
- *   open time is credited back, so a team does not lose clock to a stretch it
- *   was forbidden from drafting in. INTERVALS rather than a scalar: the credit
- *   has to be clipped to pause time after this pick's own reference, and the
- *   reference is resolved in here, so no caller can do the clip. Passing a
- *   precomputed total instead charges every pick made after a resume for the
- *   whole pause, and that error compounds — each over-late window delays the
- *   selection that anchors the next pick.
+ * @param {Date|string} [args.resumed_at] - The league's LATEST resume. A resume
+ *   voids the standing publication: until a boundary arrives at or after it,
+ *   every pick's window is null and no pick can be passed. A scalar rather than
+ *   the interval array the open-seconds credit needed, because only the latest
+ *   resume can matter — two pauses in a day are equivalent to one.
  *
  * @param {import('dayjs').Dayjs|Date|string|number} [args.until] - The caller's
- *   now, the credit's upper clip bound. Defaults to the current time. An OPEN
- *   pause is measured to here, which is what freezes a pick's remaining time
- *   for the duration of a pause instead of letting it tick down.
+ *   now, against which the governing boundary is resolved. Defaults to the
+ *   current time. The SPA passes its frozen draft clock so boundaries resolve
+ *   against the same clock every other display on the page reads.
  *
- * @returns {import('dayjs').Dayjs} The moment the pick's window opens.
- *
- * @example
- * // Pre-draft, hourly, windows open 9am through 9pm Eastern
- * getDraftWindow({
- *   draft_start_timestamp: 1787371200,
- *   pick_number: 5,
- *   cadence_unit: 'hour',
- *   daily_window_start_hour: 9,
- *   daily_window_end_hour: 22
- * })
+ * @returns {import('dayjs').Dayjs|null} The moment the pick becomes passable, or
+ *   null when it has none — no boundary since the resume, or the pick was
+ *   already made as of the boundary. LITERALLY null, never undefined:
+ *   `now.isAfter(undefined)` is TRUE, so a missing return would make every
+ *   stalled pick passable instead of blocking it, which is the exact inversion
+ *   of what a null window means.
  *
  * @example
- * // Mid-draft: pick 9 is the immediate next pick, so its window is already open
+ * // The live 2026 config: 3-hour slots on an 11:00-24:00 Eastern band
  * getDraftWindow({
- *   draft_start_timestamp: 1787371200,
- *   pick_number: 9,
- *   draft_picks: [{ pick: 8, pid: 'JOSH-ALLE-000001', selection_timestamp: '2026-08-25T18:40:00Z' }]
- * })
- *
- * @example
- * // Every other day, same time of day each step
- * getDraftWindow({
- *   draft_start_timestamp: 1787371200,
- *   pick_number: 4,
- *   cadence_unit: 'day',
- *   cadence_interval: 2
+ *   draft_start_timestamp: 1786953600,
+ *   pick_number: 3,
+ *   pick_interval_hours: 3,
+ *   daily_window_start_hour: 11,
+ *   daily_window_end_hour: 24,
+ *   draft_picks,
+ *   resumed_at: '2026-08-17T13:00:00Z'
  * })
  */
 export default function getDraftWindow({
   draft_start_timestamp,
   pick_number,
-  cadence_unit,
-  cadence_interval,
+  pick_interval_hours,
   daily_window_start_hour,
   daily_window_end_hour,
   draft_picks,
-  draft_pause_periods,
+  resumed_at,
   until
 }) {
-  const cadence = resolve_cadence({ cadence_unit, cadence_interval })
-  const daily_window = resolve_daily_window({
+  if (!Number.isFinite(pick_number) || pick_number <= 0) {
+    console.warn('[getDraftWindow] Invalid pick_number:', pick_number)
+    return null
+  }
+
+  const boundary = get_publication_boundary({
+    draft_start_timestamp,
+    resumed_at,
+    until,
     daily_window_start_hour,
     daily_window_end_hour
   })
 
-  if (!Number.isFinite(pick_number) || pick_number <= 0) {
-    console.warn('[getDraftWindow] Invalid pick_number:', pick_number)
-    return dayjs.unix(draft_start_timestamp).tz(DRAFT_TIMEZONE)
-  }
+  if (!boundary) return null
 
-  const { reference_timestamp, step_count } = resolve_reference({
+  const index = resolve_published_index({
+    draft_picks,
+    pick_number,
+    boundary
+  })
+
+  if (index === null) return null
+
+  const slot_hours = get_draft_slot_hours({
+    daily_window_start_hour,
+    daily_window_end_hour,
+    pick_interval_hours
+  })
+
+  const published = get_draft_slot_at_index({
+    from: boundary,
+    index,
+    slot_hours
+  })
+
+  const floor = resolve_exclusive_floor({
     draft_start_timestamp,
     draft_picks,
-    pick_number
+    pick_number,
+    pick_interval_hours,
+    slot_hours
   })
 
-  const reference = dayjs.unix(reference_timestamp).tz(DRAFT_TIMEZONE)
-
-  let window_open_at = advance_to_open_hour(reference, daily_window)
-
-  for (let step = 0; step < step_count; step++) {
-    window_open_at = advance_one_step({
-      window_open_at,
-      cadence,
-      daily_window
-    })
-  }
-
-  return apply_pause_credit({
-    window_open_at,
-    reference,
-    draft_pause_periods,
-    until,
-    cadence,
-    daily_window
-  })
+  return floor.isAfter(published) ? floor : published
 }
 
 /**
- * Shifts a placed window forward by the open time the league spent paused.
+ * When the pick currently on the clock becomes passable.
  *
- * Two decisions here, and both are load-bearing.
+ * The slot of the SECOND outstanding pick, which is the first moment anybody
+ * else's window opens on a board where the head is stalled — so it is the
+ * deadline the on-clock notification announces and the countdown the draft page
+ * renders.
  *
- * The credit is CLIPPED to `[reference, until]`. Only pause time this pick
- * actually waited through counts: mid-draft the reference is the previous
- * selection's timestamp, so a pause that ended before it was already absorbed
- * by whoever was on the clock then. Crediting it anyway charges every later
- * pick the whole pause, and because each over-late window delays the selection
- * that anchors the pick behind it, the error compounds down the board rather
- * than staying a fixed offset.
+ * It exists because the obvious spelling does not work under the slate. Both
+ * former call sites passed `frontier.pick + 1`, and on a board with a gap that
+ * names a pick that is already MADE (on the live 2026 board the frontier is
+ * pick 3 and pick 4 is made), for which `getDraftWindow` correctly returns
+ * null. Asking for the second outstanding pick asks the question the caller
+ * actually has.
  *
- * The credit is applied AFTER the step loop, not to the reference before it.
- * The two orderings are not equivalent: `advance_one_step` is hour-granular and
- * snaps to the top of the hour whenever a step crosses the overnight gap, so
- * feeding a credited anchor back through it truncates exactly the minutes the
- * open-seconds credit exists to preserve. Measured across anchors, step counts
- * and credit sizes on the live config, the two disagree in about 9% of cases by
- * up to 59 minutes, always shortening the team's clock. Stepping first and
- * crediting after shifts the unpaused schedule by the pause instead of
- * re-quantizing it.
- *
- * A `day` cadence is not credited at all. A day step holds its time of day
- * across the step, so open seconds and one step do not measure the same thing;
- * `get_paused_open_seconds` throws rather than return a number that would mean
- * something different than the caller assumes.
+ * @param {Object} args - The same window arguments, minus `pick_number`.
+ * @returns {import('dayjs').Dayjs|null} Null when no boundary governs, or when
+ *   fewer than two picks are outstanding — the last pick on the board cannot be
+ *   passed by anyone.
  */
-function apply_pause_credit({
-  window_open_at,
-  reference,
-  draft_pause_periods,
-  until,
-  cadence,
-  daily_window
+export function get_draft_pass_window({
+  draft_start_timestamp,
+  pick_interval_hours,
+  daily_window_start_hour,
+  daily_window_end_hour,
+  draft_picks,
+  resumed_at,
+  until
 }) {
-  if (!draft_pause_periods || !draft_pause_periods.length) {
-    return window_open_at
-  }
-
-  if (cadence.unit === 'day') {
-    return window_open_at
-  }
-
-  const upper_bound = until
-    ? dayjs(until).tz(DRAFT_TIMEZONE)
-    : dayjs().tz(DRAFT_TIMEZONE)
-
-  const credit_seconds = get_paused_open_seconds({
-    draft_pause_periods,
-    from: reference,
-    until: upper_bound,
-    cadence_unit: cadence.unit,
-    daily_window_start_hour: daily_window.start_hour,
-    daily_window_end_hour: daily_window.end_hour
+  const boundary = get_publication_boundary({
+    draft_start_timestamp,
+    resumed_at,
+    until,
+    daily_window_start_hour,
+    daily_window_end_hour
   })
 
-  if (credit_seconds <= 0) return window_open_at
+  if (!boundary) return null
 
-  return advance_open_seconds({
-    time: window_open_at,
-    seconds: credit_seconds,
-    daily_window
+  const outstanding = resolve_outstanding_picks({ draft_picks, boundary })
+
+  if (!outstanding || outstanding.length < 2) return null
+
+  return getDraftWindow({
+    draft_start_timestamp,
+    pick_number: outstanding[1],
+    pick_interval_hours,
+    daily_window_start_hour,
+    daily_window_end_hour,
+    draft_picks,
+    resumed_at,
+    until
   })
 }
 
 /**
- * Advances `time` by `seconds` of OPEN time, preserving minutes.
+ * The pick numbers with no selection AS OF `boundary`, in pick order.
  *
- * Continuous rather than hour-by-hour: it consumes whatever remains of the
- * current day's band, then whole bands, then lands mid-band on the remainder.
- * A window derived from a real selection timestamp therefore keeps that
- * timestamp's minutes across the credit, which is the difference between a
- * correct pick clock and one up to 59 minutes short.
+ * A pick counts as made only when it carries a `selection_timestamp` at or
+ * before the boundary. Reading the timestamp rather than the `pid` is what
+ * makes the set a function of the boundary instead of of now, and it also
+ * absorbs the client's reducer race, where a `pid` lands on a pick the instant
+ * a selection is made and its timestamp arrives with the next load — such a
+ * pick stays outstanding, which holds every later index still rather than
+ * jittering the slate between refetches.
+ *
+ * Returns null with no board at all, which the caller reads as the pre-draft
+ * case rather than as an empty board.
  */
-function advance_open_seconds({ time, seconds, daily_window }) {
-  let advanced = advance_to_open_hour(time, daily_window)
-  let remaining = seconds
+function resolve_outstanding_picks({ draft_picks, boundary }) {
+  if (!draft_picks || !draft_picks.length) return null
 
-  // Each iteration consumes a full day's band, so this is bounded by the credit
-  // divided by the band length and cannot spin.
-  while (remaining > 0) {
-    const band_close = advanced
-      .hour(daily_window.end_hour)
-      .minute(0)
-      .second(0)
-      .millisecond(0)
-
-    const available = band_close.diff(advanced, 'second')
-
-    if (remaining < available) {
-      return advanced.add(remaining, 'second')
-    }
-
-    remaining -= available
-    advanced = advanced
-      .add(1, 'day')
-      .hour(daily_window.start_hour)
-      .minute(0)
-      .second(0)
-      .millisecond(0)
-  }
-
-  return advanced
+  return draft_picks
+    .filter((draft_pick) => {
+      if (!draft_pick.selection_timestamp) return true
+      const selected_at = dayjs
+        .unix(timestamptz_to_epoch(draft_pick.selection_timestamp))
+        .tz(DRAFT_TIMEZONE)
+      return selected_at.isAfter(boundary)
+    })
+    .map((draft_pick) => draft_pick.pick)
+    .sort((a, b) => a - b)
 }
 
 /**
- * Resolves the timestamp to measure from and how many cadence steps past it the
- * requested pick sits.
+ * `pick_number`'s zero-based position in the outstanding set, or null when it
+ * is not in it.
  *
- * Mid-draft the reference is the last pick MADE before the requested one, and
- * the step count is how many picks are still UNMADE between the two; pre-draft,
- * or with nothing made ahead of it, the reference is the draft start, which
- * stands in for the completion of a notional pick 0.
- *
- * A pick is made when it carries a `pid`, but only a `selection_timestamp` can
- * anchor the measurement — the two come apart in the client, where the draft
- * reducer writes the `pid` onto a pick the instant a selection lands and the
- * timestamp arrives with the next load. Such a pick consumes no step and does
- * not become the anchor, so the window measures from the previous timestamped
- * selection until the board refreshes.
+ * With no board, every pick is outstanding by definition — the pre-draft case —
+ * so pick N takes the (N-1)th slot.
  */
-function resolve_reference({
+function resolve_published_index({ draft_picks, pick_number, boundary }) {
+  const outstanding = resolve_outstanding_picks({ draft_picks, boundary })
+
+  if (!outstanding) return pick_number - 1
+
+  const index = outstanding.indexOf(pick_number)
+
+  return index === -1 ? null : index
+}
+
+/**
+ * The earliest slot this pick's predecessor's interval allows.
+ *
+ * The anchor is the HIGHEST-NUMBERED made pick below P — `resolve_reference`'s
+ * long-standing convention — and not the most recent selection by TIME. The two
+ * differ on a gap board where a lower pick lands after a higher one, and the
+ * pick-order anchor is the one that preserves each team's interval: the pick
+ * behind a just-made pick X is X+1, whose highest-numbered made predecessor is
+ * X itself. Pre-draft, or with nothing made ahead of it, the anchor is
+ * `draft_start`, standing in for the completion of a notional pick 0.
+ *
+ * The result SNAPS FORWARD to a slot. A selection at 23:00 plus a 3-hour
+ * interval lands at 02:00, outside the band; the first slot at or after it is
+ * 11:00 the next morning. Snapping keeps every window on a slot time and makes
+ * the exclusive interval a floor rather than an exact quantity.
+ *
+ * Unlike the published term this reads the LIVE board rather than the board as
+ * of the boundary, and that is deliberate: a selection can only ever push the
+ * floor later, so reading it live cannot pull a window forward — which is the
+ * property the monotonicity invariant needs.
+ */
+function resolve_exclusive_floor({
   draft_start_timestamp,
   draft_picks,
-  pick_number
+  pick_number,
+  pick_interval_hours,
+  slot_hours
 }) {
-  const preceding_picks = (draft_picks ?? [])
-    .filter((draft_pick) => draft_pick.pick < pick_number)
+  const interval = resolve_pick_interval_hours(pick_interval_hours)
+
+  const preceding_selections = (draft_picks ?? [])
+    .filter(
+      (draft_pick) =>
+        draft_pick.pick < pick_number && draft_pick.selection_timestamp
+    )
     .sort((a, b) => a.pick - b.pick)
 
-  // A reverse loop rather than findLastIndex: this module is isomorphic and
-  // reaches the SPA bundle, where preset-env transpiles syntax but leaves a
-  // runtime array method to a polyfill that is not configured here.
-  let reference_index = -1
-  for (let index = preceding_picks.length - 1; index >= 0; index--) {
-    if (preceding_picks[index].selection_timestamp) {
-      reference_index = index
-      break
-    }
-  }
+  const anchor_timestamp = preceding_selections.length
+    ? timestamptz_to_epoch(
+        preceding_selections[preceding_selections.length - 1]
+          .selection_timestamp
+      )
+    : draft_start_timestamp
 
-  if (reference_index === -1) {
-    return {
-      reference_timestamp: draft_start_timestamp,
-      // With no board at all every preceding pick is unmade by definition, which
-      // is the pre-draft case the bare `pick_number` stands in for.
-      step_count: preceding_picks.length || Math.max(pick_number - 1, 0)
-    }
-  }
+  const anchor = dayjs
+    .unix(anchor_timestamp)
+    .tz(DRAFT_TIMEZONE)
+    .add(interval, 'hour')
 
-  return {
-    reference_timestamp: timestamptz_to_epoch(
-      preceding_picks[reference_index].selection_timestamp
-    ),
-    step_count: preceding_picks
-      .slice(reference_index + 1)
-      .filter((draft_pick) => !draft_pick.pid).length
-  }
+  return get_draft_slot_at_index({ from: anchor, index: 0, slot_hours })
 }
 
 /**
- * Validates the cadence, falling back to the default rather than silently
- * accepting a unit the caller misspelled.
+ * Validates the interval, falling back to the default rather than silently
+ * accepting a value that would produce an empty or infinite slot list.
  */
-function resolve_cadence({ cadence_unit, cadence_interval }) {
-  let unit = cadence_unit ?? DEFAULT_CADENCE_UNIT
-  let interval = cadence_interval ?? DEFAULT_CADENCE_INTERVAL
-
-  if (!CADENCE_UNITS.includes(unit)) {
-    console.warn(
-      '[getDraftWindow] Unrecognized cadence_unit:',
-      cadence_unit,
-      `- falling back to '${DEFAULT_CADENCE_UNIT}'`
-    )
-    unit = DEFAULT_CADENCE_UNIT
-  }
+function resolve_pick_interval_hours(pick_interval_hours) {
+  const interval = pick_interval_hours ?? DEFAULT_PICK_INTERVAL_HOURS
 
   if (!Number.isInteger(interval) || interval < 1) {
     console.warn(
-      '[getDraftWindow] Invalid cadence_interval:',
-      cadence_interval,
-      `- falling back to ${DEFAULT_CADENCE_INTERVAL}`
+      '[getDraftWindow] Invalid pick_interval_hours:',
+      pick_interval_hours,
+      `- falling back to ${DEFAULT_PICK_INTERVAL_HOURS}`
     )
-    interval = DEFAULT_CADENCE_INTERVAL
+    return DEFAULT_PICK_INTERVAL_HOURS
   }
 
-  return { unit, interval }
-}
-
-/**
- * Whether `time` falls inside the daily window `[start_hour, end_hour)`.
- *
- * Resolves the daily window the same way `getDraftWindow` does, so the gate
- * matches the placement window, including the default for null/missing bounds.
- * A time's hour of day is compared in the draft timezone — `current_season.now`
- * is already Eastern, so passing it directly is correct.
- *
- * @param {import('dayjs').Dayjs} time - A Dayjs instance in the draft timezone.
- * @param {Object} [args]
- * @param {number} [args.daily_window_start_hour]
- * @param {number} [args.daily_window_end_hour]
- * @returns {boolean} True when `time.hour()` is an open hour.
- */
-export const is_within_daily_window = (
-  time,
-  { daily_window_start_hour, daily_window_end_hour } = {}
-) => {
-  const window = resolve_daily_window({
-    daily_window_start_hour,
-    daily_window_end_hour
-  })
-  const hour = time.hour()
-  return is_open_hour(hour, window)
-}
-
-/**
- * The next moment the daily window is open, from `time`.
- *
- * A time already inside the band is returned untouched. This is what a surface
- * announcing "selection window opens ..." has to point at once a pick's own
- * window moment has passed while the clock sits outside the band hours: the
- * pick is eligible, but not until the band reopens, so `draftWindow` is in the
- * past and useless as a target.
- *
- * Takes the same argument shape as `is_within_daily_window`, so a call site
- * gating on one can point at the other with the same config.
- *
- * @param {import('dayjs').Dayjs} time - A Dayjs instance in the draft timezone.
- * @param {Object} [args]
- * @param {number} [args.daily_window_start_hour]
- * @param {number} [args.daily_window_end_hour]
- * @returns {import('dayjs').Dayjs}
- */
-export const get_next_daily_window_entry = (
-  time,
-  { daily_window_start_hour, daily_window_end_hour } = {}
-) =>
-  advance_to_open_hour(
-    time,
-    resolve_band({ daily_window_start_hour, daily_window_end_hour })
-  )
-
-/**
- * Advances one cadence step, landing on an open hour.
- *
- * An `hour` step consumes open slots, so a step taken at the end of the day
- * lands on the next morning. A `day` step holds the time of day, which is
- * already open, so the skip is a no-op.
- */
-function advance_one_step({ window_open_at, cadence, daily_window }) {
-  let advanced = window_open_at
-
-  for (let unit = 0; unit < cadence.interval; unit++) {
-    advanced = advance_to_open_hour(advanced.add(1, cadence.unit), daily_window)
-  }
-
-  return advanced
-}
-
-/**
- * Rolls forward to the next hour inside the daily window.
- *
- * A time already inside the window is returned untouched, so a window derived
- * from a real selection timestamp keeps that timestamp's minutes instead of
- * being rounded away. A time outside it snaps to the top of the destination
- * hour, since that destination is a slot boundary rather than an event.
- *
- * Bounded by the length of a day: a non-empty daily window always has a
- * qualifying hour within the next 24, so this cannot spin.
- */
-function advance_to_open_hour(time, daily_window) {
-  if (is_open_hour(time.hour(), daily_window)) {
-    return time
-  }
-
-  let candidate = time.startOf('hour')
-  for (let hour = 0; hour < HOURS_PER_DAY; hour++) {
-    candidate = candidate.add(1, 'hour')
-    if (is_open_hour(candidate.hour(), daily_window)) {
-      return candidate
-    }
-  }
-
-  return candidate
+  return interval
 }

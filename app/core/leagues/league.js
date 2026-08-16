@@ -79,17 +79,20 @@ export const League = new Record({
   draft_pick_interval: null,
   draft_hour_min: null,
   draft_hour_max: null,
+  rookie_draft_end_at: null,
   rookie_draft_completed_at: null,
 
   // League pause. `paused_at` drives the banner and every frozen clock;
-  // `draft_pause_periods` is the interval list the rookie draft window credits
-  // back. A Record DROPS any key it does not declare, so both must appear here,
-  // in the destructure below, and in the constructor call -- a miss shows up as
-  // a banner that never renders and a draft clock that credits nothing, with no
-  // error anywhere. `pause_reason` is deliberately absent: it is not on the
-  // wire, because the unauthenticated league GET would publish it.
+  // `resumed_at` voids the rookie draft standing publication, so every pick's
+  // window is null until the next boundary at or after it. A Record DROPS any
+  // key it does not declare, so both must appear here, in the destructure
+  // below, and in the constructor call -- a miss shows up as a banner that
+  // never renders and a draft board still showing windows the resume
+  // cancelled, with no error anywhere. `pause_reason` is deliberately absent:
+  // it is not on the wire, because the unauthenticated league GET would
+  // publish it.
   paused_at: null,
-  draft_pause_periods: new List(),
+  resumed_at: null,
 
   min_bid: 0,
   is_hosted: 0,
@@ -197,9 +200,10 @@ export function createLeague(league_data = {}) {
     draft_pick_interval,
     draft_hour_min,
     draft_hour_max,
+    rookie_draft_end_at,
     rookie_draft_completed_at,
     paused_at,
-    draft_pause_periods,
+    resumed_at,
 
     min_bid,
     is_hosted,
@@ -306,12 +310,13 @@ export function createLeague(league_data = {}) {
     draft_pick_interval,
     draft_hour_min,
     draft_hour_max,
+    rookie_draft_end_at,
     rookie_draft_completed_at,
     paused_at,
+    resumed_at,
     // Kept as a List so the field has one type everywhere: the wire delivers a
     // plain array, the Record default is a List, and a consumer that has to ask
     // which one it got is a consumer that will eventually guess wrong.
-    draft_pause_periods: new List(draft_pause_periods || []),
 
     min_bid,
     is_hosted,

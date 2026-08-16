@@ -10,32 +10,37 @@
  * or the draft reducer state both qualify, since both keep the column names.
  *
  * `seasons.draft_start` is timestamptz as of the 2026-08-07 conformance pass,
- * while `getDraftWindow`/`getDraftDates` remain pure epoch-seconds calculators
- * with their own test suite. This mapper is where those two units meet, which
- * is what the paragraph above is describing, so the conversion lands here.
+ * while `getDraftWindow` remains a pure epoch-seconds calculator with its own
+ * test suite. This mapper is where those two units meet, which is what the
+ * paragraph above is describing, so the conversion lands here.
+ *
+ * `draft_type` is deliberately NOT mapped. The calculator takes hours
+ * unconditionally under the published-slate rule, and the four `'day'` rows
+ * carry `draft_pick_interval = 24` instead. The COLUMN still exists and is
+ * still read — two SPA predicates branch on it — and dropping it is
+ * `user:task/league/retire-draft-type-and-conform-draft-window-naming.md`.
  *
  * @param {Object} draft_settings
  * @param {Date|string} draft_settings.draft_start - When the draft opens; a Date
  *   on the server, an ISO string once through JSON.
- * @param {string} draft_settings.draft_type - Cadence unit: 'hour' or 'day'.
- * @param {number} [draft_settings.draft_pick_interval] - Units of `draft_type` between consecutive picks' windows.
- * @param {number} draft_settings.draft_hour_min - First hour a window may open (inclusive).
- * @param {number} draft_settings.draft_hour_max - Hour windows stop opening (exclusive).
+ * @param {number} [draft_settings.draft_pick_interval] - Hours between slots, and
+ *   the exclusive-clock floor.
+ * @param {number} draft_settings.draft_hour_min - First hour a slot may fall on (inclusive).
+ * @param {number} draft_settings.draft_hour_max - Hour the band closes (exclusive),
+ *   which is also the daily publication boundary.
+ * @param {Date|string} [draft_settings.rookie_draft_end_at] - The draft's hard
+ *   cutoff, which `getDraftDates` reads instead of projecting one.
  *
- * `draft_pause_periods` rides along here rather than being passed separately at
- * each site, so every caller that already spreads this config inherits the
- * pause credit by construction. It is attached to the league record by
- * `libs-server/get-league.mjs` and declared on the SPA's `League` record, which
- * are the two shapes every call site passes. A site whose league lacks the
- * field credits nothing and fails silently, which is why the field travels with
- * the settings it belongs to instead of as a separate argument nobody
- * remembers.
+ * `resumed_at` rides along here rather than being passed separately at each
+ * site, so every caller that already spreads this config inherits the resume
+ * rule by construction. It is attached to the league record by
+ * `libs-server/get-league.mjs` and `api/routes/me.mjs` and declared on the
+ * SPA's `League` record, which are the shapes every call site passes. A site
+ * whose league lacks the field would place windows against a publication the
+ * resume already voided, which is why the field travels with the settings it
+ * belongs to instead of as a separate argument nobody remembers.
  *
- * `getDraftDates` ignores it: the hard end quantizes to `endOf('day')`, so a
- * credit below a whole band moves it by zero and the expiry sweep skips paused
- * leagues outright instead.
- *
- * @param {Array} [draft_settings.draft_pause_periods] - League pause intervals.
+ * @param {Date|string} [draft_settings.resumed_at] - The league's LATEST resume.
  *
  * @returns {Object} Window-calculation arguments, ready to spread.
  */
@@ -43,42 +48,18 @@ import timestamptz_to_epoch from './timestamptz-to-epoch.mjs'
 
 export default function get_draft_window_config({
   draft_start,
-  draft_type,
   draft_pick_interval,
   draft_hour_min,
   draft_hour_max,
-  draft_pause_periods
+  rookie_draft_end_at,
+  resumed_at
 } = {}) {
   return {
     draft_start_timestamp: timestamptz_to_epoch(draft_start),
-    cadence_unit: draft_type,
-    cadence_interval: draft_pick_interval,
+    pick_interval_hours: draft_pick_interval,
     daily_window_start_hour: draft_hour_min,
     daily_window_end_hour: draft_hour_max,
-    draft_pause_periods: normalize_pause_periods(draft_pause_periods)
+    rookie_draft_end_at: rookie_draft_end_at ?? null,
+    resumed_at: resumed_at ?? null
   }
-}
-
-/**
- * Coerces the pause intervals to a plain array of plain rows.
- *
- * The SPA holds them in an Immutable `List` of `Map`s while the server has
- * plain objects, and `get_paused_open_seconds` reads `paused_at`/`resumed_at`
- * by property. Normalizing here keeps that difference out of the calculator,
- * which is isomorphic and must not know which side it is running on.
- */
-function normalize_pause_periods(draft_pause_periods) {
-  if (!draft_pause_periods) return []
-
-  const periods =
-    typeof draft_pause_periods.toJS === 'function'
-      ? draft_pause_periods.toJS()
-      : draft_pause_periods
-
-  if (!Array.isArray(periods)) return []
-
-  return periods.map((period) => ({
-    paused_at: period.paused_at,
-    resumed_at: period.resumed_at ?? null
-  }))
 }

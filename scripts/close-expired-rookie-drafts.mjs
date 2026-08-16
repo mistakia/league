@@ -4,14 +4,12 @@ import db from '#db'
 import { current_season } from '#constants'
 import {
   is_main,
-  getLeague,
   report_job,
   close_rookie_draft,
   where_outstanding_draft_pick,
   throw_if_shortfall
 } from '#libs-server'
 import { getDraftDates } from '#libs-shared'
-import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -50,19 +48,17 @@ const run = async () => {
     // which carry no pick numbers at all.
     if (year > current_season.year) continue
 
-    const league = await getLeague({ lid })
-    if (!league) {
-      log(`league ${lid}: not found; skipping`)
-      continue
-    }
-
-    // THIS SKIP IS WHAT PROTECTS THE DRAFT'S HARD END, and the open-seconds
-    // credit in increment two cannot do it. getDraftDates quantizes draftEnd to
-    // endOf('day'), so a credit smaller than one whole day moves the end by
-    // exactly zero -- a 12-hour pause leaves draftEnd on the same Wednesday
-    // 23:59 it was already on. Without this skip a pause spanning midnight
-    // expires every unmade pick on schedule, which is the outcome the pause
-    // exists to prevent.
+    // THIS SKIP IS WHAT PROTECTS THE DRAFT'S HARD END. The end is now an
+    // announced column rather than a projection, so nothing about a pause moves
+    // it: a league paused across its own hard end would have every unmade pick
+    // expired on schedule, which is the outcome the pause exists to prevent.
+    // Extending the end for a pause is a commissioner act -- an UPDATE to
+    // seasons.rookie_draft_end_at -- and this skip is what holds the board
+    // still until someone makes it.
+    //
+    // (The comment here used to blame getDraftDates quantizing to endOf('day'),
+    // which was never the mechanism: the open-seconds credit never reached the
+    // end at all, because getDraftDates did not read the pause periods.)
     const open_pause = await get_open_league_pause({ league_id: lid })
     if (open_pause) {
       log(`league ${lid}: LEAGUE PAUSED -- not expiring unmade draft picks`)
@@ -71,27 +67,17 @@ const run = async () => {
 
     const season = await db('seasons').where({ lid, season_year: year }).first()
 
-    const last_pick = await db('draft')
-      .where({ lid, season_year: year })
-      .whereNotNull('pick')
-      .orderBy('pick', 'desc')
-      .first()
-
+    // Read from the season row for THIS year, not from `league` — `getLeague`
+    // resolves the current season, and this loop walks every year with an
+    // outstanding pick.
     const { draftEnd } = getDraftDates({
-      ...get_draft_window_config(league),
-      total_picks: last_pick?.pick,
-      // The draft end is the day the pick AFTER the last one would have
-      // opened, so it must be anchored to the highest-numbered pick — the
-      // same `last_selection_timestamp` the draft route passes. Anchoring to
-      // the most recent selection by TIME instead (the prior shape of this
-      // query) collapses the projection to that pick's own day, closing a
-      // stalled draft the day after its last pick landed and expiring every
-      // remaining pick — the live 2026 board would have been closed on Aug 12
-      // with 63 picks still unmade. Null until the final pick is made, so an
-      // in-flight draft keeps its projected cadence end.
-      last_selection_timestamp: last_pick?.selection_timestamp ?? null,
+      rookie_draft_end_at: season?.rookie_draft_end_at ?? null,
       rookie_draft_completed_at: season?.rookie_draft_completed_at ?? null
     })
+
+    // A season with no hard end has no draft configured, so there is nothing
+    // to close.
+    if (!draftEnd) continue
 
     if (!current_season.now.isAfter(draftEnd)) continue // still open
 

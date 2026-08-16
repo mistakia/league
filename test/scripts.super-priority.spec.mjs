@@ -268,9 +268,15 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .update({
           free_agency_live_auction_start:
             free_agency_auction_regular_season_start.toDate(),
-          // Draft completed before FA
+          // Draft completed before FA. The hard end has to move with the
+          // start: it is a stated column now rather than a projection off the
+          // cadence, so relocating the draft without it leaves the rookie
+          // waiver period open and no practice-squad waiver processes.
           draft_start: free_agency_auction_regular_season_start
             .subtract('1', 'week')
+            .toDate(),
+          rookie_draft_end_at: free_agency_auction_regular_season_start
+            .subtract('2', 'days')
             .toDate()
         })
 

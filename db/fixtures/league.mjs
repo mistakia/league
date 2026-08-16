@@ -1,6 +1,39 @@
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc.js'
+import timezone from 'dayjs/plugin/timezone.js'
+
 import { current_season } from '#constants'
 import { getLeague, createLeague } from '#libs-server'
+import { DRAFT_TIMEZONE } from '#libs-shared/draft-daily-window.mjs'
 import reset_league_tables from './reset-league-tables.mjs'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+// The default hard end: two weeks after the draft opens, which is comfortably
+// past the last of a full 65-pick board at five slots a day.
+//
+// Derived from the draft's OWN start rather than from now, so a spec that moves
+// `draft_start` moves the whole draft, hard end included.
+//
+// This deliberately does NOT reproduce the projection the column replaces,
+// because that projection was not one value: it read `window(total_picks + 1)`,
+// so it landed on the day the draft opened for a spec that seeded no board and
+// roughly thirteen days out for one that seeded sixty-five picks. A stated
+// column cannot vary with the board and should not -- that instability is the
+// forcing argument for the column existing. The consequence is that a spec
+// needing a CLOSED draft must now say so, by passing its own
+// `rookie_draft_end_at`, rather than getting one as a side effect of leaving
+// the `draft` table empty.
+const DEFAULT_DRAFT_LENGTH_DAYS = 14
+
+export const default_rookie_draft_end_at = (draft_start_timestamp) =>
+  dayjs
+    .unix(draft_start_timestamp)
+    .tz(DRAFT_TIMEZONE)
+    .add(DEFAULT_DRAFT_LENGTH_DAYS, 'day')
+    .endOf('day')
+    .unix()
 
 export default async function (knex, league_params = {}) {
   // One shared list, so a new league-scoped table cannot be remembered here and
@@ -18,15 +51,31 @@ export default async function (knex, league_params = {}) {
   await knex.raw('ALTER SEQUENCE super_priority_uid_seq RESTART WITH 1')
 
   const userId = 1
-  const leagueId = await createLeague({
+  const league_defaults = {
     lid: 1,
     is_hosted: 1,
     commishid: userId,
+    // A real slate config, not just a start: `draft_type` left null makes the
+    // SPA's two window predicates false, so `getPicks` places no window at all
+    // and a draft-page fixture renders no label. The 11:00-24:00 band with a
+    // 3-hour interval is the elected 2026 config, so a fixture exercises the
+    // slate the league actually runs on.
     draft_start: Math.round(Date.now() / 1000),
+    draft_type: 'hour',
+    draft_pick_interval: 3,
+    draft_hour_min: 11,
+    draft_hour_max: 24,
     free_agency_live_auction_start: null,
     tddate: current_season.regular_season_start.add('12', 'weeks').unix(),
     ext_date: current_season.now.subtract('1', 'week').unix(),
     ...league_params
+  }
+
+  const leagueId = await createLeague({
+    ...league_defaults,
+    rookie_draft_end_at:
+      league_defaults.rookie_draft_end_at ??
+      default_rookie_draft_end_at(league_defaults.draft_start)
   })
   const league = await getLeague({ lid: leagueId })
 

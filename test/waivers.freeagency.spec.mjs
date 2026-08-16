@@ -16,7 +16,7 @@ import {
 } from '#constants'
 import { getDraftDates } from '#libs-shared'
 import { user1 } from './fixtures/token.mjs'
-import { getRoster } from '#libs-server'
+import { getRoster, getLeague } from '#libs-server'
 import {
   addPlayer,
   releasePlayer,
@@ -432,10 +432,9 @@ describe('API /waivers - free agency', function () {
     })
 
     it('rookie free agent waiver w/ full practice squad and no release', async () => {
-      const picks = await knex('draft')
+      const league_row = await getLeague({ lid: 1 })
       const draftDates = getDraftDates({
-        draft_start_timestamp: current_season.now.unix(),
-        total_picks: picks.length
+        rookie_draft_end_at: league_row.rookie_draft_end_at
       })
       MockDate.set(draftDates.draftEnd.toISOString())
       const leagueId = 1

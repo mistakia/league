@@ -6,7 +6,6 @@ import knex from '#db'
 import league from '#db/fixtures/league.mjs'
 import { current_season, transaction_types, waiver_types } from '#constants'
 import { getDraftDates, Errors } from '#libs-shared'
-import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import { getLeague } from '#libs-server'
 import {
   selectPlayer,
@@ -37,10 +36,8 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
     it('rookie post draft single waiver - offseason', async () => {
       const lid = 1
       const league = await getLeague({ lid })
-      const picks = await knex('draft')
       const draftDates = getDraftDates({
-        ...get_draft_window_config(league),
-        total_picks: picks.length
+        rookie_draft_end_at: league.rookie_draft_end_at
       })
       MockDate.set(draftDates.waiverEnd.toISOString())
 
@@ -133,10 +130,8 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
     it('no waivers ready to process - offseason', async () => {
       const lid = 1
       const league = await getLeague({ lid })
-      const picks = await knex('draft')
       const draftDates = getDraftDates({
-        ...get_draft_window_config(league),
-        total_picks: picks.length
+        rookie_draft_end_at: league.rookie_draft_end_at
       })
       MockDate.set(draftDates.draftEnd.add('1', 'hour').toISOString())
 

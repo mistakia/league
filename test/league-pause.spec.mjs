@@ -10,7 +10,7 @@ import users from '#db/fixtures/users.mjs'
 import { current_season } from '#constants'
 import {
   get_open_league_pause,
-  get_draft_pause_periods,
+  get_latest_league_resume,
   assert_league_not_paused
 } from '#libs-server/league-pause.mjs'
 import { LeaguePaused } from '#libs-shared/errors.mjs'
@@ -184,50 +184,97 @@ describe('LEAGUE PAUSE', function () {
       })
     })
 
-    describe('get_draft_pause_periods', function () {
-      const draft_start = new Date('2026-08-10T15:00:00Z')
-
-      it('returns nothing when the league was never paused', async () => {
-        const periods = await get_draft_pause_periods({
+    describe('get_latest_league_resume', function () {
+      const insert_pause = ({ paused_at, resumed_at = null, reason }) =>
+        knex('league_pauses').insert({
           league_id,
-          draft_start,
-          db: knex
-        })
-        expect(periods.length).to.equal(0)
-      })
-
-      it('drops an interval that closed before the draft opened', async () => {
-        await knex('league_pauses').insert({
-          league_id,
-          paused_at: new Date('2026-08-01T12:00:00Z'),
-          resumed_at: new Date('2026-08-02T12:00:00Z'),
-          pause_reason: 'before the draft',
+          paused_at: new Date(paused_at),
+          resumed_at: resumed_at ? new Date(resumed_at) : null,
+          pause_reason: reason,
           paused_by_user_id: 1
         })
 
-        const periods = await get_draft_pause_periods({
+      it('returns null when the league was never paused', async () => {
+        const resumed_at = await get_latest_league_resume({
           league_id,
-          draft_start,
           db: knex
         })
-        expect(periods.length).to.equal(0)
+        expect(resumed_at).to.equal(null)
       })
 
-      it('keeps an open interval and leaves resumed_at null', async () => {
-        await knex('league_pauses').insert({
-          league_id,
-          paused_at: new Date('2026-08-12T12:00:00Z'),
-          pause_reason: 'live pause',
-          paused_by_user_id: 1
+      it('returns null while the first pause is still open', async () => {
+        await insert_pause({
+          paused_at: '2026-08-12T12:00:00Z',
+          reason: 'live pause'
         })
 
-        const periods = await get_draft_pause_periods({
+        const resumed_at = await get_latest_league_resume({
           league_id,
-          draft_start,
           db: knex
         })
-        expect(periods.length).to.equal(1)
-        expect(periods[0].resumed_at).to.equal(null)
+        expect(resumed_at).to.equal(null)
+      })
+
+      it('returns the resume of a single closed pause', async () => {
+        await insert_pause({
+          paused_at: '2026-08-01T12:00:00Z',
+          resumed_at: '2026-08-02T12:00:00Z',
+          reason: 'one pause'
+        })
+
+        const resumed_at = await get_latest_league_resume({
+          league_id,
+          db: knex
+        })
+        expect(new Date(resumed_at).toISOString()).to.equal(
+          '2026-08-02T12:00:00.000Z'
+        )
+      })
+
+      it('returns the LATEST resume across several pauses', async () => {
+        await insert_pause({
+          paused_at: '2026-08-01T12:00:00Z',
+          resumed_at: '2026-08-02T12:00:00Z',
+          reason: 'first'
+        })
+        await insert_pause({
+          paused_at: '2026-08-05T12:00:00Z',
+          resumed_at: '2026-08-06T12:00:00Z',
+          reason: 'second'
+        })
+        await insert_pause({
+          paused_at: '2026-08-03T12:00:00Z',
+          resumed_at: '2026-08-04T12:00:00Z',
+          reason: 'third, out of order by insert'
+        })
+
+        const resumed_at = await get_latest_league_resume({
+          league_id,
+          db: knex
+        })
+        expect(new Date(resumed_at).toISOString()).to.equal(
+          '2026-08-06T12:00:00.000Z'
+        )
+      })
+
+      it('keeps the latest resume while a NEW pause is open', async () => {
+        await insert_pause({
+          paused_at: '2026-08-01T12:00:00Z',
+          resumed_at: '2026-08-02T12:00:00Z',
+          reason: 'closed'
+        })
+        await insert_pause({
+          paused_at: '2026-08-12T12:00:00Z',
+          reason: 'open again'
+        })
+
+        const resumed_at = await get_latest_league_resume({
+          league_id,
+          db: knex
+        })
+        expect(new Date(resumed_at).toISOString()).to.equal(
+          '2026-08-02T12:00:00.000Z'
+        )
       })
     })
   })
@@ -367,13 +414,25 @@ describe('LEAGUE PAUSE', function () {
   // is populated from on auth, so a pause missing there renders no banner and
   // freezes no clock for a logged-in member — which is every real user.
   describe('pause state on the league wire', function () {
-    const open_a_pause = () =>
-      knex('league_pauses').insert({
+    const resumed_at = new Date('2026-08-02T12:00:00Z')
+
+    const open_a_pause = async () => {
+      // A CLOSED pause first, so `resumed_at` is a real instant on the wire
+      // rather than a null that a dropped field is indistinguishable from.
+      await knex('league_pauses').insert({
+        league_id,
+        paused_at: new Date('2026-08-01T12:00:00Z'),
+        resumed_at,
+        pause_reason: 'an earlier pause, since resumed',
+        paused_by_user_id: 1
+      })
+      await knex('league_pauses').insert({
         league_id,
         paused_at: new Date(),
         pause_reason: 'commissioner is reviewing a disputed trade',
         paused_by_user_id: 1
       })
+    }
 
     const assert_pause_fields = (league) => {
       expect(
@@ -381,8 +440,16 @@ describe('LEAGUE PAUSE', function () {
         'paused_at missing from the payload'
       ).to.not.equal(undefined)
       expect(league.paused_at).to.not.equal(null)
-      expect(league.draft_pause_periods).to.be.an('array')
-      expect(league.draft_pause_periods.length).to.equal(1)
+      // `resumed_at` voids the draft's standing publication, so a payload
+      // missing it renders windows the resume already cancelled.
+      expect(
+        league.resumed_at,
+        'resumed_at missing from the payload'
+      ).to.not.equal(undefined)
+      expect(new Date(league.resumed_at).toISOString()).to.equal(
+        resumed_at.toISOString()
+      )
+      expect(league.draft_pause_periods).to.equal(undefined)
       expect(league.pause_reason).to.equal(undefined)
     }
 
@@ -423,7 +490,7 @@ describe('LEAGUE PAUSE', function () {
         .set('Authorization', `Bearer ${user1}`)
       const league = me_res.body.leagues.find((l) => l.uid === league_id)
       expect(league.paused_at).to.equal(null)
-      expect(league.draft_pause_periods).to.deep.equal([])
+      expect(league.resumed_at).to.equal(null)
     })
   })
 
