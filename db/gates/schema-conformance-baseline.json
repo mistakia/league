@@ -1,7 +1,7 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-16T21:54:33.212Z",
-  "count": 670,
+  "generated_at": "2026-08-16T22:32:41.192Z",
+  "count": 601,
   "violations": [
     {
       "table": "adp_format",
@@ -585,26 +585,6 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "away_to_rem",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "away_wp_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "away_wp",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "bc_gsis",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "comp_air_epa",
       "rule": "shorthand"
     },
@@ -670,37 +650,7 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "def_to_rem",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "drive_end_qtr",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "drive_end_ydl",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "drive_fds",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "drive_seq",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "drive_start_qtr",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "drive_start_ydl",
+      "column": "def_timeouts_remaining",
       "rule": "shorthand"
     },
     {
@@ -735,31 +685,6 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "home_to_rem",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "home_wp_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "home_wp",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "intp_gsis",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "n_offense_backfield",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "no_score_prob",
       "rule": "shorthand"
     },
@@ -780,7 +705,7 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "off_personnel_rb_count_pp",
+      "column": "off_personnel_rb_count_per_play",
       "rule": "shorthand"
     },
     {
@@ -790,7 +715,7 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "off_personnel_te_count_pp",
+      "column": "off_personnel_te_count_per_play",
       "rule": "shorthand"
     },
     {
@@ -800,7 +725,7 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "off_personnel_wr_count_pp",
+      "column": "off_personnel_wr_count_per_play",
       "rule": "shorthand"
     },
     {
@@ -830,11 +755,6 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "pass_oe",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "pass_yds",
       "rule": "shorthand"
     },
@@ -850,16 +770,6 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "player_fuml_gsis",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "player_fuml_pid",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "pos_score_post",
       "rule": "shorthand"
     },
@@ -870,12 +780,7 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "pos_to_rem",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "psr_gsis",
+      "column": "pos_timeouts_remaining",
       "rule": "shorthand"
     },
     {
@@ -900,12 +805,7 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "ret_tm",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "ret_yds",
+      "column": "return_yds",
       "rule": "shorthand"
     },
     {
@@ -920,42 +820,12 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "score_diff_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "score_diff",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "sec_rem_gm",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "sec_rem_half",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "sec_rem_qtr",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "series_seq",
+      "column": "td_nfl_team",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays_current_week",
       "column": "td_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "td_tm",
       "rule": "shorthand"
     },
     {
@@ -1000,27 +870,7 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "tp_result",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "trg_gsis",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "two_conv_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "vegas_home_wp",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "vegas_wp",
+      "column": "two_conversion_prob",
       "rule": "shorthand"
     },
     {
@@ -1030,7 +880,7 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "xyac_fd_prob",
+      "column": "xyac_first_down_prob",
       "rule": "shorthand"
     },
     {
@@ -1045,32 +895,12 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "xyac_succ_prob",
+      "column": "xyac_success_prob",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "ydl_100",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "ydl_end",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "ydl_num",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "ydl_side",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "ydl_start",
+      "column": "yard_line_num",
       "rule": "shorthand"
     },
     {
@@ -1155,32 +985,12 @@
     },
     {
       "table": "nfl_plays",
-      "column": "away_to_rem",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
       "column": "away_win_prob_post",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
       "column": "away_win_prob_pre",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "away_wp_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "away_wp",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "bc_gsis",
       "rule": "shorthand"
     },
     {
@@ -1255,42 +1065,7 @@
     },
     {
       "table": "nfl_plays",
-      "column": "def_to_rem",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "desc_nflfastr",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "drive_end_qtr",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "drive_end_ydl",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "drive_fds",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "drive_seq",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "drive_start_qtr",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "drive_start_ydl",
+      "column": "def_timeouts_remaining",
       "rule": "shorthand"
     },
     {
@@ -1335,11 +1110,6 @@
     },
     {
       "table": "nfl_plays",
-      "column": "home_to_rem",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
       "column": "home_win_prob_post",
       "rule": "shorthand"
     },
@@ -1350,27 +1120,7 @@
     },
     {
       "table": "nfl_plays",
-      "column": "home_wp_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "home_wp",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "intp_gsis",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
       "column": "kickoff_yds",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "n_offense_backfield",
       "rule": "shorthand"
     },
     {
@@ -1405,7 +1155,7 @@
     },
     {
       "table": "nfl_plays",
-      "column": "off_personnel_rb_count_pp",
+      "column": "off_personnel_rb_count_per_play",
       "rule": "shorthand"
     },
     {
@@ -1415,7 +1165,7 @@
     },
     {
       "table": "nfl_plays",
-      "column": "off_personnel_te_count_pp",
+      "column": "off_personnel_te_count_per_play",
       "rule": "shorthand"
     },
     {
@@ -1425,7 +1175,7 @@
     },
     {
       "table": "nfl_plays",
-      "column": "off_personnel_wr_count_pp",
+      "column": "off_personnel_wr_count_per_play",
       "rule": "shorthand"
     },
     {
@@ -1455,11 +1205,6 @@
     },
     {
       "table": "nfl_plays",
-      "column": "pass_oe",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
       "column": "pass_prob_non_tracking",
       "rule": "shorthand"
     },
@@ -1485,16 +1230,6 @@
     },
     {
       "table": "nfl_plays",
-      "column": "player_fuml_gsis",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "player_fuml_pid",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
       "column": "pos_score_post",
       "rule": "shorthand"
     },
@@ -1505,12 +1240,7 @@
     },
     {
       "table": "nfl_plays",
-      "column": "pos_to_rem",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "psr_gsis",
+      "column": "pos_timeouts_remaining",
       "rule": "shorthand"
     },
     {
@@ -1545,12 +1275,7 @@
     },
     {
       "table": "nfl_plays",
-      "column": "ret_tm",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "ret_yds",
+      "column": "return_yds",
       "rule": "shorthand"
     },
     {
@@ -1565,42 +1290,12 @@
     },
     {
       "table": "nfl_plays",
-      "column": "score_diff_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "score_diff",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "sec_rem_gm",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "sec_rem_half",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "sec_rem_qtr",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "series_seq",
+      "column": "td_nfl_team",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
       "column": "td_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "td_tm",
       "rule": "shorthand"
     },
     {
@@ -1645,27 +1340,7 @@
     },
     {
       "table": "nfl_plays",
-      "column": "tp_result",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "trg_gsis",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "two_conv_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "vegas_home_wp",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "vegas_wp",
+      "column": "two_conversion_prob",
       "rule": "shorthand"
     },
     {
@@ -1675,7 +1350,7 @@
     },
     {
       "table": "nfl_plays",
-      "column": "xyac_fd_prob",
+      "column": "xyac_first_down_prob",
       "rule": "shorthand"
     },
     {
@@ -1690,32 +1365,12 @@
     },
     {
       "table": "nfl_plays",
-      "column": "xyac_succ_prob",
+      "column": "xyac_success_prob",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
-      "column": "ydl_100",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "ydl_end",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "ydl_num",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "ydl_side",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "ydl_start",
+      "column": "yard_line_num",
       "rule": "shorthand"
     },
     {

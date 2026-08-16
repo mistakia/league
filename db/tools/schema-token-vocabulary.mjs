@@ -1026,6 +1026,7 @@ const domain_words = [
   'throwaways',
   'tightends',
   'timeout',
+  'timeouts',
   'timestamp',
   'timezone',
   'touchbacks',
