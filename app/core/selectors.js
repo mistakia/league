@@ -1167,6 +1167,12 @@ export function isPlayerLocked(state, { player_map = new Map(), pid }) {
     return false
   }
 
+  // Unscheduled games (e.g. REG weeks 16-18 flex) have no time_eastern yet,
+  // so there is no start time to lock against — the player is not locked.
+  if (!game.date || !game.time_eastern) {
+    return false
+  }
+
   const gameStart = dayjs.tz(
     `${game.date} ${game.time_eastern}`,
     'YYYY/MM/DD HH:mm:SS',
