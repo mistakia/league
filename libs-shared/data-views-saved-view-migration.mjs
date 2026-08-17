@@ -556,6 +556,29 @@ const COLUMN_ID_RENAMES = {
   player_fantasy_games_played_from_seasonlogs: 'player_games_played',
   player_fantasy_games_played_from_careerlogs: 'player_games_played',
   player_pff_receiving_snaps: 'player_pff_pass_plays',
+  // These six run BACKWARDS relative to every other entry -- the stranded id is
+  // the CONFORMED spelling and the live one is the shorthand -- and that is the
+  // point. The 2026-08-17 counting-stat conform moved the `base_name` variable
+  // that projected-table-fields.js interpolates into BOTH the persisted column id
+  // and the player_value_path, so for the window before 3e95d695c the SPA offered
+  // ids the server registry never had (signals 125880/125881). That fix correctly
+  // restored the shorthand in the registry, which STRANDED any view saved during
+  // the window: one production view carries
+  // player_season_projected_{pass,rush}_yards today and throws "Field not found
+  // for column_id" before rendering a row (signals 125975/125976).
+  //
+  // All three period prefixes are listed rather than only the `season` pair with
+  // production hits, per the reasoning in the cpoe and pct notes below: the
+  // broken bundle built week / season / rest_of_season from the same base_name,
+  // so the other four are latent instances rather than non-cases.
+  player_week_projected_pass_yards: 'player_week_projected_pass_yds',
+  player_season_projected_pass_yards: 'player_season_projected_pass_yds',
+  player_rest_of_season_projected_pass_yards:
+    'player_rest_of_season_projected_pass_yds',
+  player_week_projected_rush_yards: 'player_week_projected_rush_yds',
+  player_season_projected_rush_yards: 'player_season_projected_rush_yds',
+  player_rest_of_season_projected_rush_yards:
+    'player_rest_of_season_projected_rush_yds',
   // The 2026-08-04 shorthand sweep renamed the COLUMN to
   // completion_percentage_over_expected but left the id spelled `cpoe`, and
   // select_as derives the payload key from the column -- so the client's
