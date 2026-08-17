@@ -76,7 +76,7 @@ describe('API /teams - release', function () {
       res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.player_position.should.equal(player.secondary_position)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -134,7 +134,7 @@ describe('API /teams - release', function () {
       res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.player_position.should.equal(player.secondary_position)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -192,7 +192,7 @@ describe('API /teams - release', function () {
       res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.player_position.should.equal(player.secondary_position)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -250,7 +250,7 @@ describe('API /teams - release', function () {
       res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.player_position.should.equal(player.secondary_position)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -308,7 +308,7 @@ describe('API /teams - release', function () {
       res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.player_position.should.equal(player.secondary_position)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -366,7 +366,7 @@ describe('API /teams - release', function () {
       res.body.pid.should.equal(player.pid)
       expect(res.body.slot).to.equal(null)
       res.body.player_position.should.equal(player.secondary_position)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -502,7 +502,7 @@ describe('API /teams - release', function () {
 
       await knex('poaches').insert({
         pid: player.pid,
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: leagueId,
         submitted: new Date(),

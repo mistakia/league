@@ -22,7 +22,7 @@ const pick_scoring_columns = (source) =>
 
 export const League = new Record({
   uid: null,
-  commishid: null,
+  commissioner_user_id: null,
   name: null,
   number_teams: null,
 
@@ -31,8 +31,8 @@ export const League = new Record({
   starter_slots_wide_receiver: null,
   starter_slots_tight_end: null,
   starter_slots_running_back_wide_receiver_flex: null,
-  srbwrte: null,
-  sqbrbwrte: null,
+  starter_slots_running_back_wide_receiver_tight_end_flex: null,
+  starter_slots_superflex: null,
   starter_slots_wide_receiver_tight_end_flex: null,
   starter_slots_defense_special_teams: null,
   starter_slots_kicker: null,
@@ -72,7 +72,7 @@ export const League = new Record({
   free_agency_period_end: null,
   free_agency_live_auction_start: null,
   free_agency_live_auction_end: null,
-  tddate: null,
+  trade_deadline_at: null,
 
   draft_start: null,
   draft_type: null,
@@ -148,7 +148,7 @@ export const League = new Record({
 export function createLeague(league_data = {}) {
   const {
     uid,
-    commishid,
+    commissioner_user_id,
     name,
     number_teams,
 
@@ -157,8 +157,8 @@ export function createLeague(league_data = {}) {
     starter_slots_wide_receiver,
     starter_slots_tight_end,
     starter_slots_running_back_wide_receiver_flex,
-    srbwrte,
-    sqbrbwrte,
+    starter_slots_running_back_wide_receiver_tight_end_flex,
+    starter_slots_superflex,
     starter_slots_wide_receiver_tight_end_flex,
     starter_slots_defense_special_teams,
     starter_slots_kicker,
@@ -193,7 +193,7 @@ export function createLeague(league_data = {}) {
     free_agency_period_end,
     free_agency_live_auction_start,
     free_agency_live_auction_end,
-    tddate,
+    trade_deadline_at,
 
     draft_start,
     draft_type,
@@ -256,7 +256,7 @@ export function createLeague(league_data = {}) {
 
   return new League({
     uid,
-    commishid,
+    commissioner_user_id,
     name,
     number_teams,
 
@@ -265,8 +265,8 @@ export function createLeague(league_data = {}) {
     starter_slots_wide_receiver,
     starter_slots_tight_end,
     starter_slots_running_back_wide_receiver_flex,
-    srbwrte,
-    sqbrbwrte,
+    starter_slots_running_back_wide_receiver_tight_end_flex,
+    starter_slots_superflex,
     starter_slots_wide_receiver_tight_end_flex,
     starter_slots_defense_special_teams,
     starter_slots_kicker,
@@ -303,7 +303,7 @@ export function createLeague(league_data = {}) {
     free_agency_period_end,
     free_agency_live_auction_start,
     free_agency_live_auction_end,
-    tddate,
+    trade_deadline_at,
 
     draft_start,
     draft_type,

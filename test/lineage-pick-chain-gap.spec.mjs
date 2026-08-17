@@ -42,9 +42,14 @@ describe('LINEAGE - pick chain gap', function () {
     await league(knex)
   })
 
-  const insert_pick = async ({ pickid, original_team_id, tid, round }) => {
+  const insert_pick = async ({
+    draft_pick_id,
+    original_team_id,
+    tid,
+    round
+  }) => {
     await knex('draft').insert({
-      uid: pickid,
+      uid: draft_pick_id,
       lid: LID,
       season_year: PICK_YEAR,
       round,
@@ -54,38 +59,39 @@ describe('LINEAGE - pick chain gap', function () {
   }
 
   const insert_trade = async ({
-    tradeid,
+    trade_id,
     propose_tid,
     accept_tid,
     accepted,
-    pickid,
+    draft_pick_id,
     recorded_tid
   }) => {
     await knex('trades').insert({
-      uid: tradeid,
+      uid: trade_id,
       lid: LID,
       propose_tid,
       accept_tid,
-      userid: 1,
+      user_id: 1,
       season_year: current_season.year,
       // `accepted` is a Date now, so `accepted - 1` would be milliseconds.
       offered: new Date(accepted.getTime() - 1000),
       accepted
     })
     await knex('trades_picks').insert({
-      tradeid,
+      trade_id,
       tid: recorded_tid,
-      pickid
+      draft_pick_id
     })
   }
 
-  const walk_pick = async ({ pickid }) => {
+  const walk_pick = async ({ draft_pick_id }) => {
     const { holding_drafts, transformation_drafts, coverage_warnings } =
       await walk_transactions({ lid: LID })
     const holdings = holding_drafts
       .filter(
         (draft) =>
-          draft.asset_type === ASSET_TYPE.PICK && draft.pickid === pickid
+          draft.asset_type === ASSET_TYPE.PICK &&
+          draft.draft_pick_id === draft_pick_id
       )
       .sort((a, b) => a.period_start - b.period_start)
     const holding_by_draft_id = new Map(
@@ -109,17 +115,24 @@ describe('LINEAGE - pick chain gap', function () {
     this.timeout(60 * 1000)
     // Team 3 is endowed the pick but team 1 is the team that trades it away, so
     // the hop that moved it from 3 to 1 is missing from trades_picks.
-    await insert_pick({ pickid: 1, original_team_id: 3, tid: 2, round: 1 })
+    await insert_pick({
+      draft_pick_id: 1,
+      original_team_id: 3,
+      tid: 2,
+      round: 1
+    })
     await insert_trade({
-      tradeid: 1,
+      trade_id: 1,
       propose_tid: 1,
       accept_tid: 2,
       accepted: epoch_to_timestamptz(now() - 7 * 24 * 60 * 60),
-      pickid: 1,
+      draft_pick_id: 1,
       recorded_tid: 1
     })
 
-    const { holdings, legs, coverage_warnings } = await walk_pick({ pickid: 1 })
+    const { holdings, legs, coverage_warnings } = await walk_pick({
+      draft_pick_id: 1
+    })
 
     expect(holdings.length).to.equal(2)
     expect(holdings[0].tid).to.equal(1)
@@ -135,17 +148,24 @@ describe('LINEAGE - pick chain gap', function () {
 
   it('leaves an intact chain alone', async function () {
     this.timeout(60 * 1000)
-    await insert_pick({ pickid: 2, original_team_id: 4, tid: 5, round: 2 })
+    await insert_pick({
+      draft_pick_id: 2,
+      original_team_id: 4,
+      tid: 5,
+      round: 2
+    })
     await insert_trade({
-      tradeid: 2,
+      trade_id: 2,
       propose_tid: 4,
       accept_tid: 5,
       accepted: epoch_to_timestamptz(now() - 7 * 24 * 60 * 60),
-      pickid: 2,
+      draft_pick_id: 2,
       recorded_tid: 4
     })
 
-    const { holdings, legs, coverage_warnings } = await walk_pick({ pickid: 2 })
+    const { holdings, legs, coverage_warnings } = await walk_pick({
+      draft_pick_id: 2
+    })
 
     expect(holdings.length).to.equal(2)
     expect(holdings[0].tid).to.equal(4)
@@ -164,20 +184,25 @@ describe('LINEAGE - pick chain gap', function () {
     this.timeout(60 * 1000)
     // Every hop is recorded and every leg names the trade's own two teams, so
     // none of the gap warnings fire -- but the chain ends on team 4 while
-    // draft.tid says team 5 holds the pick. That is the signature of a pickid
+    // draft.tid says team 5 holds the pick. That is the signature of a draft_pick_id
     // pointed at the wrong team's pick: the identity and the trade history
     // disagree about ownership, and only the end state exposes it.
-    await insert_pick({ pickid: 5, original_team_id: 3, tid: 5, round: 2 })
+    await insert_pick({
+      draft_pick_id: 5,
+      original_team_id: 3,
+      tid: 5,
+      round: 2
+    })
     await insert_trade({
-      tradeid: 6,
+      trade_id: 6,
       propose_tid: 3,
       accept_tid: 4,
       accepted: epoch_to_timestamptz(now() - 7 * 24 * 60 * 60),
-      pickid: 5,
+      draft_pick_id: 5,
       recorded_tid: 3
     })
 
-    const { legs, coverage_warnings } = await walk_pick({ pickid: 5 })
+    const { legs, coverage_warnings } = await walk_pick({ draft_pick_id: 5 })
 
     expect(legs).to.deep.equal([{ trade_uid: 6, from_tid: 3, to_tid: 4 }])
     expect(coverage_warnings.pick_chain_end_state_mismatch).to.equal(1)
@@ -194,25 +219,30 @@ describe('LINEAGE - pick chain gap', function () {
     // never received the pick, so nothing but a synthetic hop could put its
     // source holding on a participant. Direction is still recovered from the
     // recorded trades_picks.tid, and the oracle counts the leg that is left.
-    await insert_pick({ pickid: 3, original_team_id: 6, tid: 9, round: 3 })
+    await insert_pick({
+      draft_pick_id: 3,
+      original_team_id: 6,
+      tid: 9,
+      round: 3
+    })
     await insert_trade({
-      tradeid: 3,
+      trade_id: 3,
       propose_tid: 6,
       accept_tid: 7,
       accepted: epoch_to_timestamptz(now() - 14 * 24 * 60 * 60),
-      pickid: 3,
+      draft_pick_id: 3,
       recorded_tid: 6
     })
     await insert_trade({
-      tradeid: 4,
+      trade_id: 4,
       propose_tid: 8,
       accept_tid: 9,
       accepted: epoch_to_timestamptz(now() - 7 * 24 * 60 * 60),
-      pickid: 3,
+      draft_pick_id: 3,
       recorded_tid: 8
     })
 
-    const { legs, coverage_warnings } = await walk_pick({ pickid: 3 })
+    const { legs, coverage_warnings } = await walk_pick({ draft_pick_id: 3 })
 
     expect(legs[0]).to.deep.equal({ trade_uid: 3, from_tid: 6, to_tid: 7 })
     expect(legs[1].trade_uid).to.equal(4)
@@ -226,17 +256,22 @@ describe('LINEAGE - pick chain gap', function () {
     // Neither the chain holder (10) nor the recorded trades_picks.tid (12) is
     // in the trade, so the giver cannot be recovered -- but the leg must still
     // name only the trade's own two teams.
-    await insert_pick({ pickid: 4, original_team_id: 10, tid: 11, round: 1 })
+    await insert_pick({
+      draft_pick_id: 4,
+      original_team_id: 10,
+      tid: 11,
+      round: 1
+    })
     await insert_trade({
-      tradeid: 5,
+      trade_id: 5,
       propose_tid: 1,
       accept_tid: 11,
       accepted: epoch_to_timestamptz(now() - 7 * 24 * 60 * 60),
-      pickid: 4,
+      draft_pick_id: 4,
       recorded_tid: 12
     })
 
-    const { legs, coverage_warnings } = await walk_pick({ pickid: 4 })
+    const { legs, coverage_warnings } = await walk_pick({ draft_pick_id: 4 })
 
     expect(legs).to.deep.equal([{ trade_uid: 5, from_tid: 1, to_tid: 11 }])
     expect(coverage_warnings.pick_chain_gap_unresolved).to.equal(1)

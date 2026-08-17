@@ -15,7 +15,7 @@ const map_state_to_props = createSelector(
   get_current_league,
   get_teams_for_current_league,
   (app, league, teams) => ({
-    isCommish: app.userId === league.commishid,
+    isCommish: app.userId === league.commissioner_user_id,
     league,
     teams
   })

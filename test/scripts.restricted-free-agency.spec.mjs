@@ -113,7 +113,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
 
       await insert_restricted_free_agency_bid({
         pid: player.pid,
-        userid: user_id,
+        user_id,
         bid_amount: value,
         tid: team_id,
         lid: leagueId,
@@ -186,7 +186,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       const processed = Math.round(Date.now() / 1000)
       const bid_uid = await insert_restricted_free_agency_bid({
         pid: player.pid,
-        userid: user_id,
+        user_id,
         bid_amount: value,
         tid: team_id,
         lid: leagueId,
@@ -282,7 +282,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
 
       const bid_uid = await insert_restricted_free_agency_bid({
         pid: player1.pid,
-        userid: user_id,
+        user_id,
         bid_amount: bid,
         tid: team_id,
         lid: leagueId,
@@ -418,7 +418,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
 
       await insert_restricted_free_agency_bid({
         pid: player.pid,
-        userid: user_id,
+        user_id,
         bid_amount: value,
         tid: team_id,
         lid: leagueId,
@@ -465,7 +465,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
 
       await insert_restricted_free_agency_bid({
         pid: player.pid,
-        userid: user_id,
+        user_id,
         bid_amount: value,
         tid: team_id,
         lid: leagueId,
@@ -514,7 +514,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
 
       await insert_restricted_free_agency_bid({
         pid: player.pid,
-        userid: original_user_id,
+        user_id: original_user_id,
         bid_amount: 10,
         tid: original_team_id,
         lid: leagueId,
@@ -528,7 +528,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // treated as due the moment it is submitted.
       await insert_restricted_free_agency_bid({
         pid: player.pid,
-        userid: competing_user_id,
+        user_id: competing_user_id,
         bid_amount: 25,
         tid: competing_team_id,
         lid: leagueId,
@@ -604,7 +604,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // Original team bid
       await insert_restricted_free_agency_bid({
         pid: player.pid,
-        userid: user_id1,
+        user_id: user_id1,
         bid_amount: value1,
         tid: team_id1,
         lid: leagueId,
@@ -618,7 +618,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // exercise the resolution of the processing window through the player.
       await insert_restricted_free_agency_bid({
         pid: player.pid,
-        userid: user_id2,
+        user_id: user_id2,
         bid_amount: value2,
         tid: team_id2,
         lid: leagueId,
@@ -627,7 +627,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
 
       await insert_restricted_free_agency_bid({
         pid: player.pid,
-        userid: user_id3,
+        user_id: user_id3,
         bid_amount: value2,
         tid: team_id3,
         lid: leagueId,

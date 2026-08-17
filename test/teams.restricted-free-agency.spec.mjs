@@ -83,7 +83,7 @@ describe('API /teams - restricted free agency', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.userid.should.equal(userId)
+      res.body.user_id.should.equal(userId)
       res.body.pid.should.equal(player.pid)
       new Date(res.body.submitted).getTime().should.equal(Date.now())
       res.body.bid_amount.should.equal(bid)
@@ -101,7 +101,7 @@ describe('API /teams - restricted free agency', function () {
       query1[0].uid.should.be.a('number')
       query1[0].uid.should.be.above(0)
       query1[0].pid.should.equal(player.pid)
-      query1[0].userid.should.equal(userId)
+      query1[0].user_id.should.equal(userId)
       query1[0].bid_amount.should.equal(bid)
       query1[0].season_year.should.equal(current_season.year)
       query1[0].tid.should.equal(teamId)
@@ -174,7 +174,7 @@ describe('API /teams - restricted free agency', function () {
       res2.should.be.json
 
       res2.body.tid.should.equal(1)
-      res2.body.userid.should.equal(userId)
+      res2.body.user_id.should.equal(userId)
       res2.body.pid.should.equal(player.pid)
       res2.body.season_year.should.equal(current_season.year)
       new Date(res2.body.submitted).getTime().should.equal(Date.now())
@@ -258,7 +258,7 @@ describe('API /teams - restricted free agency', function () {
       res2.should.be.json
 
       res2.body.tid.should.equal(teamId)
-      res2.body.userid.should.equal(userId)
+      res2.body.user_id.should.equal(userId)
       res2.body.season_year.should.equal(current_season.year)
       res2.body.pid.should.equal(tagPlayer.pid)
       new Date(res2.body.submitted).getTime().should.equal(Date.now())

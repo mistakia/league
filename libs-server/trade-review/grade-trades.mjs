@@ -282,14 +282,14 @@ const load_short_bundle_trade_uids = async ({ lid, legs_by_trade }) => {
   const source_counts = new Map()
   for (const table of ['trades_players', 'trades_picks']) {
     const rows = await db(table)
-      .whereIn('tradeid', trade_uids)
-      .groupBy('tradeid')
-      .select('tradeid')
+      .whereIn('trade_id', trade_uids)
+      .groupBy('trade_id')
+      .select('trade_id')
       .count('* as count')
     for (const row of rows) {
       source_counts.set(
-        row.tradeid,
-        (source_counts.get(row.tradeid) || 0) + Number(row.count)
+        row.trade_id,
+        (source_counts.get(row.trade_id) || 0) + Number(row.count)
       )
     }
   }

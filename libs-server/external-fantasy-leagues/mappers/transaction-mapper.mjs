@@ -106,11 +106,11 @@ export default class TransactionMapper {
     // Standard transaction fields
     this.required_fields = ['pid', 'type', 'occurred_at', 'tid', 'lid']
     this.optional_fields = [
-      'userid',
+      'user_id',
       'player_salary',
       'week',
       'year',
-      'waiverid'
+      'waiver_id'
     ]
   }
 
@@ -210,7 +210,7 @@ export default class TransactionMapper {
     const adds = raw.adds || {}
     const drops = raw.drops || {}
 
-    const userid = raw.creator
+    const user_id = raw.creator
       ? get_mapping_value(context.user_mappings, raw.creator) || raw.creator
       : undefined
 
@@ -229,7 +229,7 @@ export default class TransactionMapper {
             get_mapping_value(context.player_mappings, player_id) || player_id,
           tid: get_mapping_value(context.team_mappings, roster_id) || roster_id
         }
-        if (userid !== undefined) row.userid = userid
+        if (user_id !== undefined) row.user_id = user_id
         if (
           row.type === transaction_types.ROSTER_ADD &&
           waiver_bid !== undefined &&
@@ -250,7 +250,7 @@ export default class TransactionMapper {
             get_mapping_value(context.player_mappings, player_id) || player_id,
           tid: get_mapping_value(context.team_mappings, roster_id) || roster_id
         }
-        if (userid !== undefined) row.userid = userid
+        if (user_id !== undefined) row.user_id = user_id
         rows.push(row)
       }
     }

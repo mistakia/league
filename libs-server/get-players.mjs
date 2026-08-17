@@ -449,7 +449,7 @@ export default async function ({
 
   // include player season, week and ros projections
   const projections = await db('projections_index')
-    .where('sourceid', external_data_sources.AVERAGE)
+    .where('source_id', external_data_sources.AVERAGE)
     .where('season_year', current_season.year)
     .where('week', '>=', current_season.week)
     .whereIn('pid', returnedPlayerIds)
@@ -457,7 +457,7 @@ export default async function ({
     // (see user:task/league/close-reg-post-week-encoding-gaps.md Out of Scope)
     .where('season_type', 'REG')
   const rosProjections = await db('ros_projections')
-    .where('sourceid', external_data_sources.AVERAGE)
+    .where('source_id', external_data_sources.AVERAGE)
     .where('season_year', current_season.year)
     .whereIn('pid', returnedPlayerIds)
 

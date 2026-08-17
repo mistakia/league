@@ -149,7 +149,7 @@ const run = async ({ season = false, dry = false } = {}) => {
       week,
       season_year: year,
       season_type: 'REG',
-      sourceid: external_data_sources.CBS,
+      source_id: external_data_sources.CBS,
       ...data
     })
   }
@@ -171,7 +171,7 @@ const run = async ({ season = false, dry = false } = {}) => {
       .where({
         season_year: year,
         week,
-        sourceid: external_data_sources.CBS,
+        source_id: external_data_sources.CBS,
         season_type: 'REG'
       })
       .whereNotIn(
@@ -184,9 +184,9 @@ const run = async ({ season = false, dry = false } = {}) => {
     await db('projections_index')
       .insert(inserts)
       .onConflict([
-        'sourceid',
+        'source_id',
         'pid',
-        'userid',
+        'user_id',
         'week',
         'season_year',
         'season_type'
@@ -201,7 +201,7 @@ const run = async ({ season = false, dry = false } = {}) => {
     skipped: false,
     year,
     week,
-    sourceid: external_data_sources.CBS,
+    source_id: external_data_sources.CBS,
     seas_type: 'REG'
   }
 }

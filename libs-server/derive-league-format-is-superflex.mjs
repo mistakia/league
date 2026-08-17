@@ -7,9 +7,9 @@ import db from '#db'
 // single-QB leagues with no error.
 //
 // The class is derived, never independently assigned -- `league_formats.sqb`
-// and `sqbrbwrte` are the league configuration's own slot counts, and this is
+// and `starter_slots_superflex` are the league configuration's own slot counts, and this is
 // the same expression the `cmv_derive_format_category` DB function applies
-// (`sqb > 1 OR sqbrbwrte > 0`). That function retires with the composite
+// (`sqb > 1 OR starter_slots_superflex > 0`). That function retires with the composite
 // pipeline; this helper does not depend on it.
 //
 // A league's format can change between seasons, so the class is resolved over
@@ -28,7 +28,7 @@ export const derive_league_format_is_superflex = async ({ lid }) => {
   const rows = await db('seasons')
     .distinct(
       'league_formats.starter_slots_quarterback',
-      'league_formats.sqbrbwrte'
+      'league_formats.starter_slots_superflex'
     )
     .join('league_formats', 'league_formats.id', 'seasons.league_format_id')
     .where('seasons.lid', lid)
@@ -40,7 +40,10 @@ export const derive_league_format_is_superflex = async ({ lid }) => {
   }
 
   const classes = new Set(
-    rows.map((row) => row.starter_slots_quarterback > 1 || row.sqbrbwrte > 0)
+    rows.map(
+      (row) =>
+        row.starter_slots_quarterback > 1 || row.starter_slots_superflex > 0
+    )
   )
   if (classes.size > 1) {
     throw new Error(

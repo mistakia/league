@@ -691,7 +691,7 @@ router.delete('/?', async (req, res) => {
       .where({
         lid: leagueId,
         tid: teamId,
-        userid: req.auth.userId
+        user_id: req.auth.userId
       })
       .where('teams.season_year', current_season.year)
     if (teamRows.length) {

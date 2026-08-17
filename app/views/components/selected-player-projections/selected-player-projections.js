@@ -45,7 +45,7 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
 
     // Filter out average projections from the projections array since they get their own row
     const filtered_projections = projections.filter(
-      (p) => p.sourceid !== external_data_sources.AVERAGE
+      (p) => p.source_id !== external_data_sources.AVERAGE
     )
     const projections_by_week = groupBy(filtered_projections, 'week')
 

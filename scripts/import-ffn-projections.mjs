@@ -92,7 +92,7 @@ const run = async ({ dry = false } = {}) => {
         season_year: current_season.year,
         week,
         season_type: 'REG',
-        sourceid: 12,
+        source_id: 12,
         ...proj
       })
     }
@@ -113,9 +113,9 @@ const run = async ({ dry = false } = {}) => {
   await db('projections_index')
     .insert(inserts)
     .onConflict([
-      'sourceid',
+      'source_id',
       'pid',
-      'userid',
+      'user_id',
       'week',
       'season_year',
       'season_type'

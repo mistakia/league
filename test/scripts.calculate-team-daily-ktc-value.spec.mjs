@@ -28,7 +28,7 @@ const observed_at = (date) => `${date}T12:00:00Z`
 const insert_transaction = async ({ uid, tid, pid, type, date }) =>
   knex('transactions').insert({
     uid,
-    userid: 1,
+    user_id: 1,
     tid,
     lid,
     pid,
@@ -129,19 +129,19 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
         propose_tid: 1,
         accept_tid: 2,
         lid,
-        userid: 1,
+        user_id: 1,
         season_year: year,
         offered: epoch_to_timestamptz(local_noon(day_two)),
         accepted: epoch_to_timestamptz(local_noon(day_two))
       })
       await knex('trades_players').insert({
-        tradeid: 1,
+        trade_id: 1,
         tid: 1,
         pid: 'PLAY-ONE-000001'
       })
       await knex('trades_transactions').insert({
-        tradeid: 1,
-        transactionid: 105
+        trade_id: 1,
+        transaction_id: 105
       })
 
       // day three: an unrelated add, which is what makes day two emit

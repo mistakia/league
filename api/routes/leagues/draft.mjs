@@ -241,20 +241,20 @@ router.get('/?', async (req, res) => {
 
     // Get trade counts for each pick
     const trade_counts = await db('trades_picks')
-      .select('pickid')
-      .count('tradeid as trade_count')
-      .innerJoin('trades', 'trades.uid', 'trades_picks.tradeid')
+      .select('draft_pick_id')
+      .count('trade_id as trade_count')
+      .innerJoin('trades', 'trades.uid', 'trades_picks.trade_id')
       .whereNotNull('trades.accepted')
       .whereIn(
-        'pickid',
+        'draft_pick_id',
         picks.map((p) => p.uid)
       )
-      .groupBy('pickid')
+      .groupBy('draft_pick_id')
 
     // Create a map for quick lookup
     const trade_count_map = {}
     trade_counts.forEach((tc) => {
-      trade_count_map[tc.pickid] = parseInt(tc.trade_count)
+      trade_count_map[tc.draft_pick_id] = parseInt(tc.trade_count)
     })
 
     // Add trade_count to each pick
@@ -325,10 +325,10 @@ router.get('/picks/:pickId', async (req, res) => {
         'trades.propose_tid',
         'trades.accept_tid',
         'trades.accepted',
-        'trades_picks.pickid'
+        'trades_picks.draft_pick_id'
       ])
-      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
-      .where('trades_picks.pickid', pickId)
+      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.trade_id')
+      .where('trades_picks.draft_pick_id', pickId)
       .whereNotNull('trades.accepted')
       .orderBy('trades.accepted', 'asc')
 
@@ -648,7 +648,7 @@ router.post('/?', async (req, res) => {
     })
 
     await db('transactions').insert({
-      userid: req.auth.userId,
+      user_id: req.auth.userId,
       tid: teamId,
       lid,
       pid,
@@ -693,8 +693,8 @@ router.post('/?', async (req, res) => {
     }
 
     const trades = await db('trades')
-      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
-      .where('trades_picks.pickid', pickId)
+      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.trade_id')
+      .where('trades_picks.draft_pick_id', pickId)
       .whereNull('trades.accepted')
       .whereNull('trades.cancelled')
       .whereNull('trades.rejected')

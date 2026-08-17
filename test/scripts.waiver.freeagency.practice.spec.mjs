@@ -45,7 +45,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       const teamId = 1
       await knex('waivers').insert({
         tid: teamId,
-        userid: 1,
+        user_id: 1,
         lid,
         pid: player.pid,
         priority_order: 9999,
@@ -139,7 +139,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       const teamId = 1
       await knex('waivers').insert({
         tid: teamId,
-        userid: 1,
+        user_id: 1,
         lid,
         pid: player.pid,
         priority_order: 9999,

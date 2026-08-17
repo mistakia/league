@@ -62,24 +62,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 1     |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 3     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 0     |
-| `bench_slot_count`                              | 0     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 0     |
-| `cap`                                           | 50000 |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 1     |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 3     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 0     |
+| `bench_slot_count`                                        | 0     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 0     |
+| `cap`                                                     | 50000 |
+| `min_bid`                                                 | 0     |
 
 ### genesis_10_team
 
@@ -91,24 +91,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 10    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 1     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 0     |
-| `bench_slot_count`                              | 7     |
-| `practice_squad_slot_count`                     | 4     |
-| `reserve_short_term_limit`                      | 99    |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 10    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 1     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 0     |
+| `bench_slot_count`                                        | 7     |
+| `practice_squad_slot_count`                               | 4     |
+| `reserve_short_term_limit`                                | 99    |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### half_ppr_10_team
 
@@ -120,24 +120,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 10    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 10    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### half_ppr_10_team_superflex
 
@@ -149,24 +149,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 10    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 1     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 10    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 1     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### half_ppr_12_team
 
@@ -178,24 +178,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### half_ppr_12_team_superflex
 
@@ -207,24 +207,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 1     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 1     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### half_ppr_lower_turnover_10_team
 
@@ -236,24 +236,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 10    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 10    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### half_ppr_lower_turnover_10_team_superflex
 
@@ -265,24 +265,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 10    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 1     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 10    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 1     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### half_ppr_lower_turnover_12_team
 
@@ -294,24 +294,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### half_ppr_lower_turnover_12_team_superflex
 
@@ -323,24 +323,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 1     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 1     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### ppr_10_team
 
@@ -352,24 +352,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 10    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 10    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### ppr_10_team_superflex
 
@@ -381,24 +381,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 10    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 1     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 10    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 1     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### ppr_12_team
 
@@ -410,24 +410,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### ppr_12_team_superflex
 
@@ -439,24 +439,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 1     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 1     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### ppr_lower_turnover_10_team
 
@@ -468,24 +468,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 10    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 10    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### ppr_lower_turnover_10_team_superflex
 
@@ -497,24 +497,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 10    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 1     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 10    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 1     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### ppr_lower_turnover_12_team
 
@@ -526,24 +526,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### ppr_lower_turnover_12_team_superflex
 
@@ -555,24 +555,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 1     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 1     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### sfb15_mfl
 
@@ -584,24 +584,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 0     |
-| `starter_slots_wide_receiver`                   | 0     |
-| `starter_slots_tight_end`                       | 0     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 9     |
-| `sqbrbwrte`                                     | 2     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 0     |
-| `starter_slots_kicker`                          | 0     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 0     |
+| `starter_slots_wide_receiver`                             | 0     |
+| `starter_slots_tight_end`                                 | 0     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 9     |
+| `starter_slots_superflex`                                 | 2     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 0     |
+| `starter_slots_kicker`                                    | 0     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### sfb15_sleeper
 
@@ -613,24 +613,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 0     |
-| `starter_slots_wide_receiver`                   | 0     |
-| `starter_slots_tight_end`                       | 0     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 9     |
-| `sqbrbwrte`                                     | 2     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 0     |
-| `starter_slots_kicker`                          | 0     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 0     |
+| `starter_slots_wide_receiver`                             | 0     |
+| `starter_slots_tight_end`                                 | 0     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 9     |
+| `starter_slots_superflex`                                 | 2     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 0     |
+| `starter_slots_kicker`                                    | 0     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### sfb16_mfl
 
@@ -642,24 +642,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 0     |
-| `starter_slots_running_back`                    | 0     |
-| `starter_slots_wide_receiver`                   | 0     |
-| `starter_slots_tight_end`                       | 0     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 8     |
-| `sqbrbwrte`                                     | 2     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 0     |
-| `starter_slots_kicker`                          | 0     |
-| `bench_slot_count`                              | 10    |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 0     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 0     |
+| `starter_slots_running_back`                              | 0     |
+| `starter_slots_wide_receiver`                             | 0     |
+| `starter_slots_tight_end`                                 | 0     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 8     |
+| `starter_slots_superflex`                                 | 2     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 0     |
+| `starter_slots_kicker`                                    | 0     |
+| `bench_slot_count`                                        | 10    |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 0     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### sfb16_sleeper
 
@@ -671,24 +671,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 0     |
-| `starter_slots_running_back`                    | 0     |
-| `starter_slots_wide_receiver`                   | 0     |
-| `starter_slots_tight_end`                       | 0     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 8     |
-| `sqbrbwrte`                                     | 2     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 0     |
-| `starter_slots_kicker`                          | 0     |
-| `bench_slot_count`                              | 10    |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 0     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 0     |
+| `starter_slots_running_back`                              | 0     |
+| `starter_slots_wide_receiver`                             | 0     |
+| `starter_slots_tight_end`                                 | 0     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 8     |
+| `starter_slots_superflex`                                 | 2     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 0     |
+| `starter_slots_kicker`                                    | 0     |
+| `bench_slot_count`                                        | 10    |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 0     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### standard_10_team
 
@@ -700,24 +700,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 10    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 10    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ### standard_12_team
 
@@ -729,24 +729,24 @@ This document shows the configuration for each named format in the system. Ident
 
 **Configuration:**
 
-| Property                                        | Value |
-| ----------------------------------------------- | ----- |
-| `number_teams`                                  | 12    |
-| `starter_slots_quarterback`                     | 1     |
-| `starter_slots_running_back`                    | 2     |
-| `starter_slots_wide_receiver`                   | 2     |
-| `starter_slots_tight_end`                       | 1     |
-| `starter_slots_running_back_wide_receiver_flex` | 0     |
-| `srbwrte`                                       | 1     |
-| `sqbrbwrte`                                     | 0     |
-| `starter_slots_wide_receiver_tight_end_flex`    | 0     |
-| `starter_slots_defense_special_teams`           | 1     |
-| `starter_slots_kicker`                          | 1     |
-| `bench_slot_count`                              | 6     |
-| `practice_squad_slot_count`                     | 0     |
-| `reserve_short_term_limit`                      | 3     |
-| `cap`                                           | 200   |
-| `min_bid`                                       | 0     |
+| Property                                                  | Value |
+| --------------------------------------------------------- | ----- |
+| `number_teams`                                            | 12    |
+| `starter_slots_quarterback`                               | 1     |
+| `starter_slots_running_back`                              | 2     |
+| `starter_slots_wide_receiver`                             | 2     |
+| `starter_slots_tight_end`                                 | 1     |
+| `starter_slots_running_back_wide_receiver_flex`           | 0     |
+| `starter_slots_running_back_wide_receiver_tight_end_flex` | 1     |
+| `starter_slots_superflex`                                 | 0     |
+| `starter_slots_wide_receiver_tight_end_flex`              | 0     |
+| `starter_slots_defense_special_teams`                     | 1     |
+| `starter_slots_kicker`                                    | 1     |
+| `bench_slot_count`                                        | 6     |
+| `practice_squad_slot_count`                               | 0     |
+| `reserve_short_term_limit`                                | 3     |
+| `cap`                                                     | 200   |
+| `min_bid`                                                 | 0     |
 
 ## Scoring Format Details
 

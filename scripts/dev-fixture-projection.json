@@ -140,7 +140,7 @@
     },
     "league_user_careerlogs": {
       "lid": "keep",
-      "userid": "keep",
+      "user_id": "keep",
       "regular_season_wins": "keep",
       "regular_season_losses": "keep",
       "regular_season_ties": "keep",
@@ -183,9 +183,10 @@
     },
     "leagues": {
       "uid": "keep",
-      "commishid": "keep",
+      "commissioner_user_id": "keep",
       "name": "keep",
       "discord_webhook_url": "NULL",
+      "discord_announcements_webhook_url": "NULL",
       "is_hosted": "keep",
       "processed_at": "keep",
       "archived_at": "keep",
@@ -214,7 +215,7 @@
     },
     "placed_wagers": {
       "wager_id": "keep",
-      "userid": "keep",
+      "user_id": "keep",
       "public": "keep",
       "wager_type": "keep",
       "placed_at": "keep",
@@ -240,13 +241,13 @@
       "projection": "keep"
     },
     "poach_releases": {
-      "poachid": "keep",
+      "poach_id": "keep",
       "pid": "keep"
     },
     "poaches": {
       "uid": "keep",
       "pid": "keep",
-      "userid": "keep",
+      "user_id": "keep",
       "tid": "keep",
       "player_tid": "keep",
       "lid": "keep",
@@ -258,7 +259,7 @@
     "restricted_free_agency_bids": {
       "uid": "keep",
       "pid": "keep",
-      "userid": "keep",
+      "user_id": "keep",
       "bid_amount": "keep",
       "tid": "keep",
       "season_year": "keep",
@@ -310,7 +311,7 @@
       "free_agency_period_start": "keep",
       "free_agency_period_end": "keep",
       "free_agency_live_auction_start": "keep",
-      "tddate": "keep",
+      "trade_deadline_at": "keep",
       "draft_type": "keep",
       "draft_hour_min": "keep",
       "draft_hour_max": "keep",
@@ -366,7 +367,7 @@
       "accent_color": "keep"
     },
     "trade_releases": {
-      "tradeid": "keep",
+      "trade_id": "keep",
       "tid": "keep",
       "pid": "keep",
       "origin_slot": "keep"
@@ -376,7 +377,7 @@
       "propose_tid": "keep",
       "accept_tid": "keep",
       "lid": "keep",
-      "userid": "keep",
+      "user_id": "keep",
       "season_year": "keep",
       "offered": "keep",
       "accepted": "keep",
@@ -386,22 +387,22 @@
       "approved": "keep"
     },
     "trades_picks": {
-      "tradeid": "keep",
+      "trade_id": "keep",
       "tid": "keep",
-      "pickid": "keep"
+      "draft_pick_id": "keep"
     },
     "trades_players": {
-      "tradeid": "keep",
+      "trade_id": "keep",
       "tid": "keep",
       "pid": "keep"
     },
     "trades_transactions": {
-      "tradeid": "keep",
-      "transactionid": "keep"
+      "trade_id": "keep",
+      "transaction_id": "keep"
     },
     "transactions": {
       "uid": "keep",
-      "userid": "keep",
+      "user_id": "keep",
       "tid": "keep",
       "lid": "keep",
       "pid": "keep",
@@ -410,7 +411,7 @@
       "week": "keep",
       "season_year": "keep",
       "occurred_at": "keep",
-      "waiverid": "keep"
+      "waiver_id": "keep"
     },
     "urls": {
       "url": "keep",
@@ -432,28 +433,27 @@
       "username": "keep",
       "email": "'user_' || id || '@example.invalid'",
       "password": "'$2a$10$devfixturedevfixturedevfixtureoWQ1qQnQ1qQnQ1qQnQ1qQnQ1qQnQ1q'",
-      "vbaseline": "keep",
       "watchlist": "keep",
-      "lastvisit": "keep",
+      "last_visit_at": "keep",
       "invite_code": "NULL"
     },
     "users_sources": {
-      "userid": "keep",
-      "sourceid": "keep",
+      "user_id": "keep",
+      "source_id": "keep",
       "weight": "keep"
     },
     "users_teams": {
-      "userid": "keep",
+      "user_id": "keep",
       "tid": "keep",
       "season_year": "keep"
     },
     "waiver_releases": {
-      "waiverid": "keep",
+      "waiver_id": "keep",
       "pid": "keep"
     },
     "waivers": {
       "uid": "keep",
-      "userid": "keep",
+      "user_id": "keep",
       "pid": "keep",
       "tid": "keep",
       "lid": "keep",

@@ -84,7 +84,7 @@ const createTransaction = async ({ roster_player, tid, league }) => {
   })
 
   return {
-    userid: 0,
+    user_id: 0,
     tid,
     lid: league.uid,
     pid,
@@ -113,7 +113,7 @@ const run = async ({ lid }) => {
   })
   await db('transactions')
     .where({
-      userid: 0,
+      user_id: 0,
       lid,
       season_year: current_season.year
     })

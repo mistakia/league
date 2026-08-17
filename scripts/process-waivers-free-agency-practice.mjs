@@ -193,7 +193,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
     // Get waiver releases
     const release = await db('waiver_releases')
       .select('pid')
-      .where('waiverid', waiver.wid)
+      .where('waiver_id', waiver.wid)
 
     try {
       // Process super priority claim
@@ -202,7 +202,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
         original_tid: waiver.tid,
         lid,
         super_priority_uid: super_priority_status.super_priority_uid,
-        userid: waiver.userid,
+        user_id: waiver.user_id,
         release: release.map((r) => r.pid)
       })
 
@@ -273,7 +273,7 @@ const handle_regular_practice_claim = async (waiver, lid, timestamp) => {
 
   const release = await db('waiver_releases')
     .select('pid')
-    .where('waiverid', waiver.wid)
+    .where('waiver_id', waiver.wid)
 
   await submitAcquisition({
     release: release.map((r) => r.pid),
@@ -281,7 +281,7 @@ const handle_regular_practice_claim = async (waiver, lid, timestamp) => {
     pid: waiver.pid,
     teamId: waiver.tid,
     bid: value,
-    userId: waiver.userid,
+    userId: waiver.user_id,
     slot: roster_slot_types.PS,
     waiverId: waiver.wid
   })

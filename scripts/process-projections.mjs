@@ -137,7 +137,7 @@ const run_season_forecast = async (lid) => {
   }
 }
 
-// The AVERAGE (sourceid 18) consensus is deliberately CURRENT-STATE ONLY. It is
+// The AVERAGE (source_id 18) consensus is deliberately CURRENT-STATE ONLY. It is
 // written to projections_index (and ros_projections) and NOT to
 // projections_history. This is a decision, not an oversight: giving it a real
 // generated_at at the hourly cadence this script runs at would append ~184M
@@ -147,10 +147,10 @@ const run_season_forecast = async (lid) => {
 // To reconstruct the consensus as of some instant D, take the latest observation
 // of each real source at or before D and re-run weightProjections over it:
 //
-//   SELECT DISTINCT ON (sourceid, pid, week, season_year, season_type) *
+//   SELECT DISTINCT ON (source_id, pid, week, season_year, season_type) *
 //   FROM projections_history
 //   WHERE generated_at <= D
-//   ORDER BY sourceid, pid, week, season_year, season_type, generated_at DESC
+//   ORDER BY source_id, pid, week, season_year, season_type, generated_at DESC
 //
 // See user:text/league/projection-history-system.md for the full rationale.
 const process_average_projections = async ({ year, seas_type = 'REG' }) => {
@@ -182,7 +182,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       player_row.projection[week] = projection
       projectionInserts.push({
         pid: player_row.pid,
-        sourceid: external_data_sources.AVERAGE,
+        source_id: external_data_sources.AVERAGE,
         season_type: seas_type,
         season_year: current_season.year,
         week,
@@ -205,7 +205,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       player_row.projection[week] = projection
       projectionInserts.push({
         pid: player_row.pid,
-        sourceid: external_data_sources.AVERAGE,
+        source_id: external_data_sources.AVERAGE,
         season_type: seas_type,
         season_year: current_season.year,
         week,
@@ -242,7 +242,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
 
       rosProjectionInserts.push({
         pid: player_row.pid,
-        sourceid: external_data_sources.AVERAGE,
+        source_id: external_data_sources.AVERAGE,
         season_year: current_season.year,
         ...ros
       })
@@ -258,9 +258,9 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
         db('projections_index')
           .insert(items)
           .onConflict([
-            'sourceid',
+            'source_id',
             'pid',
-            'userid',
+            'user_id',
             'week',
             'season_year',
             'season_type'
@@ -279,7 +279,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       save: (items) =>
         db('ros_projections')
           .insert(items)
-          .onConflict(['sourceid', 'pid', 'season_year'])
+          .onConflict(['source_id', 'pid', 'season_year'])
           .merge(),
       batch_size: 100
     })

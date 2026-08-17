@@ -57,7 +57,7 @@ router.get('/?', async (req, res) => {
     const tid = Number(teamId)
 
     const teams = await db('users_teams').where({
-      userid: req.auth.userId,
+      user_id: req.auth.userId,
       season_year: current_season.year
     })
     const teamIds = teams.map((r) => r.tid)

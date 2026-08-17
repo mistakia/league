@@ -24,7 +24,7 @@ export default async function (league_id) {
       'waivers.uid as wid',
       'waivers.pid',
       'waivers.tid',
-      'waivers.userid',
+      'waivers.user_id',
       'waivers.type as waiver_type'
     )
     .join('teams', 'waivers.tid', 'teams.uid')

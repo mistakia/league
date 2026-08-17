@@ -134,7 +134,7 @@ router.post('/?', async (req, res) => {
 
     // if active roster, verify not during FA Auction Period
     const league = await getLeague({ lid: leagueId })
-    const is_commish = league.commishid === req.auth.userId
+    const is_commish = league.commissioner_user_id === req.auth.userId
 
     if (league.free_agency_live_auction_start) {
       const rosterRow = await getRoster({ tid })
@@ -167,7 +167,7 @@ router.post('/?', async (req, res) => {
         release_pid: pid,
         tid,
         lid,
-        userid: req.auth.userId
+        user_id: req.auth.userId
       })
     } catch (error) {
       return res.status(400).send({ error: error.message })

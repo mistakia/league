@@ -141,7 +141,7 @@ const import_fanatics_wagers = async ({
       const returned_amount = fanatics.format_wager_payout(wager.header.payout)
 
       wager_item = {
-        userid: user_id,
+        user_id,
         wager_type,
         placed_at: new Date(wager.betMetaData.placementTime),
         bet_count: 1,

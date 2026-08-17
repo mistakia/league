@@ -117,7 +117,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
   // Team can update the waiver to include a release if roster space is needed
   // Super priority waivers are always FREE_AGENCY_PRACTICE type
   await db('waivers').insert({
-    userid: 0,
+    user_id: 0,
     pid,
     tid: super_priority_status.original_tid,
     lid,
@@ -133,7 +133,7 @@ export default async function ({
   lid,
   tid,
   release_pid,
-  userid,
+  user_id,
   activate_pid,
   create_notification = false
 }) {
@@ -264,7 +264,7 @@ export default async function ({
       tid
     })
     const transaction = {
-      userid,
+      user_id,
       tid,
       lid,
       pid: activate_pid,
@@ -305,7 +305,7 @@ export default async function ({
 
   // create transaction
   const transaction = {
-    userid,
+    user_id,
     tid,
     lid,
     pid: release_pid,

@@ -5,7 +5,7 @@ import weightProjections from '#libs-shared/weight-projections.mjs'
 
 const expect = chai.expect
 
-// The consensus source ("Average", sourceid 18) is what the entire value
+// The consensus source ("Average", source_id 18) is what the entire value
 // pipeline consumes, and it used to coalesce "no source has an opinion" to 0.0.
 // That is indistinguishable downstream from "every source agrees on zero", and
 // it is how four of the twelve DST scoring components -- three-and-outs,
@@ -19,8 +19,8 @@ const expect = chai.expect
 //
 // Neither defect fails anything. Both produce a confident, wrong number.
 
-const build_projection = (sourceid, stats) => ({
-  sourceid,
+const build_projection = (source_id, stats) => ({
+  source_id,
   week: 0,
   ...stats
 })
@@ -125,10 +125,10 @@ describe('LIBS-SHARED weightProjections', function () {
     const result = weightProjections({
       projections: [
         build_projection(3, { rushing_yards: 800 }),
-        // sourceid 18 is the consensus this function PRODUCES; folding it back
+        // source_id 18 is the consensus this function PRODUCES; folding it back
         // in would compound it against itself on every run.
         build_projection(18, { rushing_yards: 5000 }),
-        { sourceid: 3, week: 1, rushing_yards: 50 }
+        { source_id: 3, week: 1, rushing_yards: 50 }
       ],
       week: 0
     })

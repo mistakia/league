@@ -71,7 +71,7 @@ describe('API /teams - add', function () {
 
       res.body[0].rid.should.exist
       res.body[0].pos.should.equal(player.secondary_position)
-      res.body[0].transaction.userid.should.equal(userId)
+      res.body[0].transaction.user_id.should.equal(userId)
       res.body[0].transaction.tid.should.equal(teamId)
       res.body[0].transaction.lid.should.equal(leagueId)
       res.body[0].transaction.pid.should.equal(player.pid)
@@ -139,7 +139,7 @@ describe('API /teams - add', function () {
 
       res.body[0].rid.should.exist
       res.body[0].pos.should.equal(player.secondary_position)
-      res.body[0].transaction.userid.should.equal(userId)
+      res.body[0].transaction.user_id.should.equal(userId)
       res.body[0].transaction.tid.should.equal(teamId)
       res.body[0].transaction.lid.should.equal(leagueId)
       res.body[0].transaction.pid.should.equal(player.pid)
@@ -318,7 +318,7 @@ describe('API /teams - add', function () {
       const player = await selectPlayer({ rookie: false })
 
       await knex('waivers').insert({
-        userid: 2,
+        user_id: 2,
         pid: player.pid,
         tid: 2,
         lid: 1,

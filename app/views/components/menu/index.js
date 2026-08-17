@@ -13,7 +13,7 @@ const map_state_to_props = createSelector(
     is_logged_in: Boolean(app.userId),
     leagueId: app.leagueId,
     teamId: app.teamId,
-    is_commish: league.commishid === app.userId,
+    is_commish: league.commissioner_user_id === app.userId,
     league
   })
 )

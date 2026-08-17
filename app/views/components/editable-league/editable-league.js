@@ -18,8 +18,8 @@ export default function EditableLeague({ update, league, userId }) {
     update({ leagueId, ...value })
   }
 
-  const isCommish = league.commishid === userId
-  const isDefault = !league.commishid
+  const isCommish = league.commissioner_user_id === userId
+  const isDefault = !league.commissioner_user_id
   const is_external_league = !league.is_hosted
 
   const props = { league, isCommish, isDefault, onchange }

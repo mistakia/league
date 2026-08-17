@@ -470,8 +470,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -495,8 +495,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -519,8 +519,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -544,8 +544,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -569,8 +569,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -593,8 +593,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -618,8 +618,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 1, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 1, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -643,8 +643,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 1, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 1, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -669,8 +669,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 1, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 1, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -694,8 +694,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 1, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 1, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -720,8 +720,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 0, // starting WR
       starter_slots_tight_end: 0, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 9, // starting RB/WR/TE flex (9 flex slots)
-      sqbrbwrte: 2, // starting superflex (2 superflex slots)
+      starter_slots_running_back_wide_receiver_tight_end_flex: 9, // starting RB/WR/TE flex (9 flex slots)
+      starter_slots_superflex: 2, // starting superflex (2 superflex slots)
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 0, // starting D/ST (no D/ST)
       starter_slots_kicker: 0, // starting K (no K)
@@ -745,8 +745,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 0, // starting WR
       starter_slots_tight_end: 0, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 9, // starting RB/WR/TE flex (9 flex slots)
-      sqbrbwrte: 2, // starting superflex (2 superflex slots)
+      starter_slots_running_back_wide_receiver_tight_end_flex: 9, // starting RB/WR/TE flex (9 flex slots)
+      starter_slots_superflex: 2, // starting superflex (2 superflex slots)
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 0, // starting D/ST (no D/ST)
       starter_slots_kicker: 0, // starting K (no K)
@@ -770,8 +770,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 0,
       starter_slots_tight_end: 0,
       starter_slots_running_back_wide_receiver_flex: 0,
-      srbwrte: 8, // starting RB/WR/TE flex
-      sqbrbwrte: 2, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 8, // starting RB/WR/TE flex
+      starter_slots_superflex: 2, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0,
       starter_slots_defense_special_teams: 0,
       starter_slots_kicker: 0,
@@ -795,8 +795,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 0,
       starter_slots_tight_end: 0,
       starter_slots_running_back_wide_receiver_flex: 0,
-      srbwrte: 8,
-      sqbrbwrte: 2,
+      starter_slots_running_back_wide_receiver_tight_end_flex: 8,
+      starter_slots_superflex: 2,
       starter_slots_wide_receiver_tight_end_flex: 0,
       starter_slots_defense_special_teams: 0,
       starter_slots_kicker: 0,
@@ -826,8 +826,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 3, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 0, // starting K (no K in DraftKings)
@@ -852,8 +852,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -877,8 +877,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -902,8 +902,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 1, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 1, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -927,8 +927,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 1, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 1, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -953,8 +953,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -978,8 +978,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 0, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 0, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -1003,8 +1003,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 1, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 1, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -1028,8 +1028,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 1, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 1, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 1, // starting K
@@ -1054,8 +1054,8 @@ export const league_formats = {
       starter_slots_wide_receiver: 2, // starting WR
       starter_slots_tight_end: 1, // starting TE
       starter_slots_running_back_wide_receiver_flex: 0, // starting RB/WR flex
-      srbwrte: 1, // starting RB/WR/TE flex
-      sqbrbwrte: 1, // starting superflex
+      starter_slots_running_back_wide_receiver_tight_end_flex: 1, // starting RB/WR/TE flex
+      starter_slots_superflex: 1, // starting superflex
       starter_slots_wide_receiver_tight_end_flex: 0, // starting WR/TE flex
       starter_slots_defense_special_teams: 1, // starting D/ST
       starter_slots_kicker: 0, // starting K (no kicker)

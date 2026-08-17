@@ -128,7 +128,7 @@ export default class LeagueConfigMapper {
         TE: 'starter_slots_tight_end',
         FLEX: 'starter_slots_running_back_wide_receiver_flex',
         REC_FLEX: 'starter_slots_wide_receiver_tight_end_flex',
-        SUPER_FLEX: 'sqbrbwrte',
+        SUPER_FLEX: 'starter_slots_superflex',
         WR_TE_FLEX: 'starter_slots_wide_receiver_tight_end_flex',
         DEF: 'starter_slots_defense_special_teams',
         K: 'starter_slots_kicker',
@@ -144,7 +144,7 @@ export default class LeagueConfigMapper {
         WR: 'starter_slots_wide_receiver',
         'WR/TE': 'starter_slots_wide_receiver_tight_end_flex',
         TE: 'starter_slots_tight_end',
-        OP: 'sqbrbwrte',
+        OP: 'starter_slots_superflex',
         'D/ST': 'starter_slots_defense_special_teams',
         K: 'starter_slots_kicker',
         BE: 'bench_slot_count',
@@ -157,8 +157,8 @@ export default class LeagueConfigMapper {
         TE: 'starter_slots_tight_end',
         'W/R': 'starter_slots_running_back_wide_receiver_flex',
         'W/T': 'starter_slots_wide_receiver_tight_end_flex',
-        'W/R/T': 'srbwrte',
-        'Q/W/R/T': 'sqbrbwrte',
+        'W/R/T': 'starter_slots_running_back_wide_receiver_tight_end_flex',
+        'Q/W/R/T': 'starter_slots_superflex',
         DEF: 'starter_slots_defense_special_teams',
         K: 'starter_slots_kicker',
         BN: 'bench_slot_count',
@@ -438,8 +438,8 @@ export default class LeagueConfigMapper {
       starter_slots_wide_receiver: 0,
       starter_slots_tight_end: 0,
       starter_slots_running_back_wide_receiver_flex: 0,
-      srbwrte: 0,
-      sqbrbwrte: 0,
+      starter_slots_running_back_wide_receiver_tight_end_flex: 0,
+      starter_slots_superflex: 0,
       starter_slots_wide_receiver_tight_end_flex: 0,
       starter_slots_defense_special_teams: 0,
       starter_slots_kicker: 0,
@@ -475,8 +475,8 @@ export default class LeagueConfigMapper {
       league_params.starter_slots_wide_receiver +
       league_params.starter_slots_tight_end +
       league_params.starter_slots_running_back_wide_receiver_flex +
-      league_params.srbwrte +
-      league_params.sqbrbwrte +
+      league_params.starter_slots_running_back_wide_receiver_tight_end_flex +
+      league_params.starter_slots_superflex +
       league_params.starter_slots_wide_receiver_tight_end_flex +
       league_params.starter_slots_defense_special_teams +
       league_params.starter_slots_kicker

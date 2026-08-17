@@ -8,8 +8,8 @@ import {
 } from './find-or-create-format.mjs'
 import { current_season } from '#constants'
 
-export default async function ({ lid, commishid, ...params } = {}) {
-  const default_league_params = create_default_league({ commishid })
+export default async function ({ lid, commissioner_user_id, ...params } = {}) {
+  const default_league_params = create_default_league({ commissioner_user_id })
   const league_params = Object.assign({}, default_league_params, params)
 
   // Article XII §2 (Amendment XXXV): the Free Agency Live Auction must be
@@ -33,7 +33,7 @@ export default async function ({ lid, commishid, ...params } = {}) {
   }
 
   const league = {
-    commishid,
+    commissioner_user_id,
     name: league_params.name,
     is_hosted: league_params.is_hosted
   }
@@ -114,7 +114,7 @@ export default async function ({ lid, commishid, ...params } = {}) {
     free_agency_live_auction_start: epoch_to_timestamptz(
       league_params.free_agency_live_auction_start
     ),
-    tddate: epoch_to_timestamptz(league_params.tddate)
+    trade_deadline_at: epoch_to_timestamptz(league_params.trade_deadline_at)
   })
 
   return leagueId

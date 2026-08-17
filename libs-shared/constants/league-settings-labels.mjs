@@ -89,8 +89,8 @@ export const starting_lineup_labels = {
   starter_slots_kicker: 'K',
   starter_slots_defense_special_teams: 'DST',
   starter_slots_running_back_wide_receiver_flex: 'RB/WR',
-  srbwrte: 'RB/WR/TE',
-  sqbrbwrte: 'QB/RB/WR/TE',
+  starter_slots_running_back_wide_receiver_tight_end_flex: 'RB/WR/TE',
+  starter_slots_superflex: 'QB/RB/WR/TE',
   starter_slots_wide_receiver_tight_end_flex: 'WR/TE'
 }
 

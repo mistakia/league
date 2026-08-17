@@ -183,7 +183,7 @@ const validate_game_timing = async (waiver_id) => {
 const process_waiver_claim = async (waiver, lid, timestamp) => {
   const release = await db('waiver_releases')
     .select('pid')
-    .where('waiverid', waiver.wid)
+    .where('waiver_id', waiver.wid)
 
   await submitAcquisition({
     release: release.map((r) => r.pid),
@@ -191,7 +191,7 @@ const process_waiver_claim = async (waiver, lid, timestamp) => {
     pid: waiver.pid,
     teamId: waiver.tid,
     bid: waiver.bid_amount,
-    userId: waiver.userid,
+    userId: waiver.user_id,
     waiverId: waiver.wid
   })
 

@@ -1645,7 +1645,7 @@ DECLARE
   rec_val numeric;
 BEGIN
   SELECT receptions INTO rec_val FROM league_scoring_formats WHERE id = NEW.scoring_format_id;
-  NEW.format_category := cmv_derive_format_category(NEW.starter_slots_quarterback, NEW.sqbrbwrte, rec_val);
+  NEW.format_category := cmv_derive_format_category(NEW.starter_slots_quarterback, NEW.starter_slots_superflex, rec_val);
   RETURN NEW;
 END;
 $$;
@@ -4244,8 +4244,8 @@ CREATE TABLE public.league_formats (
     starter_slots_wide_receiver smallint NOT NULL,
     starter_slots_tight_end smallint NOT NULL,
     starter_slots_running_back_wide_receiver_flex smallint NOT NULL,
-    srbwrte smallint NOT NULL,
-    sqbrbwrte smallint NOT NULL,
+    starter_slots_running_back_wide_receiver_tight_end_flex smallint NOT NULL,
+    starter_slots_superflex smallint NOT NULL,
     starter_slots_wide_receiver_tight_end_flex smallint NOT NULL,
     starter_slots_defense_special_teams smallint NOT NULL,
     starter_slots_kicker smallint NOT NULL,
@@ -4805,7 +4805,7 @@ CREATE TABLE public.league_team_seasonlogs (
 
 CREATE TABLE public.league_user_careerlogs (
     lid integer NOT NULL,
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     regular_season_wins smallint DEFAULT 0,
     regular_season_losses smallint DEFAULT 0,
     regular_season_ties smallint DEFAULT 0,
@@ -4854,7 +4854,7 @@ CREATE TABLE public.league_user_careerlogs (
 
 CREATE TABLE public.leagues (
     uid bigint NOT NULL,
-    commishid integer NOT NULL,
+    commissioner_user_id integer NOT NULL,
     name character varying(50) NOT NULL,
     discord_webhook_url character varying(255),
     is_hosted boolean DEFAULT false,
@@ -19595,7 +19595,7 @@ CREATE TABLE public.pff_unresolved_players (
 
 CREATE TABLE public.placed_wagers (
     wager_id integer NOT NULL,
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     public smallint DEFAULT '0'::smallint,
     wager_type public.placed_wagers_wager_type NOT NULL,
     placed_at timestamp with time zone NOT NULL,
@@ -25013,7 +25013,7 @@ CREATE TABLE public.playoffs (
 --
 
 CREATE TABLE public.poach_releases (
-    poachid integer NOT NULL,
+    poach_id integer NOT NULL,
     pid character varying(25)
 );
 
@@ -25025,7 +25025,7 @@ CREATE TABLE public.poach_releases (
 CREATE TABLE public.poaches (
     uid bigint NOT NULL,
     pid character varying(25),
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     tid integer NOT NULL,
     player_tid integer NOT NULL,
     lid integer NOT NULL,
@@ -25168,8 +25168,8 @@ CREATE TABLE public.practice (
 
 CREATE TABLE public.projections_history (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25221,8 +25221,8 @@ PARTITION BY RANGE (season_year);
 
 CREATE TABLE public.projections_history_default (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25273,8 +25273,8 @@ CREATE TABLE public.projections_history_default (
 
 CREATE TABLE public.projections_history_y2020 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25325,8 +25325,8 @@ CREATE TABLE public.projections_history_y2020 (
 
 CREATE TABLE public.projections_history_y2021 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25377,8 +25377,8 @@ CREATE TABLE public.projections_history_y2021 (
 
 CREATE TABLE public.projections_history_y2022 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25429,8 +25429,8 @@ CREATE TABLE public.projections_history_y2022 (
 
 CREATE TABLE public.projections_history_y2023 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25481,8 +25481,8 @@ CREATE TABLE public.projections_history_y2023 (
 
 CREATE TABLE public.projections_history_y2024 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25533,8 +25533,8 @@ CREATE TABLE public.projections_history_y2024 (
 
 CREATE TABLE public.projections_history_y2025 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25585,8 +25585,8 @@ CREATE TABLE public.projections_history_y2025 (
 
 CREATE TABLE public.projections_history_y2026 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25637,8 +25637,8 @@ CREATE TABLE public.projections_history_y2026 (
 
 CREATE TABLE public.projections_index (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25691,8 +25691,8 @@ PARTITION BY RANGE (season_year);
 
 CREATE TABLE public.projections_index_default (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25744,8 +25744,8 @@ CREATE TABLE public.projections_index_default (
 
 CREATE TABLE public.projections_index_y2020 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25797,8 +25797,8 @@ CREATE TABLE public.projections_index_y2020 (
 
 CREATE TABLE public.projections_index_y2021 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25850,8 +25850,8 @@ CREATE TABLE public.projections_index_y2021 (
 
 CREATE TABLE public.projections_index_y2022 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25903,8 +25903,8 @@ CREATE TABLE public.projections_index_y2022 (
 
 CREATE TABLE public.projections_index_y2023 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25956,8 +25956,8 @@ CREATE TABLE public.projections_index_y2023 (
 
 CREATE TABLE public.projections_index_y2024 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26009,8 +26009,8 @@ CREATE TABLE public.projections_index_y2024 (
 
 CREATE TABLE public.projections_index_y2025 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26062,8 +26062,8 @@ CREATE TABLE public.projections_index_y2025 (
 
 CREATE TABLE public.projections_index_y2026 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26279,7 +26279,7 @@ CREATE TABLE public.props (
     over_american_odds integer,
     under_odds_decimal numeric(5,2),
     under_american_odds integer,
-    sourceid integer NOT NULL,
+    source_id integer NOT NULL,
     observed_at timestamp with time zone NOT NULL,
     is_active boolean,
     is_live boolean,
@@ -26358,7 +26358,7 @@ ALTER SEQUENCE public.props_index_prop_id_seq OWNED BY public.props_index.prop_i
 CREATE TABLE public.restricted_free_agency_bids (
     uid integer NOT NULL,
     pid character varying(25),
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     bid_amount integer,
     tid integer NOT NULL,
     season_year smallint,
@@ -26440,7 +26440,7 @@ CREATE TABLE public.restricted_free_agency_releases (
 
 CREATE TABLE public.ros_projections (
     pid character varying(25),
-    sourceid integer NOT NULL,
+    source_id integer NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -26845,7 +26845,7 @@ CREATE TABLE public.seasons (
     free_agency_period_start timestamp with time zone,
     free_agency_period_end timestamp with time zone,
     free_agency_live_auction_start timestamp with time zone,
-    tddate timestamp with time zone,
+    trade_deadline_at timestamp with time zone,
     draft_type character varying(10),
     draft_hour_min smallint,
     draft_hour_max smallint,
@@ -27175,7 +27175,7 @@ ALTER SEQUENCE public.teams_uid_seq OWNED BY public.teams.uid;
 --
 
 CREATE TABLE public.trade_releases (
-    tradeid integer NOT NULL,
+    trade_id integer NOT NULL,
     tid integer NOT NULL,
     pid character varying(25),
     origin_slot integer
@@ -27191,7 +27191,7 @@ CREATE TABLE public.trades (
     propose_tid integer NOT NULL,
     accept_tid integer NOT NULL,
     lid integer NOT NULL,
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     season_year smallint,
     offered timestamp with time zone NOT NULL,
     accepted timestamp with time zone,
@@ -27207,9 +27207,9 @@ CREATE TABLE public.trades (
 --
 
 CREATE TABLE public.trades_picks (
-    tradeid integer NOT NULL,
+    trade_id integer NOT NULL,
     tid integer NOT NULL,
-    pickid integer NOT NULL
+    draft_pick_id integer NOT NULL
 );
 
 
@@ -27218,7 +27218,7 @@ CREATE TABLE public.trades_picks (
 --
 
 CREATE TABLE public.trades_players (
-    tradeid integer NOT NULL,
+    trade_id integer NOT NULL,
     tid integer NOT NULL,
     pid character varying(25)
 );
@@ -27242,8 +27242,8 @@ CREATE TABLE public.trades_slots (
 --
 
 CREATE TABLE public.trades_transactions (
-    tradeid integer NOT NULL,
-    transactionid integer NOT NULL
+    trade_id integer NOT NULL,
+    transaction_id integer NOT NULL
 );
 
 
@@ -27272,7 +27272,7 @@ ALTER SEQUENCE public.trades_uid_seq OWNED BY public.trades.uid;
 
 CREATE TABLE public.transactions (
     uid bigint NOT NULL,
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     tid integer NOT NULL,
     lid integer NOT NULL,
     pid character varying(25),
@@ -27281,7 +27281,7 @@ CREATE TABLE public.transactions (
     week smallint NOT NULL,
     season_year smallint,
     occurred_at timestamp with time zone NOT NULL,
-    waiverid integer
+    waiver_id integer
 );
 
 
@@ -27380,9 +27380,8 @@ CREATE TABLE public.users (
     username character varying(20) NOT NULL,
     email character varying(50) DEFAULT ''::character varying NOT NULL,
     password character varying(60) DEFAULT ''::character varying NOT NULL,
-    vbaseline character varying(9) DEFAULT 'default'::character varying NOT NULL,
     watchlist text,
-    lastvisit timestamp with time zone,
+    last_visit_at timestamp with time zone,
     invite_code character varying(20)
 );
 
@@ -27411,8 +27410,8 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 --
 
 CREATE TABLE public.users_sources (
-    userid integer NOT NULL,
-    sourceid integer NOT NULL,
+    user_id integer NOT NULL,
+    source_id integer NOT NULL,
     weight numeric(2,2) NOT NULL
 );
 
@@ -27422,7 +27421,7 @@ CREATE TABLE public.users_sources (
 --
 
 CREATE TABLE public.users_teams (
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     tid integer NOT NULL,
     season_year smallint NOT NULL
 );
@@ -27516,7 +27515,7 @@ COMMENT ON VIEW public.view_trade_asset_flow IS 'One row per trade leg: which te
 --
 
 CREATE TABLE public.waiver_releases (
-    waiverid integer NOT NULL,
+    waiver_id integer NOT NULL,
     pid character varying(25)
 );
 
@@ -27527,7 +27526,7 @@ CREATE TABLE public.waiver_releases (
 
 CREATE TABLE public.waivers (
     uid integer NOT NULL,
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     pid character varying(25),
     tid integer NOT NULL,
     lid integer NOT NULL,
@@ -29193,7 +29192,7 @@ ALTER TABLE ONLY public.league_divisions
 --
 
 ALTER TABLE ONLY public.league_formats
-    ADD CONSTRAINT league_formats_config_unique UNIQUE (number_teams, starter_slots_quarterback, starter_slots_running_back, starter_slots_wide_receiver, starter_slots_tight_end, starter_slots_running_back_wide_receiver_flex, srbwrte, sqbrbwrte, starter_slots_wide_receiver_tight_end_flex, starter_slots_defense_special_teams, starter_slots_kicker, bench_slot_count, practice_squad_slot_count, reserve_short_term_limit, salary_cap, min_bid, scoring_format_id, pricing_model);
+    ADD CONSTRAINT league_formats_config_unique UNIQUE (number_teams, starter_slots_quarterback, starter_slots_running_back, starter_slots_wide_receiver, starter_slots_tight_end, starter_slots_running_back_wide_receiver_flex, starter_slots_running_back_wide_receiver_tight_end_flex, starter_slots_superflex, starter_slots_wide_receiver_tight_end_flex, starter_slots_defense_special_teams, starter_slots_kicker, bench_slot_count, practice_squad_slot_count, reserve_short_term_limit, salary_cap, min_bid, scoring_format_id, pricing_model);
 
 
 --
@@ -29281,7 +29280,7 @@ ALTER TABLE ONLY public.league_team_seasonlogs
 --
 
 ALTER TABLE ONLY public.league_user_careerlogs
-    ADD CONSTRAINT league_user_careerlogs_lid_userid_unique UNIQUE (lid, userid);
+    ADD CONSTRAINT league_user_careerlogs_lid_userid_unique UNIQUE (lid, user_id);
 
 
 --
@@ -30185,7 +30184,7 @@ ALTER TABLE ONLY public.user_plays_views
 --
 
 ALTER TABLE ONLY public.users_teams
-    ADD CONSTRAINT users_teams_pkey PRIMARY KEY (userid, tid, season_year);
+    ADD CONSTRAINT users_teams_pkey PRIMARY KEY (user_id, tid, season_year);
 
 
 --
@@ -30782,7 +30781,7 @@ CREATE UNIQUE INDEX idx_24910_tid ON public.playoffs USING btree (tid, uid, seas
 -- Name: idx_24913_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24913_pid ON public.poach_releases USING btree (poachid, pid);
+CREATE UNIQUE INDEX idx_24913_pid ON public.poach_releases USING btree (poach_id, pid);
 
 
 --
@@ -30824,7 +30823,7 @@ CREATE UNIQUE INDEX idx_24959_market ON public.prop_markets_index USING btree (s
 -- Name: idx_24970_prop; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24970_prop ON public.props USING btree (sourceid, id, pid, week, season_year, prop_line, observed_at);
+CREATE UNIQUE INDEX idx_24970_prop ON public.props USING btree (source_id, id, pid, week, season_year, prop_line, observed_at);
 
 
 --
@@ -30838,7 +30837,7 @@ CREATE UNIQUE INDEX idx_24974_prop ON public.props_index USING btree (source_id,
 -- Name: idx_24990_sourceid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24990_sourceid ON public.ros_projections USING btree (sourceid, pid, season_year);
+CREATE UNIQUE INDEX idx_24990_sourceid ON public.ros_projections USING btree (source_id, pid, season_year);
 
 
 --
@@ -30880,7 +30879,7 @@ CREATE UNIQUE INDEX idx_25075_team_season_year ON public.teams USING btree (uid,
 -- Name: idx_25085_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25085_pid ON public.trade_releases USING btree (tradeid, pid);
+CREATE UNIQUE INDEX idx_25085_pid ON public.trade_releases USING btree (trade_id, pid);
 
 
 --
@@ -30894,21 +30893,21 @@ CREATE UNIQUE INDEX idx_25089_uid ON public.trades USING btree (uid);
 -- Name: idx_25093_pick; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25093_pick ON public.trades_picks USING btree (tradeid, pickid);
+CREATE UNIQUE INDEX idx_25093_pick ON public.trades_picks USING btree (trade_id, draft_pick_id);
 
 
 --
 -- Name: idx_25096_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25096_pid ON public.trades_players USING btree (tradeid, pid);
+CREATE UNIQUE INDEX idx_25096_pid ON public.trades_players USING btree (trade_id, pid);
 
 
 --
 -- Name: idx_25099_transaction; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25099_transaction ON public.trades_transactions USING btree (tradeid, transactionid);
+CREATE UNIQUE INDEX idx_25099_transaction ON public.trades_transactions USING btree (trade_id, transaction_id);
 
 
 --
@@ -30936,21 +30935,21 @@ CREATE UNIQUE INDEX idx_25127_email ON public.users USING btree (email);
 -- Name: idx_25138_sourceid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25138_sourceid ON public.users_sources USING btree (userid, sourceid);
+CREATE UNIQUE INDEX idx_25138_sourceid ON public.users_sources USING btree (user_id, source_id);
 
 
 --
 -- Name: idx_25141_userid_tid_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25141_userid_tid_season_year ON public.users_teams USING btree (userid, tid, season_year);
+CREATE UNIQUE INDEX idx_25141_userid_tid_season_year ON public.users_teams USING btree (user_id, tid, season_year);
 
 
 --
 -- Name: idx_25147_waiverid_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25147_waiverid_pid ON public.waiver_releases USING btree (waiverid, pid);
+CREATE UNIQUE INDEX idx_25147_waiverid_pid ON public.waiver_releases USING btree (waiver_id, pid);
 
 
 --
@@ -31321,7 +31320,7 @@ CREATE INDEX idx_league_player_season_projection_values_pid ON public.league_pla
 -- Name: idx_leagues_commishid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_leagues_commishid ON public.leagues USING btree (commishid);
+CREATE INDEX idx_leagues_commishid ON public.leagues USING btree (commissioner_user_id);
 
 
 --
@@ -31811,7 +31810,7 @@ CREATE INDEX idx_placed_wagers_selections ON public.placed_wagers USING gin (sel
 -- Name: idx_placed_wagers_userid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_placed_wagers_userid ON public.placed_wagers USING btree (userid);
+CREATE INDEX idx_placed_wagers_userid ON public.placed_wagers USING btree (user_id);
 
 
 --
@@ -32084,7 +32083,7 @@ CREATE INDEX idx_playoffs_lid ON public.playoffs USING btree (lid);
 -- Name: idx_poach_releases_poachid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_poach_releases_poachid ON public.poach_releases USING btree (poachid);
+CREATE INDEX idx_poach_releases_poachid ON public.poach_releases USING btree (poach_id);
 
 
 --
@@ -32119,7 +32118,7 @@ CREATE INDEX idx_practice_nfl_week_id ON public.practice USING btree (nfl_week_i
 -- Name: idx_projections_history_natural_key; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_projections_history_natural_key ON ONLY public.projections_history USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX idx_projections_history_natural_key ON ONLY public.projections_history USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -32140,7 +32139,7 @@ CREATE INDEX idx_projections_history_pid ON ONLY public.projections_history USIN
 -- Name: idx_projections_index_natural_key; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_projections_index_natural_key ON ONLY public.projections_index USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX idx_projections_index_natural_key ON ONLY public.projections_index USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -32399,21 +32398,21 @@ CREATE INDEX idx_teams_lid ON public.teams USING btree (lid);
 -- Name: idx_trade_releases_tradeid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_trade_releases_tradeid ON public.trade_releases USING btree (tradeid);
+CREATE INDEX idx_trade_releases_tradeid ON public.trade_releases USING btree (trade_id);
 
 
 --
 -- Name: idx_trades_picks_tradeid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_trades_picks_tradeid ON public.trades_picks USING btree (tradeid);
+CREATE INDEX idx_trades_picks_tradeid ON public.trades_picks USING btree (trade_id);
 
 
 --
 -- Name: idx_trades_players_tradeid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_trades_players_tradeid ON public.trades_players USING btree (tradeid);
+CREATE INDEX idx_trades_players_tradeid ON public.trades_players USING btree (trade_id);
 
 
 --
@@ -32448,14 +32447,14 @@ CREATE INDEX idx_users_invite_code ON public.users USING btree (invite_code);
 -- Name: idx_users_sources_userid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_users_sources_userid ON public.users_sources USING btree (userid);
+CREATE INDEX idx_users_sources_userid ON public.users_sources USING btree (user_id);
 
 
 --
 -- Name: idx_waiver_releases_waiverid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_waiver_releases_waiverid ON public.waiver_releases USING btree (waiverid);
+CREATE INDEX idx_waiver_releases_waiverid ON public.waiver_releases USING btree (waiver_id);
 
 
 --
@@ -44719,7 +44718,7 @@ CREATE UNIQUE INDEX players_status_pid_observed_at_key ON public.players_status 
 -- Name: projections_history_default_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_default_natural_key_idx ON public.projections_history_default USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_default_natural_key_idx ON public.projections_history_default USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44740,7 +44739,7 @@ CREATE INDEX projections_history_default_pid_idx ON public.projections_history_d
 -- Name: projections_history_y2020_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2020_natural_key_idx ON public.projections_history_y2020 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2020_natural_key_idx ON public.projections_history_y2020 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44761,7 +44760,7 @@ CREATE INDEX projections_history_y2020_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2021_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2021_natural_key_idx ON public.projections_history_y2021 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2021_natural_key_idx ON public.projections_history_y2021 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44782,7 +44781,7 @@ CREATE INDEX projections_history_y2021_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2022_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2022_natural_key_idx ON public.projections_history_y2022 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2022_natural_key_idx ON public.projections_history_y2022 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44803,7 +44802,7 @@ CREATE INDEX projections_history_y2022_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2023_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2023_natural_key_idx ON public.projections_history_y2023 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2023_natural_key_idx ON public.projections_history_y2023 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44824,7 +44823,7 @@ CREATE INDEX projections_history_y2023_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2024_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2024_natural_key_idx ON public.projections_history_y2024 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2024_natural_key_idx ON public.projections_history_y2024 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44845,7 +44844,7 @@ CREATE INDEX projections_history_y2024_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2025_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2025_natural_key_idx ON public.projections_history_y2025 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2025_natural_key_idx ON public.projections_history_y2025 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44866,7 +44865,7 @@ CREATE INDEX projections_history_y2025_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2026_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2026_natural_key_idx ON public.projections_history_y2026 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2026_natural_key_idx ON public.projections_history_y2026 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44887,7 +44886,7 @@ CREATE INDEX projections_history_y2026_pid_idx ON public.projections_history_y20
 -- Name: projections_index_default_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_default_natural_key_idx ON public.projections_index_default USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_default_natural_key_idx ON public.projections_index_default USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44908,7 +44907,7 @@ CREATE INDEX projections_index_default_pid_idx ON public.projections_index_defau
 -- Name: projections_index_y2020_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2020_natural_key_idx ON public.projections_index_y2020 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2020_natural_key_idx ON public.projections_index_y2020 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44929,7 +44928,7 @@ CREATE INDEX projections_index_y2020_pid_idx ON public.projections_index_y2020 U
 -- Name: projections_index_y2021_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2021_natural_key_idx ON public.projections_index_y2021 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2021_natural_key_idx ON public.projections_index_y2021 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44950,7 +44949,7 @@ CREATE INDEX projections_index_y2021_pid_idx ON public.projections_index_y2021 U
 -- Name: projections_index_y2022_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2022_natural_key_idx ON public.projections_index_y2022 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2022_natural_key_idx ON public.projections_index_y2022 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44971,7 +44970,7 @@ CREATE INDEX projections_index_y2022_pid_idx ON public.projections_index_y2022 U
 -- Name: projections_index_y2023_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2023_natural_key_idx ON public.projections_index_y2023 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2023_natural_key_idx ON public.projections_index_y2023 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44992,7 +44991,7 @@ CREATE INDEX projections_index_y2023_pid_idx ON public.projections_index_y2023 U
 -- Name: projections_index_y2024_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2024_natural_key_idx ON public.projections_index_y2024 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2024_natural_key_idx ON public.projections_index_y2024 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -45013,7 +45012,7 @@ CREATE INDEX projections_index_y2024_pid_idx ON public.projections_index_y2024 U
 -- Name: projections_index_y2025_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2025_natural_key_idx ON public.projections_index_y2025 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2025_natural_key_idx ON public.projections_index_y2025 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -45034,7 +45033,7 @@ CREATE INDEX projections_index_y2025_pid_idx ON public.projections_index_y2025 U
 -- Name: projections_index_y2026_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2026_natural_key_idx ON public.projections_index_y2026 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2026_natural_key_idx ON public.projections_index_y2026 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -57641,7 +57640,7 @@ CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON publi
 -- Name: league_formats trg_cmv_classify_league_format; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER trg_cmv_classify_league_format BEFORE INSERT OR UPDATE OF starter_slots_quarterback, sqbrbwrte, scoring_format_id ON public.league_formats FOR EACH ROW EXECUTE FUNCTION public.cmv_classify_league_format();
+CREATE TRIGGER trg_cmv_classify_league_format BEFORE INSERT OR UPDATE OF starter_slots_quarterback, starter_slots_superflex, scoring_format_id ON public.league_formats FOR EACH ROW EXECUTE FUNCTION public.cmv_classify_league_format();
 
 
 --

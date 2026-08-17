@@ -473,7 +473,7 @@ export default function StatsPage({
 
   const careerLogRows = league_user_historical_ranks.map((user_careerlog) => (
     <CareerLogRow
-      key={`careerlog_${user_careerlog.userid}`}
+      key={`careerlog_${user_careerlog.user_id}`}
       user_careerlog={user_careerlog}
       percentiles={careerlog_percentiles}
     />

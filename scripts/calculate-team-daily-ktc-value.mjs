@@ -265,7 +265,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   const trades_index = {}
   for (const trade of trades) {
     for (const tran of trade.transactions) {
-      trades_index[tran.transactionid] = trade
+      trades_index[tran.transaction_id] = trade
     }
   }
 

@@ -15,7 +15,7 @@ export default async function ({
   transaction = transaction_types.ROSTER_ADD,
   value = 0,
   tag = player_tag_types.REGULAR,
-  waiverid
+  waiver_id
 }) {
   let rosters = await db('rosters')
     .where({
@@ -43,7 +43,7 @@ export default async function ({
   const rosterId = rosters[0].uid
 
   await db('transactions').insert({
-    userid: userId,
+    user_id: userId,
     tid: teamId,
     lid: leagueId,
     pid: player.pid,
@@ -52,7 +52,7 @@ export default async function ({
     week: current_season.week,
     season_year: current_season.year,
     occurred_at: new Date(),
-    waiverid
+    waiver_id
   })
 
   await db('rosters_players').insert({

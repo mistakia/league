@@ -71,7 +71,7 @@ export const insert_restricted_free_agency_bid = async ({
   lid,
   tid,
   bid_amount,
-  userid = 1,
+  user_id = 1,
   original_team_id = tid,
   nominated_at = null,
   announced_at = null,
@@ -93,7 +93,7 @@ export const insert_restricted_free_agency_bid = async ({
   const rows = await knex('restricted_free_agency_bids')
     .insert({
       pid,
-      userid,
+      user_id,
       bid_amount,
       tid,
       lid,
@@ -141,7 +141,8 @@ export const insert_restricted_free_agency_bid = async ({
       change_type === bid_change_types.SETTLED
         ? bid_change_sources.SETTLEMENT_SCRIPT
         : bid_change_sources.API_BID_CREATE,
-    changed_by_user_id: change_type === bid_change_types.SETTLED ? null : userid
+    changed_by_user_id:
+      change_type === bid_change_types.SETTLED ? null : user_id
   })
 
   return bid_id

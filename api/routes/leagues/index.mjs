@@ -376,14 +376,14 @@ router.put('/:leagueId', async (req, res) => {
  *             example:
  *               uid: 2
  *               name: "TEFLON LEAGUE"
- *               commishid: 5
+ *               commissioner_user_id: 5
  *               is_hosted: false
  *               number_teams: 14
  *               starter_slots_quarterback: 1
  *               starter_slots_running_back: 2
  *               starter_slots_wide_receiver: 3
  *               starter_slots_tight_end: 1
- *               srbwrte: 1
+ *               starter_slots_running_back_wide_receiver_tight_end_flex: 1
  *               starter_slots_defense_special_teams: 1
  *               starter_slots_kicker: 1
  *               bench_slot_count: 6
@@ -445,14 +445,14 @@ router.get('/:leagueId/?', async (req, res) => {
  *             example:
  *               uid: 2
  *               name: "TEFLON LEAGUE"
- *               commishid: 5
+ *               commissioner_user_id: 5
  *               is_hosted: false
  *               number_teams: 14
  *               starter_slots_quarterback: 1
  *               starter_slots_running_back: 2
  *               starter_slots_wide_receiver: 3
  *               starter_slots_tight_end: 1
- *               srbwrte: 1
+ *               starter_slots_running_back_wide_receiver_tight_end_flex: 1
  *               starter_slots_defense_special_teams: 1
  *               starter_slots_kicker: 1
  *               bench_slot_count: 6

@@ -132,14 +132,14 @@ describe('ADMISSION VOTE DISCLOSURE', function () {
     await seed_vote()
 
     await knex('users_teams')
-      .where({ userid: 3, season_year: current_season.year })
+      .where({ user_id: 3, season_year: current_season.year })
       .del()
 
     const refused = await read_vote({ token: user3 })
     refused.should.have.status(403)
 
     await knex('users_teams').insert({
-      userid: 3,
+      user_id: 3,
       tid: 3,
       season_year: current_season.year
     })

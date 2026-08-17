@@ -106,9 +106,9 @@ export default async function ({
   }
 
   // if signed through waivers, make sure player had no competing bids
-  if (firstTransaction.waiverid) {
+  if (firstTransaction.waiver_id) {
     const waivers = await db('waivers').where({
-      uid: firstTransaction.waiverid
+      uid: firstTransaction.waiver_id
     })
     const transactionWaiver = waivers[0]
 
@@ -153,7 +153,7 @@ export default async function ({
   await db('league_cutlist').where({ pid: deactivate_pid, tid }).del()
 
   const transaction = {
-    userid: userId,
+    user_id: userId,
     tid,
     lid: leagueId,
     pid: deactivate_pid,

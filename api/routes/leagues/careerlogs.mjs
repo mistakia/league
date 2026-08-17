@@ -14,7 +14,7 @@ router.get('/?', async (req, res) => {
 
       // User careerlogs with usernames
       db('league_user_careerlogs')
-        .join('users', 'league_user_careerlogs.userid', 'users.id')
+        .join('users', 'league_user_careerlogs.user_id', 'users.id')
         .where({ 'league_user_careerlogs.lid': leagueId })
         .select('league_user_careerlogs.*', 'users.username'),
 
@@ -26,8 +26,8 @@ router.get('/?', async (req, res) => {
     ])
 
     // Separate user_careerlogs and usernames
-    const usernames = user_careerlogs.map(({ userid, username }) => ({
-      id: userid,
+    const usernames = user_careerlogs.map(({ user_id, username }) => ({
+      id: user_id,
       username
     }))
 

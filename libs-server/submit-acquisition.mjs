@@ -190,7 +190,7 @@ export default async function ({
         release_pid,
         tid: teamId,
         lid: leagueId,
-        userid: userId
+        user_id: userId
       })
       result.push(releaseData[0])
     }
@@ -211,7 +211,7 @@ export default async function ({
 
   // add player transaction
   const addTransaction = {
-    userid: userId,
+    user_id: userId,
     tid: teamId,
     lid: leagueId,
     pid,
@@ -219,7 +219,7 @@ export default async function ({
     player_salary: bid,
     week: current_season.week,
     season_year: current_season.year,
-    waiverid: waiverId,
+    waiver_id: waiverId,
     occurred_at: new Date()
   }
   await db('transactions').insert(addTransaction)

@@ -100,7 +100,7 @@ describe('API /waivers - poach', function () {
     res.should.be.json
 
     res.body.tid.should.equal(teamId)
-    res.body.userid.should.equal(2)
+    res.body.user_id.should.equal(2)
     res.body.lid.should.equal(leagueId)
     res.body.pid.should.equal(drafted_player_id)
     res.body.priority_order.should.equal(9999)
@@ -117,7 +117,7 @@ describe('API /waivers - poach', function () {
     const waiver = waivers[0]
     expect(waiver.uid).to.be.a('number')
     expect(waiver.uid).to.be.above(0)
-    expect(waiver.userid).to.equal(2)
+    expect(waiver.user_id).to.equal(2)
     expect(waiver.pid).to.equal(drafted_player_id)
     expect(waiver.tid).to.equal(teamId)
     expect(waiver.lid).to.equal(leagueId)

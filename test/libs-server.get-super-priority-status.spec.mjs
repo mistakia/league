@@ -61,7 +61,7 @@ describe('LIB - get_super_priority_status', function () {
           Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60
         ), // 1 week ago
         week: current_season.week - 1,
-        userid: 2
+        user_id: 2
       })
 
       const status = await get_super_priority_status({
@@ -92,7 +92,7 @@ describe('LIB - get_super_priority_status', function () {
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60), // 1 day before poach
         week: current_season.week - 1,
-        userid: 1
+        user_id: 1
       })
 
       // Create poached transaction
@@ -105,7 +105,7 @@ describe('LIB - get_super_priority_status', function () {
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(poach_timestamp),
         week: current_season.week - 1,
-        userid: 2
+        user_id: 2
       })
     })
 
@@ -174,7 +174,7 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 1,
-          userid: 1
+          user_id: 1
         },
         {
           pid: player.pid,
@@ -185,7 +185,7 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 1,
-          userid: 2
+          user_id: 2
         }
       ])
     })
@@ -201,7 +201,7 @@ describe('LIB - get_super_priority_status', function () {
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(poach_timestamp + 24 * 60 * 60), // 1 day after poach
         week: current_season.week,
-        userid: 2
+        user_id: 2
       })
 
       const status = await get_super_priority_status({
@@ -229,7 +229,7 @@ describe('LIB - get_super_priority_status', function () {
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(poach_timestamp + 24 * 60 * 60),
         week: current_season.week,
-        userid: 2
+        user_id: 2
       })
 
       const [roster] = await knex('rosters')
@@ -272,7 +272,7 @@ describe('LIB - get_super_priority_status', function () {
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(poach_timestamp + 24 * 60 * 60),
         week: current_season.week,
-        userid: 2
+        user_id: 2
       })
 
       const status = await get_super_priority_status({
@@ -307,7 +307,7 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 5,
-          userid: 1
+          user_id: 1
         },
         {
           pid: player.pid,
@@ -318,7 +318,7 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 5,
-          userid: 2
+          user_id: 2
         }
       ])
     })
@@ -423,7 +423,7 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 1,
-          userid: 1
+          user_id: 1
         },
         {
           pid: player1.pid,
@@ -434,7 +434,7 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 1,
-          userid: 2
+          user_id: 2
         },
         // Player 2 poached from team 3 to team 2
         {
@@ -446,7 +446,7 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 1,
-          userid: 3
+          user_id: 3
         },
         {
           pid: player2.pid,
@@ -457,7 +457,7 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 1,
-          userid: 2
+          user_id: 2
         }
       ])
     })
@@ -506,7 +506,7 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 1,
-          userid: 1
+          user_id: 1
         },
         {
           pid: player.pid,
@@ -517,7 +517,7 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 1,
-          userid: 2
+          user_id: 2
         }
       ])
     })

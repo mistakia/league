@@ -109,7 +109,7 @@ const seed_full_league = async () => {
       week: 0,
       season_year: year,
       occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 100),
-      userid: 1
+      user_id: 1
     },
     {
       pid: ps_player.pid,
@@ -120,7 +120,7 @@ const seed_full_league = async () => {
       week: 0,
       season_year: year,
       occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 200),
-      userid: 1
+      user_id: 1
     }
   ])
   await knex('rosters_players').insert([
@@ -153,7 +153,7 @@ const seed_full_league = async () => {
     pid: rfa_player.pid,
     tid: 1,
     lid: 1,
-    userid: 1,
+    user_id: 1,
     original_team_id: 1,
     year,
     bid_amount: 10
@@ -474,7 +474,7 @@ describe('context documents', function () {
         week: 0,
         season_year: year,
         occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 300),
-        userid: 1
+        user_id: 1
       })
       await knex('rosters_players').insert({
         roster_id: roster0.uid,

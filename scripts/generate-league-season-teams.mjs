@@ -104,7 +104,7 @@ const generate_league_season_teams = async ({
     // Create new users_teams entries for the new year
     for (const user_team of previous_users_teams) {
       users_teams_inserts.push({
-        userid: user_team.userid,
+        user_id: user_team.user_id,
         tid: team_id,
         season_year: year
       })
@@ -122,7 +122,7 @@ const generate_league_season_teams = async ({
   if (users_teams_inserts.length) {
     await db('users_teams')
       .insert(users_teams_inserts)
-      .onConflict(['userid', 'tid', 'season_year'])
+      .onConflict(['user_id', 'tid', 'season_year'])
       .merge()
     log(
       `generated ${users_teams_inserts.length} users_teams associations for lid ${lid} year ${year}`

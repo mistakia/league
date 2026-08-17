@@ -52,7 +52,7 @@ const extra_column_params_by_base_name = {
 }
 
 // These columns are derived into league_format_*/league_* valuation tables that
-// carry no sourceid dimension, so they accept no source picker. `points` is NOT
+// carry no source_id dimension, so they accept no source picker. `points` is NOT
 // among them: it is now computed in-query from projections_index/ros_projections
 // (see player-projected-column-definitions.mjs) and so accepts a source picker
 // alongside its scoring-format picker, like every raw-stat projection column.
@@ -62,6 +62,15 @@ const computed_base_names = new Set([
   'salary_adjusted_points_added'
 ])
 
+// The param KEY stays `sourceid` even though its COLUMN is now `source_id`.
+// Param resolution is column_name || param_key and saved views persist the KEY,
+// so renaming it orphans every filter a user already set -- measured at 21
+// occurrences across 2 production saved views by
+// check-saved-view-param-coverage. This is the `dot` shape (its column moved to
+// depth_of_target while the key stayed `dot`), and for it a migration rule would
+// CREATE the orphan rather than fix one. The column half of the rename is in
+// player-projected-column-definitions.mjs, which names `source_id` in every
+// predicate it emits.
 const get_extra_column_params = (base_name) => ({
   ...(computed_base_names.has(base_name)
     ? {}

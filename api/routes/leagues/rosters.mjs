@@ -337,7 +337,7 @@ router.get('/?', async (req, res) => {
  *                     lid: 2
  *                     pid: "4017"
  *                     type: 1
- *                     userid: 5
+ *                     user_id: 5
  *                     player_salary: 15
  *                     week: 8
  *                     season_year: 2024
@@ -450,7 +450,7 @@ router.post('/?', async (req, res) => {
 
     // create transactions
     const transaction = {
-      userid: req.auth.userId,
+      user_id: req.auth.userId,
       tid: teamId,
       lid: leagueId,
       pid,

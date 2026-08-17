@@ -84,7 +84,7 @@ const router = express.Router({ mergeParams: true })
  *           lid: 2
  *           propose_tid: 13
  *           accept_tid: 14
- *           userid: 5
+ *           user_id: 5
  *           offered: '2026-08-08T12:30:32.000Z'
  *           accepted: null
  *           rejected: null
@@ -162,7 +162,7 @@ const router = express.Router({ mergeParams: true })
  *                     lid: 2
  *                     propose_tid: 13
  *                     accept_tid: 14
- *                     userid: 5
+ *                     user_id: 5
  *                     offered: '2026-08-08T12:30:32.000Z'
  *                     accepted: null
  *                     rejected: null
@@ -198,7 +198,7 @@ router.get('/?', async (req, res) => {
     let league = null
     if (!teamId || want_vetoable) {
       league = await getLeague({ lid: leagueId })
-      if (!league || league.commishid !== req.auth?.userId) {
+      if (!league || league.commissioner_user_id !== req.auth?.userId) {
         return res
           .status(401)
           .send({ error: 'only the commissioner can view league-wide trades' })
@@ -235,11 +235,11 @@ router.get('/?', async (req, res) => {
     const tradeids = trades.map((t) => t.uid)
 
     const trade_releases_rows = await db('trade_releases').whereIn(
-      'tradeid',
+      'trade_id',
       tradeids
     )
     const trade_players_rows = await db('trades_players').whereIn(
-      'tradeid',
+      'trade_id',
       tradeids
     )
     const trade_picks_rows = await db('trades_picks')
@@ -253,8 +253,8 @@ router.get('/?', async (req, res) => {
         'draft.lid',
         'draft.original_team_id'
       )
-      .whereIn('tradeid', tradeids)
-      .join('draft', 'trades_picks.pickid', 'draft.uid')
+      .whereIn('trade_id', tradeids)
+      .join('draft', 'trades_picks.draft_pick_id', 'draft.uid')
 
     for (const trade of trades) {
       trade.proposingTeamReleasePlayers = []
@@ -265,7 +265,7 @@ router.get('/?', async (req, res) => {
       trade.acceptingTeamPicks = []
 
       for (const row of trade_releases_rows) {
-        if (row.tradeid !== trade.uid) continue
+        if (row.trade_id !== trade.uid) continue
         if (row.tid === trade.propose_tid) {
           trade.proposingTeamReleasePlayers.push(row.pid)
         } else {
@@ -274,7 +274,7 @@ router.get('/?', async (req, res) => {
       }
 
       for (const row of trade_picks_rows) {
-        if (row.tradeid !== trade.uid) continue
+        if (row.trade_id !== trade.uid) continue
         if (row.tid === trade.propose_tid) {
           trade.proposingTeamPicks.push(row)
         } else {
@@ -283,7 +283,7 @@ router.get('/?', async (req, res) => {
       }
 
       for (const row of trade_players_rows) {
-        if (row.tradeid !== trade.uid) continue
+        if (row.trade_id !== trade.uid) continue
         if (row.tid === trade.propose_tid) {
           trade.proposingTeamPlayers.push(row.pid)
         } else {
@@ -399,7 +399,7 @@ router.get('/?', async (req, res) => {
  *                   lid: 2
  *                   propose_tid: 13
  *                   accept_tid: 14
- *                   userid: 5
+ *                   user_id: 5
  *                   offered: '2026-08-08T12:30:32.000Z'
  *                   accepted: null
  *                   rejected: null
@@ -609,7 +609,7 @@ router.post(
       }
 
       // make sure trade deadline has not passed
-      const deadline = dayjs(league.tddate)
+      const deadline = dayjs(league.trade_deadline_at)
       if (now.isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
       }
@@ -805,13 +805,13 @@ router.post(
       }
 
       // Use transaction to ensure all trade data is inserted atomically
-      const tradeid = await db.transaction(async (trx) => {
+      const trade_id = await db.transaction(async (trx) => {
         // insert trade
         const result = await trx('trades')
           .insert({
             propose_tid,
             accept_tid,
-            userid: req.auth.userId,
+            user_id: req.auth.userId,
             season_year: current_season.year,
             lid: leagueId,
             offered: new Date()
@@ -824,29 +824,29 @@ router.post(
         const insertPicks = []
         for (const pid of proposingTeamPlayers) {
           insertPlayers.push({
-            tradeid: trade_uid,
+            trade_id: trade_uid,
             tid: propose_tid,
             pid
           })
         }
         for (const pid of acceptingTeamPlayers) {
           insertPlayers.push({
-            tradeid: trade_uid,
+            trade_id: trade_uid,
             tid: accept_tid,
             pid
           })
         }
-        for (const pickid of proposingTeamPicks) {
+        for (const draft_pick_id of proposingTeamPicks) {
           insertPicks.push({
-            tradeid: trade_uid,
-            pickid,
+            trade_id: trade_uid,
+            draft_pick_id,
             tid: propose_tid
           })
         }
-        for (const pickid of acceptingTeamPicks) {
+        for (const draft_pick_id of acceptingTeamPicks) {
           insertPicks.push({
-            tradeid: trade_uid,
-            pickid,
+            trade_id: trade_uid,
+            draft_pick_id,
             tid: accept_tid
           })
         }
@@ -854,7 +854,7 @@ router.post(
         const insertReleases = []
         for (const pid of releasePlayers) {
           insertReleases.push({
-            tradeid: trade_uid,
+            trade_id: trade_uid,
             pid,
             tid: propose_tid
           })
@@ -898,7 +898,7 @@ router.post(
         return trade_uid
       })
 
-      req.params.tradeId = tradeid
+      req.params.tradeId = trade_id
       next()
     } catch (error) {
       logger(error)

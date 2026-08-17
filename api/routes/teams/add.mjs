@@ -115,7 +115,7 @@ const router = express.Router({ mergeParams: true })
  *                   transaction:
  *                     type: object
  *                     properties:
- *                       userid:
+ *                       user_id:
  *                         type: integer
  *                         description: User ID who made the transaction
  *                         example: 1

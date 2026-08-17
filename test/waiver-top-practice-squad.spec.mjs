@@ -55,7 +55,7 @@ describe('LIBS-SERVER get_top_practice_squad_waiver postseason', function () {
 
         await knex('waivers').insert({
           tid: 1,
-          userid: 1,
+          user_id: 1,
           lid,
           pid: player.pid,
           priority_order: 9999,
@@ -108,7 +108,7 @@ describe('LIBS-SERVER get_top_practice_squad_waiver postseason', function () {
       const player = await selectPlayer({ random: false, rookie: false })
       await knex('waivers').insert({
         tid: 1,
-        userid: 1,
+        user_id: 1,
         lid,
         pid: player.pid,
         priority_order: 9999,

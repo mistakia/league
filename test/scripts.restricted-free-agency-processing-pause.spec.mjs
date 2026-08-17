@@ -103,7 +103,7 @@ describe('SCRIPTS - restricted free agency processing pause', function () {
 
     await insert_restricted_free_agency_bid({
       pid: player.pid,
-      userid: 1,
+      user_id: 1,
       bid_amount,
       tid: team_id,
       lid: leagueId,

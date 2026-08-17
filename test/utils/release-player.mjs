@@ -20,7 +20,7 @@ export default async function ({ leagueId, player, teamId, userId }) {
     .del()
 
   await db('transactions').insert({
-    userid: userId,
+    user_id: userId,
     tid: teamId,
     lid: leagueId,
     pid: player.pid,

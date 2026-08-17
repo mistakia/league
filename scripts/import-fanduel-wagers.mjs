@@ -344,7 +344,7 @@ const import_fanduel_wagers = async ({
       const wager_type = format_wager_type(wager.betType)
       const bet_count = format_bet_count({ wager_type, wager })
       wager_item = {
-        userid: user_id,
+        user_id,
         wager_type,
         placed_at: dayjs(wager.placedDate).toDate(),
         bet_count,

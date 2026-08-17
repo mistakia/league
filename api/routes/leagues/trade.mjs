@@ -84,7 +84,7 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: Accepting team ID
  *           example: 14
- *         userid:
+ *         user_id:
  *           type: integer
  *           description: User ID who proposed the trade
  *           example: 5
@@ -184,12 +184,12 @@ export const get_trade = async (req, res) => {
     if (!trade) {
       return res
         .status(400)
-        .send({ error: `could not find tradeid: ${tradeId}` })
+        .send({ error: `could not find trade_id: ${tradeId}` })
     }
 
-    const release_rows = await db('trade_releases').where({ tradeid: tradeId })
+    const release_rows = await db('trade_releases').where({ trade_id: tradeId })
     const trades_players_rows = await db('trades_players').where({
-      tradeid: tradeId
+      trade_id: tradeId
     })
     const picks = await db('trades_picks')
       .select(
@@ -202,8 +202,8 @@ export const get_trade = async (req, res) => {
         'draft.lid',
         'draft.original_team_id'
       )
-      .where({ tradeid: tradeId })
-      .join('draft', 'trades_picks.pickid', 'draft.uid')
+      .where({ trade_id: tradeId })
+      .join('draft', 'trades_picks.draft_pick_id', 'draft.uid')
 
     trade.proposingTeamReleasePlayers = []
     trade.acceptingTeamReleasePlayers = []
@@ -311,7 +311,7 @@ export const get_trade = async (req, res) => {
  *                   lid: 2
  *                   propose_tid: 13
  *                   accept_tid: 14
- *                   userid: 5
+ *                   user_id: 5
  *                   offered: '2026-08-08T12:30:32.000Z'
  *                   accepted: null
  *                   rejected: null
@@ -342,7 +342,7 @@ export const get_trade = async (req, res) => {
  *               trade_not_found:
  *                 summary: Trade not found
  *                 value:
- *                   error: "could not find tradeid: 1234"
+ *                   error: "could not find trade_id: 1234"
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -440,7 +440,7 @@ router.get('/?', get_trade)
  *                   lid: 2
  *                   propose_tid: 13
  *                   accept_tid: 14
- *                   userid: 5
+ *                   user_id: 5
  *                   offered: '2026-08-08T12:30:32.000Z'
  *                   accepted: 1698765500
  *                   rejected: null
@@ -462,7 +462,7 @@ router.get('/?', get_trade)
  *               invalid_trade:
  *                 summary: Invalid trade ID
  *                 value:
- *                   error: "no valid trade with tradeid: 1234"
+ *                   error: "no valid trade with trade_id: 1234"
  *               deadline_passed:
  *                 summary: Trade deadline has passed
  *                 value:
@@ -507,7 +507,7 @@ router.post(
           )
         })
         .where('trades.uid', tradeId)
-        .where('users_teams.userid', req.auth.userId)
+        .where('users_teams.user_id', req.auth.userId)
         .whereNull('accepted')
         .whereNull('rejected')
         .whereNull('cancelled')
@@ -518,7 +518,7 @@ router.post(
       if (!trade) {
         return res
           .status(400)
-          .send({ error: `no valid trade with tradeid: ${tradeId}` })
+          .send({ error: `no valid trade with trade_id: ${tradeId}` })
       }
 
       try {
@@ -572,7 +572,7 @@ router.post(
       }
 
       const proposing_release_rows = await db('trade_releases').where({
-        tradeid: tradeId
+        trade_id: tradeId
       })
       const proposingTeamReleasePlayerIds = proposing_release_rows.map(
         ({ pid }) => pid
@@ -580,7 +580,7 @@ router.post(
 
       // gather traded players
       const trades_players_rows = await db('trades_players').where({
-        tradeid: tradeId
+        trade_id: tradeId
       })
       const proposingTeamPlayers = [] // players on proposing team
       const acceptingTeamPlayers = [] // players on accepting team
@@ -636,7 +636,7 @@ router.post(
       const league = await getLeague({ lid: leagueId })
 
       // make sure trade deadline has not passed
-      const deadline = dayjs(league.tddate)
+      const deadline = dayjs(league.trade_deadline_at)
       if (dayjs().isAfter(deadline)) {
         return res.status(400).send({ error: 'deadline has passed' })
       }
@@ -654,8 +654,8 @@ router.post(
         await verify_assets_not_trade_protected({
           league,
           pids: all_pids,
-          pickids: (await db('trades_picks').where({ tradeid: tradeId })).map(
-            ({ pickid }) => pickid
+          pickids: (await db('trades_picks').where({ trade_id: tradeId })).map(
+            ({ draft_pick_id }) => draft_pick_id
           )
         })
       } catch (error) {
@@ -843,7 +843,7 @@ router.post(
         .whereNull('processed')
         .whereIn('pid', all_pids)
 
-      const pickRows = await db('trades_picks').where({ tradeid: tradeId })
+      const pickRows = await db('trades_picks').where({ trade_id: tradeId })
 
       // Use transaction to ensure all trade acceptance operations are atomic
       await db.transaction(async (trx) => {
@@ -864,7 +864,7 @@ router.post(
         const release_inserts = []
         for (const pid of acceptingTeamReleasePlayers) {
           release_inserts.push({
-            tradeid: tradeId,
+            trade_id: tradeId,
             pid,
             tid: trade.accept_tid,
             origin_slot: release_origin_slots[pid]
@@ -905,7 +905,7 @@ router.post(
         // roster was read, so their origin slot is only known now.
         for (const pid of proposingTeamReleasePlayerIds) {
           await trx('trade_releases')
-            .where({ tradeid: tradeId, pid })
+            .where({ trade_id: tradeId, pid })
             .update({ origin_slot: release_origin_slots[pid] })
         }
 
@@ -942,7 +942,7 @@ router.post(
         const insertTransactions = []
         for (const pid of acceptingTeamPlayers) {
           insertTransactions.push({
-            userid: trade.userid,
+            user_id: trade.user_id,
             tid: trade.propose_tid,
             lid: leagueId,
             pid,
@@ -956,7 +956,7 @@ router.post(
         }
         for (const pid of proposingTeamPlayers) {
           insertTransactions.push({
-            userid: req.auth.userId,
+            user_id: req.auth.userId,
             tid: trade.accept_tid,
             lid: leagueId,
             pid,
@@ -975,7 +975,7 @@ router.post(
             .insert(insertTransactions)
             .returning('uid')
           await trx('trades_transactions').insert(
-            tranIds.map((t) => ({ transactionid: t.uid, tradeid: trade.uid }))
+            tranIds.map((t) => ({ transaction_id: t.uid, trade_id: trade.uid }))
           )
         }
 
@@ -983,7 +983,7 @@ router.post(
           const releaseTransactions = []
           for (const pid of proposingTeamReleasePlayerIds) {
             releaseTransactions.push({
-              userid: trade.userid,
+              user_id: trade.user_id,
               tid: trade.propose_tid,
               lid: leagueId,
               pid,
@@ -997,7 +997,7 @@ router.post(
 
           for (const pid of acceptingTeamReleasePlayers) {
             releaseTransactions.push({
-              userid: req.auth.userId,
+              user_id: req.auth.userId,
               tid: trade.accept_tid,
               lid: leagueId,
               pid,
@@ -1041,15 +1041,15 @@ router.post(
                   ? trade.accept_tid
                   : trade.propose_tid
             }) // swap team ids
-            .where({ uid: pick.pickid })
+            .where({ uid: pick.draft_pick_id })
         }
 
         // cancel other trades that include any picks in this trade
         const pickTradeRows = await trx('trades')
-          .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
+          .innerJoin('trades_picks', 'trades.uid', 'trades_picks.trade_id')
           .whereIn(
-            'trades_picks.pickid',
-            pickRows.map((p) => p.pickid)
+            'trades_picks.draft_pick_id',
+            pickRows.map((p) => p.draft_pick_id)
           )
           .whereNull('trades.accepted')
           .whereNull('trades.cancelled')
@@ -1067,7 +1067,7 @@ router.post(
 
         // cancel other trades that include any players in this trade
         const playerTradeRows = await trx('trades')
-          .innerJoin('trades_players', 'trades.uid', 'trades_players.tradeid')
+          .innerJoin('trades_players', 'trades.uid', 'trades_players.trade_id')
           .whereIn('trades_players.pid', all_pids)
           .where('trades.lid', leagueId)
           .whereNull('trades.accepted')
@@ -1123,7 +1123,7 @@ router.post(
 
       const picks = await db('draft').whereIn(
         'uid',
-        pickRows.map((p) => p.pickid)
+        pickRows.map((p) => p.draft_pick_id)
       )
       for (const pick of picks) {
         const pick_team = teams.find((t) => t.uid === pick.original_team_id)
@@ -1136,7 +1136,7 @@ router.post(
         }
 
         // pick.tid is the team the pick belongs to
-        const pickTradeInfo = pickRows.find((p) => p.pickid === pick.uid)
+        const pickTradeInfo = pickRows.find((p) => p.draft_pick_id === pick.uid)
         if (pickTradeInfo.tid === trade.propose_tid) {
           proposingTeamItems.push(pick_string)
         } else {
@@ -1242,7 +1242,7 @@ router.post(
  *               invalid_trade:
  *                 summary: Invalid trade ID
  *                 value:
- *                   error: "no valid trade with tradeid: 1234"
+ *                   error: "no valid trade with trade_id: 1234"
  *               team_verification_failed:
  *                 summary: User doesn't own accepting team
  *                 value:
@@ -1269,7 +1269,7 @@ router.post(
         })
         .where('trades.uid', tradeId)
         .where('teams.season_year', current_season.year)
-        .where('users_teams.userid', req.auth.userId)
+        .where('users_teams.user_id', req.auth.userId)
         .whereNull('accepted')
         .whereNull('vetoed')
         .whereNull('cancelled')
@@ -1278,7 +1278,7 @@ router.post(
       if (!trades.length) {
         return res
           .status(400)
-          .send({ error: `no valid trade with tradeid: ${tradeId}` })
+          .send({ error: `no valid trade with trade_id: ${tradeId}` })
       }
 
       const trade = trades[0]
@@ -1366,7 +1366,7 @@ router.post(
  *               invalid_trade:
  *                 summary: Invalid trade ID
  *                 value:
- *                   error: "no valid trade with tradeid: 1234"
+ *                   error: "no valid trade with trade_id: 1234"
  *               team_verification_failed:
  *                 summary: User doesn't own proposing team
  *                 value:
@@ -1393,7 +1393,7 @@ router.post(
         .join('teams', 'trades.propose_tid', 'teams.uid')
         .where('trades.uid', tradeId)
         .where('teams.season_year', current_season.year)
-        .where('users_teams.userid', req.auth.userId)
+        .where('users_teams.user_id', req.auth.userId)
         .whereNull('accepted')
         .whereNull('vetoed')
         .whereNull('cancelled')
@@ -1402,7 +1402,7 @@ router.post(
       if (!trades.length) {
         return res
           .status(400)
-          .send({ error: `no valid trade with tradeid: ${tradeId}` })
+          .send({ error: `no valid trade with trade_id: ${tradeId}` })
       }
 
       const trade = trades[0]
@@ -1498,7 +1498,7 @@ router.post(
  *               invalid_trade:
  *                 summary: Invalid trade ID
  *                 value:
- *                   error: "no valid trade with tradeid: 1234"
+ *                   error: "no valid trade with trade_id: 1234"
  *       401:
  *         description: Unauthorized - not commissioner
  *         content:
@@ -1521,7 +1521,7 @@ router.post(
       const { tradeId, leagueId } = req.params
 
       const league = await getLeague({ lid: leagueId })
-      if (league.commishid !== req.auth.userId) {
+      if (league.commissioner_user_id !== req.auth.userId) {
         return res
           .status(401)
           .send({ error: 'only the commissioner can veto trades' })
@@ -1531,7 +1531,7 @@ router.post(
       if (!trades.length) {
         return res
           .status(400)
-          .send({ error: `no valid trade with tradeid: ${tradeId}` })
+          .send({ error: `no valid trade with trade_id: ${tradeId}` })
       }
 
       const [trade] = trades
@@ -1588,12 +1588,12 @@ router.post(
       }
 
       const trades_players_rows = await db('trades_players').where({
-        tradeid: tradeId
+        trade_id: tradeId
       })
       const release_rows = await db('trade_releases').where({
-        tradeid: tradeId
+        trade_id: tradeId
       })
-      const pick_rows = await db('trades_picks').where({ tradeid: tradeId })
+      const pick_rows = await db('trades_picks').where({ trade_id: tradeId })
       const slot_rows = await db('trades_slots').where({ trade_uid: tradeId })
 
       const origin_slot_by_pid = new Map(
@@ -1627,9 +1627,9 @@ router.post(
         .join(
           'trades_transactions',
           'transactions.uid',
-          'trades_transactions.transactionid'
+          'trades_transactions.transaction_id'
         )
-        .where('trades_transactions.tradeid', tradeId)
+        .where('trades_transactions.trade_id', tradeId)
         .select('transactions.pid', 'transactions.player_salary')
       const value_by_pid = new Map(
         trade_transaction_rows.map((t) => [t.pid, t.player_salary])
@@ -1714,7 +1714,7 @@ router.post(
           // the ledger is the history, and it should read "moved, then moved
           // back" instead of silently losing the fact the trade ever executed.
           const reversal_transactions = trades_players_rows.map((row) => ({
-            userid: req.auth.userId,
+            user_id: req.auth.userId,
             tid: row.tid,
             lid: leagueId,
             pid: row.pid,
@@ -1727,7 +1727,7 @@ router.post(
 
           for (const row of release_rows) {
             reversal_transactions.push({
-              userid: req.auth.userId,
+              user_id: req.auth.userId,
               tid: row.tid,
               lid: leagueId,
               pid: row.pid,
@@ -1745,8 +1745,8 @@ router.post(
               .returning('uid')
             await trx('trades_transactions').insert(
               transaction_ids.map((t) => ({
-                transactionid: t.uid,
-                tradeid: trade.uid
+                transaction_id: t.uid,
+                trade_id: trade.uid
               }))
             )
           }
@@ -1765,7 +1765,7 @@ router.post(
           for (const pick of pick_rows) {
             await trx('draft')
               .update({ tid: pick.tid })
-              .where({ uid: pick.pickid })
+              .where({ uid: pick.draft_pick_id })
           }
         })
       } catch (error) {
@@ -1848,7 +1848,7 @@ router.post(
  *               invalid_trade:
  *                 summary: Invalid trade ID
  *                 value:
- *                   error: "no valid trade with tradeid: 1234"
+ *                   error: "no valid trade with trade_id: 1234"
  *               not_accepted:
  *                 summary: Trade has not been accepted
  *                 value:
@@ -1887,7 +1887,7 @@ router.post(
       const { tradeId, leagueId } = req.params
 
       const league = await getLeague({ lid: leagueId })
-      if (league.commishid !== req.auth.userId) {
+      if (league.commissioner_user_id !== req.auth.userId) {
         return res
           .status(401)
           .send({ error: 'only the commissioner can approve trades' })
@@ -1897,7 +1897,7 @@ router.post(
       if (!trades.length) {
         return res
           .status(400)
-          .send({ error: `no valid trade with tradeid: ${tradeId}` })
+          .send({ error: `no valid trade with trade_id: ${tradeId}` })
       }
 
       const [trade] = trades

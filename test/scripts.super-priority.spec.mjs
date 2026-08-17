@@ -56,7 +56,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 1,
-          userid: 1
+          user_id: 1
         },
         {
           pid: player.pid,
@@ -67,7 +67,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 1,
-          userid: 2
+          user_id: 2
         }
       ])
 
@@ -99,7 +99,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           Math.round(Date.now() / 1000) - 25 * 60 * 60
         ), // 25 hours ago
         week: current_season.week,
-        userid: 2
+        user_id: 2
       })
     })
 
@@ -109,7 +109,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
       // Create regular waiver by team with better waiver order
       await knex('waivers').insert({
         tid: 3, // Team 3 has better waiver order than team 1
-        userid: 3,
+        user_id: 3,
         lid: 1,
         pid: player.pid,
         priority_order: 1,
@@ -121,7 +121,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
       // Create super priority waiver by original team
       await knex('waivers').insert({
         tid: 1, // Original team
-        userid: 1,
+        user_id: 1,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -189,7 +189,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
       // Create regular waiver
       await knex('waivers').insert({
         tid: 3,
-        userid: 3,
+        user_id: 3,
         lid: 1,
         pid: player.pid,
         priority_order: 1,
@@ -227,7 +227,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
       // Create super priority waiver (should fail validation)
       await knex('waivers').insert({
         tid: 1,
-        userid: 1,
+        user_id: 1,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -307,7 +307,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
       // Create active roster waiver by team with worse waiver order
       await knex('waivers').insert({
         tid: 4, // Team 4 has worse waiver order than team 1
-        userid: 4,
+        user_id: 4,
         lid: 1,
         pid: player.pid,
         priority_order: 10,
@@ -319,7 +319,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
       // Create super priority practice squad waiver by original team (submitted later)
       await knex('waivers').insert({
         tid: 1, // Original team
-        userid: 1,
+        user_id: 1,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -433,7 +433,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
       // Create ONLY super priority practice squad waiver (no active roster waiver)
       await knex('waivers').insert({
         tid: 1, // Original team
-        userid: 1,
+        user_id: 1,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -485,7 +485,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
 
       // Simulate player being traded to another team (making them ineligible for super priority)
       await knex('transactions').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2, // Poaching team
         lid: 1,
         pid: player.pid,
@@ -499,7 +499,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
       // Create super priority practice squad waiver by original team
       await knex('waivers').insert({
         tid: 1, // Original team
-        userid: 1,
+        user_id: 1,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -557,7 +557,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 1,
-          userid: 1
+          user_id: 1
         },
         {
           pid: player.pid,
@@ -568,7 +568,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 1,
-          userid: 2
+          user_id: 2
         }
       ])
 
@@ -596,7 +596,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           original_tid: 1,
           lid: 1,
           super_priority_uid: super_priority_record.uid,
-          userid: 1
+          user_id: 1
         })
       } catch (err) {
         error = err
@@ -616,7 +616,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(transaction).to.not.equal(undefined)
-      expect(transaction.userid).to.equal(1)
+      expect(transaction.user_id).to.equal(1)
 
       // Verify player is on roster with protection period
       const roster_entry = await knex('rosters_players')
@@ -676,7 +676,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
         .first()
 
       expect(transaction).to.not.equal(undefined)
-      expect(transaction.userid).to.equal(0) // Auto-revert uses system user
+      expect(transaction.user_id).to.equal(0) // Auto-revert uses system user
 
       // Verify player is on roster in PS drafted slot
       const roster_entry = await knex('rosters_players')
@@ -717,7 +717,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 1,
-          userid: 1
+          user_id: 1
         },
         {
           pid: player1.pid,
@@ -728,7 +728,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 1,
-          userid: 2
+          user_id: 2
         },
         // Player 2: ineligible poach (traded)
         {
@@ -740,7 +740,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 1,
-          userid: 3
+          user_id: 3
         },
         {
           pid: player2.pid,
@@ -751,7 +751,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 1,
-          userid: 4
+          user_id: 4
         },
         {
           pid: player2.pid,
@@ -762,7 +762,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp + 12 * 60 * 60), // 12 hours after poach
           week: current_season.week - 1,
-          userid: 4
+          user_id: 4
         }
       ])
     })

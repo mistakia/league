@@ -53,7 +53,7 @@ router.post('/?', async (req, res) => {
         this.on('users_teams.tid', '=', 'teams.uid')
         this.andOn('users_teams.season_year', '=', 'teams.season_year')
       })
-      .where('userid', req.auth.userId)
+      .where('user_id', req.auth.userId)
       .where('teams.season_year', current_season.year)
     const team = userTeams.find((p) => p.tid === teamId)
     if (!team) {
@@ -202,7 +202,7 @@ router.put('/:poachId', async (req, res) => {
     // verify release player not use in different poach
     const otherPendingPoachReleases = await db('poaches')
       .select('poach_releases.pid')
-      .join('poach_releases', 'poaches.uid', 'poach_releases.poachid')
+      .join('poach_releases', 'poaches.uid', 'poach_releases.poach_id')
       .whereNot('uid', poachId)
       .whereNull('processed')
 
@@ -255,17 +255,17 @@ router.put('/:poachId', async (req, res) => {
     // update releases
     if (release.length) {
       const releaseInserts = release.map((pid) => ({
-        poachid: poachId,
+        poach_id: poachId,
         pid
       }))
       await db('poach_releases')
         .insert(releaseInserts)
-        .onConflict(['poachid', 'pid'])
+        .onConflict(['poach_id', 'pid'])
         .merge()
     }
     await db('poach_releases')
       .del()
-      .where('poachid', poachId)
+      .where('poach_id', poachId)
       .whereNotIn('pid', release)
 
     res.send({ ...poach, release })
@@ -309,7 +309,7 @@ router.post('/:poachId/process', async (req, res) => {
     try {
       const release = await db('poach_releases')
         .select('pid')
-        .where('poachid', poaching_claim.uid)
+        .where('poach_id', poaching_claim.uid)
 
       await processPoach({
         release: release.map((r) => r.pid),

@@ -41,7 +41,7 @@ export const league_calendar_events = [
     field: 'restricted_free_agency_period_end',
     label: 'Restricted Free Agency Ends'
   },
-  { field: 'tddate', label: 'Trade Deadline' },
+  { field: 'trade_deadline_at', label: 'Trade Deadline' },
   { field: 'season_finalized_at', label: 'Season Finalized' }
 ]
 

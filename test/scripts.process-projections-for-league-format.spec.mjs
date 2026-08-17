@@ -64,7 +64,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
         const total = 300 - index * 5 - week
         projection_rows.push({
           pid,
-          sourceid: external_data_sources.AVERAGE,
+          source_id: external_data_sources.AVERAGE,
           week,
           season_year: YEAR,
           season_type: 'REG',
@@ -173,13 +173,13 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     await knex('projections_index')
       .where({
         season_year: empty_year,
-        sourceid: external_data_sources.AVERAGE
+        source_id: external_data_sources.AVERAGE
       })
       .del()
 
     const projection_rows = seeded_pids.map((pid) => ({
       pid,
-      sourceid: external_data_sources.AVERAGE,
+      source_id: external_data_sources.AVERAGE,
       week: 1,
       season_year: empty_year,
       season_type: 'REG',

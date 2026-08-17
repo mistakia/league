@@ -57,10 +57,17 @@ const get_default_params = ({ params = {} }) => {
 
   // Projection source (projections_index / ros_projections only). Defaults to
   // the AVERAGE consensus so a column with no `sourceid` param is unchanged.
+  //
+  // The persisted param KEY is `sourceid` and deliberately did NOT move with the
+  // COLUMN, which is now `source_id`: saved views persist the key, so renaming it
+  // silently drops every filter a user already set (21 occurrences across 2
+  // production views). See the note in
+  // app/core/data-views-fields/projected-table-fields.js. Everything below this
+  // read names the conformed COLUMN.
   const sourceid_param = Array.isArray(params.sourceid)
     ? params.sourceid[0]
     : params.sourceid
-  const sourceid =
+  const source_id =
     sourceid_param == null || sourceid_param === ''
       ? external_data_sources.AVERAGE
       : Number(sourceid_param)
@@ -73,7 +80,7 @@ const get_default_params = ({ params = {} }) => {
     scoring_format_id,
     league_format_id,
     league_id,
-    sourceid
+    source_id
   }
 }
 
@@ -99,11 +106,11 @@ const get_alias_key = ({ year, week, seas_type, nfl_week }) => {
 
 const projections_index_table_alias = ({ params = {} }) => {
   const p = get_default_params({ params })
-  // sourceid is part of the alias key so two projection columns at the same
+  // source_id is part of the alias key so two projection columns at the same
   // year/week/seas_type but different sources do not collapse into one shared
-  // JOIN (which could carry only one sourceid predicate).
+  // JOIN (which could carry only one source_id predicate).
   return get_table_hash(
-    `projections_index_${get_alias_key(p)}_source_${p.sourceid}`
+    `projections_index_${get_alias_key(p)}_source_${p.source_id}`
   )
 }
 
@@ -412,23 +419,23 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
   key_columns: { year: 'season_year' },
   year_default: (params) => [get_default_params({ params }).year],
   extra_predicates: (params) => {
-    const { seas_type, week, sourceid } = get_default_params({ params })
-    // ros_projections is keyed (sourceid, pid, year) — no week/seas_type
-    // discriminator — so the rest-of-season subquery pins sourceid only.
+    const { seas_type, week, source_id } = get_default_params({ params })
+    // ros_projections is keyed (source_id, pid, year) — no week/seas_type
+    // discriminator — so the rest-of-season subquery pins source_id only.
     if (is_rest_of_season) {
-      return [{ column: 'sourceid', value: sourceid }]
+      return [{ column: 'source_id', value: source_id }]
     }
     // projections_index.week is smallint (numeric); seas_type is an enum. The
-    // offset-expanded year window plus sourceid + seas_type + week discriminates
+    // offset-expanded year window plus source_id + seas_type + week discriminates
     // the source even when the JOIN used nfl_week_id.
     return [
-      { column: 'sourceid', value: sourceid },
+      { column: 'source_id', value: source_id },
       { column: 'week', value: week },
       { column: 'season_type', value: seas_type }
     ]
   },
   attach: ({ query_context, params, table_alias, join_type }) => {
-    const { seas_type, nfl_week, sourceid } = get_default_params({ params })
+    const { seas_type, nfl_week, source_id } = get_default_params({ params })
     const join_table_clause = is_rest_of_season
       ? `ros_projections as ${table_alias}`
       : `projections_index as ${table_alias}`
@@ -442,9 +449,9 @@ const make_projections_index_source = ({ is_rest_of_season = false } = {}) => ({
       join_week: !is_rest_of_season,
       join_year_column: 'season_year',
       additional_conditions() {
-        // sourceid discriminates the projection provider on both tables. ros
+        // source_id discriminates the projection provider on both tables. ros
         // carries no week/seas_type/nfl_week_id columns, so it stops here.
-        this.andOn(`${table_alias}.sourceid`, '=', sourceid)
+        this.andOn(`${table_alias}.source_id`, '=', source_id)
         if (is_rest_of_season) return
         if (nfl_week) {
           this.andOn(
@@ -615,7 +622,7 @@ const projection_points_year_offset_range_sql = ({
   is_rest_of_season = false
 }) => {
   const [min_offset, max_offset] = resolve_year_offset_range(params)
-  const { seas_type, week, sourceid, year } = get_default_params({ params })
+  const { seas_type, week, source_id, year } = get_default_params({ params })
   const scoring_format = get_projection_scoring_format({
     params,
     data_view_options
@@ -648,7 +655,7 @@ const projection_points_year_offset_range_sql = ({
   const predicates = [
     `${inner_table}.pid = ${data_view_options.pid_reference}`,
     year_predicate,
-    `${inner_table}.sourceid = ${sourceid}`
+    `${inner_table}.source_id = ${source_id}`
   ]
   // ros_projections carries no week / seas_type discriminator.
   if (!is_rest_of_season) {
@@ -703,7 +710,7 @@ const player_projected_salary_adjusted_points_added_periods = {
 
 // Projected fantasy points are computed in-query from the projections_index /
 // ros_projections raw-stat row (reusing the sourceid-keyed alias + source built
-// for the raw-stat columns), so points honor the sourceid projection-source
+// for the raw-stat columns), so points honor the source_id projection-source
 // param and stay self-consistent with the raw-stat columns. See task
 // projected-points-in-query-scoring-source-selection.
 const player_projected_points = {

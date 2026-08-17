@@ -52,7 +52,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
           week: current_season.week - 1,
-          userid: 1
+          user_id: 1
         },
         {
           pid: player.pid,
@@ -63,7 +63,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           season_year: current_season.year,
           occurred_at: epoch_to_timestamptz(poach_timestamp),
           week: current_season.week - 1,
-          userid: 2
+          user_id: 2
         }
       ])
     })
@@ -344,7 +344,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(poach_timestamp + 12 * 60 * 60), // 12 hours later
         week: current_season.week - 1,
-        userid: 1
+        user_id: 1
       })
 
       // Add super_priority record that's already claimed
@@ -512,7 +512,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
       const originalTimestamp =
         Math.round(Date.now() / 1000) - 10 * 24 * 60 * 60 // 10 days ago
       await knex('transactions').insert({
-        userid: 1,
+        user_id: 1,
         tid: 1,
         lid: 1,
         pid: player.pid,
@@ -526,7 +526,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
       // Step 2: Poach player (9 days ago)
       const poachTimestamp = Math.round(Date.now() / 1000) - 9 * 24 * 60 * 60
       await knex('transactions').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -540,7 +540,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
       // Step 3: Release player (5 days ago)
       const releaseTimestamp = Math.round(Date.now() / 1000) - 5 * 24 * 60 * 60
       await knex('transactions').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -554,7 +554,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
       // Step 4: Re-add player to make them rostered again (1 day ago)
       const readdTimestamp = Math.round(Date.now() / 1000) - 1 * 24 * 60 * 60
       await knex('transactions').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,

@@ -120,7 +120,12 @@ export const cluster_columns = [
 
   // Invisible to the audit's suffix rule -- no _at/_time/_ts/_date ending.
   { table: 'seasons', column: 'draft_start', audit: false, rename: null },
-  { table: 'seasons', column: 'tddate', audit: false, rename: null },
+  {
+    table: 'seasons',
+    column: 'tddate',
+    audit: false,
+    rename: 'trade_deadline_at'
+  },
   {
     table: 'seasons',
     column: 'free_agency_period_start',

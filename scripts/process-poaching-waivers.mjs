@@ -92,11 +92,11 @@ const run = async ({ daily = false } = {}) => {
       try {
         const release = await db('waiver_releases')
           .select('pid')
-          .where('waiverid', waiver.wid)
+          .where('waiver_id', waiver.wid)
         await submitPoach({
           release: release.map((r) => r.pid),
           leagueId: waiver.lid,
-          userId: waiver.userid,
+          userId: waiver.user_id,
           pid: waiver.pid,
           teamId: waiver.tid,
           team: waiver,

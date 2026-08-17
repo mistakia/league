@@ -142,7 +142,7 @@ const router = express.Router({ mergeParams: true })
  *                     lid: 2
  *                     pid: "4017"
  *                     type: 1
- *                     userid: 5
+ *                     user_id: 5
  *                     player_salary: 15
  *                     week: 8
  *                     season_year: 2024
@@ -154,7 +154,7 @@ const router = express.Router({ mergeParams: true })
  *                     lid: 2
  *                     pid: "3892"
  *                     type: 3
- *                     userid: 7
+ *                     user_id: 7
  *                     player_salary: 8
  *                     week: 8
  *                     season_year: 2024
@@ -282,7 +282,7 @@ router.get('/?', async (req, res) => {
  *                     lid: 2
  *                     pid: "2041"
  *                     type: 5
- *                     userid: 5
+ *                     user_id: 5
  *                     player_salary: 0
  *                     week: 8
  *                     season_year: 2024
@@ -294,7 +294,7 @@ router.get('/?', async (req, res) => {
  *                     lid: 2
  *                     pid: "1889"
  *                     type: 4
- *                     userid: 7
+ *                     user_id: 7
  *                     player_salary: 3
  *                     week: 8
  *                     season_year: 2024
@@ -396,7 +396,7 @@ router.get('/release', async (req, res) => {
  *                       lid: 2
  *                       pid: "4017"
  *                       type: 4
- *                       userid: 5
+ *                       user_id: 5
  *                       player_salary: 12
  *                       week: 5
  *                       season_year: 2024
@@ -409,7 +409,7 @@ router.get('/release', async (req, res) => {
  *                       lid: 2
  *                       pid: "4017"
  *                       type: 4
- *                       userid: 5
+ *                       user_id: 5
  *                       player_salary: 12
  *                       week: 5
  *                       season_year: 2024

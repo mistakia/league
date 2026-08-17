@@ -36,10 +36,10 @@ const calculate_league_careerlogs = async ({ lid }) => {
       season_year: league_team_seasonlog.season_year
     })
     for (const user_team of users_teams) {
-      if (!user_seasonlogs[user_team.userid]) {
-        user_seasonlogs[user_team.userid] = []
+      if (!user_seasonlogs[user_team.user_id]) {
+        user_seasonlogs[user_team.user_id] = []
       }
-      user_seasonlogs[user_team.userid].push(league_team_seasonlog)
+      user_seasonlogs[user_team.user_id].push(league_team_seasonlog)
     }
   }
 
@@ -252,12 +252,12 @@ const calculate_league_careerlogs = async ({ lid }) => {
     team_careerlogs.push(careerlog)
   }
 
-  for (const [userid, league_team_seasonlogs] of Object.entries(
+  for (const [user_id, league_team_seasonlogs] of Object.entries(
     user_seasonlogs
   )) {
-    log(`Calculating careerlog for user ${userid}`)
+    log(`Calculating careerlog for user ${user_id}`)
     const careerlog = await calculate_careerlog({ league_team_seasonlogs })
-    careerlog.userid = Number(userid)
+    careerlog.user_id = Number(user_id)
     careerlog.lid = lid
     user_careerlogs.push(careerlog)
   }
@@ -278,7 +278,7 @@ const calculate_league_careerlogs = async ({ lid }) => {
     // Save user careerlogs to database
     await db('league_user_careerlogs')
       .insert(user_careerlogs)
-      .onConflict(['lid', 'userid'])
+      .onConflict(['lid', 'user_id'])
       .merge()
 
     log(

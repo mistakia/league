@@ -33,7 +33,7 @@ const PLAYER_VALUE = 1000
 const insert_transaction = async ({ uid, tid, pid, type, date }) =>
   knex('transactions').insert({
     uid,
-    userid: 1,
+    user_id: 1,
     tid,
     lid,
     pid,

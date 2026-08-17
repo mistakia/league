@@ -11,7 +11,7 @@ import db from '#db'
  * from the ballot row, so removing the ballot removes the prior ranking with
  * it and there is no window in which half a ranking is stored.
  *
- * Keyed on `team_id`, never on `userid`, so a Team carrying two userids gets
+ * Keyed on `team_id`, never on `user_id`, so a Team carrying two userids gets
  * one ballot.
  *
  * This writes; it does not judge. Every rule the schema cannot enforce -- the

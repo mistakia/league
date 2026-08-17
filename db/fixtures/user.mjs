@@ -22,7 +22,7 @@ export default async function (knex) {
   const userId = 1
   const draft_start_timestamp = Math.round(Date.now() / 1000)
   await createLeague({
-    commishid: userId,
+    commissioner_user_id: userId,
     lid: 1,
     is_hosted: 1,
     draft_start: draft_start_timestamp,
@@ -34,6 +34,6 @@ export default async function (knex) {
       .add(1, 'week')
       .subtract(5, 'days')
       .unix(),
-    tddate: 1606626000
+    trade_deadline_at: 1606626000
   })
 }

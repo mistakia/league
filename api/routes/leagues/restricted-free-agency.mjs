@@ -140,7 +140,7 @@ router.get('/?', async (req, res) => {
           this.on('users_teams.tid', '=', 'teams.uid')
           this.andOn('users_teams.season_year', '=', 'teams.season_year')
         })
-        .where('users_teams.userid', req.auth.userId)
+        .where('users_teams.user_id', req.auth.userId)
         .where('users_teams.season_year', year)
         .where('teams.lid', leagueId)
       for (const user_team of user_teams) {

@@ -1200,7 +1200,7 @@ const CALENDAR_EVENTS = [
   ['Free Agency Auction Begins', 'free_agency_live_auction_start'],
   ['Free Agency Auction Ends', 'free_agency_live_auction_end'],
   ['Free Agency Period Ends', 'free_agency_period_end'],
-  ['Trade Deadline', 'tddate']
+  ['Trade Deadline', 'trade_deadline_at']
 ]
 
 /**

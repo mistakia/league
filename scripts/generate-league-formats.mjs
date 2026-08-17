@@ -52,8 +52,8 @@ const generate_league_formats = async () => {
     starter_slots_wide_receiver: [2],
     starter_slots_tight_end: [1],
     starter_slots_running_back_wide_receiver_flex: [0],
-    srbwrte: [1, 2],
-    sqbrbwrte: [0, 1],
+    starter_slots_running_back_wide_receiver_tight_end_flex: [1, 2],
+    starter_slots_superflex: [0, 1],
     starter_slots_wide_receiver_tight_end_flex: [0],
     starter_slots_defense_special_teams: [1],
     starter_slots_kicker: [0, 1],
@@ -106,10 +106,10 @@ const generate_league_formats = async () => {
               5
             ) &&
             !(
-              new_combination.srbwrte +
+              new_combination.starter_slots_running_back_wide_receiver_tight_end_flex +
                 new_combination.starter_slots_running_back_wide_receiver_flex -
                 Math.max(
-                  new_combination.srbwrte,
+                  new_combination.starter_slots_running_back_wide_receiver_tight_end_flex,
                   new_combination.starter_slots_running_back_wide_receiver_flex
                 ) >
               0
@@ -160,8 +160,9 @@ const generate_league_formats = async () => {
     starter_slots_tight_end: c.starter_slots_tight_end,
     starter_slots_running_back_wide_receiver_flex:
       c.starter_slots_running_back_wide_receiver_flex,
-    srbwrte: c.srbwrte,
-    sqbrbwrte: c.sqbrbwrte,
+    starter_slots_running_back_wide_receiver_tight_end_flex:
+      c.starter_slots_running_back_wide_receiver_tight_end_flex,
+    starter_slots_superflex: c.starter_slots_superflex,
     starter_slots_wide_receiver_tight_end_flex:
       c.starter_slots_wide_receiver_tight_end_flex,
     starter_slots_defense_special_teams: c.starter_slots_defense_special_teams,

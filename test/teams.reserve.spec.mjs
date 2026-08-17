@@ -102,7 +102,7 @@ describe('API /teams - reserve', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -1019,7 +1019,7 @@ describe('API /teams - reserve', function () {
 
       // Create active poaching claim
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: leagueId,
         pid: player.pid,
@@ -1095,7 +1095,7 @@ describe('API /teams - reserve', function () {
 
       // Create active poaching claim
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: leagueId,
         pid: player.pid,

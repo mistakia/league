@@ -49,7 +49,7 @@ describe('API /leagues - format id update', function () {
         .where({
           pid: projection_pid,
           season_year: current_season.year,
-          sourceid: external_data_sources.AVERAGE
+          source_id: external_data_sources.AVERAGE
         })
         .del()
     }
@@ -208,8 +208,8 @@ describe('API /leagues - format id update', function () {
     projection_pid = player_row.pid
     await knex('projections_index').insert({
       pid: projection_pid,
-      sourceid: external_data_sources.AVERAGE,
-      userid: 0,
+      source_id: external_data_sources.AVERAGE,
+      user_id: 0,
       week: 1,
       season_year: current_season.year,
       season_type: 'REG',

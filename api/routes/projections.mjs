@@ -23,7 +23,7 @@ const router = express.Router()
  *       if authenticated.
  *
  *       **Key Features:**
- *       - Returns system-wide average projections (sourceid: 18)
+ *       - Returns system-wide average projections (source_id: 18)
  *       - Includes user-specific projections when authenticated
  *       - Filters to current season and active players only
  *       - Cached for 4 hours for performance
@@ -48,7 +48,7 @@ const router = express.Router()
  *                 summary: Quarterback season projection
  *                 value:
  *                   - pid: "PATR-MAHO-005785"
- *                     sourceid: 18
+ *                     source_id: 18
  *                     week: 0
  *                     season_year: 2024
  *                     season_type: "REG"
@@ -66,7 +66,7 @@ const router = express.Router()
  *                 summary: Running back season projection
  *                 value:
  *                   - pid: "CHRI-MCCA-005372"
- *                     sourceid: 18
+ *                     source_id: 18
  *                     week: 0
  *                     season_year: 2024
  *                     season_type: "REG"
@@ -95,7 +95,7 @@ router.get('/?', async (req, res) => {
     const season_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
     if (!projections) {
       projections = await db('projections_index')
-        .where('sourceid', external_data_sources.AVERAGE)
+        .where('source_id', external_data_sources.AVERAGE)
         .where('season_year', current_season.year)
         .where('week', '>=', current_season.week)
         .where('season_type', season_type)
@@ -112,7 +112,7 @@ router.get('/?', async (req, res) => {
         .where({
           season_year: current_season.year,
           season_type: season_type,
-          userid: req.auth.userId
+          user_id: req.auth.userId
         })
     }
 
@@ -167,7 +167,7 @@ router.get('/?', async (req, res) => {
  *                 $ref: '#/components/schemas/Projection'
  *             example:
  *               - pid: "PATR-MAHO-005785"
- *                 sourceid: 18
+ *                 source_id: 18
  *                 week: 0
  *                 season_year: 2024
  *                 season_type: "REG"
@@ -182,7 +182,7 @@ router.get('/?', async (req, res) => {
  *                 rushing_touchdowns: 4
  *                 pts: 285.6
  *               - pid: "PATR-MAHO-005785"
- *                 sourceid: 16
+ *                 source_id: 16
  *                 week: 1
  *                 season_year: 2024
  *                 season_type: "REG"
@@ -388,7 +388,7 @@ router.put(
 
       const existing_projection = await db('projections_index')
         .where({
-          userid: userId,
+          user_id: userId,
           pid,
           week,
           season_year: current_season.year,
@@ -402,7 +402,7 @@ router.put(
             [type]: value
           })
           .where({
-            userid: userId,
+            user_id: userId,
             pid,
             week,
             season_year: current_season.year,
@@ -417,7 +417,7 @@ router.put(
       } else {
         const insert_data = {
           [type]: value,
-          userid: userId,
+          user_id: userId,
           pid,
           week,
           season_year: current_season.year,
@@ -554,7 +554,7 @@ router.delete(
       // TODO validate pid
 
       await db('projections_index').del().where({
-        userid: userId,
+        user_id: userId,
         pid,
         week,
         season_year: current_season.year,

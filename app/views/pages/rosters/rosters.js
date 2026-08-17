@@ -113,8 +113,12 @@ export default function RostersPage({
     }
   }
 
-  if (league.srbwrte) {
-    for (let i = 0; i < league.srbwrte; i++) {
+  if (league.starter_slots_running_back_wide_receiver_tight_end_flex) {
+    for (
+      let i = 0;
+      i < league.starter_slots_running_back_wide_receiver_tight_end_flex;
+      i++
+    ) {
       labels.push(
         <div key={`${i}RBWRTE`} className='roster__item'>
           FLEX
@@ -123,8 +127,8 @@ export default function RostersPage({
     }
   }
 
-  if (league.sqbrbwrte) {
-    for (let i = 0; i < league.sqbrbwrte; i++) {
+  if (league.starter_slots_superflex) {
+    for (let i = 0; i < league.starter_slots_superflex; i++) {
       labels.push(
         <div key={`${i}QBRBWRTE`} className='roster__item'>
           SFLEX

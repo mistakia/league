@@ -144,10 +144,14 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.srbwrte) {
+    if (league.starter_slots_running_back_wide_receiver_tight_end_flex) {
       const slot = roster_slot_types.RBWRTE
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.srbwrte; i++) {
+      for (
+        let i = 0;
+        i < league.starter_slots_running_back_wide_receiver_tight_end_flex;
+        i++
+      ) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -159,10 +163,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.sqbrbwrte) {
+    if (league.starter_slots_superflex) {
       const slot = roster_slot_types.QBRBWRTE
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.sqbrbwrte; i++) {
+      for (let i = 0; i < league.starter_slots_superflex; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow

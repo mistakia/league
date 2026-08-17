@@ -857,8 +857,8 @@ export const get_league_events = createSelector(
       }
     }
 
-    if (league.tddate) {
-      const date = dayjs(league.tddate)
+    if (league.trade_deadline_at) {
+      const date = dayjs(league.trade_deadline_at)
       if (now.isBefore(date)) {
         events.push({
           detail: 'Trade Deadline',
@@ -3431,7 +3431,8 @@ export function get_current_trade(state) {
 export const get_is_commish = createSelector(
   get_app,
   get_current_league,
-  (app, league) => Boolean(app.userId) && league.commishid === app.userId
+  (app, league) =>
+    Boolean(app.userId) && league.commissioner_user_id === app.userId
 )
 
 /**
@@ -4130,10 +4131,10 @@ export const get_league_user_historical_ranks = createSelector(
       result.first_season_year = user_careerlog.first_season_year
       result.last_season_year = user_careerlog.last_season_year
       result.number_seasons = user_careerlog.number_seasons
-      result.userid = user_careerlog.userid
+      result.user_id = user_careerlog.user_id
       result.username = user_careerlog.username
 
-      ranks[user_careerlog.userid] = result
+      ranks[user_careerlog.user_id] = result
     })
 
     return ranks

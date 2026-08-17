@@ -365,7 +365,7 @@ const options = {
               description: 'Fantasy league ID',
               example: 2
             },
-            commishid: {
+            commissioner_user_id: {
               type: 'integer',
               description: 'Commissioner user ID',
               example: 5
@@ -468,7 +468,7 @@ const options = {
               description: 'Starting TE slots',
               example: 1
             },
-            srbwrte: {
+            starter_slots_running_back_wide_receiver_tight_end_flex: {
               type: 'integer',
               description: 'RB/WR/TE flex slots',
               example: 1
@@ -595,7 +595,7 @@ const options = {
               description: 'Player ID',
               example: 'JALE-HURT-003085'
             },
-            sourceid: {
+            source_id: {
               type: 'integer',
               enum: Object.values(external_data_sources),
               description:
@@ -952,7 +952,7 @@ const options = {
                     description: 'Player ID of released player',
                     example: 'JORD-LOVE-001990'
                   },
-                  waiverid: {
+                  waiver_id: {
                     type: 'integer',
                     description: 'Waiver claim ID',
                     example: 12345
@@ -1022,7 +1022,7 @@ const options = {
               description: 'Team ID',
               example: 5
             },
-            userid: {
+            user_id: {
               type: 'integer',
               description: 'User ID who submitted the claim',
               example: 1
@@ -1095,7 +1095,7 @@ const options = {
           required: [
             'uid',
             'tid',
-            'userid',
+            'user_id',
             'lid',
             'pid',
             'priority_order',
@@ -1263,7 +1263,7 @@ const options = {
               description: 'Unique wager ID',
               example: 12345
             },
-            userid: {
+            user_id: {
               type: 'integer',
               description: 'User ID who placed the wager',
               example: 123
@@ -1389,7 +1389,7 @@ const options = {
           },
           required: [
             'wager_id',
-            'userid',
+            'user_id',
             'wager_type',
             'placed_at',
             'bet_count',
@@ -1419,12 +1419,12 @@ const options = {
         UserSourceSetting: {
           type: 'object',
           properties: {
-            userid: {
+            user_id: {
               type: 'integer',
               description: 'User ID who owns this setting',
               example: 123
             },
-            sourceid: {
+            source_id: {
               type: 'integer',
               enum: Object.values(external_data_sources),
               description: 'Projection source ID',
@@ -1439,7 +1439,7 @@ const options = {
               example: 1.5
             }
           },
-          required: ['userid', 'sourceid', 'weight']
+          required: ['user_id', 'source_id', 'weight']
         },
         SourceWeightUpdateRequest: {
           type: 'object',
@@ -1972,7 +1972,7 @@ const options = {
                 uid: {
                   $ref: '#/components/schemas/EntityId'
                 },
-                userid: {
+                user_id: {
                   $ref: '#/components/schemas/UserId'
                 },
                 pid: {
@@ -2005,7 +2005,7 @@ const options = {
                   description: 'When the transaction occurred',
                   example: '2024-10-22T14:22:00Z'
                 },
-                waiverid: {
+                waiver_id: {
                   type: 'integer',
                   nullable: true,
                   description: 'Associated waiver claim ID',
@@ -2014,14 +2014,14 @@ const options = {
               },
               required: [
                 'uid',
-                'userid',
+                'user_id',
                 'pid',
                 'type',
                 'player_salary',
                 'week',
                 'season_year',
                 'occurred_at',
-                'waiverid'
+                'waiver_id'
               ]
             }
           ]
@@ -3471,7 +3471,7 @@ const options = {
               lid: 2,
               propose_tid: 13,
               accept_tid: 14,
-              userid: 5,
+              user_id: 5,
               offered: '2026-08-08T12:30:32.000Z',
               accepted: null,
               rejected: null,
@@ -3509,7 +3509,7 @@ const options = {
               description: 'Accepting team ID',
               example: 14
             },
-            userid: {
+            user_id: {
               type: 'integer',
               description: 'User ID who proposed the trade',
               example: 5

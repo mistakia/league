@@ -22,7 +22,7 @@ const should = chai.should()
 chai.use(chai_http)
 
 // user1 is the league fixture's commissioner (db/fixtures/league.mjs sets
-// commishid to user 1) and owns team 1; user2 owns team 2.
+// commissioner_user_id to user 1) and owns team 1; user2 owns team 2.
 // K and DST each have a single roster slot, so trading one to a team that
 // already holds one fails position validation on accept. Without an ORDER BY
 // the pick also depends on physical row order, which shifts whenever another
@@ -75,16 +75,16 @@ const propose_and_accept_one_for_one = async () => {
     })
   propose_res.should.have.status(200)
 
-  const tradeid = propose_res.body.uid
+  const trade_id = propose_res.body.uid
 
   const accept_res = await chai_request
     .execute(server)
-    .post(`/api/leagues/1/trades/${tradeid}/accept`)
+    .post(`/api/leagues/1/trades/${trade_id}/accept`)
     .set('Authorization', `Bearer ${user2}`)
   accept_res.should.have.status(200)
 
   return {
-    tradeid,
+    trade_id,
     proposing_row,
     accepting_row,
     proposingTeamPlayers,
@@ -135,15 +135,15 @@ const propose_and_accept_with_pick = async () => {
     })
   propose_res.should.have.status(200)
 
-  const tradeid = propose_res.body.uid
+  const trade_id = propose_res.body.uid
 
   const accept_res = await chai_request
     .execute(server)
-    .post(`/api/leagues/1/trades/${tradeid}/accept`)
+    .post(`/api/leagues/1/trades/${trade_id}/accept`)
     .set('Authorization', `Bearer ${user2}`)
   accept_res.should.have.status(200)
 
-  return { tradeid, pick, proposing_row, accepting_row }
+  return { trade_id, pick, proposing_row, accepting_row }
 }
 
 describe('API /trades - veto', function () {
@@ -163,7 +163,7 @@ describe('API /trades - veto', function () {
   })
 
   it('returns players to their original rosters', async () => {
-    const { tradeid, proposing_row, accepting_row } =
+    const { trade_id, proposing_row, accepting_row } =
       await propose_and_accept_one_for_one()
 
     // the accept moved each player to the other team
@@ -176,7 +176,7 @@ describe('API /trades - veto', function () {
 
     const veto_res = await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .post(`/api/leagues/1/trades/${trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
     veto_res.should.have.status(200)
 
@@ -190,12 +190,12 @@ describe('API /trades - veto', function () {
   })
 
   it('restores each player to the slot they occupied before the trade', async () => {
-    const { tradeid, proposing_row, accepting_row } =
+    const { trade_id, proposing_row, accepting_row } =
       await propose_and_accept_one_for_one()
 
     const veto_res = await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .post(`/api/leagues/1/trades/${trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
     veto_res.should.have.status(200)
 
@@ -256,29 +256,29 @@ describe('API /trades - veto', function () {
   })
 
   it('keeps the trade in history as accepted and vetoed', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     const veto_res = await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .post(`/api/leagues/1/trades/${trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
 
     should.exist(veto_res.body.accepted)
     should.exist(veto_res.body.vetoed)
 
-    const rows = await knex('trades').where({ uid: tradeid })
+    const rows = await knex('trades').where({ uid: trade_id })
     rows.length.should.equal(1)
     should.exist(rows[0].accepted)
     should.exist(rows[0].vetoed)
   })
 
   it('appends reversing transactions rather than deleting the originals', async () => {
-    const { tradeid, proposing_row, accepting_row } =
+    const { trade_id, proposing_row, accepting_row } =
       await propose_and_accept_one_for_one()
 
     await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .post(`/api/leagues/1/trades/${trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
 
     const pids = [proposing_row.pid, accepting_row.pid]
@@ -332,13 +332,13 @@ describe('API /trades - veto', function () {
   })
 
   it('refuses to reverse a trade after the veto window has closed', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     MockDate.set(Date.now() + 25 * 60 * 60 * 1000)
 
     const request = chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .post(`/api/leagues/1/trades/${trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
 
     await error(
@@ -348,11 +348,11 @@ describe('API /trades - veto', function () {
   })
 
   it('rejects a veto from anyone but the commissioner', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     const res = await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .post(`/api/leagues/1/trades/${trade_id}/veto`)
       .set('Authorization', `Bearer ${user2}`)
 
     res.should.have.status(401)
@@ -360,16 +360,16 @@ describe('API /trades - veto', function () {
   })
 
   it('rejects a second veto of the same trade', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .post(`/api/leagues/1/trades/${trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
 
     const request = chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .post(`/api/leagues/1/trades/${trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
 
     await error(request, 'trade has already been vetoed')
@@ -409,7 +409,7 @@ describe('API /trades - veto', function () {
   })
 
   it('lists a vetoable trade for the commissioner', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     const res = await chai_request
       .execute(server)
@@ -418,18 +418,18 @@ describe('API /trades - veto', function () {
     res.should.have.status(200)
 
     res.body.length.should.equal(1)
-    res.body[0].uid.should.equal(tradeid)
+    res.body[0].uid.should.equal(trade_id)
     // the commissioner is not party to every trade they rule on, so the list
     // has to carry the assets rather than just the trade row
     res.body[0].proposingTeamPlayers.length.should.equal(1)
   })
 
   it('omits an already vetoed trade from the vetoable list', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .post(`/api/leagues/1/trades/${trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
 
     const res = await chai_request
@@ -470,7 +470,7 @@ describe('API /trades - veto', function () {
   })
 
   it('unlocks a traded player for release once the trade is approved', async () => {
-    const { tradeid, proposing_row } = await propose_and_accept_one_for_one()
+    const { trade_id, proposing_row } = await propose_and_accept_one_for_one()
 
     // still frozen while the window is open and the trade unapproved
     const frozen_res = await chai_request
@@ -482,7 +482,7 @@ describe('API /trades - veto', function () {
 
     const approve_res = await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .post(`/api/leagues/1/trades/${trade_id}/approve`)
       .set('Authorization', `Bearer ${user1}`)
     approve_res.should.have.status(200)
     should.exist(approve_res.body.approved)
@@ -496,11 +496,11 @@ describe('API /trades - veto', function () {
   })
 
   it('omits an approved trade from the vetoable list', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .post(`/api/leagues/1/trades/${trade_id}/approve`)
       .set('Authorization', `Bearer ${user1}`)
 
     const res = await chai_request
@@ -512,16 +512,16 @@ describe('API /trades - veto', function () {
   })
 
   it('refuses to veto a trade the commissioner approved', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .post(`/api/leagues/1/trades/${trade_id}/approve`)
       .set('Authorization', `Bearer ${user1}`)
 
     const request = chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/veto`)
+      .post(`/api/leagues/1/trades/${trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
 
     await error(
@@ -531,7 +531,7 @@ describe('API /trades - veto', function () {
   })
 
   it('rolls the whole reversal back when an approval lands mid-veto', async () => {
-    const { tradeid, pick, proposing_row, accepting_row } =
+    const { trade_id, pick, proposing_row, accepting_row } =
       await propose_and_accept_with_pick()
 
     // The veto route reads the trade, finds it unapproved, and only then opens
@@ -556,7 +556,7 @@ describe('API /trades - veto', function () {
         value: async (...args) => {
           restore()
           await knex('trades')
-            .where({ uid: tradeid })
+            .where({ uid: trade_id })
             .update({ approved: new Date() })
           return original_transaction(...args)
         }
@@ -564,7 +564,7 @@ describe('API /trades - veto', function () {
 
       veto_res = await chai_request
         .execute(server)
-        .post(`/api/leagues/1/trades/${tradeid}/veto`)
+        .post(`/api/leagues/1/trades/${trade_id}/veto`)
         .set('Authorization', `Bearer ${user1}`)
     } finally {
       restore()
@@ -576,7 +576,7 @@ describe('API /trades - veto', function () {
     )
 
     // the status code alone cannot tell a rollback from a committed reversal
-    const trade_row = await knex('trades').where({ uid: tradeid }).first()
+    const trade_row = await knex('trades').where({ uid: trade_id }).first()
     should.not.exist(trade_row.vetoed)
     should.exist(trade_row.approved)
 
@@ -595,10 +595,10 @@ describe('API /trades - veto', function () {
     // the accept links its own TRADE transactions here, so the assertion is
     // that the rolled-back veto added nothing -- not that the table is empty
     const linked_transactions = await knex('trades_transactions')
-      .where({ tradeid })
+      .where({ trade_id })
       .join(
         'transactions',
-        'trades_transactions.transactionid',
+        'trades_transactions.transaction_id',
         'transactions.uid'
       )
       .select('transactions.type')
@@ -612,11 +612,11 @@ describe('API /trades - veto', function () {
   })
 
   it('rejects an approval from anyone but the commissioner', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     const res = await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .post(`/api/leagues/1/trades/${trade_id}/approve`)
       .set('Authorization', `Bearer ${user2}`)
 
     res.should.have.status(401)
@@ -652,29 +652,29 @@ describe('API /trades - veto', function () {
   })
 
   it('rejects a second approval of the same trade', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .post(`/api/leagues/1/trades/${trade_id}/approve`)
       .set('Authorization', `Bearer ${user1}`)
 
     const request = chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .post(`/api/leagues/1/trades/${trade_id}/approve`)
       .set('Authorization', `Bearer ${user1}`)
 
     await error(request, 'trade has already been approved')
   })
 
   it('refuses to approve a trade whose veto window has closed', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     MockDate.set(Date.now() + 25 * 60 * 60 * 1000)
 
     const request = chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .post(`/api/leagues/1/trades/${trade_id}/approve`)
       .set('Authorization', `Bearer ${user1}`)
 
     await error(
@@ -684,7 +684,7 @@ describe('API /trades - veto', function () {
   })
 
   it('refuses to approve in a league that has veto disabled', async () => {
-    const { tradeid } = await propose_and_accept_one_for_one()
+    const { trade_id } = await propose_and_accept_one_for_one()
 
     await knex('seasons')
       .where({ lid: 1, season_year: current_season.year })
@@ -692,7 +692,7 @@ describe('API /trades - veto', function () {
 
     const request = chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${tradeid}/approve`)
+      .post(`/api/leagues/1/trades/${trade_id}/approve`)
       .set('Authorization', `Bearer ${user1}`)
 
     await error(

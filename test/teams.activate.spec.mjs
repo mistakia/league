@@ -75,7 +75,7 @@ describe('API /teams - activate', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(roster_slot_types.BENCH)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -414,7 +414,7 @@ describe('API /teams - activate', function () {
 
       // Add player to deactivate that was previously activated
       await knex('transactions').insert({
-        userid: 1,
+        user_id: 1,
         tid: 1,
         lid: 1,
         pid: deactivate_player.pid,
@@ -485,7 +485,7 @@ describe('API /teams - activate', function () {
 
       // Insert transaction from 49 hours ago
       await knex('transactions').insert({
-        userid: userId,
+        user_id: userId,
         tid: teamId,
         lid: leagueId,
         pid: deactivate_player.pid,

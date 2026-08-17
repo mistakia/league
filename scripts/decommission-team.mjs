@@ -40,7 +40,7 @@ const decommission_team = async ({ year = current_season.year, team_id }) => {
     const params = {
       tid: team_id,
       release_pid: player.pid,
-      userid: 0,
+      user_id: 0,
       lid: leagueId,
       create_notification: true
     }

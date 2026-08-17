@@ -52,7 +52,7 @@ describe('API /poaches - process', function () {
       const poach = {
         uid: 1,
         pid: player1.pid,
-        userid: 2,
+        user_id: 2,
         tid: 2,
         player_tid: teamId,
         lid: leagueId,

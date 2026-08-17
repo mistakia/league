@@ -34,11 +34,15 @@ const get_eligible_slots = ({ pos, ps, bench, reserve_short_term, league }) => {
       eligible.push('RBWR')
     }
 
-    for (let i = 0; i < league.srbwrte; i++) {
+    for (
+      let i = 0;
+      i < league.starter_slots_running_back_wide_receiver_tight_end_flex;
+      i++
+    ) {
       eligible.push('RBWRTE')
     }
 
-    for (let i = 0; i < league.sqbrbwrte; i++) {
+    for (let i = 0; i < league.starter_slots_superflex; i++) {
       eligible.push('QBRBWRTE')
     }
 

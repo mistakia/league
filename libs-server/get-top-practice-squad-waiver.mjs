@@ -55,7 +55,7 @@ export default async function (lid) {
       'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
-      'waivers.userid',
+      'waivers.user_id',
       'waivers.type as waiver_type'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
@@ -103,7 +103,7 @@ export default async function (lid) {
       'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
-      'waivers.userid',
+      'waivers.user_id',
       'waivers.type as waiver_type',
       'waivers.super_priority'
     )

@@ -36,7 +36,7 @@ const get_window_hours = (league) => {
  * @param {string[]} [params.pids] player ids to test
  * @param {number[]} [params.pickids] draft pick ids to test
  * @returns {Promise<{pids: Map<string, object>, pickids: Map<number, object>}>}
- *   maps of frozen asset to { tradeid, protected_until }
+ *   maps of frozen asset to { trade_id, protected_until }
  */
 export const get_trade_protected_assets = async ({
   league,
@@ -67,8 +67,8 @@ export const get_trade_protected_assets = async ({
   // so the open-coded `Number(...) + hours * 3600` here was reading milliseconds
   // as seconds, and a second copy of the deadline formula could drift from the
   // one the client renders its countdown against.
-  const protected_until = (tradeid) =>
-    get_trade_veto_deadline({ trade: trade_by_uid.get(tradeid), league })
+  const protected_until = (trade_id) =>
+    get_trade_veto_deadline({ trade: trade_by_uid.get(trade_id), league })
 
   const result = { pids: new Map(), pickids: new Map() }
 
@@ -76,29 +76,29 @@ export const get_trade_protected_assets = async ({
     // Released players are frozen too: a veto has to put them back on the
     // roster they were cut from, which is impossible if someone has signed them.
     const [traded_rows, released_rows] = await Promise.all([
-      db('trades_players').whereIn('tradeid', tradeids).whereIn('pid', pids),
-      db('trade_releases').whereIn('tradeid', tradeids).whereIn('pid', pids)
+      db('trades_players').whereIn('trade_id', tradeids).whereIn('pid', pids),
+      db('trade_releases').whereIn('trade_id', tradeids).whereIn('pid', pids)
     ])
 
     for (const row of [...traded_rows, ...released_rows]) {
       if (result.pids.has(row.pid)) continue
       result.pids.set(row.pid, {
-        tradeid: row.tradeid,
-        protected_until: protected_until(row.tradeid)
+        trade_id: row.trade_id,
+        protected_until: protected_until(row.trade_id)
       })
     }
   }
 
   if (pickids.length) {
     const pick_rows = await db('trades_picks')
-      .whereIn('tradeid', tradeids)
-      .whereIn('pickid', pickids)
+      .whereIn('trade_id', tradeids)
+      .whereIn('draft_pick_id', pickids)
 
     for (const row of pick_rows) {
-      if (result.pickids.has(row.pickid)) continue
-      result.pickids.set(row.pickid, {
-        tradeid: row.tradeid,
-        protected_until: protected_until(row.tradeid)
+      if (result.pickids.has(row.draft_pick_id)) continue
+      result.pickids.set(row.draft_pick_id, {
+        trade_id: row.trade_id,
+        protected_until: protected_until(row.trade_id)
       })
     }
   }
@@ -121,14 +121,14 @@ export const verify_assets_not_trade_protected = async ({
   if (frozen_pids.size) {
     const [pid, info] = [...frozen_pids.entries()][0]
     throw new Error(
-      `player ${pid} was traded in trade #${info.tradeid} and is locked until that trade's veto window closes`
+      `player ${pid} was traded in trade #${info.trade_id} and is locked until that trade's veto window closes`
     )
   }
 
   if (frozen_pickids.size) {
-    const [pickid, info] = [...frozen_pickids.entries()][0]
+    const [draft_pick_id, info] = [...frozen_pickids.entries()][0]
     throw new Error(
-      `draft pick ${pickid} was traded in trade #${info.tradeid} and is locked until that trade's veto window closes`
+      `draft pick ${draft_pick_id} was traded in trade #${info.trade_id} and is locked until that trade's veto window closes`
     )
   }
 }

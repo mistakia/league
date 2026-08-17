@@ -54,7 +54,7 @@ export default async function (knex, league_params = {}) {
   const league_defaults = {
     lid: 1,
     is_hosted: 1,
-    commishid: userId,
+    commissioner_user_id: userId,
     // A real slate config, not just a start: `draft_type` left null makes the
     // SPA's two window predicates false, so `getPicks` places no window at all
     // and a draft-page fixture renders no label. The 11:00-24:00 band with a
@@ -66,7 +66,9 @@ export default async function (knex, league_params = {}) {
     draft_hour_min: 11,
     draft_hour_max: 24,
     free_agency_live_auction_start: null,
-    tddate: current_season.regular_season_start.add('12', 'weeks').unix(),
+    trade_deadline_at: current_season.regular_season_start
+      .add('12', 'weeks')
+      .unix(),
     extension_deadline_at: current_season.now.subtract('1', 'week').unix(),
     ...league_params
   }
@@ -122,7 +124,7 @@ export default async function (knex, league_params = {}) {
     }
 
     users_teams_rows.push({
-      userid: i,
+      user_id: i,
       tid: i,
       season_year: current_season.year
     })

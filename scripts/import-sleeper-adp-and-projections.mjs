@@ -127,7 +127,7 @@ const process_matched_player = ({
     season_year: current_season.year,
     week: 0,
     season_type: 'REG',
-    sourceid: external_data_sources.SLEEPER,
+    source_id: external_data_sources.SLEEPER,
     ...proj
   })
 }
@@ -242,7 +242,7 @@ const import_sleeper_adp_and_projections = async ({
     // Check for duplicate projection_inserts
     const unique_keys = new Set()
     const duplicates = projection_inserts.filter((item) => {
-      const key = `${item.sourceid}-${item.pid}-${item.userid}-${item.week}-${item.season_year}`
+      const key = `${item.source_id}-${item.pid}-${item.user_id}-${item.week}-${item.season_year}`
       if (unique_keys.has(key)) {
         return true
       }
@@ -258,9 +258,9 @@ const import_sleeper_adp_and_projections = async ({
       log(
         projection_inserts.find(
           (item) =>
-            item.sourceid === duplicates[0].sourceid &&
+            item.source_id === duplicates[0].source_id &&
             item.pid === duplicates[0].pid &&
-            item.userid === duplicates[0].userid &&
+            item.user_id === duplicates[0].user_id &&
             item.week === duplicates[0].week &&
             item.season_year === duplicates[0].season_year
         )
@@ -309,9 +309,9 @@ const import_sleeper_adp_and_projections = async ({
         await db('projections_index')
           .insert(batch)
           .onConflict([
-            'sourceid',
+            'source_id',
             'pid',
-            'userid',
+            'user_id',
             'week',
             'season_year',
             'season_type'
@@ -332,7 +332,7 @@ const import_sleeper_adp_and_projections = async ({
     skipped: false,
     year: current_season.year,
     week: 0,
-    sourceid: external_data_sources.SLEEPER,
+    source_id: external_data_sources.SLEEPER,
     seas_type: 'REG'
   }
 }

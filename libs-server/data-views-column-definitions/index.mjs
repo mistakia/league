@@ -96,7 +96,7 @@ const restricted_free_agency_tag_is_visible_sql = ({
     value: viewer_user_id,
     param_name: 'viewer_user_id'
   })
-  const is_own_team = `rosters_players.tid IN (SELECT users_teams.tid FROM users_teams WHERE users_teams.userid = ${viewer} AND users_teams.season_year = ${year})`
+  const is_own_team = `rosters_players.tid IN (SELECT users_teams.tid FROM users_teams WHERE users_teams.user_id = ${viewer} AND users_teams.season_year = ${year})`
 
   return `(${is_own_team} OR ${announced})`
 }
