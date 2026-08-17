@@ -135,8 +135,8 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
               {show_quarter_snaps &&
                 QUARTER_LABELS.map((label, index) => {
                   const quarter_num = index + 1
-                  const snap_count_field = `q${quarter_num}_snaps_${quarter_snap_type}`
-                  const snap_percentage_field = `q${quarter_num}_snaps_${quarter_snap_type}_percentage`
+                  const snap_count_field = `quarter_${quarter_num}_snaps_${quarter_snap_type}`
+                  const snap_percentage_field = `quarter_${quarter_num}_snaps_${quarter_snap_type}_percentage`
                   const snap_count = game[snap_count_field]
                   const snap_percentage = game[snap_percentage_field]
                   const percentage_value =

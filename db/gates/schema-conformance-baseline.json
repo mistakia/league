@@ -1,7 +1,7 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
   "generated_at": "2026-08-17T01:37:59.701Z",
-  "count": 252,
+  "count": 236,
   "violations": [
     {
       "table": "adp_format",
@@ -826,86 +826,6 @@
     {
       "table": "player_game_outcome_correlations",
       "column": "trailing_fpg",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q1_snaps_defense_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q1_snaps_defense",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q1_snaps_offense_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q1_snaps_offense",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q2_snaps_defense_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q2_snaps_defense",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q2_snaps_offense_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q2_snaps_offense",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q3_snaps_defense_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q3_snaps_defense",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q3_snaps_offense_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q3_snaps_offense",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q4_snaps_defense_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q4_snaps_defense",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q4_snaps_offense_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "q4_snaps_offense",
       "rule": "shorthand"
     },
     {

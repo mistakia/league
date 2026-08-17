@@ -449,38 +449,38 @@ const generate_player_snaps_for_week = async ({
         : null,
 
       // Quarter-specific offensive snaps
-      q1_snaps_offense: player_snaps.q1_off.size,
-      q1_snaps_offense_percentage: team_total.off.q1_off
+      quarter_1_snaps_offense: player_snaps.q1_off.size,
+      quarter_1_snaps_offense_percentage: team_total.off.q1_off
         ? player_snaps.q1_off.size / team_total.off.q1_off || 0
         : null,
-      q2_snaps_offense: player_snaps.q2_off.size,
-      q2_snaps_offense_percentage: team_total.off.q2_off
+      quarter_2_snaps_offense: player_snaps.q2_off.size,
+      quarter_2_snaps_offense_percentage: team_total.off.q2_off
         ? player_snaps.q2_off.size / team_total.off.q2_off || 0
         : null,
-      q3_snaps_offense: player_snaps.q3_off.size,
-      q3_snaps_offense_percentage: team_total.off.q3_off
+      quarter_3_snaps_offense: player_snaps.q3_off.size,
+      quarter_3_snaps_offense_percentage: team_total.off.q3_off
         ? player_snaps.q3_off.size / team_total.off.q3_off || 0
         : null,
-      q4_snaps_offense: player_snaps.q4_off.size,
-      q4_snaps_offense_percentage: team_total.off.q4_off
+      quarter_4_snaps_offense: player_snaps.q4_off.size,
+      quarter_4_snaps_offense_percentage: team_total.off.q4_off
         ? player_snaps.q4_off.size / team_total.off.q4_off || 0
         : null,
 
       // Quarter-specific defensive snaps
-      q1_snaps_defense: player_snaps.q1_def.size,
-      q1_snaps_defense_percentage: team_total.def.q1_def
+      quarter_1_snaps_defense: player_snaps.q1_def.size,
+      quarter_1_snaps_defense_percentage: team_total.def.q1_def
         ? player_snaps.q1_def.size / team_total.def.q1_def || 0
         : null,
-      q2_snaps_defense: player_snaps.q2_def.size,
-      q2_snaps_defense_percentage: team_total.def.q2_def
+      quarter_2_snaps_defense: player_snaps.q2_def.size,
+      quarter_2_snaps_defense_percentage: team_total.def.q2_def
         ? player_snaps.q2_def.size / team_total.def.q2_def || 0
         : null,
-      q3_snaps_defense: player_snaps.q3_def.size,
-      q3_snaps_defense_percentage: team_total.def.q3_def
+      quarter_3_snaps_defense: player_snaps.q3_def.size,
+      quarter_3_snaps_defense_percentage: team_total.def.q3_def
         ? player_snaps.q3_def.size / team_total.def.q3_def || 0
         : null,
-      q4_snaps_defense: player_snaps.q4_def.size,
-      q4_snaps_defense_percentage: team_total.def.q4_def
+      quarter_4_snaps_defense: player_snaps.q4_def.size,
+      quarter_4_snaps_defense_percentage: team_total.def.q4_def
         ? player_snaps.q4_def.size / team_total.def.q4_def || 0
         : null
     })

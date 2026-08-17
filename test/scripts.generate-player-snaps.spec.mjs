@@ -306,10 +306,10 @@ describe('SCRIPTS generate-player-snaps', function () {
     // The computed key `q${quarter}_off` is the specific thing worth pinning:
     // it is built by template literal from a renamed variable, so neither a
     // grep for the old name nor a column-existence check can reach it.
-    expect(row.q1_snaps_offense).to.equal(1)
-    expect(row.q2_snaps_offense).to.equal(1)
-    expect(row.q3_snaps_offense).to.equal(2)
-    expect(row.q4_snaps_offense).to.equal(1)
+    expect(row.quarter_1_snaps_offense).to.equal(1)
+    expect(row.quarter_2_snaps_offense).to.equal(1)
+    expect(row.quarter_3_snaps_offense).to.equal(2)
+    expect(row.quarter_4_snaps_offense).to.equal(1)
   })
 
   it('counts defensive snaps into the quarter the play was in', async () => {
@@ -319,10 +319,10 @@ describe('SCRIPTS generate-player-snaps', function () {
       .where({ esbid, pid: defense_pid, season_year })
       .first()
 
-    expect(row.q1_snaps_defense).to.equal(0)
-    expect(row.q2_snaps_defense).to.equal(1)
-    expect(row.q3_snaps_defense).to.equal(1)
-    expect(row.q4_snaps_defense).to.equal(0)
+    expect(row.quarter_1_snaps_defense).to.equal(0)
+    expect(row.quarter_2_snaps_defense).to.equal(1)
+    expect(row.quarter_3_snaps_defense).to.equal(1)
+    expect(row.quarter_4_snaps_defense).to.equal(0)
   })
 
   // Added 2026-08-15 with the pct -> percentage conform. Every assertion above
@@ -348,10 +348,10 @@ describe('SCRIPTS generate-player-snaps', function () {
 
     // Sole offensive player: his share of every offensive bucket is the whole.
     expect(Number(offense.snaps_offense_percentage)).to.equal(1)
-    expect(Number(offense.q1_snaps_offense_percentage)).to.equal(1)
-    expect(Number(offense.q2_snaps_offense_percentage)).to.equal(1)
-    expect(Number(offense.q3_snaps_offense_percentage)).to.equal(1)
-    expect(Number(offense.q4_snaps_offense_percentage)).to.equal(1)
+    expect(Number(offense.quarter_1_snaps_offense_percentage)).to.equal(1)
+    expect(Number(offense.quarter_2_snaps_offense_percentage)).to.equal(1)
+    expect(Number(offense.quarter_3_snaps_offense_percentage)).to.equal(1)
+    expect(Number(offense.quarter_4_snaps_offense_percentage)).to.equal(1)
     // He took no defensive snap, but the defense HAS a total, so this is a real
     // zero rather than the null a missing denominator produces.
     expect(Number(offense.snaps_defense_percentage)).to.equal(0)
@@ -362,12 +362,12 @@ describe('SCRIPTS generate-player-snaps', function () {
 
     // Two of the five defensive snaps.
     expect(Number(defense.snaps_defense_percentage)).to.equal(0.4)
-    expect(Number(defense.q1_snaps_defense_percentage)).to.equal(0)
-    expect(Number(defense.q2_snaps_defense_percentage)).to.equal(1)
+    expect(Number(defense.quarter_1_snaps_defense_percentage)).to.equal(0)
+    expect(Number(defense.quarter_2_snaps_defense_percentage)).to.equal(1)
     // The one value that separates a correct quarter mapping from a plausible
     // wrong one: q3 is the only quarter with two team snaps.
-    expect(Number(defense.q3_snaps_defense_percentage)).to.equal(0.5)
-    expect(Number(defense.q4_snaps_defense_percentage)).to.equal(0)
+    expect(Number(defense.quarter_3_snaps_defense_percentage)).to.equal(0.5)
+    expect(Number(defense.quarter_4_snaps_defense_percentage)).to.equal(0)
   })
 
   it('splits neutral snaps on down and counts the low win-probability play', async () => {
