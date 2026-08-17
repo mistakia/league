@@ -999,6 +999,7 @@ const domain_words = [
   'breakaway',
   'changelog',
   'config',
+  'covid',
   'dropback',
   'dropbacks',
   'email',
