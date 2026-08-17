@@ -61,3 +61,17 @@ export function resolve_daily_window({
 
   return { start_hour, end_hour }
 }
+
+/**
+ * Whether an hour of the day falls inside the band `[start_hour, end_hour)`.
+ *
+ * The band is half-open, so an `end_hour` of 24 admits 23 and excludes the
+ * midnight that closes it — which is what makes the close a boundary rather
+ * than a slot.
+ *
+ * @param {number} hour
+ * @param {{start_hour: number, end_hour: number}} band
+ * @returns {boolean}
+ */
+export const is_open_hour = (hour, band) =>
+  hour >= band.start_hour && hour < band.end_hour

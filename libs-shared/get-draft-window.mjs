@@ -6,6 +6,7 @@ import timestamptz_to_epoch from './timestamptz-to-epoch.mjs'
 import {
   DRAFT_TIMEZONE,
   HOURS_PER_DAY,
+  is_open_hour,
   resolve_daily_window as resolve_band
 } from './draft-daily-window.mjs'
 
@@ -59,40 +60,65 @@ const band_close_at = (date, band) => {
 }
 
 /**
- * The wall-clock hours a draft day publishes a slot at.
+ * The calendar date one day after `date`.
  *
- * Derived from the band and the interval rather than configured: the first slot
- * is the band's opening hour and each further slot is one interval later, while
- * still strictly inside the band. The elected 2026 config — a 3-hour interval
- * on an 11:00-24:00 band — gives 11, 14, 17, 20 and 23 Eastern.
- *
- * Always at least one slot. An interval at or above the band's width leaves
- * only the opening hour, which is the full-day 24-hour case: one slot a day, at
- * midnight, which is the Article XI Section 8 rule.
- *
- * @param {Object} args
- * @param {number} [args.daily_window_start_hour]
- * @param {number} [args.daily_window_end_hour]
- * @param {number} [args.pick_interval_hours]
- * @returns {Array<number>} Ascending wall-clock hours.
+ * Resolved at NOON so the addition cannot land on an hour that a DST
+ * transition removes or repeats; only the date is read off the result.
  */
-export function get_draft_slot_hours({
-  daily_window_start_hour,
-  daily_window_end_hour,
-  pick_interval_hours
-} = {}) {
-  const band = resolve_daily_window({
-    daily_window_start_hour,
-    daily_window_end_hour
-  })
-  const interval = resolve_pick_interval_hours(pick_interval_hours)
+const next_date_after = (date) =>
+  dayjs.tz(`${date} 12:00:00`, DRAFT_TIMEZONE).add(1, 'day').format(DATE_FORMAT)
 
-  const slot_hours = []
-  for (let hour = band.start_hour; hour < band.end_hour; hour += interval) {
-    slot_hours.push(hour)
+/**
+ * Rolls forward to the band's opening hour, if `time` is outside the band.
+ *
+ * A time already inside the band is returned untouched. One outside it lands on
+ * the opening hour of its own date when it falls before the band opens, and on
+ * the next date's opening hour when it falls after the band closes.
+ *
+ * Built from a `(date, hour)` pair rather than by adding hours, for the reason
+ * `instant_at` gives: hour arithmetic across a DST transition drifts by the
+ * offset change. Walking 11 hours forward from midnight on the November
+ * fall-back date reaches 10:00, not 11:00, because one of those hours is lived
+ * twice — which is exactly the defect this walk shipped with historically.
+ */
+function advance_to_open_hour(time, band) {
+  if (is_open_hour(time.hour(), band)) return time
+
+  const date = time.format(DATE_FORMAT)
+
+  if (time.hour() < band.start_hour) return instant_at(date, band.start_hour)
+
+  return instant_at(next_date_after(date), band.start_hour)
+}
+
+/**
+ * Advances one cadence step, landing on an open hour.
+ *
+ * A step is `interval` OPEN hours, counted one at a time and skipping the
+ * overnight gap — so a step begun late in the band lands the next morning and
+ * consumes only the hours the band was actually open for. That is why the day's
+ * slot times DRIFT once the band's width is not a multiple of the interval: a
+ * 13-hour band at a 3-hour interval seats five picks at 11, 14, 17, 20 and 23,
+ * and the sixth lands at 13:00 rather than 11:00, because one of its three
+ * hours was spent closing out the previous day.
+ *
+ * Counted as a `(date, hour)` pair for the DST reason above, and rebuilt into
+ * an instant once, at the end.
+ */
+function advance_one_step({ time, interval, band }) {
+  let date = time.format(DATE_FORMAT)
+  let hour = time.hour()
+
+  for (let open_hour = 0; open_hour < interval; open_hour++) {
+    hour += 1
+
+    if (!is_open_hour(hour, band)) {
+      date = next_date_after(date)
+      hour = band.start_hour
+    }
   }
 
-  return slot_hours
+  return instant_at(date, hour)
 }
 
 /**
@@ -205,42 +231,6 @@ export function get_next_publication_boundary({
 }
 
 /**
- * The `index`-th slot AT OR AFTER `from`, counting from zero.
- *
- * AT OR AFTER, never strictly after, and the difference is not cosmetic. Under
- * a full-day band the boundary and the day's only slot are the SAME instant, so
- * the strict reading makes the head pick's window the next boundary — which
- * republishes it one day further out again, every day, so no window ever opens
- * for any pick and a genuine stall becomes permanent.
- *
- * @param {Object} args
- * @param {import('dayjs').Dayjs} args.from - Boundary or anchor instant.
- * @param {number} args.index - Zero-based slot offset.
- * @param {Array<number>} args.slot_hours - From `get_draft_slot_hours`.
- * @returns {import('dayjs').Dayjs}
- */
-export function get_draft_slot_at_index({ from, index, slot_hours }) {
-  let remaining = index
-
-  // Each day contributes at least one slot, so `index + 2` days always covers
-  // the request even when the boundary's own day is fully consumed.
-  for (let day_offset = 0; day_offset <= index + 1; day_offset++) {
-    const date = from.add(day_offset, 'day').format(DATE_FORMAT)
-
-    for (const hour of slot_hours) {
-      const slot = instant_at(date, hour)
-      if (slot.isBefore(from)) continue
-      if (remaining === 0) return slot
-      remaining -= 1
-    }
-  }
-
-  // Unreachable for a non-empty slot list; returned rather than thrown so a
-  // misconfigured band degrades to a late window instead of a crashed page.
-  return from.add(index + 2, 'day')
-}
-
-/**
  * Calculates when a given pick becomes passable.
  *
  * A pick's window is the moment that pick may be taken *out of order* — when
@@ -248,43 +238,57 @@ export function get_draft_slot_at_index({ from, index, slot_hours }) {
  * preceding pick has already been made is on the clock regardless of the
  * window; the window governs only jumping a stalled team ahead of you.
  *
- * The rule is a frozen daily slate, and nothing else:
+ * The rule is the historical anchored walk, RECOMPUTED ONCE A DAY:
  *
- *   window(P) = published
+ *   window(P) = walk(anchor, steps)
  *
- *     boundary    the latest publication boundary at or before now that is also
- *                 at or after the latest resume; `draft_start` counts as one
- *     outstanding the picks with no selection AS OF that boundary, in pick order
- *     index       P's position within `outstanding`
- *     published   the index-th slot at or after `boundary`
+ *     boundary   the latest publication boundary at or before now that is also
+ *                at or after the latest resume; `draft_start` counts as one
+ *     as-of      the board as it stood AT that boundary: a pick counts as made
+ *                only if its selection landed at or before it
+ *     anchor     the highest-numbered pick below P that is made as of the
+ *                boundary, taken at the LATER of its selection instant and the
+ *                boundary; with nothing made ahead of P, `draft_start`
+ *     steps      how many picks between the anchor and P are still unmade as of
+ *                the boundary
+ *     walk       start at the anchor, advance to an open hour, then take one
+ *                step of `pick_interval_hours` OPEN hours per step
  *
- * There is no second term, and in particular no selection-time input. A pick's
- * window is the slot the slate published for it, however fast or slow the board
- * then goes: a pick made nine hours after its own slot does not push the picks
- * behind it back, and a board that races ahead does not pull anything forward.
- * That is what makes the day's schedule knowable the night before, which is the
- * property the notice publishes.
+ * Two things about `anchor` carry the whole design.
  *
- * The outstanding set is computed as of the BOUNDARY, not as of now. A pick made
- * after the boundary stays in the set and keeps its index, so no later pick's
- * published slot moves until the next boundary. Filtering the live board
- * instead would shrink a jumped pick out of the set and pull later windows
- * EARLIER between boundaries — the freeze is what "publication" means.
+ * It is the highest-numbered made pick below P rather than the latest by TIME,
+ * which is what keeps a gap board honest: the pick behind a just-made pick X
+ * measures from X, not from whoever happened to click most recently. Counting
+ * only UNMADE picks as steps is the same idea — a jumped pick is already made,
+ * so it consumes no step and the picks behind it do not inherit a stale queue.
+ *
+ * And it is clamped forward to the boundary, which is the once-a-day part. A
+ * selection made during the day moves nothing until midnight; at midnight the
+ * remaining picks are laid out afresh from that morning's opening hour, and the
+ * picks made during the day have left the queue, so the ones behind them move
+ * up. That is the shift, calculated once, knowable the night before. The clamp
+ * is also what stops a long pause from stranding the board: without it every
+ * window on a five-day-old anchor is already in the past, and the whole
+ * remaining board is passable the instant the slate publishes.
  *
  * A pick is ON THE CLOCK from the start of its window, whether or not the pick
- * ahead of it has been selected. Slots are one interval apart, so each pick has
- * the clock to itself for a full interval before the next one joins it — the
- * exclusive interval is a property of the slate's SPACING, which is why no
- * separate floor term is needed to produce it.
+ * ahead of it has been selected. Consecutive steps are one interval apart, so a
+ * pick has the clock to itself for a full interval before the next one joins —
+ * that is the exclusive-interval guarantee, and it comes from the step spacing.
  *
- * The invariant, stated exactly: BETWEEN two boundaries `window(P)` is
- * CONSTANT, because the only inputs that could move it — the outstanding set
- * and the boundary — are both fixed for the day. AT a boundary it is re-laid
- * from the new midnight, so its absolute movement is the net of the boundary
- * advancing one day against P's index shrinking by the picks that were made.
- * It moves EARLIER only when the day consumed more than a day of slots, and
- * otherwise moves LATER. "Windows only ever move up" is false and must not be
- * said: a day on which nobody picks rolls every window forward 24 hours.
+ * The invariant: BETWEEN two boundaries `window(P)` is CONSTANT, since both the
+ * as-of board and the anchor are fixed for the day. AT a boundary it is re-laid
+ * from the new morning, so it moves EARLIER by one step per pick made during
+ * the day, and LATER by the day the boundary itself advanced. A day on which
+ * nobody picks therefore rolls every window forward 24 hours; a day that
+ * consumes more than a day of steps pulls them back. "Windows only ever move
+ * up" is false and must not be said.
+ *
+ * Note the slot times DRIFT across days whenever the band's width is not a
+ * multiple of the interval — see `advance_one_step`. The first day after any
+ * boundary always opens at the band's opening hour, because the anchor is
+ * clamped to that boundary; only picks landing on a LATER day drift, and the
+ * next boundary re-lays them anyway.
  *
  * @param {Object} args
  * @param {number} args.draft_start_timestamp - Unix timestamp (seconds) the draft opens.
@@ -358,25 +362,118 @@ export default function getDraftWindow({
 
   if (!boundary) return null
 
-  const index = resolve_published_index({
-    draft_picks,
+  const band = resolve_daily_window({
+    daily_window_start_hour,
+    daily_window_end_hour
+  })
+  const interval = resolve_pick_interval_hours(pick_interval_hours)
+  const as_of_boundary = resolve_board_as_of({ draft_picks, boundary })
+
+  // A pick already made as of the boundary has no window to open. Literally
+  // null, for the reason the return doc gives.
+  const own_row = as_of_boundary?.find((row) => row.pick === pick_number)
+  if (own_row && own_row.selection_timestamp) return null
+
+  const { anchor, steps } = resolve_anchor({
+    draft_start_timestamp,
+    as_of_boundary,
     pick_number,
     boundary
   })
 
-  if (index === null) return null
+  let window_open_at = advance_to_open_hour(anchor, band)
+  for (let step = 0; step < steps; step++) {
+    window_open_at = advance_one_step({ time: window_open_at, interval, band })
+  }
 
-  const slot_hours = get_draft_slot_hours({
-    daily_window_start_hour,
-    daily_window_end_hour,
-    pick_interval_hours
-  })
+  return window_open_at
+}
 
-  return get_draft_slot_at_index({
-    from: boundary,
-    index,
-    slot_hours
+/**
+ * The board as it stood AT the boundary.
+ *
+ * A pick counts as made only when it carries a `selection_timestamp` at or
+ * before the boundary; anything later is stripped back to unmade, which is what
+ * freezes the day. Reading the timestamp rather than the `pid` also absorbs the
+ * client's reducer race, where a `pid` lands the instant a selection is made and
+ * its timestamp arrives with the next load — such a pick stays outstanding,
+ * holding the queue still rather than jittering it between refetches.
+ *
+ * Returns null with no board at all, which the caller reads as the pre-draft
+ * case rather than as an empty board.
+ */
+function resolve_board_as_of({ draft_picks, boundary }) {
+  if (!draft_picks || !draft_picks.length) return null
+
+  return draft_picks.map((draft_pick) => {
+    if (!draft_pick.selection_timestamp) return draft_pick
+
+    const selected_at = dayjs
+      .unix(timestamptz_to_epoch(draft_pick.selection_timestamp))
+      .tz(DRAFT_TIMEZONE)
+
+    if (!selected_at.isAfter(boundary)) return draft_pick
+
+    return { ...draft_pick, pid: null, selection_timestamp: null }
   })
+}
+
+/**
+ * The instant to walk from, and how many steps past it the pick sits.
+ *
+ * The anchor is the highest-numbered pick below the target that is made as of
+ * the boundary, and the steps are the picks still unmade between the two. With
+ * nothing made ahead of it the anchor is `draft_start`, standing in for the
+ * completion of a notional pick 0, and every preceding pick is a step.
+ *
+ * The returned anchor is CLAMPED FORWARD to the boundary. A selection is only
+ * ever at or before the boundary (`resolve_board_as_of` guarantees it), so in
+ * practice the clamp always fires and the walk starts from the boundary — which
+ * is the once-a-day recomputation. The selection instant still decides WHICH
+ * pick anchors and therefore how many steps the target sits behind it.
+ */
+function resolve_anchor({
+  draft_start_timestamp,
+  as_of_boundary,
+  pick_number,
+  boundary
+}) {
+  const clamp = (instant) => (instant.isBefore(boundary) ? boundary : instant)
+
+  const preceding = (as_of_boundary ?? [])
+    .filter((draft_pick) => draft_pick.pick < pick_number)
+    .sort((a, b) => a.pick - b.pick)
+
+  // A reverse loop rather than findLast: this module is isomorphic and reaches
+  // the SPA bundle, where preset-env transpiles syntax but leaves a runtime
+  // array method to a polyfill that is not configured here.
+  let anchor_index = -1
+  for (let index = preceding.length - 1; index >= 0; index--) {
+    if (preceding[index].selection_timestamp) {
+      anchor_index = index
+      break
+    }
+  }
+
+  if (anchor_index === -1) {
+    return {
+      anchor: clamp(dayjs.unix(draft_start_timestamp).tz(DRAFT_TIMEZONE)),
+      // With no board at all every preceding pick is unmade by definition,
+      // which is the pre-draft case the bare `pick_number` stands in for.
+      steps: preceding.length || Math.max(pick_number - 1, 0)
+    }
+  }
+
+  return {
+    anchor: clamp(
+      dayjs
+        .unix(timestamptz_to_epoch(preceding[anchor_index].selection_timestamp))
+        .tz(DRAFT_TIMEZONE)
+    ),
+    steps: preceding
+      .slice(anchor_index + 1)
+      .filter((draft_pick) => !draft_pick.selection_timestamp).length
+  }
 }
 
 /**
@@ -461,23 +558,6 @@ function resolve_outstanding_picks({ draft_picks, boundary }) {
     })
     .map((draft_pick) => draft_pick.pick)
     .sort((a, b) => a - b)
-}
-
-/**
- * `pick_number`'s zero-based position in the outstanding set, or null when it
- * is not in it.
- *
- * With no board, every pick is outstanding by definition — the pre-draft case —
- * so pick N takes the (N-1)th slot.
- */
-function resolve_published_index({ draft_picks, pick_number, boundary }) {
-  const outstanding = resolve_outstanding_picks({ draft_picks, boundary })
-
-  if (!outstanding) return pick_number - 1
-
-  const index = outstanding.indexOf(pick_number)
-
-  return index === -1 ? null : index
 }
 
 /**
