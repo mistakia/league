@@ -40,7 +40,17 @@ if (!process.env.DEBUG) {
    jersey_number 0
  */
 
-const required = [
+/*
+  Exported so a caller can evaluate the same predicate BEFORE calling and tell a
+  REFUSAL apart from a FAILURE. createPlayer returns null for both, and a run
+  oracle that cannot separate them either alarms nightly on permanently
+  incomplete feed entries or stays silent on a real writer fault.
+
+  Import this rather than copying the list. It is already hand-duplicated once at
+  scripts/backfill-players-from-nflverse-weekly-rosters.mjs, and a third copy
+  would drift.
+*/
+export const CREATE_PLAYER_REQUIRED_FIELDS = [
   'first_name',
   'last_name',
   'primary_position',
@@ -51,7 +61,7 @@ const required = [
 ]
 
 const createPlayer = async (playerData) => {
-  for (const field of required) {
+  for (const field of CREATE_PLAYER_REQUIRED_FIELDS) {
     if (!playerData[field]) {
       log(`Unable to create player, missing ${field} field`)
       log(playerData)

@@ -65,7 +65,16 @@ export { default as get_laegue_rosters_from_database } from './get-league-roster
 export { default as getAcquisitionTransaction } from './get-acquisition-transaction.mjs'
 export { default as getPlay } from './get-play.mjs'
 export { default as is_main } from './is-main.mjs'
-export { default as createPlayer } from './create-player.mjs'
+export {
+  default as createPlayer,
+  CREATE_PLAYER_REQUIRED_FIELDS
+} from './create-player.mjs'
+export {
+  default as resolve_canonical_player,
+  BIRTH_DATE_PLACEHOLDER,
+  UNKNOWN_REASONS,
+  describe_resolution
+} from './resolve-canonical-player.mjs'
 export { default as insert_prop_markets } from './insert-prop-markets.mjs'
 export { format_sql, normalize_sql_for_comparison } from './format-sql.mjs'
 export { default as generate_player_id } from './generate-player-id.mjs'
