@@ -17,7 +17,7 @@ export default function LeagueSettingsRosterLimits({
     <>
       <EditableLeagueField
         label='QB'
-        field='max_roster_qb'
+        field='max_roster_quarterback'
         type='int'
         max={7}
         min={0}
@@ -25,7 +25,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='RB'
-        field='max_roster_rb'
+        field='max_roster_running_back'
         type='int'
         max={20}
         min={0}
@@ -33,7 +33,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='WR'
-        field='max_roster_wr'
+        field='max_roster_wide_receiver'
         type='int'
         max={20}
         min={0}
@@ -41,7 +41,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='TE'
-        field='max_roster_te'
+        field='max_roster_tight_end'
         type='int'
         max={10}
         min={0}
@@ -49,7 +49,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='K'
-        field='max_roster_k'
+        field='max_roster_kicker'
         type='int'
         max={5}
         min={0}
@@ -57,7 +57,7 @@ export default function LeagueSettingsRosterLimits({
       />
       <EditableLeagueField
         label='DST'
-        field='max_roster_dst'
+        field='max_roster_defense_special_teams'
         type='int'
         max={4}
         min={0}

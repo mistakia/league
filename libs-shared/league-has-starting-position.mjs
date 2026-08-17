@@ -1,32 +1,32 @@
 export default function league_has_starting_position({ pos, league }) {
   switch (pos) {
     case 'QB':
-      return Boolean(league.starter_slots_qb || league.sqbrbwrte)
+      return Boolean(league.starter_slots_quarterback || league.sqbrbwrte)
     case 'RB':
       return Boolean(
-        league.starter_slots_rb ||
-          league.starter_slots_rb_wr_flex ||
+        league.starter_slots_running_back ||
+          league.starter_slots_running_back_wide_receiver_flex ||
           league.srbwrte ||
           league.sqbrbwrte
       )
     case 'WR':
       return Boolean(
-        league.starter_slots_wr ||
-          league.starter_slots_rb_wr_flex ||
+        league.starter_slots_wide_receiver ||
+          league.starter_slots_running_back_wide_receiver_flex ||
           league.srbwrte ||
-          league.starter_slots_wr_te_flex ||
+          league.starter_slots_wide_receiver_tight_end_flex ||
           league.sqbrbwrte
       )
     case 'TE':
       return Boolean(
-        league.starter_slots_te ||
+        league.starter_slots_tight_end ||
           league.srbwrte ||
-          league.starter_slots_wr_te_flex ||
+          league.starter_slots_wide_receiver_tight_end_flex ||
           league.sqbrbwrte
       )
     case 'K':
-      return Boolean(league.starter_slots_k)
+      return Boolean(league.starter_slots_kicker)
     case 'DST':
-      return Boolean(league.starter_slots_dst)
+      return Boolean(league.starter_slots_defense_special_teams)
   }
 }

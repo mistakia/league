@@ -74,7 +74,7 @@ const calibrate_for_date_and_category = async ({
   const window_start = dayjs(date_iso).subtract(30, 'day').format('YYYY-MM-DD')
   const ktc = await extract_ktc_per_asset({
     player_ids,
-    ktc_qb_axis: mapping.ktc_qb_axis,
+    ktc_quarterback_axis: mapping.ktc_quarterback_axis,
     start_date: window_start,
     end_date: date_iso
   })

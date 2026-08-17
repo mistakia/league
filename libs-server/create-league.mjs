@@ -59,12 +59,13 @@ export default async function ({ lid, commishid, ...params } = {}) {
     league_format_id,
     scoring_format_id,
 
-    max_roster_qb: league_params.max_roster_qb,
-    max_roster_rb: league_params.max_roster_rb,
-    max_roster_wr: league_params.max_roster_wr,
-    max_roster_te: league_params.max_roster_te,
-    max_roster_dst: league_params.max_roster_dst,
-    max_roster_k: league_params.max_roster_k,
+    max_roster_quarterback: league_params.max_roster_quarterback,
+    max_roster_running_back: league_params.max_roster_running_back,
+    max_roster_wide_receiver: league_params.max_roster_wide_receiver,
+    max_roster_tight_end: league_params.max_roster_tight_end,
+    max_roster_defense_special_teams:
+      league_params.max_roster_defense_special_teams,
+    max_roster_kicker: league_params.max_roster_kicker,
 
     starting_faab_budget: league_params.starting_faab_budget,
 
@@ -73,10 +74,14 @@ export default async function ({ lid, commishid, ...params } = {}) {
     restricted_free_agency_tag_limit:
       league_params.restricted_free_agency_tag_limit,
 
-    franchise_tag_salary_qb: league_params.franchise_tag_salary_qb,
-    franchise_tag_salary_rb: league_params.franchise_tag_salary_rb,
-    franchise_tag_salary_wr: league_params.franchise_tag_salary_wr,
-    franchise_tag_salary_te: league_params.franchise_tag_salary_te,
+    franchise_tag_salary_quarterback:
+      league_params.franchise_tag_salary_quarterback,
+    franchise_tag_salary_running_back:
+      league_params.franchise_tag_salary_running_back,
+    franchise_tag_salary_wide_receiver:
+      league_params.franchise_tag_salary_wide_receiver,
+    franchise_tag_salary_tight_end:
+      league_params.franchise_tag_salary_tight_end,
 
     // The seasons calendar instants are timestamptz; league_params carries them
     // as epoch seconds, which is the shape the create-league API accepts and

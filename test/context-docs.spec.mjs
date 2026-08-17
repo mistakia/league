@@ -42,10 +42,10 @@ const base_url = 'https://xo.football'
 
 // Franchise-tag amounts are not part of the default league, so seed them.
 const league_params = {
-  franchise_tag_salary_qb: 15,
-  franchise_tag_salary_rb: 10,
-  franchise_tag_salary_wr: 12,
-  franchise_tag_salary_te: 8
+  franchise_tag_salary_quarterback: 15,
+  franchise_tag_salary_running_back: 10,
+  franchise_tag_salary_wide_receiver: 12,
+  franchise_tag_salary_tight_end: 8
 }
 
 const parse_frontmatter = (markdown) => {
@@ -365,7 +365,7 @@ describe('context documents', function () {
       doc.should.include('Salary cap')
       doc.should.include('Free agency budget (FAAB)')
       doc.should.include('Salary attribution rule')
-      doc.should.include('$15') // franchise_tag_salary_qb
+      doc.should.include('$15') // franchise_tag_salary_quarterback
 
       // Genesis league (lid 1) points to the authored constitution for governance
       doc.should.include('League Constitution')

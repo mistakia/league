@@ -50,12 +50,15 @@ export default function ({ positions, league }) {
     if (min < flexCount && positions.length) processFlex(positions, flexCount)
   }
 
-  if (league.starter_slots_rb_wr_flex) {
-    processFlex(['RB', 'WR'], league.starter_slots_rb_wr_flex)
+  if (league.starter_slots_running_back_wide_receiver_flex) {
+    processFlex(
+      ['RB', 'WR'],
+      league.starter_slots_running_back_wide_receiver_flex
+    )
   }
 
-  if (league.starter_slots_wr_te_flex) {
-    processFlex(['WR', 'TE'], league.starter_slots_wr_te_flex)
+  if (league.starter_slots_wide_receiver_tight_end_flex) {
+    processFlex(['WR', 'TE'], league.starter_slots_wide_receiver_tight_end_flex)
   }
 
   if (league.srbwrte) {

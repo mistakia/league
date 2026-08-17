@@ -3,16 +3,16 @@ import { roster_slot_types, player_tag_types } from '#constants'
 const getFranchiseAmount = ({ pos, league }) => {
   switch (pos) {
     case 'QB':
-      return league.franchise_tag_salary_qb || 0
+      return league.franchise_tag_salary_quarterback || 0
 
     case 'RB':
-      return league.franchise_tag_salary_rb || 0
+      return league.franchise_tag_salary_running_back || 0
 
     case 'WR':
-      return league.franchise_tag_salary_wr || 0
+      return league.franchise_tag_salary_wide_receiver || 0
 
     case 'TE':
-      return league.franchise_tag_salary_te || 0
+      return league.franchise_tag_salary_tight_end || 0
 
     // A position with no franchise amount prices at $0, matching what each branch
     // above already does for an unconfigured league. Falling out of the switch

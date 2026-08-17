@@ -83,9 +83,9 @@ const batches = {
   // ol/dl/lb personnel counts) land in the same DDL.
   side: ['off', 'def', 'st'],
   // League format/settings position codes plus the adp/faab/std/dev format
-  // vocabulary. Highest user-visible risk in the campaign (starter_slots_qb is
-  // read in 7 SPA files); db takes TWO targets by sense (dropback vs
-  // defensive_back).
+  // vocabulary. Highest user-visible risk in the campaign -- the slot and roster
+  // settings are read across the SPA -- so the frontend deploy rode with the
+  // apply; db took TWO targets by sense (dropback vs defensive_back).
   format: [
     'qb',
     'rb',

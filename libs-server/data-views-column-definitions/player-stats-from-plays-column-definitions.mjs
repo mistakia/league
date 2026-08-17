@@ -1149,7 +1149,7 @@ export default {
 
   player_quarterback_epa_from_plays: player_stat_from_plays({
     pid_columns: ['qb_pid'],
-    measure: { kind: 'additive', expr: `qb_epa` },
+    measure: { kind: 'additive', expr: `quarterback_epa` },
     stat_name: 'quarterback_epa_from_plays'
   }),
 

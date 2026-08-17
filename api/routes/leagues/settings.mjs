@@ -29,32 +29,32 @@ const router = express.Router()
  *           minimum: 0
  *           description: Free agent acquisition budget
  *           example: 100
- *         starter_slots_qb:
+ *         starter_slots_quarterback:
  *           type: integer
  *           minimum: 0
  *           description: Starting QB roster slots
  *           example: 1
- *         starter_slots_rb:
+ *         starter_slots_running_back:
  *           type: integer
  *           minimum: 0
  *           description: Starting RB roster slots
  *           example: 2
- *         starter_slots_wr:
+ *         starter_slots_wide_receiver:
  *           type: integer
  *           minimum: 0
  *           description: Starting WR roster slots
  *           example: 2
- *         starter_slots_te:
+ *         starter_slots_tight_end:
  *           type: integer
  *           minimum: 0
  *           description: Starting TE roster slots
  *           example: 1
- *         starter_slots_dst:
+ *         starter_slots_defense_special_teams:
  *           type: integer
  *           minimum: 0
  *           description: Starting DST roster slots
  *           example: 1
- *         starter_slots_k:
+ *         starter_slots_kicker:
  *           type: integer
  *           minimum: 0
  *           description: Starting K roster slots
@@ -210,12 +210,12 @@ const router = express.Router()
  *                   num_teams: 12
  *                   cap: 200
  *                   starting_faab_budget: 100
- *                   starter_slots_qb: 1
- *                   starter_slots_rb: 2
- *                   starter_slots_wr: 2
- *                   starter_slots_te: 1
- *                   starter_slots_dst: 1
- *                   starter_slots_k: 1
+ *                   starter_slots_quarterback: 1
+ *                   starter_slots_running_back: 2
+ *                   starter_slots_wide_receiver: 2
+ *                   starter_slots_tight_end: 1
+ *                   starter_slots_defense_special_teams: 1
+ *                   starter_slots_kicker: 1
  *                   bench_slot_count: 8
  *                   practice_squad_slot_count: 4
  *                   reserve_short_term_limit: 3

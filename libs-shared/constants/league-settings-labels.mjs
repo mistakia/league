@@ -82,25 +82,25 @@ export const scoring_field_labels = {
 }
 
 export const starting_lineup_labels = {
-  starter_slots_qb: 'QB',
-  starter_slots_rb: 'RB',
-  starter_slots_wr: 'WR',
-  starter_slots_te: 'TE',
-  starter_slots_k: 'K',
-  starter_slots_dst: 'DST',
-  starter_slots_rb_wr_flex: 'RB/WR',
+  starter_slots_quarterback: 'QB',
+  starter_slots_running_back: 'RB',
+  starter_slots_wide_receiver: 'WR',
+  starter_slots_tight_end: 'TE',
+  starter_slots_kicker: 'K',
+  starter_slots_defense_special_teams: 'DST',
+  starter_slots_running_back_wide_receiver_flex: 'RB/WR',
   srbwrte: 'RB/WR/TE',
   sqbrbwrte: 'QB/RB/WR/TE',
-  starter_slots_wr_te_flex: 'WR/TE'
+  starter_slots_wide_receiver_tight_end_flex: 'WR/TE'
 }
 
 export const roster_limit_labels = {
-  max_roster_qb: 'QB',
-  max_roster_rb: 'RB',
-  max_roster_wr: 'WR',
-  max_roster_te: 'TE',
-  max_roster_k: 'K',
-  max_roster_dst: 'DST',
+  max_roster_quarterback: 'QB',
+  max_roster_running_back: 'RB',
+  max_roster_wide_receiver: 'WR',
+  max_roster_tight_end: 'TE',
+  max_roster_kicker: 'K',
+  max_roster_defense_special_teams: 'DST',
   bench_slot_count: 'Bench',
   practice_squad_slot_count: 'PS',
   reserve_short_term_limit: 'Short Term Reserve Limit'

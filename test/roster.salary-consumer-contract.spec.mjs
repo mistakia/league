@@ -305,7 +305,7 @@ describe('roster salary consumer contract', function () {
       ps: 4,
       practice_squad_slot_count: 4,
       reserve_short_term_limit: 3,
-      max_roster_qb: 4
+      max_roster_quarterback: 4
     }
 
     const build_roster = () =>

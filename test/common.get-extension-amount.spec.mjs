@@ -22,10 +22,10 @@ const { expect } = chai
 // two components did -- hands the team a free roster spot instead.
 
 const league = {
-  franchise_tag_salary_qb: 20,
-  franchise_tag_salary_rb: 15,
-  franchise_tag_salary_wr: 18,
-  franchise_tag_salary_te: 10
+  franchise_tag_salary_quarterback: 20,
+  franchise_tag_salary_running_back: 15,
+  franchise_tag_salary_wide_receiver: 18,
+  franchise_tag_salary_tight_end: 10
 }
 
 describe('LIBS-SHARED getExtensionAmount', function () {

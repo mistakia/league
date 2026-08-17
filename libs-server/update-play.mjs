@@ -23,7 +23,7 @@ const excluded_props = ['esbid', 'play_id', 'updated']
 const FLOAT_TOLERANCE = 0.01
 const float_tolerance_fields = new Set([
   'epa',
-  'qb_epa',
+  'quarterback_epa',
   'yac_epa',
   'comp_air_epa',
   'comp_yac_epa',

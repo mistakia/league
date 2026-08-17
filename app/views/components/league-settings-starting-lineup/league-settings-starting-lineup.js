@@ -16,7 +16,7 @@ export default function LeagueSettingsStartingLineup({
   const body = (
     <>
       <EditableLeagueField
-        field='starter_slots_qb'
+        field='starter_slots_quarterback'
         label='QB'
         type='int'
         max={2}
@@ -25,7 +25,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='RB'
-        field='starter_slots_rb'
+        field='starter_slots_running_back'
         type='int'
         max={3}
         min={0}
@@ -33,7 +33,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='WR'
-        field='starter_slots_wr'
+        field='starter_slots_wide_receiver'
         type='int'
         max={3}
         min={0}
@@ -41,7 +41,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='TE'
-        field='starter_slots_te'
+        field='starter_slots_tight_end'
         type='int'
         max={2}
         min={0}
@@ -49,7 +49,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='K'
-        field='starter_slots_k'
+        field='starter_slots_kicker'
         type='int'
         max={1}
         min={0}
@@ -57,7 +57,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='DST'
-        field='starter_slots_dst'
+        field='starter_slots_defense_special_teams'
         type='int'
         max={1}
         min={0}
@@ -65,7 +65,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='RB/WR'
-        field='starter_slots_rb_wr_flex'
+        field='starter_slots_running_back_wide_receiver_flex'
         type='int'
         max={3}
         min={0}
@@ -89,7 +89,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='WR/TE'
-        field='starter_slots_wr_te_flex'
+        field='starter_slots_wide_receiver_tight_end_flex'
         type='int'
         max={2}
         min={0}

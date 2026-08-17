@@ -14,16 +14,16 @@ const expect = chai.expect
 // A two-team league: one QB, one RB, one WR, one TE and one superflex per team.
 const two_team_league = {
   num_teams: 2,
-  starter_slots_qb: 1,
-  starter_slots_rb: 1,
-  starter_slots_wr: 1,
-  starter_slots_te: 1,
-  starter_slots_wr_te_flex: 0,
-  starter_slots_rb_wr_flex: 0,
+  starter_slots_quarterback: 1,
+  starter_slots_running_back: 1,
+  starter_slots_wide_receiver: 1,
+  starter_slots_tight_end: 1,
+  starter_slots_wide_receiver_tight_end_flex: 0,
+  starter_slots_running_back_wide_receiver_flex: 0,
   srbwrte: 0,
   sqbrbwrte: 1,
-  starter_slots_k: 0,
-  starter_slots_dst: 0
+  starter_slots_kicker: 0,
+  starter_slots_defense_special_teams: 0
 }
 
 const make_player = ({ pid, position, total, week = 0 }) => ({

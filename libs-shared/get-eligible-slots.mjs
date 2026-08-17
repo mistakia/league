@@ -2,27 +2,35 @@ const get_eligible_slots = ({ pos, ps, bench, reserve_short_term, league }) => {
   let eligible = []
 
   if (pos) {
-    for (let i = 0; i < league.starter_slots_qb; i++) {
+    for (let i = 0; i < league.starter_slots_quarterback; i++) {
       eligible.push('QB')
     }
 
-    for (let i = 0; i < league.starter_slots_rb; i++) {
+    for (let i = 0; i < league.starter_slots_running_back; i++) {
       eligible.push('RB')
     }
 
-    for (let i = 0; i < league.starter_slots_wr; i++) {
+    for (let i = 0; i < league.starter_slots_wide_receiver; i++) {
       eligible.push('WR')
     }
 
-    for (let i = 0; i < league.starter_slots_te; i++) {
+    for (let i = 0; i < league.starter_slots_tight_end; i++) {
       eligible.push('TE')
     }
 
-    for (let i = 0; i < league.starter_slots_wr_te_flex; i++) {
+    for (
+      let i = 0;
+      i < league.starter_slots_wide_receiver_tight_end_flex;
+      i++
+    ) {
       eligible.push('WRTE')
     }
 
-    for (let i = 0; i < league.starter_slots_rb_wr_flex; i++) {
+    for (
+      let i = 0;
+      i < league.starter_slots_running_back_wide_receiver_flex;
+      i++
+    ) {
       eligible.push('RBWR')
     }
 
@@ -34,11 +42,11 @@ const get_eligible_slots = ({ pos, ps, bench, reserve_short_term, league }) => {
       eligible.push('QBRBWRTE')
     }
 
-    for (let i = 0; i < league.starter_slots_k; i++) {
+    for (let i = 0; i < league.starter_slots_kicker; i++) {
       eligible.push('K')
     }
 
-    for (let i = 0; i < league.starter_slots_dst; i++) {
+    for (let i = 0; i < league.starter_slots_defense_special_teams; i++) {
       eligible.push('DST')
     }
 

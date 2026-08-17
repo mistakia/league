@@ -57,10 +57,10 @@ export default class Lineup extends React.Component {
     const r = new Roster({ roster: roster.toJS(), league })
 
     const starters = []
-    if (league.starter_slots_qb) {
+    if (league.starter_slots_quarterback) {
       const slot = roster_slot_types.QB
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_qb; i++) {
+      for (let i = 0; i < league.starter_slots_quarterback; i++) {
         const { pid } = rosterPlayers[i] || {}
         starters.push(
           <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
@@ -68,10 +68,10 @@ export default class Lineup extends React.Component {
       }
     }
 
-    if (league.starter_slots_rb) {
+    if (league.starter_slots_running_back) {
       const slot = roster_slot_types.RB
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_rb; i++) {
+      for (let i = 0; i < league.starter_slots_running_back; i++) {
         const { pid } = rosterPlayers[i] || {}
         starters.push(
           <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
@@ -79,10 +79,10 @@ export default class Lineup extends React.Component {
       }
     }
 
-    if (league.starter_slots_wr) {
+    if (league.starter_slots_wide_receiver) {
       const slot = roster_slot_types.WR
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_wr; i++) {
+      for (let i = 0; i < league.starter_slots_wide_receiver; i++) {
         const { pid } = rosterPlayers[i] || {}
         starters.push(
           <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
@@ -90,10 +90,14 @@ export default class Lineup extends React.Component {
       }
     }
 
-    if (league.starter_slots_rb_wr_flex) {
+    if (league.starter_slots_running_back_wide_receiver_flex) {
       const slot = roster_slot_types.RBWR
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_rb_wr_flex; i++) {
+      for (
+        let i = 0;
+        i < league.starter_slots_running_back_wide_receiver_flex;
+        i++
+      ) {
         const { pid } = rosterPlayers[i] || {}
         starters.push(
           <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
@@ -123,10 +127,14 @@ export default class Lineup extends React.Component {
       }
     }
 
-    if (league.starter_slots_wr_te_flex) {
+    if (league.starter_slots_wide_receiver_tight_end_flex) {
       const slot = roster_slot_types.WRTE
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_wr_te_flex; i++) {
+      for (
+        let i = 0;
+        i < league.starter_slots_wide_receiver_tight_end_flex;
+        i++
+      ) {
         const { pid } = rosterPlayers[i] || {}
         starters.push(
           <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
@@ -134,10 +142,10 @@ export default class Lineup extends React.Component {
       }
     }
 
-    if (league.starter_slots_te) {
+    if (league.starter_slots_tight_end) {
       const slot = roster_slot_types.TE
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_te; i++) {
+      for (let i = 0; i < league.starter_slots_tight_end; i++) {
         const { pid } = rosterPlayers[i] || {}
         starters.push(
           <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
@@ -145,10 +153,10 @@ export default class Lineup extends React.Component {
       }
     }
 
-    if (league.starter_slots_k) {
+    if (league.starter_slots_kicker) {
       const slot = roster_slot_types.K
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_k; i++) {
+      for (let i = 0; i < league.starter_slots_kicker; i++) {
         const { pid } = rosterPlayers[i] || {}
         starters.push(
           <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />
@@ -156,10 +164,10 @@ export default class Lineup extends React.Component {
       }
     }
 
-    if (league.starter_slots_dst) {
+    if (league.starter_slots_defense_special_teams) {
       const slot = roster_slot_types.DST
       const rosterPlayers = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_dst; i++) {
+      for (let i = 0; i < league.starter_slots_defense_special_teams; i++) {
         const { pid } = rosterPlayers[i] || {}
         starters.push(
           <PlayerSlot key={`${slot}${i}`} {...{ pid, slot, ...slotProps }} />

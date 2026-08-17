@@ -131,7 +131,7 @@ const FIELD_MAPPINGS = {
   middleOfFieldCoveragePlayed: 'mofc_played',
   middleOfFieldCoverageLook: 'mofc_look',
   passWidth: 'pass_width',
-  quarterbackScrambleSide: 'qb_scramble_side',
+  quarterbackScrambleSide: 'quarterback_scramble_side',
   splitRun: 'is_split_run',
   reverseRun: 'is_reverse_run',
   pitchRun: 'is_pitch_run',
@@ -187,9 +187,11 @@ export function map_charting_play_to_db_fields(source_play) {
     result.man_zone = source_play.manZoneCoverage
   }
 
-  // quarterbackAlignment -> qb_position
+  // quarterbackAlignment -> quarterback_position
   if ('quarterbackAlignment' in source_play) {
-    result.qb_position = map_qb_alignment(source_play.quarterbackAlignment)
+    result.quarterback_position = map_qb_alignment(
+      source_play.quarterbackAlignment
+    )
   }
 
   // formation -> offense_formation

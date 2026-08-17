@@ -16,17 +16,17 @@ const DEF_SOFTMAP = {
 }
 
 export const PERSONNEL_OFFENSE_COLUMNS = {
-  qb: 'offense_personnel_qb_count',
-  rb: 'offense_personnel_rb_count',
-  te: 'offense_personnel_te_count',
-  wr: 'offense_personnel_wr_count',
-  ol: 'offense_personnel_ol_count'
+  qb: 'offense_personnel_quarterback_count',
+  rb: 'offense_personnel_running_back_count',
+  te: 'offense_personnel_tight_end_count',
+  wr: 'offense_personnel_wide_receiver_count',
+  ol: 'offense_personnel_offensive_line_count'
 }
 
 export const PERSONNEL_DEFENSE_COLUMNS = {
-  dl: 'defense_personnel_dl_count',
-  lb: 'defense_personnel_lb_count',
-  db: 'defense_personnel_db_count'
+  dl: 'defense_personnel_defensive_line_count',
+  lb: 'defense_personnel_linebacker_count',
+  db: 'defense_personnel_defensive_back_count'
 }
 
 const parse_offensive = (value) => {

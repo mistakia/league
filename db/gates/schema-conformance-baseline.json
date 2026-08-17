@@ -1,11 +1,11 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-17T01:22:18.404Z",
-  "count": 517,
+  "generated_at": "2026-08-17T01:37:59.701Z",
+  "count": 454,
   "violations": [
     {
       "table": "adp_format",
-      "column": "num_qb",
+      "column": "num_quarterback",
       "rule": "shorthand"
     },
     {
@@ -399,11 +399,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "format_category_signal_mapping",
-      "column": "ktc_qb_axis",
-      "rule": "shorthand"
-    },
-    {
       "table": "keeptradecut_liquidity",
       "column": "std_liquidity",
       "rule": "shorthand"
@@ -436,46 +431,6 @@
     {
       "table": "league_formats",
       "column": "srbwrte",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_formats",
-      "column": "starter_slots_dst",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_formats",
-      "column": "starter_slots_k",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_formats",
-      "column": "starter_slots_qb",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_formats",
-      "column": "starter_slots_rb_wr_flex",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_formats",
-      "column": "starter_slots_rb",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_formats",
-      "column": "starter_slots_te",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_formats",
-      "column": "starter_slots_wr_te_flex",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_formats",
-      "column": "starter_slots_wr",
       "rule": "shorthand"
     },
     {
@@ -554,36 +509,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "league_team_seasonlogs",
-      "column": "starter_points_dst",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_team_seasonlogs",
-      "column": "starter_points_k",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_team_seasonlogs",
-      "column": "starter_points_qb",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_team_seasonlogs",
-      "column": "starter_points_rb",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_team_seasonlogs",
-      "column": "starter_points_te",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_team_seasonlogs",
-      "column": "starter_points_wr",
-      "rule": "shorthand"
-    },
-    {
       "table": "league_user_careerlogs",
       "column": "num_byes",
       "rule": "shorthand"
@@ -650,26 +575,6 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "db_blitzers",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "defense_personnel_db_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "defense_personnel_dl_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "defense_personnel_lb_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "drive_yds_penalized",
       "rule": "shorthand"
     },
@@ -701,46 +606,6 @@
     {
       "table": "nfl_plays_current_week",
       "column": "no_score_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "offense_personnel_ol_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "offense_personnel_qb_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "offense_personnel_rb_count_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "offense_personnel_rb_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "offense_personnel_te_count_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "offense_personnel_te_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "offense_personnel_wr_count_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "offense_personnel_wr_count",
       "rule": "shorthand"
     },
     {
@@ -786,21 +651,6 @@
     {
       "table": "nfl_plays_current_week",
       "column": "pos_timeouts_remaining",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_epa",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_position",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "qb_scramble_side",
       "rule": "shorthand"
     },
     {
@@ -934,21 +784,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "nfl_plays_player",
-      "column": "is_lined_up_as_qb",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "separation_to_qb",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "time_to_qb_hurry",
-      "rule": "shorthand"
-    },
-    {
       "table": "nfl_plays_rusher",
       "column": "speed_at_los",
       "rule": "shorthand"
@@ -975,7 +810,7 @@
     },
     {
       "table": "nfl_plays",
-      "column": "avg_pass_rusher_distance_to_qb",
+      "column": "avg_pass_rusher_distance_to_quarterback",
       "rule": "shorthand"
     },
     {
@@ -1021,26 +856,6 @@
     {
       "table": "nfl_plays",
       "column": "cov_type",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "db_blitzers",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "defense_personnel_db_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "defense_personnel_dl_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "defense_personnel_lb_count",
       "rule": "shorthand"
     },
     {
@@ -1115,46 +930,6 @@
     },
     {
       "table": "nfl_plays",
-      "column": "offense_personnel_ol_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "offense_personnel_qb_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "offense_personnel_rb_count_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "offense_personnel_rb_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "offense_personnel_te_count_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "offense_personnel_te_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "offense_personnel_wr_count_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "offense_personnel_wr_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
       "column": "opp_fg_prob",
       "rule": "shorthand"
     },
@@ -1211,26 +986,6 @@
     {
       "table": "nfl_plays",
       "column": "punt_yds",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_epa",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_position_tracking",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_position",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "qb_scramble_side",
       "rule": "shorthand"
     },
     {
@@ -1435,11 +1190,6 @@
     },
     {
       "table": "nfl_team_seasonlogs",
-      "column": "pass_epa_per_db",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_seasonlogs",
       "column": "recv_air_yards_per_target",
       "rule": "shorthand"
     },
@@ -1640,11 +1390,6 @@
     },
     {
       "table": "player_college_careerlogs",
-      "column": "qb_rating",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_careerlogs",
       "column": "rec_epa_per_target",
       "rule": "shorthand"
     },
@@ -1761,11 +1506,6 @@
     {
       "table": "player_college_seasonlogs",
       "column": "pass_td",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
-      "column": "qb_rating",
       "rule": "shorthand"
     },
     {
@@ -1986,11 +1726,6 @@
     {
       "table": "player_passing_gamelogs",
       "column": "pass_comp_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_passing_gamelogs",
-      "column": "pass_epa_per_db",
       "rule": "shorthand"
     },
     {
@@ -2416,56 +2151,6 @@
     {
       "table": "seasons",
       "column": "ext_date",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "franchise_tag_salary_qb",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "franchise_tag_salary_rb",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "franchise_tag_salary_te",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "franchise_tag_salary_wr",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "max_roster_dst",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "max_roster_k",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "max_roster_qb",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "max_roster_rb",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "max_roster_te",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "max_roster_wr",
       "rule": "shorthand"
     },
     {

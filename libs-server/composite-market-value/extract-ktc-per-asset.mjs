@@ -13,7 +13,7 @@ import db from '#db'
 
 export const extract_ktc_per_asset = async ({
   player_ids,
-  ktc_qb_axis,
+  ktc_quarterback_axis,
   start_date,
   end_date
 }) => {
@@ -32,7 +32,7 @@ export const extract_ktc_per_asset = async ({
       )
     )
     .whereIn('pid', player_ids)
-    .where('is_superflex', ktc_qb_axis === 2)
+    .where('is_superflex', ktc_quarterback_axis === 2)
     .where('observed_at', '>=', new Date(start_date))
     .where('observed_at', '<=', end_bound)
     .orderBy('observed_at', 'asc')

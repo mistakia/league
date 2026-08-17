@@ -1545,9 +1545,9 @@ Translates to:
 
 ```sql
 WHERE (
-  (offense_personnel_rb_count = 1 AND offense_personnel_te_count = 1 AND offense_personnel_wr_count = 3)
+  (offense_personnel_running_back_count = 1 AND offense_personnel_tight_end_count = 1 AND offense_personnel_wide_receiver_count = 3)
   OR
-  (offense_personnel_rb_count = 1 AND offense_personnel_te_count = 2 AND offense_personnel_wr_count = 2)
+  (offense_personnel_running_back_count = 1 AND offense_personnel_tight_end_count = 2 AND offense_personnel_wide_receiver_count = 2)
 )
 ```
 
@@ -1564,14 +1564,14 @@ Each OBJECT_PRESET param specifies:
 
 Authoritative columns (parsed from the NFL-feed `offense_personnel` / `defense_personnel` strings):
 
-- `offense_personnel_qb_count`, `offense_personnel_rb_count`, `offense_personnel_te_count`, `offense_personnel_wr_count`, `offense_personnel_ol_count`
-- `defense_personnel_dl_count`, `defense_personnel_lb_count`, `defense_personnel_db_count`
+- `offense_personnel_quarterback_count`, `offense_personnel_running_back_count`, `offense_personnel_tight_end_count`, `offense_personnel_wide_receiver_count`, `offense_personnel_offensive_line_count`
+- `defense_personnel_defensive_line_count`, `defense_personnel_linebacker_count`, `defense_personnel_defensive_back_count`
 
 PlayerProfiler-source columns (preserved snap-classification counts, not used by the filter):
 
-- `offense_personnel_rb_count_per_play`, `offense_personnel_te_count_per_play`, `offense_personnel_wr_count_per_play`
+- `offense_personnel_running_back_count_per_play`, `offense_personnel_tight_end_count_per_play`, `offense_personnel_wide_receiver_count_per_play`
 
-Per-partition composite indexes cover `(offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count)` and `(defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count)`.
+Per-partition composite indexes cover `(offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count)` and `(defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count)`.
 
 ### Discrepancy Log
 

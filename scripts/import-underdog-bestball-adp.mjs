@@ -36,7 +36,7 @@ const jittered_delay = () =>
     setTimeout(resolve, 500 + Math.floor(Math.random() * 500))
   )
 
-// num_qb is carried by the slate, not the scoring type: the same half-PPR
+// num_quarterback is carried by the slate, not the scoring type: the same half-PPR
 // scoring_type_id returns 2QB-premium ADP for a Superflex slate (validated:
 // top QB ADP 1.2 superflex vs 33.5 standard). Unknown titles default to 1QB.
 const num_qb_for_slate = (title) => (/superflex/i.test(title) ? 2 : 1)
@@ -71,8 +71,10 @@ const import_underdog_bestball_adp = async ({
       continue
     }
 
-    const num_qb = num_qb_for_slate(title)
-    log(`fetching slate "${title}" (${slate.id}) as num_qb=${num_qb}`)
+    const num_quarterback = num_qb_for_slate(title)
+    log(
+      `fetching slate "${title}" (${slate.id}) as num_quarterback=${num_quarterback}`
+    )
 
     await jittered_delay()
     const appearances = await underdog.get_underdog_appearances({
@@ -83,20 +85,28 @@ const import_underdog_bestball_adp = async ({
       slate_id: slate.id
     })
 
-    slate_payloads.push({ slate, title, num_qb, appearances, players })
+    slate_payloads.push({ slate, title, num_quarterback, appearances, players })
   }
 
   // Release the headless browser before the multi-minute DB matching phase.
   await underdog.cleanup_underdog_session()
 
   // Phase 2 (DB-bound): resolve adp_format, match players, insert.
-  for (const { slate, title, num_qb, appearances, players } of slate_payloads) {
-    log(`ingesting slate "${title}" (${slate.id}) as num_qb=${num_qb}`)
+  for (const {
+    slate,
+    title,
+    num_quarterback,
+    appearances,
+    players
+  } of slate_payloads) {
+    log(
+      `ingesting slate "${title}" (${slate.id}) as num_quarterback=${num_quarterback}`
+    )
 
     const adp_format_id = await find_or_create_adp_format(db, {
       scoring_class: 'HALF_PPR',
       scoring_format_id: null,
-      num_qb,
+      num_quarterback,
       num_teams: null,
       duration: 'REDRAFT',
       draft_pool: 'ALL',
@@ -186,7 +196,7 @@ const import_underdog_bestball_adp = async ({
     )
     summary.push({
       title,
-      num_qb,
+      num_quarterback,
       appearances: appearances.length,
       matched,
       unmatched,

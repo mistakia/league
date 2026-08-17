@@ -39,8 +39,8 @@ export default function RostersPage({
   }, [lid, load_rosters, load_league_players, navigate])
 
   const labels = []
-  if (league.starter_slots_qb) {
-    for (let i = 0; i < league.starter_slots_qb; i++) {
+  if (league.starter_slots_quarterback) {
+    for (let i = 0; i < league.starter_slots_quarterback; i++) {
       labels.push(
         <div key={`${i}QB`} className='roster__item'>
           QB
@@ -49,8 +49,8 @@ export default function RostersPage({
     }
   }
 
-  if (league.starter_slots_rb) {
-    for (let i = 0; i < league.starter_slots_rb; i++) {
+  if (league.starter_slots_running_back) {
+    for (let i = 0; i < league.starter_slots_running_back; i++) {
       labels.push(
         <div key={`${i}RB`} className='roster__item'>
           RB
@@ -59,8 +59,8 @@ export default function RostersPage({
     }
   }
 
-  if (league.starter_slots_wr) {
-    for (let i = 0; i < league.starter_slots_wr; i++) {
+  if (league.starter_slots_wide_receiver) {
+    for (let i = 0; i < league.starter_slots_wide_receiver; i++) {
       labels.push(
         <div key={`${i}WR`} className='roster__item'>
           WR
@@ -69,8 +69,8 @@ export default function RostersPage({
     }
   }
 
-  if (league.starter_slots_te) {
-    for (let i = 0; i < league.starter_slots_te; i++) {
+  if (league.starter_slots_tight_end) {
+    for (let i = 0; i < league.starter_slots_tight_end; i++) {
       labels.push(
         <div key={`${i}TE`} className='roster__item'>
           TE
@@ -79,8 +79,8 @@ export default function RostersPage({
     }
   }
 
-  if (league.starter_slots_k) {
-    for (let i = 0; i < league.starter_slots_k; i++) {
+  if (league.starter_slots_kicker) {
+    for (let i = 0; i < league.starter_slots_kicker; i++) {
       labels.push(
         <div key={`${i}K`} className='roster__item'>
           K
@@ -89,8 +89,8 @@ export default function RostersPage({
     }
   }
 
-  if (league.starter_slots_dst) {
-    for (let i = 0; i < league.starter_slots_dst; i++) {
+  if (league.starter_slots_defense_special_teams) {
+    for (let i = 0; i < league.starter_slots_defense_special_teams; i++) {
       labels.push(
         <div key={`${i}DST`} className='roster__item'>
           DST
@@ -99,8 +99,12 @@ export default function RostersPage({
     }
   }
 
-  if (league.starter_slots_rb_wr_flex) {
-    for (let i = 0; i < league.starter_slots_rb_wr_flex; i++) {
+  if (league.starter_slots_running_back_wide_receiver_flex) {
+    for (
+      let i = 0;
+      i < league.starter_slots_running_back_wide_receiver_flex;
+      i++
+    ) {
       labels.push(
         <div key={`${i}RBWR`} className='roster__item'>
           RB/WR
@@ -129,8 +133,12 @@ export default function RostersPage({
     }
   }
 
-  if (league.starter_slots_wr_te_flex) {
-    for (let i = 0; i < league.starter_slots_wr_te_flex; i++) {
+  if (league.starter_slots_wide_receiver_tight_end_flex) {
+    for (
+      let i = 0;
+      i < league.starter_slots_wide_receiver_tight_end_flex;
+      i++
+    ) {
       labels.push(
         <div key={`${i}WRTE`} className='roster__item'>
           WR/TE

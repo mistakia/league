@@ -223,7 +223,7 @@ const nfl_play_fields = [
   'defensive_backs_in_box',
   'pass_rushers',
   'blitzers',
-  'db_blitzers',
+  'defensive_back_blitzers',
   // 'oopd',
   // 'cov_charted',
 
@@ -238,7 +238,7 @@ const nfl_play_fields = [
   'total_home_pass_epa',
   'total_away_pass_epa',
 
-  'qb_epa',
+  'quarterback_epa',
   'air_epa',
   'yac_epa',
   'comp_air_epa',

@@ -348,7 +348,7 @@ describe('API /teams - add', function () {
 
       // Set position limit for RB to 3
       await knex('seasons')
-        .update({ max_roster_rb: 3 })
+        .update({ max_roster_running_back: 3 })
         .where({ lid: leagueId })
 
       // Add 1 RB to bench
@@ -427,7 +427,7 @@ describe('API /teams - add', function () {
 
       // Set position limit for RB to 3
       await knex('seasons')
-        .update({ max_roster_rb: 3 })
+        .update({ max_roster_running_back: 3 })
         .where({ lid: leagueId })
 
       // Add 1 RB to bench

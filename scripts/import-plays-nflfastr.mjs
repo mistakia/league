@@ -467,8 +467,10 @@ const format_epa_data = (play) => {
     total_away_rush_epa: format_number(play.total_away_rush_epa),
     total_home_pass_epa: format_number(play.total_home_pass_epa),
     total_away_pass_epa: format_number(play.total_away_pass_epa),
-    qb_epa: format_number(
-      is_kickoff && play.qb_epa != null ? -play.qb_epa : play.qb_epa
+    quarterback_epa: format_number(
+      is_kickoff && play.quarterback_epa != null
+        ? -play.quarterback_epa
+        : play.quarterback_epa
     ),
     air_epa: format_number(
       is_kickoff && play.air_epa != null ? -play.air_epa : play.air_epa

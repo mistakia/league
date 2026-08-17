@@ -20,7 +20,7 @@
  * Background: the 2026-05-24 incident. A historical re-import run with
  * `--overwrite_existing` flipped ~12,259 FTN-sourced `catchable_ball` TRUE
  * values to FALSE (and clobbered run_play_option, screen_pass, no_huddle,
- * qb_position, starting_hash, and the nflfastR-owned outcome flags below).
+ * quarterback_position, starting_hash, and the nflfastR-owned outcome flags below).
  * `overwrite_existing=true` bypassed the per-field allowlist entirely. This
  * blocklist is the structural backstop that the allowlist could not provide.
  */
@@ -43,7 +43,7 @@ export const SPORTRADAR_PROTECTED_FIELDS = new Set([
   'is_qb_sneak',
   'is_qb_fault_sack',
   'read_thrown', // read_thrown
-  'qb_position', // qb_location — FTN pre-snap formation is authoritative
+  'quarterback_position', // qb_location — FTN pre-snap formation is authoritative
   'starting_hash', // starting_hash — FTN pre-snap formation is authoritative
   'number_offense_backfield', // number_offense_backfield
   'blitzers', // n_blitzers

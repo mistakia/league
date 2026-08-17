@@ -415,28 +415,28 @@ export default {
     column_specs: [
       {
         key: 'rb',
-        column: 'offense_personnel_rb_count',
+        column: 'offense_personnel_running_back_count',
         label: 'RB',
         min: 0,
         max: 4
       },
       {
         key: 'te',
-        column: 'offense_personnel_te_count',
+        column: 'offense_personnel_tight_end_count',
         label: 'TE',
         min: 0,
         max: 5
       },
       {
         key: 'wr',
-        column: 'offense_personnel_wr_count',
+        column: 'offense_personnel_wide_receiver_count',
         label: 'WR',
         min: 0,
         max: 5
       },
       {
         key: 'qb',
-        column: 'offense_personnel_qb_count',
+        column: 'offense_personnel_quarterback_count',
         label: 'Extra QB',
         min: 0,
         max: 2,
@@ -444,7 +444,7 @@ export default {
       },
       {
         key: 'ol',
-        column: 'offense_personnel_ol_count',
+        column: 'offense_personnel_offensive_line_count',
         label: 'Extra OL (6+)',
         min: 6,
         max: 8,
@@ -468,21 +468,21 @@ export default {
     column_specs: [
       {
         key: 'dl',
-        column: 'defense_personnel_dl_count',
+        column: 'defense_personnel_defensive_line_count',
         label: 'DL',
         min: 0,
         max: 8
       },
       {
         key: 'lb',
-        column: 'defense_personnel_lb_count',
+        column: 'defense_personnel_linebacker_count',
         label: 'LB',
         min: 0,
         max: 6
       },
       {
         key: 'db',
-        column: 'defense_personnel_db_count',
+        column: 'defense_personnel_defensive_back_count',
         label: 'DB',
         min: 3,
         max: 8
@@ -1319,7 +1319,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
-  qb_position: {
+  quarterback_position: {
     values: ['UNDER_CENTER', 'SHOTGUN', 'PISTOL'],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
@@ -1419,7 +1419,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
-  db_blitzers: {
+  defensive_back_blitzers: {
     label: 'DB Blitzers',
     show_key_in_short: true,
     min: 0,
@@ -1501,7 +1501,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
 
-  qb_epa: {
+  quarterback_epa: {
     min: -80,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,

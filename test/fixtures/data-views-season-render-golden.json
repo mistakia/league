@@ -112,7 +112,7 @@
     "CASE WHEN SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN rush_yds > 0 THEN 1 ELSE 0 END) / SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as positive_rush_pct_from_plays"
   ],
   "player_quarterback_epa_from_plays": [
-    "SUM(qb_epa) as quarterback_epa_from_plays"
+    "SUM(quarterback_epa) as quarterback_epa_from_plays"
   ],
   "player_quarterback_hits_percentage_from_plays": [
     "CASE WHEN SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_qb_hit = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as qb_hit_pct_from_plays"

@@ -20,16 +20,16 @@ const make_league = () => ({
   bye_count: 2,
   has_division_winner_berths: false,
   // starter slot counts -- required_starter_count = 7
-  starter_slots_qb: 1,
-  starter_slots_rb: 2,
-  starter_slots_wr: 2,
-  starter_slots_te: 1,
-  starter_slots_rb_wr_flex: 0,
+  starter_slots_quarterback: 1,
+  starter_slots_running_back: 2,
+  starter_slots_wide_receiver: 2,
+  starter_slots_tight_end: 1,
+  starter_slots_running_back_wide_receiver_flex: 0,
   srbwrte: 0,
   sqbrbwrte: 0,
-  starter_slots_wr_te_flex: 0,
-  starter_slots_dst: 0,
-  starter_slots_k: 1,
+  starter_slots_wide_receiver_tight_end_flex: 0,
+  starter_slots_defense_special_teams: 0,
+  starter_slots_kicker: 1,
   // calculate-points needs at least nominal scoring config; the optimizer only
   // cares about totals, and we provide gamelogs whose `points.total` is set
   // directly via stats.

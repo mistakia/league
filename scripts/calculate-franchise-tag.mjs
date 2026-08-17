@@ -18,10 +18,10 @@ debug.enable('calculate:franchise-tags')
 const average = (array) => array.reduce((a, b) => a + b) / array.length
 
 const franchise_tag_salary_columns = {
-  QB: 'franchise_tag_salary_qb',
-  RB: 'franchise_tag_salary_rb',
-  WR: 'franchise_tag_salary_wr',
-  TE: 'franchise_tag_salary_te'
+  QB: 'franchise_tag_salary_quarterback',
+  RB: 'franchise_tag_salary_running_back',
+  WR: 'franchise_tag_salary_wide_receiver',
+  TE: 'franchise_tag_salary_tight_end'
 }
 
 const run = async ({ year = current_season.year, dry_run = false } = {}) => {

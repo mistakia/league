@@ -35,7 +35,7 @@ export const transform_to_enum_value = (value) => {
 }
 
 /**
- * Transform Sportradar qb_at_snap to qb_position enum
+ * Transform Sportradar qb_at_snap to quarterback_position enum
  */
 export const transform_qb_position = (value) => {
   if (!value) return null

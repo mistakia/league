@@ -46,16 +46,16 @@ export const active_roster_slots = [
 // `sqbrbwrte` were not part of that rename and still carry their shorthand
 // names -- see league_formats in the schema.
 export const starting_lineup_slot_league_keys = [
-  'starter_slots_qb',
-  'starter_slots_rb',
-  'starter_slots_wr',
-  'starter_slots_te',
-  'starter_slots_wr_te_flex',
-  'starter_slots_rb_wr_flex',
+  'starter_slots_quarterback',
+  'starter_slots_running_back',
+  'starter_slots_wide_receiver',
+  'starter_slots_tight_end',
+  'starter_slots_wide_receiver_tight_end_flex',
+  'starter_slots_running_back_wide_receiver_flex',
   'srbwrte',
   'sqbrbwrte',
-  'starter_slots_k',
-  'starter_slots_dst'
+  'starter_slots_kicker',
+  'starter_slots_defense_special_teams'
 ]
 
 // League-config column for each roster slot's starting-lineup/bench/practice-
@@ -66,18 +66,38 @@ export const starting_lineup_slot_league_keys = [
 // `s`-prefix pattern (see starter_slots_* above vs. the retained
 // srbwrte/sqbrbwrte shorthand).
 export const starter_slot_league_columns = {
-  [roster_slot_types.QB]: 'starter_slots_qb',
-  [roster_slot_types.RB]: 'starter_slots_rb',
-  [roster_slot_types.WR]: 'starter_slots_wr',
-  [roster_slot_types.TE]: 'starter_slots_te',
-  [roster_slot_types.WRTE]: 'starter_slots_wr_te_flex',
-  [roster_slot_types.RBWR]: 'starter_slots_rb_wr_flex',
+  [roster_slot_types.QB]: 'starter_slots_quarterback',
+  [roster_slot_types.RB]: 'starter_slots_running_back',
+  [roster_slot_types.WR]: 'starter_slots_wide_receiver',
+  [roster_slot_types.TE]: 'starter_slots_tight_end',
+  [roster_slot_types.WRTE]: 'starter_slots_wide_receiver_tight_end_flex',
+  [roster_slot_types.RBWR]: 'starter_slots_running_back_wide_receiver_flex',
   [roster_slot_types.RBWRTE]: 'srbwrte',
   [roster_slot_types.QBRBWRTE]: 'sqbrbwrte',
-  [roster_slot_types.K]: 'starter_slots_k',
-  [roster_slot_types.DST]: 'starter_slots_dst',
+  [roster_slot_types.K]: 'starter_slots_kicker',
+  [roster_slot_types.DST]: 'starter_slots_defense_special_teams',
   [roster_slot_types.BENCH]: 'bench_slot_count',
   [roster_slot_types.PS]: 'practice_squad_slot_count'
+}
+
+// League-config column holding the maximum roster count at each POSITION.
+// Same shape and same reason as starter_slot_league_columns above:
+// `has_position_capacity` derived this by concatenation
+// (`` `max_roster_${pos.toLowerCase()}` ``), which broke silently the moment the
+// 2026-08-16 position-code conform moved the columns to full words -- the lookup
+// returned undefined, `!limit` read as "no limit configured", and every position
+// limit passed. A roster-limit check that fails OPEN is the worst direction, and
+// no column-existence check can see a computed key.
+//
+// Keyed by the player POSITION value rather than by roster slot, which is what
+// the caller holds.
+export const max_roster_league_columns = {
+  QB: 'max_roster_quarterback',
+  RB: 'max_roster_running_back',
+  WR: 'max_roster_wide_receiver',
+  TE: 'max_roster_tight_end',
+  K: 'max_roster_kicker',
+  DST: 'max_roster_defense_special_teams'
 }
 
 export const practice_squad_slots = [

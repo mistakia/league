@@ -129,12 +129,12 @@ describe('add_personnel_counts_to_play_data', function () {
   it('mutates a play row with offensive counts only when only offense_personnel present', function () {
     const play = { offense_personnel: '1 RB, 1 TE, 3 WR' }
     add_personnel_counts_to_play_data(play)
-    expect(play.offense_personnel_rb_count).to.equal(1)
-    expect(play.offense_personnel_te_count).to.equal(1)
-    expect(play.offense_personnel_wr_count).to.equal(3)
-    expect(play.offense_personnel_qb_count).to.equal(1)
-    expect(play.offense_personnel_ol_count).to.equal(5)
-    expect(play).to.not.have.property('defense_personnel_dl_count')
+    expect(play.offense_personnel_running_back_count).to.equal(1)
+    expect(play.offense_personnel_tight_end_count).to.equal(1)
+    expect(play.offense_personnel_wide_receiver_count).to.equal(3)
+    expect(play.offense_personnel_quarterback_count).to.equal(1)
+    expect(play.offense_personnel_offensive_line_count).to.equal(5)
+    expect(play).to.not.have.property('defense_personnel_defensive_line_count')
   })
 
   it('populates both sides when both strings present', function () {
@@ -143,9 +143,9 @@ describe('add_personnel_counts_to_play_data', function () {
       defense_personnel: '4 DL, 3 LB, 4 DB'
     }
     add_personnel_counts_to_play_data(play)
-    expect(play.defense_personnel_dl_count).to.equal(4)
-    expect(play.defense_personnel_lb_count).to.equal(3)
-    expect(play.defense_personnel_db_count).to.equal(4)
+    expect(play.defense_personnel_defensive_line_count).to.equal(4)
+    expect(play.defense_personnel_linebacker_count).to.equal(3)
+    expect(play.defense_personnel_defensive_back_count).to.equal(4)
   })
 
   it('is a no-op when both personnel strings absent', function () {
@@ -157,27 +157,27 @@ describe('add_personnel_counts_to_play_data', function () {
   it('does not overwrite the other side with NULL', function () {
     const play = {
       offense_personnel: '1 RB, 1 TE, 3 WR',
-      defense_personnel_dl_count: 4
+      defense_personnel_defensive_line_count: 4
     }
     add_personnel_counts_to_play_data(play)
-    expect(play.defense_personnel_dl_count).to.equal(4)
+    expect(play.defense_personnel_defensive_line_count).to.equal(4)
   })
 
   it('handles unparseable strings without throwing or overwriting', function () {
     const play = { offense_personnel: 'gibberish' }
     add_personnel_counts_to_play_data(play)
-    expect(play).to.not.have.property('offense_personnel_rb_count')
+    expect(play).to.not.have.property('offense_personnel_running_back_count')
   })
 
   it('does not overwrite dl/lb when defensive softmap label parses to db only', function () {
     const play = {
       defense_personnel: 'Nickel',
-      defense_personnel_dl_count: 4,
-      defense_personnel_lb_count: 2
+      defense_personnel_defensive_line_count: 4,
+      defense_personnel_linebacker_count: 2
     }
     add_personnel_counts_to_play_data(play)
-    expect(play.defense_personnel_db_count).to.equal(5)
-    expect(play.defense_personnel_dl_count).to.equal(4)
-    expect(play.defense_personnel_lb_count).to.equal(2)
+    expect(play.defense_personnel_defensive_back_count).to.equal(5)
+    expect(play.defense_personnel_defensive_line_count).to.equal(4)
+    expect(play.defense_personnel_linebacker_count).to.equal(2)
   })
 })

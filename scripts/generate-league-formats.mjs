@@ -47,16 +47,16 @@ const generate_scoring_format_title = (scoring_format) => {
 const generate_league_formats = async () => {
   const options = {
     num_teams: [10, 12],
-    starter_slots_qb: [1],
-    starter_slots_rb: [2],
-    starter_slots_wr: [2],
-    starter_slots_te: [1],
-    starter_slots_rb_wr_flex: [0],
+    starter_slots_quarterback: [1],
+    starter_slots_running_back: [2],
+    starter_slots_wide_receiver: [2],
+    starter_slots_tight_end: [1],
+    starter_slots_running_back_wide_receiver_flex: [0],
     srbwrte: [1, 2],
     sqbrbwrte: [0, 1],
-    starter_slots_wr_te_flex: [0],
-    starter_slots_dst: [1],
-    starter_slots_k: [0, 1],
+    starter_slots_wide_receiver_tight_end_flex: [0],
+    starter_slots_defense_special_teams: [1],
+    starter_slots_kicker: [0, 1],
     bench_slot_count: [7],
     practice_squad_slot_count: [4],
     reserve_short_term_limit: [3],
@@ -101,16 +101,16 @@ const generate_league_formats = async () => {
           const new_combination = { ...combination, [key]: option }
           if (
             !(
-              new_combination.starter_slots_rb +
-                new_combination.starter_slots_wr >
+              new_combination.starter_slots_running_back +
+                new_combination.starter_slots_wide_receiver >
               5
             ) &&
             !(
               new_combination.srbwrte +
-                new_combination.starter_slots_rb_wr_flex -
+                new_combination.starter_slots_running_back_wide_receiver_flex -
                 Math.max(
                   new_combination.srbwrte,
-                  new_combination.starter_slots_rb_wr_flex
+                  new_combination.starter_slots_running_back_wide_receiver_flex
                 ) >
               0
             )
@@ -154,16 +154,18 @@ const generate_league_formats = async () => {
 
   const extract_league = (c) => ({
     num_teams: c.num_teams,
-    starter_slots_qb: c.starter_slots_qb,
-    starter_slots_rb: c.starter_slots_rb,
-    starter_slots_wr: c.starter_slots_wr,
-    starter_slots_te: c.starter_slots_te,
-    starter_slots_rb_wr_flex: c.starter_slots_rb_wr_flex,
+    starter_slots_quarterback: c.starter_slots_quarterback,
+    starter_slots_running_back: c.starter_slots_running_back,
+    starter_slots_wide_receiver: c.starter_slots_wide_receiver,
+    starter_slots_tight_end: c.starter_slots_tight_end,
+    starter_slots_running_back_wide_receiver_flex:
+      c.starter_slots_running_back_wide_receiver_flex,
     srbwrte: c.srbwrte,
     sqbrbwrte: c.sqbrbwrte,
-    starter_slots_wr_te_flex: c.starter_slots_wr_te_flex,
-    starter_slots_dst: c.starter_slots_dst,
-    starter_slots_k: c.starter_slots_k,
+    starter_slots_wide_receiver_tight_end_flex:
+      c.starter_slots_wide_receiver_tight_end_flex,
+    starter_slots_defense_special_teams: c.starter_slots_defense_special_teams,
+    starter_slots_kicker: c.starter_slots_kicker,
     bench_slot_count: c.bench_slot_count,
     practice_squad_slot_count: c.practice_squad_slot_count,
     reserve_short_term_limit: c.reserve_short_term_limit,

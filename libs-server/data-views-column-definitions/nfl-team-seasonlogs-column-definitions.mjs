@@ -116,7 +116,7 @@ const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
   'pass_comp_percentage',
   'expected_pass_comp',
   'completion_percentage_over_expected',
-  'pass_epa_per_db',
+  'pass_epa_per_dropback',
   'avg_time_to_throw',
   'avg_time_to_pressure',
   'avg_time_to_sack',
@@ -287,8 +287,9 @@ export default {
     create_field_from_nfl_team_seasonlogs('dropbacks'),
   nfl_team_seasonlogs_pass_epa:
     create_field_from_nfl_team_seasonlogs('pass_epa'),
-  nfl_team_seasonlogs_pass_epa_per_db:
-    create_field_from_nfl_team_seasonlogs('pass_epa_per_db'),
+  nfl_team_seasonlogs_pass_epa_per_db: create_field_from_nfl_team_seasonlogs(
+    'pass_epa_per_dropback'
+  ),
   nfl_team_seasonlogs_avg_time_to_throw:
     create_field_from_nfl_team_seasonlogs('avg_time_to_throw'),
   nfl_team_seasonlogs_avg_time_to_pressure:

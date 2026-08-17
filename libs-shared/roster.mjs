@@ -6,6 +6,7 @@ import {
   player_tag_types,
   current_season,
   starter_slot_league_columns,
+  max_roster_league_columns,
   tag_limit_season_columns
 } from '#constants'
 import getExtensionAmount from './get-extension-amount.mjs'
@@ -189,7 +190,7 @@ export default class Roster {
   }
 
   // Returns players that count toward position limits (active roster + signed practice squad)
-  // Position limits (max_roster_dst, max_roster_qb, max_roster_rb, max_roster_wr, max_roster_te, max_roster_k) apply to:
+  // Position limits (max_roster_defense_special_teams, max_roster_quarterback, max_roster_running_back, max_roster_wide_receiver, max_roster_tight_end, max_roster_kicker) apply to:
   // - Active roster slots (bench, starter slots)
   // - Signed practice squad slots (PS, PSP)
   // Excludes drafted practice squad (PSD, PSDP) and reserve slots
@@ -414,11 +415,12 @@ export default class Roster {
   }
 
   has_position_capacity(pos) {
-    // Position limits (max_roster_dst, max_roster_qb, etc.) apply to active roster + signed practice squad combined
+    // Position limits (max_roster_defense_special_teams, max_roster_quarterback, etc.) apply to active roster + signed practice squad combined
     const count = this.roster_players_for_position_limits.filter(
       (p) => p.pos === pos
     ).length
-    const limit = this._league[`max_roster_${pos.toLowerCase()}`]
+    const column = max_roster_league_columns[pos]
+    const limit = column ? this._league[column] : undefined
     return !limit || count < limit
   }
 

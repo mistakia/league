@@ -24,7 +24,7 @@ export const CONTEST_STYLE = Object.freeze(['MANAGED', 'BEST_BALL'])
 export const ADP_FORMAT_TUPLE_COLUMNS = Object.freeze([
   'scoring_class',
   'scoring_format_id',
-  'num_qb',
+  'num_quarterback',
   'num_teams',
   'duration',
   'draft_pool',
@@ -61,7 +61,7 @@ export const LEGACY_ADP_TYPES = Object.freeze([
 // count, so scoring_format_id and num_teams are null for every decoded row.
 const tuple = ({
   scoring_class,
-  num_qb,
+  num_quarterback,
   duration,
   draft_pool,
   contest_style
@@ -69,7 +69,7 @@ const tuple = ({
   Object.freeze({
     scoring_class,
     scoring_format_id: null,
-    num_qb,
+    num_quarterback,
     num_teams: null,
     duration,
     draft_pool,
@@ -85,133 +85,133 @@ const tuple = ({
 export const ADP_TYPE_DECODE_MAP = Object.freeze({
   STANDARD_REDRAFT: tuple({
     scoring_class: 'STANDARD',
-    num_qb: 1,
+    num_quarterback: 1,
     duration: 'REDRAFT',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   PPR_REDRAFT: tuple({
     scoring_class: 'PPR',
-    num_qb: 1,
+    num_quarterback: 1,
     duration: 'REDRAFT',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   HALF_PPR_REDRAFT: tuple({
     scoring_class: 'HALF_PPR',
-    num_qb: 1,
+    num_quarterback: 1,
     duration: 'REDRAFT',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   STANDARD_SUPERFLEX_REDRAFT: tuple({
     scoring_class: 'STANDARD',
-    num_qb: 2,
+    num_quarterback: 2,
     duration: 'REDRAFT',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   PPR_SUPERFLEX_REDRAFT: tuple({
     scoring_class: 'PPR',
-    num_qb: 2,
+    num_quarterback: 2,
     duration: 'REDRAFT',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   HALF_PPR_SUPERFLEX_REDRAFT: tuple({
     scoring_class: 'HALF_PPR',
-    num_qb: 2,
+    num_quarterback: 2,
     duration: 'REDRAFT',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   STANDARD_DYNASTY: tuple({
     scoring_class: 'STANDARD',
-    num_qb: 1,
+    num_quarterback: 1,
     duration: 'DYNASTY',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   PPR_DYNASTY: tuple({
     scoring_class: 'PPR',
-    num_qb: 1,
+    num_quarterback: 1,
     duration: 'DYNASTY',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   HALF_PPR_DYNASTY: tuple({
     scoring_class: 'HALF_PPR',
-    num_qb: 1,
+    num_quarterback: 1,
     duration: 'DYNASTY',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   STANDARD_SUPERFLEX_DYNASTY: tuple({
     scoring_class: 'STANDARD',
-    num_qb: 2,
+    num_quarterback: 2,
     duration: 'DYNASTY',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   PPR_SUPERFLEX_DYNASTY: tuple({
     scoring_class: 'PPR',
-    num_qb: 2,
+    num_quarterback: 2,
     duration: 'DYNASTY',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   HALF_PPR_SUPERFLEX_DYNASTY: tuple({
     scoring_class: 'HALF_PPR',
-    num_qb: 2,
+    num_quarterback: 2,
     duration: 'DYNASTY',
     draft_pool: 'ALL',
     contest_style: 'MANAGED'
   }),
   STANDARD_ROOKIE: tuple({
     scoring_class: 'STANDARD',
-    num_qb: 1,
+    num_quarterback: 1,
     duration: 'DYNASTY',
     draft_pool: 'ROOKIE',
     contest_style: 'MANAGED'
   }),
   PPR_ROOKIE: tuple({
     scoring_class: 'PPR',
-    num_qb: 1,
+    num_quarterback: 1,
     duration: 'DYNASTY',
     draft_pool: 'ROOKIE',
     contest_style: 'MANAGED'
   }),
   HALF_PPR_ROOKIE: tuple({
     scoring_class: 'HALF_PPR',
-    num_qb: 1,
+    num_quarterback: 1,
     duration: 'DYNASTY',
     draft_pool: 'ROOKIE',
     contest_style: 'MANAGED'
   }),
   STANDARD_SUPERFLEX_ROOKIE: tuple({
     scoring_class: 'STANDARD',
-    num_qb: 2,
+    num_quarterback: 2,
     duration: 'DYNASTY',
     draft_pool: 'ROOKIE',
     contest_style: 'MANAGED'
   }),
   PPR_SUPERFLEX_ROOKIE: tuple({
     scoring_class: 'PPR',
-    num_qb: 2,
+    num_quarterback: 2,
     duration: 'DYNASTY',
     draft_pool: 'ROOKIE',
     contest_style: 'MANAGED'
   }),
   HALF_PPR_SUPERFLEX_ROOKIE: tuple({
     scoring_class: 'HALF_PPR',
-    num_qb: 2,
+    num_quarterback: 2,
     duration: 'DYNASTY',
     draft_pool: 'ROOKIE',
     contest_style: 'MANAGED'
   }),
   BESTBALL: tuple({
     scoring_class: 'HALF_PPR',
-    num_qb: 1,
+    num_quarterback: 1,
     duration: 'REDRAFT',
     draft_pool: 'ALL',
     contest_style: 'BEST_BALL'

@@ -14,25 +14,25 @@ export default class DashboardTeamSummaryFranchiseTags extends React.Component {
     items.push(
       <tr key='qb'>
         <td>QB</td>
-        <td>${league.franchise_tag_salary_qb}</td>
+        <td>${league.franchise_tag_salary_quarterback}</td>
       </tr>
     )
     items.push(
       <tr key='rb'>
         <td>RB</td>
-        <td>${league.franchise_tag_salary_rb}</td>
+        <td>${league.franchise_tag_salary_running_back}</td>
       </tr>
     )
     items.push(
       <tr key='wr'>
         <td>WR</td>
-        <td>${league.franchise_tag_salary_wr}</td>
+        <td>${league.franchise_tag_salary_wide_receiver}</td>
       </tr>
     )
     items.push(
       <tr key='te'>
         <td>TE</td>
-        <td>${league.franchise_tag_salary_te}</td>
+        <td>${league.franchise_tag_salary_tight_end}</td>
       </tr>
     )
 

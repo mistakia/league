@@ -284,9 +284,13 @@ function is_unprefixed_boolean(col) {
 // (operator ruling 2026-08-15). "QB hit", "QB pressure", "QB scramble" etc. are
 // the published charting stat names -- the closed-list test is whether the
 // ABBREVIATION is the term in actual use, and `qb` is. Ratifying the token `qb`
-// in the vocabulary instead would also stop the gate flagging `starter_slots_qb`
-// and `max_roster_qb`, the league-format/settings class this plan most wants it
-// to hold. So the exemption is the shape -- a BOOLEAN named is_qb_<event> --
+// in the vocabulary instead would also have stopped the gate flagging the
+// league-format and settings class this plan most wanted it to hold --
+// `starter_slots_qb`, `max_roster_qb` and their siblings, since conformed to
+// `starter_slots_quarterback` and `max_roster_quarterback` by the 2026-08-16
+// position-code batch. The class is what the shape carve-out protects, not
+// those particular names. So the exemption is the shape -- a BOOLEAN named
+// is_qb_<event> --
 // which keeps the ruling narrow and lets a charting boolean added later conform
 // on arrival, the same reasoning as the `_is_`/`_has_` qualified-predicate
 // exemption above. A non-boolean is_qb_* column is NOT exempt: the is_ prefix
@@ -386,7 +390,7 @@ const accepted_non_timestamp_columns = new Set([
 // ("Off-Man", a defensive back aligned off the receiver). A uniform token rename
 // writes `player_get_offense` and `positional_factor_offense_man_coverage`,
 // which mis-documents the columns rather than conforming them. Same reasoning as
-// the `mid_zone` KEEP and the `pass_epa_per_db` sense split: the audit's token
+// the `mid_zone` KEEP and the `pass_epa_per_dropback` sense split: the audit's token
 // view cannot see a sense, so the sense is settled here.
 const accepted_column_tokens = new Map([
   ['nfl_plays.qb_pid', new Set(['qb'])],

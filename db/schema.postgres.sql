@@ -1643,7 +1643,7 @@ DECLARE
   rec_val numeric;
 BEGIN
   SELECT receptions INTO rec_val FROM league_scoring_formats WHERE id = NEW.scoring_format_id;
-  NEW.format_category := cmv_derive_format_category(NEW.starter_slots_qb, NEW.sqbrbwrte, rec_val);
+  NEW.format_category := cmv_derive_format_category(NEW.starter_slots_quarterback, NEW.sqbrbwrte, rec_val);
   RETURN NEW;
 END;
 $$;
@@ -2042,7 +2042,7 @@ CREATE TABLE public.adp_format (
     id text DEFAULT (gen_random_uuid())::text NOT NULL,
     scoring_class text,
     scoring_format_id text,
-    num_qb smallint DEFAULT 1 NOT NULL,
+    num_quarterback smallint DEFAULT 1 NOT NULL,
     num_teams smallint,
     duration text,
     draft_pool text DEFAULT 'ALL'::text NOT NULL,
@@ -2050,7 +2050,7 @@ CREATE TABLE public.adp_format (
     CONSTRAINT adp_format_contest_style_check CHECK ((contest_style = ANY (ARRAY['MANAGED'::text, 'BEST_BALL'::text]))),
     CONSTRAINT adp_format_draft_pool_check CHECK ((draft_pool = ANY (ARRAY['ALL'::text, 'ROOKIE'::text]))),
     CONSTRAINT adp_format_duration_check CHECK ((duration = ANY (ARRAY['REDRAFT'::text, 'DYNASTY'::text]))),
-    CONSTRAINT adp_format_num_qb_check CHECK ((num_qb >= 1)),
+    CONSTRAINT adp_format_num_qb_check CHECK ((num_quarterback >= 1)),
     CONSTRAINT adp_format_scoring_class_check CHECK ((scoring_class = ANY (ARRAY['STANDARD'::text, 'PPR'::text, 'HALF_PPR'::text])))
 );
 
@@ -3403,7 +3403,7 @@ COMMENT ON COLUMN public.external_leagues.last_message_at IS 'Weak liveness prox
 
 CREATE TABLE public.format_category_signal_mapping (
     format_category smallint NOT NULL,
-    ktc_qb_axis smallint NOT NULL,
+    ktc_quarterback_axis smallint NOT NULL,
     ranking_type text NOT NULL,
     props_scoring_formula_template text,
     adp_format_id text
@@ -4237,16 +4237,16 @@ CREATE TABLE public.league_format_player_seasonlogs (
 
 CREATE TABLE public.league_formats (
     num_teams smallint NOT NULL,
-    starter_slots_qb smallint NOT NULL,
-    starter_slots_rb smallint NOT NULL,
-    starter_slots_wr smallint NOT NULL,
-    starter_slots_te smallint NOT NULL,
-    starter_slots_rb_wr_flex smallint NOT NULL,
+    starter_slots_quarterback smallint NOT NULL,
+    starter_slots_running_back smallint NOT NULL,
+    starter_slots_wide_receiver smallint NOT NULL,
+    starter_slots_tight_end smallint NOT NULL,
+    starter_slots_running_back_wide_receiver_flex smallint NOT NULL,
     srbwrte smallint NOT NULL,
     sqbrbwrte smallint NOT NULL,
-    starter_slots_wr_te_flex smallint NOT NULL,
-    starter_slots_dst smallint NOT NULL,
-    starter_slots_k smallint NOT NULL,
+    starter_slots_wide_receiver_tight_end_flex smallint NOT NULL,
+    starter_slots_defense_special_teams smallint NOT NULL,
+    starter_slots_kicker smallint NOT NULL,
     bench_slot_count smallint NOT NULL,
     practice_squad_slot_count smallint NOT NULL,
     reserve_short_term_limit smallint NOT NULL,
@@ -4782,12 +4782,12 @@ CREATE TABLE public.league_team_seasonlogs (
     starter_slot_15_points numeric(6,2) DEFAULT 0.00,
     starter_slot_16_points numeric(6,2),
     starter_slot_17_points numeric(6,2),
-    starter_points_qb numeric(6,2) DEFAULT 0.00,
-    starter_points_rb numeric(6,2) DEFAULT 0.00,
-    starter_points_wr numeric(6,2) DEFAULT 0.00,
-    starter_points_te numeric(6,2) DEFAULT 0.00,
-    starter_points_k numeric(6,2) DEFAULT 0.00,
-    starter_points_dst numeric(6,2) DEFAULT 0.00,
+    starter_points_quarterback numeric(6,2) DEFAULT 0.00,
+    starter_points_running_back numeric(6,2) DEFAULT 0.00,
+    starter_points_wide_receiver numeric(6,2) DEFAULT 0.00,
+    starter_points_tight_end numeric(6,2) DEFAULT 0.00,
+    starter_points_kicker numeric(6,2) DEFAULT 0.00,
+    starter_points_defense_special_teams numeric(6,2) DEFAULT 0.00,
     division_finish smallint,
     regular_season_finish smallint,
     post_season_finish smallint,
@@ -5351,7 +5351,7 @@ CREATE TABLE public.nfl_plays (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -5417,7 +5417,7 @@ CREATE TABLE public.nfl_plays (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -5502,7 +5502,7 @@ CREATE TABLE public.nfl_plays (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -5534,7 +5534,7 @@ CREATE TABLE public.nfl_plays (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -5542,7 +5542,7 @@ CREATE TABLE public.nfl_plays (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -5629,7 +5629,7 @@ CREATE TABLE public.nfl_plays (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -5642,17 +5642,17 @@ CREATE TABLE public.nfl_plays (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint
 )
 PARTITION BY RANGE (season_year);
 
@@ -5980,10 +5980,10 @@ COMMENT ON COLUMN public.nfl_plays.blitzers IS 'number of LBs and DBs blitzing';
 
 
 --
--- Name: COLUMN nfl_plays.db_blitzers; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.defensive_back_blitzers; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.db_blitzers IS 'Number of DBs blitzing';
+COMMENT ON COLUMN public.nfl_plays.defensive_back_blitzers IS 'Number of DBs blitzing';
 
 
 --
@@ -6357,7 +6357,7 @@ CREATE TABLE public.nfl_plays_current_week (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -6424,7 +6424,7 @@ CREATE TABLE public.nfl_plays_current_week (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -6511,7 +6511,7 @@ CREATE TABLE public.nfl_plays_current_week (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -6546,7 +6546,7 @@ CREATE TABLE public.nfl_plays_current_week (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -6558,25 +6558,25 @@ CREATE TABLE public.nfl_plays_current_week (
     is_own_fumble_recovery boolean,
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_current_week_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_current_week_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_current_week_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_current_week_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_current_week_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_current_week_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_current_week_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_current_week_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_current_week_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_current_week_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -6649,7 +6649,7 @@ CREATE TABLE public.nfl_plays_player (
     is_ball_carrier boolean,
     is_defense_play boolean,
     is_interceptor boolean,
-    is_lined_up_as_qb boolean,
+    is_lined_up_as_quarterback boolean,
     is_no_play boolean,
     is_offense_play boolean,
     is_playtime_play boolean,
@@ -6677,13 +6677,13 @@ CREATE TABLE public.nfl_plays_player (
     is_blitzing boolean,
     has_caused_pressure boolean,
     has_pressure_caused_turnover boolean,
-    separation_to_qb numeric(10,4),
+    separation_to_quarterback numeric(10,4),
     is_running_route boolean,
     defender_location_type character varying(20),
     left_or_right_of_center character varying(10),
     ngs_position character varying(20),
     ngs_position_group character varying(10),
-    time_to_qb_hurry numeric(10,3),
+    time_to_quarterback_hurry numeric(10,3),
     player_get_off numeric(10,3),
     CONSTRAINT nfl_plays_player_player_position_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[])))),
     CONSTRAINT nfl_plays_player_position_group_vocabulary CHECK (((position_group IS NULL) OR ((position_group)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
@@ -6903,7 +6903,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -6969,7 +6969,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -7054,7 +7054,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -7086,7 +7086,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -7094,7 +7094,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -7181,7 +7181,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -7194,25 +7194,25 @@ CREATE TABLE public.nfl_plays_year_2000 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2000_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2000_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2000_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2000_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2000_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2000_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2000_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2000_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2000_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2000_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -7336,7 +7336,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -7402,7 +7402,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -7487,7 +7487,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -7519,7 +7519,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -7527,7 +7527,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -7614,7 +7614,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -7627,25 +7627,25 @@ CREATE TABLE public.nfl_plays_year_2001 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2001_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2001_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2001_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2001_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2001_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2001_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2001_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2001_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2001_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2001_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -7769,7 +7769,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -7835,7 +7835,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -7920,7 +7920,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -7952,7 +7952,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -7960,7 +7960,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -8047,7 +8047,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -8060,25 +8060,25 @@ CREATE TABLE public.nfl_plays_year_2002 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2002_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2002_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2002_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2002_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2002_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2002_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2002_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2002_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2002_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2002_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -8202,7 +8202,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -8268,7 +8268,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -8353,7 +8353,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -8385,7 +8385,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -8393,7 +8393,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -8480,7 +8480,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -8493,25 +8493,25 @@ CREATE TABLE public.nfl_plays_year_2003 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2003_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2003_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2003_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2003_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2003_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2003_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2003_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2003_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2003_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2003_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -8635,7 +8635,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -8701,7 +8701,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -8786,7 +8786,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -8818,7 +8818,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -8826,7 +8826,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -8913,7 +8913,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -8926,25 +8926,25 @@ CREATE TABLE public.nfl_plays_year_2004 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2004_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2004_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2004_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2004_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2004_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2004_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2004_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2004_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2004_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2004_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -9068,7 +9068,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -9134,7 +9134,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -9219,7 +9219,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -9251,7 +9251,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -9259,7 +9259,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -9346,7 +9346,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -9359,25 +9359,25 @@ CREATE TABLE public.nfl_plays_year_2005 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2005_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2005_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2005_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2005_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2005_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2005_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2005_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2005_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2005_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2005_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -9501,7 +9501,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -9567,7 +9567,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -9652,7 +9652,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -9684,7 +9684,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -9692,7 +9692,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -9779,7 +9779,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -9792,25 +9792,25 @@ CREATE TABLE public.nfl_plays_year_2006 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2006_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2006_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2006_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2006_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2006_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2006_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2006_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2006_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2006_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2006_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -9934,7 +9934,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -10000,7 +10000,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -10085,7 +10085,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -10117,7 +10117,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -10125,7 +10125,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -10212,7 +10212,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -10225,25 +10225,25 @@ CREATE TABLE public.nfl_plays_year_2007 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2007_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2007_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2007_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2007_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2007_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2007_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2007_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2007_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2007_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2007_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -10367,7 +10367,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -10433,7 +10433,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -10518,7 +10518,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -10550,7 +10550,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -10558,7 +10558,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -10645,7 +10645,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -10658,25 +10658,25 @@ CREATE TABLE public.nfl_plays_year_2008 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2008_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2008_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2008_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2008_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2008_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2008_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2008_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2008_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2008_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2008_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -10800,7 +10800,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -10866,7 +10866,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -10951,7 +10951,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -10983,7 +10983,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -10991,7 +10991,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -11078,7 +11078,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -11091,25 +11091,25 @@ CREATE TABLE public.nfl_plays_year_2009 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2009_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2009_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2009_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2009_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2009_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2009_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2009_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2009_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2009_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2009_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -11233,7 +11233,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -11299,7 +11299,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -11384,7 +11384,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -11416,7 +11416,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -11424,7 +11424,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -11511,7 +11511,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -11524,25 +11524,25 @@ CREATE TABLE public.nfl_plays_year_2010 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2010_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2010_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2010_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2010_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2010_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2010_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2010_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2010_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2010_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2010_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -11666,7 +11666,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -11732,7 +11732,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -11817,7 +11817,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -11849,7 +11849,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -11857,7 +11857,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -11944,7 +11944,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -11957,25 +11957,25 @@ CREATE TABLE public.nfl_plays_year_2011 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2011_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2011_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2011_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2011_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2011_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2011_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2011_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2011_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2011_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2011_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -12099,7 +12099,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -12165,7 +12165,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -12250,7 +12250,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -12282,7 +12282,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -12290,7 +12290,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -12377,7 +12377,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -12390,25 +12390,25 @@ CREATE TABLE public.nfl_plays_year_2012 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2012_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2012_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2012_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2012_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2012_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2012_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2012_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2012_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2012_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2012_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -12532,7 +12532,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -12598,7 +12598,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -12683,7 +12683,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -12715,7 +12715,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -12723,7 +12723,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -12810,7 +12810,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -12823,25 +12823,25 @@ CREATE TABLE public.nfl_plays_year_2013 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2013_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2013_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2013_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2013_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2013_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2013_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2013_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2013_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2013_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2013_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -12965,7 +12965,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -13031,7 +13031,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -13116,7 +13116,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -13148,7 +13148,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -13156,7 +13156,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -13243,7 +13243,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -13256,25 +13256,25 @@ CREATE TABLE public.nfl_plays_year_2014 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2014_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2014_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2014_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2014_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2014_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2014_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2014_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2014_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2014_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2014_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -13398,7 +13398,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -13464,7 +13464,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -13549,7 +13549,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -13581,7 +13581,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -13589,7 +13589,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -13676,7 +13676,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -13689,25 +13689,25 @@ CREATE TABLE public.nfl_plays_year_2015 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2015_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2015_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2015_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2015_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2015_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2015_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2015_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2015_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2015_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2015_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -13831,7 +13831,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -13897,7 +13897,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -13982,7 +13982,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -14014,7 +14014,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -14022,7 +14022,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -14109,7 +14109,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -14122,25 +14122,25 @@ CREATE TABLE public.nfl_plays_year_2016 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2016_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2016_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2016_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2016_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2016_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2016_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2016_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2016_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2016_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2016_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -14264,7 +14264,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -14330,7 +14330,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -14415,7 +14415,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -14447,7 +14447,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -14455,7 +14455,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -14542,7 +14542,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -14555,25 +14555,25 @@ CREATE TABLE public.nfl_plays_year_2017 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2017_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2017_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2017_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2017_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2017_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2017_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2017_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2017_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2017_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2017_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -14697,7 +14697,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -14763,7 +14763,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -14848,7 +14848,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -14880,7 +14880,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -14888,7 +14888,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -14975,7 +14975,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -14988,25 +14988,25 @@ CREATE TABLE public.nfl_plays_year_2018 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2018_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2018_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2018_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2018_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2018_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2018_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2018_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2018_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2018_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2018_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -15130,7 +15130,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -15196,7 +15196,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -15281,7 +15281,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -15313,7 +15313,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -15321,7 +15321,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -15408,7 +15408,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -15421,25 +15421,25 @@ CREATE TABLE public.nfl_plays_year_2019 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2019_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2019_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2019_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2019_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2019_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2019_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2019_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2019_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2019_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2019_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -15563,7 +15563,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -15629,7 +15629,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -15714,7 +15714,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -15746,7 +15746,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -15754,7 +15754,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -15841,7 +15841,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -15854,25 +15854,25 @@ CREATE TABLE public.nfl_plays_year_2020 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2020_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2020_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2020_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2020_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2020_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2020_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2020_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2020_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2020_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2020_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -15996,7 +15996,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -16062,7 +16062,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -16147,7 +16147,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -16179,7 +16179,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -16187,7 +16187,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -16274,7 +16274,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -16287,25 +16287,25 @@ CREATE TABLE public.nfl_plays_year_2021 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2021_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2021_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2021_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2021_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2021_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2021_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2021_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2021_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2021_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2021_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -16429,7 +16429,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -16495,7 +16495,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -16580,7 +16580,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -16612,7 +16612,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -16620,7 +16620,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -16707,7 +16707,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -16720,25 +16720,25 @@ CREATE TABLE public.nfl_plays_year_2022 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2022_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2022_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2022_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2022_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2022_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2022_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2022_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2022_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2022_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2022_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -16862,7 +16862,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -16928,7 +16928,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -17013,7 +17013,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -17045,7 +17045,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -17053,7 +17053,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -17140,7 +17140,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -17153,25 +17153,25 @@ CREATE TABLE public.nfl_plays_year_2023 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2023_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2023_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2023_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2023_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2023_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2023_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2023_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2023_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2023_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2023_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -17295,7 +17295,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -17361,7 +17361,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -17446,7 +17446,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -17478,7 +17478,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -17486,7 +17486,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -17573,7 +17573,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -17586,25 +17586,25 @@ CREATE TABLE public.nfl_plays_year_2024 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2024_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2024_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2024_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2024_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2024_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2024_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2024_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2024_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2024_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2024_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -17728,7 +17728,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -17794,7 +17794,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -17879,7 +17879,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -17911,7 +17911,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -17919,7 +17919,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -18006,7 +18006,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -18019,25 +18019,25 @@ CREATE TABLE public.nfl_plays_year_2025 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2025_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2025_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2025_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2025_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2025_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2025_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2025_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2025_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2025_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2025_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -18161,7 +18161,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     defensive_backs_in_box smallint,
     pass_rushers smallint,
     blitzers smallint,
-    db_blitzers smallint,
+    defensive_back_blitzers smallint,
     out_of_pocket_details character varying(2),
     coverage_on_target smallint,
     cov_type_charted character varying(3),
@@ -18227,7 +18227,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     total_away_rush_epa numeric(16,12),
     total_home_pass_epa numeric(16,12),
     total_away_pass_epa numeric(16,12),
-    qb_epa numeric(16,12),
+    quarterback_epa numeric(16,12),
     air_epa numeric(16,12),
     yac_epa numeric(16,12),
     comp_air_epa numeric(16,12),
@@ -18312,7 +18312,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     is_qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
-    qb_position public.qb_position,
+    quarterback_position public.qb_position,
     number_offense_backfield numeric,
     is_run_play_option boolean,
     read_thrown public.read_thrown_type,
@@ -18344,7 +18344,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     away_win_prob_pre numeric(16,12),
     away_win_prob_post numeric(16,12),
     receiver_alignment character varying(10),
-    avg_pass_rusher_distance_to_qb numeric(16,12),
+    avg_pass_rusher_distance_to_quarterback numeric(16,12),
     num_high_safeties smallint,
     safety_shell character varying(20),
     num_shifted_players smallint,
@@ -18352,7 +18352,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_tracking character varying(50),
+    quarterback_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -18439,7 +18439,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     mofc_played character varying(20),
     mofc_look character varying(20),
     pass_width numeric(8,4),
-    qb_scramble_side character varying(20),
+    quarterback_scramble_side character varying(20),
     is_split_run boolean,
     is_reverse_run boolean,
     is_pitch_run boolean,
@@ -18452,25 +18452,25 @@ CREATE TABLE public.nfl_plays_year_2026 (
     charting_play_type character varying(50),
     charting_penalty_outcome character varying(100),
     qb_pid character varying(25),
-    offense_personnel_qb_count smallint,
-    offense_personnel_rb_count smallint,
-    offense_personnel_te_count smallint,
-    offense_personnel_wr_count smallint,
-    offense_personnel_ol_count smallint,
-    defense_personnel_dl_count smallint,
-    defense_personnel_lb_count smallint,
-    defense_personnel_db_count smallint,
-    offense_personnel_rb_count_per_play smallint,
-    offense_personnel_te_count_per_play smallint,
-    offense_personnel_wr_count_per_play smallint,
-    CONSTRAINT nfl_plays_year_2026_def_personnel_db_count_range_chk CHECK (((defense_personnel_db_count IS NULL) OR ((defense_personnel_db_count >= 0) AND (defense_personnel_db_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2026_def_personnel_dl_count_range_chk CHECK (((defense_personnel_dl_count IS NULL) OR ((defense_personnel_dl_count >= 0) AND (defense_personnel_dl_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2026_def_personnel_lb_count_range_chk CHECK (((defense_personnel_lb_count IS NULL) OR ((defense_personnel_lb_count >= 0) AND (defense_personnel_lb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2026_off_personnel_ol_count_range_chk CHECK (((offense_personnel_ol_count IS NULL) OR ((offense_personnel_ol_count >= 0) AND (offense_personnel_ol_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2026_off_personnel_qb_count_range_chk CHECK (((offense_personnel_qb_count IS NULL) OR ((offense_personnel_qb_count >= 0) AND (offense_personnel_qb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2026_off_personnel_rb_count_range_chk CHECK (((offense_personnel_rb_count IS NULL) OR ((offense_personnel_rb_count >= 0) AND (offense_personnel_rb_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2026_off_personnel_te_count_range_chk CHECK (((offense_personnel_te_count IS NULL) OR ((offense_personnel_te_count >= 0) AND (offense_personnel_te_count <= 9)))),
-    CONSTRAINT nfl_plays_year_2026_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wr_count IS NULL) OR ((offense_personnel_wr_count >= 0) AND (offense_personnel_wr_count <= 9))))
+    offense_personnel_quarterback_count smallint,
+    offense_personnel_running_back_count smallint,
+    offense_personnel_tight_end_count smallint,
+    offense_personnel_wide_receiver_count smallint,
+    offense_personnel_offensive_line_count smallint,
+    defense_personnel_defensive_line_count smallint,
+    defense_personnel_linebacker_count smallint,
+    defense_personnel_defensive_back_count smallint,
+    offense_personnel_running_back_count_per_play smallint,
+    offense_personnel_tight_end_count_per_play smallint,
+    offense_personnel_wide_receiver_count_per_play smallint,
+    CONSTRAINT nfl_plays_year_2026_def_personnel_db_count_range_chk CHECK (((defense_personnel_defensive_back_count IS NULL) OR ((defense_personnel_defensive_back_count >= 0) AND (defense_personnel_defensive_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_def_personnel_dl_count_range_chk CHECK (((defense_personnel_defensive_line_count IS NULL) OR ((defense_personnel_defensive_line_count >= 0) AND (defense_personnel_defensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_def_personnel_lb_count_range_chk CHECK (((defense_personnel_linebacker_count IS NULL) OR ((defense_personnel_linebacker_count >= 0) AND (defense_personnel_linebacker_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_off_personnel_ol_count_range_chk CHECK (((offense_personnel_offensive_line_count IS NULL) OR ((offense_personnel_offensive_line_count >= 0) AND (offense_personnel_offensive_line_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_off_personnel_qb_count_range_chk CHECK (((offense_personnel_quarterback_count IS NULL) OR ((offense_personnel_quarterback_count >= 0) AND (offense_personnel_quarterback_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_off_personnel_rb_count_range_chk CHECK (((offense_personnel_running_back_count IS NULL) OR ((offense_personnel_running_back_count >= 0) AND (offense_personnel_running_back_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_off_personnel_te_count_range_chk CHECK (((offense_personnel_tight_end_count IS NULL) OR ((offense_personnel_tight_end_count >= 0) AND (offense_personnel_tight_end_count <= 9)))),
+    CONSTRAINT nfl_plays_year_2026_off_personnel_wr_count_range_chk CHECK (((offense_personnel_wide_receiver_count IS NULL) OR ((offense_personnel_wide_receiver_count >= 0) AND (offense_personnel_wide_receiver_count <= 9))))
 );
 
 
@@ -18971,7 +18971,7 @@ CREATE TABLE public.nfl_team_seasonlogs (
     completion_percentage_over_expected numeric(5,4) DEFAULT NULL::numeric,
     dropbacks numeric(5,2) DEFAULT NULL::numeric,
     pass_epa numeric(5,2) DEFAULT NULL::numeric,
-    pass_epa_per_db numeric(5,2) DEFAULT NULL::numeric,
+    pass_epa_per_dropback numeric(5,2) DEFAULT NULL::numeric,
     avg_time_to_throw numeric(5,2) DEFAULT NULL::numeric,
     avg_time_to_pressure numeric(5,2) DEFAULT NULL::numeric,
     avg_time_to_sack numeric(5,2) DEFAULT NULL::numeric,
@@ -20442,7 +20442,7 @@ CREATE TABLE public.player_college_careerlogs (
     positive_percentage_hit_at_line numeric,
     positive_percentage_inside numeric,
     positive_percentage_outside numeric,
-    qb_rating numeric,
+    quarterback_rating numeric,
     rec_epa numeric,
     rec_td integer,
     rush_attempts integer,
@@ -20660,7 +20660,7 @@ CREATE TABLE public.player_college_seasonlogs (
     positive_percentage_hit_at_line numeric,
     positive_percentage_inside numeric,
     positive_percentage_outside numeric,
-    qb_rating numeric,
+    quarterback_rating numeric,
     rec_epa numeric,
     rec_td integer,
     rush_attempts integer,
@@ -24400,7 +24400,7 @@ CREATE TABLE public.player_passing_gamelogs (
     passing_sacks smallint,
     dropbacks smallint,
     pass_epa numeric(5,2),
-    pass_epa_per_db numeric(5,2),
+    pass_epa_per_dropback numeric(5,2),
     avg_time_to_throw numeric(4,2),
     avg_time_to_pressure numeric(4,2),
     avg_time_to_sack numeric(4,2),
@@ -26807,10 +26807,10 @@ CREATE TABLE public.seasons (
     lid integer NOT NULL,
     season_year smallint NOT NULL,
     season_started_at timestamp with time zone,
-    franchise_tag_salary_qb integer,
-    franchise_tag_salary_rb integer,
-    franchise_tag_salary_wr integer,
-    franchise_tag_salary_te integer,
+    franchise_tag_salary_quarterback integer,
+    franchise_tag_salary_running_back integer,
+    franchise_tag_salary_wide_receiver integer,
+    franchise_tag_salary_tight_end integer,
     restricted_free_agency_period_start timestamp with time zone,
     restricted_free_agency_period_end timestamp with time zone,
     ext_date timestamp with time zone,
@@ -26822,12 +26822,12 @@ CREATE TABLE public.seasons (
     draft_type character varying(10),
     draft_hour_min smallint,
     draft_hour_max smallint,
-    max_roster_qb smallint NOT NULL,
-    max_roster_rb smallint NOT NULL,
-    max_roster_wr smallint NOT NULL,
-    max_roster_te smallint NOT NULL,
-    max_roster_dst smallint NOT NULL,
-    max_roster_k smallint NOT NULL,
+    max_roster_quarterback smallint NOT NULL,
+    max_roster_running_back smallint NOT NULL,
+    max_roster_wide_receiver smallint NOT NULL,
+    max_roster_tight_end smallint NOT NULL,
+    max_roster_defense_special_teams smallint NOT NULL,
+    max_roster_kicker smallint NOT NULL,
     starting_faab_budget integer NOT NULL,
     franchise_tag_limit smallint DEFAULT '1'::smallint NOT NULL,
     rookie_tag_limit smallint DEFAULT '1'::smallint NOT NULL,
@@ -29166,7 +29166,7 @@ ALTER TABLE ONLY public.league_divisions
 --
 
 ALTER TABLE ONLY public.league_formats
-    ADD CONSTRAINT league_formats_config_unique UNIQUE (num_teams, starter_slots_qb, starter_slots_rb, starter_slots_wr, starter_slots_te, starter_slots_rb_wr_flex, srbwrte, sqbrbwrte, starter_slots_wr_te_flex, starter_slots_dst, starter_slots_k, bench_slot_count, practice_squad_slot_count, reserve_short_term_limit, cap, min_bid, scoring_format_id, pricing_model);
+    ADD CONSTRAINT league_formats_config_unique UNIQUE (num_teams, starter_slots_quarterback, starter_slots_running_back, starter_slots_wide_receiver, starter_slots_tight_end, starter_slots_running_back_wide_receiver_flex, srbwrte, sqbrbwrte, starter_slots_wide_receiver_tight_end_flex, starter_slots_defense_special_teams, starter_slots_kicker, bench_slot_count, practice_squad_slot_count, reserve_short_term_limit, cap, min_bid, scoring_format_id, pricing_model);
 
 
 --
@@ -30180,7 +30180,7 @@ CREATE UNIQUE INDEX admission_votes_one_open_vote_per_league_season ON public.ad
 -- Name: adp_format_axis_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX adp_format_axis_unique ON public.adp_format USING btree (scoring_class, scoring_format_id, num_qb, num_teams, duration, draft_pool, contest_style) NULLS NOT DISTINCT;
+CREATE UNIQUE INDEX adp_format_axis_unique ON public.adp_format USING btree (scoring_class, scoring_format_id, num_quarterback, num_teams, duration, draft_pool, contest_style) NULLS NOT DISTINCT;
 
 
 --
@@ -32525,21 +32525,21 @@ CREATE INDEX nfl_games_sportradar_game_id_idx ON public.nfl_games USING btree (s
 -- Name: nfl_plays_current_week_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_current_week_def_personnel_counts_idx ON public.nfl_plays_current_week USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_current_week_def_personnel_counts_idx ON public.nfl_plays_current_week USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_current_week_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_current_week_def_personnel_db_count_idx ON public.nfl_plays_current_week USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_current_week_def_personnel_db_count_idx ON public.nfl_plays_current_week USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_current_week_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_current_week_def_personnel_dl_count_idx ON public.nfl_plays_current_week USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_current_week_def_personnel_dl_count_idx ON public.nfl_plays_current_week USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -32560,7 +32560,7 @@ CREATE UNIQUE INDEX nfl_plays_current_week_esbid_play_id ON public.nfl_plays_cur
 -- Name: nfl_plays_current_week_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_current_week_off_personnel_counts_idx ON public.nfl_plays_current_week USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_current_week_off_personnel_counts_idx ON public.nfl_plays_current_week USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -32574,14 +32574,14 @@ CREATE INDEX nfl_plays_current_week_play_id ON public.nfl_plays_current_week USI
 -- Name: nfl_plays_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_def_personnel_db_count_idx ON ONLY public.nfl_plays USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_def_personnel_db_count_idx ON ONLY public.nfl_plays USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_def_personnel_dl_count_idx ON ONLY public.nfl_plays USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_def_personnel_dl_count_idx ON ONLY public.nfl_plays USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -32644,21 +32644,21 @@ CREATE INDEX nfl_plays_year_2000_catchable_ball_idx ON public.nfl_plays_year_200
 -- Name: nfl_plays_year_2000_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_def_personnel_counts_idx ON public.nfl_plays_year_2000 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2000_def_personnel_counts_idx ON public.nfl_plays_year_2000 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2000_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_def_personnel_db_count_idx ON public.nfl_plays_year_2000 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2000_def_personnel_db_count_idx ON public.nfl_plays_year_2000 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2000_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_def_personnel_dl_count_idx ON public.nfl_plays_year_2000 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2000_def_personnel_dl_count_idx ON public.nfl_plays_year_2000 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -32707,7 +32707,7 @@ CREATE INDEX nfl_plays_year_2000_off_idx ON public.nfl_plays_year_2000 USING btr
 -- Name: nfl_plays_year_2000_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_off_personnel_counts_idx ON public.nfl_plays_year_2000 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2000_off_personnel_counts_idx ON public.nfl_plays_year_2000 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -33029,21 +33029,21 @@ CREATE INDEX nfl_plays_year_2001_catchable_ball_idx ON public.nfl_plays_year_200
 -- Name: nfl_plays_year_2001_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_def_personnel_counts_idx ON public.nfl_plays_year_2001 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2001_def_personnel_counts_idx ON public.nfl_plays_year_2001 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2001_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_def_personnel_db_count_idx ON public.nfl_plays_year_2001 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2001_def_personnel_db_count_idx ON public.nfl_plays_year_2001 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2001_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_def_personnel_dl_count_idx ON public.nfl_plays_year_2001 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2001_def_personnel_dl_count_idx ON public.nfl_plays_year_2001 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -33092,7 +33092,7 @@ CREATE INDEX nfl_plays_year_2001_off_idx ON public.nfl_plays_year_2001 USING btr
 -- Name: nfl_plays_year_2001_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_off_personnel_counts_idx ON public.nfl_plays_year_2001 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2001_off_personnel_counts_idx ON public.nfl_plays_year_2001 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -33414,21 +33414,21 @@ CREATE INDEX nfl_plays_year_2002_catchable_ball_idx ON public.nfl_plays_year_200
 -- Name: nfl_plays_year_2002_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_def_personnel_counts_idx ON public.nfl_plays_year_2002 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2002_def_personnel_counts_idx ON public.nfl_plays_year_2002 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2002_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_def_personnel_db_count_idx ON public.nfl_plays_year_2002 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2002_def_personnel_db_count_idx ON public.nfl_plays_year_2002 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2002_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_def_personnel_dl_count_idx ON public.nfl_plays_year_2002 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2002_def_personnel_dl_count_idx ON public.nfl_plays_year_2002 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -33477,7 +33477,7 @@ CREATE INDEX nfl_plays_year_2002_off_idx ON public.nfl_plays_year_2002 USING btr
 -- Name: nfl_plays_year_2002_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_off_personnel_counts_idx ON public.nfl_plays_year_2002 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2002_off_personnel_counts_idx ON public.nfl_plays_year_2002 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -33799,21 +33799,21 @@ CREATE INDEX nfl_plays_year_2003_catchable_ball_idx ON public.nfl_plays_year_200
 -- Name: nfl_plays_year_2003_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_def_personnel_counts_idx ON public.nfl_plays_year_2003 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2003_def_personnel_counts_idx ON public.nfl_plays_year_2003 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2003_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_def_personnel_db_count_idx ON public.nfl_plays_year_2003 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2003_def_personnel_db_count_idx ON public.nfl_plays_year_2003 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2003_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_def_personnel_dl_count_idx ON public.nfl_plays_year_2003 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2003_def_personnel_dl_count_idx ON public.nfl_plays_year_2003 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -33862,7 +33862,7 @@ CREATE INDEX nfl_plays_year_2003_off_idx ON public.nfl_plays_year_2003 USING btr
 -- Name: nfl_plays_year_2003_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_off_personnel_counts_idx ON public.nfl_plays_year_2003 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2003_off_personnel_counts_idx ON public.nfl_plays_year_2003 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -34184,21 +34184,21 @@ CREATE INDEX nfl_plays_year_2004_catchable_ball_idx ON public.nfl_plays_year_200
 -- Name: nfl_plays_year_2004_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_def_personnel_counts_idx ON public.nfl_plays_year_2004 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2004_def_personnel_counts_idx ON public.nfl_plays_year_2004 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2004_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_def_personnel_db_count_idx ON public.nfl_plays_year_2004 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2004_def_personnel_db_count_idx ON public.nfl_plays_year_2004 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2004_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_def_personnel_dl_count_idx ON public.nfl_plays_year_2004 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2004_def_personnel_dl_count_idx ON public.nfl_plays_year_2004 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -34247,7 +34247,7 @@ CREATE INDEX nfl_plays_year_2004_off_idx ON public.nfl_plays_year_2004 USING btr
 -- Name: nfl_plays_year_2004_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_off_personnel_counts_idx ON public.nfl_plays_year_2004 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2004_off_personnel_counts_idx ON public.nfl_plays_year_2004 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -34569,21 +34569,21 @@ CREATE INDEX nfl_plays_year_2005_catchable_ball_idx ON public.nfl_plays_year_200
 -- Name: nfl_plays_year_2005_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_def_personnel_counts_idx ON public.nfl_plays_year_2005 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2005_def_personnel_counts_idx ON public.nfl_plays_year_2005 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2005_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_def_personnel_db_count_idx ON public.nfl_plays_year_2005 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2005_def_personnel_db_count_idx ON public.nfl_plays_year_2005 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2005_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_def_personnel_dl_count_idx ON public.nfl_plays_year_2005 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2005_def_personnel_dl_count_idx ON public.nfl_plays_year_2005 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -34632,7 +34632,7 @@ CREATE INDEX nfl_plays_year_2005_off_idx ON public.nfl_plays_year_2005 USING btr
 -- Name: nfl_plays_year_2005_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_off_personnel_counts_idx ON public.nfl_plays_year_2005 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2005_off_personnel_counts_idx ON public.nfl_plays_year_2005 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -34954,21 +34954,21 @@ CREATE INDEX nfl_plays_year_2006_catchable_ball_idx ON public.nfl_plays_year_200
 -- Name: nfl_plays_year_2006_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_def_personnel_counts_idx ON public.nfl_plays_year_2006 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2006_def_personnel_counts_idx ON public.nfl_plays_year_2006 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2006_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_def_personnel_db_count_idx ON public.nfl_plays_year_2006 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2006_def_personnel_db_count_idx ON public.nfl_plays_year_2006 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2006_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_def_personnel_dl_count_idx ON public.nfl_plays_year_2006 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2006_def_personnel_dl_count_idx ON public.nfl_plays_year_2006 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -35017,7 +35017,7 @@ CREATE INDEX nfl_plays_year_2006_off_idx ON public.nfl_plays_year_2006 USING btr
 -- Name: nfl_plays_year_2006_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_off_personnel_counts_idx ON public.nfl_plays_year_2006 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2006_off_personnel_counts_idx ON public.nfl_plays_year_2006 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -35339,21 +35339,21 @@ CREATE INDEX nfl_plays_year_2007_catchable_ball_idx ON public.nfl_plays_year_200
 -- Name: nfl_plays_year_2007_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_def_personnel_counts_idx ON public.nfl_plays_year_2007 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2007_def_personnel_counts_idx ON public.nfl_plays_year_2007 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2007_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_def_personnel_db_count_idx ON public.nfl_plays_year_2007 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2007_def_personnel_db_count_idx ON public.nfl_plays_year_2007 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2007_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_def_personnel_dl_count_idx ON public.nfl_plays_year_2007 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2007_def_personnel_dl_count_idx ON public.nfl_plays_year_2007 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -35402,7 +35402,7 @@ CREATE INDEX nfl_plays_year_2007_off_idx ON public.nfl_plays_year_2007 USING btr
 -- Name: nfl_plays_year_2007_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_off_personnel_counts_idx ON public.nfl_plays_year_2007 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2007_off_personnel_counts_idx ON public.nfl_plays_year_2007 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -35724,21 +35724,21 @@ CREATE INDEX nfl_plays_year_2008_catchable_ball_idx ON public.nfl_plays_year_200
 -- Name: nfl_plays_year_2008_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_def_personnel_counts_idx ON public.nfl_plays_year_2008 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2008_def_personnel_counts_idx ON public.nfl_plays_year_2008 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2008_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_def_personnel_db_count_idx ON public.nfl_plays_year_2008 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2008_def_personnel_db_count_idx ON public.nfl_plays_year_2008 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2008_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_def_personnel_dl_count_idx ON public.nfl_plays_year_2008 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2008_def_personnel_dl_count_idx ON public.nfl_plays_year_2008 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -35787,7 +35787,7 @@ CREATE INDEX nfl_plays_year_2008_off_idx ON public.nfl_plays_year_2008 USING btr
 -- Name: nfl_plays_year_2008_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_off_personnel_counts_idx ON public.nfl_plays_year_2008 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2008_off_personnel_counts_idx ON public.nfl_plays_year_2008 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -36109,21 +36109,21 @@ CREATE INDEX nfl_plays_year_2009_catchable_ball_idx ON public.nfl_plays_year_200
 -- Name: nfl_plays_year_2009_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_def_personnel_counts_idx ON public.nfl_plays_year_2009 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2009_def_personnel_counts_idx ON public.nfl_plays_year_2009 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2009_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_def_personnel_db_count_idx ON public.nfl_plays_year_2009 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2009_def_personnel_db_count_idx ON public.nfl_plays_year_2009 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2009_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_def_personnel_dl_count_idx ON public.nfl_plays_year_2009 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2009_def_personnel_dl_count_idx ON public.nfl_plays_year_2009 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -36172,7 +36172,7 @@ CREATE INDEX nfl_plays_year_2009_off_idx ON public.nfl_plays_year_2009 USING btr
 -- Name: nfl_plays_year_2009_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_off_personnel_counts_idx ON public.nfl_plays_year_2009 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2009_off_personnel_counts_idx ON public.nfl_plays_year_2009 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -36494,21 +36494,21 @@ CREATE INDEX nfl_plays_year_2010_catchable_ball_idx ON public.nfl_plays_year_201
 -- Name: nfl_plays_year_2010_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_def_personnel_counts_idx ON public.nfl_plays_year_2010 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2010_def_personnel_counts_idx ON public.nfl_plays_year_2010 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2010_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_def_personnel_db_count_idx ON public.nfl_plays_year_2010 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2010_def_personnel_db_count_idx ON public.nfl_plays_year_2010 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2010_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_def_personnel_dl_count_idx ON public.nfl_plays_year_2010 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2010_def_personnel_dl_count_idx ON public.nfl_plays_year_2010 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -36557,7 +36557,7 @@ CREATE INDEX nfl_plays_year_2010_off_idx ON public.nfl_plays_year_2010 USING btr
 -- Name: nfl_plays_year_2010_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_off_personnel_counts_idx ON public.nfl_plays_year_2010 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2010_off_personnel_counts_idx ON public.nfl_plays_year_2010 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -36879,21 +36879,21 @@ CREATE INDEX nfl_plays_year_2011_catchable_ball_idx ON public.nfl_plays_year_201
 -- Name: nfl_plays_year_2011_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_def_personnel_counts_idx ON public.nfl_plays_year_2011 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2011_def_personnel_counts_idx ON public.nfl_plays_year_2011 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2011_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_def_personnel_db_count_idx ON public.nfl_plays_year_2011 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2011_def_personnel_db_count_idx ON public.nfl_plays_year_2011 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2011_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_def_personnel_dl_count_idx ON public.nfl_plays_year_2011 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2011_def_personnel_dl_count_idx ON public.nfl_plays_year_2011 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -36942,7 +36942,7 @@ CREATE INDEX nfl_plays_year_2011_off_idx ON public.nfl_plays_year_2011 USING btr
 -- Name: nfl_plays_year_2011_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_off_personnel_counts_idx ON public.nfl_plays_year_2011 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2011_off_personnel_counts_idx ON public.nfl_plays_year_2011 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -37264,21 +37264,21 @@ CREATE INDEX nfl_plays_year_2012_catchable_ball_idx ON public.nfl_plays_year_201
 -- Name: nfl_plays_year_2012_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_def_personnel_counts_idx ON public.nfl_plays_year_2012 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2012_def_personnel_counts_idx ON public.nfl_plays_year_2012 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2012_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_def_personnel_db_count_idx ON public.nfl_plays_year_2012 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2012_def_personnel_db_count_idx ON public.nfl_plays_year_2012 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2012_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_def_personnel_dl_count_idx ON public.nfl_plays_year_2012 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2012_def_personnel_dl_count_idx ON public.nfl_plays_year_2012 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -37327,7 +37327,7 @@ CREATE INDEX nfl_plays_year_2012_off_idx ON public.nfl_plays_year_2012 USING btr
 -- Name: nfl_plays_year_2012_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_off_personnel_counts_idx ON public.nfl_plays_year_2012 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2012_off_personnel_counts_idx ON public.nfl_plays_year_2012 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -37649,21 +37649,21 @@ CREATE INDEX nfl_plays_year_2013_catchable_ball_idx ON public.nfl_plays_year_201
 -- Name: nfl_plays_year_2013_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_def_personnel_counts_idx ON public.nfl_plays_year_2013 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2013_def_personnel_counts_idx ON public.nfl_plays_year_2013 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2013_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_def_personnel_db_count_idx ON public.nfl_plays_year_2013 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2013_def_personnel_db_count_idx ON public.nfl_plays_year_2013 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2013_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_def_personnel_dl_count_idx ON public.nfl_plays_year_2013 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2013_def_personnel_dl_count_idx ON public.nfl_plays_year_2013 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -37712,7 +37712,7 @@ CREATE INDEX nfl_plays_year_2013_off_idx ON public.nfl_plays_year_2013 USING btr
 -- Name: nfl_plays_year_2013_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_off_personnel_counts_idx ON public.nfl_plays_year_2013 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2013_off_personnel_counts_idx ON public.nfl_plays_year_2013 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -38034,21 +38034,21 @@ CREATE INDEX nfl_plays_year_2014_catchable_ball_idx ON public.nfl_plays_year_201
 -- Name: nfl_plays_year_2014_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_def_personnel_counts_idx ON public.nfl_plays_year_2014 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2014_def_personnel_counts_idx ON public.nfl_plays_year_2014 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2014_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_def_personnel_db_count_idx ON public.nfl_plays_year_2014 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2014_def_personnel_db_count_idx ON public.nfl_plays_year_2014 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2014_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_def_personnel_dl_count_idx ON public.nfl_plays_year_2014 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2014_def_personnel_dl_count_idx ON public.nfl_plays_year_2014 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -38097,7 +38097,7 @@ CREATE INDEX nfl_plays_year_2014_off_idx ON public.nfl_plays_year_2014 USING btr
 -- Name: nfl_plays_year_2014_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_off_personnel_counts_idx ON public.nfl_plays_year_2014 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2014_off_personnel_counts_idx ON public.nfl_plays_year_2014 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -38419,21 +38419,21 @@ CREATE INDEX nfl_plays_year_2015_catchable_ball_idx ON public.nfl_plays_year_201
 -- Name: nfl_plays_year_2015_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_def_personnel_counts_idx ON public.nfl_plays_year_2015 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2015_def_personnel_counts_idx ON public.nfl_plays_year_2015 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2015_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_def_personnel_db_count_idx ON public.nfl_plays_year_2015 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2015_def_personnel_db_count_idx ON public.nfl_plays_year_2015 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2015_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_def_personnel_dl_count_idx ON public.nfl_plays_year_2015 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2015_def_personnel_dl_count_idx ON public.nfl_plays_year_2015 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -38482,7 +38482,7 @@ CREATE INDEX nfl_plays_year_2015_off_idx ON public.nfl_plays_year_2015 USING btr
 -- Name: nfl_plays_year_2015_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_off_personnel_counts_idx ON public.nfl_plays_year_2015 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2015_off_personnel_counts_idx ON public.nfl_plays_year_2015 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -38804,21 +38804,21 @@ CREATE INDEX nfl_plays_year_2016_catchable_ball_idx ON public.nfl_plays_year_201
 -- Name: nfl_plays_year_2016_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_def_personnel_counts_idx ON public.nfl_plays_year_2016 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2016_def_personnel_counts_idx ON public.nfl_plays_year_2016 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2016_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_def_personnel_db_count_idx ON public.nfl_plays_year_2016 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2016_def_personnel_db_count_idx ON public.nfl_plays_year_2016 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2016_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_def_personnel_dl_count_idx ON public.nfl_plays_year_2016 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2016_def_personnel_dl_count_idx ON public.nfl_plays_year_2016 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -38867,7 +38867,7 @@ CREATE INDEX nfl_plays_year_2016_off_idx ON public.nfl_plays_year_2016 USING btr
 -- Name: nfl_plays_year_2016_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_off_personnel_counts_idx ON public.nfl_plays_year_2016 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2016_off_personnel_counts_idx ON public.nfl_plays_year_2016 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -39189,21 +39189,21 @@ CREATE INDEX nfl_plays_year_2017_catchable_ball_idx ON public.nfl_plays_year_201
 -- Name: nfl_plays_year_2017_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_def_personnel_counts_idx ON public.nfl_plays_year_2017 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2017_def_personnel_counts_idx ON public.nfl_plays_year_2017 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2017_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_def_personnel_db_count_idx ON public.nfl_plays_year_2017 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2017_def_personnel_db_count_idx ON public.nfl_plays_year_2017 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2017_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_def_personnel_dl_count_idx ON public.nfl_plays_year_2017 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2017_def_personnel_dl_count_idx ON public.nfl_plays_year_2017 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -39252,7 +39252,7 @@ CREATE INDEX nfl_plays_year_2017_off_idx ON public.nfl_plays_year_2017 USING btr
 -- Name: nfl_plays_year_2017_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_off_personnel_counts_idx ON public.nfl_plays_year_2017 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2017_off_personnel_counts_idx ON public.nfl_plays_year_2017 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -39574,21 +39574,21 @@ CREATE INDEX nfl_plays_year_2018_catchable_ball_idx ON public.nfl_plays_year_201
 -- Name: nfl_plays_year_2018_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_def_personnel_counts_idx ON public.nfl_plays_year_2018 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2018_def_personnel_counts_idx ON public.nfl_plays_year_2018 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2018_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_def_personnel_db_count_idx ON public.nfl_plays_year_2018 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2018_def_personnel_db_count_idx ON public.nfl_plays_year_2018 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2018_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_def_personnel_dl_count_idx ON public.nfl_plays_year_2018 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2018_def_personnel_dl_count_idx ON public.nfl_plays_year_2018 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -39637,7 +39637,7 @@ CREATE INDEX nfl_plays_year_2018_off_idx ON public.nfl_plays_year_2018 USING btr
 -- Name: nfl_plays_year_2018_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_off_personnel_counts_idx ON public.nfl_plays_year_2018 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2018_off_personnel_counts_idx ON public.nfl_plays_year_2018 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -39959,21 +39959,21 @@ CREATE INDEX nfl_plays_year_2019_catchable_ball_idx ON public.nfl_plays_year_201
 -- Name: nfl_plays_year_2019_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_def_personnel_counts_idx ON public.nfl_plays_year_2019 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2019_def_personnel_counts_idx ON public.nfl_plays_year_2019 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2019_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_def_personnel_db_count_idx ON public.nfl_plays_year_2019 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2019_def_personnel_db_count_idx ON public.nfl_plays_year_2019 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2019_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_def_personnel_dl_count_idx ON public.nfl_plays_year_2019 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2019_def_personnel_dl_count_idx ON public.nfl_plays_year_2019 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -40022,7 +40022,7 @@ CREATE INDEX nfl_plays_year_2019_off_idx ON public.nfl_plays_year_2019 USING btr
 -- Name: nfl_plays_year_2019_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_off_personnel_counts_idx ON public.nfl_plays_year_2019 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2019_off_personnel_counts_idx ON public.nfl_plays_year_2019 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -40344,21 +40344,21 @@ CREATE INDEX nfl_plays_year_2020_catchable_ball_idx ON public.nfl_plays_year_202
 -- Name: nfl_plays_year_2020_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_def_personnel_counts_idx ON public.nfl_plays_year_2020 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2020_def_personnel_counts_idx ON public.nfl_plays_year_2020 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2020_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_def_personnel_db_count_idx ON public.nfl_plays_year_2020 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2020_def_personnel_db_count_idx ON public.nfl_plays_year_2020 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2020_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_def_personnel_dl_count_idx ON public.nfl_plays_year_2020 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2020_def_personnel_dl_count_idx ON public.nfl_plays_year_2020 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -40407,7 +40407,7 @@ CREATE INDEX nfl_plays_year_2020_off_idx ON public.nfl_plays_year_2020 USING btr
 -- Name: nfl_plays_year_2020_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_off_personnel_counts_idx ON public.nfl_plays_year_2020 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2020_off_personnel_counts_idx ON public.nfl_plays_year_2020 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -40729,21 +40729,21 @@ CREATE INDEX nfl_plays_year_2021_catchable_ball_idx ON public.nfl_plays_year_202
 -- Name: nfl_plays_year_2021_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_def_personnel_counts_idx ON public.nfl_plays_year_2021 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2021_def_personnel_counts_idx ON public.nfl_plays_year_2021 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2021_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_def_personnel_db_count_idx ON public.nfl_plays_year_2021 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2021_def_personnel_db_count_idx ON public.nfl_plays_year_2021 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2021_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_def_personnel_dl_count_idx ON public.nfl_plays_year_2021 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2021_def_personnel_dl_count_idx ON public.nfl_plays_year_2021 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -40792,7 +40792,7 @@ CREATE INDEX nfl_plays_year_2021_off_idx ON public.nfl_plays_year_2021 USING btr
 -- Name: nfl_plays_year_2021_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_off_personnel_counts_idx ON public.nfl_plays_year_2021 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2021_off_personnel_counts_idx ON public.nfl_plays_year_2021 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -41114,21 +41114,21 @@ CREATE INDEX nfl_plays_year_2022_catchable_ball_idx ON public.nfl_plays_year_202
 -- Name: nfl_plays_year_2022_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_def_personnel_counts_idx ON public.nfl_plays_year_2022 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2022_def_personnel_counts_idx ON public.nfl_plays_year_2022 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2022_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_def_personnel_db_count_idx ON public.nfl_plays_year_2022 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2022_def_personnel_db_count_idx ON public.nfl_plays_year_2022 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2022_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_def_personnel_dl_count_idx ON public.nfl_plays_year_2022 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2022_def_personnel_dl_count_idx ON public.nfl_plays_year_2022 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -41177,7 +41177,7 @@ CREATE INDEX nfl_plays_year_2022_off_idx ON public.nfl_plays_year_2022 USING btr
 -- Name: nfl_plays_year_2022_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_off_personnel_counts_idx ON public.nfl_plays_year_2022 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2022_off_personnel_counts_idx ON public.nfl_plays_year_2022 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -41499,21 +41499,21 @@ CREATE INDEX nfl_plays_year_2023_catchable_ball_idx ON public.nfl_plays_year_202
 -- Name: nfl_plays_year_2023_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_def_personnel_counts_idx ON public.nfl_plays_year_2023 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2023_def_personnel_counts_idx ON public.nfl_plays_year_2023 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2023_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_def_personnel_db_count_idx ON public.nfl_plays_year_2023 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2023_def_personnel_db_count_idx ON public.nfl_plays_year_2023 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2023_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_def_personnel_dl_count_idx ON public.nfl_plays_year_2023 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2023_def_personnel_dl_count_idx ON public.nfl_plays_year_2023 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -41562,7 +41562,7 @@ CREATE INDEX nfl_plays_year_2023_off_idx ON public.nfl_plays_year_2023 USING btr
 -- Name: nfl_plays_year_2023_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_off_personnel_counts_idx ON public.nfl_plays_year_2023 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2023_off_personnel_counts_idx ON public.nfl_plays_year_2023 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -41884,21 +41884,21 @@ CREATE INDEX nfl_plays_year_2024_catchable_ball_idx ON public.nfl_plays_year_202
 -- Name: nfl_plays_year_2024_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_def_personnel_counts_idx ON public.nfl_plays_year_2024 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2024_def_personnel_counts_idx ON public.nfl_plays_year_2024 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2024_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_def_personnel_db_count_idx ON public.nfl_plays_year_2024 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2024_def_personnel_db_count_idx ON public.nfl_plays_year_2024 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2024_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_def_personnel_dl_count_idx ON public.nfl_plays_year_2024 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2024_def_personnel_dl_count_idx ON public.nfl_plays_year_2024 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -41947,7 +41947,7 @@ CREATE INDEX nfl_plays_year_2024_off_idx ON public.nfl_plays_year_2024 USING btr
 -- Name: nfl_plays_year_2024_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_off_personnel_counts_idx ON public.nfl_plays_year_2024 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2024_off_personnel_counts_idx ON public.nfl_plays_year_2024 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -42269,21 +42269,21 @@ CREATE INDEX nfl_plays_year_2025_catchable_ball_idx ON public.nfl_plays_year_202
 -- Name: nfl_plays_year_2025_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_def_personnel_counts_idx ON public.nfl_plays_year_2025 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2025_def_personnel_counts_idx ON public.nfl_plays_year_2025 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2025_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_def_personnel_db_count_idx ON public.nfl_plays_year_2025 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2025_def_personnel_db_count_idx ON public.nfl_plays_year_2025 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2025_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_def_personnel_dl_count_idx ON public.nfl_plays_year_2025 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2025_def_personnel_dl_count_idx ON public.nfl_plays_year_2025 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -42332,7 +42332,7 @@ CREATE INDEX nfl_plays_year_2025_off_idx ON public.nfl_plays_year_2025 USING btr
 -- Name: nfl_plays_year_2025_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_off_personnel_counts_idx ON public.nfl_plays_year_2025 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2025_off_personnel_counts_idx ON public.nfl_plays_year_2025 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -42654,21 +42654,21 @@ CREATE INDEX nfl_plays_year_2026_catchable_ball_idx ON public.nfl_plays_year_202
 -- Name: nfl_plays_year_2026_def_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_def_personnel_counts_idx ON public.nfl_plays_year_2026 USING btree (defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2026_def_personnel_counts_idx ON public.nfl_plays_year_2026 USING btree (defense_personnel_defensive_line_count, defense_personnel_linebacker_count, defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2026_def_personnel_db_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_def_personnel_db_count_idx ON public.nfl_plays_year_2026 USING btree (defense_personnel_db_count);
+CREATE INDEX nfl_plays_year_2026_def_personnel_db_count_idx ON public.nfl_plays_year_2026 USING btree (defense_personnel_defensive_back_count);
 
 
 --
 -- Name: nfl_plays_year_2026_def_personnel_dl_count_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_def_personnel_dl_count_idx ON public.nfl_plays_year_2026 USING btree (defense_personnel_dl_count);
+CREATE INDEX nfl_plays_year_2026_def_personnel_dl_count_idx ON public.nfl_plays_year_2026 USING btree (defense_personnel_defensive_line_count);
 
 
 --
@@ -42717,7 +42717,7 @@ CREATE INDEX nfl_plays_year_2026_off_idx ON public.nfl_plays_year_2026 USING btr
 -- Name: nfl_plays_year_2026_off_personnel_counts_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_off_personnel_counts_idx ON public.nfl_plays_year_2026 USING btree (offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count);
+CREATE INDEX nfl_plays_year_2026_off_personnel_counts_idx ON public.nfl_plays_year_2026 USING btree (offense_personnel_running_back_count, offense_personnel_tight_end_count, offense_personnel_wide_receiver_count);
 
 
 --
@@ -57606,7 +57606,7 @@ CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON publi
 -- Name: league_formats trg_cmv_classify_league_format; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER trg_cmv_classify_league_format BEFORE INSERT OR UPDATE OF starter_slots_qb, sqbrbwrte, scoring_format_id ON public.league_formats FOR EACH ROW EXECUTE FUNCTION public.cmv_classify_league_format();
+CREATE TRIGGER trg_cmv_classify_league_format BEFORE INSERT OR UPDATE OF starter_slots_quarterback, sqbrbwrte, scoring_format_id ON public.league_formats FOR EACH ROW EXECUTE FUNCTION public.cmv_classify_league_format();
 
 
 --

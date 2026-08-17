@@ -54,14 +54,23 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
         roster_config: league.roster_positions
       })
 
-      result.league_params.should.have.property('starter_slots_qb', 1)
-      result.league_params.should.have.property('starter_slots_rb', 2)
-      result.league_params.should.have.property('starter_slots_wr', 3)
-      result.league_params.should.have.property('starter_slots_te', 1)
-      result.league_params.should.have.property('starter_slots_rb_wr_flex', 2)
+      result.league_params.should.have.property('starter_slots_quarterback', 1)
+      result.league_params.should.have.property('starter_slots_running_back', 2)
+      result.league_params.should.have.property(
+        'starter_slots_wide_receiver',
+        3
+      )
+      result.league_params.should.have.property('starter_slots_tight_end', 1)
+      result.league_params.should.have.property(
+        'starter_slots_running_back_wide_receiver_flex',
+        2
+      )
       result.league_params.should.have.property('sqbrbwrte', 1)
-      result.league_params.should.have.property('starter_slots_dst', 0)
-      result.league_params.should.have.property('starter_slots_k', 0)
+      result.league_params.should.have.property(
+        'starter_slots_defense_special_teams',
+        0
+      )
+      result.league_params.should.have.property('starter_slots_kicker', 0)
       result.league_params.should.have.property('bench_slot_count', 15)
     })
   })

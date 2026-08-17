@@ -448,22 +448,22 @@ const options = {
               description: 'Number of fantasy teams in league',
               example: 14
             },
-            starter_slots_qb: {
+            starter_slots_quarterback: {
               type: 'integer',
               description: 'Starting QB slots',
               example: 1
             },
-            starter_slots_rb: {
+            starter_slots_running_back: {
               type: 'integer',
               description: 'Starting RB slots',
               example: 2
             },
-            starter_slots_wr: {
+            starter_slots_wide_receiver: {
               type: 'integer',
               description: 'Starting WR slots',
               example: 3
             },
-            starter_slots_te: {
+            starter_slots_tight_end: {
               type: 'integer',
               description: 'Starting TE slots',
               example: 1
@@ -473,12 +473,12 @@ const options = {
               description: 'RB/WR/TE flex slots',
               example: 1
             },
-            starter_slots_dst: {
+            starter_slots_defense_special_teams: {
               type: 'integer',
               description: 'Starting DEF/ST slots',
               example: 1
             },
-            starter_slots_k: {
+            starter_slots_kicker: {
               type: 'integer',
               description: 'Starting kicker slots',
               example: 1
@@ -3233,37 +3233,37 @@ const options = {
               description: 'Free agent acquisition budget',
               example: 100
             },
-            starter_slots_qb: {
+            starter_slots_quarterback: {
               type: 'integer',
               minimum: 0,
               description: 'Starting QB roster slots',
               example: 1
             },
-            starter_slots_rb: {
+            starter_slots_running_back: {
               type: 'integer',
               minimum: 0,
               description: 'Starting RB roster slots',
               example: 2
             },
-            starter_slots_wr: {
+            starter_slots_wide_receiver: {
               type: 'integer',
               minimum: 0,
               description: 'Starting WR roster slots',
               example: 2
             },
-            starter_slots_te: {
+            starter_slots_tight_end: {
               type: 'integer',
               minimum: 0,
               description: 'Starting TE roster slots',
               example: 1
             },
-            starter_slots_dst: {
+            starter_slots_defense_special_teams: {
               type: 'integer',
               minimum: 0,
               description: 'Starting DST roster slots',
               example: 1
             },
-            starter_slots_k: {
+            starter_slots_kicker: {
               type: 'integer',
               minimum: 0,
               description: 'Starting K roster slots',

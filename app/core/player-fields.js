@@ -1070,8 +1070,8 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'passing efficiency matchup',
       column_header: 'EPA/ATT',
       csv_header: 'Opponent pass EPA per dropback over average',
-      percentile_field: 'pass_epa_per_db',
-      ...opponent_field('pass_epa_per_db')
+      percentile_field: 'pass_epa_per_dropback',
+      ...opponent_field('pass_epa_per_dropback')
     },
     opponent_avg_time_to_throw: {
       category: 'passing usage matchup',

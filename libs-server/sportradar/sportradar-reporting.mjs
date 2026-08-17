@@ -79,7 +79,7 @@ export const print_dry_mode_comparison = ({ sample_plays_by_type }) => {
     'sportradar_drive_id',
     'sportradar_play_type',
     'wall_clock',
-    'qb_position',
+    'quarterback_position',
     'starting_hash',
     'run_gap',
     'is_play_action',

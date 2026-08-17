@@ -31,7 +31,7 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   'total_away_pass_epa',
 
   // EPA Component Metrics
-  'qb_epa', // QB-specific EPA
+  'quarterback_epa', // QB-specific EPA
   'air_epa', // EPA from air yards
   'yac_epa', // EPA from yards after catch
   'comp_air_epa', // EPA on completed air yards

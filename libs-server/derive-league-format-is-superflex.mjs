@@ -26,7 +26,10 @@ export const derive_league_format_is_superflex = async ({ lid }) => {
   }
 
   const rows = await db('seasons')
-    .distinct('league_formats.starter_slots_qb', 'league_formats.sqbrbwrte')
+    .distinct(
+      'league_formats.starter_slots_quarterback',
+      'league_formats.sqbrbwrte'
+    )
     .join('league_formats', 'league_formats.id', 'seasons.league_format_id')
     .where('seasons.lid', lid)
 
@@ -37,7 +40,7 @@ export const derive_league_format_is_superflex = async ({ lid }) => {
   }
 
   const classes = new Set(
-    rows.map((row) => row.starter_slots_qb > 1 || row.sqbrbwrte > 0)
+    rows.map((row) => row.starter_slots_quarterback > 1 || row.sqbrbwrte > 0)
   )
   if (classes.size > 1) {
     throw new Error(

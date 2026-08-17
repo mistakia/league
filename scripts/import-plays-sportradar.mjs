@@ -340,7 +340,7 @@ const map_formation_data = ({ sportradar_play: play }) => {
   const mapped = {}
 
   if (play.qb_at_snap) {
-    mapped.qb_position = transform_qb_position(play.qb_at_snap)
+    mapped.quarterback_position = transform_qb_position(play.qb_at_snap)
   }
   if (play.hash_mark) {
     mapped.starting_hash = transform_hash_position(play.hash_mark)

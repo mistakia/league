@@ -63,7 +63,7 @@ const PASSING_EFFICIENCY = [
   'pass_comp_percentage',
   'expected_pass_comp',
   'cpoe',
-  'pass_epa_per_db'
+  'pass_epa_per_dropback'
 ]
 
 const PASSING_USAGE = [
@@ -193,7 +193,7 @@ const FIELD_FIXED_VALUES = {
   points_added_earned_per_game: 1,
   points_added_net: 1,
   points_added_net_per_game: 1,
-  pass_epa_per_db: 2,
+  pass_epa_per_dropback: 2,
   pass_rating: 1,
   pass_yards_per_attempt: 1,
   cpoe: 1,

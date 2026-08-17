@@ -50,16 +50,19 @@ export default function ScoreboardTeam({
     // the field names no longer share the single-letter-prefix shape
     // (`s` + slot key) that let this derive slot_key from the field name.
     const league_slots = [
-      { field: 'starter_slots_qb', slot_key: 'QB' },
-      { field: 'starter_slots_rb', slot_key: 'RB' },
-      { field: 'starter_slots_wr', slot_key: 'WR' },
-      { field: 'starter_slots_rb_wr_flex', slot_key: 'RBWR' },
+      { field: 'starter_slots_quarterback', slot_key: 'QB' },
+      { field: 'starter_slots_running_back', slot_key: 'RB' },
+      { field: 'starter_slots_wide_receiver', slot_key: 'WR' },
+      {
+        field: 'starter_slots_running_back_wide_receiver_flex',
+        slot_key: 'RBWR'
+      },
       { field: 'srbwrte', slot_key: 'RBWRTE' },
       { field: 'sqbrbwrte', slot_key: 'QBRBWRTE' },
-      { field: 'starter_slots_wr_te_flex', slot_key: 'WRTE' },
-      { field: 'starter_slots_te', slot_key: 'TE' },
-      { field: 'starter_slots_k', slot_key: 'K' },
-      { field: 'starter_slots_dst', slot_key: 'DST' }
+      { field: 'starter_slots_wide_receiver_tight_end_flex', slot_key: 'WRTE' },
+      { field: 'starter_slots_tight_end', slot_key: 'TE' },
+      { field: 'starter_slots_kicker', slot_key: 'K' },
+      { field: 'starter_slots_defense_special_teams', slot_key: 'DST' }
     ]
     for (const { field, slot_key } of league_slots) {
       if (league[field]) {

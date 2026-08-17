@@ -35,10 +35,10 @@ export default class Roster extends React.Component {
     const show_bid = team_id === roster.tid
 
     const rows = []
-    if (league.starter_slots_qb) {
+    if (league.starter_slots_quarterback) {
       const slot = roster_slot_types.QB
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_qb; i++) {
+      for (let i = 0; i < league.starter_slots_quarterback; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -50,10 +50,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.starter_slots_rb) {
+    if (league.starter_slots_running_back) {
       const slot = roster_slot_types.RB
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_rb; i++) {
+      for (let i = 0; i < league.starter_slots_running_back; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -65,10 +65,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.starter_slots_wr) {
+    if (league.starter_slots_wide_receiver) {
       const slot = roster_slot_types.WR
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_wr; i++) {
+      for (let i = 0; i < league.starter_slots_wide_receiver; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -80,10 +80,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.starter_slots_te) {
+    if (league.starter_slots_tight_end) {
       const slot = roster_slot_types.TE
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_te; i++) {
+      for (let i = 0; i < league.starter_slots_tight_end; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -95,10 +95,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.starter_slots_k) {
+    if (league.starter_slots_kicker) {
       const slot = roster_slot_types.K
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_k; i++) {
+      for (let i = 0; i < league.starter_slots_kicker; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -110,10 +110,10 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.starter_slots_dst) {
+    if (league.starter_slots_defense_special_teams) {
       const slot = roster_slot_types.DST
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_dst; i++) {
+      for (let i = 0; i < league.starter_slots_defense_special_teams; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -125,10 +125,14 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.starter_slots_rb_wr_flex) {
+    if (league.starter_slots_running_back_wide_receiver_flex) {
       const slot = roster_slot_types.RBWR
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_rb_wr_flex; i++) {
+      for (
+        let i = 0;
+        i < league.starter_slots_running_back_wide_receiver_flex;
+        i++
+      ) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
@@ -170,10 +174,14 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.starter_slots_wr_te_flex) {
+    if (league.starter_slots_wide_receiver_tight_end_flex) {
       const slot = roster_slot_types.WRTE
       const players = r.starters.filter((p) => p.slot === slot)
-      for (let i = 0; i < league.starter_slots_wr_te_flex; i++) {
+      for (
+        let i = 0;
+        i < league.starter_slots_wide_receiver_tight_end_flex;
+        i++
+      ) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow

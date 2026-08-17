@@ -384,12 +384,12 @@
 | defensive_backs_in_box   | DBs in the Box        | Number of defensive backs in the box                                                     | -        | -          |
 | pass_rushers             | Pass Rushers          | Number of pass rushers involved in the play                                              | 83.59%   | 2021/09/09 |
 | blitzers                 | Blitzers              | Number of linebackers and defensive backs blitzing                                       | 83.59%   | 2021/09/09 |
-| db_blitzers              | DB Blitzers           | Number of defensive backs blitzing                                                       | -        | -          |
+| defensive_back_blitzers  | DB Blitzers           | Number of defensive backs blitzing                                                       | -        | -          |
 | backfield_player_count   | Number in Backfield   | Number of players in the backfield                                                       | -        | -          |
 | is_no_huddle             | No Huddle             | Indicator if the huddle was not used                                                     | 83.97%   | 2021/09/09 |
 | extra_men_on_line        | Extra Men on Line     | Number of players lined up on either side of the Offensive Tackles - usually a Tight End | -        | -          |
 | is_zero_blitz            | Zero Blitz            | At least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage     | 13.91%   | 2021/09/09 |
-| qb_position              | QB Position           | Position of the quarterback (UNDER_CENTER, SHOTGUN, or PISTOL)                           | 83.72%   | 2021/09/09 |
+| quarterback_position     | QB Position           | Position of the quarterback (UNDER_CENTER, SHOTGUN, or PISTOL)                           | 83.72%   | 2021/09/09 |
 | number_offense_backfield | Offensive Backfield   | Number of offensive players in the backfield                                             | 88.18%   | 2022/09/08 |
 | is_run_play_option       | Run Play Option       | Indicator if the play was a run option                                                   | 88.18%   | 2022/09/08 |
 | read_thrown              | Read Thrown           | Indicator if the quarterback made a read and threw the ball                              | 83.66%   | 2021/09/09 |
@@ -431,7 +431,7 @@
 | total_away_rush_epa     | Total Away Rush EPA          | Cumulative total rushing EPA for the away team in the game so far                            | 83.52%   | 2001/01/06 |
 | total_home_pass_epa     | Total Home Pass EPA          | Cumulative total passing EPA for the home team in the game so far                            | 83.52%   | 2001/01/06 |
 | total_away_pass_epa     | Total Away Pass EPA          | Cumulative total passing EPA for the away team in the game so far                            | 83.52%   | 2001/01/06 |
-| qb_epa                  | QB EPA                       | EPA credited to the quarterback up to the point where a receiver lost a fumble after a catch | 83.52%   | 2001/01/06 |
+| quarterback_epa         | QB EPA                       | EPA credited to the quarterback up to the point where a receiver lost a fumble after a catch | 83.52%   | 2001/01/06 |
 | air_epa                 | Air EPA                      | EPA from the air yards alone                                                                 | 83.52%   | 2001/01/06 |
 | yac_epa                 | YAC EPA                      | EPA from the yards after catch alone                                                         | 83.52%   | 2001/01/06 |
 | comp_air_epa            | Completed Air EPA            | EPA from the air yards alone only for completions                                            | 83.52%   | 2001/01/06 |

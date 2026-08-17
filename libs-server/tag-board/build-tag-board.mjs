@@ -97,13 +97,13 @@ export const contract_key = (tid, pid) => `${tid}:${pid}`
 const franchise_price_for = ({ pos, season }) => {
   switch (pos) {
     case 'QB':
-      return season.franchise_tag_salary_qb
+      return season.franchise_tag_salary_quarterback
     case 'RB':
-      return season.franchise_tag_salary_rb
+      return season.franchise_tag_salary_running_back
     case 'WR':
-      return season.franchise_tag_salary_wr
+      return season.franchise_tag_salary_wide_receiver
     case 'TE':
-      return season.franchise_tag_salary_te
+      return season.franchise_tag_salary_tight_end
     default:
       return null
   }
@@ -311,10 +311,10 @@ export default function build_tag_board({
   const cap_total = league_format.cap
   const active_roster_limit = get_active_roster_limit(league_format)
   const franchise_prices = {
-    QB: season.franchise_tag_salary_qb,
-    RB: season.franchise_tag_salary_rb,
-    WR: season.franchise_tag_salary_wr,
-    TE: season.franchise_tag_salary_te
+    QB: season.franchise_tag_salary_quarterback,
+    RB: season.franchise_tag_salary_running_back,
+    WR: season.franchise_tag_salary_wide_receiver,
+    TE: season.franchise_tag_salary_tight_end
   }
   const tag_limits = {
     franchise: season.franchise_tag_limit,

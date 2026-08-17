@@ -144,10 +144,10 @@ export default async function generate_league_rules({
     markdown_table(
       ['Position', 'Salary'],
       [
-        ['QB', `$${league.franchise_tag_salary_qb}`],
-        ['RB', `$${league.franchise_tag_salary_rb}`],
-        ['WR', `$${league.franchise_tag_salary_wr}`],
-        ['TE', `$${league.franchise_tag_salary_te}`]
+        ['QB', `$${league.franchise_tag_salary_quarterback}`],
+        ['RB', `$${league.franchise_tag_salary_running_back}`],
+        ['WR', `$${league.franchise_tag_salary_wide_receiver}`],
+        ['TE', `$${league.franchise_tag_salary_tight_end}`]
       ]
     ),
     `Restricted free agency window: ${format_date_et(

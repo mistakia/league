@@ -122,45 +122,45 @@ export default class LeagueConfigMapper {
     // Platform-specific roster position mappings
     this.roster_mappings = {
       sleeper: {
-        QB: 'starter_slots_qb',
-        RB: 'starter_slots_rb',
-        WR: 'starter_slots_wr',
-        TE: 'starter_slots_te',
-        FLEX: 'starter_slots_rb_wr_flex',
-        REC_FLEX: 'starter_slots_wr_te_flex',
+        QB: 'starter_slots_quarterback',
+        RB: 'starter_slots_running_back',
+        WR: 'starter_slots_wide_receiver',
+        TE: 'starter_slots_tight_end',
+        FLEX: 'starter_slots_running_back_wide_receiver_flex',
+        REC_FLEX: 'starter_slots_wide_receiver_tight_end_flex',
         SUPER_FLEX: 'sqbrbwrte',
-        WR_TE_FLEX: 'starter_slots_wr_te_flex',
-        DEF: 'starter_slots_dst',
-        K: 'starter_slots_k',
+        WR_TE_FLEX: 'starter_slots_wide_receiver_tight_end_flex',
+        DEF: 'starter_slots_defense_special_teams',
+        K: 'starter_slots_kicker',
         BN: 'bench_slot_count', // Sleeper's raw format uses BN
         BENCH: 'bench_slot_count', // Canonical format uses BENCH
         IR: 'ir',
         TAXI: 'practice_squad_slot_count'
       },
       espn: {
-        QB: 'starter_slots_qb',
-        RB: 'starter_slots_rb',
-        'RB/WR': 'starter_slots_rb_wr_flex',
-        WR: 'starter_slots_wr',
-        'WR/TE': 'starter_slots_wr_te_flex',
-        TE: 'starter_slots_te',
+        QB: 'starter_slots_quarterback',
+        RB: 'starter_slots_running_back',
+        'RB/WR': 'starter_slots_running_back_wide_receiver_flex',
+        WR: 'starter_slots_wide_receiver',
+        'WR/TE': 'starter_slots_wide_receiver_tight_end_flex',
+        TE: 'starter_slots_tight_end',
         OP: 'sqbrbwrte',
-        'D/ST': 'starter_slots_dst',
-        K: 'starter_slots_k',
+        'D/ST': 'starter_slots_defense_special_teams',
+        K: 'starter_slots_kicker',
         BE: 'bench_slot_count',
         IR: 'ir'
       },
       yahoo: {
-        QB: 'starter_slots_qb',
-        WR: 'starter_slots_wr',
-        RB: 'starter_slots_rb',
-        TE: 'starter_slots_te',
-        'W/R': 'starter_slots_rb_wr_flex',
-        'W/T': 'starter_slots_wr_te_flex',
+        QB: 'starter_slots_quarterback',
+        WR: 'starter_slots_wide_receiver',
+        RB: 'starter_slots_running_back',
+        TE: 'starter_slots_tight_end',
+        'W/R': 'starter_slots_running_back_wide_receiver_flex',
+        'W/T': 'starter_slots_wide_receiver_tight_end_flex',
         'W/R/T': 'srbwrte',
         'Q/W/R/T': 'sqbrbwrte',
-        DEF: 'starter_slots_dst',
-        K: 'starter_slots_k',
+        DEF: 'starter_slots_defense_special_teams',
+        K: 'starter_slots_kicker',
         BN: 'bench_slot_count',
         IR: 'ir'
       }
@@ -433,16 +433,16 @@ export default class LeagueConfigMapper {
   get_default_league_params() {
     return {
       num_teams: 12,
-      starter_slots_qb: 0,
-      starter_slots_rb: 0,
-      starter_slots_wr: 0,
-      starter_slots_te: 0,
-      starter_slots_rb_wr_flex: 0,
+      starter_slots_quarterback: 0,
+      starter_slots_running_back: 0,
+      starter_slots_wide_receiver: 0,
+      starter_slots_tight_end: 0,
+      starter_slots_running_back_wide_receiver_flex: 0,
       srbwrte: 0,
       sqbrbwrte: 0,
-      starter_slots_wr_te_flex: 0,
-      starter_slots_dst: 0,
-      starter_slots_k: 0,
+      starter_slots_wide_receiver_tight_end_flex: 0,
+      starter_slots_defense_special_teams: 0,
+      starter_slots_kicker: 0,
       bench_slot_count: 0,
       practice_squad_slot_count: 0,
       ir: 0,
@@ -470,16 +470,16 @@ export default class LeagueConfigMapper {
     }
 
     const total_starters =
-      league_params.starter_slots_qb +
-      league_params.starter_slots_rb +
-      league_params.starter_slots_wr +
-      league_params.starter_slots_te +
-      league_params.starter_slots_rb_wr_flex +
+      league_params.starter_slots_quarterback +
+      league_params.starter_slots_running_back +
+      league_params.starter_slots_wide_receiver +
+      league_params.starter_slots_tight_end +
+      league_params.starter_slots_running_back_wide_receiver_flex +
       league_params.srbwrte +
       league_params.sqbrbwrte +
-      league_params.starter_slots_wr_te_flex +
-      league_params.starter_slots_dst +
-      league_params.starter_slots_k
+      league_params.starter_slots_wide_receiver_tight_end_flex +
+      league_params.starter_slots_defense_special_teams +
+      league_params.starter_slots_kicker
 
     if (total_starters === 0) {
       log('Invalid league params: no starting roster positions')

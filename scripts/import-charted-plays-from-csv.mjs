@@ -77,7 +77,7 @@ const formatPlay = (play) => ({
   defensive_backs_in_box: parseInt(play.boxdb, 10) || null,
   pass_rushers: parseInt(play.pru, 10) || null,
   blitzers: parseInt(play.blz, 10) || null,
-  db_blitzers: parseInt(play.dblz, 10) || null,
+  defensive_back_blitzers: parseInt(play.dblz, 10) || null,
   out_of_pocket_details: play.oopd || null,
   coverage_on_target: play.cov || null,
   cov_type_charted: play.cov_type || null,

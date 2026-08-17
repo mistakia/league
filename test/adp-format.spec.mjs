@@ -44,8 +44,8 @@ describe('LIBS-SHARED adp-format decode map', function () {
       DURATION.should.include(t.duration, adp_type)
       DRAFT_POOL.should.include(t.draft_pool, adp_type)
       CONTEST_STYLE.should.include(t.contest_style, adp_type)
-      Number.isInteger(t.num_qb).should.equal(true, adp_type)
-      t.num_qb.should.be.at.least(1, adp_type)
+      Number.isInteger(t.num_quarterback).should.equal(true, adp_type)
+      t.num_quarterback.should.be.at.least(1, adp_type)
       // legacy rows carry no concrete scoring link or team count
       expect(t.scoring_format_id, adp_type).to.equal(null)
       expect(t.num_teams, adp_type).to.equal(null)
@@ -69,15 +69,15 @@ describe('LIBS-SHARED adp-format decode map', function () {
   it('maps the empty BESTBALL bucket to half-PPR 1QB redraft best ball', () => {
     const t = decode_adp_type('BESTBALL')
     t.scoring_class.should.equal('HALF_PPR')
-    t.num_qb.should.equal(1)
+    t.num_quarterback.should.equal(1)
     t.duration.should.equal('REDRAFT')
     t.draft_pool.should.equal('ALL')
     t.contest_style.should.equal('BEST_BALL')
   })
 
-  it('distinguishes superflex (num_qb 2) from 1QB', () => {
-    decode_adp_type('PPR_REDRAFT').num_qb.should.equal(1)
-    decode_adp_type('PPR_SUPERFLEX_REDRAFT').num_qb.should.equal(2)
+  it('distinguishes superflex (num_quarterback 2) from 1QB', () => {
+    decode_adp_type('PPR_REDRAFT').num_quarterback.should.equal(1)
+    decode_adp_type('PPR_SUPERFLEX_REDRAFT').num_quarterback.should.equal(2)
   })
 
   it('maps rookie drafts to dynasty duration with rookie draft pool', () => {
@@ -96,8 +96,8 @@ describe('LIBS-SHARED adp-format decode map', function () {
 
   it('returns a fresh object (callers cannot mutate the shared map)', () => {
     const a = decode_adp_type('PPR_REDRAFT')
-    a.num_qb = 999
-    decode_adp_type('PPR_REDRAFT').num_qb.should.equal(1)
+    a.num_quarterback = 999
+    decode_adp_type('PPR_REDRAFT').num_quarterback.should.equal(1)
   })
 })
 
@@ -151,7 +151,7 @@ describe('LIBS-SERVER find_or_create_adp_format', function () {
   const base_axes = {
     scoring_class: 'PPR',
     scoring_format_id: null,
-    num_qb: 1,
+    num_quarterback: 1,
     num_teams: null,
     duration: 'REDRAFT',
     draft_pool: 'ALL',
@@ -169,7 +169,7 @@ describe('LIBS-SERVER find_or_create_adp_format', function () {
     const a = await find_or_create_adp_format(db, base_axes)
     const superflex = await find_or_create_adp_format(db, {
       ...base_axes,
-      num_qb: 2
+      num_quarterback: 2
     })
     superflex.should.not.equal(a)
     const bestball = await find_or_create_adp_format(db, {
@@ -185,14 +185,14 @@ describe('LIBS-SERVER find_or_create_adp_format', function () {
     // collapse them to one row rather than minting a fresh id each time.
     const a = await find_or_create_adp_format(db, {
       scoring_class: 'HALF_PPR',
-      num_qb: 1,
+      num_quarterback: 1,
       duration: 'REDRAFT',
       draft_pool: 'ALL',
       contest_style: 'BEST_BALL'
     })
     const b = await find_or_create_adp_format(db, {
       scoring_class: 'HALF_PPR',
-      num_qb: 1,
+      num_quarterback: 1,
       duration: 'REDRAFT',
       draft_pool: 'ALL',
       contest_style: 'BEST_BALL'

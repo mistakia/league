@@ -104,7 +104,7 @@ router.use('/:leagueId', require_league_not_paused)
  *             updateRosterSize:
  *               summary: Update starting QB slots
  *               value:
- *                 field: starter_slots_qb
+ *                 field: starter_slots_quarterback
  *                 value: 1
  *             updateScoringSettings:
  *               summary: Update passing yards scoring
@@ -379,13 +379,13 @@ router.put('/:leagueId', async (req, res) => {
  *               commishid: 5
  *               is_hosted: false
  *               num_teams: 14
- *               starter_slots_qb: 1
- *               starter_slots_rb: 2
- *               starter_slots_wr: 3
- *               starter_slots_te: 1
+ *               starter_slots_quarterback: 1
+ *               starter_slots_running_back: 2
+ *               starter_slots_wide_receiver: 3
+ *               starter_slots_tight_end: 1
  *               srbwrte: 1
- *               starter_slots_dst: 1
- *               starter_slots_k: 1
+ *               starter_slots_defense_special_teams: 1
+ *               starter_slots_kicker: 1
  *               bench_slot_count: 6
  *               practice_squad_slot_count: 4
  *               reserve_short_term_limit: 3
@@ -448,13 +448,13 @@ router.get('/:leagueId/?', async (req, res) => {
  *               commishid: 5
  *               is_hosted: false
  *               num_teams: 14
- *               starter_slots_qb: 1
- *               starter_slots_rb: 2
- *               starter_slots_wr: 3
- *               starter_slots_te: 1
+ *               starter_slots_quarterback: 1
+ *               starter_slots_running_back: 2
+ *               starter_slots_wide_receiver: 3
+ *               starter_slots_tight_end: 1
  *               srbwrte: 1
- *               starter_slots_dst: 1
- *               starter_slots_k: 1
+ *               starter_slots_defense_special_teams: 1
+ *               starter_slots_kicker: 1
  *               bench_slot_count: 6
  *               practice_squad_slot_count: 4
  *               reserve_short_term_limit: 3

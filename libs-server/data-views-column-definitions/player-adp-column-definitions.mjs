@@ -14,7 +14,7 @@ const get_default_params = ({ params = {} } = {}) => {
     year: [current_season.year],
     adp_source_id: ['SLEEPER'],
     scoring_class: ['PPR'],
-    num_qb: [1],
+    num_quarterback: [1],
     duration: ['REDRAFT'],
     draft_pool: ['ALL'],
     contest_style: ['MANAGED']
@@ -43,12 +43,12 @@ const generate_table_alias = ({ params = {} } = {}) => {
     year,
     adp_source_id,
     scoring_class,
-    num_qb,
+    num_quarterback,
     duration,
     draft_pool,
     contest_style
   } = get_default_params({ params })
-  const key = `player_adp_${year.join('_')}_${adp_source_id.join('_')}_${scoring_class.join('_')}_${num_qb.join('_')}_${duration.join('_')}_${draft_pool.join('_')}_${contest_style.join('_')}`
+  const key = `player_adp_${year.join('_')}_${adp_source_id.join('_')}_${scoring_class.join('_')}_${num_quarterback.join('_')}_${duration.join('_')}_${draft_pool.join('_')}_${contest_style.join('_')}`
   return get_table_hash(key)
 }
 
@@ -87,7 +87,7 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
     year,
     adp_source_id,
     scoring_class,
-    num_qb,
+    num_quarterback,
     duration,
     draft_pool,
     contest_style
@@ -114,7 +114,7 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
     .whereIn('player_adp_index.source_id', adp_source_id)
     .whereIn('player_adp_index.season_year', cte_years)
     .whereIn('adp_format.scoring_class', scoring_class)
-    .whereIn('adp_format.num_qb', num_qb)
+    .whereIn('adp_format.num_quarterback', num_quarterback)
     .whereIn('adp_format.duration', duration)
     .whereIn('adp_format.draft_pool', draft_pool)
     .whereIn('adp_format.contest_style', contest_style)

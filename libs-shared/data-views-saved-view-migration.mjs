@@ -239,6 +239,16 @@ export const PLAYS_LOCAL_PARAM_RENAMES = {
 // No column ID moves: the plays-view ids are the play_* spellings and the
 // from-plays ids are semantic stat_names, neither of which embeds a side
 // prefix. Only these five param keys rename.
+// Position codes, renamed by the 2026-08-16 conform
+// (db/adhoc/2026-08-16-conform-position-code-tokens.sql). Only ONE of the 65
+// columns is a registry key: `num_qb` on the ADP table
+// (app/core/data-views-fields/player-adp-table-fields.js), which saved views
+// persist. The rest are physical columns behind semantic column ids, and no
+// column id embeds a position code, so nothing moves in COLUMN_ID_RENAMES.
+export const POSITION_CODE_PARAM_RENAMES = {
+  num_qb: 'num_quarterback'
+}
+
 export const SIDE_PREFIX_PARAM_RENAMES = {
   def_personnel: 'defense_personnel',
   def_score: 'defense_score',
@@ -442,7 +452,8 @@ const PARAM_KEY_RENAMES = {
   ...BOOLEAN_PREFIX_PARAM_RENAMES,
   ...SHORTHAND_PARAM_RENAMES,
   ...PLAYS_LOCAL_PARAM_RENAMES,
-  ...SIDE_PREFIX_PARAM_RENAMES
+  ...SIDE_PREFIX_PARAM_RENAMES,
+  ...POSITION_CODE_PARAM_RENAMES
 }
 
 // Every legacy param key this module rewrites at read time, exported so

@@ -13,10 +13,10 @@ import { current_season, player_tag_types } from '@constants'
 // league.franchise_tag_salary_<pos> no longer shares a shape with the
 // position code, so the per-position lookup needs an explicit map.
 const franchise_tag_salary_field_by_position = {
-  qb: 'franchise_tag_salary_qb',
-  rb: 'franchise_tag_salary_rb',
-  wr: 'franchise_tag_salary_wr',
-  te: 'franchise_tag_salary_te'
+  qb: 'franchise_tag_salary_quarterback',
+  rb: 'franchise_tag_salary_running_back',
+  wr: 'franchise_tag_salary_wide_receiver',
+  te: 'franchise_tag_salary_tight_end'
 }
 
 class PlayerRoster extends Player {
