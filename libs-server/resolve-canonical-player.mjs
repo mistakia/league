@@ -77,13 +77,17 @@ const resolve_canonical_player = async ({ name, date_of_birth }) => {
   // back twice and trips MatchedMultiplePlayers. CLEV-HARR-002939 holds exactly
   // two. player has no primary key, so GROUP BY player.pid is not available
   // either.
+  // Hoisted rather than written inline in the orWhereIn. Identical SQL, but
+  // check-knex-column-resolution binds a nested builder's columns to the
+  // ENCLOSING statement's table, so inline it resolved formatted_alias against
+  // `player` and failed the gate on a column that is correct on
+  // `player_aliases`. Naming the statement is what lets the gate see the table.
+  const alias_pids = db('player_aliases')
+    .select('pid')
+    .where({ formatted_alias: formatted_name })
+
   const candidates = await db('player').where(function () {
-    this.where({ formatted_name }).orWhereIn(
-      'pid',
-      db('player_aliases')
-        .select('pid')
-        .where({ formatted_alias: formatted_name })
-    )
+    this.where({ formatted_name }).orWhereIn('pid', alias_pids)
   })
 
   if (!candidates.length) {
