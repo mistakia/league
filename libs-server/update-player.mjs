@@ -57,6 +57,17 @@ const combine_protected_props = ['height_inches', 'weight_pounds']
 
 const nullable_props = ['game_designation']
 
+// Two values are the same verdict when they spell the same thing. `player`
+// holds several logically-textual fields as varchar and several as integers,
+// and an override stores the value as text, so the comparison is on the string
+// form. NULL on both sides is a match: that is a CLEAR -- an override declaring
+// the field should hold nothing.
+const override_value_matches = (override_value, incoming_value) => {
+  if (override_value == null && incoming_value == null) return true
+  if (override_value == null || incoming_value == null) return false
+  return String(override_value) === String(incoming_value)
+}
+
 /*
    player can be a string identifier or player db entry
 */
@@ -67,7 +78,12 @@ const updatePlayer = async ({
   update,
   allow_protected_props = false,
   allow_primary_position_write = false,
-  source = null
+  source = null,
+  // Optional free text carried onto every player_changelog row this call
+  // writes. record_changelog has always accepted it; nothing passed it until
+  // overrides, where the adjudication's reason belongs in the trail beside the
+  // value it explains.
+  reason = null
 }) => {
   if (!player_row && (typeof pid === 'string' || pid instanceof String)) {
     const player_rows = await db('player').where({ pid })
@@ -115,46 +131,91 @@ const updatePlayer = async ({
     return 0
   }
 
+  // Human verdicts for THIS row, read once and only when there is something to
+  // write. Every guard below is per-column-CLASS -- it knows that
+  // sleeper_player_id is an external id, never that a person adjudicated one
+  // specific value for one specific row. That is the axis this table adds, and
+  // it is why the lookup cannot be folded into any of them.
+  //
+  // Fetched rather than cached: overrides change on human timescales but an
+  // importer process can outlive one, and a stale cache here silently reverts a
+  // verdict, which is the failure this whole mechanism exists to end.
+  const override_rows = await db('player_field_override').where({
+    pid: player_row.pid
+  })
+  const overrides = new Map(
+    override_rows.map((row) => [row.column_name, row.override_value])
+  )
+
   let changes = 0
   for (const edit of edits) {
     const prop = edit.path[0]
-    const is_null = edit.rhs == null
-    const is_nullable = nullable_props.includes(prop)
-
-    if (is_null && !is_nullable) {
-      continue
-    }
-
-    // ignore empty dates
-    if (edit.rhs === '0000-00-00') {
-      continue
-    }
 
     if (excluded_props.includes(prop)) {
       log(`not allowed to update ${prop}`)
       continue
     }
 
-    if (prop === primary_position_prop && !allow_primary_position_write) {
-      log(
-        `SKIP ${prop} on ${player_row.pid}: pass allow_primary_position_write=true to write it.`
-      )
-      continue
+    // An adjudicated field admits exactly ONE value, and the check sits ahead of
+    // every class guard below because a human verdict outranks a class switch in
+    // BOTH directions: it refuses writes the class guards allow (date_of_birth
+    // is protected by nothing today), and it admits the one value a class guard
+    // would refuse (the adjudicated id onto a row holding a contaminated one).
+    const has_override = overrides.has(prop)
+
+    if (has_override) {
+      const override_value = overrides.get(prop)
+      if (!override_value_matches(override_value, edit.rhs)) {
+        log(
+          `SKIP ${prop} on ${player_row.pid}: adjudicated override holds ${JSON.stringify(override_value)}, incoming ${JSON.stringify(edit.rhs)}. No allow_* flag lifts this -- revise the verdict through set_player_field_override.`
+        )
+        continue
+      }
+    } else {
+      const is_null = edit.rhs == null
+      const is_nullable = nullable_props.includes(prop)
+
+      if (is_null && !is_nullable) {
+        continue
+      }
+
+      // ignore empty dates
+      if (edit.rhs === '0000-00-00') {
+        continue
+      }
+
+      if (prop === primary_position_prop && !allow_primary_position_write) {
+        log(
+          `SKIP ${prop} on ${player_row.pid}: pass allow_primary_position_write=true to write it.`
+        )
+        continue
+      }
     }
 
     if (protected_props.includes(prop) && !allow_protected_props) {
-      const exists = await db('player').where(prop, edit.rhs).limit(1)
-      if (exists.length) {
-        log(
-          `Player (${exists[0].pid}) has existing value (${edit.rhs}) for field (${prop})`
-        )
-        continue
+      // A clear cannot collide with anything, and it only reaches here through
+      // an override -- the null guard above stops every other caller.
+      if (edit.rhs != null) {
+        const exists = await db('player').where(prop, edit.rhs).limit(1)
+        if (exists.length) {
+          log(
+            `Player (${exists[0].pid}) has existing value (${edit.rhs}) for field (${prop})`
+          )
+          continue
+        }
       }
 
       // Refuse to silently overwrite the same pid's existing-non-null
       // differing value -- guards against importers hijacking external IDs
       // when a name-fallback match lands on the wrong relative.
+      //
+      // An override IS the adjudication of that differing value, so it satisfies
+      // this same-row guard. The cross-row check above is deliberately NOT
+      // lifted: it protects a DIFFERENT row, and it is what mechanically
+      // enforces the clear-before-set ordering when two rows swap contaminated
+      // ids, which was documented only as prose until now.
       if (
+        !has_override &&
         player_row[prop] != null &&
         String(player_row[prop]) !== String(edit.rhs)
       ) {
@@ -166,6 +227,7 @@ const updatePlayer = async ({
     }
 
     if (
+      !has_override &&
       combine_protected_props.includes(prop) &&
       source !== 'combine' &&
       player_row[prop] !== null &&
@@ -184,7 +246,14 @@ const updatePlayer = async ({
     )
 
     const prev = edit.lhs
-    if (prev) {
+    // `prev` alone would drop the trail for a write onto an EMPTY field, which
+    // is most of an override's first customers -- twelve of the fourteen
+    // sleeper_player_id repairs land on a null column. An adjudicated write with
+    // no changelog row is the unattributed correction this mechanism exists to
+    // end, so an override always records one. The condition is widened only for
+    // overridden fields: making every importer log its null-to-value writes
+    // would add tens of millions of rows to a 67.9M-row table for no verdict.
+    if (prev || has_override) {
       if (!source) {
         throw new Error(
           `updatePlayer: source is required to record a player_changelog entry (pid ${player_row.pid}, field ${prop})`
@@ -197,7 +266,8 @@ const updatePlayer = async ({
           column_name: prop,
           previous_value: prev,
           new_value: edit.rhs,
-          source
+          source,
+          reason
         }
       })
     }

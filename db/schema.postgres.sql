@@ -544,6 +544,7 @@ ALTER TABLE IF EXISTS ONLY public.player_gamelogs_default DROP CONSTRAINT IF EXI
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs DROP CONSTRAINT IF EXISTS player_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_game_outcome_correlations DROP CONSTRAINT IF EXISTS player_game_outcome_correlations_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fleaflicker_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_field_override DROP CONSTRAINT IF EXISTS player_field_override_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_ffpc_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fantrax_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fanduel_id_unique;
@@ -827,6 +828,7 @@ DROP TABLE IF EXISTS public.player_gamelogs_year_2000;
 DROP TABLE IF EXISTS public.player_gamelogs_default;
 DROP TABLE IF EXISTS public.player_gamelogs;
 DROP TABLE IF EXISTS public.player_game_outcome_correlations;
+DROP TABLE IF EXISTS public.player_field_override;
 DROP TABLE IF EXISTS public.player_dfs_ownership;
 DROP TABLE IF EXISTS public.player_defender_gamelogs;
 DROP TABLE IF EXISTS public.player_contracts;
@@ -20870,6 +20872,31 @@ CREATE TABLE public.player_dfs_ownership (
 
 
 --
+-- Name: player_field_override; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_field_override (
+    pid character varying(25) NOT NULL,
+    column_name text NOT NULL,
+    override_value text,
+    provider_name text NOT NULL,
+    adjudicated_by text NOT NULL,
+    adjudicated_at timestamp with time zone NOT NULL,
+    evidence_source text NOT NULL,
+    reason text NOT NULL,
+    CONSTRAINT player_field_override_column_name_writable CHECK ((column_name <> ALL (ARRAY['pid'::text, 'formatted_name'::text]))),
+    CONSTRAINT player_field_override_provenance_present CHECK (((length(btrim(provider_name)) > 0) AND (length(btrim(adjudicated_by)) > 0) AND (length(btrim(evidence_source)) > 0) AND (length(btrim(reason)) > 0)))
+);
+
+
+--
+-- Name: TABLE player_field_override; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.player_field_override IS 'Human verdicts about a single (pid, column_name) that must survive re-import. Declared and applied together by libs-server/set-player-field-override.mjs; enforced as a per-field veto in libs-server/update-player.mjs; reconciled against live `player` values by the player-field-override-drift data check. Not a read path -- `player` remains the only value consumers read.';
+
+
+--
 -- Name: player_game_outcome_correlations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -29583,6 +29610,14 @@ ALTER TABLE ONLY public.player
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_ffpc_id_unique UNIQUE (ffpc_player_id);
+
+
+--
+-- Name: player_field_override player_field_override_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_field_override
+    ADD CONSTRAINT player_field_override_pkey PRIMARY KEY (pid, column_name);
 
 
 --
@@ -59500,6 +59535,13 @@ GRANT SELECT ON TABLE public.player_defender_gamelogs TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.player_dfs_ownership TO league_reader;
+
+
+--
+-- Name: TABLE player_field_override; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.player_field_override TO league_reader;
 
 
 --

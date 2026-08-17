@@ -453,6 +453,72 @@ const registry = [
     min_denominator: 25000,
     repair_command:
       'Adjudicate each pair before merging anything. The strongest positive same-person evidence available here is the same draft_overall_pick on both rows — within one anchor group, since the column is NOT unique per year across the table (96 year/pick groups hold more than one row, 40 of them with differing last names). A shared birth date is NOT evidence, because brothers share one. Park a genuine two-person pair in db/checks/parked.json; merge the rest in a dated file under db/adhoc/ following 2026-08-16-dedupe-duplicate-person-rows-round-5.sql — round 5 rather than round 4, whose hand-written column list names three columns a later conform renamed away and silently drops any column added since it was written. Note this class is HARDER to merge than the sibling one, and needs a stronger oracle: there the donor is always a shell holding no identifier and no gamelog, so a wrong merge costs little and reverses cleanly, while here BOTH rows routinely carry identifiers and gamelogs and a wrong merge collides them.'
+  },
+
+  {
+    check_id: 'player-field-override-drift',
+    invariant:
+      'Every human verdict in player_field_override equals the value `player` actually holds for that (pid, column_name). This is the only oracle that can see a correction which was RECORDED and never LANDED: two writes on the parent repair task were claimed applied and "verified by read-back" while JORD-MURR-006621 still held 8106 and SEAN-RYAN-027249 still held 5834, and nothing could detect it because the intended values existed only as prose. player_changelog structurally cannot cover this — a write that never happened leaves no changelog row at all.',
+    grain: ['pid', 'column_name'],
+    rows: async () => {
+      // The compared column is DATA, not a literal, so the live value is read
+      // through to_jsonb rather than named in the select list. `->>` yields the
+      // text form of whatever type the column is, which is the spelling the
+      // override stores.
+      //
+      // LEFT JOIN, not JOIN: an override whose player row was merged away is a
+      // verdict that can no longer be honored, and an inner join would make it
+      // silently leave the population rather than report it.
+      const { rows: found } = await db.raw(
+        `
+        select
+          o.pid,
+          o.column_name,
+          o.override_value,
+          to_jsonb(p) ->> o.column_name as live_value,
+          (p.pid is null) as is_player_row_missing
+        from player_field_override o
+        left join player p on p.pid = o.pid
+        `
+      )
+
+      // Every override is scanned, so the whole table is the denominator. There
+      // is no acceptable fraction of ignored human verdicts, which is why this
+      // is a count over the declared population rather than a rate over a
+      // larger one.
+      const denominator = found.length
+
+      const violations = found.filter((row) => {
+        if (row.is_player_row_missing) return true
+        const { override_value, live_value } = row
+        if (override_value == null && live_value == null) return false
+        if (override_value == null || live_value == null) return true
+        return String(override_value) !== String(live_value)
+      })
+
+      return violations.length
+        ? violations.map((row) => ({
+            pid: row.pid,
+            column_name: row.column_name,
+            numerator: 1,
+            denominator
+          }))
+        : [{ pid: null, column_name: null, numerator: 0, denominator }]
+    },
+    max_count: 0,
+    calibration:
+      'EXACT, not a tolerance: an override disagreeing with `player` is a defect by definition, so the healthy reading is zero violations against a non-zero scanned population and max_count 0 is a live invariant rather than an aspiration. Measured 2026-08-17 at seeding: 14 overrides, 0 violations — the 8 date_of_birth backfills and 6 sleeper_player_id links that were applied to `player` with no provenance at all, retro-declared so their evidence attaches to values already in the table. This catches THREE distinct causes with one predicate, which is why it earns its own row: an override recorded but never applied (the failure that motivated it), an importer forcing the field back afterwards, and a hand-written UPDATE outside updatePlayer. It does not care which happened and cannot be fooled by the write path, unlike any contract inside updatePlayer itself. THIS IS A CHECK AND NOT A GATE, deliberately: override-versus-player drift arises with no code change at all, and db/README.md is explicit that a standing data condition in db/gates/ defers every session push to mistakia/league. WHAT IT CANNOT SEE: a field nobody has adjudicated. It grades declared verdicts only, so it is silent about a wrong value carrying no override — that is the resolver and the importers` business, not this. The population only grows, since a verdict is revised in place rather than deleted.',
+    min_gradeable_units: 1,
+    // Exactly one sentinel row when clean, so the row-count floor is a
+    // tautology and the denominator carries the whole signal. 14 overrides at
+    // seeding, growing as the parent repair task declares the rest of its
+    // adjudicated writes. 10 sits under today's figure and catches the reading
+    // that matters here — an emptied override table would otherwise report a
+    // clean sentinel and pass, which is exactly the vacuous green this floor
+    // exists to deny.
+    min_denominator: 10,
+    repair_command:
+      'Do NOT edit player_field_override to match `player` — that inverts the direction of authority and destroys the verdict. Establish which side is wrong first. If the override is right and the write never landed or was reverted, re-apply it: node libs-server/set-player-field-override.mjs --pid <pid> --column_name <column> --override_value <value> --provider_name <provider> --adjudicated_by <who> --evidence_source <evidence> --reason <why>. The usual cause of a refusal is the cross-row uniqueness guard on an external id, which requires clearing the value from the row wrongly holding it FIRST. If the verdict itself has been superseded by new evidence, re-run that same command with the new value and evidence, which revises the row in place and records the change in player_changelog. If the player row was merged away, re-point the override at the surviving pid.'
   }
 ]
 
