@@ -85,7 +85,26 @@
 // and that shape is not reproduced here.
 //
 // Exit 0 = no findings; 1 = a finding or a control that stayed green; 2 = a
-// tooling error (unresolvable base ref, unreadable schema).
+// tooling error (unresolvable base ref, unreadable schema, or a window with no
+// retype AND no schema change at all -- see derive_schema_delta).
+//
+// THE NO-SUBJECT VERDICT is checked by running the three paths against real
+// refs, since it is a whole-run outcome that no per-matcher control can reach.
+// Re-verify with these; each was measured 2026-08-16:
+//
+//   --base 805d8a5d6~1   real retype     33 retyped columns, 7 controls RED,
+//                                        exit 1 on a finding (unchanged)
+//   --base 07352afbd~1   additive only   0 retyped, delta +1334/-1333 (net +1 =
+//                                        seasons.rookie_draft_end_at; the churn
+//                                        is a sibling rename counted across
+//                                        nfl_plays' partition children),
+//                                        NO SUBJECT, exit 0
+//   --base HEAD          no movement     delta 0, TOOLING ERROR, exit 2
+//
+// The middle case is the one this exists for: before 2026-08-16 it exited 1 with
+// `negative control STAYED GREEN` over a cluster with nothing wrong, and the
+// remedy that failure invites -- deleting the adjudications it reports as stale
+// -- is destructive.
 //
 // Uses console.log deliberately, never `debug`.
 
@@ -228,6 +247,73 @@ const assert_table_coverage = (sql, tables, revision_label) => {
 // both revisions and its type moved from numeric to temporal. The name-identity
 // requirement is what separates this from a rename -- a renamed column is
 // another gate's class and is absent from the base side entirely.
+// An EMPTY retyped set has two causes that are byte-identical at the subject
+// line, and they want opposite verdicts. Either the window genuinely contains no
+// type change -- an ADDITIVE-only cluster, where the correct answer is "not
+// applicable" -- or the base ref resolves but sits AFTER the DDL, the documented
+// wrong-base failure, where the retype is real and simply outside the window.
+//
+// The retyped set cannot tell them apart. The WIDER schema delta can, for the
+// case that actually occurs: an additive cluster changes the schema (it adds a
+// column), while a base ref pointing past the whole cluster typically shows no
+// schema change at all. So a run with no subject AND no schema movement is
+// treated as a tooling error rather than a pass, and a run with no subject but
+// real additive movement is allowed to be OK.
+//
+// This is a discriminator, not a proof: a base ref landing between two commits
+// of the same cluster could show movement and still be wrong. That is why the
+// no-subject banner prints the base ref and says outright that confirming it is
+// the DDL commit is the caller's job.
+const derive_schema_delta = (base_tables, head_tables) => {
+  let added_tables = 0
+  let removed_tables = 0
+  let added_columns = 0
+  let removed_columns = 0
+  let type_changes = 0
+
+  for (const [table, columns] of head_tables) {
+    const base_columns = base_tables.get(table)
+    if (!base_columns) {
+      added_tables += 1
+      continue
+    }
+    for (const [column, type] of columns) {
+      const base_type = base_columns.get(column)
+      if (!base_type) {
+        added_columns += 1
+        continue
+      }
+      if (base_type !== type) type_changes += 1
+    }
+  }
+
+  for (const [table, columns] of base_tables) {
+    const head_columns = head_tables.get(table)
+    if (!head_columns) {
+      removed_tables += 1
+      continue
+    }
+    for (const column of columns.keys()) {
+      if (!head_columns.has(column)) removed_columns += 1
+    }
+  }
+
+  const total =
+    added_tables +
+    removed_tables +
+    added_columns +
+    removed_columns +
+    type_changes
+  return {
+    added_tables,
+    removed_tables,
+    added_columns,
+    removed_columns,
+    type_changes,
+    total
+  }
+}
+
 const derive_retyped_columns = (base_tables, head_tables) => {
   const retyped = []
   for (const [table, columns] of head_tables) {
@@ -847,9 +933,19 @@ const main = async () => {
 
   const retyped = derive_retyped_columns(base_tables, head_tables)
 
+  const schema_delta = derive_schema_delta(base_tables, head_tables)
+
   console.log(`SUBJECT (derived from the schema diff against ${options.base})`)
   if (!retyped.length) {
     console.log('  no numeric -> temporal retype in this window')
+    console.log(
+      `  schema delta in window: ${schema_delta.total} change(s) — ` +
+        `${schema_delta.added_columns} column(s) added, ` +
+        `${schema_delta.removed_columns} removed, ` +
+        `${schema_delta.type_changes} retyped (any direction), ` +
+        `${schema_delta.added_tables} table(s) added, ` +
+        `${schema_delta.removed_tables} removed`
+    )
   }
   for (const entry of retyped) {
     console.log(
@@ -978,6 +1074,73 @@ const main = async () => {
   )
   for (const entry of not_exercised) {
     console.log(`  ${entry.path}  ${entry.column}  ${entry.kind}`)
+  }
+
+  // With no subject there is no read site to mutate, so the controls cannot run
+  // and their verdict carries no information. Requiring `control_ok` here is
+  // what made an additive-only cluster exit 1 with `negative control STAYED
+  // GREEN` -- a failure over a cluster with nothing wrong, whose documented
+  // remedy (deleting the adjudications it reports) is actively destructive.
+  if (!retyped.length) {
+    console.log('')
+    if (!schema_delta.total) {
+      console.log(
+        'TOOLING ERROR: no retype AND no schema change of any kind against ' +
+          `${options.base}.`
+      )
+      console.log(
+        '  A base ref that sits AFTER the DDL produces exactly this. Give this ' +
+          'gate the SCHEMA commit (the DDL apply), not the consumer-sweep commit —'
+      )
+      console.log(
+        '  they are different commits whenever the sweep did not ride in the ' +
+          'same commit as the apply, and only this gate takes the first one.'
+      )
+      // Same reason as the no-subject path below: without the block the runner
+      // reports BLIND, which is a true failure under a label that hides the
+      // actual cause. Both are failures, so this is precision, not leniency.
+      console.log('')
+      console.log('NEGATIVE CONTROL')
+      console.log(
+        '  NOT RUN — no retyped column in this window, so there is nothing to ' +
+          'mutate. Fix the base ref and re-run.'
+      )
+      process.exit(2)
+    }
+    console.log(
+      'NO SUBJECT: this window changes the schema but retypes nothing ' +
+        'numeric -> temporal, which is what an ADDITIVE-only cluster looks like.'
+    )
+    console.log(
+      '  Nothing to check, so the negative controls are not run and their ' +
+        'silence is not evidence either way.'
+    )
+    // The runner reads a gate that DECLARES a negative control and prints no
+    // block as BLIND (scripts/check-cluster-gates.mjs), which would put this
+    // cluster right back where it started. So the block is printed, saying
+    // plainly that the controls did NOT run -- never a fabricated pass, and
+    // deliberately without the STAYED GREEN token, which the runner reads as a
+    // gate that cannot report.
+    console.log('')
+    console.log('NEGATIVE CONTROL')
+    console.log(
+      '  NOT RUN — every control mutates a real corpus read of a real retyped ' +
+        'column, and this window has none to mutate.'
+    )
+    console.log(
+      `  Confirm ${options.base} is your DDL commit before reading this as a ` +
+        'pass — the schema delta above is a discriminator, not a proof.'
+    )
+    console.log('')
+    const failed_without_subject = findings.length || stale.length
+    if (!failed_without_subject) {
+      console.log('GATE OK (not applicable to this cluster)')
+      process.exit(0)
+    }
+    console.log(
+      `GATE FAIL: ${findings.length} finding(s), ${stale.length} stale adjudication(s)`
+    )
+    process.exit(1)
   }
 
   const control_ok = run_negative_controls({ retyped_names, corpus_read_site })
