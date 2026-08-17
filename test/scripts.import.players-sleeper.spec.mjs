@@ -39,7 +39,9 @@ const sleeper_item = ({
   rookie_year,
   team = null,
   college = 'Test University',
-  injury_status = null
+  injury_status = null,
+  sportradar_id = null,
+  yahoo_id = null
 }) => ({
   player_id: sleeper_id,
   full_name: `${first_name} ${last_name}`,
@@ -55,6 +57,8 @@ const sleeper_item = ({
   injury_status,
   status: 'Active',
   active: true,
+  sportradar_id,
+  yahoo_id,
   metadata: rookie_year === undefined ? {} : { rookie_year }
 })
 
@@ -152,7 +156,9 @@ const seed_player = ({
   primary_position = 'WR',
   current_nfl_team = 'KC',
   nfl_draft_year = null,
-  sleeper_player_id = null
+  sleeper_player_id = null,
+  sportradar_player_id = null,
+  yahoo_player_id = null
 }) =>
   db('player').insert({
     pid,
@@ -165,7 +171,9 @@ const seed_player = ({
     current_nfl_team,
     date_of_birth,
     nfl_draft_year,
-    sleeper_player_id
+    sleeper_player_id,
+    sportradar_player_id,
+    yahoo_player_id
   })
 
 const created_row = (sleeper_id) =>
@@ -494,6 +502,101 @@ describe('SCRIPTS import-players-sleeper', function () {
 
       expect(counts.skipped_exists).to.equal(1)
       expect(shortfall).to.equal(null)
+    })
+
+    /*
+      The name rungs cannot reach an abbreviated first name: format_player_name
+      maps "E.J. Jenkins" to `ej jenkins` and the stored row to `emanuel
+      jenkins`, which share no token. Production ran into exactly this on
+      2026-08-17 -- the resolver returned `new`, the insert went out, and
+      Postgres refused it on the sportradar UNIQUE index, which the importer
+      counted as `failed` and reported as a shortfall on EVERY run thereafter.
+    */
+    it('refuses a create when another row already holds an incoming unique external id', async function () {
+      await seed_player({
+        pid: 'EMAN-JENK-000001',
+        first_name: 'Emanuel',
+        last_name: 'Jenkins',
+        date_of_birth: '0000-00-00',
+        sportradar_player_id: 'sr-emanuel-jenkins'
+      })
+
+      const sleeper_id = next_sleeper_id()
+      stub_payload([
+        ...injury_filler(),
+        sleeper_item({
+          sleeper_id,
+          first_name: 'E.J.',
+          last_name: 'Jenkins',
+          birth_date: '1998-11-03',
+          rookie_year: '2023',
+          sportradar_id: 'sr-emanuel-jenkins'
+        })
+      ])
+
+      const { counts, shortfall } = await spec_run()
+
+      // The disposition that matters: a REFUSAL the resolver owns, not a
+      // writer FAILURE the database owns.
+      expect(counts.skipped_exists).to.equal(1)
+      expect(counts.created).to.equal(FILLER_COUNT)
+      expect(counts.failed).to.equal(0)
+      expect(shortfall).to.equal(null)
+      expect(await created_row(sleeper_id)).to.equal(undefined)
+    })
+
+    it('checks every unique external id, not just sportradar', async function () {
+      await seed_player({
+        pid: 'MARC-HARR-000001',
+        first_name: 'Marcus',
+        last_name: 'Harris',
+        date_of_birth: '1989-03-01',
+        yahoo_player_id: 987654
+      })
+
+      const sleeper_id = next_sleeper_id()
+      stub_payload([
+        ...injury_filler(),
+        sleeper_item({
+          sleeper_id,
+          first_name: 'M',
+          last_name: 'Harris',
+          birth_date: '1989-03-01',
+          rookie_year: '2012',
+          yahoo_id: 987654
+        })
+      ])
+
+      const { counts, shortfall } = await spec_run()
+
+      expect(counts.skipped_exists).to.equal(1)
+      expect(counts.failed).to.equal(0)
+      expect(shortfall).to.equal(null)
+      expect(await created_row(sleeper_id)).to.equal(undefined)
+    })
+
+    // The rung must not swallow a genuine create: a candidate whose ids no row
+    // holds is still new, which is what keeps this from being a blunt refusal.
+    it('still creates when no row holds any of the incoming external ids', async function () {
+      const sleeper_id = next_sleeper_id()
+      stub_payload([
+        ...injury_filler(),
+        sleeper_item({
+          sleeper_id,
+          first_name: 'Unheld',
+          last_name: next_fixture_name('Identifier'),
+          birth_date: '2001-05-05',
+          rookie_year: '2024',
+          sportradar_id: 'sr-nobody-holds-this'
+        })
+      ])
+
+      const { counts, shortfall } = await spec_run()
+
+      expect(counts.skipped_exists).to.equal(0)
+      expect(counts.created).to.equal(FILLER_COUNT + 1)
+      expect(shortfall).to.equal(null)
+      expect(await created_row(sleeper_id)).to.exist
     })
   })
 

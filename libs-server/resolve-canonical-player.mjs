@@ -19,6 +19,42 @@ export const UNKNOWN_REASONS = {
   BIRTH_DATES_DIFFER: 'birth_dates_differ'
 }
 
+export const EXISTS_REASONS = {
+  EXTERNAL_ID_HELD: 'external_id_held',
+  NAME_AND_BIRTH_DATE: 'name_and_birth_date'
+}
+
+/*
+  Every column here carries a UNIQUE index on `player`, so a row already holding
+  one of these values makes the insert IMPOSSIBLE -- Postgres rejects it with
+  23505 regardless of what any resolver believes about identity.
+
+  That is why this rung is NOT an identity heuristic and is not in tension with
+  the "no external-id rungs" reasoning below. It is a pre-check of a constraint
+  the insert enforces anyway; the only question it answers is whether the caller
+  finds out before or after wasting an insert.
+
+  Measured in production 2026-08-17, on the first repaired run: the resolver's
+  name rungs returned `new` for two entries the database then refused --
+  sleeper 1771 "M Harris" against MARC-HARR-022384 "marcus harris" (same
+  1989-03-01 birth date, same Murray State) and sleeper 11304 "E.J. Jenkins"
+  against EMAN-JENK-017347 "emanuel jenkins" (same Georgia Tech, stored birth
+  date is the placeholder). format_player_name maps neither abbreviated name
+  onto its full-name row, so no name rung can ever reach either one. Both are
+  the same human under an abbreviated first name, and both recurred on every
+  run, which made the job's own oracle report failure nightly and permanently.
+*/
+export const UNIQUE_EXTERNAL_ID_COLUMNS = [
+  'sleeper_player_id',
+  'gsis_player_id',
+  'sportradar_player_id',
+  'espn_player_id',
+  'yahoo_player_id',
+  'rotoworld_player_id',
+  'rotowire_player_id',
+  'fantasy_data_player_id'
+]
+
 const holds_real_birth_date = (row) =>
   Boolean(row.date_of_birth) && row.date_of_birth !== BIRTH_DATE_PLACEHOLDER
 
@@ -52,17 +88,62 @@ const holds_real_birth_date = (row) =>
   Measured on the Sleeper create path, collapsing `unknown` toward `new`
   misclassified 9 existing people as new.
 
-  ## There are deliberately no external-id rungs
+  ## The external-id rung is a constraint pre-check, not an identity ladder
 
-  Measured on 573 unmatched Sleeper create candidates: 1 carried a gsis id and it
-  resolved to zero rows, and of 543 carrying a sportradar id only 2 resolved to a
-  row this name+birth-date rule does not already reach. The vendor ids a feed
-  supplies are mostly written BY the name-matching importer whose errors an
-  existence check exists to catch, so they cannot detect those errors -- they
-  agree perfectly and vacuously. gsis_player_id is the one id that dissents, and
-  a feed does not carry it for exactly the unmatched players this is about.
+  This function shipped 2026-08-17 with no id rung at all, on the measurement
+  that of 573 unmatched Sleeper candidates only 2 resolved to a row the
+  name+birth-date rule does not already reach -- and on the reasoning that
+  vendor ids are mostly written BY the name-matching importer whose errors an
+  existence check exists to catch, so they agree vacuously.
+
+  The reasoning still holds for RANKING identity signals and the ladder is still
+  not built. What the measurement got wrong is that those 2 were not harmless:
+  both resolved as `new`, so the run attempted a create and Postgres rejected it
+  on a UNIQUE index. See UNIQUE_EXTERNAL_ID_COLUMNS. The rung added afterwards
+  asks a strictly narrower question than an identity ladder would -- "is this
+  insert possible" rather than "who is this person" -- and its worst failure is a
+  wrongly refused create, which is the cheap error by the asymmetry above.
 */
-const resolve_canonical_player = async ({ name, date_of_birth }) => {
+const resolve_canonical_player = async ({
+  name,
+  date_of_birth,
+  external_ids = {}
+}) => {
+  /*
+    Rung 0, ahead of the name rungs because it is a hard constraint rather than a
+    signal: if any row already holds one of these unique ids, no create is
+    possible at all. Ordering it first also means a caller never pays for the
+    name query on a candidate the database was going to refuse.
+  */
+  const held_ids = UNIQUE_EXTERNAL_ID_COLUMNS.map((column) => ({
+    column,
+    value: external_ids[column]
+  })).filter(
+    ({ value }) => value !== null && value !== undefined && value !== ''
+  )
+
+  if (held_ids.length) {
+    const id_matches = await db('player').where(function () {
+      for (const { column, value } of held_ids) {
+        this.orWhere(column, value)
+      }
+    })
+
+    if (id_matches.length) {
+      const player_row = id_matches[0]
+      const matched = held_ids.find(
+        ({ column, value }) => String(player_row[column]) === String(value)
+      )
+      return {
+        status: 'exists',
+        player_row,
+        reason: EXISTS_REASONS.EXTERNAL_ID_HELD,
+        matched_external_id_column: matched ? matched.column : null,
+        candidates: id_matches
+      }
+    }
+  }
+
   const formatted_name = format_player_name(name || '')
   if (!formatted_name) {
     return {
@@ -107,7 +188,12 @@ const resolve_canonical_player = async ({ name, date_of_birth }) => {
   )
 
   if (birth_date_matches.length === 1) {
-    return { status: 'exists', player_row: birth_date_matches[0], candidates }
+    return {
+      status: 'exists',
+      player_row: birth_date_matches[0],
+      reason: EXISTS_REASONS.NAME_AND_BIRTH_DATE,
+      candidates
+    }
   }
 
   // Load-bearing rather than defensive: 6 groups share a formatted_name and a
@@ -156,9 +242,12 @@ export default resolve_canonical_player
 
 export const describe_resolution = ({ name, date_of_birth, resolution }) => {
   const pids = (resolution.candidates || []).map((row) => row.pid).join(', ')
+  const matched_column = resolution.matched_external_id_column
+    ? ` on=${resolution.matched_external_id_column}`
+    : ''
   return `${resolution.status}${
     resolution.reason ? ` (${resolution.reason})` : ''
-  }: "${name}" dob=${date_of_birth || 'absent'} candidates=[${pids}]`
+  }: "${name}" dob=${date_of_birth || 'absent'}${matched_column} candidates=[${pids}]`
 }
 
 export { holds_real_birth_date }

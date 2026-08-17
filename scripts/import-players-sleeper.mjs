@@ -343,9 +343,14 @@ const run = async ({
       // Does this person already exist? `!player_row` above only means "no row
       // matched my narrow UPDATE criteria", and reading that as "this person does
       // not exist" is what would write 109 rows for people already in the table.
+      // player_data already carries every external id, because `data` is spread
+      // into it above -- so this hands the resolver the SAME id values the
+      // insert is about to attempt, which is what makes the unique-constraint
+      // pre-check exact rather than approximate.
       const resolution = await resolve_canonical_player({
         name,
-        date_of_birth: item.birth_date
+        date_of_birth: item.birth_date,
+        external_ids: player_data
       })
 
       if (resolution.status !== 'new') {
