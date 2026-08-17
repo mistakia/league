@@ -193,7 +193,7 @@ const process_projections_for_league_format = async ({
   for (const process_year of years) {
     const projections = await db('projections_index').where({
       season_year: process_year,
-      sourceid: external_data_sources.AVERAGE,
+      source_id: external_data_sources.AVERAGE,
       season_type: 'REG'
     })
 

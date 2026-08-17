@@ -38,21 +38,21 @@ const JSONB_COLUMNS = new Set(
 )
 
 export const LEAGUE_COLUMNS = [
-  'num_teams',
+  'number_teams',
   'starter_slots_quarterback',
   'starter_slots_running_back',
   'starter_slots_wide_receiver',
   'starter_slots_tight_end',
   'starter_slots_running_back_wide_receiver_flex',
-  'srbwrte',
-  'sqbrbwrte',
+  'starter_slots_running_back_wide_receiver_tight_end_flex',
+  'starter_slots_superflex',
   'starter_slots_wide_receiver_tight_end_flex',
   'starter_slots_defense_special_teams',
   'starter_slots_kicker',
   'bench_slot_count',
   'practice_squad_slot_count',
   'reserve_short_term_limit',
-  'cap',
+  'salary_cap',
   'min_bid'
 ]
 

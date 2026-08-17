@@ -22,8 +22,8 @@ export default function SelectedPlayerProjection({
   const rows = []
   let has_action = false
   projections.forEach((p, index) => {
-    const isUser = !p.sourceid
-    const title = isUser ? 'User' : <Source sourceId={p.sourceid} />
+    const isUser = !p.source_id
+    const title = isUser ? 'User' : <Source sourceId={p.source_id} />
     const action = isUser && (
       <div className='row__action'>
         <div onClick={handle_clear_click}>

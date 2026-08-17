@@ -73,7 +73,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='RB/WR/TE'
-        field='srbwrte'
+        field='starter_slots_running_back_wide_receiver_tight_end_flex'
         type='int'
         max={3}
         min={0}
@@ -81,7 +81,7 @@ export default function LeagueSettingsStartingLineup({
       />
       <EditableLeagueField
         label='QB/RB/WR/TE'
-        field='sqbrbwrte'
+        field='starter_slots_superflex'
         type='int'
         max={1}
         min={0}

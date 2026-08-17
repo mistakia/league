@@ -313,7 +313,7 @@ export default async function ({
       tid
     })
     const transaction = {
-      userid: user_id,
+      user_id,
       tid,
       lid: league_id,
       pid: activate_pid,
@@ -377,7 +377,7 @@ export default async function ({
   // of the two rows, which share a timestamp.
   if (is_practice_squad_activation) {
     const activate_transaction = {
-      userid: user_id,
+      user_id,
       tid,
       lid: league_id,
       pid: reserve_pid,
@@ -405,7 +405,7 @@ export default async function ({
   }
 
   const transaction = {
-    userid: user_id,
+    user_id,
     tid,
     lid: league_id,
     pid: reserve_pid,

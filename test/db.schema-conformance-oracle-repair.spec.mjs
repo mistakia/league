@@ -56,7 +56,14 @@ CREATE TABLE public.nfl_games (
 
 CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
     second_and_mid_dvoa numeric,
-    mid_zone_dvoa numeric
+    team_rush_mid_guard_yards numeric,
+    mid_zone_dvoa numeric,
+    mid_zone_dvoa_rank integer
+);
+
+CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
+    mid_zone_dvoa numeric,
+    mid_zone_dvoa_rank integer
 );
 
 CREATE TABLE public.league_formats (
@@ -132,7 +139,30 @@ describe('schema conformance audit -- 2026-08-15 oracle repair', function () {
       'dvoa_team_unit_seasonlogs_history.second_and_mid_dvoa'
     )
     expect(shorthand_columns).to.include(
+      'dvoa_team_unit_seasonlogs_history.team_rush_mid_guard_yards'
+    )
+  })
+
+  it('ratifies `mid_zone` by table.column without ratifying the token', function () {
+    // Settled 2026-08-17 on the DVOA team-unit batch. "Mid zone" is the
+    // published Football Outsiders blocking scheme -- two words, not an
+    // abbreviation of one -- so `middle_zone` would rename a vendor term
+    // rather than conform shorthand. The carve-out is per (table, column) and
+    // token-scoped, which is what keeps the OTHER two senses of `mid` on the
+    // same tables reportable: a blanket `mid` ratification would satisfy the
+    // includes here while silently retiring `second_and_mid` and
+    // `team_rush_mid_guard`, so those are asserted flagged directly above.
+    expect(shorthand_columns).to.not.include(
       'dvoa_team_unit_seasonlogs_history.mid_zone_dvoa'
+    )
+    expect(shorthand_columns).to.not.include(
+      'dvoa_team_unit_seasonlogs_history.mid_zone_dvoa_rank'
+    )
+    expect(shorthand_columns).to.not.include(
+      'dvoa_team_unit_seasonlogs_index.mid_zone_dvoa'
+    )
+    expect(shorthand_columns).to.not.include(
+      'dvoa_team_unit_seasonlogs_index.mid_zone_dvoa_rank'
     )
   })
 
@@ -271,8 +301,8 @@ describe('schema conformance audit -- 2026-08-15 oracle repair', function () {
     // a vocabulary widened too far, or a carve-out that leaked, would satisfy
     // every `include` above while failing here.
     expect(shorthand_columns.sort()).to.deep.equal([
-      'dvoa_team_unit_seasonlogs_history.mid_zone_dvoa',
       'dvoa_team_unit_seasonlogs_history.second_and_mid_dvoa',
+      'dvoa_team_unit_seasonlogs_history.team_rush_mid_guard_yards',
       'league_formats.is_qb_not_boolean',
       'league_formats.sourceid',
       'league_formats.starter_slots_k',

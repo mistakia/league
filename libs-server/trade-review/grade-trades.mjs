@@ -171,10 +171,10 @@ const load_num_teams_by_format = async ({ format_ids }) => {
   const by_format = new Map()
   if (!format_ids.length) return by_format
   const rows = await db('league_formats')
-    .select('id', 'num_teams')
+    .select('id', 'number_teams')
     .whereIn('id', format_ids)
   for (const format_row of rows) {
-    by_format.set(format_row.id, format_row.num_teams)
+    by_format.set(format_row.id, format_row.number_teams)
   }
   return by_format
 }
@@ -282,14 +282,14 @@ const load_short_bundle_trade_uids = async ({ lid, legs_by_trade }) => {
   const source_counts = new Map()
   for (const table of ['trades_players', 'trades_picks']) {
     const rows = await db(table)
-      .whereIn('tradeid', trade_uids)
-      .groupBy('tradeid')
-      .select('tradeid')
+      .whereIn('trade_id', trade_uids)
+      .groupBy('trade_id')
+      .select('trade_id')
       .count('* as count')
     for (const row of rows) {
       source_counts.set(
-        row.tradeid,
-        (source_counts.get(row.tradeid) || 0) + Number(row.count)
+        row.trade_id,
+        (source_counts.get(row.trade_id) || 0) + Number(row.count)
       )
     }
   }
@@ -433,14 +433,14 @@ const grade_trades = async ({
         now_unix
       })
     }
-    const num_teams = num_teams_by_format.get(terminal_row.league_format_id)
-    if (!num_teams) return 0
+    const number_teams = num_teams_by_format.get(terminal_row.league_format_id)
+    if (!number_teams) return 0
     return (
       ktc_pick_at({
         pick_year: terminal_row.pick_year,
         pick_round: terminal_row.pick_round,
         pick_overall_position: terminal_row.pick_draft_overall_position,
-        num_teams,
+        number_teams,
         target_unix: now_unix,
         idx: pick_ktc
       }) ?? 0

@@ -50,7 +50,7 @@ const import_yahoo_adp = async ({
   const raw_data = await yahoo.get_yahoo_adp()
   const players = parse_yahoo_data(raw_data)
 
-  const adp_format_id = await find_or_create_adp_format(
+  const average_draft_position_format_id = await find_or_create_adp_format(
     db,
     adp_format.decode_adp_type('HALF_PPR_REDRAFT')
   )
@@ -82,11 +82,11 @@ const import_yahoo_adp = async ({
         average_draft_position: source_player.adp,
         min_pick: null,
         max_pick: null,
-        std_dev: null,
+        standard_deviation: null,
         sample_size: null,
         percent_drafted: source_player.percent_drafted,
         source_id: 'YAHOO',
-        adp_format_id
+        average_draft_position_format_id
       })
     } else {
       unmatched_players.push(source_player)
@@ -137,11 +137,11 @@ const import_yahoo_adp = async ({
         average_draft_position: source_player.adp,
         min_pick: null,
         max_pick: null,
-        std_dev: null,
+        standard_deviation: null,
         sample_size: null,
         percent_drafted: source_player.percent_drafted,
         source_id: 'YAHOO',
-        adp_format_id
+        average_draft_position_format_id
       })
     } else {
       log(
@@ -164,7 +164,12 @@ const import_yahoo_adp = async ({
       save: async (batch) => {
         await db('player_adp_index')
           .insert(batch)
-          .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
+          .onConflict([
+            'season_year',
+            'source_id',
+            'average_draft_position_format_id',
+            'pid'
+          ])
           .merge()
       }
     })

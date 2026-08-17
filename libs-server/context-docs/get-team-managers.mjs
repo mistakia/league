@@ -15,7 +15,7 @@ export default async function get_team_managers({ db, lid, year }) {
         'teams.season_year'
       )
     })
-    .join('users', 'users_teams.userid', 'users.id')
+    .join('users', 'users_teams.user_id', 'users.id')
     .where('teams.lid', lid)
     .where('teams.season_year', year)
     .select('users_teams.tid', 'users.username')

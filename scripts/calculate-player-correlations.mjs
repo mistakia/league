@@ -98,12 +98,12 @@ const calculate_player_correlations = async ({
 
   // Calculate correlations for all player pairs
   for (let i = 0; i < player_ids.length; i++) {
-    const pid_a = player_ids[i]
-    const games_a = player_games.get(pid_a)
+    const pid_first = player_ids[i]
+    const games_a = player_games.get(pid_first)
 
     for (let j = i + 1; j < player_ids.length; j++) {
-      const pid_b = player_ids[j]
-      const games_b = player_games.get(pid_b)
+      const pid_second = player_ids[j]
+      const games_b = player_games.get(pid_second)
 
       // Find games where both players played
       const common_games = []
@@ -113,9 +113,9 @@ const calculate_player_correlations = async ({
           const game_info = game_map.get(esbid)
 
           const team_a =
-            player_team_by_game.get(`${pid_a}:${esbid}`) || data_a.team
+            player_team_by_game.get(`${pid_first}:${esbid}`) || data_a.team
           const team_b =
-            player_team_by_game.get(`${pid_b}:${esbid}`) || data_b.team
+            player_team_by_game.get(`${pid_second}:${esbid}`) || data_b.team
 
           common_games.push({
             esbid,
@@ -169,20 +169,22 @@ const calculate_player_correlations = async ({
         }
       }
 
-      // Enforce pid_a < pid_b ordering
-      const [ordered_pid_a, ordered_pid_b] =
-        pid_a < pid_b ? [pid_a, pid_b] : [pid_b, pid_a]
+      // Enforce pid_first < pid_second ordering
+      const [ordered_pid_first, ordered_pid_second] =
+        pid_first < pid_second
+          ? [pid_first, pid_second]
+          : [pid_second, pid_first]
       const [ordered_team_a, ordered_team_b] =
-        pid_a < pid_b
+        pid_first < pid_second
           ? [first_game.team_a, first_game.team_b]
           : [first_game.team_b, first_game.team_a]
 
       correlations_to_insert.push({
-        pid_a: ordered_pid_a,
-        pid_b: ordered_pid_b,
+        pid_first: ordered_pid_first,
+        pid_second: ordered_pid_second,
         season_year: year,
-        nfl_team_a: ordered_team_a,
-        nfl_team_b: ordered_team_b,
+        nfl_team_first: ordered_team_a,
+        nfl_team_second: ordered_team_b,
         games_together: common_games.length,
         correlation: corr_value.toFixed(4),
         relationship_type,
@@ -207,7 +209,7 @@ const calculate_player_correlations = async ({
       save: async (batch) => {
         await db('player_pair_correlations')
           .insert(batch)
-          .onConflict(['pid_a', 'pid_b', 'season_year'])
+          .onConflict(['pid_first', 'pid_second', 'season_year'])
           .merge()
       }
     })

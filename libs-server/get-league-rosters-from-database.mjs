@@ -100,7 +100,7 @@ export default async function ({
           'users_teams.season_year'
         )
       })
-      .where('users_teams.userid', userId)
+      .where('users_teams.user_id', userId)
       .where('teams.lid', lid)
       .where('teams.season_year', current_season.year)
 

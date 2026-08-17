@@ -34,7 +34,7 @@ const import_espn_adp = async ({
 } = {}) => {
   const data = await espn.get_espn_adp({ year })
 
-  const adp_format_id = await find_or_create_adp_format(
+  const average_draft_position_format_id = await find_or_create_adp_format(
     db,
     adp_format.decode_adp_type('PPR_REDRAFT')
   )
@@ -80,11 +80,11 @@ const import_espn_adp = async ({
         average_draft_position: source_player.average_draft_position,
         min_pick: null,
         max_pick: null,
-        std_dev: null,
+        standard_deviation: null,
         sample_size: null,
         percent_drafted: source_player.percent_owned,
         source_id: 'ESPN',
-        adp_format_id
+        average_draft_position_format_id
       })
     } else {
       unmatched_players.push(source_player)
@@ -136,11 +136,11 @@ const import_espn_adp = async ({
         average_draft_position: source_player.average_draft_position,
         min_pick: null,
         max_pick: null,
-        std_dev: null,
+        standard_deviation: null,
         sample_size: null,
         percent_drafted: source_player.percent_owned,
         source_id: 'ESPN',
-        adp_format_id
+        average_draft_position_format_id
       })
     }
   }
@@ -159,7 +159,12 @@ const import_espn_adp = async ({
       save: async (batch) => {
         await db('player_adp_index')
           .insert(batch)
-          .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
+          .onConflict([
+            'season_year',
+            'source_id',
+            'average_draft_position_format_id',
+            'pid'
+          ])
           .merge()
       }
     })

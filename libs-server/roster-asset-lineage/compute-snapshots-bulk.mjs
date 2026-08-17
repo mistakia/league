@@ -230,14 +230,14 @@ const load_indexes = async ({
     }
   }
 
-  // num_teams per league_format_id
-  idx.num_teams = new Map()
+  // number_teams per league_format_id
+  idx.number_teams = new Map()
   if (format_ids.length) {
     const f_rows = await db('league_formats')
-      .select('id', 'num_teams')
+      .select('id', 'number_teams')
       .whereIn('id', format_ids)
     for (const r of f_rows) {
-      idx.num_teams.set(r.id, r.num_teams)
+      idx.number_teams.set(r.id, r.number_teams)
     }
   }
 
@@ -280,7 +280,7 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
     weeks_covid_reserve: 0,
     weeks_started: 0,
     initial_slot_type: null,
-    ps_slot_subtype: null,
+    practice_squad_slot_subtype: null,
     realized_pts_added_net_through_termination: 0,
     realized_pts_added_earned_through_termination: 0,
     realized_pts_added_net_in_active_slot: 0,
@@ -368,14 +368,14 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
     }
     if (first_row) {
       result.initial_slot_type = initial_slot_family(first_row.slot)
-      result.ps_slot_subtype = ps_subtype(first_row.slot)
+      result.practice_squad_slot_subtype = ps_subtype(first_row.slot)
     }
   } else if (draft.asset_type === ASSET_TYPE.PICK) {
     // Pick projection: by rank if known else median of round.
     if (draft.league_format_id) {
       let rank = draft.pick_draft_overall_position
       if (rank == null && draft.pick_round != null) {
-        const nt = idx.num_teams.get(draft.league_format_id)
+        const nt = idx.number_teams.get(draft.league_format_id)
         if (nt) rank = (draft.pick_round - 1) * nt + Math.ceil(nt / 2)
       }
       if (rank != null) {
@@ -387,13 +387,13 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
     // 2023-09-08 onwards. The helper applies an analog-year fallback for
     // pre-data picks (matching round, slot, and years-out-from-target-date)
     // and returns null when neither path yields data.
-    const nt = idx.num_teams.get(draft.league_format_id)
+    const nt = idx.number_teams.get(draft.league_format_id)
     if (nt && draft.pick_year != null && draft.pick_round != null) {
       result.keeptradecut_value_at_acquisition = ktc_pick_at({
         pick_year: draft.pick_year,
         pick_round: draft.pick_round,
         pick_overall_position: draft.pick_draft_overall_position,
-        num_teams: nt,
+        number_teams: nt,
         target_unix: start_unix,
         idx: idx.pick_ktc
       })
@@ -402,7 +402,7 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
           pick_year: draft.pick_year,
           pick_round: draft.pick_round,
           pick_overall_position: draft.pick_draft_overall_position,
-          num_teams: nt,
+          number_teams: nt,
           target_unix: end_unix,
           idx: idx.pick_ktc
         })

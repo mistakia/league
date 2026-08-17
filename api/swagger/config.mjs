@@ -365,7 +365,7 @@ const options = {
               description: 'Fantasy league ID',
               example: 2
             },
-            commishid: {
+            commissioner_user_id: {
               type: 'integer',
               description: 'Commissioner user ID',
               example: 5
@@ -443,7 +443,7 @@ const options = {
               example:
                 'eb75c8fd2acb21fea5d8754f53e9aa2e5d7c40327d5853c58592f658235ba756'
             },
-            num_teams: {
+            number_teams: {
               type: 'integer',
               description: 'Number of fantasy teams in league',
               example: 14
@@ -468,7 +468,7 @@ const options = {
               description: 'Starting TE slots',
               example: 1
             },
-            srbwrte: {
+            starter_slots_running_back_wide_receiver_tight_end_flex: {
               type: 'integer',
               description: 'RB/WR/TE flex slots',
               example: 1
@@ -498,12 +498,12 @@ const options = {
               description: 'Short term reserve spots limit (99+ = unlimited)',
               example: 3
             },
-            cap: {
+            salary_cap: {
               type: 'integer',
               description: 'Salary cap',
               example: 200
             },
-            starting_faab_budget: {
+            starting_free_agent_acquisition_budget: {
               type: 'integer',
               description: 'Free Agent Acquisition Budget',
               example: 200
@@ -568,7 +568,7 @@ const options = {
               description: 'Fantasy team salary cap',
               example: 200
             },
-            faab_balance: {
+            free_agent_acquisition_budget_balance: {
               type: 'integer',
               description: 'Free Agent Acquisition Budget remaining',
               example: 150
@@ -595,7 +595,7 @@ const options = {
               description: 'Player ID',
               example: 'JALE-HURT-003085'
             },
-            sourceid: {
+            source_id: {
               type: 'integer',
               enum: Object.values(external_data_sources),
               description:
@@ -952,7 +952,7 @@ const options = {
                     description: 'Player ID of released player',
                     example: 'JORD-LOVE-001990'
                   },
-                  waiverid: {
+                  waiver_id: {
                     type: 'integer',
                     description: 'Waiver claim ID',
                     example: 12345
@@ -1022,7 +1022,7 @@ const options = {
               description: 'Team ID',
               example: 5
             },
-            userid: {
+            user_id: {
               type: 'integer',
               description: 'User ID who submitted the claim',
               example: 1
@@ -1095,7 +1095,7 @@ const options = {
           required: [
             'uid',
             'tid',
-            'userid',
+            'user_id',
             'lid',
             'pid',
             'priority_order',
@@ -1263,7 +1263,7 @@ const options = {
               description: 'Unique wager ID',
               example: 12345
             },
-            userid: {
+            user_id: {
               type: 'integer',
               description: 'User ID who placed the wager',
               example: 123
@@ -1389,7 +1389,7 @@ const options = {
           },
           required: [
             'wager_id',
-            'userid',
+            'user_id',
             'wager_type',
             'placed_at',
             'bet_count',
@@ -1419,12 +1419,12 @@ const options = {
         UserSourceSetting: {
           type: 'object',
           properties: {
-            userid: {
+            user_id: {
               type: 'integer',
               description: 'User ID who owns this setting',
               example: 123
             },
-            sourceid: {
+            source_id: {
               type: 'integer',
               enum: Object.values(external_data_sources),
               description: 'Projection source ID',
@@ -1439,7 +1439,7 @@ const options = {
               example: 1.5
             }
           },
-          required: ['userid', 'sourceid', 'weight']
+          required: ['user_id', 'source_id', 'weight']
         },
         SourceWeightUpdateRequest: {
           type: 'object',
@@ -1972,7 +1972,7 @@ const options = {
                 uid: {
                   $ref: '#/components/schemas/EntityId'
                 },
-                userid: {
+                user_id: {
                   $ref: '#/components/schemas/UserId'
                 },
                 pid: {
@@ -2005,7 +2005,7 @@ const options = {
                   description: 'When the transaction occurred',
                   example: '2024-10-22T14:22:00Z'
                 },
-                waiverid: {
+                waiver_id: {
                   type: 'integer',
                   nullable: true,
                   description: 'Associated waiver claim ID',
@@ -2014,14 +2014,14 @@ const options = {
               },
               required: [
                 'uid',
-                'userid',
+                'user_id',
                 'pid',
                 'type',
                 'player_salary',
                 'week',
                 'season_year',
                 'occurred_at',
-                'waiverid'
+                'waiver_id'
               ]
             }
           ]
@@ -2037,7 +2037,7 @@ const options = {
                   description: 'Draft pick number',
                   example: 15
                 },
-                pick_str: {
+                pick_string: {
                   type: 'string',
                   description: 'Draft pick string (round.pick)',
                   example: '1.15'
@@ -2124,7 +2124,7 @@ const options = {
                 'Fantasy points based on league scoring (when leagueId provided)',
               example: 18.5
             },
-            pos_rnk: {
+            position_rank: {
               type: 'integer',
               nullable: true,
               description:
@@ -3214,20 +3214,20 @@ const options = {
               description: 'League name',
               example: 'Dynasty Warriors League'
             },
-            num_teams: {
+            number_teams: {
               type: 'integer',
               minimum: 4,
               maximum: 32,
               description: 'Number of teams in the league',
               example: 12
             },
-            cap: {
+            salary_cap: {
               type: 'integer',
               minimum: 0,
               description: 'Salary cap limit',
               example: 200
             },
-            starting_faab_budget: {
+            starting_free_agent_acquisition_budget: {
               type: 'integer',
               minimum: 0,
               description: 'Free agent acquisition budget',
@@ -3359,18 +3359,18 @@ const options = {
               description: 'League name',
               example: 'Dynasty Warriors League'
             },
-            num_teams: {
+            number_teams: {
               type: 'integer',
               minimum: 4,
               maximum: 32,
               description: 'Number of teams in the league'
             },
-            cap: {
+            salary_cap: {
               type: 'integer',
               minimum: 0,
               description: 'Salary cap limit'
             },
-            starting_faab_budget: {
+            starting_free_agent_acquisition_budget: {
               type: 'integer',
               minimum: 0,
               description: 'Free agent acquisition budget'
@@ -3471,7 +3471,7 @@ const options = {
               lid: 2,
               propose_tid: 13,
               accept_tid: 14,
-              userid: 5,
+              user_id: 5,
               offered: '2026-08-08T12:30:32.000Z',
               accepted: null,
               rejected: null,
@@ -3509,7 +3509,7 @@ const options = {
               description: 'Accepting team ID',
               example: 14
             },
-            userid: {
+            user_id: {
               type: 'integer',
               description: 'User ID who proposed the trade',
               example: 5

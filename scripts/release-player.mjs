@@ -384,7 +384,7 @@ const main = async () => {
       lid,
       tid,
       release_pid: release_player.pid,
-      userid: ADMIN_USER_ID,
+      user_id: ADMIN_USER_ID,
       activate_pid: activate_player?.pid || null,
       create_notification: true
     }

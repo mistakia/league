@@ -47,7 +47,7 @@ const generate_scoring_format_player_gamelogs = async ({
         esbid: game.esbid,
         scoring_format_id,
         points: player.points,
-        pos_rnk: player.pos_rnk
+        position_rank: player.position_rank
       })
     }
   }

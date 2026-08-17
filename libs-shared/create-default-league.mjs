@@ -7,11 +7,11 @@ import {
 // payload for new-league creation. Format identities default to the named
 // catalog's canonical default IDs; create_league() overrides them via
 // find-or-create against the actual config tuple.
-const create_default_league = ({ commishid = 0 } = {}) => {
+const create_default_league = ({ commissioner_user_id = 0 } = {}) => {
   const league_params = {
-    commishid,
+    commissioner_user_id,
     name: 'SUPERFLEX DYNASTY LEAGUE',
-    num_teams: 12,
+    number_teams: 12,
     playoff_team_count: 6,
     bye_count: 2,
     bye_candidate_pool: 'league',
@@ -24,8 +24,8 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     starter_slots_wide_receiver: 2,
     starter_slots_tight_end: 1,
     starter_slots_running_back_wide_receiver_flex: 0,
-    srbwrte: 1,
-    sqbrbwrte: 1,
+    starter_slots_running_back_wide_receiver_tight_end_flex: 1,
+    starter_slots_superflex: 1,
     starter_slots_wide_receiver_tight_end_flex: 0,
     starter_slots_defense_special_teams: 1,
     starter_slots_kicker: 1,
@@ -38,8 +38,8 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     max_roster_tight_end: 0,
     max_roster_defense_special_teams: 3,
     max_roster_kicker: 3,
-    starting_faab_budget: 200,
-    cap: 200,
+    starting_free_agent_acquisition_budget: 200,
+    salary_cap: 200,
     passing_attempts: 0.0,
     passing_completions: 0.0,
     passing_yards: 0.05,
@@ -72,7 +72,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     draft_pause_periods: [],
     free_agency_live_auction_start: null,
     min_bid: 1,
-    tddate: 1606626000,
+    trade_deadline_at: 1606626000,
     b_QB: 13.3,
     b_RB: 8.9,
     b_WR: 10.09,

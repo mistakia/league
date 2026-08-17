@@ -219,7 +219,7 @@ const query_params_validator = v.compile({
  *                 summary: Successful parlay wager
  *                 value:
  *                   - wager_id: 12345
- *                     userid: 123
+ *                     user_id: 123
  *                     wager_type: PARLAY
  *                     placed_at: "2022-01-01T00:00:00.000Z"
  *                     bet_count: 1
@@ -246,7 +246,7 @@ const query_params_validator = v.compile({
  *                 summary: Open single bet
  *                 value:
  *                   - wager_id: 12346
- *                     userid: 123
+ *                     user_id: 123
  *                     wager_type: SINGLE
  *                     placed_at: "2022-01-02T00:00:00.000Z"
  *                     bet_count: 1
@@ -317,7 +317,7 @@ router.get('/:user_id', async (req, res) => {
       return res.status(400).send({ error: validation_response[0].message })
     }
 
-    const wagers_query = db('placed_wagers').where('userid', user_id)
+    const wagers_query = db('placed_wagers').where('user_id', user_id)
 
     // placed_before/placed_after remain Unix-second query params (wire contract);
     // placed_at is now timestamptz, so compare against a Date.

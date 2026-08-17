@@ -124,7 +124,7 @@ export default function DraftPage({
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
-              Next: Pick #{nextPick.pick} ({nextPick.pick_str})
+              Next: Pick #{nextPick.pick} ({nextPick.pick_string})
             </div>
             <div>
               {is_paused
@@ -148,7 +148,7 @@ export default function DraftPage({
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
-              Pick #{nextPick.pick} ({nextPick.pick_str})
+              Pick #{nextPick.pick} ({nextPick.pick_string})
             </div>
             {!windowEnd && <div>Cannot be passed yet</div>}
             {windowEnd && !isWindowClosed && (
@@ -213,6 +213,7 @@ export default function DraftPage({
   const pickItems = []
 
   let pick_index = 0
+  let next_up_found = false
   for (const pick of picksSorted) {
     // previous pick might not be pick - 1 if it belonged to a commissioned team
     const prev_pick = picksSorted.get(pick_index - 1)
@@ -230,6 +231,12 @@ export default function DraftPage({
       // its published slot to have passed. A null window is after nothing.
       (isPreviousSelectionMade || draft_clock_now.isAfter(pick.draftWindow))
 
+    // The next pick to be on the clock is the first unmade pick past the ones
+    // on the clock now; the rail labels that one with its scheduled window.
+    const is_next_up =
+      !is_active && !pick.pid && Boolean(pick.pick) && !next_up_found
+    if (is_next_up) next_up_found = true
+
     const trade_count = pick.trade_count || 0
 
     pickItems.push(
@@ -240,8 +247,8 @@ export default function DraftPage({
         tid={pick.tid}
         is_user={is_user}
         is_active={is_active}
+        is_next_up={is_next_up}
         trade_count={trade_count}
-        draft_clock_now={draft_clock_now}
       />
     )
 

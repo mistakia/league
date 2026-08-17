@@ -17,7 +17,7 @@ export default async function process_super_priority({
   original_tid,
   lid,
   super_priority_uid,
-  userid = null,
+  user_id = null,
   release = []
 }) {
   // Both consumers below -- transactions.occurred_at and
@@ -100,7 +100,7 @@ export default async function process_super_priority({
         release_pid,
         tid: original_tid,
         lid,
-        userid: userid || 0
+        user_id: user_id || 0
       })
     }
   }
@@ -150,7 +150,7 @@ export default async function process_super_priority({
   const player_salary = last_transaction[0].player_salary
 
   const transaction = {
-    userid: userid || 0, // use provided userid or default to system user
+    user_id: user_id || 0, // use provided user_id or default to system user
     tid: original_tid,
     lid,
     pid,

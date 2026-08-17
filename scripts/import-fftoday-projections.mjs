@@ -214,7 +214,7 @@ const run = async ({
       week,
       season_year: year,
       season_type: 'REG',
-      sourceid: external_data_sources.FFTODAY,
+      source_id: external_data_sources.FFTODAY,
       ...data
     })
   }
@@ -243,7 +243,7 @@ const run = async ({
       .where({
         season_year: year,
         week,
-        sourceid: external_data_sources.FFTODAY,
+        source_id: external_data_sources.FFTODAY,
         season_type: 'REG'
       })
       .whereNotIn(
@@ -256,9 +256,9 @@ const run = async ({
     await db('projections_index')
       .insert(inserts)
       .onConflict([
-        'sourceid',
+        'source_id',
         'pid',
-        'userid',
+        'user_id',
         'week',
         'season_year',
         'season_type'
@@ -273,7 +273,7 @@ const run = async ({
     skipped: false,
     year,
     week,
-    sourceid: external_data_sources.FFTODAY,
+    source_id: external_data_sources.FFTODAY,
     seas_type: 'REG'
   }
 }

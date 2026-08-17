@@ -37,7 +37,7 @@ const insert_poach_history = async ({
       season_year: current_season.year,
       occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
       week: 0,
-      userid: original_tid
+      user_id: original_tid
     },
     {
       pid: player.pid,
@@ -48,7 +48,7 @@ const insert_poach_history = async ({
       season_year: current_season.year,
       occurred_at: epoch_to_timestamptz(poach_timestamp),
       week: 0,
-      userid: poaching_tid
+      user_id: poaching_tid
     },
     {
       pid: player.pid,
@@ -59,7 +59,7 @@ const insert_poach_history = async ({
       season_year: current_season.year,
       occurred_at: epoch_to_timestamptz(release_timestamp),
       week: 0,
-      userid: poaching_tid
+      user_id: poaching_tid
     }
   ])
 }
@@ -79,7 +79,7 @@ const insert_extension = async ({
     season_year: current_season.year,
     occurred_at: epoch_to_timestamptz(timestamp),
     week: 0,
-    userid: poaching_tid
+    user_id: poaching_tid
   })
 }
 
@@ -228,7 +228,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
         week: 0,
-        userid: 1
+        user_id: 1
       },
       {
         pid: player.pid,
@@ -239,7 +239,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         season_year: null,
         occurred_at: epoch_to_timestamptz(poach_timestamp),
         week: 0,
-        userid: 2
+        user_id: 2
       },
       {
         pid: player.pid,
@@ -250,7 +250,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(release_timestamp),
         week: 0,
-        userid: 2
+        user_id: 2
       }
     ])
 
@@ -297,7 +297,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         season_year: prior_year,
         occurred_at: epoch_to_timestamptz(poach_timestamp - 24 * 60 * 60),
         week: 0,
-        userid: 1
+        user_id: 1
       },
       {
         pid: player.pid,
@@ -308,7 +308,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         season_year: prior_year,
         occurred_at: epoch_to_timestamptz(poach_timestamp),
         week: 0,
-        userid: 2
+        user_id: 2
       },
       {
         pid: player.pid,
@@ -319,7 +319,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         season_year: prior_year,
         occurred_at: epoch_to_timestamptz(extension_timestamp),
         week: 0,
-        userid: 2
+        user_id: 2
       },
       {
         pid: player.pid,
@@ -330,7 +330,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(release_timestamp),
         week: 0,
-        userid: 2
+        user_id: 2
       }
     ])
 

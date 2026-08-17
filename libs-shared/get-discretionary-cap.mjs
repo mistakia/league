@@ -14,8 +14,11 @@ import getRosterSize from './get-roster-size.mjs'
 // and one wrong one is the failure mode a shared derivation removes: there is
 // now no site at which a future writer re-derives this at all.
 const get_discretionary_cap = (league_format) => {
-  const { num_teams, cap, min_bid } = league_format
-  return num_teams * cap - num_teams * getRosterSize(league_format) * min_bid
+  const { number_teams, salary_cap, min_bid } = league_format
+  return (
+    number_teams * salary_cap -
+    number_teams * getRosterSize(league_format) * min_bid
+  )
 }
 
 export default get_discretionary_cap

@@ -308,7 +308,7 @@ describe('API /waivers - update', function () {
       res.body.release.should.deep.equal([releasePlayer.pid])
 
       const waivers = await knex('waiver_releases')
-        .where({ waiverid: res.body.uid })
+        .where({ waiver_id: res.body.uid })
         .limit(1)
       expect(waivers.length).to.equal(1)
       expect(waivers[0].pid).to.equal(releasePlayer.pid)

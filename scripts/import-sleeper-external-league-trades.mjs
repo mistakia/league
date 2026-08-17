@@ -320,7 +320,7 @@ export const import_sleeper_league_trades = async ({
 const LEAGUE_REFRESH_COLUMNS = [
   'season_year',
   'league_name',
-  'num_teams',
+  'number_teams',
   'league_format',
   'is_superflex',
   'is_best_ball',

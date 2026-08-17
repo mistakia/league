@@ -59,7 +59,7 @@ const format_projection = (projection_item) => ({
 
 // Sleeper's projection feed carries a flat ADP value per legacy adp_type.
 // Each maps to an adp_format row resolved once up front (SLEEPER_ADP_FORMAT_IDS)
-// and written via adp_format_id.
+// and written via average_draft_position_format_id.
 const SLEEPER_ADP_TYPES = [
   { type: 'STANDARD_REDRAFT', adp_key: 'adp_std' },
   { type: 'PPR_REDRAFT', adp_key: 'adp_ppr' },
@@ -95,11 +95,11 @@ const create_adp_entries = ({ player_row, adp, format_id_by_type }) => {
     average_draft_position: adp[adp_key],
     min_pick: null,
     max_pick: null,
-    std_dev: null,
+    standard_deviation: null,
     sample_size: null,
     percent_drafted: null,
     source_id: 'SLEEPER',
-    adp_format_id: format_id_by_type[type]
+    average_draft_position_format_id: format_id_by_type[type]
   }))
 }
 
@@ -127,7 +127,7 @@ const process_matched_player = ({
     season_year: current_season.year,
     week: 0,
     season_type: 'REG',
-    sourceid: external_data_sources.SLEEPER,
+    source_id: external_data_sources.SLEEPER,
     ...proj
   })
 }
@@ -153,7 +153,7 @@ const import_sleeper_adp_and_projections = async ({
   log(`Game IDs: ${distinct_values.game_id.join(', ')}`)
   log(`Weeks: ${distinct_values.week.join(', ')}`)
 
-  // Resolve an adp_format_id for each legacy Sleeper adp_type once up front.
+  // Resolve an average_draft_position_format_id for each legacy Sleeper adp_type once up front.
   const format_id_by_type = {}
   for (const { type } of SLEEPER_ADP_TYPES) {
     format_id_by_type[type] = await find_or_create_adp_format(
@@ -242,7 +242,7 @@ const import_sleeper_adp_and_projections = async ({
     // Check for duplicate projection_inserts
     const unique_keys = new Set()
     const duplicates = projection_inserts.filter((item) => {
-      const key = `${item.sourceid}-${item.pid}-${item.userid}-${item.week}-${item.season_year}`
+      const key = `${item.source_id}-${item.pid}-${item.user_id}-${item.week}-${item.season_year}`
       if (unique_keys.has(key)) {
         return true
       }
@@ -258,9 +258,9 @@ const import_sleeper_adp_and_projections = async ({
       log(
         projection_inserts.find(
           (item) =>
-            item.sourceid === duplicates[0].sourceid &&
+            item.source_id === duplicates[0].source_id &&
             item.pid === duplicates[0].pid &&
-            item.userid === duplicates[0].userid &&
+            item.user_id === duplicates[0].user_id &&
             item.week === duplicates[0].week &&
             item.season_year === duplicates[0].season_year
         )
@@ -282,7 +282,12 @@ const import_sleeper_adp_and_projections = async ({
       save: async (batch) => {
         await db('player_adp_index')
           .insert(batch)
-          .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
+          .onConflict([
+            'season_year',
+            'source_id',
+            'average_draft_position_format_id',
+            'pid'
+          ])
           .merge()
       }
     })
@@ -304,9 +309,9 @@ const import_sleeper_adp_and_projections = async ({
         await db('projections_index')
           .insert(batch)
           .onConflict([
-            'sourceid',
+            'source_id',
             'pid',
-            'userid',
+            'user_id',
             'week',
             'season_year',
             'season_type'
@@ -327,7 +332,7 @@ const import_sleeper_adp_and_projections = async ({
     skipped: false,
     year: current_season.year,
     week: 0,
-    sourceid: external_data_sources.SLEEPER,
+    source_id: external_data_sources.SLEEPER,
     seas_type: 'REG'
   }
 }

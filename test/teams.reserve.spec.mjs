@@ -102,7 +102,7 @@ describe('API /teams - reserve', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -696,7 +696,7 @@ describe('API /teams - reserve', function () {
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
-        time_est: '13:00:00',
+        time_eastern: '13:00:00',
         kickoff_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) // 3 days from now (Sunday)
       })
 
@@ -789,7 +789,7 @@ describe('API /teams - reserve', function () {
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
-        time_est: '13:00:00',
+        time_eastern: '13:00:00',
         kickoff_at: new Date(1640700000 * 1000) // Static kickoff for current week game
       })
 
@@ -880,7 +880,7 @@ describe('API /teams - reserve', function () {
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
-        time_est: '13:00:00',
+        time_eastern: '13:00:00',
         kickoff_at: new Date(1640700000 * 1000) // Static kickoff for current week game
       })
 
@@ -969,7 +969,7 @@ describe('API /teams - reserve', function () {
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
-        time_est: '20:15:00',
+        time_eastern: '20:15:00',
         kickoff_at: new Date(1640700000 * 1000) // Static kickoff for current week game
       })
 
@@ -1019,7 +1019,7 @@ describe('API /teams - reserve', function () {
 
       // Create active poaching claim
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: leagueId,
         pid: player.pid,
@@ -1095,7 +1095,7 @@ describe('API /teams - reserve', function () {
 
       // Create active poaching claim
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: leagueId,
         pid: player.pid,

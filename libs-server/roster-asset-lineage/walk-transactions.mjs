@@ -56,15 +56,15 @@ import {
 // and `trade_leg_source_not_participant` is the oracle -- it must stay at zero.
 //
 // Pick identity contract: `draft.uid` is a pick's stable identity and
-// `trades_picks.pickid` is the only reference to it, so `draft.(tid, otid)` may
+// `trades_picks.draft_pick_id` is the only reference to it, so `draft.(tid, otid)` may
 // only ever be written keyed on `draft.uid`. Rewriting them keyed on
 // `(round, pick)` -- the way a draft-order correction is tempting to write --
-// re-points a pickid at another team's pick and silently mis-keys every trade
+// re-points a draft_pick_id at another team's pick and silently mis-keys every trade
 // row naming it. `pick_chain_end_state_mismatch` is the oracle for that: the
 // team the chain lands on after the last accepted trade must equal `draft.tid`.
 // The identity-preserving way to restate draft order is to fix
 // `teams.draft_order` and re-run scripts/set-draft-pick-number.mjs, which
-// derives `pick`/`pick_str` from `draft.original_team_id` keyed on `draft.uid`.
+// derives `pick`/`pick_string` from `draft.original_team_id` keyed on `draft.uid`.
 //   Unhandled flows (super-priority chains, decommission_reassignment,
 //   failed_poach_sanctuary, auto_cap_release, season_rollover for picks):
 //   accumulated as coverage_warnings; surfaced by the generator's row-count
@@ -119,7 +119,7 @@ const INTRA_HOLDING_TRANSACTION_TYPES = new Set([
 ])
 
 const player_key = (tid, player_id) => `p__${tid}__${player_id}`
-const pick_key = (tid, pickid) => `pk__${tid}__${pickid}`
+const pick_key = (tid, draft_pick_id) => `pk__${tid}__${draft_pick_id}`
 
 // Endowment date for a draft year. Picks for year Y are decided based on
 // year (Y-1) standings; we synthesize the endowment at the prior year's
@@ -169,7 +169,7 @@ const walk_transactions = async ({ lid }) => {
       tid,
       asset_type: ASSET_TYPE.PLAYER,
       player_id,
-      pickid: null,
+      draft_pick_id: null,
       pick_year: null,
       pick_round: null,
       pick_original_owner_tid: null,
@@ -192,14 +192,14 @@ const walk_transactions = async ({ lid }) => {
 
   const open_pick_holding = ({
     tid,
-    pickid,
+    draft_pick_id,
     pick_year,
     pick_round,
     pick_original_owner_tid,
     pick_draft_overall_position,
     occurred_at
   }) => {
-    const draft_id = `pk__${tid}__${pickid}__${occurred_at.getTime()}`
+    const draft_id = `pk__${tid}__${draft_pick_id}__${occurred_at.getTime()}`
     if (ctx.drafts_by_id.has(draft_id)) {
       note_warning('duplicate_draft_id_pick')
       return ctx.drafts_by_id.get(draft_id)
@@ -210,7 +210,7 @@ const walk_transactions = async ({ lid }) => {
       tid,
       asset_type: ASSET_TYPE.PICK,
       player_id: null,
-      pickid,
+      draft_pick_id,
       pick_year,
       pick_round,
       pick_original_owner_tid,
@@ -223,7 +223,7 @@ const walk_transactions = async ({ lid }) => {
     }
     ctx.drafts_by_id.set(draft_id, draft)
     ctx.holding_drafts.push(draft)
-    ctx.open.set(pick_key(tid, pickid), draft_id)
+    ctx.open.set(pick_key(tid, draft_pick_id), draft_id)
     return draft
   }
 
@@ -467,7 +467,7 @@ const walk_transactions = async ({ lid }) => {
     } else if (event.kind === 'pick_endowment') {
       const draft = open_pick_holding({
         tid: event.tid,
-        pickid: event.pickid,
+        draft_pick_id: event.draft_pick_id,
         pick_year: event.pick_year,
         pick_round: event.pick_round,
         pick_original_owner_tid: event.pick_original_owner_tid,
@@ -486,7 +486,7 @@ const walk_transactions = async ({ lid }) => {
     } else if (event.kind === 'pick_conversion') {
       // Closes pick_holding on event.tid, opened in earlier endowment / trade leg.
       const closed = close_open({
-        key: pick_key(event.tid, event.pickid),
+        key: pick_key(event.tid, event.draft_pick_id),
         occurred_at: event.occurred_at,
         terminated_by: TERMINATED_BY.PICK_CONVERTED
       })
@@ -520,7 +520,7 @@ const walk_transactions = async ({ lid }) => {
         if (draft.period_end) continue
         draft.period_end = event.occurred_at
         draft.terminated_by = TERMINATED_BY.EXPIRED_TO_FA
-        ctx.open.delete(pick_key(draft.tid, draft.pickid))
+        ctx.open.delete(pick_key(draft.tid, draft.draft_pick_id))
         note_warning('pick_expired_undrafted')
       }
     } else if (event.kind === 'coverage_warning') {
@@ -549,7 +549,7 @@ const apply_trade = ({
   const source_drafts = []
   const target_drafts = []
 
-  // Resolve the actual open pick_key for a pickid, regardless of which team
+  // Resolve the actual open pick_key for a draft_pick_id, regardless of which team
   // the trades_picks row claims is losing. Handles upstream data errors where
   // trades_picks.tid points at a team that does not currently hold the pick
   // (observed on lid=1 trade #64 where pick 37 was recorded as losing from
@@ -571,11 +571,11 @@ const apply_trade = ({
     note_warning('trade_leg_source_not_participant')
   }
 
-  const find_open_pick = (pickid) => {
+  const find_open_pick = (draft_pick_id) => {
     for (const key of ctx.open.keys()) {
       if (!key.startsWith('pk__')) continue
       const parts = key.split('__')
-      if (parts[2] === String(pickid)) {
+      if (parts[2] === String(draft_pick_id)) {
         return { key, tid: Number(parts[1]) }
       }
     }
@@ -605,7 +605,7 @@ const apply_trade = ({
       target_drafts.push(opened.draft_id)
     } else if (leg.asset_type === ASSET_TYPE.PICK) {
       let closed = close_open({
-        key: pick_key(losing_tid, leg.pickid),
+        key: pick_key(losing_tid, leg.draft_pick_id),
         occurred_at: event.occurred_at,
         terminated_by: TERMINATED_BY.TRADE
       })
@@ -614,7 +614,7 @@ const apply_trade = ({
         // resolved holder is the recorded winning_tid, the trades_picks tids
         // were reversed -- swap so we close on the real loser and open on
         // the real winner.
-        const found = find_open_pick(leg.pickid)
+        const found = find_open_pick(leg.draft_pick_id)
         if (found) {
           if (found.tid === winning_tid) winning_tid = losing_tid
           closed = close_open({
@@ -630,7 +630,7 @@ const apply_trade = ({
       note_source_participant(closed)
       const opened = open_pick_holding({
         tid: winning_tid,
-        pickid: leg.pickid,
+        draft_pick_id: leg.draft_pick_id,
         pick_year: leg.pick_year,
         pick_round: leg.pick_round,
         pick_original_owner_tid: leg.pick_original_owner_tid,
@@ -663,14 +663,14 @@ const apply_trade = ({
 const build_event_stream = async ({ lid }) => {
   const events = []
 
-  // 1. Trade lookup: trades_transactions links transactionid -> tradeid.
+  // 1. Trade lookup: trades_transactions links transaction_id -> trade_id.
   const trade_transactionids = await db('trades_transactions')
-    .join('trades', 'trades.uid', 'trades_transactions.tradeid')
+    .join('trades', 'trades.uid', 'trades_transactions.trade_id')
     .where('trades.lid', lid)
     .whereNotNull('trades.accepted')
-    .select('trades_transactions.transactionid')
+    .select('trades_transactions.transaction_id')
   const trade_tran_ids = new Set(
-    trade_transactionids.map((r) => r.transactionid)
+    trade_transactionids.map((r) => r.transaction_id)
   )
 
   // Cross-team RFA wins are emitted from restricted_free_agency_bids; the
@@ -875,13 +875,13 @@ const build_event_stream = async ({ lid }) => {
     .orderBy('accepted', 'asc')
   const trade_ids = trades.map((t) => t.uid)
   const trade_players = trade_ids.length
-    ? await db('trades_players').whereIn('tradeid', trade_ids)
+    ? await db('trades_players').whereIn('trade_id', trade_ids)
     : []
   const trade_picks = trade_ids.length
-    ? await db('trades_picks').whereIn('tradeid', trade_ids)
+    ? await db('trades_picks').whereIn('trade_id', trade_ids)
     : []
-  // Pre-resolve trades_picks.pickid -> pick metadata.
-  const pickids = Array.from(new Set(trade_picks.map((p) => p.pickid)))
+  // Pre-resolve trades_picks.draft_pick_id -> pick metadata.
+  const pickids = Array.from(new Set(trade_picks.map((p) => p.draft_pick_id)))
   const picks_meta = pickids.length
     ? await db('draft')
         .whereIn('uid', pickids)
@@ -905,7 +905,7 @@ const build_event_stream = async ({ lid }) => {
   // league (likely due to import-time vs route-generated history), and
   // relying on it produced wrong-direction trade legs and orphaned holdings
   // (e.g. pick 3 traded 9->1 in 2020-07-25 but `tid=1` looked like a giver).
-  const pick_leg_dir = new Map() // `${tradeid}__${pickid}` -> {from_tid, to_tid}
+  const pick_leg_dir = new Map() // `${trade_id}__${draft_pick_id}` -> {from_tid, to_tid}
   // Picks whose chain is broken at its head: the endowment opens on this team
   // instead of `draft.original_team_id` so the first trade closes a holding the trade's own
   // participants own. See the chain-gap contract in this module's header.
@@ -914,25 +914,25 @@ const build_event_stream = async ({ lid }) => {
   const trades_for_pickid = new Map()
   const recorded_pick_tid_by_trade_pick = new Map()
   for (const tpi of trade_picks) {
-    if (!trade_by_id.has(tpi.tradeid)) continue // unaccepted trade
-    if (!trades_for_pickid.has(tpi.pickid))
-      trades_for_pickid.set(tpi.pickid, [])
-    trades_for_pickid.get(tpi.pickid).push(tpi.tradeid)
+    if (!trade_by_id.has(tpi.trade_id)) continue // unaccepted trade
+    if (!trades_for_pickid.has(tpi.draft_pick_id))
+      trades_for_pickid.set(tpi.draft_pick_id, [])
+    trades_for_pickid.get(tpi.draft_pick_id).push(tpi.trade_id)
     recorded_pick_tid_by_trade_pick.set(
-      `${tpi.tradeid}__${tpi.pickid}`,
+      `${tpi.trade_id}__${tpi.draft_pick_id}`,
       tpi.tid
     )
   }
-  for (const [pickid, tradeids] of trades_for_pickid) {
-    const meta = pick_meta_by_id.get(pickid)
+  for (const [draft_pick_id, tradeids] of trades_for_pickid) {
+    const meta = pick_meta_by_id.get(draft_pick_id)
     if (!meta) continue // ghost pick handled per-leg below
     tradeids.sort(
       (a, b) => trade_by_id.get(a).accepted - trade_by_id.get(b).accepted
     )
     let current = meta.original_team_id
     let leg_index = 0
-    for (const tradeid of tradeids) {
-      const trade = trade_by_id.get(tradeid)
+    for (const trade_id of tradeids) {
+      const trade = trade_by_id.get(trade_id)
       const is_participant = (tid) =>
         tid === trade.propose_tid || tid === trade.accept_tid
       // The giver is normally whoever the chain says holds the pick. When that
@@ -944,7 +944,7 @@ const build_event_stream = async ({ lid }) => {
       let from_tid = current
       if (!is_participant(current)) {
         const recorded_tid = recorded_pick_tid_by_trade_pick.get(
-          `${tradeid}__${pickid}`
+          `${trade_id}__${draft_pick_id}`
         )
         const recovered = is_participant(recorded_tid)
         from_tid = recovered ? recorded_tid : trade.propose_tid
@@ -957,7 +957,7 @@ const build_event_stream = async ({ lid }) => {
         // indexes exist to prevent. That leaves the leg's source holding on a
         // non-participant, counted by trade_leg_source_not_participant.
         if (leg_index === 0) {
-          endowment_holder_tid_by_pickid.set(pickid, from_tid)
+          endowment_holder_tid_by_pickid.set(draft_pick_id, from_tid)
         }
         const gap_label = !recovered
           ? 'pick_chain_gap_unresolved'
@@ -974,7 +974,7 @@ const build_event_stream = async ({ lid }) => {
       }
       const to_tid =
         from_tid === trade.propose_tid ? trade.accept_tid : trade.propose_tid
-      pick_leg_dir.set(`${tradeid}__${pickid}`, {
+      pick_leg_dir.set(`${trade_id}__${draft_pick_id}`, {
         from_tid,
         to_tid
       })
@@ -985,7 +985,7 @@ const build_event_stream = async ({ lid }) => {
     // `draft.tid` says holds the pick. A mismatch means the pick's identity and
     // its trade history disagree about who owns it -- the shape produced by
     // rewriting `draft.(tid, otid)` keyed on `(round, pick)` instead of on
-    // `draft.uid`, which re-points a pickid at a different team's pick and
+    // `draft.uid`, which re-points a draft_pick_id at a different team's pick and
     // leaves every trades_picks row naming it mis-keyed.
     if (current !== meta.tid) {
       const last_trade = trade_by_id.get(tradeids[tradeids.length - 1])
@@ -1000,7 +1000,7 @@ const build_event_stream = async ({ lid }) => {
   }
   for (const trade of trades) {
     const legs = []
-    for (const tp of trade_players.filter((r) => r.tradeid === trade.uid)) {
+    for (const tp of trade_players.filter((r) => r.trade_id === trade.uid)) {
       legs.push({
         asset_type: ASSET_TYPE.PLAYER,
         player_id: tp.pid,
@@ -1009,8 +1009,8 @@ const build_event_stream = async ({ lid }) => {
           tp.tid === trade.propose_tid ? trade.accept_tid : trade.propose_tid
       })
     }
-    for (const tpi of trade_picks.filter((r) => r.tradeid === trade.uid)) {
-      const meta = pick_meta_by_id.get(tpi.pickid)
+    for (const tpi of trade_picks.filter((r) => r.trade_id === trade.uid)) {
+      const meta = pick_meta_by_id.get(tpi.draft_pick_id)
       if (!meta) {
         // Stray trades_picks row pointing at a draft row that no longer exists
         // (or never did). Without metadata we cannot open a typed pick holding;
@@ -1025,10 +1025,10 @@ const build_event_stream = async ({ lid }) => {
         })
         continue
       }
-      const dir = pick_leg_dir.get(`${trade.uid}__${tpi.pickid}`)
+      const dir = pick_leg_dir.get(`${trade.uid}__${tpi.draft_pick_id}`)
       legs.push({
         asset_type: ASSET_TYPE.PICK,
-        pickid: tpi.pickid,
+        draft_pick_id: tpi.draft_pick_id,
         pick_year: meta.season_year,
         pick_round: meta.round,
         pick_original_owner_tid: meta.original_team_id,
@@ -1075,10 +1075,10 @@ const build_event_stream = async ({ lid }) => {
   // the endowment back so the pre-trade ownership window exists.
   const earliest_trade_by_pickid = new Map()
   for (const trade of trades) {
-    for (const tpi of trade_picks.filter((r) => r.tradeid === trade.uid)) {
-      const prior = earliest_trade_by_pickid.get(tpi.pickid)
+    for (const tpi of trade_picks.filter((r) => r.trade_id === trade.uid)) {
+      const prior = earliest_trade_by_pickid.get(tpi.draft_pick_id)
       if (prior == null || trade.accepted < prior) {
-        earliest_trade_by_pickid.set(tpi.pickid, trade.accepted)
+        earliest_trade_by_pickid.set(tpi.draft_pick_id, trade.accepted)
       }
     }
   }
@@ -1108,7 +1108,7 @@ const build_event_stream = async ({ lid }) => {
       // and only for a pick whose first trade does not include `otid`.
       tid:
         endowment_holder_tid_by_pickid.get(pick.uid) ?? pick.original_team_id,
-      pickid: pick.uid,
+      draft_pick_id: pick.uid,
       pick_year: pick.season_year,
       pick_round: pick.round,
       pick_original_owner_tid: pick.original_team_id,
@@ -1121,7 +1121,7 @@ const build_event_stream = async ({ lid }) => {
         sort_priority: 4, // after DRAFT-transaction acquisition (priority 2) so the player draft exists
         kind: 'pick_conversion',
         tid: pick.tid,
-        pickid: pick.uid,
+        draft_pick_id: pick.uid,
         player_id: pick.pid,
         occurred_at: pick.selection_timestamp
       })

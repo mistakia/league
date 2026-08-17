@@ -67,7 +67,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
   after(cleanup)
 
   describe('slot_from_position', function () {
-    it('buckets a within-round position into thirds of num_teams', () => {
+    it('buckets a within-round position into thirds of number_teams', () => {
       slot_from_position(1, 12).should.equal(PICK_SLOT.EARLY)
       slot_from_position(4, 12).should.equal(PICK_SLOT.EARLY)
       slot_from_position(5, 12).should.equal(PICK_SLOT.MID)
@@ -76,7 +76,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
       slot_from_position(12, 12).should.equal(PICK_SLOT.LATE)
     })
 
-    it('returns null when position or num_teams is unknown', () => {
+    it('returns null when position or number_teams is unknown', () => {
       expect(slot_from_position(null, 12)).to.equal(null)
       expect(slot_from_position(1, null)).to.equal(null)
       expect(slot_from_position(1, 0)).to.equal(null)
@@ -195,7 +195,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
           pick_year: 2023,
           pick_round: 1,
           pick_overall_position: 1,
-          num_teams: 12,
+          number_teams: 12,
           target_unix,
           idx
         })
@@ -229,7 +229,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
         pick_year: 2025,
         pick_round: 1,
         pick_overall_position: 1,
-        num_teams: 12,
+        number_teams: 12,
         target_unix,
         idx
       })
@@ -251,7 +251,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
         pick_year: 2020,
         pick_round: 1,
         pick_overall_position: 1,
-        num_teams: 12,
+        number_teams: 12,
         target_unix,
         idx
       })
@@ -268,7 +268,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
           pick_year: 2023,
           pick_round: 1,
           pick_overall_position: 1,
-          num_teams: null,
+          number_teams: null,
           target_unix,
           idx
         })
@@ -278,7 +278,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
           pick_year: null,
           pick_round: 1,
           pick_overall_position: 1,
-          num_teams: 12,
+          number_teams: 12,
           target_unix,
           idx
         })
@@ -288,7 +288,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
           pick_year: 2023,
           pick_round: null,
           pick_overall_position: 1,
-          num_teams: 12,
+          number_teams: 12,
           target_unix,
           idx
         })
@@ -325,7 +325,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
         pick_year: 2027,
         pick_round: 1,
         pick_overall_position: null,
-        num_teams: 10,
+        number_teams: 10,
         target_unix: Math.floor(
           new Date('2026-07-29T00:00:00Z').getTime() / 1000
         ),
@@ -338,14 +338,14 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
       value.should.equal(5600)
     })
 
-    it('still returns null when the position is known but num_teams is not', async () => {
+    it('still returns null when the position is known but number_teams is not', async () => {
       const idx = await load_pick_ktc_indexes({ is_superflex: true })
       expect(
         ktc_pick_at({
           pick_year: 2027,
           pick_round: 1,
           pick_overall_position: 5,
-          num_teams: null,
+          number_teams: null,
           target_unix: Math.floor(
             new Date('2026-07-29T00:00:00Z').getTime() / 1000
           ),
@@ -397,14 +397,14 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
           pick_year: 2026,
           pick_round: 2,
           pick_overall_position,
-          num_teams: NUM_TEAMS,
+          number_teams: NUM_TEAMS,
           target_unix: TARGET_UNIX,
           idx
         })
 
       // Regression signature: the overall rank went straight into the slot
       // bucketer, and an overall rank in round 2 or beyond always exceeds two
-      // thirds of num_teams -- so every one of these resolved to LATE (2821),
+      // thirds of number_teams -- so every one of these resolved to LATE (2821),
       // understating every pick outside round 1 in the league.
       value_at(11).should.equal(3341) // round 2 pick 1 -- early
       value_at(13).should.equal(3341) // round 2 pick 3 -- early
@@ -422,7 +422,7 @@ describe('LIBS SERVER ktc-pick-value-at', function () {
         pick_year: 2026,
         pick_round: 2,
         pick_overall_position: 3,
-        num_teams: NUM_TEAMS,
+        number_teams: NUM_TEAMS,
         target_unix: TARGET_UNIX,
         idx
       }).should.equal(3035)

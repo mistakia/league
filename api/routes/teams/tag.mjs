@@ -180,8 +180,8 @@ router.post('/?', async (req, res) => {
     // make sure extension has not passed
     if (
       current_season.week === 0 &&
-      league.ext_date &&
-      current_season.now.isAfter(dayjs(league.ext_date))
+      league.extension_deadline_at &&
+      current_season.now.isAfter(dayjs(league.extension_deadline_at))
     ) {
       return res.status(400).send({ error: 'extension deadline has passed' })
     }
@@ -335,8 +335,8 @@ router.delete('/?', async (req, res) => {
     // make sure extension has not passed
     if (
       current_season.week === 0 &&
-      league.ext_date &&
-      current_season.now.isAfter(dayjs(league.ext_date))
+      league.extension_deadline_at &&
+      current_season.now.isAfter(dayjs(league.extension_deadline_at))
     ) {
       return res.status(400).send({ error: 'extension deadline has passed' })
     }

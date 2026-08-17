@@ -98,7 +98,7 @@ class PlayCache {
    * @param {number} params.down_number - Down
    * @param {number} params.yards_to_go - Yards to go
    * @param {string} params.play_type - Play type
-   * @param {number} params.yard_line_num - Yardline number
+   * @param {number} params.yard_line_number - Yardline number
    * @param {string} params.yard_line_side - Yardline side
    * @param {number} params.yard_line_100 - Yardline from 0-100
    * @param {number} params.seconds_remaining_quarter - Seconds remaining in quarter
@@ -124,7 +124,7 @@ class PlayCache {
     down_number,
     yards_to_go,
     play_type,
-    yard_line_num,
+    yard_line_number,
     yard_line_side,
     yard_line_100,
     seconds_remaining_quarter,
@@ -155,7 +155,7 @@ class PlayCache {
         sec_rem_qtr_tolerance,
         game_clock_start,
         play_type,
-        yard_line_num,
+        yard_line_number,
         yard_line_side,
         desc_contains,
         timeout_team,
@@ -334,7 +334,7 @@ class PlayCache {
     sec_rem_qtr_tolerance,
     game_clock_start,
     play_type,
-    yard_line_num,
+    yard_line_number,
     yard_line_side,
     desc_contains,
     timeout_team,
@@ -368,7 +368,7 @@ class PlayCache {
           sec_rem_qtr_tolerance,
           game_clock_start,
           play_type,
-          yard_line_num,
+          yard_line_number,
           yard_line_side,
           desc_contains,
           timeout_team,
@@ -400,7 +400,7 @@ class PlayCache {
         sec_rem_qtr_tolerance,
         game_clock_start,
         play_type,
-        yard_line_num,
+        yard_line_number,
         yard_line_side,
         desc_contains,
         timeout_team,
@@ -529,8 +529,8 @@ class PlayCache {
       filters.play_type
     )
     const ydl_num_match = this._matches_numeric_field(
-      play.yard_line_num,
-      filters.yard_line_num
+      play.yard_line_number,
+      filters.yard_line_number
     )
     const ydl_side_match = this._matches_team_field(
       play.yard_line_side,

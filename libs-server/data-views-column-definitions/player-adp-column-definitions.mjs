@@ -14,7 +14,7 @@ const get_default_params = ({ params = {} } = {}) => {
     year: [current_season.year],
     adp_source_id: ['SLEEPER'],
     scoring_class: ['PPR'],
-    num_quarterback: [1],
+    number_quarterback: [1],
     duration: ['REDRAFT'],
     draft_pool: ['ALL'],
     contest_style: ['MANAGED']
@@ -43,12 +43,12 @@ const generate_table_alias = ({ params = {} } = {}) => {
     year,
     adp_source_id,
     scoring_class,
-    num_quarterback,
+    number_quarterback,
     duration,
     draft_pool,
     contest_style
   } = get_default_params({ params })
-  const key = `player_adp_${year.join('_')}_${adp_source_id.join('_')}_${scoring_class.join('_')}_${num_quarterback.join('_')}_${duration.join('_')}_${draft_pool.join('_')}_${contest_style.join('_')}`
+  const key = `player_adp_${year.join('_')}_${adp_source_id.join('_')}_${scoring_class.join('_')}_${number_quarterback.join('_')}_${duration.join('_')}_${draft_pool.join('_')}_${contest_style.join('_')}`
   return get_table_hash(key)
 }
 
@@ -87,7 +87,7 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
     year,
     adp_source_id,
     scoring_class,
-    num_quarterback,
+    number_quarterback,
     duration,
     draft_pool,
     contest_style
@@ -98,7 +98,11 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
   )
 
   const cte_query = db('player_adp_index')
-    .join('adp_format', 'player_adp_index.adp_format_id', 'adp_format.id')
+    .join(
+      'adp_format',
+      'player_adp_index.average_draft_position_format_id',
+      'adp_format.id'
+    )
     .select(
       'player_adp_index.pid',
       'player_adp_index.season_year',
@@ -107,14 +111,14 @@ const register_player_adp_cte = ({ query, params, data_view_options }) => {
       'player_adp_index.average_draft_position as adp',
       'player_adp_index.min_pick',
       'player_adp_index.max_pick',
-      'player_adp_index.std_dev',
+      'player_adp_index.standard_deviation',
       'player_adp_index.sample_size',
       'player_adp_index.percent_drafted'
     )
     .whereIn('player_adp_index.source_id', adp_source_id)
     .whereIn('player_adp_index.season_year', cte_years)
     .whereIn('adp_format.scoring_class', scoring_class)
-    .whereIn('adp_format.num_quarterback', num_quarterback)
+    .whereIn('adp_format.number_quarterback', number_quarterback)
     .whereIn('adp_format.duration', duration)
     .whereIn('adp_format.draft_pool', draft_pool)
     .whereIn('adp_format.contest_style', contest_style)
@@ -183,7 +187,7 @@ const player_adp_source = {
 // reduces the offset window with this function (default SUM). ADP statistics are
 // not additive across years -- adp/percent_drafted are means (AVG), min_pick is
 // a floor (MIN), max_pick a ceiling (MAX); only sample_size accumulates (SUM).
-// AVG of std_dev across years is an approximation (a sample-weighted pooled
+// AVG of standard_deviation across years is an approximation (a sample-weighted pooled
 // std dev would need the per-year sample sizes); AVG is the least-wrong closed
 // form and is documented as such.
 const create_player_adp_field = (field, select_as, range_offset_aggregate) => ({
@@ -203,7 +207,7 @@ const create_player_adp_field = (field, select_as, range_offset_aggregate) => ({
 //   min_pick / max_pick      -> MFL, CBS
 //   sample_size              -> MFL
 //   percent_drafted          -> ESPN, Yahoo, MFL, CBS
-//   std_dev                  -> no importer populates it (column removed
+//   standard_deviation                  -> no importer populates it (column removed
 //                               2026-06-29; re-add only if a source provides it)
 // The secondary sources were dormant (last run 2024-09-02) at audit time; these
 // columns fill in as those pipelines are re-enabled.

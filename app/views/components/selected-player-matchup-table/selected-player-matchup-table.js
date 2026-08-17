@@ -100,7 +100,7 @@ export default function SelectedPlayerMatchupTable({
             ? gamelog.points_added_earned.toFixed(1)
             : '-'}
         </div>
-        <div className='table__cell metric'>{gamelog.pos_rnk || '-'}</div>
+        <div className='table__cell metric'>{gamelog.position_rank || '-'}</div>
       </>
     )
     rows.push(

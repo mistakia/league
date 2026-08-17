@@ -88,7 +88,7 @@ const measure_format = async ({ scoring_format_id, projections_by_year }) => {
     )
 
     for (const row of rows) {
-      if (row.sourceid !== external_data_sources.AVERAGE) continue
+      if (row.source_id !== external_data_sources.AVERAGE) continue
       const position = row.primary_position
       if (!POSITIONS.includes(position)) continue
       const { week, primary_position, ...stats } = row
@@ -177,7 +177,7 @@ const main = async () => {
       season_year: year,
       week: 0,
       season_type: 'REG',
-      sourceid: external_data_sources.AVERAGE
+      source_id: external_data_sources.AVERAGE
     })
     if (!rows.length) continue
     const players = await db('player')

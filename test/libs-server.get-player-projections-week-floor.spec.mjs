@@ -33,17 +33,17 @@ const seed_projection = async ({ week, season_type }) =>
   knex('projections_index')
     .insert({
       pid: TEST_PID,
-      sourceid: TEST_SOURCEID,
-      userid: 0,
+      source_id: TEST_SOURCEID,
+      user_id: 0,
       week,
       season_year: current_season.year,
       season_type,
       passing_yards: 100
     })
     .onConflict([
-      'sourceid',
+      'source_id',
       'pid',
-      'userid',
+      'user_id',
       'week',
       'season_year',
       'season_type'

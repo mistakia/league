@@ -40,7 +40,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const value = 10
       await knex('waivers').insert({
         tid: teamId,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player.pid,
         priority_order: 9999,
@@ -99,7 +99,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       })
 
       // verify team faab budget
-      expect(team1.faab_balance).to.equal(200 - value)
+      expect(team1.free_agent_acquisition_budget_balance).to.equal(200 - value)
     })
 
     it('process multiple faab waivers', async () => {
@@ -111,7 +111,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const value1 = 180
       await knex('waivers').insert({
         tid: 1,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player1.pid,
         priority_order: 9999,
@@ -122,7 +122,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player1.pid,
         priority_order: 9999,
@@ -136,7 +136,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const value2 = 80
       await knex('waivers').insert({
         tid: 2,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player2.pid,
         priority_order: 9999,
@@ -150,7 +150,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const value3 = 20
       await knex('waivers').insert({
         tid: 1,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player3.pid,
         priority_order: 9999,
@@ -160,7 +160,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       })
       await knex('waivers').insert({
         tid: 2,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player3.pid,
         priority_order: 9999,
@@ -174,7 +174,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const value4 = 2
       await knex('waivers').insert({
         tid: 1,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player4.pid,
         priority_order: 9999,
@@ -184,7 +184,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       })
       await knex('waivers').insert({
         tid: 4,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player4.pid,
         priority_order: 9999,
@@ -307,7 +307,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const player = await selectPlayer()
       const leagueId = 1
       await knex('transactions').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: leagueId,
         pid: player.pid,
@@ -322,7 +322,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const value = 10
       await knex('waivers').insert({
         tid: teamId,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player.pid,
         priority_order: 9999,

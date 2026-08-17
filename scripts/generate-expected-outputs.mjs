@@ -55,7 +55,7 @@ function generate_league_config_output({ league_fixture }) {
   const league = league_fixture.data.league
   const input = {
     platform: 'sleeper',
-    league_config: { num_teams: league.total_rosters },
+    league_config: { number_teams: league.total_rosters },
     scoring_config: league.scoring_settings,
     roster_config: league.roster_positions
   }

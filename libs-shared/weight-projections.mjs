@@ -24,7 +24,7 @@ const weightProjections = ({ projections, weights = [], userId, week }) => {
     data[r] = []
   }
 
-  // Guard on userId first. Without it, an absent `userid` on a source row
+  // Guard on userId first. Without it, an absent `user_id` on a source row
   // matches an absent `userId` argument (undefined === undefined) and that row
   // is treated as a user override, clobbering the consensus with one source's
   // raw numbers. Production rows come from projections_index and carry an
@@ -32,13 +32,13 @@ const weightProjections = ({ projections, weights = [], userId, week }) => {
   // away from doing so.
   const userProjection =
     (userId &&
-      projections.find((p) => p.userid === userId && p.week === week)) ||
+      projections.find((p) => p.user_id === userId && p.week === week)) ||
     {}
   const sourceProjections = projections.filter(
     (p) =>
-      p.sourceid &&
+      p.source_id &&
       p.week === week &&
-      p.sourceid !== external_data_sources.AVERAGE
+      p.source_id !== external_data_sources.AVERAGE
   )
 
   for (const projection of sourceProjections) {
@@ -57,8 +57,8 @@ const weightProjections = ({ projections, weights = [], userId, week }) => {
       continue
     }
 
-    const { sourceid } = projection
-    const source = weights.find((w) => w.uid === sourceid)
+    const { source_id } = projection
+    const source = weights.find((w) => w.uid === source_id)
     const weight = source && source.weight !== null ? source.weight : 1
 
     for (const r in data) {

@@ -31,7 +31,7 @@ const router = express.Router()
  *                     - $ref: '#/components/schemas/User'
  *                     - type: object
  *                       properties:
- *                         lastvisit:
+ *                         last_visit_at:
  *                           type: string
  *                           format: date-time
  *                           description: 'Last visit timestamp'
@@ -94,7 +94,7 @@ const router = express.Router()
  *                       pid:
  *                         type: string
  *                         description: 'Player ID being poached'
- *                       userid:
+ *                       user_id:
  *                         type: integer
  *                         description: 'User ID making the poach'
  *                       submitted:
@@ -132,7 +132,7 @@ const router = express.Router()
  *                     id: 123
  *                     username: 'fantasy_manager'
  *                     email: 'user@example.com'
- *                     lastvisit: '2024-01-15T10:30:00Z'
+ *                     last_visit_at: '2024-01-15T10:30:00Z'
  *                     watchlist: ['JALE-HURT-003085', 'PATR-MAHO-005785']
  *                   teams:
  *                     - uid: 13
@@ -143,7 +143,7 @@ const router = express.Router()
  *                   leagues:
  *                     - uid: 2
  *                       name: 'TEFLON LEAGUE'
- *                       num_teams: 14
+ *                       number_teams: 14
  *                       years: [2020, 2021, 2022, 2023, 2024]
  *                       division_1_name: 'NFC North'
  *                       division_2_name: 'AFC South'
@@ -183,7 +183,7 @@ router.get('/?', async (req, res) => {
     const teams = await db('teams')
       .select('teams.*')
       .where({
-        'users_teams.userid': req.auth.userId,
+        'users_teams.user_id': req.auth.userId,
         'users_teams.season_year': current_season.year
       })
       .join('users_teams', function () {
@@ -248,11 +248,11 @@ router.get('/?', async (req, res) => {
 
     const sources = await db('sources')
     const userSources = await db('users_sources').where(
-      'userid',
+      'user_id',
       req.auth.userId
     )
     for (const source of sources) {
-      const userSource = userSources.find((s) => s.sourceid === source.uid)
+      const userSource = userSources.find((s) => s.source_id === source.uid)
       source.weight = userSource ? userSource.weight : 1
     }
 
@@ -261,12 +261,12 @@ router.get('/?', async (req, res) => {
       .whereNull('processed')
     const poachIds = poaches.map((p) => p.uid)
     const poachReleases = await db('poach_releases').whereIn(
-      'poachid',
+      'poach_id',
       poachIds
     )
     for (const poach of poaches) {
       poach.release = poachReleases
-        .filter((p) => p.poachid === poach.uid)
+        .filter((p) => p.poach_id === poach.uid)
         .map((p) => p.pid)
     }
 
@@ -276,12 +276,12 @@ router.get('/?', async (req, res) => {
       .whereNull('cancelled')
     const waiverIds = waivers.map((p) => p.uid)
     const waiverReleases = await db('waiver_releases').whereIn(
-      'waiverid',
+      'waiver_id',
       waiverIds
     )
     for (const waiver of waivers) {
       waiver.release = waiverReleases
-        .filter((p) => p.waiverid === waiver.uid)
+        .filter((p) => p.waiver_id === waiver.uid)
         .map((p) => p.pid)
     }
 
@@ -296,7 +296,7 @@ router.get('/?', async (req, res) => {
 
     await db('users')
       .where({ id: req.auth.userId })
-      .update({ lastvisit: new Date() })
+      .update({ last_visit_at: new Date() })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

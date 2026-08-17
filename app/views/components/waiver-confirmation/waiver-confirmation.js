@@ -71,7 +71,9 @@ export default function WaiverConfirmation({
         )
 
   const [waiver_max_bid, set_waiver_max_bid] = useState(
-    current_season.isRegularSeason ? team.faab_balance : ros.availableCap
+    current_season.isRegularSeason
+      ? team.free_agent_acquisition_budget_balance
+      : ros.availableCap
   )
   const [isEligible, set_isEligible] = useState(
     waiver ? has_bench_space(waiver.type === waiver_types.FREE_AGENCY) : false
@@ -121,7 +123,10 @@ export default function WaiverConfirmation({
 
     if (isNaN(value) || value % 1 !== 0) {
       set_waiver_error(true)
-    } else if (value < 0 || value > team.faab_balance) {
+    } else if (
+      value < 0 ||
+      value > team.free_agent_acquisition_budget_balance
+    ) {
       set_waiver_error(true)
     } else {
       set_waiver_error(false)

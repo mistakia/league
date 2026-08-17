@@ -36,11 +36,11 @@ export const process_scoring_format_year = async ({
   const projections = await db('projections_index').where({
     season_year: year,
     season_type: 'REG',
-    sourceid: external_data_sources.AVERAGE
+    source_id: external_data_sources.AVERAGE
   })
   const ros_projections = await db('ros_projections').where({
     season_year: year,
-    sourceid: external_data_sources.AVERAGE
+    source_id: external_data_sources.AVERAGE
   })
 
   const projections_by_pid = groupBy(projections, 'pid')

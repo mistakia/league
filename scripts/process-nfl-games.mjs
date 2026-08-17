@@ -20,7 +20,7 @@ const processNflGames = async () => {
   const updates = []
   for (const {
     date,
-    time_est,
+    time_eastern,
     away_nfl_team,
     home_nfl_team,
     week,
@@ -28,9 +28,9 @@ const processNflGames = async () => {
     season_type: seas_type,
     week_type
   } of games) {
-    if (date && time_est) {
+    if (date && time_eastern) {
       const datetime = dayjs.tz(
-        `${date} ${time_est}`,
+        `${date} ${time_eastern}`,
         'YYYY/MM/DD HH:mm:ss',
         'America/New_York'
       )
@@ -48,7 +48,7 @@ const processNflGames = async () => {
         update.day = getGameDayAbbreviation({
           seas_type,
           date,
-          time_est,
+          time_eastern,
           week_type
         })
       }

@@ -55,7 +55,7 @@ export default async function (lid) {
       'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
-      'waivers.userid',
+      'waivers.user_id',
       'waivers.type as waiver_type'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
@@ -82,7 +82,7 @@ export default async function (lid) {
   if (!current_season.isOffseason) {
     query
       .select('nfl_games.date')
-      .select('nfl_games.time_est')
+      .select('nfl_games.time_eastern')
       .join('player', 'waivers.pid', 'player.pid')
     apply_nfl_games_current_week_join({ db, query })
   }
@@ -103,7 +103,7 @@ export default async function (lid) {
       'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
-      'waivers.userid',
+      'waivers.user_id',
       'waivers.type as waiver_type',
       'waivers.super_priority'
     )
@@ -147,7 +147,7 @@ export default async function (lid) {
     const filtered = waiver_rows.filter((waiver_row) => {
       if (!waiver_row.date) return true
       const gameStart = dayjs.tz(
-        `${waiver_row.date} ${waiver_row.time_est}`,
+        `${waiver_row.date} ${waiver_row.time_eastern}`,
         'YYYY/MM/DD HH:mm:SS',
         'America/New_York'
       )

@@ -50,17 +50,17 @@ SELECT md5(concat_ws('|',
      FROM transactions WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', uid, propose_tid, accept_tid, season_year, offered, accepted, cancelled, rejected, vetoed), ',' ORDER BY uid))
      FROM trades WHERE lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', tt.tradeid, tt.transactionid), ',' ORDER BY tt.tradeid, tt.transactionid))
-     FROM trades_transactions tt JOIN trades t ON t.uid = tt.tradeid WHERE t.lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', tp.tradeid, tp.tid, tp.pid), ',' ORDER BY tp.tradeid, tp.tid, tp.pid))
-     FROM trades_players tp JOIN trades t ON t.uid = tp.tradeid WHERE t.lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', tk.tradeid, tk.tid, tk.pickid), ',' ORDER BY tk.tradeid, tk.tid, tk.pickid))
-     FROM trades_picks tk JOIN trades t ON t.uid = tk.tradeid WHERE t.lid = ?),
+  (SELECT md5(string_agg(concat_ws(':', tt.trade_id, tt.transaction_id), ',' ORDER BY tt.trade_id, tt.transaction_id))
+     FROM trades_transactions tt JOIN trades t ON t.uid = tt.trade_id WHERE t.lid = ?),
+  (SELECT md5(string_agg(concat_ws(':', tp.trade_id, tp.tid, tp.pid), ',' ORDER BY tp.trade_id, tp.tid, tp.pid))
+     FROM trades_players tp JOIN trades t ON t.uid = tp.trade_id WHERE t.lid = ?),
+  (SELECT md5(string_agg(concat_ws(':', tk.trade_id, tk.tid, tk.draft_pick_id), ',' ORDER BY tk.trade_id, tk.tid, tk.draft_pick_id))
+     FROM trades_picks tk JOIN trades t ON t.uid = tk.trade_id WHERE t.lid = ?),
   (SELECT md5(string_agg(concat_ws(':', uid, pid, round, is_compensatory, pick, tid, original_team_id, season_year, selection_timestamp), ',' ORDER BY uid))
      FROM draft WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', uid, pid, bid_amount, tid, season_year, is_successful, processed, cancelled, nomination_id, outcome), ',' ORDER BY uid))
      FROM restricted_free_agency_bids WHERE lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', season_year, draft_start, rookie_draft_completed_at, ext_date), ',' ORDER BY season_year))
+  (SELECT md5(string_agg(concat_ws(':', season_year, draft_start, rookie_draft_completed_at, extension_deadline_at), ',' ORDER BY season_year))
      FROM seasons WHERE lid = ?)
 )) AS input_hash`
 

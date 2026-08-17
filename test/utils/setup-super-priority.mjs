@@ -26,7 +26,7 @@ export default async function setupSuperPriority({
   // Step 0: Optionally add previous release (for rostered scenario)
   if (add_previous_release) {
     await db('transactions').insert({
-      userid: original_user_id,
+      user_id: original_user_id,
       tid: original_team_id,
       lid: league_id,
       pid: player.pid,
@@ -51,7 +51,7 @@ export default async function setupSuperPriority({
 
   // Insert transaction with custom timestamp
   await db('transactions').insert({
-    userid: original_user_id,
+    user_id: original_user_id,
     tid: original_team_id,
     lid: league_id,
     pid: player.pid,
@@ -77,7 +77,7 @@ export default async function setupSuperPriority({
 
   // Step 2: Create poach transaction
   await db('transactions').insert({
-    userid: poaching_user_id,
+    user_id: poaching_user_id,
     tid: poaching_team_id,
     lid: league_id,
     pid: player.pid,
@@ -127,7 +127,7 @@ export default async function setupSuperPriority({
     releaseTimestamp = currentTimestamp
 
     await db('transactions').insert({
-      userid: poaching_user_id,
+      user_id: poaching_user_id,
       tid: poaching_team_id,
       lid: league_id,
       pid: player.pid,

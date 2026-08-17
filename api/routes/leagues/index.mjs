@@ -376,21 +376,21 @@ router.put('/:leagueId', async (req, res) => {
  *             example:
  *               uid: 2
  *               name: "TEFLON LEAGUE"
- *               commishid: 5
+ *               commissioner_user_id: 5
  *               is_hosted: false
- *               num_teams: 14
+ *               number_teams: 14
  *               starter_slots_quarterback: 1
  *               starter_slots_running_back: 2
  *               starter_slots_wide_receiver: 3
  *               starter_slots_tight_end: 1
- *               srbwrte: 1
+ *               starter_slots_running_back_wide_receiver_tight_end_flex: 1
  *               starter_slots_defense_special_teams: 1
  *               starter_slots_kicker: 1
  *               bench_slot_count: 6
  *               practice_squad_slot_count: 4
  *               reserve_short_term_limit: 3
- *               cap: 200
- *               starting_faab_budget: 200
+ *               salary_cap: 200
+ *               starting_free_agent_acquisition_budget: 200
  *               years: [2022, 2023, 2024]
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
@@ -445,21 +445,21 @@ router.get('/:leagueId/?', async (req, res) => {
  *             example:
  *               uid: 2
  *               name: "TEFLON LEAGUE"
- *               commishid: 5
+ *               commissioner_user_id: 5
  *               is_hosted: false
- *               num_teams: 14
+ *               number_teams: 14
  *               starter_slots_quarterback: 1
  *               starter_slots_running_back: 2
  *               starter_slots_wide_receiver: 3
  *               starter_slots_tight_end: 1
- *               srbwrte: 1
+ *               starter_slots_running_back_wide_receiver_tight_end_flex: 1
  *               starter_slots_defense_special_teams: 1
  *               starter_slots_kicker: 1
  *               bench_slot_count: 6
  *               practice_squad_slot_count: 4
  *               reserve_short_term_limit: 3
- *               cap: 200
- *               starting_faab_budget: 200
+ *               salary_cap: 200
+ *               starting_free_agent_acquisition_budget: 200
  *               league_format_id: "b5310a7f7c47c20ce372e47e8a0a188b22b78b1d34e2ea18829d94b94ffdc342"
  *               scoring_format_id: "eb75c8fd2acb21fea5d8754f53e9aa2e5d7c40327d5853c58592f658235ba756"
  *       400:

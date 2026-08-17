@@ -5,14 +5,14 @@ import get_discretionary_cap from './get-discretionary-cap.mjs'
 //
 //   rate = get_discretionary_cap(league_format) / total_pts_added
 //
-// The cap is derived HERE rather than by the caller -- num_teams * cap minus
+// The cap is derived HERE rather than by the caller -- number_teams * salary_cap minus
 // the minimum bid on every roster spot -- so the money teams must spend simply
 // filling out a roster is out of the pool, and no caller can get that
 // subtraction wrong. One did: see get-discretionary-cap.mjs.
 //
 // The pricing_model gate lives here for the same reason. A DFS format
 // (pricing_model 'dfs_fixed') publishes per-player salaries externally, so a
-// market_salary derived from a contest-entry cap and num_teams = 1 is
+// market_salary derived from a contest-entry cap and number_teams = 1 is
 // meaningless; pts_added stays meaningful for any format. That gate was
 // open-coded at three call sites and absent from a fourth, which is how
 // draftkings_classic ended up carrying a realized earned_salary on every row

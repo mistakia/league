@@ -194,7 +194,7 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
 
       const result = map_charting_play_to_db_fields(source)
       expect(result.field_goal_result).to.equal('made')
-      expect(result.ep_result).to.equal('missed')
+      expect(result.extra_point_result).to.equal('missed')
       expect(result.two_point_result).to.equal(null)
       expect(result.home_score).to.equal(14)
       expect(result.away_score).to.equal(7)

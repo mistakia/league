@@ -155,7 +155,7 @@ export default class EspnAdapter extends BaseAdapter {
       name: data.settings.name,
       year: Number(data.seasonId),
       settings: {
-        num_teams: data.settings.size || data.teams?.length || 12,
+        number_teams: data.settings.size || data.teams?.length || 12,
         season_type: data.settings.isKeeper ? 'KEEPER' : 'REDRAFT',
         playoff_teams: data.settings.playoffTeamCount || 6,
         playoff_week_start: data.settings.playoffWeekStart || 15,

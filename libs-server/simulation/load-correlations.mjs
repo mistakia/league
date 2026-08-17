@@ -78,15 +78,23 @@ export async function load_correlations({
 
   if (is_within_set) {
     // Both players must be in the set
-    query = query.whereIn('pid_a', player_ids).whereIn('pid_b', player_ids)
+    query = query
+      .whereIn('pid_first', player_ids)
+      .whereIn('pid_second', player_ids)
   } else {
     // Between two sets: match pairs where one is in set A and one is in set B
     query = query
       .where(function () {
-        this.whereIn('pid_a', player_set_a).orWhereIn('pid_b', player_set_a)
+        this.whereIn('pid_first', player_set_a).orWhereIn(
+          'pid_second',
+          player_set_a
+        )
       })
       .where(function () {
-        this.whereIn('pid_a', player_set_b).orWhereIn('pid_b', player_set_b)
+        this.whereIn('pid_first', player_set_b).orWhereIn(
+          'pid_second',
+          player_set_b
+        )
       })
   }
 
@@ -107,17 +115,20 @@ export async function load_correlations({
   for (const row of correlations) {
     // For within-set queries, ensure both players are actually in our set
     if (is_within_set) {
-      if (!player_ids_set.has(row.pid_a) || !player_ids_set.has(row.pid_b)) {
+      if (
+        !player_ids_set.has(row.pid_first) ||
+        !player_ids_set.has(row.pid_second)
+      ) {
         continue
       }
     }
 
     // For between-set queries, ensure we have one from each set
     if (is_between_sets) {
-      const a_in_set_a = player_set_a_lookup.has(row.pid_a)
-      const a_in_set_b = player_set_b_lookup.has(row.pid_a)
-      const b_in_set_a = player_set_a_lookup.has(row.pid_b)
-      const b_in_set_b = player_set_b_lookup.has(row.pid_b)
+      const a_in_set_a = player_set_a_lookup.has(row.pid_first)
+      const a_in_set_b = player_set_b_lookup.has(row.pid_first)
+      const b_in_set_a = player_set_a_lookup.has(row.pid_second)
+      const b_in_set_b = player_set_b_lookup.has(row.pid_second)
 
       // Need one player from each set (not both from same set)
       const valid_pairing =
@@ -127,7 +138,7 @@ export async function load_correlations({
       }
     }
 
-    const pair_key = `${row.pid_a}:${row.pid_b}`
+    const pair_key = `${row.pid_first}:${row.pid_second}`
     if (seen_pairs.has(pair_key)) {
       continue
     }
@@ -141,8 +152,8 @@ export async function load_correlations({
     }
 
     results.push({
-      pid_a: row.pid_a,
-      pid_b: row.pid_b,
+      pid_first: row.pid_first,
+      pid_second: row.pid_second,
       correlation: correlation_value,
       games_together: row.games_together,
       team_a: row.team_a,
@@ -158,7 +169,7 @@ export async function load_correlations({
   if (output_format === 'map') {
     const correlation_map = new Map()
     for (const row of results) {
-      const cache_key = `${row.pid_a}:${row.pid_b}`
+      const cache_key = `${row.pid_first}:${row.pid_second}`
       correlation_map.set(cache_key, {
         correlation: row.correlation,
         games_together: row.games_together,
@@ -180,7 +191,7 @@ export async function load_correlations({
  * @param {Object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.year - Year of correlation data (typically prior year)
- * @returns {Promise<Map>} Map of 'pid_a:pid_b' -> correlation data
+ * @returns {Promise<Map>} Map of 'pid_first:pid_second' -> correlation data
  */
 export async function load_correlations_for_players({ player_ids, year }) {
   return load_correlations({
@@ -256,7 +267,7 @@ export async function load_correlations_within_set({
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.year - Current year
  * @param {number} [params.min_games_together=3] - Minimum games for valid correlation
- * @returns {Promise<Map>} Map of 'pid_a:pid_b' -> correlation data
+ * @returns {Promise<Map>} Map of 'pid_first:pid_second' -> correlation data
  */
 export async function load_correlations_smart({
   player_ids,

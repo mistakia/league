@@ -243,7 +243,7 @@ describe('API /teams - tag', function () {
 
       // Add franchise tag transaction from two years ago
       await knex('transactions').insert({
-        userid: userId,
+        user_id: userId,
         tid: teamId,
         lid: leagueId,
         pid: player.pid,
@@ -258,7 +258,7 @@ describe('API /teams - tag', function () {
 
       // Add franchise tag transaction from one year ago
       await knex('transactions').insert({
-        userid: userId,
+        user_id: userId,
         tid: teamId,
         lid: leagueId,
         pid: player.pid,

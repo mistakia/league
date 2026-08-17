@@ -55,12 +55,21 @@ describe('API /players - bid visibility across the three players routes', functi
     MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
 
     const leagueId = 1
+    // `selectPlayer` is ORDER BY RANDOM() over a pool of roughly twenty, so two
+    // bare draws collide on a few percent of runs -- and here both draws are
+    // rostered, so the collision surfaces as a `rosters_players_pkey` duplicate
+    // key rather than as a readable assertion. That is the shape this spec has
+    // been failing with intermittently, including on CI, where it blocks every
+    // session's push behind a red master.
+    const exclude_pids = []
     const player = await selectPlayer()
+    exclude_pids.push(player.pid)
     await addPlayer({ leagueId, player, teamId, userId: teamId })
 
     const release_players = []
     for (let i = 0; i < release.length; i++) {
-      const release_player = await selectPlayer()
+      const release_player = await selectPlayer({ exclude_pids })
+      exclude_pids.push(release_player.pid)
       await addPlayer({
         leagueId,
         player: release_player,

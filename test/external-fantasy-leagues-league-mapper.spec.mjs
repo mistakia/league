@@ -21,7 +21,7 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
       const league = sleeper_fixture.data.league
       const result = mapper.map_league_config({
         platform: 'sleeper',
-        league_config: { num_teams: league.total_rosters },
+        league_config: { number_teams: league.total_rosters },
         scoring_config: league.scoring_settings,
         roster_config: league.roster_positions
       })
@@ -29,7 +29,7 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
       result.should.have.property('scoring_params').that.is.an('object')
       result.should.have.property('league_params').that.is.an('object')
       result.scoring_params.should.have.property('passing_yards')
-      result.league_params.should.have.property('num_teams')
+      result.league_params.should.have.property('number_teams')
     })
 
     it('throws for an unsupported platform', function () {
@@ -49,7 +49,7 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
       const league = sleeper_fixture.data.league
       const args = {
         platform: 'sleeper',
-        league_config: { num_teams: league.total_rosters },
+        league_config: { number_teams: league.total_rosters },
         scoring_config: league.scoring_settings,
         roster_config: league.roster_positions
       }
@@ -237,7 +237,7 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
       const league = sleeper_fixture.data.league
       const mapped = mapper.map_league_config({
         platform: 'sleeper',
-        league_config: { num_teams: league.total_rosters },
+        league_config: { number_teams: league.total_rosters },
         scoring_config: league.scoring_settings,
         roster_config: league.roster_positions
       })
@@ -248,7 +248,7 @@ describe('External Fantasy Leagues - League Config Mapper', function () {
     it('returns false for a config with no starting roster slots', function () {
       const mapped = mapper.map_league_config({
         platform: 'sleeper',
-        league_config: { num_teams: 12 },
+        league_config: { number_teams: 12 },
         scoring_config: { pass_yd: 0.04 },
         roster_config: ['BN', 'BN']
       })

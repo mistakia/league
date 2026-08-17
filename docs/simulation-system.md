@@ -161,7 +161,7 @@ Wildcard and championship round forecasting with player-level correlations and a
 ```sql
 -- Player correlations (pre-calculated annually)
 player_pair_correlations (
-  pid_a, pid_b, year, correlation,
+  pid_first, pid_second, year, correlation,
   relationship_type, team_a, team_b, games_together
 )
 

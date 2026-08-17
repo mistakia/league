@@ -65,7 +65,7 @@ const import_mfl_adp = async ({
   for (const { url, ranking_type } of adp_types) {
     const players = await fetch_mfl_data(url)
 
-    const adp_format_id = await find_or_create_adp_format(
+    const average_draft_position_format_id = await find_or_create_adp_format(
       db,
       adp_format.decode_adp_type(ranking_type)
     )
@@ -106,11 +106,11 @@ const import_mfl_adp = async ({
           average_draft_position: player.average_pick,
           min_pick: player.min_pick,
           max_pick: player.max_pick,
-          std_dev: null,
+          standard_deviation: null,
           sample_size: player.drafts_selected_in,
           percent_drafted: player.draft_sel_pct,
           source_id: 'MFL',
-          adp_format_id
+          average_draft_position_format_id
         })
       } else {
         unmatched_players.push(player)
@@ -185,7 +185,12 @@ const import_mfl_adp = async ({
         save: async (batch) => {
           await db('player_adp_index')
             .insert(batch)
-            .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
+            .onConflict([
+              'season_year',
+              'source_id',
+              'average_draft_position_format_id',
+              'pid'
+            ])
             .merge()
         }
       })

@@ -24,7 +24,7 @@ export default function LeagueSettingsGeneral({
       />
       <EditableLeagueField
         label='Number of Teams'
-        field='num_teams'
+        field='number_teams'
         type='int'
         max={20}
         min={4}
@@ -32,7 +32,7 @@ export default function LeagueSettingsGeneral({
       />
       <EditableLeagueField
         label='FAAB Budget'
-        field='starting_faab_budget'
+        field='starting_free_agent_acquisition_budget'
         type='int'
         max={1000000}
         min={0}
@@ -40,7 +40,7 @@ export default function LeagueSettingsGeneral({
       />
       <EditableLeagueField
         label='CAP Limit'
-        field='cap'
+        field='salary_cap'
         type='int'
         max={1000000}
         min={0}

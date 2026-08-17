@@ -42,8 +42,8 @@ export const active_roster_slots = [
 // Enumerated rather than derived by prefix: the league object also carries
 // unrelated s-prefixed fields (salary_attribution_rule, sleeper_id,
 // scoring_format_id) that must not be summed into a starter count. Most of
-// these conformed to full-word `starter_slots_*` columns; `srbwrte` and
-// `sqbrbwrte` were not part of that rename and still carry their shorthand
+// these conformed to full-word `starter_slots_*` columns; `starter_slots_running_back_wide_receiver_tight_end_flex` and
+// `starter_slots_superflex` were not part of that rename and still carry their shorthand
 // names -- see league_formats in the schema.
 export const starting_lineup_slot_league_keys = [
   'starter_slots_quarterback',
@@ -52,8 +52,8 @@ export const starting_lineup_slot_league_keys = [
   'starter_slots_tight_end',
   'starter_slots_wide_receiver_tight_end_flex',
   'starter_slots_running_back_wide_receiver_flex',
-  'srbwrte',
-  'sqbrbwrte',
+  'starter_slots_running_back_wide_receiver_tight_end_flex',
+  'starter_slots_superflex',
   'starter_slots_kicker',
   'starter_slots_defense_special_teams'
 ]
@@ -64,7 +64,7 @@ export const starting_lineup_slot_league_keys = [
 // by string concatenation (`` `s${slot}` ``) -- that concatenation broke
 // silently the moment a column's physical name diverged from the bare
 // `s`-prefix pattern (see starter_slots_* above vs. the retained
-// srbwrte/sqbrbwrte shorthand).
+// starter_slots_running_back_wide_receiver_tight_end_flex/starter_slots_superflex shorthand).
 export const starter_slot_league_columns = {
   [roster_slot_types.QB]: 'starter_slots_quarterback',
   [roster_slot_types.RB]: 'starter_slots_running_back',
@@ -72,8 +72,9 @@ export const starter_slot_league_columns = {
   [roster_slot_types.TE]: 'starter_slots_tight_end',
   [roster_slot_types.WRTE]: 'starter_slots_wide_receiver_tight_end_flex',
   [roster_slot_types.RBWR]: 'starter_slots_running_back_wide_receiver_flex',
-  [roster_slot_types.RBWRTE]: 'srbwrte',
-  [roster_slot_types.QBRBWRTE]: 'sqbrbwrte',
+  [roster_slot_types.RBWRTE]:
+    'starter_slots_running_back_wide_receiver_tight_end_flex',
+  [roster_slot_types.QBRBWRTE]: 'starter_slots_superflex',
   [roster_slot_types.K]: 'starter_slots_kicker',
   [roster_slot_types.DST]: 'starter_slots_defense_special_teams',
   [roster_slot_types.BENCH]: 'bench_slot_count',

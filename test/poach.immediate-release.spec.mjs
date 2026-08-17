@@ -58,7 +58,7 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
         release: [],
         lid: leagueId,
         tid: poachingTeamId,
-        userid: 2
+        user_id: 2
       })
 
       // Check that poach transaction was created
@@ -136,7 +136,7 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
         release: [],
         lid: leagueId,
         tid: poachingTeamId,
-        userid: 2
+        user_id: 2
       })
 
       // Check that poach transaction was created

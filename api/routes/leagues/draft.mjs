@@ -56,7 +56,7 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: Overall pick number
  *           example: 3
- *         pick_str:
+ *         pick_string:
  *           type: string
  *           description: Formatted pick string (e.g., "1.03")
  *           example: "1.03"
@@ -197,7 +197,7 @@ const router = express.Router({ mergeParams: true })
  *                       season_year: 2024
  *                       round: 1
  *                       pick: 3
- *                       pick_str: "1.03"
+ *                       pick_string: "1.03"
  *                       original_team_id: null
  *                       pid: "4017"
  *                       selection_timestamp: 1698765432
@@ -207,7 +207,7 @@ const router = express.Router({ mergeParams: true })
  *                       season_year: 2024
  *                       round: 1
  *                       pick: 4
- *                       pick_str: "1.04"
+ *                       pick_string: "1.04"
  *                       original_team_id: 13
  *                       pid: null
  *                       selection_timestamp: null
@@ -241,20 +241,20 @@ router.get('/?', async (req, res) => {
 
     // Get trade counts for each pick
     const trade_counts = await db('trades_picks')
-      .select('pickid')
-      .count('tradeid as trade_count')
-      .innerJoin('trades', 'trades.uid', 'trades_picks.tradeid')
+      .select('draft_pick_id')
+      .count('trade_id as trade_count')
+      .innerJoin('trades', 'trades.uid', 'trades_picks.trade_id')
       .whereNotNull('trades.accepted')
       .whereIn(
-        'pickid',
+        'draft_pick_id',
         picks.map((p) => p.uid)
       )
-      .groupBy('pickid')
+      .groupBy('draft_pick_id')
 
     // Create a map for quick lookup
     const trade_count_map = {}
     trade_counts.forEach((tc) => {
-      trade_count_map[tc.pickid] = parseInt(tc.trade_count)
+      trade_count_map[tc.draft_pick_id] = parseInt(tc.trade_count)
     })
 
     // Add trade_count to each pick
@@ -325,10 +325,10 @@ router.get('/picks/:pickId', async (req, res) => {
         'trades.propose_tid',
         'trades.accept_tid',
         'trades.accepted',
-        'trades_picks.pickid'
+        'trades_picks.draft_pick_id'
       ])
-      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
-      .where('trades_picks.pickid', pickId)
+      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.trade_id')
+      .where('trades_picks.draft_pick_id', pickId)
       .whereNotNull('trades.accepted')
       .orderBy('trades.accepted', 'asc')
 
@@ -631,8 +631,8 @@ router.post('/?', async (req, res) => {
     })
     const roster = new Roster({ roster: rosterRow, league })
     const value =
-      league.num_teams - pick.pick + 1 > 0
-        ? league.num_teams - pick.pick + 1
+      league.number_teams - pick.pick + 1 > 0
+        ? league.number_teams - pick.pick + 1
         : 1
 
     await db('rosters_players').insert({
@@ -648,7 +648,7 @@ router.post('/?', async (req, res) => {
     })
 
     await db('transactions').insert({
-      userid: req.auth.userId,
+      user_id: req.auth.userId,
       tid: teamId,
       lid,
       pid,
@@ -693,8 +693,8 @@ router.post('/?', async (req, res) => {
     }
 
     const trades = await db('trades')
-      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
-      .where('trades_picks.pickid', pickId)
+      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.trade_id')
+      .where('trades_picks.draft_pick_id', pickId)
       .whereNull('trades.accepted')
       .whereNull('trades.cancelled')
       .whereNull('trades.rejected')
@@ -726,7 +726,7 @@ router.post('/?', async (req, res) => {
     if (pick.pick === 1) {
       message += 'the first overall pick '
     } else {
-      message += `pick #${pick.pick} (${pick.pick_str}) `
+      message += `pick #${pick.pick} (${pick.pick_string}) `
     }
     message += `in the ${current_season.year} draft`
 

@@ -575,7 +575,7 @@ router.get('/:pid/practices/?', async (req, res) => {
  *                   - pid: "PATR-MAHO-005785"
  *                     esbid: "2024011401"
  *                     points: 24.5
- *                     pos_rnk: 3
+ *                     position_rank: 3
  *                     points_added_earned: 8.2
  *                     points_added_net: 6.8
  *                     day: "Sunday"
@@ -591,7 +591,7 @@ router.get('/:pid/practices/?', async (req, res) => {
  *                   - pid: "PATR-MAHO-005785"
  *                     esbid: "2024011401"
  *                     points: 24.5
- *                     pos_rnk: 3
+ *                     position_rank: 3
  *                     points_added_earned: 8.2
  *                     points_added_net: 6.8
  *                     day: "Sunday"
@@ -616,7 +616,7 @@ router.get('/:pid/practices/?', async (req, res) => {
  *                   - pid: "CHRI-MCCA-005372"
  *                     esbid: "2024011401"
  *                     points: 18.7
- *                     pos_rnk: 5
+ *                     position_rank: 5
  *                     points_added_earned: 6.1
  *                     points_added_net: 4.4
  *                     day: "Sunday"
@@ -1087,10 +1087,10 @@ router.get('/:pid/seasonlogs/?', async (req, res) => {
         'scoring_format_player_seasonlogs.points',
         'scoring_format_player_seasonlogs.points_per_game',
         'scoring_format_player_seasonlogs.games_played',
-        'scoring_format_player_seasonlogs.points_rnk',
-        'scoring_format_player_seasonlogs.points_pos_rnk',
-        'scoring_format_player_seasonlogs.points_per_game_rnk',
-        'scoring_format_player_seasonlogs.points_per_game_pos_rnk',
+        'scoring_format_player_seasonlogs.points_rank',
+        'scoring_format_player_seasonlogs.points_position_rank',
+        'scoring_format_player_seasonlogs.points_per_game_rank',
+        'scoring_format_player_seasonlogs.points_per_game_position_rank',
         'league_format_player_seasonlogs.points_added_earned',
         'league_format_player_seasonlogs.points_added_earned_per_game',
         'league_format_player_seasonlogs.points_added_earned_rank',
@@ -1145,7 +1145,7 @@ router.get('/:pid/markets/?', async (req, res) => {
         'nfl_games.away_nfl_team',
         'nfl_games.week',
         'nfl_games.date',
-        'nfl_games.time_est'
+        'nfl_games.time_eastern'
       )
       .join('prop_market_selections_index', function () {
         this.on(
@@ -1182,7 +1182,7 @@ router.get('/:pid/markets/?', async (req, res) => {
           year: row.season_year,
           week: row.week,
           event_date: row.date,
-          event_time_est: row.time_est,
+          event_time_est: row.time_eastern,
           home_team: row.home_nfl_team,
           away_team: row.away_nfl_team,
           selections: []

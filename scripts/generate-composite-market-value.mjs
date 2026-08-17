@@ -70,7 +70,7 @@ const generate_for_date_and_category = async ({
   })
   const adp = await extract_adp_per_asset({
     player_ids,
-    adp_format_id: mapping.adp_format_id,
+    average_draft_position_format_id: mapping.average_draft_position_format_id,
     league_format_id,
     start_date: window_start,
     end_date: date_iso
@@ -110,7 +110,7 @@ const generate_for_date_and_category = async ({
 
   // Constant per call — hoist out of the per-player loop.
   const w_ktc = Number(weights.ktc_weight)
-  const w_adp = Number(weights.adp_weight)
+  const w_adp = Number(weights.average_draft_position_weight)
   const w_rank = Number(weights.rankings_weight)
   const w_props = Number(weights.props_weight)
   const intended_player_weight = w_ktc + w_adp + w_rank + w_props
@@ -172,7 +172,8 @@ const generate_for_date_and_category = async ({
       pick_original_owner_tid: null,
       date: date_iso,
       ktc_value: k_cal != null ? Number(k_cal.toFixed(1)) : null,
-      adp_value: a_cal != null ? Number(a_cal.toFixed(1)) : null,
+      average_draft_position_value:
+        a_cal != null ? Number(a_cal.toFixed(1)) : null,
       rankings_value: r_cal != null ? Number(r_cal.toFixed(1)) : null,
       props_value: p_cal != null ? Number(p_cal.toFixed(1)) : null,
       draft_pick_model_value: null,

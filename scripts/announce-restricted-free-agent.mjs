@@ -173,7 +173,7 @@ const announce_restricted_free_agent = async ({
   } else {
     const team_index = get_restricted_free_agency_nominating_team_index({
       window_index: target_window_index,
-      num_teams: teams.length
+      number_teams: teams.length
     })
     nominating_team = teams[team_index]
   }

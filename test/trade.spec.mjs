@@ -141,7 +141,7 @@ describe('API /trades', function () {
       proposeRes.should.be.json
       proposeRes.body.propose_tid.should.be.equal(1)
       proposeRes.body.accept_tid.should.be.equal(2)
-      proposeRes.body.userid.should.be.equal(1)
+      proposeRes.body.user_id.should.be.equal(1)
       proposeRes.body.season_year.should.be.equal(current_season.year)
       should.exist(proposeRes.body.offered)
       should.not.exist(proposeRes.body.cancelled)
@@ -153,11 +153,11 @@ describe('API /trades', function () {
       proposeRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
       proposeRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
-      const tradeid = proposeRes.body.uid
+      const trade_id = proposeRes.body.uid
 
       // Verify slot assignments stored in database
       const stored_slots = await knex('trades_slots').where({
-        trade_uid: tradeid
+        trade_uid: trade_id
       })
       stored_slots.length.should.equal(
         proposingTeamPlayers.length + acceptingTeamPlayers.length
@@ -165,7 +165,7 @@ describe('API /trades', function () {
 
       const acceptRes = await chai_request
         .execute(server)
-        .post(`/api/leagues/1/trades/${tradeid}/accept`)
+        .post(`/api/leagues/1/trades/${trade_id}/accept`)
         .set('Authorization', `Bearer ${user2}`)
 
       acceptRes.should.have.status(200)
@@ -173,7 +173,7 @@ describe('API /trades', function () {
       acceptRes.should.be.json
       acceptRes.body.propose_tid.should.be.equal(1)
       acceptRes.body.accept_tid.should.be.equal(2)
-      acceptRes.body.userid.should.be.equal(1)
+      acceptRes.body.user_id.should.be.equal(1)
       acceptRes.body.season_year.should.be.equal(current_season.year)
       should.exist(acceptRes.body.offered)
       should.not.exist(acceptRes.body.cancelled)
@@ -246,11 +246,11 @@ describe('API /trades', function () {
       proposalRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
       proposalRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
-      const tradeid = proposalRes.body.uid
+      const trade_id = proposalRes.body.uid
 
       // Verify slot assignments stored in database
       const stored_slots = await knex('trades_slots').where({
-        trade_uid: tradeid
+        trade_uid: trade_id
       })
       stored_slots.length.should.equal(
         proposingTeamPlayers.length + acceptingTeamPlayers.length
@@ -259,7 +259,7 @@ describe('API /trades', function () {
       // Accept trade
       const acceptRes = await chai_request
         .execute(server)
-        .post(`/api/leagues/1/trades/${tradeid}/accept`)
+        .post(`/api/leagues/1/trades/${trade_id}/accept`)
         .set('Authorization', `Bearer ${user2}`)
 
       acceptRes.should.have.status(200)
@@ -304,7 +304,7 @@ describe('API /trades', function () {
       })
 
       await knex('poaches').insert({
-        userid: 3,
+        user_id: 3,
         tid: 3,
         lid: 1,
         pid: player1.pid,
@@ -317,7 +317,7 @@ describe('API /trades', function () {
         .update('slot', roster_slot_types.BENCH)
         .where('pid', player1.pid)
       await knex('transactions').insert({
-        userid: userId,
+        user_id: userId,
         tid: teamId,
         lid: leagueId,
         pid: player1.pid,
@@ -380,7 +380,7 @@ describe('API /trades', function () {
       proposeRes.should.be.json
       proposeRes.body.propose_tid.should.be.equal(1)
       proposeRes.body.accept_tid.should.be.equal(2)
-      proposeRes.body.userid.should.be.equal(1)
+      proposeRes.body.user_id.should.be.equal(1)
       proposeRes.body.season_year.should.be.equal(current_season.year)
       should.exist(proposeRes.body.offered)
       should.not.exist(proposeRes.body.cancelled)
@@ -392,11 +392,11 @@ describe('API /trades', function () {
       proposeRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
       proposeRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
-      const tradeid = proposeRes.body.uid
+      const trade_id = proposeRes.body.uid
 
       // Verify slot assignments stored in database
       const stored_slots = await knex('trades_slots').where({
-        trade_uid: tradeid
+        trade_uid: trade_id
       })
       stored_slots.length.should.equal(
         proposingTeamPlayers.length + acceptingTeamPlayers.length
@@ -404,7 +404,7 @@ describe('API /trades', function () {
 
       const acceptRes = await chai_request
         .execute(server)
-        .post(`/api/leagues/1/trades/${tradeid}/accept`)
+        .post(`/api/leagues/1/trades/${trade_id}/accept`)
         .set('Authorization', `Bearer ${user2}`)
 
       acceptRes.should.have.status(200)
@@ -412,7 +412,7 @@ describe('API /trades', function () {
       acceptRes.should.be.json
       acceptRes.body.propose_tid.should.be.equal(1)
       acceptRes.body.accept_tid.should.be.equal(2)
-      acceptRes.body.userid.should.be.equal(1)
+      acceptRes.body.user_id.should.be.equal(1)
       acceptRes.body.season_year.should.be.equal(current_season.year)
       should.exist(acceptRes.body.offered)
       should.not.exist(acceptRes.body.cancelled)
@@ -449,7 +449,7 @@ describe('API /trades', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player2.pid)
       res.body.slot.should.equal(roster_slot_types.PS)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player2.pid)
@@ -551,11 +551,11 @@ describe('API /trades', function () {
       proposeRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
       proposeRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
-      const tradeid = proposeRes.body.uid
+      const trade_id = proposeRes.body.uid
 
       // Verify slot assignments in database
       const stored_slots = await knex('trades_slots').where({
-        trade_uid: tradeid
+        trade_uid: trade_id
       })
       stored_slots.length.should.equal(2)
 
@@ -570,7 +570,7 @@ describe('API /trades', function () {
       // Accept trade (accepting team can override their slot if desired)
       const acceptRes = await chai_request
         .execute(server)
-        .post(`/api/leagues/1/trades/${tradeid}/accept`)
+        .post(`/api/leagues/1/trades/${trade_id}/accept`)
         .set('Authorization', `Bearer ${user2}`)
 
       acceptRes.should.have.status(200)
@@ -644,7 +644,7 @@ describe('API /trades', function () {
         })
 
       proposeRes.should.have.status(200)
-      const tradeid = proposeRes.body.uid
+      const trade_id = proposeRes.body.uid
 
       // Accepting team overrides their slot assignment to BENCH
       const accepting_team_slot_override = {}
@@ -652,7 +652,7 @@ describe('API /trades', function () {
 
       const acceptRes = await chai_request
         .execute(server)
-        .post(`/api/leagues/1/trades/${tradeid}/accept`)
+        .post(`/api/leagues/1/trades/${trade_id}/accept`)
         .set('Authorization', `Bearer ${user2}`)
         .send({
           accepting_team_slots: accepting_team_slot_override
@@ -732,7 +732,7 @@ describe('API /trades', function () {
       })
 
       await knex('poaches').insert({
-        userid: 3,
+        user_id: 3,
         tid: 3,
         lid: 1,
         pid: player1.pid,

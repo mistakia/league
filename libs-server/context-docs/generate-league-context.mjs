@@ -108,7 +108,7 @@ export default async function generate_league_context({
       league_id: league.uid,
       league_name: league.name,
       year,
-      num_teams: teams.length
+      number_teams: teams.length
     },
     related: {
       children: teams.map((team) => doc_url(base_url, { lid, tid: team.uid })),
@@ -125,7 +125,7 @@ export default async function generate_league_context({
   const identity = [
     heading(1, `${league.name} — League Context`),
     `League ${league.uid} · ${year} season · ${teams.length} teams`,
-    `Format: ${league.num_teams || teams.length}-team, $${league.cap} cap auction. See [rules](${doc_url(
+    `Format: ${league.number_teams || teams.length}-team, $${league.salary_cap} cap auction. See [rules](${doc_url(
       base_url,
       { lid, view: 'rules' }
     )}) for full scoring and roster construction.`

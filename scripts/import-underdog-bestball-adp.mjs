@@ -36,7 +36,7 @@ const jittered_delay = () =>
     setTimeout(resolve, 500 + Math.floor(Math.random() * 500))
   )
 
-// num_quarterback is carried by the slate, not the scoring type: the same half-PPR
+// number_quarterback is carried by the slate, not the scoring type: the same half-PPR
 // scoring_type_id returns 2QB-premium ADP for a Superflex slate (validated:
 // top QB ADP 1.2 superflex vs 33.5 standard). Unknown titles default to 1QB.
 const num_qb_for_slate = (title) => (/superflex/i.test(title) ? 2 : 1)
@@ -71,9 +71,9 @@ const import_underdog_bestball_adp = async ({
       continue
     }
 
-    const num_quarterback = num_qb_for_slate(title)
+    const number_quarterback = num_qb_for_slate(title)
     log(
-      `fetching slate "${title}" (${slate.id}) as num_quarterback=${num_quarterback}`
+      `fetching slate "${title}" (${slate.id}) as number_quarterback=${number_quarterback}`
     )
 
     await jittered_delay()
@@ -85,7 +85,13 @@ const import_underdog_bestball_adp = async ({
       slate_id: slate.id
     })
 
-    slate_payloads.push({ slate, title, num_quarterback, appearances, players })
+    slate_payloads.push({
+      slate,
+      title,
+      number_quarterback,
+      appearances,
+      players
+    })
   }
 
   // Release the headless browser before the multi-minute DB matching phase.
@@ -95,23 +101,26 @@ const import_underdog_bestball_adp = async ({
   for (const {
     slate,
     title,
-    num_quarterback,
+    number_quarterback,
     appearances,
     players
   } of slate_payloads) {
     log(
-      `ingesting slate "${title}" (${slate.id}) as num_quarterback=${num_quarterback}`
+      `ingesting slate "${title}" (${slate.id}) as number_quarterback=${number_quarterback}`
     )
 
-    const adp_format_id = await find_or_create_adp_format(db, {
-      scoring_class: 'HALF_PPR',
-      scoring_format_id: null,
-      num_quarterback,
-      num_teams: null,
-      duration: 'REDRAFT',
-      draft_pool: 'ALL',
-      contest_style: 'BEST_BALL'
-    })
+    const average_draft_position_format_id = await find_or_create_adp_format(
+      db,
+      {
+        scoring_class: 'HALF_PPR',
+        scoring_format_id: null,
+        number_quarterback,
+        number_teams: null,
+        duration: 'REDRAFT',
+        draft_pool: 'ALL',
+        contest_style: 'BEST_BALL'
+      }
+    )
 
     const player_by_id = new Map(players.map((player) => [player.id, player]))
 
@@ -179,11 +188,11 @@ const import_underdog_bestball_adp = async ({
         average_draft_position: adp,
         min_pick: null,
         max_pick: null,
-        std_dev: null,
+        standard_deviation: null,
         sample_size: null,
         percent_drafted: null,
         source_id: 'UNDERDOG',
-        adp_format_id
+        average_draft_position_format_id
       })
     }
 
@@ -196,7 +205,7 @@ const import_underdog_bestball_adp = async ({
     )
     summary.push({
       title,
-      num_quarterback,
+      number_quarterback,
       appearances: appearances.length,
       matched,
       unmatched,
@@ -216,7 +225,12 @@ const import_underdog_bestball_adp = async ({
         save: async (batch) => {
           await db('player_adp_index')
             .insert(batch)
-            .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
+            .onConflict([
+              'season_year',
+              'source_id',
+              'average_draft_position_format_id',
+              'pid'
+            ])
             .merge()
         }
       })

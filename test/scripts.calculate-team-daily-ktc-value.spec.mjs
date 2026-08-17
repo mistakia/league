@@ -28,7 +28,7 @@ const observed_at = (date) => `${date}T12:00:00Z`
 const insert_transaction = async ({ uid, tid, pid, type, date }) =>
   knex('transactions').insert({
     uid,
-    userid: 1,
+    user_id: 1,
     tid,
     lid,
     pid,
@@ -79,7 +79,7 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
         name: `team ${uid}`,
         abbreviation: `T${uid}`,
         salary_cap: 200,
-        faab_balance: 200
+        free_agent_acquisition_budget_balance: 200
       })
     }
   })
@@ -129,19 +129,19 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
         propose_tid: 1,
         accept_tid: 2,
         lid,
-        userid: 1,
+        user_id: 1,
         season_year: year,
         offered: epoch_to_timestamptz(local_noon(day_two)),
         accepted: epoch_to_timestamptz(local_noon(day_two))
       })
       await knex('trades_players').insert({
-        tradeid: 1,
+        trade_id: 1,
         tid: 1,
         pid: 'PLAY-ONE-000001'
       })
       await knex('trades_transactions').insert({
-        tradeid: 1,
-        transactionid: 105
+        trade_id: 1,
+        transaction_id: 105
       })
 
       // day three: an unrelated add, which is what makes day two emit
@@ -236,6 +236,29 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
         // ktc_share is numeric(6,5), so each row rounds to five decimal places
         share_total.should.be.closeTo(1, 1e-4)
       }
+    })
+
+    it('emits the final transaction own day', async function () {
+      // The replay emits a day only on a date TRANSITION, so the last date it
+      // sees has nothing following it to trigger the emission. Left unflushed,
+      // the newest written day trails the last transaction by one — which is
+      // what desynchronized the trailing-gap filler (anchored on the last
+      // transaction) from the staleness oracle (anchored on max(date)) and
+      // fired signal #125844 as a false alarm. day_three carries the fixture's
+      // last transaction, so it is the day that used to go missing.
+      await calculate_team_daily_ktc_value({ lid })
+
+      const rows = await get_rows(day_three)
+      rows.length.should.equal(
+        3,
+        'the last transaction own day was not emitted'
+      )
+
+      const max_date = await knex('league_team_daily_values')
+        .where({ lid })
+        .max('date as max_date')
+        .first()
+      dayjs(max_date.max_date).format('YYYY-MM-DD').should.equal(day_three)
     })
   })
 

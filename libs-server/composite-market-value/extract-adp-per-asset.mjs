@@ -14,7 +14,7 @@ import {
 
 export const extract_adp_per_asset = async ({
   player_ids,
-  adp_format_id,
+  average_draft_position_format_id,
   league_format_id,
   start_date,
   end_date
@@ -29,7 +29,7 @@ export const extract_adp_per_asset = async ({
       )
     )
     .whereIn('pid', player_ids)
-    .where('adp_format_id', adp_format_id)
+    .where('average_draft_position_format_id', average_draft_position_format_id)
     .where('observed_at', '>=', new Date(start_date))
     .where(
       'observed_at',

@@ -86,7 +86,7 @@ const generate_dst_market_projections = async ({
 
       inserts.push({
         pid: team,
-        sourceid: SOURCE_ID,
+        source_id: SOURCE_ID,
         season_year,
         season_type: 'REG',
         week,
@@ -120,9 +120,9 @@ const generate_dst_market_projections = async ({
         db('projections_index')
           .insert(items)
           .onConflict([
-            'sourceid',
+            'source_id',
             'pid',
-            'userid',
+            'user_id',
             'week',
             'season_year',
             'season_type'

@@ -40,14 +40,14 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
     for (const year in byPosition) {
       const players = byPosition[year]
       for (const player of players) {
-        if (sums[player.pos_rnk]) {
-          sums[player.pos_rnk].pts_added += player.pts_added_earned
-          sums[player.pos_rnk].value += player.value
-          sums[player.pos_rnk].points += player.points
+        if (sums[player.position_rank]) {
+          sums[player.position_rank].pts_added += player.pts_added_earned
+          sums[player.position_rank].value += player.value
+          sums[player.position_rank].points += player.points
         } else {
-          sums[player.pos_rnk] = {
+          sums[player.position_rank] = {
             primary_position: pos,
-            rank: player.pos_rnk,
+            rank: player.position_rank,
             pts_added: player.pts_added_earned,
             value: player.value,
             points: player.points
@@ -56,8 +56,8 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
       }
     }
 
-    for (const pos_rnk in sums) {
-      const item = sums[pos_rnk]
+    for (const position_rank in sums) {
+      const item = sums[position_rank]
       item.value = item.value / years
     }
 

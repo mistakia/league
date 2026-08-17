@@ -52,7 +52,7 @@ const insert_bid = async ({
     lid: league_id,
     tid,
     bid_amount: bid,
-    userid: user_id,
+    user_id,
     original_team_id: player_tid,
     processed,
     cancelled,

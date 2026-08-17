@@ -172,7 +172,7 @@ router.post('/?', async (req, res) => {
           release_pid,
           tid,
           lid: leagueId,
-          userid: req.auth.userId,
+          user_id: req.auth.userId,
           activate_pid,
           create_notification: true
         })

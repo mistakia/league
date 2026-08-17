@@ -63,7 +63,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
 
       // Submit claim 3 days ago so it's older than 48 hours
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -105,7 +105,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
 
       // Submit claim 3 days ago so it's older than 48 hours
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -146,7 +146,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
 
       // Submit claim 3 days ago so it's older than 48 hours
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -189,7 +189,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
 
       // Submit claim 3 days ago so it's older than 48 hours
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -231,7 +231,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
 
       // Submit claim 3 days ago so it's older than 48 hours
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -278,7 +278,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
 
       // Submit claim 3 days ago so it's older than 48 hours
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -322,7 +322,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
 
       // Submit claim 3 days ago so it's older than 48 hours
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -363,7 +363,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
 
       // Submit claim 3 days ago so it's older than 48 hours
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -404,7 +404,7 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
 
       // Submit claim 3 days ago so it's older than 48 hours
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,

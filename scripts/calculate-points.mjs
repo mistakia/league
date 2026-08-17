@@ -208,7 +208,7 @@ const calculate_points = async ({
     output[player.pid] = {
       player: player.short_name,
       rookie: player.nfl_draft_year === year,
-      pos_rnk:
+      position_rank:
         points_by_position[player.primary_position].indexOf(
           player.total_points
         ) + 1,

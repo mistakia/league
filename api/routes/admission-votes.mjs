@@ -68,13 +68,13 @@ const resolve_league_membership = async ({ db, league_id, user_id }) => {
     .where({
       'teams.lid': league_id,
       'teams.season_year': current_season.year,
-      'users_teams.userid': user_id,
+      'users_teams.user_id': user_id,
       'users_teams.season_year': current_season.year
     })
     .select('teams.uid as team_id')
 
   return {
-    is_commissioner: league.commishid === user_id,
+    is_commissioner: league.commissioner_user_id === user_id,
     team_ids: teams.map((team) => team.team_id)
   }
 }
@@ -345,7 +345,7 @@ router.get('/', async (req, res) => {
  *   post:
  *     summary: Submit or replace the caller's own confidential ranked ballot
  *     description: |
- *       Bound to the caller's team, never to his userid, so a team with two
+ *       Bound to the caller's team, never to his user_id, so a team with two
  *       userids gets one ballot. Replaces any prior ballot for that team in a
  *       single transaction. Refused for a team absent from the eligibility
  *       snapshot, which is Section 10(c) — "A Team without a Manager shall not

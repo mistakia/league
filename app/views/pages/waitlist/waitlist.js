@@ -21,10 +21,9 @@ import './waitlist.styl'
 // manager can act on the landing page's pitch.
 //
 // IT OPENS ON THE COMMITMENT, NOT ON A PITCH. The landing page has already made
-// the case and already told the reader the group has never taken in a stranger,
-// so repeating any of that here costs the one thing this page is short of,
-// which is the reader's patience. What it owes them instead is the thing the
-// landing page cannot say in passing: exactly what they are signing up for,
+// the case, so repeating any of it here costs the one thing this page is short
+// of, which is the reader's patience. What it owes them instead is the thing
+// the landing page cannot say in passing: exactly what they are signing up for,
 // before they spend ten minutes writing.
 //
 // DELIBERATELY NOT WIRED THROUGH REDUX. Every other write in this app goes

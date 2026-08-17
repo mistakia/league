@@ -22,17 +22,17 @@ const pick_scoring_columns = (source) =>
 
 export const League = new Record({
   uid: null,
-  commishid: null,
+  commissioner_user_id: null,
   name: null,
-  num_teams: null,
+  number_teams: null,
 
   starter_slots_quarterback: null,
   starter_slots_running_back: null,
   starter_slots_wide_receiver: null,
   starter_slots_tight_end: null,
   starter_slots_running_back_wide_receiver_flex: null,
-  srbwrte: null,
-  sqbrbwrte: null,
+  starter_slots_running_back_wide_receiver_tight_end_flex: null,
+  starter_slots_superflex: null,
   starter_slots_wide_receiver_tight_end_flex: null,
   starter_slots_defense_special_teams: null,
   starter_slots_kicker: null,
@@ -48,8 +48,8 @@ export const League = new Record({
   max_roster_defense_special_teams: null,
   max_roster_kicker: null,
 
-  starting_faab_budget: null,
-  cap: null,
+  starting_free_agent_acquisition_budget: null,
+  salary_cap: null,
 
   // Playoff format, from the seasons row. These MUST be declared here or
   // Immutable's Record silently drops them from the constructor payload and
@@ -72,7 +72,7 @@ export const League = new Record({
   free_agency_period_end: null,
   free_agency_live_auction_start: null,
   free_agency_live_auction_end: null,
-  tddate: null,
+  trade_deadline_at: null,
 
   draft_start: null,
   draft_type: null,
@@ -105,7 +105,7 @@ export const League = new Record({
   restricted_free_agency_period_start: null,
   restricted_free_agency_period_end: null,
   restricted_free_agency_first_window_at: null,
-  ext_date: null,
+  extension_deadline_at: null,
 
   b_QB: null,
   b_RB: null,
@@ -148,17 +148,17 @@ export const League = new Record({
 export function createLeague(league_data = {}) {
   const {
     uid,
-    commishid,
+    commissioner_user_id,
     name,
-    num_teams,
+    number_teams,
 
     starter_slots_quarterback,
     starter_slots_running_back,
     starter_slots_wide_receiver,
     starter_slots_tight_end,
     starter_slots_running_back_wide_receiver_flex,
-    srbwrte,
-    sqbrbwrte,
+    starter_slots_running_back_wide_receiver_tight_end_flex,
+    starter_slots_superflex,
     starter_slots_wide_receiver_tight_end_flex,
     starter_slots_defense_special_teams,
     starter_slots_kicker,
@@ -174,8 +174,8 @@ export function createLeague(league_data = {}) {
     max_roster_defense_special_teams,
     max_roster_kicker,
 
-    starting_faab_budget,
-    cap,
+    starting_free_agent_acquisition_budget,
+    salary_cap,
 
     playoff_team_count,
     bye_count,
@@ -193,7 +193,7 @@ export function createLeague(league_data = {}) {
     free_agency_period_end,
     free_agency_live_auction_start,
     free_agency_live_auction_end,
-    tddate,
+    trade_deadline_at,
 
     draft_start,
     draft_type,
@@ -223,7 +223,7 @@ export function createLeague(league_data = {}) {
     restricted_free_agency_period_start,
     restricted_free_agency_period_end,
     restricted_free_agency_first_window_at,
-    ext_date,
+    extension_deadline_at,
 
     processed_at,
 
@@ -256,17 +256,17 @@ export function createLeague(league_data = {}) {
 
   return new League({
     uid,
-    commishid,
+    commissioner_user_id,
     name,
-    num_teams,
+    number_teams,
 
     starter_slots_quarterback,
     starter_slots_running_back,
     starter_slots_wide_receiver,
     starter_slots_tight_end,
     starter_slots_running_back_wide_receiver_flex,
-    srbwrte,
-    sqbrbwrte,
+    starter_slots_running_back_wide_receiver_tight_end_flex,
+    starter_slots_superflex,
     starter_slots_wide_receiver_tight_end_flex,
     starter_slots_defense_special_teams,
     starter_slots_kicker,
@@ -282,8 +282,8 @@ export function createLeague(league_data = {}) {
     max_roster_defense_special_teams,
     max_roster_kicker,
 
-    starting_faab_budget,
-    cap,
+    starting_free_agent_acquisition_budget,
+    salary_cap,
 
     playoff_team_count,
     bye_count,
@@ -303,7 +303,7 @@ export function createLeague(league_data = {}) {
     free_agency_period_end,
     free_agency_live_auction_start,
     free_agency_live_auction_end,
-    tddate,
+    trade_deadline_at,
 
     draft_start,
     draft_type,
@@ -336,7 +336,7 @@ export function createLeague(league_data = {}) {
     restricted_free_agency_period_start,
     restricted_free_agency_period_end,
     restricted_free_agency_first_window_at,
-    ext_date,
+    extension_deadline_at,
 
     processed_at,
 

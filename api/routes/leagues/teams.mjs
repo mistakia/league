@@ -274,7 +274,7 @@ const router = express.Router({
  *                       waiver_order: 5
  *                       draft_order: 3
  *                       salary_cap: 200
- *                       faab_balance: 150
+ *                       free_agent_acquisition_budget_balance: 150
  *                       primary_color: null
  *                       accent_color: null
  *                       playoff_odds: 0.85
@@ -459,7 +459,7 @@ router.get('/?', async (req, res) => {
  *                     waiver_order: 5
  *                     draft_order: 5
  *                     salary_cap: 200
- *                     faab_balance: 200
+ *                     free_agent_acquisition_budget_balance: 200
  *                     lid: 2
  *                   roster:
  *                     uid: 1234
@@ -519,7 +519,7 @@ router.post('/?', async (req, res) => {
       lid: leagueId,
       season_year: current_season.year
     })
-    if (teams.length >= league.num_teams) {
+    if (teams.length >= league.number_teams) {
       return res.status(400).send({ error: 'league is full' })
     }
 
@@ -530,8 +530,9 @@ router.post('/?', async (req, res) => {
       abbreviation: `TM${count}`,
       waiver_order: count,
       draft_order: count,
-      salary_cap: league.cap,
-      faab_balance: league.starting_faab_budget,
+      salary_cap: league.salary_cap,
+      free_agent_acquisition_budget_balance:
+        league.starting_free_agent_acquisition_budget,
       lid: leagueId
     }
 
@@ -690,7 +691,7 @@ router.delete('/?', async (req, res) => {
       .where({
         lid: leagueId,
         tid: teamId,
-        userid: req.auth.userId
+        user_id: req.auth.userId
       })
       .where('teams.season_year', current_season.year)
     if (teamRows.length) {

@@ -265,7 +265,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   const trades_index = {}
   for (const trade of trades) {
     for (const tran of trade.transactions) {
-      trades_index[tran.transactionid] = trade
+      trades_index[tran.transaction_id] = trade
     }
   }
 
@@ -516,6 +516,21 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     }
 
     last_date = tran_date
+  }
+
+  // Flush the final transaction's own day. The loop above emits only on a date
+  // TRANSITION, so the last date it sets is never emitted by it — nothing
+  // follows to trigger the transition. Without this the newest emitted day
+  // trails the last transaction by one, which desynchronizes the two anchors
+  // below: the trailing-gap filler measures from `last_date` while the
+  // staleness oracle measures from max(date) of the written rows, so the
+  // oracle is guaranteed to fire a day BEFORE the filler is permitted to run.
+  // That fired as a false staleness alarm (signal #125844) whenever league
+  // activity paused for max_day_interval + 1 days. `emit_day` keys a Map by
+  // date, so this cannot double-write, and the filler starts its cursor
+  // max_day_interval days later so it cannot collide.
+  if (last_date) {
+    emit_day({ date: last_date, observed_at: dayjs(last_date).toDate() })
   }
 
   // Check if the gap between the last transaction and the present day is larger than the max interval

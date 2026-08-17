@@ -69,7 +69,7 @@ describe('API /waivers - free agency', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.userid.should.equal(1)
+      res.body.user_id.should.equal(1)
       res.body.lid.should.equal(leagueId)
       res.body.pid.should.equal(player.pid)
       res.body.priority_order.should.equal(9999)
@@ -127,7 +127,7 @@ describe('API /waivers - free agency', function () {
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
-      res.body.userid.should.equal(1)
+      res.body.user_id.should.equal(1)
       res.body.lid.should.equal(leagueId)
       res.body.pid.should.equal(player.pid)
       res.body.priority_order.should.equal(9999)

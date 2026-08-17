@@ -41,7 +41,7 @@ export const has_projection_source_for_year = async ({ db, year }) => {
     .where({
       season_year: year,
       season_type: 'REG',
-      sourceid: external_data_sources.AVERAGE
+      source_id: external_data_sources.AVERAGE
     })
     .first('pid')
   return Boolean(row)

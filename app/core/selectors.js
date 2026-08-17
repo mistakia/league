@@ -378,43 +378,29 @@ export const is_free_agent_period = createSelector(
 //   }
 // )
 
-// How many picks past the ones on the clock the rail labels with their window.
-const UPCOMING_PICK_WINDOWS = 2
-
 export const getPicks = createSelector(
   get_draft_state,
   get_current_league,
   (draft, league) => {
     const { picks } = draft
-    let previousSelected = true
-    let previousActive = true
-    let previousNotActive = false
-    let upcoming_windows_placed = 0
     const draft_picks = picks.toJS()
     // Frozen at the pause instant while the league is paused, so the rail's
-    // windows and its active flags stop advancing for the duration.
+    // windows stop advancing for the duration.
     const draft_clock_now = get_draft_clock_now({
       paused_at: league.paused_at,
       now: current_season.now
     })
 
+    // Every unmade pick carries its currently-scheduled window, so the rail
+    // can label the next one to be on the clock and hover can name any pick's
+    // slot. A window is null until a slate publishes — between a resume and
+    // the next close every pick is void — and it only ever moves EARLIER as
+    // the picks ahead land, so a displayed time is the current schedule, not
+    // a guarantee.
     return picks
       .sort((a, b) => a.pick - b.pick)
       .map((p) => {
         if (p.pid) {
-          return p
-        }
-
-        // A pick carries a draftWindow exactly when the rail should label it:
-        // the picks still on the clock, plus the next UPCOMING_PICK_WINDOWS to
-        // reach it. Today's slate is frozen and will be honoured to the
-        // minute, but a pick far enough down the board sits on a later day,
-        // and a window only ever moves EARLIER as the picks ahead land — so
-        // the rail says nothing rather than advertising a date it will beat.
-        if (
-          previousNotActive &&
-          upcoming_windows_placed >= UPCOMING_PICK_WINDOWS
-        ) {
           return p
         }
 
@@ -426,33 +412,6 @@ export const getPicks = createSelector(
             until: draft_clock_now
           })
         }
-
-        if (previousNotActive) {
-          upcoming_windows_placed += 1
-          return p
-        }
-
-        // A pick goes on the clock at the start of its published window,
-        // whether or not the pick ahead of it has been selected. There is no
-        // band condition on the current time: every window is itself a slot
-        // inside the band, so a check on the hour is inert against the window
-        // check it guards -- and the symbol it called was deleted with the
-        // floor, so it threw on the one branch it was reached from.
-        //
-        // Note the clock is granted for the DAY, not until the pick is made:
-        // the next midnight re-lays this pick onto its own slate, which on a
-        // day where nobody picked is 24 hours later.
-        const isActive =
-          previousSelected || draft_clock_now.isAfter(p.draftWindow)
-
-        previousNotActive = !isActive && previousActive
-        // This pick is the first one off the clock, so it is the first of the
-        // upcoming windows the rail shows.
-        if (previousNotActive) {
-          upcoming_windows_placed += 1
-        }
-        previousActive = isActive
-        previousSelected = Boolean(p.pid)
 
         return p
       })
@@ -640,13 +599,17 @@ export const get_draft_pick_value_by_pick = createSelector(
 
 export const is_before_extension_deadline = createSelector(
   (state) =>
-    state.getIn(['leagues', state.getIn(['app', 'leagueId']), 'ext_date']),
-  (ext_date) => {
-    if (!ext_date) {
+    state.getIn([
+      'leagues',
+      state.getIn(['app', 'leagueId']),
+      'extension_deadline_at'
+    ]),
+  (extension_deadline_at) => {
+    if (!extension_deadline_at) {
       return true
     }
 
-    const deadline = dayjs(ext_date)
+    const deadline = dayjs(extension_deadline_at)
     return current_season.now.isBefore(deadline)
   }
 )
@@ -700,12 +663,12 @@ export const get_league_events = createSelector(
     const events = []
     const now = dayjs()
 
-    if (league.ext_date) {
-      const ext_date = dayjs(league.ext_date)
-      if (now.isBefore(ext_date)) {
+    if (league.extension_deadline_at) {
+      const extension_deadline_at = dayjs(league.extension_deadline_at)
+      if (now.isBefore(extension_deadline_at)) {
         events.push({
           detail: 'Extension Deadline',
-          date: ext_date
+          date: extension_deadline_at
         })
       }
     }
@@ -853,8 +816,8 @@ export const get_league_events = createSelector(
       }
     }
 
-    if (league.tddate) {
-      const date = dayjs(league.tddate)
+    if (league.trade_deadline_at) {
+      const date = dayjs(league.trade_deadline_at)
       if (now.isBefore(date)) {
         events.push({
           detail: 'Trade Deadline',
@@ -1163,8 +1126,14 @@ export function isPlayerLocked(state, { player_map = new Map(), pid }) {
     return false
   }
 
+  // Unscheduled games (e.g. REG weeks 16-18 flex) have no time_eastern yet,
+  // so there is no start time to lock against — the player is not locked.
+  if (!game.date || !game.time_eastern) {
+    return false
+  }
+
   const gameStart = dayjs.tz(
-    `${game.date} ${game.time_est}`,
+    `${game.date} ${game.time_eastern}`,
     'YYYY/MM/DD HH:mm:SS',
     'America/New_York'
   )
@@ -2479,7 +2448,7 @@ export function getStartersByMatchupId(state, { mid }) {
       week: matchup.week
     })
     if (!game) continue
-    const dateStr = `${game.date} ${game.time_est}`
+    const dateStr = `${game.date} ${game.time_eastern}`
     if (!games[dateStr]) games[dateStr] = []
     games[dateStr].push(player_map)
   }
@@ -2890,7 +2859,8 @@ export const get_team_value_deltas_by_team_id = createSelector(
     const team_values = league_team_daily_values.get(tid)
     if (!team_values) return new Map()
 
-    const league_total_due_amount = league.num_teams * league.season_due_amount
+    const league_total_due_amount =
+      league.number_teams * league.season_due_amount
 
     let result = new Map()
 
@@ -3420,7 +3390,8 @@ export function get_current_trade(state) {
 export const get_is_commish = createSelector(
   get_app,
   get_current_league,
-  (app, league) => Boolean(app.userId) && league.commishid === app.userId
+  (app, league) =>
+    Boolean(app.userId) && league.commissioner_user_id === app.userId
 )
 
 /**
@@ -4082,7 +4053,7 @@ export const get_league_user_historical_ranks = createSelector(
       'championships',
       'championship_rounds',
       'regular_season_leader',
-      'num_byes',
+      'number_byes',
       'best_season_win_percentage',
       'best_season_all_play_percentage',
       'wildcards',
@@ -4118,11 +4089,11 @@ export const get_league_user_historical_ranks = createSelector(
       // Add non-rankable fields
       result.first_season_year = user_careerlog.first_season_year
       result.last_season_year = user_careerlog.last_season_year
-      result.num_seasons = user_careerlog.num_seasons
-      result.userid = user_careerlog.userid
+      result.number_seasons = user_careerlog.number_seasons
+      result.user_id = user_careerlog.user_id
       result.username = user_careerlog.username
 
-      ranks[user_careerlog.userid] = result
+      ranks[user_careerlog.user_id] = result
     })
 
     return ranks
@@ -4160,7 +4131,7 @@ export const get_league_team_historical_ranks = createSelector(
       'championships',
       'championship_rounds',
       'regular_season_leader',
-      'num_byes',
+      'number_byes',
       'best_season_win_percentage',
       'best_season_all_play_percentage',
       'wildcards',
@@ -4196,7 +4167,7 @@ export const get_league_team_historical_ranks = createSelector(
       // Add non-rankable fields
       result.first_season_year = team_careerlog.first_season_year
       result.last_season_year = team_careerlog.last_season_year
-      result.num_seasons = team_careerlog.num_seasons
+      result.number_seasons = team_careerlog.number_seasons
       result.tid = team_careerlog.tid
 
       ranks[team_careerlog.tid] = result

@@ -109,7 +109,7 @@ const seed_full_league = async () => {
       week: 0,
       season_year: year,
       occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 100),
-      userid: 1
+      user_id: 1
     },
     {
       pid: ps_player.pid,
@@ -120,7 +120,7 @@ const seed_full_league = async () => {
       week: 0,
       season_year: year,
       occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 200),
-      userid: 1
+      user_id: 1
     }
   ])
   await knex('rosters_players').insert([
@@ -153,7 +153,7 @@ const seed_full_league = async () => {
     pid: rfa_player.pid,
     tid: 1,
     lid: 1,
-    userid: 1,
+    user_id: 1,
     original_team_id: 1,
     year,
     bid_amount: 10
@@ -185,7 +185,7 @@ const seed_full_league = async () => {
   await knex('draft').insert({
     round: 1,
     pick: 3,
-    pick_str: '1.03',
+    pick_string: '1.03',
     tid: 1,
     original_team_id: 1,
     lid: 1,
@@ -451,7 +451,9 @@ describe('context documents', function () {
       const year = current_season.year
       await knex('seasons')
         .where({ lid: 1, season_year: year })
-        .update({ ext_date: current_season.now.add(1, 'week').toDate() })
+        .update({
+          extension_deadline_at: current_season.now.add(1, 'week').toDate()
+        })
 
       // A regular contract with one extension already used: the recorded $20
       // becomes $20 + (1 + 1) * 5 = $30 on the post-extension basis.
@@ -472,7 +474,7 @@ describe('context documents', function () {
         week: 0,
         season_year: year,
         occurred_at: epoch_to_timestamptz(Math.round(Date.now() / 1000) - 300),
-        userid: 1
+        user_id: 1
       })
       await knex('rosters_players').insert({
         roster_id: roster0.uid,
@@ -514,7 +516,7 @@ describe('context documents', function () {
       const doc = await generate_league_rosters({ db: knex, lid: 1, base_url })
       const fm = parse_frontmatter(doc)
       fm.type.should.equal('league_rosters')
-      fm.num_teams.should.equal(12)
+      fm.number_teams.should.equal(12)
       fm.num_rostered_players.should.equal(2)
       fm.salary_basis.should.equal('as_recorded')
       fm.csv_url.should.equal(`${base_url}/leagues/1/rosters.csv`)

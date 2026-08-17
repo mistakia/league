@@ -77,7 +77,7 @@ describe('API /teams - deactivate', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(roster_slot_types.PSD)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -123,7 +123,7 @@ describe('API /teams - deactivate', function () {
       const player = await selectPlayer()
       await knex('waivers').insert({
         tid: teamId,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player.pid,
         priority_order: 9999,
@@ -157,7 +157,7 @@ describe('API /teams - deactivate', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(roster_slot_types.PS)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
@@ -381,7 +381,7 @@ describe('API /teams - deactivate', function () {
       })
 
       await knex('transactions').insert({
-        userid: userId,
+        user_id: userId,
         tid: teamId,
         lid: leagueId,
         pid: player.pid,
@@ -433,7 +433,7 @@ describe('API /teams - deactivate', function () {
       const result = await knex('waivers')
         .insert({
           tid: 1,
-          userid: 1,
+          user_id: 1,
           lid: leagueId,
           pid: player.pid,
           priority_order: 9999,
@@ -451,12 +451,12 @@ describe('API /teams - deactivate', function () {
         slot: roster_slot_types.BENCH,
         transaction: transaction_types.ROSTER_ADD,
         value: 1,
-        waiverid: result[0].uid
+        waiver_id: result[0].uid
       })
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 1,
+        user_id: 1,
         lid: leagueId,
         pid: player.pid,
         priority_order: 9999,

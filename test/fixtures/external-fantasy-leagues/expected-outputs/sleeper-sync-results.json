@@ -9,7 +9,7 @@
       "name": "TA1 - Traders Anonymous",
       "year": 2025,
       "settings": {
-        "num_teams": 12,
+        "number_teams": 12,
         "season_type": "REDRAFT",
         "playoff_teams": 6,
         "playoff_week_start": 15,
@@ -490,7 +490,7 @@
             "playoff_seed_type": 0,
             "playoff_teams": 6,
             "veto_votes_needed": 6,
-            "num_teams": 12,
+            "number_teams": 12,
             "daily_waivers_hour": 9,
             "playoff_type": 0,
             "taxi_slots": 4,

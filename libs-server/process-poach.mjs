@@ -13,7 +13,7 @@ import create_conditional_pick from './create-conditional-pick.mjs'
 import getLastTransaction from './get-last-transaction.mjs'
 import { verify_assets_not_trade_protected } from './get-trade-veto-window.mjs'
 
-export default async function ({ pid, release = [], lid, tid, userid }) {
+export default async function ({ pid, release = [], lid, tid, user_id }) {
   let should_immediate_release_poached_player = false
 
   const rosterSlots = await db('rosters_players')
@@ -99,7 +99,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   // process release
   if (releasePlayers.length) {
     for (const release_pid of releasePlayers) {
-      await processRelease({ release_pid, tid, lid, userid })
+      await processRelease({ release_pid, tid, lid, user_id })
     }
   }
 
@@ -115,7 +115,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     .del()
 
   const transaction = {
-    userid,
+    user_id,
     tid,
     lid,
     pid,
@@ -155,7 +155,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
       release_pid: pid,
       tid,
       lid,
-      userid
+      user_id
     })
     // Note: Super priority waiver is automatically created by handle_super_priority_on_release()
     // within processRelease when the original team has available roster space

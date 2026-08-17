@@ -21,7 +21,7 @@ export const league_calendar_events = [
   { field: 'season_started_at', label: 'Season Begins' },
   { field: 'draft_start', label: 'Rookie Draft Begins' },
   { field: 'rookie_draft_end_at', label: 'Rookie Draft Ends' },
-  { field: 'ext_date', label: 'Extension Deadline' },
+  { field: 'extension_deadline_at', label: 'Extension Deadline' },
   { field: 'free_agency_period_start', label: 'Free Agency Period Begins' },
   {
     field: 'free_agency_live_auction_start',
@@ -41,7 +41,7 @@ export const league_calendar_events = [
     field: 'restricted_free_agency_period_end',
     label: 'Restricted Free Agency Ends'
   },
-  { field: 'tddate', label: 'Trade Deadline' },
+  { field: 'trade_deadline_at', label: 'Trade Deadline' },
   { field: 'season_finalized_at', label: 'Season Finalized' }
 ]
 
@@ -97,7 +97,9 @@ export function resolve_current_phase({ league, now_unix }) {
   // Same read boundary as build_league_calendar: these are timestamptz columns
   // and every comparison below is against epoch seconds.
   const season_finalized_at = timestamptz_to_epoch(league.season_finalized_at)
-  const ext_date = timestamptz_to_epoch(league.ext_date)
+  const extension_deadline_at = timestamptz_to_epoch(
+    league.extension_deadline_at
+  )
   const draft_start = timestamptz_to_epoch(league.draft_start)
   const restricted_free_agency_period_start = timestamptz_to_epoch(
     league.restricted_free_agency_period_start
@@ -110,7 +112,7 @@ export function resolve_current_phase({ league, now_unix }) {
     return 'Offseason (season finalized)'
   }
 
-  if (ext_date && now < ext_date) {
+  if (extension_deadline_at && now < extension_deadline_at) {
     return 'Extension Window'
   }
 
@@ -147,7 +149,12 @@ export function resolve_current_phase({ league, now_unix }) {
     return 'Restricted Free Agency'
   }
 
-  if (draft_start && now >= draft_start && ext_date && now < ext_date) {
+  if (
+    draft_start &&
+    now >= draft_start &&
+    extension_deadline_at &&
+    now < extension_deadline_at
+  ) {
     return 'Rookie Draft'
   }
 

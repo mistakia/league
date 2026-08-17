@@ -153,7 +153,7 @@ const get_active_waiver_shortfall = async () => {
 // Helper functions
 const validate_game_timing = async (waiver_id) => {
   const waiver_game_query = db('waivers')
-    .select('waivers.*', 'nfl_games.date', 'nfl_games.time_est')
+    .select('waivers.*', 'nfl_games.date', 'nfl_games.time_eastern')
     .join('player', 'waivers.pid', 'player.pid')
   apply_nfl_games_current_week_join({ db, query: waiver_game_query })
   const waiver_with_game_info = await waiver_game_query
@@ -167,7 +167,7 @@ const validate_game_timing = async (waiver_id) => {
 
     const now = dayjs.default()
     const game_start = dayjs.default.tz(
-      `${waiver_with_game_info.date} ${waiver_with_game_info.time_est}`,
+      `${waiver_with_game_info.date} ${waiver_with_game_info.time_eastern}`,
       'YYYY/MM/DD HH:mm:SS',
       'America/New_York'
     )
@@ -183,7 +183,7 @@ const validate_game_timing = async (waiver_id) => {
 const process_waiver_claim = async (waiver, lid, timestamp) => {
   const release = await db('waiver_releases')
     .select('pid')
-    .where('waiverid', waiver.wid)
+    .where('waiver_id', waiver.wid)
 
   await submitAcquisition({
     release: release.map((r) => r.pid),
@@ -191,7 +191,7 @@ const process_waiver_claim = async (waiver, lid, timestamp) => {
     pid: waiver.pid,
     teamId: waiver.tid,
     bid: waiver.bid_amount,
-    userId: waiver.userid,
+    userId: waiver.user_id,
     waiverId: waiver.wid
   })
 
@@ -226,10 +226,12 @@ const handle_tied_waivers = async (waiver) => {
 }
 
 const update_team_budget = async (team_id, bid) => {
-  await db('teams').decrement('faab_balance', bid).where({
-    uid: team_id,
-    season_year: current_season.year
-  })
+  await db('teams')
+    .decrement('free_agent_acquisition_budget_balance', bid)
+    .where({
+      uid: team_id,
+      season_year: current_season.year
+    })
 }
 
 const cancel_other_pending_waivers = async (lid, pid, waiver_id, timestamp) => {

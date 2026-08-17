@@ -35,17 +35,17 @@ const to_date_string = (value) =>
 // property of the season the pick belongs to, and it has changed -- league 1 ran
 // 12 teams through 2022 and 10 from 2023 -- so it is read off the `seasons` row
 // for the pick's own year rather than hardcoded.
-const load_num_teams_by_season_year = async ({ lid }) => {
+const load_number_teams_by_season_year = async ({ lid }) => {
   const rows = await db('seasons')
     .join('league_formats', 'league_formats.id', 'seasons.league_format_id')
     .where('seasons.lid', lid)
-    .select('seasons.season_year', 'league_formats.num_teams')
+    .select('seasons.season_year', 'league_formats.number_teams')
 
-  const num_teams_by_season_year = new Map()
+  const number_teams_by_season_year = new Map()
   for (const row of rows) {
-    num_teams_by_season_year.set(row.season_year, row.num_teams)
+    number_teams_by_season_year.set(row.season_year, row.number_teams)
   }
-  return num_teams_by_season_year
+  return number_teams_by_season_year
 }
 
 export const build_pick_holding_value_index = async ({ lid, is_superflex }) => {
@@ -70,16 +70,18 @@ export const build_pick_holding_value_index = async ({ lid, is_superflex }) => {
   }))
 
   const keeptradecut_pick_index = await load_pick_ktc_indexes({ is_superflex })
-  const num_teams_by_season_year = await load_num_teams_by_season_year({ lid })
+  const number_teams_by_season_year = await load_number_teams_by_season_year({
+    lid
+  })
 
   // A pick for a season that has no `seasons` row yet -- league 1's 2027 and
   // 2028 picks -- has no league size of its own. Every one of those also has a
   // null overall position, so ktc_pick_at takes the mid slot and never consults
-  // num_teams; the most recent known size is the honest stand-in for the day a
+  // number_teams; the most recent known size is the honest stand-in for the day a
   // future season's draft order does get set before its season row exists.
-  const known_season_years = Array.from(num_teams_by_season_year.keys())
-  const latest_num_teams = known_season_years.length
-    ? num_teams_by_season_year.get(Math.max(...known_season_years))
+  const known_season_years = Array.from(number_teams_by_season_year.keys())
+  const latest_number_teams = known_season_years.length
+    ? number_teams_by_season_year.get(Math.max(...known_season_years))
     : null
 
   // ktc_pick_at's analog-year fallback scans every ranked pick series, so it is
@@ -88,16 +90,16 @@ export const build_pick_holding_value_index = async ({ lid, is_superflex }) => {
   // resolves roughly twenty -- so the memo collapses the whole run onto them.
   const value_cache = new Map()
   const resolve_pick_value = ({ holding, date, target_unix }) => {
-    const num_teams =
-      num_teams_by_season_year.get(holding.pick_year) ?? latest_num_teams
-    const cache_key = `${holding.pick_year}__${holding.pick_round}__${holding.pick_draft_overall_position}__${num_teams}__${date}`
+    const number_teams =
+      number_teams_by_season_year.get(holding.pick_year) ?? latest_number_teams
+    const cache_key = `${holding.pick_year}__${holding.pick_round}__${holding.pick_draft_overall_position}__${number_teams}__${date}`
     if (value_cache.has(cache_key)) return value_cache.get(cache_key)
 
     const value = ktc_pick_at({
       pick_year: holding.pick_year,
       pick_round: holding.pick_round,
       pick_overall_position: holding.pick_draft_overall_position,
-      num_teams,
+      number_teams,
       target_unix,
       idx: keeptradecut_pick_index
     })

@@ -46,7 +46,7 @@ describe('API /wagers', function () {
         {
           ...base_wager,
           wager_id: 90001,
-          userid: 1,
+          user_id: 1,
           public: 1,
           wager_status: 'OPEN',
           book_wager_id: 'TEST_WAGER_OPEN_PUBLIC'
@@ -54,7 +54,7 @@ describe('API /wagers', function () {
         {
           ...base_wager,
           wager_id: 90002,
-          userid: 1,
+          user_id: 1,
           public: 1,
           wager_status: 'WON',
           book_wager_id: 'TEST_WAGER_WON_PUBLIC'
@@ -62,7 +62,7 @@ describe('API /wagers', function () {
         {
           ...base_wager,
           wager_id: 90003,
-          userid: 1,
+          user_id: 1,
           public: 0,
           wager_status: 'LOST',
           book_wager_id: 'TEST_WAGER_LOST_PRIVATE'

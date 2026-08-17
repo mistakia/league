@@ -7,6 +7,7 @@ import bcrypt from 'bcrypt'
 import server from '#api'
 import knex from '#db'
 import config from '#config'
+import { reset_emission_warnings } from '#libs-shared/log.mjs'
 import users from '#db/fixtures/users.mjs'
 import { error } from './utils/index.mjs'
 
@@ -433,6 +434,95 @@ describe('API /auth', function () {
       JSON.stringify(known.body).should.equal(JSON.stringify(unknown.body))
       // And the provider's own error text must not reach the caller either.
       JSON.stringify(known.body).should.not.include('refused')
+    })
+
+    // THE OPERATOR'S OBSERVABLE FOR A SUCCESSFUL SEND. This app receives no
+    // Resend delivery webhook, so the provider's message id is the only handle
+    // that can answer "what happened to that particular email" afterwards. A
+    // route that discarded it left an accepted send with no trace anywhere,
+    // which is what made a real missing-reset-email report unanswerable.
+    it('records the provider message id for an accepted send', async () => {
+      // `#api` default-exports the http server, not the express app -- the app
+      // is its request listener, and `app.locals` is what the route reads its
+      // logger off per request.
+      const app = server.listeners('request')[0]
+      const original_logger = app.locals.logger
+      const log_lines = []
+      app.locals.logger = (...args) => log_lines.push(args)
+
+      try {
+        await chai_request
+          .execute(server)
+          .post('/api/auth/reset-password')
+          .send({ email: 'user1@email.com' })
+      } finally {
+        app.locals.logger = original_logger
+      }
+
+      const accepted_line = log_lines.find(
+        (args) =>
+          typeof args[0] === 'string' &&
+          args[0].includes('password reset email accepted')
+      )
+
+      chai.expect(accepted_line, 'no accepted-send line was logged').to.exist
+      // The id the captured provider response returned, not a placeholder --
+      // asserting the literal is what proves the value was threaded through
+      // rather than the line merely being printed.
+      accepted_line.should.include('captured-by-test')
+      // And never the address: this line is synced and indexed.
+      JSON.stringify(accepted_line).should.not.include('user1@email.com')
+    })
+
+    // A MAILER THAT IS NOT CONFIGURED AT ALL WAS THE SILENT OUTCOME. sendEmail
+    // throws on a provider REFUSAL, so that branch reaches the handler's catch
+    // and raises a signal — but it RESOLVES `is_sent: false` when there is no
+    // provider, which a caller that ignores the return value cannot see. The
+    // route then tells the user an email is on its way while none was ever
+    // attempted, with nothing written down anywhere.
+    //
+    // The assertion rides the stderr warning `log.mjs` emits when it cannot
+    // reach the signal queue (`signals_api_url` is "" in config-test.json), so
+    // it observes that the ERROR PATH RAN without needing a live queue.
+    it('reports a not-configured mailer instead of claiming a send', async () => {
+      const original_api_key = config.email.resend_api_key
+      const original_stderr_write = process.stderr.write
+      const stderr_output = []
+
+      reset_emission_warnings()
+      delete config.email.resend_api_key
+      process.stderr.write = (chunk, ...rest) => {
+        stderr_output.push(String(chunk))
+        return original_stderr_write.call(process.stderr, chunk, ...rest)
+      }
+
+      sent_emails = []
+
+      let res
+      try {
+        res = await chai_request
+          .execute(server)
+          .post('/api/auth/reset-password')
+          .send({ email: 'user1@email.com' })
+      } finally {
+        process.stderr.write = original_stderr_write
+        config.email.resend_api_key = original_api_key
+      }
+
+      // The caller still learns nothing — the enumeration property is not
+      // allowed to depend on the mailer being healthy.
+      res.should.have.status(200)
+      res.body.message.should.equal(generic_message)
+      // Nothing was actually sent, which is the whole point.
+      sent_emails.should.have.lengthOf(0)
+
+      const emission_warning = stderr_output.find((line) =>
+        line.includes('[log_error] signal emission disabled')
+      )
+      chai.expect(
+        emission_warning,
+        'the not-configured branch raised no operator-facing error'
+      ).to.exist
     })
 
     it('should return error for missing username and email', async () => {

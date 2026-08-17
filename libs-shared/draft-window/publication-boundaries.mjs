@@ -24,11 +24,10 @@ dayjs.extend(timezone)
  * Eastern — plus the draft opening, which is the first one. The schedule is
  * recomputed at each and is frozen between two.
  *
- * A resume voids every standing publication: after a pause, the slate is laid
- * again from the first close at or after the resume, and until that close
- * arrives no pick has a window and no pick can be passed. That is "windows
- * start the following day after an unpause", and it is the one sanctioned way
- * a window moves LATER.
+ * A resume voids every standing publication, and the first close at or after
+ * it is the initial publication: it governs immediately, so the lead-up
+ * between the resume and that close has a board rather than a void, and it
+ * becomes the ordinary close when it arrives.
  */
 
 /**
@@ -63,8 +62,9 @@ const resolve_now = (until) =>
  * @param {{start_hour: number, end_hour: number}} args.band
  * @param {Date|string} [args.resumed_at] - The league's LATEST resume.
  * @param {import('dayjs').Dayjs|Date|string|number} [args.until] - The caller's now.
- * @returns {import('dayjs').Dayjs[]} Empty when nothing has published yet —
- *   before the draft opens, or between a resume and the next close.
+ * @returns {import('dayjs').Dayjs[]} Empty only before the draft opens. A
+ *   resumed league's first close at or after the resume is its initial
+ *   publication, so the lead-up always carries a board.
  */
 export function list_publication_boundaries({
   draft_start_timestamp,
@@ -100,6 +100,14 @@ export function list_publication_boundaries({
     close = band_close_at(date, band)
   }
 
+  // The first close at or after the resume is the initial publication: it
+  // governs immediately, so the lead-up between the resume and that close has
+  // a board rather than a void. Once the close arrives the loop below pushes
+  // it again (same instant, so the re-laid slate is unchanged).
+  if (is_resumed && close.isAfter(now)) {
+    boundaries.push(close)
+  }
+
   while (!close.isAfter(now)) {
     boundaries.push(close)
     date = next_date_after(date)
@@ -112,9 +120,10 @@ export function list_publication_boundaries({
 /**
  * The publication boundary governing `until`, or null when none does.
  *
- * The latest publication — what the board is laid out from today. Returning
- * null is the resume's whole effect: between a resume and the next close there
- * is no publication, so no pick has a window and no pick can be passed.
+ * The latest publication — what the board is laid out from today. Null only
+ * before the draft opens; a resumed league's first close at or after the
+ * resume is its initial publication, so the lead-up between the resume and
+ * that close is already governed by it.
  *
  * @param {Object} args
  * @param {number} args.draft_start_timestamp - Unix seconds the draft opens.

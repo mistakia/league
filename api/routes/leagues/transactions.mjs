@@ -142,25 +142,25 @@ const router = express.Router({ mergeParams: true })
  *                     lid: 2
  *                     pid: "4017"
  *                     type: 1
- *                     userid: 5
+ *                     user_id: 5
  *                     player_salary: 15
  *                     week: 8
  *                     season_year: 2024
  *                     timestamp: 1698765432
  *                     pick: 15
- *                     pick_str: "2.03"
+ *                     pick_string: "2.03"
  *                   - uid: 12344
  *                     tid: 14
  *                     lid: 2
  *                     pid: "3892"
  *                     type: 3
- *                     userid: 7
+ *                     user_id: 7
  *                     player_salary: 8
  *                     week: 8
  *                     season_year: 2024
  *                     timestamp: 1698765400
  *                     pick: null
- *                     pick_str: null
+ *                     pick_string: null
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -192,7 +192,7 @@ router.get('/?', async (req, res) => {
             db.raw('?', [transaction_types.DRAFT])
           )
       })
-      .select('transactions.*', 'draft.pick', 'draft.pick_str')
+      .select('transactions.*', 'draft.pick', 'draft.pick_string')
       .where({ 'transactions.lid': leagueId })
       .orderBy('transactions.occurred_at', 'desc')
       .orderBy('transactions.uid', 'desc')
@@ -282,25 +282,25 @@ router.get('/?', async (req, res) => {
  *                     lid: 2
  *                     pid: "2041"
  *                     type: 5
- *                     userid: 5
+ *                     user_id: 5
  *                     player_salary: 0
  *                     week: 8
  *                     season_year: 2024
  *                     timestamp: 1698765000
  *                     pick: null
- *                     pick_str: null
+ *                     pick_string: null
  *                   - uid: 12349
  *                     tid: 14
  *                     lid: 2
  *                     pid: "1889"
  *                     type: 4
- *                     userid: 7
+ *                     user_id: 7
  *                     player_salary: 3
  *                     week: 8
  *                     season_year: 2024
  *                     timestamp: 1698764800
  *                     pick: null
- *                     pick_str: null
+ *                     pick_string: null
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -396,26 +396,26 @@ router.get('/release', async (req, res) => {
  *                       lid: 2
  *                       pid: "4017"
  *                       type: 4
- *                       userid: 5
+ *                       user_id: 5
  *                       player_salary: 12
  *                       week: 5
  *                       season_year: 2024
  *                       timestamp: 1698600000
  *                       pick: null
- *                       pick_str: null
+ *                       pick_string: null
  *                   sinceAcquisition:
  *                     - uid: 12340
  *                       tid: 13
  *                       lid: 2
  *                       pid: "4017"
  *                       type: 4
- *                       userid: 5
+ *                       user_id: 5
  *                       player_salary: 12
  *                       week: 5
  *                       season_year: 2024
  *                       timestamp: 1698600000
  *                       pick: null
- *                       pick_str: null
+ *                       pick_string: null
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */

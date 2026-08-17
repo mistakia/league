@@ -86,7 +86,7 @@ export default async function (knex) {
       transaction_types.AUCTION_PROCESSED
     ]) {
       transaction_rows.push({
-        userid: roster.tid,
+        user_id: roster.tid,
         tid: roster.tid,
         lid: league.uid,
         pid: player.pid,

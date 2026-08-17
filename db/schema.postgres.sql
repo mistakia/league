@@ -544,6 +544,7 @@ ALTER TABLE IF EXISTS ONLY public.player_gamelogs_default DROP CONSTRAINT IF EXI
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs DROP CONSTRAINT IF EXISTS player_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_game_outcome_correlations DROP CONSTRAINT IF EXISTS player_game_outcome_correlations_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fleaflicker_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_field_override DROP CONSTRAINT IF EXISTS player_field_override_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_ffpc_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fantrax_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fanduel_id_unique;
@@ -694,7 +695,7 @@ ALTER TABLE IF EXISTS public.league_migrations_lock ALTER COLUMN index DROP DEFA
 ALTER TABLE IF EXISTS public.league_migrations ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.jobs ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.draft ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS public.composite_market_value_daily ALTER COLUMN cmv_row_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.composite_market_value_daily ALTER COLUMN composite_market_value_row_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_blend_weights ALTER COLUMN version_id DROP DEFAULT;
 DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
 DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
@@ -827,6 +828,7 @@ DROP TABLE IF EXISTS public.player_gamelogs_year_2000;
 DROP TABLE IF EXISTS public.player_gamelogs_default;
 DROP TABLE IF EXISTS public.player_gamelogs;
 DROP TABLE IF EXISTS public.player_game_outcome_correlations;
+DROP TABLE IF EXISTS public.player_field_override;
 DROP TABLE IF EXISTS public.player_dfs_ownership;
 DROP TABLE IF EXISTS public.player_defender_gamelogs;
 DROP TABLE IF EXISTS public.player_contracts;
@@ -1643,7 +1645,7 @@ DECLARE
   rec_val numeric;
 BEGIN
   SELECT receptions INTO rec_val FROM league_scoring_formats WHERE id = NEW.scoring_format_id;
-  NEW.format_category := cmv_derive_format_category(NEW.starter_slots_quarterback, NEW.sqbrbwrte, rec_val);
+  NEW.format_category := cmv_derive_format_category(NEW.starter_slots_quarterback, NEW.starter_slots_superflex, rec_val);
   RETURN NEW;
 END;
 $$;
@@ -2042,15 +2044,15 @@ CREATE TABLE public.adp_format (
     id text DEFAULT (gen_random_uuid())::text NOT NULL,
     scoring_class text,
     scoring_format_id text,
-    num_quarterback smallint DEFAULT 1 NOT NULL,
-    num_teams smallint,
+    number_quarterback smallint DEFAULT 1 NOT NULL,
+    number_teams smallint,
     duration text,
     draft_pool text DEFAULT 'ALL'::text NOT NULL,
     contest_style text DEFAULT 'MANAGED'::text NOT NULL,
     CONSTRAINT adp_format_contest_style_check CHECK ((contest_style = ANY (ARRAY['MANAGED'::text, 'BEST_BALL'::text]))),
     CONSTRAINT adp_format_draft_pool_check CHECK ((draft_pool = ANY (ARRAY['ALL'::text, 'ROOKIE'::text]))),
     CONSTRAINT adp_format_duration_check CHECK ((duration = ANY (ARRAY['REDRAFT'::text, 'DYNASTY'::text]))),
-    CONSTRAINT adp_format_num_qb_check CHECK ((num_quarterback >= 1)),
+    CONSTRAINT adp_format_num_qb_check CHECK ((number_quarterback >= 1)),
     CONSTRAINT adp_format_scoring_class_check CHECK ((scoring_class = ANY (ARRAY['STANDARD'::text, 'PPR'::text, 'HALF_PPR'::text])))
 );
 
@@ -2105,12 +2107,12 @@ CREATE TABLE public.composite_market_value_blend_weights (
     format_category smallint,
     effective_from date NOT NULL,
     ktc_weight numeric(4,3) NOT NULL,
-    adp_weight numeric(4,3) NOT NULL,
+    average_draft_position_weight numeric(4,3) NOT NULL,
     rankings_weight numeric(4,3) NOT NULL,
     props_weight numeric(4,3) NOT NULL,
     draft_pick_model_weight numeric(4,3) NOT NULL,
     notes text,
-    CONSTRAINT cmv_weights_sum_one CHECK ((abs((((((ktc_weight + adp_weight) + rankings_weight) + props_weight) + draft_pick_model_weight) - 1.000)) < 0.005))
+    CONSTRAINT cmv_weights_sum_one CHECK ((abs((((((ktc_weight + average_draft_position_weight) + rankings_weight) + props_weight) + draft_pick_model_weight) - 1.000)) < 0.005))
 );
 
 
@@ -2176,7 +2178,7 @@ COMMENT ON COLUMN public.composite_market_value_calibration.source IS 'Enum: 1=k
 --
 
 CREATE TABLE public.composite_market_value_daily (
-    cmv_row_id bigint NOT NULL,
+    composite_market_value_row_id bigint NOT NULL,
     format_category smallint NOT NULL,
     asset_type smallint NOT NULL,
     player_id character varying(25),
@@ -2185,7 +2187,7 @@ CREATE TABLE public.composite_market_value_daily (
     pick_original_owner_tid integer,
     date date NOT NULL,
     ktc_value numeric(8,1),
-    adp_value numeric(8,1),
+    average_draft_position_value numeric(8,1),
     rankings_value numeric(8,1),
     props_value numeric(8,1),
     draft_pick_model_value numeric(8,1),
@@ -2233,7 +2235,7 @@ CREATE SEQUENCE public.composite_market_value_daily_cmv_row_id_seq
 -- Name: composite_market_value_daily_cmv_row_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.composite_market_value_daily_cmv_row_id_seq OWNED BY public.composite_market_value_daily.cmv_row_id;
+ALTER SEQUENCE public.composite_market_value_daily_cmv_row_id_seq OWNED BY public.composite_market_value_daily.composite_market_value_row_id;
 
 
 --
@@ -2282,7 +2284,7 @@ CREATE TABLE public.draft (
     round smallint NOT NULL,
     is_compensatory boolean DEFAULT false NOT NULL,
     pick smallint,
-    pick_str character varying(4),
+    pick_string character varying(4),
     tid integer NOT NULL,
     original_team_id integer NOT NULL,
     lid integer NOT NULL,
@@ -2560,26 +2562,26 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
     total_dvoa_rank integer,
     total_dvoa numeric,
     pass_dvoa_rank integer,
-    pass_wr1_dvoa numeric,
-    pass_wr1_dvoa_rank integer,
-    pass_points_allowed_per_game_wr1 numeric,
-    pass_yards_allowed_per_game_wr1 numeric,
-    pass_wr2_dvoa numeric,
-    pass_wr2_dvoa_rank integer,
-    pass_points_allowed_per_game_wr2 numeric,
-    pass_yards_allowed_per_game_wr2 numeric,
-    pass_wr3_dvoa numeric,
-    pass_wr3_dvoa_rank integer,
-    pass_points_allowed_per_game_wr3 numeric,
-    pass_yards_allowed_per_game_wr3 numeric,
-    pass_te_dvoa numeric,
-    pass_te_dvoa_rank integer,
-    pass_points_allowed_per_game_te numeric,
-    pass_yards_allowed_per_game_te numeric,
-    pass_rb_dvoa numeric,
-    pass_rb_dvoa_rank integer,
-    pass_points_allowed_per_game_rb numeric,
-    pass_yards_allowed_per_game_rb numeric,
+    pass_wide_receiver_1_dvoa numeric,
+    pass_wide_receiver_1_dvoa_rank integer,
+    pass_points_allowed_per_game_wide_receiver_1 numeric,
+    pass_yards_allowed_per_game_wide_receiver_1 numeric,
+    pass_wide_receiver_2_dvoa numeric,
+    pass_wide_receiver_2_dvoa_rank integer,
+    pass_points_allowed_per_game_wide_receiver_2 numeric,
+    pass_yards_allowed_per_game_wide_receiver_2 numeric,
+    pass_wide_receiver_3_dvoa numeric,
+    pass_wide_receiver_3_dvoa_rank integer,
+    pass_points_allowed_per_game_wide_receiver_3 numeric,
+    pass_yards_allowed_per_game_wide_receiver_3 numeric,
+    pass_tight_end_dvoa numeric,
+    pass_tight_end_dvoa_rank integer,
+    pass_points_allowed_per_game_tight_end numeric,
+    pass_yards_allowed_per_game_tight_end numeric,
+    pass_running_back_dvoa numeric,
+    pass_running_back_dvoa_rank integer,
+    pass_points_allowed_per_game_running_back numeric,
+    pass_yards_allowed_per_game_running_back numeric,
     pass_left_dvoa numeric,
     pass_left_dvoa_rank integer,
     pass_middle_dvoa numeric,
@@ -2598,8 +2600,8 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
     pass_short_right_dvoa numeric,
     team_adjusted_line_yards numeric,
     team_adjusted_line_yards_rank integer,
-    team_rb_yards numeric,
-    team_rb_yards_rank integer,
+    team_running_back_yards numeric,
+    team_running_back_yards_rank integer,
     team_power_success numeric,
     team_power_success_rank integer,
     team_stuffed_rate numeric,
@@ -2619,16 +2621,16 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
     all_first_down_dvoa_rank integer,
     second_and_short_dvoa numeric,
     second_and_short_dvoa_rank integer,
-    second_and_mid_dvoa numeric,
-    second_and_mid_dvoa_rank integer,
+    second_and_medium_dvoa numeric,
+    second_and_medium_dvoa_rank integer,
     second_and_long_dvoa numeric,
     second_and_long_dvoa_rank integer,
     all_second_down_dvoa numeric,
     all_second_down_dvoa_rank integer,
     third_and_short_dvoa numeric,
     third_and_short_dvoa_rank integer,
-    third_and_mid_dvoa numeric,
-    third_and_mid_dvoa_rank integer,
+    third_and_medium_dvoa numeric,
+    third_and_medium_dvoa_rank integer,
     third_and_long_dvoa numeric,
     third_and_long_dvoa_rank integer,
     all_third_down_dvoa numeric,
@@ -2667,8 +2669,8 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
     second_quarter_dvoa_rank integer,
     third_quarter_dvoa numeric,
     third_quarter_dvoa_rank integer,
-    fourth_quarter_ot_dvoa numeric,
-    fourth_quarter_ot_dvoa_rank integer,
+    fourth_quarter_overtime_dvoa numeric,
+    fourth_quarter_overtime_dvoa_rank integer,
     first_half_dvoa numeric,
     first_half_dvoa_rank integer,
     second_half_dvoa numeric,
@@ -2715,8 +2717,8 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
     team_rush_left_end_yards_rank integer,
     team_rush_left_tackle_yards numeric,
     team_rush_left_tackle_yards_rank integer,
-    team_rush_mid_guard_yards numeric,
-    team_rush_mid_guard_yards_rank integer,
+    team_rush_middle_guard_yards numeric,
+    team_rush_middle_guard_yards_rank integer,
     team_rush_right_tackle_yards numeric,
     team_rush_right_tackle_yards_rank integer,
     team_rush_right_end_yards numeric,
@@ -2725,7 +2727,7 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
     team_running_back_carries_rank integer,
     team_rush_left_end_percentage numeric,
     team_rush_left_tackle_percentage numeric,
-    team_rush_mid_guard_percentage numeric,
+    team_rush_middle_guard_percentage numeric,
     team_rush_right_tackle_percentage numeric,
     team_rush_right_end_percentage numeric,
     pass_dvoa numeric,
@@ -2748,26 +2750,26 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
     total_dvoa_rank integer,
     total_dvoa numeric,
     pass_dvoa_rank integer,
-    pass_wr1_dvoa numeric,
-    pass_wr1_dvoa_rank integer,
-    pass_points_allowed_per_game_wr1 numeric,
-    pass_yards_allowed_per_game_wr1 numeric,
-    pass_wr2_dvoa numeric,
-    pass_wr2_dvoa_rank integer,
-    pass_points_allowed_per_game_wr2 numeric,
-    pass_yards_allowed_per_game_wr2 numeric,
-    pass_wr3_dvoa numeric,
-    pass_wr3_dvoa_rank integer,
-    pass_points_allowed_per_game_wr3 numeric,
-    pass_yards_allowed_per_game_wr3 numeric,
-    pass_te_dvoa numeric,
-    pass_te_dvoa_rank integer,
-    pass_points_allowed_per_game_te numeric,
-    pass_yards_allowed_per_game_te numeric,
-    pass_rb_dvoa numeric,
-    pass_rb_dvoa_rank integer,
-    pass_points_allowed_per_game_rb numeric,
-    pass_yards_allowed_per_game_rb numeric,
+    pass_wide_receiver_1_dvoa numeric,
+    pass_wide_receiver_1_dvoa_rank integer,
+    pass_points_allowed_per_game_wide_receiver_1 numeric,
+    pass_yards_allowed_per_game_wide_receiver_1 numeric,
+    pass_wide_receiver_2_dvoa numeric,
+    pass_wide_receiver_2_dvoa_rank integer,
+    pass_points_allowed_per_game_wide_receiver_2 numeric,
+    pass_yards_allowed_per_game_wide_receiver_2 numeric,
+    pass_wide_receiver_3_dvoa numeric,
+    pass_wide_receiver_3_dvoa_rank integer,
+    pass_points_allowed_per_game_wide_receiver_3 numeric,
+    pass_yards_allowed_per_game_wide_receiver_3 numeric,
+    pass_tight_end_dvoa numeric,
+    pass_tight_end_dvoa_rank integer,
+    pass_points_allowed_per_game_tight_end numeric,
+    pass_yards_allowed_per_game_tight_end numeric,
+    pass_running_back_dvoa numeric,
+    pass_running_back_dvoa_rank integer,
+    pass_points_allowed_per_game_running_back numeric,
+    pass_yards_allowed_per_game_running_back numeric,
     pass_left_dvoa numeric,
     pass_left_dvoa_rank integer,
     pass_middle_dvoa numeric,
@@ -2786,8 +2788,8 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
     pass_short_right_dvoa numeric,
     team_adjusted_line_yards numeric,
     team_adjusted_line_yards_rank integer,
-    team_rb_yards numeric,
-    team_rb_yards_rank integer,
+    team_running_back_yards numeric,
+    team_running_back_yards_rank integer,
     team_power_success numeric,
     team_power_success_rank integer,
     team_stuffed_rate numeric,
@@ -2807,16 +2809,16 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
     all_first_down_dvoa_rank integer,
     second_and_short_dvoa numeric,
     second_and_short_dvoa_rank integer,
-    second_and_mid_dvoa numeric,
-    second_and_mid_dvoa_rank integer,
+    second_and_medium_dvoa numeric,
+    second_and_medium_dvoa_rank integer,
     second_and_long_dvoa numeric,
     second_and_long_dvoa_rank integer,
     all_second_down_dvoa numeric,
     all_second_down_dvoa_rank integer,
     third_and_short_dvoa numeric,
     third_and_short_dvoa_rank integer,
-    third_and_mid_dvoa numeric,
-    third_and_mid_dvoa_rank integer,
+    third_and_medium_dvoa numeric,
+    third_and_medium_dvoa_rank integer,
     third_and_long_dvoa numeric,
     third_and_long_dvoa_rank integer,
     all_third_down_dvoa numeric,
@@ -2855,8 +2857,8 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
     second_quarter_dvoa_rank integer,
     third_quarter_dvoa numeric,
     third_quarter_dvoa_rank integer,
-    fourth_quarter_ot_dvoa numeric,
-    fourth_quarter_ot_dvoa_rank integer,
+    fourth_quarter_overtime_dvoa numeric,
+    fourth_quarter_overtime_dvoa_rank integer,
     first_half_dvoa numeric,
     first_half_dvoa_rank integer,
     second_half_dvoa numeric,
@@ -2903,8 +2905,8 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
     team_rush_left_end_yards_rank integer,
     team_rush_left_tackle_yards numeric,
     team_rush_left_tackle_yards_rank integer,
-    team_rush_mid_guard_yards numeric,
-    team_rush_mid_guard_yards_rank integer,
+    team_rush_middle_guard_yards numeric,
+    team_rush_middle_guard_yards_rank integer,
     team_rush_right_tackle_yards numeric,
     team_rush_right_tackle_yards_rank integer,
     team_rush_right_end_yards numeric,
@@ -2913,7 +2915,7 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
     team_running_back_carries_rank integer,
     team_rush_left_end_percentage numeric,
     team_rush_left_tackle_percentage numeric,
-    team_rush_mid_guard_percentage numeric,
+    team_rush_middle_guard_percentage numeric,
     team_rush_right_tackle_percentage numeric,
     team_rush_right_end_percentage numeric,
     pass_dvoa numeric,
@@ -3268,9 +3270,9 @@ CREATE TABLE public.external_league_trade_legs (
     pick_season_year smallint,
     pick_round smallint,
     pick_original_roster_id smallint,
-    faab_amount integer,
+    free_agent_acquisition_budget_amount integer,
     CONSTRAINT external_league_trade_legs_leg_type_check CHECK (((leg_type)::text = ANY ((ARRAY['player'::character varying, 'pick'::character varying, 'faab'::character varying])::text[]))),
-    CONSTRAINT external_league_trade_legs_payload_check CHECK (((((leg_type)::text = 'player'::text) AND (external_player_id IS NOT NULL) AND (pick_round IS NULL) AND (faab_amount IS NULL)) OR (((leg_type)::text = 'pick'::text) AND (pick_season_year IS NOT NULL) AND (pick_round IS NOT NULL) AND (external_player_id IS NULL) AND (pid IS NULL) AND (faab_amount IS NULL)) OR (((leg_type)::text = 'faab'::text) AND (faab_amount IS NOT NULL) AND (external_player_id IS NULL) AND (pid IS NULL) AND (pick_round IS NULL))))
+    CONSTRAINT external_league_trade_legs_payload_check CHECK (((((leg_type)::text = 'player'::text) AND (external_player_id IS NOT NULL) AND (pick_round IS NULL) AND (free_agent_acquisition_budget_amount IS NULL)) OR (((leg_type)::text = 'pick'::text) AND (pick_season_year IS NOT NULL) AND (pick_round IS NOT NULL) AND (external_player_id IS NULL) AND (pid IS NULL) AND (free_agent_acquisition_budget_amount IS NULL)) OR (((leg_type)::text = 'faab'::text) AND (free_agent_acquisition_budget_amount IS NOT NULL) AND (external_player_id IS NULL) AND (pid IS NULL) AND (pick_round IS NULL))))
 );
 
 
@@ -3292,9 +3294,9 @@ CREATE TABLE public.external_league_trades (
     season_year smallint NOT NULL,
     platform_transaction_bucket smallint NOT NULL,
     processed_at timestamp with time zone NOT NULL,
-    num_sides smallint NOT NULL,
+    number_sides smallint NOT NULL,
     imported_at timestamp with time zone DEFAULT now() NOT NULL,
-    CONSTRAINT external_league_trades_num_sides_check CHECK ((num_sides >= 2))
+    CONSTRAINT external_league_trades_num_sides_check CHECK ((number_sides >= 2))
 );
 
 
@@ -3335,7 +3337,7 @@ CREATE TABLE public.external_leagues (
     external_league_id character varying(64) NOT NULL,
     season_year smallint NOT NULL,
     league_name text,
-    num_teams smallint,
+    number_teams smallint,
     league_format character varying(10) NOT NULL,
     is_superflex boolean DEFAULT false NOT NULL,
     is_best_ball boolean DEFAULT false NOT NULL,
@@ -3406,7 +3408,7 @@ CREATE TABLE public.format_category_signal_mapping (
     ktc_quarterback_axis smallint NOT NULL,
     ranking_type text NOT NULL,
     props_scoring_formula_template text,
-    adp_format_id text
+    average_draft_position_format_id text
 );
 
 
@@ -4035,7 +4037,7 @@ CREATE TABLE public.keeptradecut_liquidity (
     is_superflex boolean NOT NULL,
     observed_at timestamp with time zone NOT NULL,
     raw_liquidity numeric NOT NULL,
-    std_liquidity numeric NOT NULL,
+    standardized_liquidity numeric NOT NULL,
     trade_count integer NOT NULL
 );
 
@@ -4236,21 +4238,21 @@ CREATE TABLE public.league_format_player_seasonlogs (
 --
 
 CREATE TABLE public.league_formats (
-    num_teams smallint NOT NULL,
+    number_teams smallint NOT NULL,
     starter_slots_quarterback smallint NOT NULL,
     starter_slots_running_back smallint NOT NULL,
     starter_slots_wide_receiver smallint NOT NULL,
     starter_slots_tight_end smallint NOT NULL,
     starter_slots_running_back_wide_receiver_flex smallint NOT NULL,
-    srbwrte smallint NOT NULL,
-    sqbrbwrte smallint NOT NULL,
+    starter_slots_running_back_wide_receiver_tight_end_flex smallint NOT NULL,
+    starter_slots_superflex smallint NOT NULL,
     starter_slots_wide_receiver_tight_end_flex smallint NOT NULL,
     starter_slots_defense_special_teams smallint NOT NULL,
     starter_slots_kicker smallint NOT NULL,
     bench_slot_count smallint NOT NULL,
     practice_squad_slot_count smallint NOT NULL,
     reserve_short_term_limit smallint NOT NULL,
-    cap integer NOT NULL,
+    salary_cap integer NOT NULL,
     min_bid smallint DEFAULT '0'::smallint NOT NULL,
     format_category smallint,
     id text NOT NULL,
@@ -4549,13 +4551,13 @@ CREATE TABLE public.league_team_careerlogs (
     worst_overall_finish smallint,
     first_season_year smallint,
     last_season_year smallint,
-    num_seasons smallint,
+    number_seasons smallint,
     weekly_high_scores smallint DEFAULT 0,
     post_seasons smallint DEFAULT 0,
     championships smallint DEFAULT 0,
     championship_rounds smallint DEFAULT 0,
     regular_season_leader smallint DEFAULT 0,
-    num_byes smallint DEFAULT 0,
+    number_byes smallint DEFAULT 0,
     best_season_win_percentage numeric(5,2),
     best_season_all_play_percentage numeric(5,2),
     wildcards smallint DEFAULT 0,
@@ -4803,7 +4805,7 @@ CREATE TABLE public.league_team_seasonlogs (
 
 CREATE TABLE public.league_user_careerlogs (
     lid integer NOT NULL,
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     regular_season_wins smallint DEFAULT 0,
     regular_season_losses smallint DEFAULT 0,
     regular_season_ties smallint DEFAULT 0,
@@ -4825,13 +4827,13 @@ CREATE TABLE public.league_user_careerlogs (
     worst_overall_finish smallint,
     first_season_year smallint,
     last_season_year smallint,
-    num_seasons smallint,
+    number_seasons smallint,
     weekly_high_scores smallint DEFAULT 0,
     post_seasons smallint DEFAULT 0,
     championships smallint DEFAULT 0,
     championship_rounds smallint DEFAULT 0,
     regular_season_leader smallint DEFAULT 0,
-    num_byes smallint DEFAULT 0,
+    number_byes smallint DEFAULT 0,
     best_season_win_percentage numeric(5,2),
     best_season_all_play_percentage numeric(5,2),
     wildcards smallint DEFAULT 0,
@@ -4852,7 +4854,7 @@ CREATE TABLE public.league_user_careerlogs (
 
 CREATE TABLE public.leagues (
     uid bigint NOT NULL,
-    commishid integer NOT NULL,
+    commissioner_user_id integer NOT NULL,
     name character varying(50) NOT NULL,
     discord_webhook_url character varying(255),
     is_hosted boolean DEFAULT false,
@@ -4862,7 +4864,8 @@ CREATE TABLE public.leagues (
     sleeper_league_id bigint,
     mfl_league_id bigint,
     fleaflicker_league_id bigint,
-    salary_attribution_rule smallint DEFAULT 0 NOT NULL
+    salary_attribution_rule smallint DEFAULT 0 NOT NULL,
+    discord_announcements_webhook_url character varying(255)
 );
 
 
@@ -4915,7 +4918,7 @@ CREATE TABLE public.manager_waitlist_submissions (
 -- Name: TABLE manager_waitlist_submissions; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON TABLE public.manager_waitlist_submissions IS 'Prospective manager questionnaire responses feeding the Article IV waiting-list ranking vote. Answers are keyed by question id from libs-shared/manager-waitlist-questions.mjs. Candidate PII: the API exposes it only to the league''s sitting managers, but league_reader can read it directly via pg_read_all_data. Deleted when the recruiting round closes.';
+COMMENT ON TABLE public.manager_waitlist_submissions IS 'Prospective manager questionnaire responses feeding the Article IV waiting-list ranking vote. Candidate PII: the API exposes it only to the league''s sitting managers, but league_reader can read it directly via pg_read_all_data. RETAINED INDEFINITELY as the standing candidate pool for future admission rounds -- there is no round-close purge. Note the emailed edit token has no expiry and the purge was its only revocation.';
 
 
 --
@@ -5083,8 +5086,7 @@ CREATE TABLE public.nfl_games (
     week smallint NOT NULL,
     day character varying(5),
     date character varying(10),
-    time_est character varying(8),
-    time_tz_offset smallint,
+    time_eastern character varying(8),
     time_start character varying(36),
     time_end character varying(36),
     kickoff_at timestamp with time zone,
@@ -5252,7 +5254,7 @@ CREATE TABLE public.nfl_plays (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -5467,18 +5469,18 @@ CREATE TABLE public.nfl_plays (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -5527,7 +5529,7 @@ CREATE TABLE public.nfl_plays (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -5535,9 +5537,9 @@ CREATE TABLE public.nfl_plays (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -6204,10 +6206,10 @@ COMMENT ON COLUMN public.nfl_plays.away_timeouts_remaining IS 'Numeric timeouts 
 
 
 --
--- Name: COLUMN nfl_plays.pos_timeouts_remaining; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.possession_timeouts_remaining; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.pos_timeouts_remaining IS 'Number of timeouts remaining for the possession team';
+COMMENT ON COLUMN public.nfl_plays.possession_timeouts_remaining IS 'Number of timeouts remaining for the possession team';
 
 
 --
@@ -6259,7 +6261,7 @@ CREATE TABLE public.nfl_plays_current_week (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -6475,19 +6477,19 @@ CREATE TABLE public.nfl_plays_current_week (
     is_punt_attempt boolean,
     field_goal_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    extra_point_result character varying(10),
     two_point_result character varying(10),
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -6667,7 +6669,7 @@ CREATE TABLE public.nfl_plays_player (
     x_at_snap numeric(10,2),
     y_at_snap numeric(10,2),
     yards_to_go integer,
-    in_play_dist numeric(10,4),
+    in_play_distance numeric(10,4),
     max_speed numeric(10,4),
     x_at_end_of_play numeric(10,2),
     x_ball_at_snap numeric(10,2),
@@ -6804,7 +6806,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -7019,18 +7021,18 @@ CREATE TABLE public.nfl_plays_year_2000 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -7079,7 +7081,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -7087,9 +7089,9 @@ CREATE TABLE public.nfl_plays_year_2000 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -7237,7 +7239,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -7452,18 +7454,18 @@ CREATE TABLE public.nfl_plays_year_2001 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -7512,7 +7514,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -7520,9 +7522,9 @@ CREATE TABLE public.nfl_plays_year_2001 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -7670,7 +7672,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -7885,18 +7887,18 @@ CREATE TABLE public.nfl_plays_year_2002 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -7945,7 +7947,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -7953,9 +7955,9 @@ CREATE TABLE public.nfl_plays_year_2002 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -8103,7 +8105,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -8318,18 +8320,18 @@ CREATE TABLE public.nfl_plays_year_2003 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -8378,7 +8380,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -8386,9 +8388,9 @@ CREATE TABLE public.nfl_plays_year_2003 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -8536,7 +8538,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -8751,18 +8753,18 @@ CREATE TABLE public.nfl_plays_year_2004 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -8811,7 +8813,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -8819,9 +8821,9 @@ CREATE TABLE public.nfl_plays_year_2004 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -8969,7 +8971,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -9184,18 +9186,18 @@ CREATE TABLE public.nfl_plays_year_2005 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -9244,7 +9246,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -9252,9 +9254,9 @@ CREATE TABLE public.nfl_plays_year_2005 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -9402,7 +9404,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -9617,18 +9619,18 @@ CREATE TABLE public.nfl_plays_year_2006 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -9677,7 +9679,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -9685,9 +9687,9 @@ CREATE TABLE public.nfl_plays_year_2006 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -9835,7 +9837,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -10050,18 +10052,18 @@ CREATE TABLE public.nfl_plays_year_2007 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -10110,7 +10112,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -10118,9 +10120,9 @@ CREATE TABLE public.nfl_plays_year_2007 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -10268,7 +10270,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -10483,18 +10485,18 @@ CREATE TABLE public.nfl_plays_year_2008 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -10543,7 +10545,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -10551,9 +10553,9 @@ CREATE TABLE public.nfl_plays_year_2008 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -10701,7 +10703,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -10916,18 +10918,18 @@ CREATE TABLE public.nfl_plays_year_2009 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -10976,7 +10978,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -10984,9 +10986,9 @@ CREATE TABLE public.nfl_plays_year_2009 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -11134,7 +11136,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -11349,18 +11351,18 @@ CREATE TABLE public.nfl_plays_year_2010 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -11409,7 +11411,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -11417,9 +11419,9 @@ CREATE TABLE public.nfl_plays_year_2010 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -11567,7 +11569,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -11782,18 +11784,18 @@ CREATE TABLE public.nfl_plays_year_2011 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -11842,7 +11844,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -11850,9 +11852,9 @@ CREATE TABLE public.nfl_plays_year_2011 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -12000,7 +12002,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -12215,18 +12217,18 @@ CREATE TABLE public.nfl_plays_year_2012 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -12275,7 +12277,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -12283,9 +12285,9 @@ CREATE TABLE public.nfl_plays_year_2012 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -12433,7 +12435,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -12648,18 +12650,18 @@ CREATE TABLE public.nfl_plays_year_2013 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -12708,7 +12710,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -12716,9 +12718,9 @@ CREATE TABLE public.nfl_plays_year_2013 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -12866,7 +12868,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -13081,18 +13083,18 @@ CREATE TABLE public.nfl_plays_year_2014 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -13141,7 +13143,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -13149,9 +13151,9 @@ CREATE TABLE public.nfl_plays_year_2014 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -13299,7 +13301,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -13514,18 +13516,18 @@ CREATE TABLE public.nfl_plays_year_2015 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -13574,7 +13576,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -13582,9 +13584,9 @@ CREATE TABLE public.nfl_plays_year_2015 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -13732,7 +13734,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -13947,18 +13949,18 @@ CREATE TABLE public.nfl_plays_year_2016 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -14007,7 +14009,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -14015,9 +14017,9 @@ CREATE TABLE public.nfl_plays_year_2016 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -14165,7 +14167,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -14380,18 +14382,18 @@ CREATE TABLE public.nfl_plays_year_2017 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -14440,7 +14442,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -14448,9 +14450,9 @@ CREATE TABLE public.nfl_plays_year_2017 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -14598,7 +14600,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -14813,18 +14815,18 @@ CREATE TABLE public.nfl_plays_year_2018 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -14873,7 +14875,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -14881,9 +14883,9 @@ CREATE TABLE public.nfl_plays_year_2018 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -15031,7 +15033,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -15246,18 +15248,18 @@ CREATE TABLE public.nfl_plays_year_2019 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -15306,7 +15308,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -15314,9 +15316,9 @@ CREATE TABLE public.nfl_plays_year_2019 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -15464,7 +15466,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -15679,18 +15681,18 @@ CREATE TABLE public.nfl_plays_year_2020 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -15739,7 +15741,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -15747,9 +15749,9 @@ CREATE TABLE public.nfl_plays_year_2020 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -15897,7 +15899,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -16112,18 +16114,18 @@ CREATE TABLE public.nfl_plays_year_2021 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -16172,7 +16174,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -16180,9 +16182,9 @@ CREATE TABLE public.nfl_plays_year_2021 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -16330,7 +16332,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -16545,18 +16547,18 @@ CREATE TABLE public.nfl_plays_year_2022 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -16605,7 +16607,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -16613,9 +16615,9 @@ CREATE TABLE public.nfl_plays_year_2022 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -16763,7 +16765,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -16978,18 +16980,18 @@ CREATE TABLE public.nfl_plays_year_2023 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -17038,7 +17040,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -17046,9 +17048,9 @@ CREATE TABLE public.nfl_plays_year_2023 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -17196,7 +17198,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -17411,18 +17413,18 @@ CREATE TABLE public.nfl_plays_year_2024 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -17471,7 +17473,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -17479,9 +17481,9 @@ CREATE TABLE public.nfl_plays_year_2024 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -17629,7 +17631,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -17844,18 +17846,18 @@ CREATE TABLE public.nfl_plays_year_2025 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -17904,7 +17906,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -17912,9 +17914,9 @@ CREATE TABLE public.nfl_plays_year_2025 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -18062,7 +18064,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     season_type character varying(36),
     away_score smallint,
     week smallint NOT NULL,
-    yard_line_num integer,
+    yard_line_number integer,
     yard_line_side character varying(10),
     yards_to_go integer,
     offense_formation character varying(100),
@@ -18277,18 +18279,18 @@ CREATE TABLE public.nfl_plays_year_2026 (
     is_kickoff_attempt boolean,
     is_punt_attempt boolean,
     kick_distance integer,
-    ep_result public.nfl_kick_result,
+    extra_point_result public.nfl_kick_result,
     is_punt_blocked boolean,
     home_timeouts_remaining smallint,
     away_timeouts_remaining smallint,
-    pos_timeouts_remaining smallint,
+    possession_timeouts_remaining smallint,
     defense_timeouts_remaining smallint,
     is_timeout boolean,
     timeout_team character varying(3),
-    pos_score smallint,
+    possession_score smallint,
     defense_score smallint,
     score_difference smallint,
-    pos_score_post smallint,
+    possession_score_post smallint,
     defense_score_post smallint,
     score_difference_post smallint,
     no_score_probability numeric(16,12),
@@ -18337,7 +18339,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
     play_direction character varying(10),
-    ep_ngs numeric(16,12),
+    expected_points_ngs numeric(16,12),
     epa_ngs numeric(16,12),
     home_win_probability_pre_ngs numeric(16,12),
     home_win_probability_post_ngs numeric(16,12),
@@ -18345,9 +18347,9 @@ CREATE TABLE public.nfl_plays_year_2026 (
     away_win_probability_post_ngs numeric(16,12),
     receiver_alignment character varying(10),
     average_pass_rusher_distance_to_quarterback numeric(16,12),
-    num_high_safeties smallint,
+    number_high_safeties smallint,
     safety_shell character varying(20),
-    num_shifted_players smallint,
+    number_shifted_players smallint,
     pass_probability_tracking numeric(16,12),
     pass_probability_non_tracking numeric(16,12),
     average_height numeric(5,2),
@@ -19393,7 +19395,7 @@ COMMENT ON TABLE public.pff_player_gamelogs IS 'PFF player measurements at game 
 CREATE TABLE public.pff_player_seasonlogs (
     pid character varying(25) NOT NULL,
     season_year smallint NOT NULL,
-    field_goal_ep_kicker numeric(4,1),
+    field_goal_extra_point_kicker numeric(4,1),
     defense_rank smallint,
     grade_position character varying(5),
     height smallint,
@@ -19593,7 +19595,7 @@ CREATE TABLE public.pff_unresolved_players (
 
 CREATE TABLE public.placed_wagers (
     wager_id integer NOT NULL,
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     public smallint DEFAULT '0'::smallint,
     wager_type public.placed_wagers_wager_type NOT NULL,
     placed_at timestamp with time zone NOT NULL,
@@ -20061,12 +20063,12 @@ CREATE TABLE public.player_adp_history (
     average_draft_position numeric(5,2),
     min_pick integer,
     max_pick integer,
-    std_dev numeric(5,2),
+    standard_deviation numeric(5,2),
     sample_size integer,
     percent_drafted numeric(5,2),
     observed_at timestamp with time zone NOT NULL,
     source_id public.adp_source_id,
-    adp_format_id text NOT NULL,
+    average_draft_position_format_id text NOT NULL,
     CONSTRAINT player_adp_history_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -20089,11 +20091,11 @@ CREATE TABLE public.player_adp_index (
     average_draft_position numeric(5,2),
     min_pick integer,
     max_pick integer,
-    std_dev numeric(5,2),
+    standard_deviation numeric(5,2),
     sample_size integer,
     percent_drafted numeric(5,2),
     source_id public.adp_source_id NOT NULL,
-    adp_format_id text NOT NULL,
+    average_draft_position_format_id text NOT NULL,
     CONSTRAINT player_adp_index_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -20127,10 +20129,10 @@ COMMENT ON COLUMN public.player_adp_index.max_pick IS 'Latest draft position obs
 
 
 --
--- Name: COLUMN player_adp_index.std_dev; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_adp_index.standard_deviation; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_adp_index.std_dev IS 'Standard deviation of draft positions';
+COMMENT ON COLUMN public.player_adp_index.standard_deviation IS 'Standard deviation of draft positions';
 
 
 --
@@ -20276,8 +20278,8 @@ CREATE TABLE public.player_college_careerlogs (
     bench_is_pro_day boolean,
     broad_jump numeric,
     broad_jump_is_pro_day boolean,
-    vert_jump numeric,
-    vert_jump_is_pro_day boolean,
+    vertical_jump numeric,
+    vertical_jump_is_pro_day boolean,
     shuttle numeric,
     shuttle_is_pro_day boolean,
     completions integer,
@@ -20313,7 +20315,7 @@ CREATE TABLE public.player_college_careerlogs (
     broken_tackles integer,
     defensive_end_percentage numeric,
     defensive_tackle_percentage numeric,
-    dropped_int integer,
+    dropped_interceptions integer,
     epa numeric,
     epa_per_attempt_run_behind numeric,
     forced_fumbles integer,
@@ -20412,12 +20414,12 @@ CREATE TABLE public.player_college_careerlogs (
     bench_is_unofficial boolean,
     boom_percentage numeric,
     broad_jump_is_unofficial boolean,
-    broken_missed_tackles_per_100db numeric,
-    broken_tackles_per_100touches numeric,
+    broken_missed_tackles_per_100_defensive_backs numeric,
+    broken_tackles_per_100_touches numeric,
     bust_percentage numeric,
     catchable_percentage numeric,
     epa_per_dropback numeric,
-    fumbles_per_100touches numeric,
+    fumbles_per_100_touches numeric,
     hands_is_unofficial boolean,
     heavy_box_percentage numeric,
     height_is_unofficial boolean,
@@ -20429,7 +20431,7 @@ CREATE TABLE public.player_college_careerlogs (
     iqr_short numeric,
     iqr_vs_man numeric,
     iqr_vs_zone numeric,
-    missed_tackles_per_100touches numeric,
+    missed_tackles_per_100_touches numeric,
     on_target_percentage numeric,
     pass_attempts integer,
     passer_points numeric,
@@ -20457,7 +20459,7 @@ CREATE TABLE public.player_college_careerlogs (
     snap_to_throw_plus_minus numeric,
     split_out_percentage numeric,
     throw_air_time_plus_minus numeric,
-    vert_jump_is_unofficial boolean,
+    vertical_jump_is_unofficial boolean,
     weight_is_unofficial boolean,
     yards_after_contact_per_attempt numeric,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
@@ -20494,8 +20496,8 @@ CREATE TABLE public.player_college_seasonlogs (
     bench_is_pro_day boolean,
     broad_jump numeric,
     broad_jump_is_pro_day boolean,
-    vert_jump numeric,
-    vert_jump_is_pro_day boolean,
+    vertical_jump numeric,
+    vertical_jump_is_pro_day boolean,
     shuttle numeric,
     shuttle_is_pro_day boolean,
     completions integer,
@@ -20531,7 +20533,7 @@ CREATE TABLE public.player_college_seasonlogs (
     broken_tackles integer,
     defensive_end_percentage numeric,
     defensive_tackle_percentage numeric,
-    dropped_int integer,
+    dropped_interceptions integer,
     epa numeric,
     epa_per_attempt_run_behind numeric,
     forced_fumbles integer,
@@ -20630,12 +20632,12 @@ CREATE TABLE public.player_college_seasonlogs (
     bench_is_unofficial boolean,
     boom_percentage numeric,
     broad_jump_is_unofficial boolean,
-    broken_missed_tackles_per_100db numeric,
-    broken_tackles_per_100touches numeric,
+    broken_missed_tackles_per_100_defensive_backs numeric,
+    broken_tackles_per_100_touches numeric,
     bust_percentage numeric,
     catchable_percentage numeric,
     epa_per_dropback numeric,
-    fumbles_per_100touches numeric,
+    fumbles_per_100_touches numeric,
     hands_is_unofficial boolean,
     heavy_box_percentage numeric,
     height_is_unofficial boolean,
@@ -20647,7 +20649,7 @@ CREATE TABLE public.player_college_seasonlogs (
     iqr_short numeric,
     iqr_vs_man numeric,
     iqr_vs_zone numeric,
-    missed_tackles_per_100touches numeric,
+    missed_tackles_per_100_touches numeric,
     on_target_percentage numeric,
     pass_attempts integer,
     passer_points numeric,
@@ -20675,7 +20677,7 @@ CREATE TABLE public.player_college_seasonlogs (
     snap_to_throw_plus_minus numeric,
     split_out_percentage numeric,
     throw_air_time_plus_minus numeric,
-    vert_jump_is_unofficial boolean,
+    vertical_jump_is_unofficial boolean,
     weight_is_unofficial boolean,
     yards_after_contact_per_attempt numeric,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
@@ -20870,6 +20872,31 @@ CREATE TABLE public.player_dfs_ownership (
 
 
 --
+-- Name: player_field_override; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_field_override (
+    pid character varying(25) NOT NULL,
+    column_name text NOT NULL,
+    override_value text,
+    provider_name text NOT NULL,
+    adjudicated_by text NOT NULL,
+    adjudicated_at timestamp with time zone NOT NULL,
+    evidence_source text NOT NULL,
+    reason text NOT NULL,
+    CONSTRAINT player_field_override_column_name_writable CHECK ((column_name <> ALL (ARRAY['pid'::text, 'formatted_name'::text]))),
+    CONSTRAINT player_field_override_provenance_present CHECK (((length(btrim(provider_name)) > 0) AND (length(btrim(adjudicated_by)) > 0) AND (length(btrim(evidence_source)) > 0) AND (length(btrim(reason)) > 0)))
+);
+
+
+--
+-- Name: TABLE player_field_override; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.player_field_override IS 'Human verdicts about a single (pid, column_name) that must survive re-import. Declared and applied together by libs-server/set-player-field-override.mjs; enforced as a per-field veto in libs-server/update-player.mjs; reconciled against live `player` values by the player-field-override-drift data check. Not a read path -- `player` remains the only value consumers read.';
+
+
+--
 -- Name: player_game_outcome_correlations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -20881,9 +20908,9 @@ CREATE TABLE public.player_game_outcome_correlations (
     games_sample smallint NOT NULL,
     leading_games smallint,
     trailing_games smallint,
-    leading_fpg numeric(5,2),
-    trailing_fpg numeric(5,2),
-    overall_fpg numeric(5,2),
+    leading_fantasy_points_per_game numeric(5,2),
+    trailing_fantasy_points_per_game numeric(5,2),
+    overall_fantasy_points_per_game numeric(5,2),
     confidence numeric(4,3),
     calculated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT player_game_outcome_correlations_outcome_type CHECK (((outcome_type)::text = 'game_script'::text))
@@ -24331,16 +24358,16 @@ CREATE TABLE public.player_gamelogs_year_2026 (
 --
 
 CREATE TABLE public.player_pair_correlations (
-    pid_a character varying(25) NOT NULL,
-    pid_b character varying(25) NOT NULL,
+    pid_first character varying(25) NOT NULL,
+    pid_second character varying(25) NOT NULL,
     season_year smallint NOT NULL,
-    nfl_team_a character varying(3),
-    nfl_team_b character varying(3),
+    nfl_team_first character varying(3),
+    nfl_team_second character varying(3),
     games_together smallint NOT NULL,
     correlation numeric(5,4),
     relationship_type character varying(20) NOT NULL,
     calculated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT player_pair_correlations_pid_order CHECK (((pid_a)::text < (pid_b)::text)),
+    CONSTRAINT player_pair_correlations_pid_order CHECK (((pid_first)::text < (pid_second)::text)),
     CONSTRAINT player_pair_correlations_relationship_type CHECK (((relationship_type)::text = ANY ((ARRAY['same_team'::character varying, 'cross_team_same_game'::character varying])::text[])))
 );
 
@@ -24353,31 +24380,31 @@ COMMENT ON TABLE public.player_pair_correlations IS 'Pre-calculated fantasy poin
 
 
 --
--- Name: COLUMN player_pair_correlations.pid_a; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_pair_correlations.pid_first; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_pair_correlations.pid_a IS 'First player ID (alphabetically smaller to enforce ordering)';
-
-
---
--- Name: COLUMN player_pair_correlations.pid_b; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.player_pair_correlations.pid_b IS 'Second player ID (alphabetically larger to enforce ordering)';
+COMMENT ON COLUMN public.player_pair_correlations.pid_first IS 'First player ID (alphabetically smaller to enforce ordering)';
 
 
 --
--- Name: COLUMN player_pair_correlations.nfl_team_a; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_pair_correlations.pid_second; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_pair_correlations.nfl_team_a IS 'NFL team of pid_a when correlation was calculated (for team change detection)';
+COMMENT ON COLUMN public.player_pair_correlations.pid_second IS 'Second player ID (alphabetically larger to enforce ordering)';
 
 
 --
--- Name: COLUMN player_pair_correlations.nfl_team_b; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_pair_correlations.nfl_team_first; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_pair_correlations.nfl_team_b IS 'NFL team of pid_b when correlation was calculated (for team change detection)';
+COMMENT ON COLUMN public.player_pair_correlations.nfl_team_first IS 'NFL team of pid_a when correlation was calculated (for team change detection)';
+
+
+--
+-- Name: COLUMN player_pair_correlations.nfl_team_second; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_pair_correlations.nfl_team_second IS 'NFL team of pid_b when correlation was calculated (for team change detection)';
 
 
 --
@@ -24786,7 +24813,7 @@ CREATE TABLE public.player_rushing_gamelogs (
     rush_yards_10_plus_rate numeric(5,4),
     weighted_opportunity numeric(5,2),
     rush_attempts_redzone smallint,
-    rush_attempts_goaline smallint,
+    rush_attempts_goal_line smallint,
     rush_share numeric(5,4)
 );
 
@@ -24950,7 +24977,7 @@ CREATE TABLE public.players_status (
     depth_chart_order character varying(255),
     depth_chart_position character varying(255),
     details character varying(255),
-    exp_return character varying(255),
+    expected_return character varying(255),
     injury_body_part character varying(255),
     injury_start_date date,
     injury_notes character varying(255),
@@ -24986,7 +25013,7 @@ CREATE TABLE public.playoffs (
 --
 
 CREATE TABLE public.poach_releases (
-    poachid integer NOT NULL,
+    poach_id integer NOT NULL,
     pid character varying(25)
 );
 
@@ -24998,7 +25025,7 @@ CREATE TABLE public.poach_releases (
 CREATE TABLE public.poaches (
     uid bigint NOT NULL,
     pid character varying(25),
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     tid integer NOT NULL,
     player_tid integer NOT NULL,
     lid integer NOT NULL,
@@ -25141,8 +25168,8 @@ CREATE TABLE public.practice (
 
 CREATE TABLE public.projections_history (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25194,8 +25221,8 @@ PARTITION BY RANGE (season_year);
 
 CREATE TABLE public.projections_history_default (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25246,8 +25273,8 @@ CREATE TABLE public.projections_history_default (
 
 CREATE TABLE public.projections_history_y2020 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25298,8 +25325,8 @@ CREATE TABLE public.projections_history_y2020 (
 
 CREATE TABLE public.projections_history_y2021 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25350,8 +25377,8 @@ CREATE TABLE public.projections_history_y2021 (
 
 CREATE TABLE public.projections_history_y2022 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25402,8 +25429,8 @@ CREATE TABLE public.projections_history_y2022 (
 
 CREATE TABLE public.projections_history_y2023 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25454,8 +25481,8 @@ CREATE TABLE public.projections_history_y2023 (
 
 CREATE TABLE public.projections_history_y2024 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25506,8 +25533,8 @@ CREATE TABLE public.projections_history_y2024 (
 
 CREATE TABLE public.projections_history_y2025 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25558,8 +25585,8 @@ CREATE TABLE public.projections_history_y2025 (
 
 CREATE TABLE public.projections_history_y2026 (
     pid character varying(25),
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -25610,8 +25637,8 @@ CREATE TABLE public.projections_history_y2026 (
 
 CREATE TABLE public.projections_index (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25664,8 +25691,8 @@ PARTITION BY RANGE (season_year);
 
 CREATE TABLE public.projections_index_default (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25717,8 +25744,8 @@ CREATE TABLE public.projections_index_default (
 
 CREATE TABLE public.projections_index_y2020 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25770,8 +25797,8 @@ CREATE TABLE public.projections_index_y2020 (
 
 CREATE TABLE public.projections_index_y2021 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25823,8 +25850,8 @@ CREATE TABLE public.projections_index_y2021 (
 
 CREATE TABLE public.projections_index_y2022 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25876,8 +25903,8 @@ CREATE TABLE public.projections_index_y2022 (
 
 CREATE TABLE public.projections_index_y2023 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25929,8 +25956,8 @@ CREATE TABLE public.projections_index_y2023 (
 
 CREATE TABLE public.projections_index_y2024 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -25982,8 +26009,8 @@ CREATE TABLE public.projections_index_y2024 (
 
 CREATE TABLE public.projections_index_y2025 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26035,8 +26062,8 @@ CREATE TABLE public.projections_index_y2025 (
 
 CREATE TABLE public.projections_index_y2026 (
     pid character varying(25) NOT NULL,
-    sourceid integer DEFAULT 0 NOT NULL,
-    userid integer DEFAULT 0 NOT NULL,
+    source_id integer DEFAULT 0 NOT NULL,
+    user_id integer DEFAULT 0 NOT NULL,
     week smallint NOT NULL,
     season_year smallint NOT NULL,
     passing_attempts numeric(5,1),
@@ -26249,10 +26276,10 @@ CREATE TABLE public.props (
     id character varying(100) NOT NULL,
     prop_line numeric(4,1),
     over_odds_decimal numeric(5,2),
-    o_am integer,
+    over_american_odds integer,
     under_odds_decimal numeric(5,2),
-    u_am integer,
-    sourceid integer NOT NULL,
+    under_american_odds integer,
+    source_id integer NOT NULL,
     observed_at timestamp with time zone NOT NULL,
     is_active boolean,
     is_live boolean,
@@ -26273,8 +26300,8 @@ CREATE TABLE public.props_index (
     prop_line numeric(4,1),
     over_odds_decimal numeric(5,2),
     under_odds_decimal numeric(5,2),
-    o_am integer,
-    u_am integer,
+    over_american_odds integer,
+    under_american_odds integer,
     source_id public.market_source_id NOT NULL,
     observed_at timestamp with time zone NOT NULL,
     time_type public.time_type NOT NULL,
@@ -26331,7 +26358,7 @@ ALTER SEQUENCE public.props_index_prop_id_seq OWNED BY public.props_index.prop_i
 CREATE TABLE public.restricted_free_agency_bids (
     uid integer NOT NULL,
     pid character varying(25),
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     bid_amount integer,
     tid integer NOT NULL,
     season_year smallint,
@@ -26413,7 +26440,7 @@ CREATE TABLE public.restricted_free_agency_releases (
 
 CREATE TABLE public.ros_projections (
     pid character varying(25),
-    sourceid integer NOT NULL,
+    source_id integer NOT NULL,
     passing_attempts numeric(5,1),
     passing_completions numeric(5,1),
     passing_yards numeric(5,1),
@@ -26473,7 +26500,7 @@ CREATE TABLE public.roster_asset_holding (
     salary_paid integer,
     salary_basis smallint,
     initial_slot_type smallint,
-    ps_slot_subtype smallint,
+    practice_squad_slot_subtype smallint,
     weeks_active smallint DEFAULT 0 NOT NULL,
     weeks_practice_squad smallint DEFAULT 0 NOT NULL,
     weeks_reserve_short_term smallint DEFAULT 0 NOT NULL,
@@ -26537,10 +26564,10 @@ COMMENT ON COLUMN public.roster_asset_holding.initial_slot_type IS 'Enum mirrori
 
 
 --
--- Name: COLUMN roster_asset_holding.ps_slot_subtype; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN roster_asset_holding.practice_squad_slot_subtype; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.roster_asset_holding.ps_slot_subtype IS 'Enum derived from PS sub-families: 1=drafted_ps (PSD+PSDP), 2=signed_ps (PS+PSP). NULL if not in PS family.';
+COMMENT ON COLUMN public.roster_asset_holding.practice_squad_slot_subtype IS 'Enum derived from PS sub-families: 1=drafted_ps (PSD+PSDP), 2=signed_ps (PS+PSP). NULL if not in PS family.';
 
 
 --
@@ -26763,7 +26790,7 @@ CREATE TABLE public.scoring_format_player_gamelogs (
     pid character varying(25) NOT NULL,
     esbid integer NOT NULL,
     points numeric(6,3),
-    pos_rnk smallint,
+    position_rank smallint,
     scoring_format_id text NOT NULL
 );
 
@@ -26791,10 +26818,10 @@ CREATE TABLE public.scoring_format_player_seasonlogs (
     points numeric(4,1),
     points_per_game numeric(3,1),
     games_played smallint,
-    points_rnk smallint,
-    points_pos_rnk smallint,
-    points_per_game_rnk smallint,
-    points_per_game_pos_rnk smallint,
+    points_rank smallint,
+    points_position_rank smallint,
+    points_per_game_rank smallint,
+    points_per_game_position_rank smallint,
     scoring_format_id text NOT NULL
 );
 
@@ -26813,12 +26840,12 @@ CREATE TABLE public.seasons (
     franchise_tag_salary_tight_end integer,
     restricted_free_agency_period_start timestamp with time zone,
     restricted_free_agency_period_end timestamp with time zone,
-    ext_date timestamp with time zone,
+    extension_deadline_at timestamp with time zone,
     draft_start timestamp with time zone,
     free_agency_period_start timestamp with time zone,
     free_agency_period_end timestamp with time zone,
     free_agency_live_auction_start timestamp with time zone,
-    tddate timestamp with time zone,
+    trade_deadline_at timestamp with time zone,
     draft_type character varying(10),
     draft_hour_min smallint,
     draft_hour_max smallint,
@@ -26828,7 +26855,7 @@ CREATE TABLE public.seasons (
     max_roster_tight_end smallint NOT NULL,
     max_roster_defense_special_teams smallint NOT NULL,
     max_roster_kicker smallint NOT NULL,
-    starting_faab_budget integer NOT NULL,
+    starting_free_agent_acquisition_budget integer NOT NULL,
     franchise_tag_limit smallint DEFAULT '1'::smallint NOT NULL,
     rookie_tag_limit smallint DEFAULT '1'::smallint NOT NULL,
     restricted_free_agency_tag_limit smallint DEFAULT '2'::smallint NOT NULL,
@@ -27117,7 +27144,7 @@ CREATE TABLE public.teams (
     waiver_order smallint,
     draft_order smallint,
     salary_cap integer DEFAULT 0 NOT NULL,
-    faab_balance integer DEFAULT 0 NOT NULL,
+    free_agent_acquisition_budget_balance integer DEFAULT 0 NOT NULL,
     primary_color character varying(6),
     accent_color character varying(6)
 );
@@ -27148,7 +27175,7 @@ ALTER SEQUENCE public.teams_uid_seq OWNED BY public.teams.uid;
 --
 
 CREATE TABLE public.trade_releases (
-    tradeid integer NOT NULL,
+    trade_id integer NOT NULL,
     tid integer NOT NULL,
     pid character varying(25),
     origin_slot integer
@@ -27164,7 +27191,7 @@ CREATE TABLE public.trades (
     propose_tid integer NOT NULL,
     accept_tid integer NOT NULL,
     lid integer NOT NULL,
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     season_year smallint,
     offered timestamp with time zone NOT NULL,
     accepted timestamp with time zone,
@@ -27180,9 +27207,9 @@ CREATE TABLE public.trades (
 --
 
 CREATE TABLE public.trades_picks (
-    tradeid integer NOT NULL,
+    trade_id integer NOT NULL,
     tid integer NOT NULL,
-    pickid integer NOT NULL
+    draft_pick_id integer NOT NULL
 );
 
 
@@ -27191,7 +27218,7 @@ CREATE TABLE public.trades_picks (
 --
 
 CREATE TABLE public.trades_players (
-    tradeid integer NOT NULL,
+    trade_id integer NOT NULL,
     tid integer NOT NULL,
     pid character varying(25)
 );
@@ -27215,8 +27242,8 @@ CREATE TABLE public.trades_slots (
 --
 
 CREATE TABLE public.trades_transactions (
-    tradeid integer NOT NULL,
-    transactionid integer NOT NULL
+    trade_id integer NOT NULL,
+    transaction_id integer NOT NULL
 );
 
 
@@ -27245,7 +27272,7 @@ ALTER SEQUENCE public.trades_uid_seq OWNED BY public.trades.uid;
 
 CREATE TABLE public.transactions (
     uid bigint NOT NULL,
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     tid integer NOT NULL,
     lid integer NOT NULL,
     pid character varying(25),
@@ -27254,7 +27281,7 @@ CREATE TABLE public.transactions (
     week smallint NOT NULL,
     season_year smallint,
     occurred_at timestamp with time zone NOT NULL,
-    waiverid integer
+    waiver_id integer
 );
 
 
@@ -27353,9 +27380,8 @@ CREATE TABLE public.users (
     username character varying(20) NOT NULL,
     email character varying(50) DEFAULT ''::character varying NOT NULL,
     password character varying(60) DEFAULT ''::character varying NOT NULL,
-    vbaseline character varying(9) DEFAULT 'default'::character varying NOT NULL,
     watchlist text,
-    lastvisit timestamp with time zone,
+    last_visit_at timestamp with time zone,
     invite_code character varying(20)
 );
 
@@ -27384,8 +27410,8 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 --
 
 CREATE TABLE public.users_sources (
-    userid integer NOT NULL,
-    sourceid integer NOT NULL,
+    user_id integer NOT NULL,
+    source_id integer NOT NULL,
     weight numeric(2,2) NOT NULL
 );
 
@@ -27395,7 +27421,7 @@ CREATE TABLE public.users_sources (
 --
 
 CREATE TABLE public.users_teams (
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     tid integer NOT NULL,
     season_year smallint NOT NULL
 );
@@ -27489,7 +27515,7 @@ COMMENT ON VIEW public.view_trade_asset_flow IS 'One row per trade leg: which te
 --
 
 CREATE TABLE public.waiver_releases (
-    waiverid integer NOT NULL,
+    waiver_id integer NOT NULL,
     pid character varying(25)
 );
 
@@ -27500,7 +27526,7 @@ CREATE TABLE public.waiver_releases (
 
 CREATE TABLE public.waivers (
     uid integer NOT NULL,
-    userid integer NOT NULL,
+    user_id integer NOT NULL,
     pid character varying(25),
     tid integer NOT NULL,
     lid integer NOT NULL,
@@ -28403,10 +28429,10 @@ ALTER TABLE ONLY public.composite_market_value_blend_weights ALTER COLUMN versio
 
 
 --
--- Name: composite_market_value_daily cmv_row_id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: composite_market_value_daily composite_market_value_row_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.composite_market_value_daily ALTER COLUMN cmv_row_id SET DEFAULT nextval('public.composite_market_value_daily_cmv_row_id_seq'::regclass);
+ALTER TABLE ONLY public.composite_market_value_daily ALTER COLUMN composite_market_value_row_id SET DEFAULT nextval('public.composite_market_value_daily_cmv_row_id_seq'::regclass);
 
 
 --
@@ -28678,7 +28704,7 @@ ALTER TABLE ONLY public.composite_market_value_calibration
 --
 
 ALTER TABLE ONLY public.composite_market_value_daily
-    ADD CONSTRAINT composite_market_value_daily_pkey PRIMARY KEY (cmv_row_id);
+    ADD CONSTRAINT composite_market_value_daily_pkey PRIMARY KEY (composite_market_value_row_id);
 
 
 --
@@ -29166,7 +29192,7 @@ ALTER TABLE ONLY public.league_divisions
 --
 
 ALTER TABLE ONLY public.league_formats
-    ADD CONSTRAINT league_formats_config_unique UNIQUE (num_teams, starter_slots_quarterback, starter_slots_running_back, starter_slots_wide_receiver, starter_slots_tight_end, starter_slots_running_back_wide_receiver_flex, srbwrte, sqbrbwrte, starter_slots_wide_receiver_tight_end_flex, starter_slots_defense_special_teams, starter_slots_kicker, bench_slot_count, practice_squad_slot_count, reserve_short_term_limit, cap, min_bid, scoring_format_id, pricing_model);
+    ADD CONSTRAINT league_formats_config_unique UNIQUE (number_teams, starter_slots_quarterback, starter_slots_running_back, starter_slots_wide_receiver, starter_slots_tight_end, starter_slots_running_back_wide_receiver_flex, starter_slots_running_back_wide_receiver_tight_end_flex, starter_slots_superflex, starter_slots_wide_receiver_tight_end_flex, starter_slots_defense_special_teams, starter_slots_kicker, bench_slot_count, practice_squad_slot_count, reserve_short_term_limit, salary_cap, min_bid, scoring_format_id, pricing_model);
 
 
 --
@@ -29254,7 +29280,7 @@ ALTER TABLE ONLY public.league_team_seasonlogs
 --
 
 ALTER TABLE ONLY public.league_user_careerlogs
-    ADD CONSTRAINT league_user_careerlogs_lid_userid_unique UNIQUE (lid, userid);
+    ADD CONSTRAINT league_user_careerlogs_lid_userid_unique UNIQUE (lid, user_id);
 
 
 --
@@ -29462,7 +29488,7 @@ ALTER TABLE ONLY public.play_changelog
 --
 
 ALTER TABLE ONLY public.player_adp_index
-    ADD CONSTRAINT player_adp_index_unique UNIQUE (season_year, source_id, adp_format_id, pid);
+    ADD CONSTRAINT player_adp_index_unique UNIQUE (season_year, source_id, average_draft_position_format_id, pid);
 
 
 --
@@ -29583,6 +29609,14 @@ ALTER TABLE ONLY public.player
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_ffpc_id_unique UNIQUE (ffpc_player_id);
+
+
+--
+-- Name: player_field_override player_field_override_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_field_override
+    ADD CONSTRAINT player_field_override_pkey PRIMARY KEY (pid, column_name);
 
 
 --
@@ -29862,7 +29896,7 @@ ALTER TABLE ONLY public.player
 --
 
 ALTER TABLE ONLY public.player_pair_correlations
-    ADD CONSTRAINT player_pair_correlations_pkey PRIMARY KEY (pid_a, pid_b, season_year);
+    ADD CONSTRAINT player_pair_correlations_pkey PRIMARY KEY (pid_first, pid_second, season_year);
 
 
 --
@@ -30150,7 +30184,7 @@ ALTER TABLE ONLY public.user_plays_views
 --
 
 ALTER TABLE ONLY public.users_teams
-    ADD CONSTRAINT users_teams_pkey PRIMARY KEY (userid, tid, season_year);
+    ADD CONSTRAINT users_teams_pkey PRIMARY KEY (user_id, tid, season_year);
 
 
 --
@@ -30180,7 +30214,7 @@ CREATE UNIQUE INDEX admission_votes_one_open_vote_per_league_season ON public.ad
 -- Name: adp_format_axis_unique; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX adp_format_axis_unique ON public.adp_format USING btree (scoring_class, scoring_format_id, num_quarterback, num_teams, duration, draft_pool, contest_style) NULLS NOT DISTINCT;
+CREATE UNIQUE INDEX adp_format_axis_unique ON public.adp_format USING btree (scoring_class, scoring_format_id, number_quarterback, number_teams, duration, draft_pool, contest_style) NULLS NOT DISTINCT;
 
 
 --
@@ -30747,7 +30781,7 @@ CREATE UNIQUE INDEX idx_24910_tid ON public.playoffs USING btree (tid, uid, seas
 -- Name: idx_24913_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24913_pid ON public.poach_releases USING btree (poachid, pid);
+CREATE UNIQUE INDEX idx_24913_pid ON public.poach_releases USING btree (poach_id, pid);
 
 
 --
@@ -30789,7 +30823,7 @@ CREATE UNIQUE INDEX idx_24959_market ON public.prop_markets_index USING btree (s
 -- Name: idx_24970_prop; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24970_prop ON public.props USING btree (sourceid, id, pid, week, season_year, prop_line, observed_at);
+CREATE UNIQUE INDEX idx_24970_prop ON public.props USING btree (source_id, id, pid, week, season_year, prop_line, observed_at);
 
 
 --
@@ -30803,7 +30837,7 @@ CREATE UNIQUE INDEX idx_24974_prop ON public.props_index USING btree (source_id,
 -- Name: idx_24990_sourceid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24990_sourceid ON public.ros_projections USING btree (sourceid, pid, season_year);
+CREATE UNIQUE INDEX idx_24990_sourceid ON public.ros_projections USING btree (source_id, pid, season_year);
 
 
 --
@@ -30845,7 +30879,7 @@ CREATE UNIQUE INDEX idx_25075_team_season_year ON public.teams USING btree (uid,
 -- Name: idx_25085_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25085_pid ON public.trade_releases USING btree (tradeid, pid);
+CREATE UNIQUE INDEX idx_25085_pid ON public.trade_releases USING btree (trade_id, pid);
 
 
 --
@@ -30859,21 +30893,21 @@ CREATE UNIQUE INDEX idx_25089_uid ON public.trades USING btree (uid);
 -- Name: idx_25093_pick; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25093_pick ON public.trades_picks USING btree (tradeid, pickid);
+CREATE UNIQUE INDEX idx_25093_pick ON public.trades_picks USING btree (trade_id, draft_pick_id);
 
 
 --
 -- Name: idx_25096_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25096_pid ON public.trades_players USING btree (tradeid, pid);
+CREATE UNIQUE INDEX idx_25096_pid ON public.trades_players USING btree (trade_id, pid);
 
 
 --
 -- Name: idx_25099_transaction; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25099_transaction ON public.trades_transactions USING btree (tradeid, transactionid);
+CREATE UNIQUE INDEX idx_25099_transaction ON public.trades_transactions USING btree (trade_id, transaction_id);
 
 
 --
@@ -30901,21 +30935,21 @@ CREATE UNIQUE INDEX idx_25127_email ON public.users USING btree (email);
 -- Name: idx_25138_sourceid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25138_sourceid ON public.users_sources USING btree (userid, sourceid);
+CREATE UNIQUE INDEX idx_25138_sourceid ON public.users_sources USING btree (user_id, source_id);
 
 
 --
 -- Name: idx_25141_userid_tid_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25141_userid_tid_season_year ON public.users_teams USING btree (userid, tid, season_year);
+CREATE UNIQUE INDEX idx_25141_userid_tid_season_year ON public.users_teams USING btree (user_id, tid, season_year);
 
 
 --
 -- Name: idx_25147_waiverid_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25147_waiverid_pid ON public.waiver_releases USING btree (waiverid, pid);
+CREATE UNIQUE INDEX idx_25147_waiverid_pid ON public.waiver_releases USING btree (waiver_id, pid);
 
 
 --
@@ -31286,7 +31320,7 @@ CREATE INDEX idx_league_player_season_projection_values_pid ON public.league_pla
 -- Name: idx_leagues_commishid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_leagues_commishid ON public.leagues USING btree (commishid);
+CREATE INDEX idx_leagues_commishid ON public.leagues USING btree (commissioner_user_id);
 
 
 --
@@ -31776,7 +31810,7 @@ CREATE INDEX idx_placed_wagers_selections ON public.placed_wagers USING gin (sel
 -- Name: idx_placed_wagers_userid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_placed_wagers_userid ON public.placed_wagers USING btree (userid);
+CREATE INDEX idx_placed_wagers_userid ON public.placed_wagers USING btree (user_id);
 
 
 --
@@ -31797,7 +31831,7 @@ CREATE INDEX idx_player_adp_history_pid ON public.player_adp_history USING btree
 -- Name: idx_player_adp_history_source_format; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_adp_history_source_format ON public.player_adp_history USING btree (source_id, adp_format_id);
+CREATE INDEX idx_player_adp_history_source_format ON public.player_adp_history USING btree (source_id, average_draft_position_format_id);
 
 
 --
@@ -31818,7 +31852,7 @@ CREATE INDEX idx_player_adp_index_season_year ON public.player_adp_index USING b
 -- Name: idx_player_adp_index_source_format; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_adp_index_source_format ON public.player_adp_index USING btree (source_id, adp_format_id);
+CREATE INDEX idx_player_adp_index_source_format ON public.player_adp_index USING btree (source_id, average_draft_position_format_id);
 
 
 --
@@ -31965,14 +31999,14 @@ CREATE INDEX idx_player_nffc_id ON public.player USING btree (nffc_player_id);
 -- Name: idx_player_pair_correlations_season_year_pid_a; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pair_correlations_season_year_pid_a ON public.player_pair_correlations USING btree (season_year, pid_a);
+CREATE INDEX idx_player_pair_correlations_season_year_pid_a ON public.player_pair_correlations USING btree (season_year, pid_first);
 
 
 --
 -- Name: idx_player_pair_correlations_season_year_pid_b; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_pair_correlations_season_year_pid_b ON public.player_pair_correlations USING btree (season_year, pid_b);
+CREATE INDEX idx_player_pair_correlations_season_year_pid_b ON public.player_pair_correlations USING btree (season_year, pid_second);
 
 
 --
@@ -32049,7 +32083,7 @@ CREATE INDEX idx_playoffs_lid ON public.playoffs USING btree (lid);
 -- Name: idx_poach_releases_poachid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_poach_releases_poachid ON public.poach_releases USING btree (poachid);
+CREATE INDEX idx_poach_releases_poachid ON public.poach_releases USING btree (poach_id);
 
 
 --
@@ -32084,7 +32118,7 @@ CREATE INDEX idx_practice_nfl_week_id ON public.practice USING btree (nfl_week_i
 -- Name: idx_projections_history_natural_key; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_projections_history_natural_key ON ONLY public.projections_history USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX idx_projections_history_natural_key ON ONLY public.projections_history USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -32105,7 +32139,7 @@ CREATE INDEX idx_projections_history_pid ON ONLY public.projections_history USIN
 -- Name: idx_projections_index_natural_key; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_projections_index_natural_key ON ONLY public.projections_index USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX idx_projections_index_natural_key ON ONLY public.projections_index USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -32364,21 +32398,21 @@ CREATE INDEX idx_teams_lid ON public.teams USING btree (lid);
 -- Name: idx_trade_releases_tradeid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_trade_releases_tradeid ON public.trade_releases USING btree (tradeid);
+CREATE INDEX idx_trade_releases_tradeid ON public.trade_releases USING btree (trade_id);
 
 
 --
 -- Name: idx_trades_picks_tradeid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_trades_picks_tradeid ON public.trades_picks USING btree (tradeid);
+CREATE INDEX idx_trades_picks_tradeid ON public.trades_picks USING btree (trade_id);
 
 
 --
 -- Name: idx_trades_players_tradeid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_trades_players_tradeid ON public.trades_players USING btree (tradeid);
+CREATE INDEX idx_trades_players_tradeid ON public.trades_players USING btree (trade_id);
 
 
 --
@@ -32413,14 +32447,14 @@ CREATE INDEX idx_users_invite_code ON public.users USING btree (invite_code);
 -- Name: idx_users_sources_userid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_users_sources_userid ON public.users_sources USING btree (userid);
+CREATE INDEX idx_users_sources_userid ON public.users_sources USING btree (user_id);
 
 
 --
 -- Name: idx_waiver_releases_waiverid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_waiver_releases_waiverid ON public.waiver_releases USING btree (waiverid);
+CREATE INDEX idx_waiver_releases_waiverid ON public.waiver_releases USING btree (waiver_id);
 
 
 --
@@ -44684,7 +44718,7 @@ CREATE UNIQUE INDEX players_status_pid_observed_at_key ON public.players_status 
 -- Name: projections_history_default_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_default_natural_key_idx ON public.projections_history_default USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_default_natural_key_idx ON public.projections_history_default USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44705,7 +44739,7 @@ CREATE INDEX projections_history_default_pid_idx ON public.projections_history_d
 -- Name: projections_history_y2020_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2020_natural_key_idx ON public.projections_history_y2020 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2020_natural_key_idx ON public.projections_history_y2020 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44726,7 +44760,7 @@ CREATE INDEX projections_history_y2020_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2021_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2021_natural_key_idx ON public.projections_history_y2021 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2021_natural_key_idx ON public.projections_history_y2021 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44747,7 +44781,7 @@ CREATE INDEX projections_history_y2021_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2022_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2022_natural_key_idx ON public.projections_history_y2022 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2022_natural_key_idx ON public.projections_history_y2022 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44768,7 +44802,7 @@ CREATE INDEX projections_history_y2022_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2023_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2023_natural_key_idx ON public.projections_history_y2023 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2023_natural_key_idx ON public.projections_history_y2023 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44789,7 +44823,7 @@ CREATE INDEX projections_history_y2023_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2024_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2024_natural_key_idx ON public.projections_history_y2024 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2024_natural_key_idx ON public.projections_history_y2024 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44810,7 +44844,7 @@ CREATE INDEX projections_history_y2024_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2025_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2025_natural_key_idx ON public.projections_history_y2025 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2025_natural_key_idx ON public.projections_history_y2025 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44831,7 +44865,7 @@ CREATE INDEX projections_history_y2025_pid_idx ON public.projections_history_y20
 -- Name: projections_history_y2026_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_history_y2026_natural_key_idx ON public.projections_history_y2026 USING btree (sourceid, pid, userid, generated_at, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_history_y2026_natural_key_idx ON public.projections_history_y2026 USING btree (source_id, pid, user_id, generated_at, week, season_year, season_type);
 
 
 --
@@ -44852,7 +44886,7 @@ CREATE INDEX projections_history_y2026_pid_idx ON public.projections_history_y20
 -- Name: projections_index_default_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_default_natural_key_idx ON public.projections_index_default USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_default_natural_key_idx ON public.projections_index_default USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44873,7 +44907,7 @@ CREATE INDEX projections_index_default_pid_idx ON public.projections_index_defau
 -- Name: projections_index_y2020_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2020_natural_key_idx ON public.projections_index_y2020 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2020_natural_key_idx ON public.projections_index_y2020 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44894,7 +44928,7 @@ CREATE INDEX projections_index_y2020_pid_idx ON public.projections_index_y2020 U
 -- Name: projections_index_y2021_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2021_natural_key_idx ON public.projections_index_y2021 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2021_natural_key_idx ON public.projections_index_y2021 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44915,7 +44949,7 @@ CREATE INDEX projections_index_y2021_pid_idx ON public.projections_index_y2021 U
 -- Name: projections_index_y2022_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2022_natural_key_idx ON public.projections_index_y2022 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2022_natural_key_idx ON public.projections_index_y2022 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44936,7 +44970,7 @@ CREATE INDEX projections_index_y2022_pid_idx ON public.projections_index_y2022 U
 -- Name: projections_index_y2023_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2023_natural_key_idx ON public.projections_index_y2023 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2023_natural_key_idx ON public.projections_index_y2023 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44957,7 +44991,7 @@ CREATE INDEX projections_index_y2023_pid_idx ON public.projections_index_y2023 U
 -- Name: projections_index_y2024_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2024_natural_key_idx ON public.projections_index_y2024 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2024_natural_key_idx ON public.projections_index_y2024 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44978,7 +45012,7 @@ CREATE INDEX projections_index_y2024_pid_idx ON public.projections_index_y2024 U
 -- Name: projections_index_y2025_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2025_natural_key_idx ON public.projections_index_y2025 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2025_natural_key_idx ON public.projections_index_y2025 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -44999,7 +45033,7 @@ CREATE INDEX projections_index_y2025_pid_idx ON public.projections_index_y2025 U
 -- Name: projections_index_y2026_natural_key_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2026_natural_key_idx ON public.projections_index_y2026 USING btree (sourceid, pid, userid, week, season_year, season_type);
+CREATE UNIQUE INDEX projections_index_y2026_natural_key_idx ON public.projections_index_y2026 USING btree (source_id, pid, user_id, week, season_year, season_type);
 
 
 --
@@ -57606,7 +57640,7 @@ CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON publi
 -- Name: league_formats trg_cmv_classify_league_format; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER trg_cmv_classify_league_format BEFORE INSERT OR UPDATE OF starter_slots_quarterback, sqbrbwrte, scoring_format_id ON public.league_formats FOR EACH ROW EXECUTE FUNCTION public.cmv_classify_league_format();
+CREATE TRIGGER trg_cmv_classify_league_format BEFORE INSERT OR UPDATE OF starter_slots_quarterback, starter_slots_superflex, scoring_format_id ON public.league_formats FOR EACH ROW EXECUTE FUNCTION public.cmv_classify_league_format();
 
 
 --
@@ -57802,7 +57836,7 @@ ALTER TABLE ONLY public.selection_combination_odds_index
 --
 
 ALTER TABLE ONLY public.format_category_signal_mapping
-    ADD CONSTRAINT format_category_signal_mapping_adp_format_id_fkey FOREIGN KEY (adp_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
+    ADD CONSTRAINT format_category_signal_mapping_adp_format_id_fkey FOREIGN KEY (average_draft_position_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
 
 
 --
@@ -57930,7 +57964,7 @@ ALTER TABLE ONLY public.ngs_prospect_scores_index
 --
 
 ALTER TABLE ONLY public.player_adp_history
-    ADD CONSTRAINT player_adp_history_adp_format_id_fkey FOREIGN KEY (adp_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
+    ADD CONSTRAINT player_adp_history_adp_format_id_fkey FOREIGN KEY (average_draft_position_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
 
 
 --
@@ -57938,7 +57972,7 @@ ALTER TABLE ONLY public.player_adp_history
 --
 
 ALTER TABLE ONLY public.player_adp_index
-    ADD CONSTRAINT player_adp_index_adp_format_id_fkey FOREIGN KEY (adp_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
+    ADD CONSTRAINT player_adp_index_adp_format_id_fkey FOREIGN KEY (average_draft_position_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
 
 
 --
@@ -59500,6 +59534,13 @@ GRANT SELECT ON TABLE public.player_defender_gamelogs TO league_reader;
 --
 
 GRANT SELECT ON TABLE public.player_dfs_ownership TO league_reader;
+
+
+--
+-- Name: TABLE player_field_override; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON TABLE public.player_field_override TO league_reader;
 
 
 --

@@ -66,7 +66,7 @@ router.get('/?', async (req, res) => {
       if (userId) {
         // check if userId is a team manager
         const rows = await db('users_teams').where({
-          userid: userId,
+          user_id: userId,
           tid: teamId,
           season_year: current_season.year
         })
@@ -106,7 +106,7 @@ router.get('/?', async (req, res) => {
     if (userId) {
       // check if userId is a team manager
       const rows = await db('users_teams').where({
-        userid: userId,
+        user_id: userId,
         tid: teamId,
         season_year: current_season.year
       })

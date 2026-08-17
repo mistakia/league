@@ -28,7 +28,7 @@ const initialize_cli = () => {
 
 // Constitution art. 11 (as amended by Amendment XI): a protected practice squad
 // designation "can not be reversed and will expire at the extension deadline the
-// following Offseason". So the trigger is the league's own `seasons.ext_date`,
+// following Offseason". So the trigger is the league's own `seasons.extension_deadline_at`,
 // not a fixed calendar point and not the start of the offseason -- Amendment III
 // originally expired protections at the start of the offseason and the earlier
 // version of this script encoded that superseded rule.
@@ -39,7 +39,7 @@ const PROTECTED_SLOTS = {
 
 // Lift every protected designation held by a league in the current season year.
 //
-// Scope is the whole season year rather than one week. The `ext_date` trigger
+// Scope is the whole season year rather than one week. The `extension_deadline_at` trigger
 // falls in the offseason, where generate-rosters now holds the forward slice
 // until Week 1 is days away, so week 0 is normally the only populated slice --
 // but a run inside that lead window sees week 1 too, and a week-0-only form
@@ -99,7 +99,7 @@ const reset_league = async ({ lid, dry_run = false }) => {
 }
 
 // Announce the expiry to the league's Discord channel, at most once per league
-// per ext_date.
+// per extension_deadline_at.
 //
 // The marker is CLAIMED before the send, inverting the order used by
 // process-extensions.mjs and announce-free-agency-period-start.mjs. Those check
@@ -117,7 +117,7 @@ const reset_league = async ({ lid, dry_run = false }) => {
 // dropping the announcement silently. Nothing retries a claimed send.
 const announce_protections_expired = async ({
   lid,
-  ext_date,
+  extension_deadline_at,
   expired_count,
   dry_run = false
 }) => {
@@ -128,11 +128,11 @@ const announce_protections_expired = async ({
       lid,
       season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_PROTECTIONS_EXPIRED,
-      event_timestamp: ext_date
+      event_timestamp: extension_deadline_at
     })
     log(
       already_announced
-        ? `DRY RUN: league ${lid}: already announced for ext_date ${ext_date}`
+        ? `DRY RUN: league ${lid}: already announced for extension_deadline_at ${extension_deadline_at}`
         : `DRY RUN: league ${lid}: would announce: ${message}`
     )
     return
@@ -142,14 +142,14 @@ const announce_protections_expired = async ({
     lid,
     season_year: current_season.year,
     notification_type: NOTIFICATION_TYPE_PROTECTIONS_EXPIRED,
-    event_timestamp: ext_date,
+    event_timestamp: extension_deadline_at,
     message,
-    metadata: { ext_date, expired_count }
+    metadata: { extension_deadline_at, expired_count }
   })
 
   if (!claimed) {
     log(
-      `league ${lid}: protections-expired notification already sent for ext_date ${ext_date}`
+      `league ${lid}: protections-expired notification already sent for extension_deadline_at ${extension_deadline_at}`
     )
     return
   }
@@ -190,7 +190,7 @@ const reset_protected_designations_for_due_leagues = async ({
 
   const now = Math.round(Date.now() / 1000)
 
-  // A league with no configured ext_date is inside the extension window
+  // A league with no configured extension_deadline_at is inside the extension window
   // indefinitely, matching is-before-extension-deadline.mjs, so it is never due.
   const eligible = await db('seasons')
     .join('leagues', 'leagues.uid', 'seasons.lid')
@@ -198,29 +198,29 @@ const reset_protected_designations_for_due_leagues = async ({
       'seasons.season_year': current_season.year,
       'leagues.is_hosted': true
     })
-    .whereNotNull('seasons.ext_date')
-    .select('seasons.lid', 'seasons.ext_date')
+    .whereNotNull('seasons.extension_deadline_at')
+    .select('seasons.lid', 'seasons.extension_deadline_at')
 
   const due_leagues = []
   const announce_failures = []
 
-  // seasons.ext_date is timestamptz; `now` and league_notifications'
+  // seasons.extension_deadline_at is timestamptz; `now` and league_notifications'
   // event_timestamp contract downstream are both epoch seconds.
-  for (const { lid, ext_date: ext_date_at } of eligible) {
-    const ext_date = timestamptz_to_epoch(ext_date_at)
-    if (now < ext_date) {
+  for (const { lid, extension_deadline_at: ext_date_at } of eligible) {
+    const extension_deadline_at = timestamptz_to_epoch(ext_date_at)
+    if (now < extension_deadline_at) {
       log(
-        `league ${lid}: ext_date ${ext_date} not yet reached (now=${now}); skipping`
+        `league ${lid}: extension_deadline_at ${extension_deadline_at} not yet reached (now=${now}); skipping`
       )
       continue
     }
 
-    due_leagues.push({ lid, ext_date })
+    due_leagues.push({ lid, extension_deadline_at })
 
     const expired_pids = await get_protected_pids({ lid })
     const updated = await reset_league({ lid, dry_run })
     log(
-      `league ${lid}: extension deadline passed (ext_date=${ext_date}), ${updated} rows reset across ${expired_pids.length} players`
+      `league ${lid}: extension deadline passed (extension_deadline_at=${extension_deadline_at}), ${updated} rows reset across ${expired_pids.length} players`
     )
 
     // Nothing expired means nothing to announce. Every league reaches its
@@ -236,13 +236,13 @@ const reset_protected_designations_for_due_leagues = async ({
     try {
       await announce_protections_expired({
         lid,
-        ext_date,
+        extension_deadline_at,
         expired_count: expired_pids.length,
         dry_run
       })
     } catch (err) {
       announce_failures.push(
-        `league ${lid}: protections expired (ext_date=${ext_date}) but the announcement failed: ${err.message}`
+        `league ${lid}: protections expired (extension_deadline_at=${extension_deadline_at}) but the announcement failed: ${err.message}`
       )
     }
   }
@@ -260,7 +260,7 @@ const reset_protected_designations_for_due_leagues = async ({
   // season year. Distinct from the exit code -- a filter that silently matched
   // nothing updates 0 rows and exits 0 exactly as a correct no-op run does.
   const shortfalls = [...announce_failures]
-  for (const { lid, ext_date } of due_leagues) {
+  for (const { lid, extension_deadline_at } of due_leagues) {
     const row = await db('rosters_players')
       .where({ lid, season_year: current_season.year })
       .whereIn('slot', Object.keys(PROTECTED_SLOTS).map(Number))
@@ -269,7 +269,7 @@ const reset_protected_designations_for_due_leagues = async ({
     const remaining = Number(row?.count || 0)
     if (remaining > 0) {
       shortfalls.push(
-        `league ${lid}: ${remaining} protected practice squad rows remain after reset (ext_date=${ext_date})`
+        `league ${lid}: ${remaining} protected practice squad rows remain after reset (extension_deadline_at=${extension_deadline_at})`
       )
     }
   }

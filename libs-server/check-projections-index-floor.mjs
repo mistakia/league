@@ -4,7 +4,7 @@ import { is_offseason } from '#constants'
 import throw_if_shortfall from './throw-if-shortfall.mjs'
 
 // Post-run oracle for projection imports: counts rows in projections_index
-// for the (year, week, sourceid|sourceids, seas_type) tuple and surfaces a
+// for the (year, week, source_id|sourceids, seas_type) tuple and surfaces a
 // shortfall through throw_if_shortfall when below the floor. Default floor
 // is 50 for season totals (week=0) and 30 for weekly.
 //
@@ -16,7 +16,7 @@ import throw_if_shortfall from './throw-if-shortfall.mjs'
 export default async function check_projections_index_floor({
   year,
   week,
-  sourceid,
+  source_id,
   sourceids,
   seas_type,
   floor
@@ -30,17 +30,17 @@ export default async function check_projections_index_floor({
     week,
     season_type: seas_type
   })
-  if (sourceids) query.whereIn('sourceid', sourceids)
-  else query.where({ sourceid })
+  if (sourceids) query.whereIn('source_id', sourceids)
+  else query.where({ source_id })
 
   const [row] = await query.count('* as cnt')
   const count = Number(row?.cnt || 0)
   const effective_floor = floor ?? (week === 0 ? 50 : 30)
-  const source_label = sourceids ? sourceids.join(',') : sourceid
+  const source_label = sourceids ? sourceids.join(',') : source_id
 
   throw_if_shortfall(
     count < effective_floor
-      ? `projections_index row-count shortfall for sourceid=${source_label} (season_year=${year}, week=${week}, season_type=${seas_type}): ${count} rows (floor=${effective_floor})`
+      ? `projections_index row-count shortfall for source_id=${source_label} (season_year=${year}, week=${week}, season_type=${seas_type}): ${count} rows (floor=${effective_floor})`
       : null
   )
 }

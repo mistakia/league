@@ -60,7 +60,7 @@ export const player_extended_salary_table_alias = ({ params = {} } = {}) => {
 
 // Whether the season's extensions have been PROCESSED, which is a database
 // question and not a clock question. `scripts/process-extensions.mjs` runs on a
-// */5 cron, so there is a window in which now is past `seasons.ext_date` and no
+// */5 cron, so there is a window in which now is past `seasons.extension_deadline_at` and no
 // extension transaction has been written yet. Keying the branch on the clock
 // would understate every contract by its ladder step for the length of that
 // window. See `libs-server/tag-board/build-tag-board.mjs` `post_deadline_salary`
@@ -108,7 +108,7 @@ export const player_extended_salary_join = async ({
   // `extended_salary = player_league_salary` held for a tagged player and for no
   // regular one, so differencing two public columns recovered the hidden tag
   // exactly. The window is real and annual: tags are applied through
-  // `POST /teams/:teamId/tag` up until `ext_date`, and this branch is live for
+  // `POST /teams/:teamId/tag` up until `extension_deadline_at`, and this branch is live for
   // precisely that period.
   const salary_expression = extensions_processed
     ? 'COALESCE(s.salary_paid, 0) AS extended_salary'

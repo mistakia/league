@@ -151,8 +151,8 @@ export default function SelectedPlayerTransactions({
                     <TableCell variant='head'>Draft Pick</TableCell>
                     <TableCell colSpan={2}>
                       #{draft_transaction.pick}
-                      {draft_transaction.pick_str &&
-                        ` (${draft_transaction.pick_str})`}
+                      {draft_transaction.pick_string &&
+                        ` (${draft_transaction.pick_string})`}
                     </TableCell>
                   </TableRow>
                 )}

@@ -139,16 +139,16 @@ router.put('/:sourceId', async (req, res) => {
     if (weight === 1) {
       await db('users_sources')
         .del()
-        .where({ userid: userId, sourceid: sourceId })
+        .where({ user_id: userId, source_id: sourceId })
     } else {
       const rows = await db('users_sources').where({
-        userid: userId,
-        sourceid: sourceId
+        user_id: userId,
+        source_id: sourceId
       })
       if (!rows.length) {
         await db('users_sources').insert({
-          userid: userId,
-          sourceid: sourceId,
+          user_id: userId,
+          source_id: sourceId,
           weight
         })
       } else {
@@ -156,7 +156,7 @@ router.put('/:sourceId', async (req, res) => {
           .update({
             weight
           })
-          .where({ userid: userId, sourceid: sourceId })
+          .where({ user_id: userId, source_id: sourceId })
       }
     }
 

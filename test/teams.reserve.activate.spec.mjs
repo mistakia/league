@@ -94,7 +94,7 @@ describe('API /teams - reserve', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player1.pid)
       res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player1.pid)

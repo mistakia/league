@@ -209,7 +209,7 @@ export default class Auction {
     } catch (error) {
       this.logger('error in sold()', error)
       this._start_bid_timer()
-      this.reply(bid.userid, 'processing error')
+      this.reply(bid.user_id, 'processing error')
       return false
     } finally {
       this._locked = false
@@ -244,7 +244,7 @@ export default class Auction {
     } catch (error) {
       this.logger('error in bid()', error)
       this._start_bid_timer()
-      this.reply(message.userid, 'bid error')
+      this.reply(message.user_id, 'bid error')
       return false
     } finally {
       this._locked = false
@@ -255,11 +255,15 @@ export default class Auction {
     if (await this._refresh_league_pause()) return
 
     const nominating_team_id = this.nominating_team_id
-    let { userid, value = 0 } = message
+    // The socket-authenticated `user_id` above and the one the CLIENT sends in
+    // the message are different identities, and this file has always printed
+    // both. Binding the message field as `user_id` would shadow the
+    // authenticated parameter, so it is aliased.
+    let { user_id: message_user_id, value = 0 } = message
     const { pid } = message
 
     this.logger(
-      `received nomination for ${pid} for $${value} (team_id ${tid}, socket user_id ${user_id}, account userid ${userid})`
+      `received nomination for ${pid} for $${value} (team_id ${tid}, socket user_id ${user_id}, account user_id ${message_user_id})`
     )
 
     // Validate nomination
@@ -278,7 +282,7 @@ export default class Auction {
     if (!this._slow_mode) {
       this._clear_nomination_timer()
 
-      if (user_id !== this._league.commishid) {
+      if (user_id !== this._league.commissioner_user_id) {
         value = 0
       }
     }
@@ -541,12 +545,12 @@ export default class Auction {
   // ============================================================================
 
   _validate_bid(message, current) {
-    const { userid, tid, pid, value } = message
+    const { user_id, tid, pid, value } = message
 
     // Check team capacity
     const team = this._teams.find((t) => t.uid === tid)
     if (team.cap - value < 0) {
-      this.reply(userid, 'exceeds salary limit')
+      this.reply(user_id, 'exceeds salary limit')
       this._start_bid_timer()
       this.logger(
         `team ${tid} does not have enough available cap ${team.cap} for a bid of ${value}`
@@ -555,7 +559,7 @@ export default class Auction {
     }
 
     if (!team.availableSpace) {
-      this.reply(userid, 'exceeds roster limits')
+      this.reply(user_id, 'exceeds roster limits')
       this._start_bid_timer()
       this.logger(
         `team ${tid} does not have enough available space ${team.availableSpace}`
@@ -568,7 +572,7 @@ export default class Auction {
       this.logger(
         `received bid for player ${pid} is not the current player of ${current.pid}`
       )
-      this.reply(userid, 'invalid bid')
+      this.reply(user_id, 'invalid bid')
       this._start_bid_timer()
       return false
     }
@@ -577,7 +581,7 @@ export default class Auction {
       this.logger(
         `received bid of ${value} is not greater than current value of ${current.player_salary}`
       )
-      this.reply(userid, 'invalid bid')
+      this.reply(user_id, 'invalid bid')
       this._start_bid_timer()
       return false
     }
@@ -586,7 +590,12 @@ export default class Auction {
   }
 
   async _validate_nomination(message, nominating_team_id, tid, user_id) {
-    const { pid, userid } = message
+    // `user_id` is the SOCKET-AUTHENTICATED identity and is what the two
+    // commissioner checks below must compare against; the message field is only
+    // the address the client asked replies to go to. Binding the message field
+    // as `user_id` would shadow the parameter and let any client claim the
+    // commissioner's id to nominate out of turn, so it is aliased.
+    const { pid, user_id: message_user_id } = message
 
     if (!pid) {
       this.logger('no player to nominate')
@@ -594,19 +603,22 @@ export default class Auction {
     }
 
     // In slow mode, allow commish to nominate at any time
-    if (this._slow_mode && user_id === this._league.commishid) {
+    if (this._slow_mode && user_id === this._league.commissioner_user_id) {
       return true
     }
 
     // Allow commish to nominate when timer has expired (normal mode)
-    if (this._nomination_timer_expired && user_id === this._league.commishid) {
+    if (
+      this._nomination_timer_expired &&
+      user_id === this._league.commissioner_user_id
+    ) {
       return true
     }
 
     // Check if it's the team's turn to nominate
     if (nominating_team_id !== tid) {
       this.logger('received nomination from a team out of turn')
-      this.reply(userid, 'invalid nomination')
+      this.reply(message_user_id, 'invalid nomination')
       return false
     }
 
@@ -614,7 +626,7 @@ export default class Auction {
     const players = await db('player').where('pid', pid)
     const player_info = players[0]
     if (!player_info) {
-      this.reply(userid, 'invalid nomination')
+      this.reply(message_user_id, 'invalid nomination')
       this.logger(`can not nominate invalid player ${pid}`)
       return false
     }
@@ -625,7 +637,7 @@ export default class Auction {
       .where('season_year', current_season.year)
       .where('pid', pid)
     if (roster_rows.length) {
-      this.reply(userid, 'invalid nomination')
+      this.reply(message_user_id, 'invalid nomination')
       this.logger(`can not nominate already rostered player ${pid}`)
       return false
     }
@@ -640,12 +652,12 @@ export default class Auction {
       this.logger(
         `no open slots available for ${pid} on team_id ${nominating_team_id}`
       )
-      this.reply(userid, 'exceeds roster limits')
+      this.reply(message_user_id, 'exceeds roster limits')
       return false
     }
 
     if (message.value > roster_obj.availableCap) {
-      this.reply(userid, 'exceeds salary limit')
+      this.reply(message_user_id, 'exceeds salary limit')
       return false
     }
 
@@ -700,7 +712,7 @@ export default class Auction {
     const player_info = players[0]
 
     if (!player_info) {
-      this.reply(this._transactions[0].userid, 'invalid player')
+      this.reply(this._transactions[0].user_id, 'invalid player')
       this.logger(`can not process invalid player ${pid}`)
       return null
     }
@@ -716,14 +728,14 @@ export default class Auction {
       this.logger(
         `no open slots available for ${player_info.pid} on team_id ${this._transactions[0].tid}`
       )
-      this.reply(this._transactions[0].userid, 'exceeds roster limits')
+      this.reply(this._transactions[0].user_id, 'exceeds roster limits')
       return false
     }
 
     // Check cap space
     if (roster_obj.availableCap - value < 0) {
       this.logger('no available cap space')
-      this.reply(this._transactions[0].userid, 'exceeds salary limit')
+      this.reply(this._transactions[0].user_id, 'exceeds salary limit')
       return false
     }
 
@@ -735,10 +747,10 @@ export default class Auction {
   // ============================================================================
 
   async _create_bid_record(message) {
-    const { userid, tid, pid, value } = message
+    const { user_id, tid, pid, value } = message
 
     const bid = {
-      userid,
+      user_id,
       tid,
       pid,
       lid: this._lid,
@@ -764,10 +776,10 @@ export default class Auction {
   }
 
   async _create_nomination_bid(message, nominating_team_id, value) {
-    const { userid, pid } = message
+    const { user_id, pid } = message
 
     const bid = {
-      userid,
+      user_id,
       tid: nominating_team_id,
       pid,
       type: transaction_types.AUCTION_BID,
@@ -810,7 +822,7 @@ export default class Auction {
       this.logger(
         `unable to add player ${player_info.pid} to roster of team_id ${tid}`
       )
-      this.reply(this._transactions[0].userid, err.message)
+      this.reply(this._transactions[0].user_id, err.message)
       throw err
     }
   }
@@ -833,7 +845,7 @@ export default class Auction {
 
   async _record_auction_transaction(bid) {
     const transaction = {
-      userid: bid.userid,
+      user_id: bid.user_id,
       tid: bid.tid,
       pid: bid.pid,
       lid: this._lid,
@@ -1000,15 +1012,15 @@ export default class Auction {
 
       switch (message.type) {
         case 'AUCTION_PAUSE':
-          if (user_id !== this._league.commishid) return
+          if (user_id !== this._league.commissioner_user_id) return
           return this.pause()
 
         case 'AUCTION_RESUME':
-          if (user_id !== this._league.commishid) return
+          if (user_id !== this._league.commissioner_user_id) return
           return this.start()
 
         case 'AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT':
-          if (user_id !== this._league.commishid) return
+          if (user_id !== this._league.commissioner_user_id) return
           this._pause_on_team_disconnect = !this._pause_on_team_disconnect
           return this.broadcast({
             type: 'AUCTION_CONFIG',

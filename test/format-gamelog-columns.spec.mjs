@@ -72,7 +72,7 @@ describe('attach_format_gamelog_columns', () => {
 
   it('selects the fantasy point columns from both format tables', () => {
     expect(sql).to.include('"scoring_format_player_gamelogs"."points"')
-    expect(sql).to.include('"scoring_format_player_gamelogs"."pos_rnk"')
+    expect(sql).to.include('"scoring_format_player_gamelogs"."position_rank"')
     expect(sql).to.include(
       '"league_format_player_gamelogs"."points_added_earned"'
     )

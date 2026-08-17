@@ -162,7 +162,7 @@ const AuthPage = ({
         </h1>
         <p className='auth__deck'>
           {is_login
-            ? 'For managers who already have an account. If you are not in the league yet, the waiting list is the way in.'
+            ? 'If you do not have an account, an invitation is needed, join the discord server.'
             : 'Registration needs an invite code. Contributors and testers can request one on Discord.'}
         </p>
 

@@ -12,7 +12,7 @@ export default async function (pid) {
   }
 
   const query = db('player')
-    .select('player.*', 'nfl_games.date', 'nfl_games.time_est')
+    .select('player.*', 'nfl_games.date', 'nfl_games.time_eastern')
     .where({ pid })
   apply_nfl_games_current_week_join({ db, query })
   const player_rows = await query.whereNotNull('nfl_games.esbid').limit(1)
@@ -24,7 +24,7 @@ export default async function (pid) {
   }
 
   const gameStart = dayjs.tz(
-    `${player_row.date} ${player_row.time_est}`,
+    `${player_row.date} ${player_row.time_eastern}`,
     'YYYY/MM/DD HH:mm:SS',
     'America/New_York'
   )

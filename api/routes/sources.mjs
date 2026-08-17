@@ -57,7 +57,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /sources/{sourceid}:
+ * /sources/{source_id}:
  *   put:
  *     tags:
  *       - Projections
@@ -80,7 +80,7 @@ router.get('/?', async (req, res) => {
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: sourceid
+ *       - name: source_id
  *         in: path
  *         required: true
  *         description: The unique identifier of the projection source to update
@@ -137,24 +137,24 @@ router.get('/?', async (req, res) => {
  *                   format: float
  *                   description: The weight that was applied to the source
  *                   example: 1.5
- *                 sourceid:
+ *                 source_id:
  *                   type: string
  *                   description: The source ID that was updated
  *                   example: "16"
  *               required:
  *                 - weight
- *                 - sourceid
+ *                 - source_id
  *             examples:
  *               weight_updated:
  *                 summary: Weight updated
  *                 value:
  *                   weight: 1.5
- *                   sourceid: "16"
+ *                   source_id: "16"
  *               weight_reset:
  *                 summary: Weight reset to default
  *                 value:
  *                   weight: 1
- *                   sourceid: "16"
+ *                   source_id: "16"
  *       400:
  *         description: Bad request - missing or invalid parameters
  *         content:
@@ -169,7 +169,7 @@ router.get('/?', async (req, res) => {
  *               missing_sourceid:
  *                 summary: Missing source ID parameter
  *                 value:
- *                   error: "missing sourceid param"
+ *                   error: "missing source_id param"
  *       401:
  *         description: Authentication required
  *         content:
@@ -181,11 +181,11 @@ router.get('/?', async (req, res) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.put('/:sourceid', async (req, res) => {
+router.put('/:source_id', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const weight = parseFloat(req.body.weight)
-    const { sourceid } = req.params
+    const { source_id } = req.params
 
     if (!req.auth || !req.auth.userId) {
       return res.status(401).send({ error: 'invalid userId' })
@@ -195,33 +195,33 @@ router.put('/:sourceid', async (req, res) => {
       return res.status(400).send({ error: 'missing weight param' })
     }
 
-    if (!sourceid) {
-      return res.status(400).send({ error: 'missing sourceid param' })
+    if (!source_id) {
+      return res.status(400).send({ error: 'missing source_id param' })
     }
 
     if (weight === 1) {
       await db('users_sources')
         .del()
-        .where({ userid: req.auth.userId, sourceid })
+        .where({ user_id: req.auth.userId, source_id })
     } else {
       const rows = await db('users_sources').where({
-        userid: req.auth.userId,
-        sourceid
+        user_id: req.auth.userId,
+        source_id
       })
       if (rows.length) {
         await db('users_sources')
           .update({ weight })
-          .where({ userid: req.auth.userId, sourceid })
+          .where({ user_id: req.auth.userId, source_id })
       } else {
         await db('users_sources').insert({
-          userid: req.auth.userId,
-          sourceid,
+          user_id: req.auth.userId,
+          source_id,
           weight
         })
       }
     }
 
-    res.send({ weight, sourceid })
+    res.send({ weight, source_id })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

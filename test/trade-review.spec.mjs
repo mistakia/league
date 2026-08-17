@@ -239,7 +239,7 @@ const seed_trade = async () => {
     propose_tid: PROPOSE_TID,
     accept_tid: ACCEPT_TID,
     lid: LID,
-    userid: 1,
+    user_id: 1,
     season_year: current_season.year,
     offered: new Date(traded_at.getTime() - 3600 * 1000),
     accepted: traded_at
@@ -360,7 +360,7 @@ const seed_zero_priced_trade = async ({ exclude_pids }) => {
     propose_tid: PROPOSE_TID,
     accept_tid: ACCEPT_TID,
     lid: LID,
-    userid: 1,
+    user_id: 1,
     season_year: current_season.year,
     offered: new Date(traded_at.getTime() - 3600 * 1000),
     accepted: traded_at
@@ -459,7 +459,7 @@ const build_lineage = () => {
       propose_tid,
       accept_tid,
       lid: LID,
-      userid: 1,
+      user_id: 1,
       season_year: current_season.year,
       offered: at(occurred_on - 1),
       accepted: at(occurred_on)
@@ -707,7 +707,7 @@ describe('API /leagues/:leagueId/trade-review', function () {
   })
 
   it('refuses a user who owns no team in the league', async () => {
-    await knex('users_teams').where({ userid: 3 }).del()
+    await knex('users_teams').where({ user_id: 3 }).del()
 
     const res = await chai_request
       .execute(server)

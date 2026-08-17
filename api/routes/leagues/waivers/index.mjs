@@ -166,11 +166,11 @@ router.get('/?', async (req, res) => {
       .orderBy('processed', 'desc')
     const waiverIds = waivers.map((p) => p.uid)
     const waiverReleases = await db('waiver_releases').whereIn(
-      'waiverid',
+      'waiver_id',
       waiverIds
     )
     for (const waiver of waivers) {
-      waiver.release = waiverReleases.filter((p) => p.waiverid === waiver.uid)
+      waiver.release = waiverReleases.filter((p) => p.waiver_id === waiver.uid)
     }
 
     res.send(waivers)
@@ -251,7 +251,7 @@ router.get('/?', async (req, res) => {
  *                 value:
  *                   uid: 12345
  *                   tid: 5
- *                   userid: 1
+ *                   user_id: 1
  *                   lid: 2
  *                   pid: 'ALVI-KAMA-015215'
  *                   priority_order: 9999
@@ -498,7 +498,7 @@ router.post('/?', async (req, res) => {
         // compare releases
         for (const claim of claims) {
           const release_rows = await db('waiver_releases').where(
-            'waiverid',
+            'waiver_id',
             claim.uid
           )
           const existing_release_pids = release_rows.map((r) => r.pid)
@@ -610,7 +610,7 @@ router.post('/?', async (req, res) => {
 
     const data = {
       tid,
-      userid: req.auth.userId,
+      user_id: req.auth.userId,
       lid: leagueId,
       pid,
       priority_order: 9999,
@@ -625,7 +625,7 @@ router.post('/?', async (req, res) => {
 
     if (release.length) {
       const releaseInserts = release.map((pid) => ({
-        waiverid: waiverId,
+        waiver_id: waiverId,
         pid
       }))
       await db('waiver_releases').insert(releaseInserts)
@@ -855,7 +855,7 @@ router.put('/:waiverId', async (req, res) => {
     const waiver = waivers[0]
 
     // if bid - make sure it is below available faab
-    if (bid > team.faab_balance) {
+    if (bid > team.free_agent_acquisition_budget_balance) {
       return res.status(400).send({ error: 'bid exceeds available faab' })
     }
 
@@ -893,17 +893,17 @@ router.put('/:waiverId', async (req, res) => {
     await db('waivers').update({ bid_amount: bid }).where({ uid: waiverId })
     if (release.length) {
       const releaseInserts = release.map((pid) => ({
-        waiverid: waiverId,
+        waiver_id: waiverId,
         pid
       }))
       await db('waiver_releases')
         .insert(releaseInserts)
-        .onConflict(['waiverid', 'pid'])
+        .onConflict(['waiver_id', 'pid'])
         .merge()
     }
     await db('waiver_releases')
       .del()
-      .where('waiverid', waiverId)
+      .where('waiver_id', waiverId)
       .whereNotIn('pid', release)
 
     res.send({ bid, release, uid: waiverId })

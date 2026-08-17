@@ -112,7 +112,7 @@ const run = async ({
       season_year: year,
       week,
       season_type: seas_type,
-      sourceid: external_data_sources['4FOR4'],
+      source_id: external_data_sources['4FOR4'],
       ...proj
     })
   }
@@ -134,7 +134,7 @@ const run = async ({
       .where({
         season_year: year,
         week,
-        sourceid: external_data_sources['4FOR4'],
+        source_id: external_data_sources['4FOR4'],
         season_type: seas_type
       })
       .whereNotIn(
@@ -149,9 +149,9 @@ const run = async ({
     await db('projections_index')
       .insert(inserts)
       .onConflict([
-        'sourceid',
+        'source_id',
         'pid',
-        'userid',
+        'user_id',
         'week',
         'season_year',
         'season_type'
@@ -166,7 +166,7 @@ const run = async ({
     skipped: false,
     year,
     week,
-    sourceid: external_data_sources['4FOR4'],
+    source_id: external_data_sources['4FOR4'],
     seas_type
   }
 }

@@ -64,7 +64,7 @@ describe('LINEAGE - super priority resign', function () {
       season_year: current_season.year,
       occurred_at: epoch_to_timestamptz(origin_timestamp + index),
       week: current_season.week,
-      userid: 1
+      user_id: 1
     }))
 
     await knex('transactions').insert([
@@ -78,7 +78,7 @@ describe('LINEAGE - super priority resign', function () {
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(poach_timestamp),
         week: current_season.week,
-        userid: 2
+        user_id: 2
       },
       {
         pid: player.pid,
@@ -89,7 +89,7 @@ describe('LINEAGE - super priority resign', function () {
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(release_timestamp),
         week: current_season.week,
-        userid: 2
+        user_id: 2
       },
       {
         pid: player.pid,
@@ -102,7 +102,7 @@ describe('LINEAGE - super priority resign', function () {
         season_year: current_season.year,
         occurred_at: epoch_to_timestamptz(exercise_timestamp),
         week: current_season.week,
-        userid: 1
+        user_id: 1
       }
     ])
   }

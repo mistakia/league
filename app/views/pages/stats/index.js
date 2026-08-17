@@ -66,7 +66,7 @@ const map_state_to_props = createSelector(
       'championships',
       'championship_rounds',
       'regular_season_leader',
-      'num_byes',
+      'number_byes',
       'best_season_win_percentage',
       'best_season_all_play_percentage',
       'wildcards',

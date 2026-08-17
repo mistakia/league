@@ -73,7 +73,7 @@ describe('SCRIPTS import-keeptradecut liquidity', function () {
           is_superflex: false,
           observed_at: OBSERVED_AT,
           raw_liquidity: 0,
-          std_liquidity: 31,
+          standardized_liquidity: 31,
           trade_count: 38
         },
         {
@@ -81,7 +81,7 @@ describe('SCRIPTS import-keeptradecut liquidity', function () {
           is_superflex: true,
           observed_at: OBSERVED_AT,
           raw_liquidity: 4.5,
-          std_liquidity: 29,
+          standardized_liquidity: 29,
           trade_count: 41
         }
       ])

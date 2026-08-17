@@ -37,7 +37,7 @@ const get_restricted_free_agency_nomination_info = ({
     !league.restricted_free_agency_first_window_at ||
     !Array.isArray(teams) ||
     !teams.length ||
-    league.num_teams !== teams.length
+    league.number_teams !== teams.length
   ) {
     return null
   }
@@ -83,7 +83,7 @@ const get_restricted_free_agency_nomination_info = ({
   for (let window_index = 0; window_index < window_count; window_index++) {
     const team_index = get_restricted_free_agency_nominating_team_index({
       window_index,
-      num_teams: sorted_teams.length
+      number_teams: sorted_teams.length
     })
     const announce_at = get_restricted_free_agency_window_start({
       league,

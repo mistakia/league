@@ -46,14 +46,14 @@ const generate_scoring_format_title = (scoring_format) => {
 
 const generate_league_formats = async () => {
   const options = {
-    num_teams: [10, 12],
+    number_teams: [10, 12],
     starter_slots_quarterback: [1],
     starter_slots_running_back: [2],
     starter_slots_wide_receiver: [2],
     starter_slots_tight_end: [1],
     starter_slots_running_back_wide_receiver_flex: [0],
-    srbwrte: [1, 2],
-    sqbrbwrte: [0, 1],
+    starter_slots_running_back_wide_receiver_tight_end_flex: [1, 2],
+    starter_slots_superflex: [0, 1],
     starter_slots_wide_receiver_tight_end_flex: [0],
     starter_slots_defense_special_teams: [1],
     starter_slots_kicker: [0, 1],
@@ -88,7 +88,7 @@ const generate_league_formats = async () => {
     rushing_first_downs: [0],
     receiving_first_downs: [0],
     is_excluding_quarterback_kneels: [false],
-    cap: [200],
+    salary_cap: [200],
     min_bid: [0]
   }
 
@@ -106,10 +106,10 @@ const generate_league_formats = async () => {
               5
             ) &&
             !(
-              new_combination.srbwrte +
+              new_combination.starter_slots_running_back_wide_receiver_tight_end_flex +
                 new_combination.starter_slots_running_back_wide_receiver_flex -
                 Math.max(
-                  new_combination.srbwrte,
+                  new_combination.starter_slots_running_back_wide_receiver_tight_end_flex,
                   new_combination.starter_slots_running_back_wide_receiver_flex
                 ) >
               0
@@ -153,15 +153,16 @@ const generate_league_formats = async () => {
   })
 
   const extract_league = (c) => ({
-    num_teams: c.num_teams,
+    number_teams: c.number_teams,
     starter_slots_quarterback: c.starter_slots_quarterback,
     starter_slots_running_back: c.starter_slots_running_back,
     starter_slots_wide_receiver: c.starter_slots_wide_receiver,
     starter_slots_tight_end: c.starter_slots_tight_end,
     starter_slots_running_back_wide_receiver_flex:
       c.starter_slots_running_back_wide_receiver_flex,
-    srbwrte: c.srbwrte,
-    sqbrbwrte: c.sqbrbwrte,
+    starter_slots_running_back_wide_receiver_tight_end_flex:
+      c.starter_slots_running_back_wide_receiver_tight_end_flex,
+    starter_slots_superflex: c.starter_slots_superflex,
     starter_slots_wide_receiver_tight_end_flex:
       c.starter_slots_wide_receiver_tight_end_flex,
     starter_slots_defense_special_teams: c.starter_slots_defense_special_teams,
@@ -169,7 +170,7 @@ const generate_league_formats = async () => {
     bench_slot_count: c.bench_slot_count,
     practice_squad_slot_count: c.practice_squad_slot_count,
     reserve_short_term_limit: c.reserve_short_term_limit,
-    cap: c.cap,
+    salary_cap: c.salary_cap,
     min_bid: c.min_bid
   })
 

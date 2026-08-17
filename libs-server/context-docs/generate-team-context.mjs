@@ -116,8 +116,8 @@ export default async function generate_team_context({
       year,
       salary_basis: salary_basis.frontmatter_value,
       salary_year: year,
-      extension_deadline: league.ext_date
-        ? new Date(league.ext_date).toISOString()
+      extension_deadline: league.extension_deadline_at
+        ? new Date(league.extension_deadline_at).toISOString()
         : null
     },
     related: {
@@ -155,9 +155,9 @@ export default async function generate_team_context({
           salary_basis.before_deadline
             ? `Cap space (post-extension ${year})`
             : `Cap space (${year})`,
-          `$${roster.availableCap} of $${league.cap}`
+          `$${roster.availableCap} of $${league.salary_cap}`
         ],
-        ['FAAB remaining', `$${team.faab_balance}`]
+        ['FAAB remaining', `$${team.free_agent_acquisition_budget_balance}`]
       ]
     )
   ])
@@ -183,7 +183,7 @@ export default async function generate_team_context({
           ['Round', 'Pick'],
           draft_picks.map((pick) => [
             pick.round,
-            pick.pick_str || pick.pick || '—'
+            pick.pick_string || pick.pick || '—'
           ])
         )
       : '_No unused draft picks._'

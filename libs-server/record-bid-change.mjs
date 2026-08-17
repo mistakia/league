@@ -97,10 +97,10 @@ export default async function record_bid_change({
     changed_by_user_id,
     changed_at,
     bid_amount: bid.bid_amount ?? null,
-    // The bid's own `userid` is the LAST writer of the row, which is not the
+    // The bid's own `user_id` is the LAST writer of the row, which is not the
     // same fact as the actor of this change -- a cancellation does not touch it.
     // Both are recorded so neither has to be inferred from the other.
-    bid_user_id: bid.userid ?? null,
+    bid_user_id: bid.user_id ?? null,
     // Bound directly: both bid tables' `cancelled`/`processed` are timestamptz
     // as of the 2026-08-08 lifecycle retype, so the `to_timestamp()` wrapper
     // that used to convert epoch seconds here is now a DOUBLE conversion --

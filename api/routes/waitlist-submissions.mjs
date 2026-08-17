@@ -70,7 +70,7 @@ router.get('/', async (req, res) => {
       .where({
         'teams.lid': league_id,
         'teams.season_year': current_season.year,
-        'users_teams.userid': req.auth.userId,
+        'users_teams.user_id': req.auth.userId,
         'users_teams.season_year': current_season.year
       })
       .limit(1)

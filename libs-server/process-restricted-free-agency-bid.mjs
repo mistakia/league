@@ -26,7 +26,7 @@ export default async function ({
   bid_amount,
   tid,
   lid,
-  userid,
+  user_id,
   original_team_id,
   uid,
   processed
@@ -130,12 +130,12 @@ export default async function ({
 
   // release conditional & cutlist players
   for (const release_pid of release_pids) {
-    await processRelease({ lid, tid, release_pid, userid })
+    await processRelease({ lid, tid, release_pid, user_id })
   }
 
   // create transaction
   const addTransaction = {
-    userid,
+    user_id,
     tid,
     lid,
     pid,

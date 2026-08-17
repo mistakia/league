@@ -21,7 +21,7 @@ import {
 } from '@constants'
 
 const careerlog_single_fields = {
-  num_seasons: 'Seasons',
+  number_seasons: 'Seasons',
   division_wins: 'Division Wins'
 }
 
@@ -63,7 +63,7 @@ const careerlog_group_fields = {
   },
   'Post Season': {
     post_seasons: { label: '#' },
-    num_byes: { label: 'Byes' }
+    number_byes: { label: 'Byes' }
   },
   Wildcards: {
     wildcards: { label: '#' },
@@ -473,7 +473,7 @@ export default function StatsPage({
 
   const careerLogRows = league_user_historical_ranks.map((user_careerlog) => (
     <CareerLogRow
-      key={`careerlog_${user_careerlog.userid}`}
+      key={`careerlog_${user_careerlog.user_id}`}
       user_careerlog={user_careerlog}
       percentiles={careerlog_percentiles}
     />

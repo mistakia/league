@@ -152,7 +152,7 @@ router.post('/?', async (req, res) => {
         release_pid,
         lid: leagueId,
         tid,
-        userid: req.auth.userId
+        user_id: req.auth.userId
       })
       for (const release_data of result) {
         broadcast(leagueId, {

@@ -54,7 +54,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -66,7 +66,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -137,7 +137,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player1.pid,
         priority_order: 9999,
@@ -149,7 +149,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player1.pid,
@@ -179,7 +179,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('waivers').insert({
         tid: 4,
-        userid: 4,
+        user_id: 4,
         lid: 1,
         pid: player2.pid,
         priority_order: 9999,
@@ -191,7 +191,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       await knex('poaches').insert({
-        userid: 4,
+        user_id: 4,
         tid: 4,
         lid: 1,
         pid: player2.pid,
@@ -273,7 +273,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -285,7 +285,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -351,7 +351,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const query1 = await knex('waivers')
         .insert({
           tid: 2,
-          userid: 2,
+          user_id: 2,
           lid: 1,
           pid: player.pid,
           priority_order: 9999,
@@ -364,13 +364,13 @@ describe('SCRIPTS /waivers - poach', function () {
         .returning('uid')
 
       await knex('waiver_releases').insert({
-        waiverid: query1[0].uid,
+        waiver_id: query1[0].uid,
         pid: releasePlayer.pid
       })
 
       const query2 = await knex('poaches')
         .insert({
-          userid: 2,
+          user_id: 2,
           tid: 2,
           lid: 1,
           pid: player.pid,
@@ -380,7 +380,7 @@ describe('SCRIPTS /waivers - poach', function () {
         .returning('uid')
 
       await knex('poach_releases').insert({
-        poachid: query2[0].uid,
+        poach_id: query2[0].uid,
         pid: releasePlayer.pid
       })
 
@@ -447,7 +447,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -459,7 +459,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       await knex('poaches').insert({
-        userid: 2,
+        user_id: 2,
         tid: 2,
         lid: 1,
         pid: player.pid,
@@ -472,7 +472,7 @@ describe('SCRIPTS /waivers - poach', function () {
         .where({ pid: player.pid })
 
       await knex('transactions').insert({
-        userid: 1,
+        user_id: 1,
         tid: 1,
         lid: 1,
         pid: player.pid,

@@ -53,7 +53,7 @@ const router = express.Router({ mergeParams: true })
  *                     type: integer
  *                     description: Team ID
  *                     example: 13
- *                   userid:
+ *                   user_id:
  *                     type: integer
  *                     description: User ID
  *                     example: 1
@@ -215,7 +215,7 @@ router.get('/?', async (req, res) => {
  *                   type: integer
  *                   description: Team ID
  *                   example: 13
- *                 userid:
+ *                 user_id:
  *                   type: integer
  *                   description: User ID
  *                   example: 1
@@ -578,7 +578,7 @@ router.post('/?', async (req, res) => {
     // insert into restrictedFreeAgencyBids
     const data = {
       tid,
-      userid: req.auth.userId,
+      user_id: req.auth.userId,
       lid: leagueId,
       pid,
       submitted: new Date(),
@@ -892,7 +892,7 @@ router.delete('/?', async (req, res) => {
  *                   type: integer
  *                   description: Updated bid amount
  *                   example: 30
- *                 userid:
+ *                 user_id:
  *                   type: integer
  *                   description: User ID
  *                   example: 1
@@ -1094,7 +1094,7 @@ router.put('/?', async (req, res) => {
     }
 
     // This is the write that made a bid's history unrecoverable: it overwrites
-    // `bid_amount` and `userid` over the only copy of them, and the conditional
+    // `bid_amount` and `user_id` over the only copy of them, and the conditional
     // releases are rewritten by delete-and-insert just below. One `updated` row
     // records the whole request, because the amount and the releases were one
     // decision by one manager at one instant.
@@ -1105,7 +1105,7 @@ router.put('/?', async (req, res) => {
     await db.transaction(async (trx) => {
       await trx('restricted_free_agency_bids')
         .update({
-          userid: req.auth.userId,
+          user_id: req.auth.userId,
           bid_amount: bid
         })
         .where('uid', restrictedFreeAgencyBid.uid)
@@ -1138,7 +1138,7 @@ router.put('/?', async (req, res) => {
     res.send({
       ...restrictedFreeAgencyBid,
       bid_amount: bid,
-      userid: req.auth.userId,
+      user_id: req.auth.userId,
       release
     })
   } catch (error) {

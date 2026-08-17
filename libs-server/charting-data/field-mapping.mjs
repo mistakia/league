@@ -235,9 +235,11 @@ export function map_charting_play_to_db_fields(source_play) {
     )
   }
 
-  // extraPointMade -> ep_result
+  // extraPointMade -> extra_point_result
   if ('extraPointMade' in source_play) {
-    result.ep_result = map_boolean_to_kick_result(source_play.extraPointMade)
+    result.extra_point_result = map_boolean_to_kick_result(
+      source_play.extraPointMade
+    )
   }
 
   // twoPointMade -> two_point_result

@@ -61,12 +61,15 @@ export default function ({ positions, league }) {
     processFlex(['WR', 'TE'], league.starter_slots_wide_receiver_tight_end_flex)
   }
 
-  if (league.srbwrte) {
-    processFlex(['RB', 'WR', 'TE'], league.srbwrte)
+  if (league.starter_slots_running_back_wide_receiver_tight_end_flex) {
+    processFlex(
+      ['RB', 'WR', 'TE'],
+      league.starter_slots_running_back_wide_receiver_tight_end_flex
+    )
   }
 
-  if (league.sqbrbwrte) {
-    processFlex(['QB', 'RB', 'WR', 'TE'], league.sqbrbwrte)
+  if (league.starter_slots_superflex) {
+    processFlex(['QB', 'RB', 'WR', 'TE'], league.starter_slots_superflex)
   }
 
   return constraints

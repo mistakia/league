@@ -44,29 +44,31 @@ const map_state_to_props = createSelector(
         !auction.isPaused &&
         !auction.nominated_pid &&
         (auction.nominating_team_id === app.teamId ||
-          app.userId === league.commishid),
+          app.userId === league.commissioner_user_id),
       team,
       rosteredPlayerIds,
       watchlist: playerState.get('watchlist'),
-      show_qb: Boolean(league.starter_slots_quarterback || league.sqbrbwrte),
+      show_qb: Boolean(
+        league.starter_slots_quarterback || league.starter_slots_superflex
+      ),
       show_rb: Boolean(
         league.starter_slots_running_back ||
-          league.sqbrbwrte ||
+          league.starter_slots_superflex ||
           league.starter_slots_running_back_wide_receiver_flex ||
-          league.srbwrte
+          league.starter_slots_running_back_wide_receiver_tight_end_flex
       ),
       show_wr: Boolean(
         league.starter_slots_wide_receiver ||
           league.starter_slots_running_back_wide_receiver_flex ||
-          league.srbwrte ||
+          league.starter_slots_running_back_wide_receiver_tight_end_flex ||
           league.starter_slots_wide_receiver_tight_end_flex ||
-          league.sqbrbwrte
+          league.starter_slots_superflex
       ),
       show_te: Boolean(
         league.starter_slots_tight_end ||
-          league.srbwrte ||
+          league.starter_slots_running_back_wide_receiver_tight_end_flex ||
           league.starter_slots_wide_receiver_tight_end_flex ||
-          league.sqbrbwrte
+          league.starter_slots_superflex
       ),
       show_k: Boolean(league.starter_slots_kicker),
       show_dst: Boolean(league.starter_slots_defense_special_teams)

@@ -204,7 +204,7 @@ export const PLAYS_LOCAL_PARAM_RENAMES = {
   home_wp_post: 'home_win_probability_post',
   n_offense_backfield: 'number_offense_backfield',
   pass_oe: 'pass_over_expected',
-  pos_to_rem: 'pos_timeouts_remaining',
+  pos_to_rem: 'possession_timeouts_remaining',
   ret_yds: 'return_yds',
   score_diff: 'score_difference',
   score_diff_post: 'score_difference_post',
@@ -218,7 +218,7 @@ export const PLAYS_LOCAL_PARAM_RENAMES = {
   xyac_fd_prob: 'xyac_first_down_prob',
   xyac_succ_prob: 'xyac_success_prob',
   ydl_100: 'yard_line_100',
-  ydl_num: 'yard_line_num'
+  ydl_num: 'yard_line_number'
 }
 
 // Side-of-the-ball prefixes, renamed by the 2026-08-16 conform
@@ -246,7 +246,7 @@ export const PLAYS_LOCAL_PARAM_RENAMES = {
 // persist. The rest are physical columns behind semantic column ids, and no
 // column id embeds a position code, so nothing moves in COLUMN_ID_RENAMES.
 export const POSITION_CODE_PARAM_RENAMES = {
-  num_qb: 'num_quarterback'
+  num_qb: 'number_quarterback'
 }
 
 // Counting-stat vocabulary, renamed by the 2026-08-17 conform
@@ -345,6 +345,22 @@ export const SIDE_PREFIX_PARAM_RENAMES = {
   off_personnel: 'offense_personnel'
 }
 
+// The 2026-08-17 long-tail conform. Five of its nfl_plays renames are live play
+// FILTER params, so a saved view carrying one drops that filter silently
+// without a rule here -- the `qtr` and `dwn` failure the gate exists to catch.
+// The other 41 columns in that batch back no param key.
+//
+// `pos_score` / `pos_score_post` / `pos_timeouts_remaining` chain off the side
+// batch's `def_score` family: both sides of the possession/defense pair now
+// spell their side in full.
+export const LONG_TAIL_PARAM_RENAMES = {
+  ep_result: 'extra_point_result',
+  pos_score: 'possession_score',
+  pos_score_post: 'possession_score_post',
+  pos_timeouts_remaining: 'possession_timeouts_remaining',
+  yard_line_num: 'yard_line_number'
+}
+
 // scoring_format_hash -> scoring_format_id, stranded by the format-id migration
 // (44cf7fd9 code-side, db/adhoc/2026-05-28-format-id-migration.sql). Unlike the
 // renames above this needs a VALUE mapping, not just a key rename: the persisted
@@ -398,12 +414,80 @@ const SCORING_FORMAT_HASH_TO_ID = {
 // can persist any of them at any time, so a value with no occurrences today is a
 // latent instance rather than a non-case -- the same reasoning that put all 18
 // keys in SHORTHAND_PARAM_RENAMES rather than only the 5 with production hits.
+// The 2026-08-17 abbreviation-token conform then moved 31 columns on the same two
+// tables (ot -> overtime, rb -> running_back, te -> tight_end, wrN ->
+// wide_receiver_N, and a `mid` SENSE SPLIT: second_and_mid / third_and_mid ->
+// _medium, team_rush_mid_guard -> middle_guard, mid_zone KEPT). Every one of them
+// is reachable as a dvoa_type value, so every one needs an entry here.
+//
+// ALL 31 rather than the 4 in the SPA dropdown, and that is not caution: the
+// server validates dvoa_type by SHAPE, not by membership
+// (team-dvoa-column-definitions.mjs splices it into identifier position after
+// sql_identifier_param), so any of the ~175 columns on those tables can be
+// persisted. test/data-view-queries/team-dova.json carries `pass_wr3_dvoa` —
+// a value the dropdown never offered — which is the proof rather than the theory.
+// Production held ZERO occurrences of any of the 31 on either surface when this
+// shipped (against a positive control of 6 URLs and 29 saved views carrying
+// dvoa_type at all), which makes them latent instances, not non-cases.
+//
+// `team_rush_mid_guard_dvoa` CHAINS: it is the 2026-08-08 legacy key, and its
+// target moved again today. apply_dvoa_type_value_renames is a SINGLE-PASS
+// lookup, so the chain is collapsed here at authoring time — pointing it at the
+// intermediate `team_rush_mid_guard_yards` would strand a saved view on a name
+// the registry no longer carries, which is the stale-target class that blanked
+// filters before. Both hops therefore resolve to today's name in one step.
+//
+// NOTE this map is NOT covered by the `rename-map target liveness` test in
+// test/data-views-saved-view-migration.spec.mjs: that suite filters exports on
+// `_PARAM_RENAMES` and this is a `_VALUE_RENAMES` map, so it is the ninth map
+// against those eight. Its liveness assertion lives in
+// test/data-views.dvoa-type-value-migration.spec.mjs instead, resolving each
+// legacy key THROUGH the migrator and requiring the result to be a column the
+// two DVOA tables actually carry.
 export const DVOA_TYPE_VALUE_RENAMES = {
   team_rush_left_end_dvoa: 'team_rush_left_end_yards',
   team_rush_left_tackle_dvoa: 'team_rush_left_tackle_yards',
-  team_rush_mid_guard_dvoa: 'team_rush_mid_guard_yards',
+  team_rush_mid_guard_dvoa: 'team_rush_middle_guard_yards',
   team_rush_right_tackle_dvoa: 'team_rush_right_tackle_yards',
-  team_rush_right_end_dvoa: 'team_rush_right_end_yards'
+  team_rush_right_end_dvoa: 'team_rush_right_end_yards',
+
+  fourth_quarter_ot_dvoa: 'fourth_quarter_overtime_dvoa',
+  fourth_quarter_ot_dvoa_rank: 'fourth_quarter_overtime_dvoa_rank',
+  pass_points_allowed_per_game_rb: 'pass_points_allowed_per_game_running_back',
+  pass_points_allowed_per_game_te: 'pass_points_allowed_per_game_tight_end',
+  pass_points_allowed_per_game_wr1:
+    'pass_points_allowed_per_game_wide_receiver_1',
+  pass_points_allowed_per_game_wr2:
+    'pass_points_allowed_per_game_wide_receiver_2',
+  pass_points_allowed_per_game_wr3:
+    'pass_points_allowed_per_game_wide_receiver_3',
+  pass_rb_dvoa: 'pass_running_back_dvoa',
+  pass_rb_dvoa_rank: 'pass_running_back_dvoa_rank',
+  pass_te_dvoa: 'pass_tight_end_dvoa',
+  pass_te_dvoa_rank: 'pass_tight_end_dvoa_rank',
+  pass_wr1_dvoa: 'pass_wide_receiver_1_dvoa',
+  pass_wr1_dvoa_rank: 'pass_wide_receiver_1_dvoa_rank',
+  pass_wr2_dvoa: 'pass_wide_receiver_2_dvoa',
+  pass_wr2_dvoa_rank: 'pass_wide_receiver_2_dvoa_rank',
+  pass_wr3_dvoa: 'pass_wide_receiver_3_dvoa',
+  pass_wr3_dvoa_rank: 'pass_wide_receiver_3_dvoa_rank',
+  pass_yards_allowed_per_game_rb: 'pass_yards_allowed_per_game_running_back',
+  pass_yards_allowed_per_game_te: 'pass_yards_allowed_per_game_tight_end',
+  pass_yards_allowed_per_game_wr1:
+    'pass_yards_allowed_per_game_wide_receiver_1',
+  pass_yards_allowed_per_game_wr2:
+    'pass_yards_allowed_per_game_wide_receiver_2',
+  pass_yards_allowed_per_game_wr3:
+    'pass_yards_allowed_per_game_wide_receiver_3',
+  second_and_mid_dvoa: 'second_and_medium_dvoa',
+  second_and_mid_dvoa_rank: 'second_and_medium_dvoa_rank',
+  team_rb_yards: 'team_running_back_yards',
+  team_rb_yards_rank: 'team_running_back_yards_rank',
+  team_rush_mid_guard_percentage: 'team_rush_middle_guard_percentage',
+  team_rush_mid_guard_yards: 'team_rush_middle_guard_yards',
+  team_rush_mid_guard_yards_rank: 'team_rush_middle_guard_yards_rank',
+  third_and_mid_dvoa: 'third_and_medium_dvoa',
+  third_and_mid_dvoa_rank: 'third_and_medium_dvoa_rank'
 }
 
 // Rewrites a params object's dvoa_type value(s), returning the params unchanged
@@ -472,6 +556,29 @@ const COLUMN_ID_RENAMES = {
   player_fantasy_games_played_from_seasonlogs: 'player_games_played',
   player_fantasy_games_played_from_careerlogs: 'player_games_played',
   player_pff_receiving_snaps: 'player_pff_pass_plays',
+  // These six run BACKWARDS relative to every other entry -- the stranded id is
+  // the CONFORMED spelling and the live one is the shorthand -- and that is the
+  // point. The 2026-08-17 counting-stat conform moved the `base_name` variable
+  // that projected-table-fields.js interpolates into BOTH the persisted column id
+  // and the player_value_path, so for the window before 3e95d695c the SPA offered
+  // ids the server registry never had (signals 125880/125881). That fix correctly
+  // restored the shorthand in the registry, which STRANDED any view saved during
+  // the window: one production view carries
+  // player_season_projected_{pass,rush}_yards today and throws "Field not found
+  // for column_id" before rendering a row (signals 125975/125976).
+  //
+  // All three period prefixes are listed rather than only the `season` pair with
+  // production hits, per the reasoning in the cpoe and pct notes below: the
+  // broken bundle built week / season / rest_of_season from the same base_name,
+  // so the other four are latent instances rather than non-cases.
+  player_week_projected_pass_yards: 'player_week_projected_pass_yds',
+  player_season_projected_pass_yards: 'player_season_projected_pass_yds',
+  player_rest_of_season_projected_pass_yards:
+    'player_rest_of_season_projected_pass_yds',
+  player_week_projected_rush_yards: 'player_week_projected_rush_yds',
+  player_season_projected_rush_yards: 'player_season_projected_rush_yds',
+  player_rest_of_season_projected_rush_yards:
+    'player_rest_of_season_projected_rush_yds',
   // The 2026-08-04 shorthand sweep renamed the COLUMN to
   // completion_percentage_over_expected but left the id spelled `cpoe`, and
   // select_as derives the payload key from the column -- so the client's
@@ -544,7 +651,8 @@ const PARAM_KEY_RENAMES = {
   ...SIDE_PREFIX_PARAM_RENAMES,
   ...POSITION_CODE_PARAM_RENAMES,
   ...COUNTING_STAT_PARAM_RENAMES,
-  ...MARKETS_PARAM_RENAMES
+  ...MARKETS_PARAM_RENAMES,
+  ...LONG_TAIL_PARAM_RENAMES
 }
 
 // Every legacy param key this module rewrites at read time, exported so

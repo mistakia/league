@@ -57,8 +57,11 @@ export default function ScoreboardTeam({
         field: 'starter_slots_running_back_wide_receiver_flex',
         slot_key: 'RBWR'
       },
-      { field: 'srbwrte', slot_key: 'RBWRTE' },
-      { field: 'sqbrbwrte', slot_key: 'QBRBWRTE' },
+      {
+        field: 'starter_slots_running_back_wide_receiver_tight_end_flex',
+        slot_key: 'RBWRTE'
+      },
+      { field: 'starter_slots_superflex', slot_key: 'QBRBWRTE' },
       { field: 'starter_slots_wide_receiver_tight_end_flex', slot_key: 'WRTE' },
       { field: 'starter_slots_tight_end', slot_key: 'TE' },
       { field: 'starter_slots_kicker', slot_key: 'K' },

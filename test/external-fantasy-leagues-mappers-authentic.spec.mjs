@@ -49,7 +49,7 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
       const league = sleeper_league_fixture.data.league
       const result = mapper.map_league_config({
         platform: 'sleeper',
-        league_config: { num_teams: league.total_rosters },
+        league_config: { number_teams: league.total_rosters },
         scoring_config: league.scoring_settings,
         roster_config: league.roster_positions
       })
@@ -65,7 +65,7 @@ describe('External Fantasy Leagues - Mappers (authentic Sleeper fixtures)', func
         'starter_slots_running_back_wide_receiver_flex',
         2
       )
-      result.league_params.should.have.property('sqbrbwrte', 1)
+      result.league_params.should.have.property('starter_slots_superflex', 1)
       result.league_params.should.have.property(
         'starter_slots_defense_special_teams',
         0

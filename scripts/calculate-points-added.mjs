@@ -65,15 +65,15 @@ const calculate_points_added = async ({
 
   const rows = await query
 
-  // Fetch pos_rnk from player_seasonlogs in a separate query
+  // Fetch position_rank from player_seasonlogs in a separate query
   const pos_rnk_query = db('scoring_format_player_seasonlogs')
-    .select('pid', 'points_pos_rnk')
+    .select('pid', 'points_position_rank')
     .where('season_year', year)
     .where('scoring_format_id', league.scoring_format_id)
 
   const pos_rnk_rows = await pos_rnk_query
   const pos_rnk_map = pos_rnk_rows.reduce((acc, row) => {
-    acc[row.pid] = row.points_pos_rnk
+    acc[row.pid] = row.points_position_rank
     return acc
   }, {})
 
@@ -105,13 +105,13 @@ const calculate_points_added = async ({
     }
 
     const { short_name, primary_position, nfl_draft_year } = games[0]
-    const pos_rnk = pos_rnk_map[pid] || null
+    const position_rank = pos_rnk_map[pid] || null
     players.push({
       pid,
       short_name,
       primary_position,
       nfl_draft_year,
-      pos_rnk,
+      position_rank,
       ...item
     })
   }
@@ -201,7 +201,7 @@ const calculate_points_added = async ({
       player: player.short_name,
       rookie: player.nfl_draft_year === year,
       primary_position: player.primary_position,
-      pos_rnk: player.pos_rnk,
+      position_rank: player.position_rank,
       pts_added_earned: player.pts_added.earned,
       pts_added_net: player.pts_added.earned_net,
       pts_added_raw_by_week: player.pts_added_raw_by_week,
@@ -266,7 +266,7 @@ const main = async () => {
           name: player.player,
           pts_added: player.pts_added_earned.toFixed(2),
           points: player.points.toFixed(2),
-          rank: `${player.primary_position}${player.pos_rnk}`,
+          rank: `${player.primary_position}${player.position_rank}`,
           earned_salary: `$${player.earned_salary}`,
           net_salary: `$${player.net_salary}`,
           rookie: player.rookie ? 'rookie' : '',

@@ -194,7 +194,7 @@ router.post('/?', async (req, res) => {
     })
 
     const transaction = {
-      userid: req.auth.userId,
+      user_id: req.auth.userId,
       tid,
       lid: leagueId,
       pid,

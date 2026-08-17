@@ -51,7 +51,8 @@ const ForgotPasswordPage = ({
         <h1 className='auth__title'>Check your email</h1>
         <p className='auth__deck'>
           If an account exists for that email or username, a reset link is on
-          its way. The link expires in one hour.
+          its way. The link expires in one hour. If you do not see it within a
+          few minutes, check your spam folder.
         </p>
         <div className='auth__footer'>
           <Link to='/login'>Back to sign in</Link>

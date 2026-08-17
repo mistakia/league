@@ -62,10 +62,10 @@ function GameStatus({ status, player_map }) {
 
   if (!status.lastPlay) {
     let game_time = 'TBD'
-    if (status.game.date && status.game.time_est) {
+    if (status.game.date && status.game.time_eastern) {
       game_time = dayjs
         .tz(
-          `${status.game.date} ${status.game.time_est}`,
+          `${status.game.date} ${status.game.time_eastern}`,
           'YYYY/MM/DD HH:mm:SS',
           'America/New_York'
         )

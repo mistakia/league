@@ -49,7 +49,10 @@ export function* optimize() {
     },
     value: {
       // TODO - adjust based on bench depth
-      max: Math.min(current_players.roster.availableCap, league.cap * 0.8)
+      max: Math.min(
+        current_players.roster.availableCap,
+        league.salary_cap * 0.8
+      )
     }
   }
 
@@ -153,7 +156,7 @@ export function* submit_bid({ payload }) {
   const message = {
     type: auction_actions.AUCTION_BID,
     payload: {
-      userid: userId,
+      user_id: userId,
       tid: teamId,
       pid: nominated_pid,
       value
@@ -170,7 +173,7 @@ export function* submit_nomination({ payload }) {
   const message = {
     type: auction_actions.AUCTION_SUBMIT_NOMINATION,
     payload: {
-      userid: userId,
+      user_id: userId,
       tid: teamId,
       value,
       pid: selected_pid
@@ -205,7 +208,7 @@ export function* submit_pass() {
   const message = {
     type: auction_actions.AUCTION_PASS_NOMINATION,
     payload: {
-      userid: userId,
+      user_id: userId,
       tid: teamId,
       pid: nominated_pid
     }

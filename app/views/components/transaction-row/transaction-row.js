@@ -32,9 +32,9 @@ export default function TransactionRow({
           {transaction.pick && (
             <span className='transaction__draft-pick'>#{transaction.pick}</span>
           )}
-          {transaction.pick_str && (
+          {transaction.pick_string && (
             <span className='transaction__draft-pick'>
-              {transaction.pick_str}
+              {transaction.pick_string}
             </span>
           )}
         </>

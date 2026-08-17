@@ -159,14 +159,14 @@ describe('ADMISSION VOTE BALLOT', function () {
       // stranger to this league rather than requiring an invented user. The
       // control is that the same token succeeds once the row is back.
       await knex('users_teams')
-        .where({ userid: 3, season_year: current_season.year })
+        .where({ user_id: 3, season_year: current_season.year })
         .del()
 
       const refused = await read_vote({ token: user3 })
       refused.should.have.status(403)
 
       await knex('users_teams').insert({
-        userid: 3,
+        user_id: 3,
         tid: ineligible_team_id,
         season_year: current_season.year
       })

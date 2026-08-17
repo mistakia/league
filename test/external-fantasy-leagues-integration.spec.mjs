@@ -568,7 +568,7 @@ describe('External Fantasy Leagues - Integration Tests', function () {
         name: 'Large Test League',
         year: 2024,
         settings: {
-          num_teams: 32, // Large league
+          number_teams: 32, // Large league
           season_type: 'REDRAFT',
           playoff_teams: 8,
           playoff_week_start: 15,
@@ -674,7 +674,7 @@ describe('External Fantasy Leagues - Integration Tests', function () {
         platform: 'SLEEPER',
         name: 'Cache Test League',
         year: 2024,
-        settings: { num_teams: 12, season_type: 'REDRAFT' },
+        settings: { number_teams: 12, season_type: 'REDRAFT' },
         scoring_settings: {},
         roster_slots: [],
         teams: [],

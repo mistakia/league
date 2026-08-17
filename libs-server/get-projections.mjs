@@ -47,13 +47,13 @@ export default async function get_player_projections({
     .whereIn('pid', pids)
     .where({
       season_year: year,
-      userid: 0,
+      user_id: 0,
       season_type: seas_type
     })
     .where('week', '>=', week)
 
   if (!include_averages) {
-    query.whereNot('sourceid', external_data_sources.AVERAGE)
+    query.whereNot('source_id', external_data_sources.AVERAGE)
   }
 
   return query

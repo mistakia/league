@@ -190,7 +190,9 @@ export const job_types = {
   // single scheduled job whose outcome is detector health, and a per-check id
   // would put a finding's shape into the runs ledger, where a red row must mean
   // only that the detector could not answer.
-  AUDIT_DATA_CHECKS: 139
+  AUDIT_DATA_CHECKS: 139,
+
+  ANNOUNCE_DRAFT_SLATE: 140
 }
 
 export const job_title_by_id = {
@@ -331,5 +333,6 @@ export const job_title_by_id = {
   135: 'Close Expired Rookie Drafts',
   136: 'Import KeepTradeCut Liquidity (recovery)',
   137: 'Audit KeepTradeCut Liquidity Coverage',
-  139: 'Run Data Checks'
+  139: 'Run Data Checks',
+  140: 'Announce Draft Slate'
 }

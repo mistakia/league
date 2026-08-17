@@ -97,7 +97,7 @@ const router = express.Router({ mergeParams: true })
  *                   - uid: 12345
  *                     lid: 2
  *                     tid: 13
- *                     userid: 5
+ *                     user_id: 5
  *                     pid: "ELIJ-HIGG-025009"
  *                     type: 1
  *                     is_successful: true
@@ -111,7 +111,7 @@ const router = express.Router({ mergeParams: true })
  *                   - uid: 12346
  *                     lid: 2
  *                     tid: 14
- *                     userid: 7
+ *                     user_id: 7
  *                     pid: "ELIJ-HIGG-025009"
  *                     type: 1
  *                     is_successful: false
@@ -128,7 +128,7 @@ const router = express.Router({ mergeParams: true })
  *                   - uid: 12345
  *                     lid: 2
  *                     tid: 13
- *                     userid: 5
+ *                     user_id: 5
  *                     pid: "ELIJ-HIGG-025009"
  *                     type: 1
  *                     is_successful: true
@@ -142,7 +142,7 @@ const router = express.Router({ mergeParams: true })
  *                   - uid: 12347
  *                     lid: 2
  *                     tid: 13
- *                     userid: 5
+ *                     user_id: 5
  *                     pid: "MALI-WILL-007833"
  *                     type: 1
  *                     is_successful: false

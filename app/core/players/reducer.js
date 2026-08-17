@@ -105,11 +105,11 @@ export function players_reducer(state = initialState, { payload, type }) {
         .get('items')
         .get(pid)
         .get('projections')
-        .findKey((p) => !p.sourceid)
+        .findKey((p) => !p.source_id)
       if (typeof key !== 'undefined') {
         return state.setIn(['items', pid, 'projections', key, type], value)
       }
-      const newProj = { [type]: value, userid: userId, week, pid }
+      const newProj = { [type]: value, user_id: userId, week, pid }
       return state.updateIn(['items', pid, 'projections'], (arr) =>
         arr.push(newProj)
       )
@@ -122,7 +122,7 @@ export function players_reducer(state = initialState, { payload, type }) {
         ['items', pid, 'projections'],
         state
           .getIn(['items', pid, 'projections'])
-          .filter((p) => p.sourceid || p.week !== week)
+          .filter((p) => p.source_id || p.week !== week)
       )
     }
 
@@ -574,16 +574,16 @@ export function players_reducer(state = initialState, { payload, type }) {
         )
         state.setIn(['items', payload.opts.pid, 'loading_projections'], false)
 
-        // Extract average projections (sourceid: 18) and store in projection field
+        // Extract average projections (source_id: 18) and store in projection field
         const average_projections = {}
         projections.forEach((projection) => {
-          if (projection.sourceid === external_data_sources.AVERAGE) {
+          if (projection.source_id === external_data_sources.AVERAGE) {
             const week = projection.week
             // Create a copy of the projection without metadata fields
             const {
-              sourceid,
+              source_id,
               pid,
-              userid,
+              user_id,
               season_year,
               season_type,
               generated_at,

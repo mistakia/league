@@ -95,10 +95,10 @@ describe('ADMISSION VOTE END TO END', function () {
 
     // Team 2 carries TWO userids. This is real in the live league — two Teams
     // do — and it is the whole reason ballots key on team_id rather than on
-    // userid. User 11 keeps his own Team 11, which is outside this vote's
+    // user_id. User 11 keeps his own Team 11, which is outside this vote's
     // snapshot, so Team 2 is his only eligible Team here.
     await knex('users_teams').insert({
-      userid: 11,
+      user_id: 11,
       tid: 2,
       season_year: current_season.year
     })
@@ -111,7 +111,7 @@ describe('ADMISSION VOTE END TO END', function () {
     await knex('admission_vote_candidates').del()
     await knex('admission_vote_eligible_teams').del()
     await knex('admission_votes').del()
-    await knex('users_teams').where({ userid: 11, tid: 2 }).del()
+    await knex('users_teams').where({ user_id: 11, tid: 2 }).del()
     MockDate.reset()
   })
 

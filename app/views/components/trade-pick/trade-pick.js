@@ -15,8 +15,8 @@ export default class TradePick extends React.Component {
       text = `${text} #${pick.pick}`
     }
 
-    if (pick.pick_str) {
-      text += ` (${pick.pick_str})`
+    if (pick.pick_string) {
+      text += ` (${pick.pick_string})`
     }
 
     const team = teams.get(pick.original_team_id, new Team())

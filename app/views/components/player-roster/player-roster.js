@@ -105,9 +105,9 @@ class PlayerRoster extends Player {
     // Note: seasonlog_points is used because 'points' is overwritten by projection points object
     const seasonlog_points = player_map.get('seasonlog_points', null)
     const points_per_game = player_map.get('points_per_game', null)
-    const points_pos_rnk = player_map.get('points_pos_rnk', null)
-    const points_per_game_pos_rnk = player_map.get(
-      'points_per_game_pos_rnk',
+    const points_position_rank = player_map.get('points_position_rank', null)
+    const points_per_game_position_rank = player_map.get(
+      'points_per_game_position_rank',
       null
     )
     const points_added_earned = player_map.get('points_added_earned', null)
@@ -284,14 +284,14 @@ class PlayerRoster extends Player {
               <div className='row__group-body'>
                 <StackedMetric
                   value={seasonlog_points}
-                  position_rank={points_pos_rnk}
+                  position_rank={points_position_rank}
                   position={pos}
                   percentile={percentiles.seasonlog_points}
                   fixed={1}
                 />
                 <StackedMetric
                   value={points_per_game}
-                  position_rank={points_per_game_pos_rnk}
+                  position_rank={points_per_game_position_rank}
                   position={pos}
                   percentile={percentiles.points_per_game}
                   fixed={1}

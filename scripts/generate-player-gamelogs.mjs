@@ -440,7 +440,7 @@ const format_rushing_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
     weighted_opportunity,
     rush_yards_per_attempt,
     rush_attempts_redzone: stats.rush_attempts_redzone,
-    rush_attempts_goaline: stats.rush_attempts_goaline
+    rush_attempts_goal_line: stats.rush_attempts_goal_line
   }
 }
 

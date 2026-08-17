@@ -115,7 +115,7 @@ export function optimizeAuctionLineup({
     league
   })
   const constraints = {
-    value: { max: Math.round(league.cap * 0.9) },
+    value: { max: Math.round(league.salary_cap * 0.9) },
     ...positionConstraints,
     ...limits
   }

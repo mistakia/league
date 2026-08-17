@@ -8,7 +8,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 const log = debug('set-draft-pick-number')
 
 const calculatePick = ({ round, order, league }) =>
-  (round - 1) * league.num_teams + order
+  (round - 1) * league.number_teams + order
 
 const set_draft_pick_number = async ({ lid }) => {
   log(`setting draft picks for ${current_season.year}`)
@@ -37,9 +37,12 @@ const set_draft_pick_number = async ({ lid }) => {
       order: draftOrder.indexOf(pick.original_team_id) + 1,
       league
     })
-    const pick_number_in_round = num - (pick.round - 1) * league.num_teams
+    const pick_number_in_round = num - (pick.round - 1) * league.number_teams
     await db('draft')
-      .update({ pick: num, pick_str: `${pick.round}.${pick_number_in_round}` })
+      .update({
+        pick: num,
+        pick_string: `${pick.round}.${pick_number_in_round}`
+      })
       .where('uid', pick.uid)
   }
 
@@ -72,8 +75,8 @@ const set_draft_pick_number = async ({ lid }) => {
   let count = 0
   while (compensatory_picks.length) {
     // find comp picks following the draft order
-    // TODO do not use num_teams as it could change
-    const tid = draftOrder[count % league.num_teams]
+    // TODO do not use number_teams as it could change
+    const tid = draftOrder[count % league.number_teams]
     const index = compensatory_picks.findIndex((p) => p.tid === tid)
     if (index >= 0) {
       const pick = compensatory_picks.splice(index, 1)[0]
@@ -82,8 +85,8 @@ const set_draft_pick_number = async ({ lid }) => {
       await db('draft')
         .update({
           pick: num,
-          round: Math.ceil(num / league.num_teams),
-          pick_str: `${Math.ceil(num / league.num_teams)}.${num % league.num_teams || league.num_teams}`
+          round: Math.ceil(num / league.number_teams),
+          pick_string: `${Math.ceil(num / league.number_teams)}.${num % league.number_teams || league.number_teams}`
         })
         .where('uid', pick.uid)
     }

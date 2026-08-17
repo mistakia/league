@@ -372,7 +372,8 @@ async function handle_validate_connection(ws, payload) {
           league_info: {
             name: league_config.name || 'Unknown',
             season: league_config.year || new Date().getFullYear(),
-            total_teams: league_config.settings?.num_teams || teams.length || 0
+            total_teams:
+              league_config.settings?.number_teams || teams.length || 0
           }
         }
       })

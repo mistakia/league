@@ -45,7 +45,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       const teamId = 1
       await knex('waivers').insert({
         tid: teamId,
-        userid: 1,
+        user_id: 1,
         lid,
         pid: player.pid,
         priority_order: 9999,
@@ -104,7 +104,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         type: transaction_types.PRACTICE_ADD
       })
 
-      expect(team1.faab_balance).to.equal(200)
+      expect(team1.free_agent_acquisition_budget_balance).to.equal(200)
     })
 
     it('rookie post draft multiple waivers - offseason', async () => {
@@ -139,7 +139,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       const teamId = 1
       await knex('waivers').insert({
         tid: teamId,
-        userid: 1,
+        user_id: 1,
         lid,
         pid: player.pid,
         priority_order: 9999,
@@ -181,7 +181,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       expect(team3.waiver_order).to.equal(3)
       expect(team4.waiver_order).to.equal(4)
 
-      expect(team1.faab_balance).to.equal(200)
+      expect(team1.free_agent_acquisition_budget_balance).to.equal(200)
     })
   })
 

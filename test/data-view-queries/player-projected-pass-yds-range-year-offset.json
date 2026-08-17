@@ -1,6 +1,6 @@
 {
   "name": "player_season_projected_pass_yds range year_offset re-scans projections_index with numeric week + seas_type discriminators",
-  "description": "projections_index-backed projected stat (additive count, SUM is correct) with range year_offset=[1,2] re-scans projections_index pinned to sourceid=18, numeric week=0, seas_type=REG and year IN (2024,2025).",
+  "description": "projections_index-backed projected stat (additive count, SUM is correct) with range year_offset=[1,2] re-scans projections_index pinned to source_id=18, numeric week=0, seas_type=REG and year IN (2024,2025).",
   "request": {
     "prefix_columns": ["player_name"],
     "columns": [
@@ -13,6 +13,6 @@
       }
     ]
   },
-  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT SUM(projections_index.passing_yards) FROM projections_index WHERE projections_index.pid = player.pid AND projections_index.season_year IN (2024,2025) AND projections_index.sourceid = 18 AND projections_index.week = 0 AND projections_index.season_type = 'REG') AS \"season_projected_pass_yds_0\", \"player\".\"primary_position\" from \"player\" group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, (SELECT SUM(projections_index.passing_yards) FROM projections_index WHERE projections_index.pid = player.pid AND projections_index.season_year IN (2024,2025) AND projections_index.source_id = 18 AND projections_index.week = 0 AND projections_index.season_type = 'REG') AS \"season_projected_pass_yds_0\", \"player\".\"primary_position\" from \"player\" group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
   "tags": ["year_offset", "projected", "range", "regression"]
 }

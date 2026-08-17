@@ -11,7 +11,7 @@
          Every figure is real league 1 configuration, read from the database
          rather than written from memory:
 
-           select lf.cap, lf.num_teams, lf.starter_slots_*, lf.bench_slot_count,
+           select lf.cap, lf.number_teams, lf.starter_slots_*, lf.bench_slot_count,
                   lf.practice_squad_slot_count, s.playoff_team_count
            from seasons s join league_formats lf on lf.id = s.league_format_id
            where s.lid = 1 and s.season_year = 2026

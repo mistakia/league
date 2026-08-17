@@ -89,7 +89,7 @@ describe('API /teams - activate', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player1.pid)
       res.body.slot.should.equal(roster_slot_types.BENCH)
-      res.body.transaction.userid.should.equal(userId)
+      res.body.transaction.user_id.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player1.pid)
@@ -124,7 +124,7 @@ describe('API /teams - activate', function () {
       expect(activateTransaction.player_salary).to.equal(value)
       expect(activateTransaction.pid).to.equal(player1.pid)
       expect(activateTransaction.tid).to.equal(teamId)
-      expect(activateTransaction.userid).to.equal(userId)
+      expect(activateTransaction.user_id).to.equal(userId)
 
       const reserveTransaction = transactions.find(
         (t) => t.type === transaction_types.RESERVE_IR
@@ -134,7 +134,7 @@ describe('API /teams - activate', function () {
       expect(reserveTransaction.player_salary).to.equal(value)
       expect(reserveTransaction.pid).to.equal(player2.pid)
       expect(reserveTransaction.tid).to.equal(teamId)
-      expect(reserveTransaction.userid).to.equal(userId)
+      expect(reserveTransaction.user_id).to.equal(userId)
     })
   })
 

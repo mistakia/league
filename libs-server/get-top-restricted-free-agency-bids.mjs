@@ -131,17 +131,18 @@ export default async function get_top_restricted_free_agency_bids(leagueId) {
     ...new Set(restricted_free_agency_bid_rows.map((bid) => bid.pid))
   ]
 
-  const next_pid = biddable_pids.sort((pid_a, pid_b) => {
+  const next_pid = biddable_pids.sort((pid_first, pid_second) => {
     const announced_delta =
-      nominations_by_pid[pid_a].announced - nominations_by_pid[pid_b].announced
+      nominations_by_pid[pid_first].announced -
+      nominations_by_pid[pid_second].announced
     if (announced_delta !== 0) return announced_delta
 
     // Two auctions sharing an announcement timestamp is unreachable today --
     // claim_league_notification holds one announcement per (league, season,
     // window timestamp) -- but a tie must still resolve deterministically
     // rather than by row order.
-    if (pid_a < pid_b) return -1
-    if (pid_a > pid_b) return 1
+    if (pid_first < pid_second) return -1
+    if (pid_first > pid_second) return 1
     return 0
   })[0]
 

@@ -87,7 +87,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -131,7 +131,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -177,7 +177,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -231,7 +231,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poaches.length).to.equal(1)
       expect(poaches[0].pid).to.equal(player.pid)
       expect(poaches[0].player_tid).to.equal(1)
-      expect(poaches[0].userid).to.equal(2)
+      expect(poaches[0].user_id).to.equal(2)
       expect(poaches[0].tid).to.equal(2)
       expect(poaches[0].lid).to.equal(1)
       expect(poaches[0].is_successful).to.equal(null)
@@ -256,7 +256,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -310,7 +310,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poaches.length).to.equal(1)
       expect(poaches[0].pid).to.equal(player.pid)
       expect(poaches[0].player_tid).to.equal(1)
-      expect(poaches[0].userid).to.equal(2)
+      expect(poaches[0].user_id).to.equal(2)
       expect(poaches[0].tid).to.equal(2)
       expect(poaches[0].lid).to.equal(1)
       expect(poaches[0].is_successful).to.equal(null)
@@ -336,7 +336,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // waiver one - user 2
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -348,7 +348,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // waiver twaiver_order - user 4
       await knex('waivers').insert({
         tid: 4,
-        userid: 4,
+        user_id: 4,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -410,7 +410,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poaches.length).to.equal(1)
       expect(poaches[0].pid).to.equal(player.pid)
       expect(poaches[0].player_tid).to.equal(1)
-      expect(poaches[0].userid).to.equal(2)
+      expect(poaches[0].user_id).to.equal(2)
       expect(poaches[0].tid).to.equal(2)
       expect(poaches[0].lid).to.equal(1)
       expect(poaches[0].is_successful).to.equal(null)
@@ -450,7 +450,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // waiver one - user 2
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player1.pid,
         priority_order: 9999,
@@ -462,7 +462,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // waiver twaiver_order - user 4
       await knex('waivers').insert({
         tid: 4,
-        userid: 4,
+        user_id: 4,
         lid: 1,
         pid: player2.pid,
         priority_order: 9999,
@@ -526,7 +526,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poaches.length).to.equal(2)
       expect(poach1.pid).to.equal(player1.pid)
       expect(poach1.player_tid).to.equal(1)
-      expect(poach1.userid).to.equal(2)
+      expect(poach1.user_id).to.equal(2)
       expect(poach1.tid).to.equal(2)
       expect(poach1.lid).to.equal(1)
       expect(poach1.is_successful).to.equal(null)
@@ -536,7 +536,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       expect(poach2.pid).to.equal(player2.pid)
       expect(poach2.player_tid).to.equal(3)
-      expect(poach2.userid).to.equal(4)
+      expect(poach2.user_id).to.equal(4)
       expect(poach2.tid).to.equal(4)
       expect(poach2.lid).to.equal(1)
       expect(poach2.is_successful).to.equal(null)
@@ -576,7 +576,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // waiver one - user 2
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player1.pid,
         priority_order: 9999,
@@ -588,7 +588,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // waiver twaiver_order - user 4
       await knex('waivers').insert({
         tid: 4,
-        userid: 4,
+        user_id: 4,
         lid: 1,
         pid: player2.pid,
         priority_order: 9999,
@@ -600,7 +600,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // waiver three - user 6
       await knex('waivers').insert({
         tid: 6,
-        userid: 6,
+        user_id: 6,
         lid: 1,
         pid: player1.pid,
         priority_order: 9999,
@@ -673,7 +673,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(poaches.length).to.equal(2)
       expect(poach1.pid).to.equal(player1.pid)
       expect(poach1.player_tid).to.equal(1)
-      expect(poach1.userid).to.equal(2)
+      expect(poach1.user_id).to.equal(2)
       expect(poach1.tid).to.equal(2)
       expect(poach1.lid).to.equal(1)
       expect(poach1.is_successful).to.equal(null)
@@ -683,7 +683,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       expect(poach2.pid).to.equal(player2.pid)
       expect(poach2.player_tid).to.equal(3)
-      expect(poach2.userid).to.equal(4)
+      expect(poach2.user_id).to.equal(4)
       expect(poach2.tid).to.equal(4)
       expect(poach2.lid).to.equal(1)
       expect(poach2.is_successful).to.equal(null)
@@ -716,7 +716,7 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('waivers').insert({
         tid: 2,
-        userid: 2,
+        user_id: 2,
         lid: 1,
         pid: player.pid,
         priority_order: 9999,
@@ -730,7 +730,7 @@ describe('SCRIPTS /waivers - poach', function () {
         .where({ pid: player.pid })
 
       await knex('transactions').insert({
-        userid: 1,
+        user_id: 1,
         tid: 1,
         lid: 1,
         pid: player.pid,

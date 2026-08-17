@@ -55,7 +55,7 @@ export async function validate_and_get_league(leagueId, res) {
  * @returns {boolean} True if authorized, false if response was sent
  */
 export function require_commissioner(league, userId, res, action) {
-  if (league.commishid !== userId) {
+  if (league.commissioner_user_id !== userId) {
     res.status(403).send({
       error: `Only league commissioner can ${action}`
     })
@@ -86,7 +86,7 @@ export function require_commissioner(league, userId, res, action) {
  * @returns {Promise<boolean>} True if authorized, false if response was sent
  */
 export async function require_league_access(league, userId, leagueId, db, res) {
-  if (league.commishid === userId) {
+  if (league.commissioner_user_id === userId) {
     return true
   }
 
@@ -99,7 +99,7 @@ export async function require_league_access(league, userId, leagueId, db, res) {
       )
     })
     .where('teams.lid', leagueId)
-    .where('users_teams.userid', userId)
+    .where('users_teams.user_id', userId)
     .first('teams.uid')
 
   if (!user_team) {

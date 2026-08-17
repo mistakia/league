@@ -13,12 +13,12 @@ export default async function get_draft_data_with_history({ lid, year }) {
   if (pick_ids.length > 0) {
     // Get trades involving these picks (accepted trades only)
     const trades_with_picks = await db('trades')
-      .join('trades_picks', 'trades.uid', 'trades_picks.tradeid')
-      .whereIn('trades_picks.pickid', pick_ids)
+      .join('trades_picks', 'trades.uid', 'trades_picks.trade_id')
+      .whereIn('trades_picks.draft_pick_id', pick_ids)
       .whereNotNull('trades.accepted')
       .select(
         'trades.*',
-        'trades_picks.pickid',
+        'trades_picks.draft_pick_id',
         'trades_picks.tid as pick_recipient_tid'
       )
       .orderBy('trades.accepted', 'asc')
@@ -28,18 +28,18 @@ export default async function get_draft_data_with_history({ lid, year }) {
 
     if (trade_ids.length > 0) {
       const trade_players = await db('trades_players').whereIn(
-        'tradeid',
+        'trade_id',
         trade_ids
       )
       const trade_picks_all = await db('trades_picks').whereIn(
-        'tradeid',
+        'trade_id',
         trade_ids
       )
 
       // Organize trade history by pick ID
       for (const pick_id of pick_ids) {
         const pick_trades = trades_with_picks.filter(
-          (t) => t.pickid === pick_id
+          (t) => t.draft_pick_id === pick_id
         )
 
         // Build complete trade chain for this pick
@@ -52,8 +52,8 @@ export default async function get_draft_data_with_history({ lid, year }) {
             accepted: trade.accepted,
             season_year: trade.season_year,
             pick_recipient_tid: trade.pick_recipient_tid,
-            players: trade_players.filter((p) => p.tradeid === trade.uid),
-            picks: trade_picks_all.filter((p) => p.tradeid === trade.uid)
+            players: trade_players.filter((p) => p.trade_id === trade.uid),
+            picks: trade_picks_all.filter((p) => p.trade_id === trade.uid)
           }
           trade_chain.push(trade_data)
         }

@@ -68,7 +68,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
   })
 
   const transaction = {
-    userid: userId,
+    user_id: userId,
     tid,
     lid: leagueId,
     pid: activate_pid,

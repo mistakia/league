@@ -19,7 +19,7 @@ export default function DashboardTeamValue({
 }) {
   const allClassNames = []
   if (allRank <= quarterOfLeague) allClassNames.push('text-green')
-  if (allRank >= league.num_teams - quarterOfLeague) {
+  if (allRank >= league.number_teams - quarterOfLeague) {
     allClassNames.push('text-red')
   }
 
@@ -44,7 +44,8 @@ export default function DashboardTeamValue({
     const rank = values.indexOf(value) + 1
     const classNames = []
     if (rank <= quarterOfLeague) classNames.push('text-green')
-    if (rank >= league.num_teams - quarterOfLeague) classNames.push('text-red')
+    if (rank >= league.number_teams - quarterOfLeague)
+      classNames.push('text-red')
     rows.push(
       <tr key={idx}>
         <td>{position}</td>
@@ -59,7 +60,7 @@ export default function DashboardTeamValue({
   const draft_rank = draft_values.indexOf(draft_value) + 1
   const classNames = []
   if (draft_rank <= quarterOfLeague) classNames.push('text-green')
-  if (draft_rank >= league.num_teams - quarterOfLeague)
+  if (draft_rank >= league.number_teams - quarterOfLeague)
     classNames.push('text-red')
 
   rows.push(

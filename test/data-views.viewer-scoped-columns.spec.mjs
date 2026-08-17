@@ -47,7 +47,7 @@ describe('data-views viewer-scoped columns', () => {
         user_id: 5
       })
 
-      expect(sql).to.include('users_teams.userid = 5')
+      expect(sql).to.include('users_teams.user_id = 5')
       expect(sql).to.include('rosters_players.tid IN (SELECT users_teams.tid')
       expect(sql).to.include('restricted_free_agency_nominations')
     })

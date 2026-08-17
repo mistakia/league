@@ -38,7 +38,7 @@ const build_rows_for_weeks = ({ year, seas_type, min_week, max_week }) => {
         // populated values. Date is set far in the future to avoid
         // kickoff-filter drops in game-time-aware code paths.
         date: `${year + 1}/12/01`,
-        time_est: '20:00:00'
+        time_eastern: '20:00:00'
       })
     }
   }

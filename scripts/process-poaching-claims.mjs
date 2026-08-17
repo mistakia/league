@@ -60,7 +60,7 @@ const run = async () => {
     try {
       const release = await db('poach_releases')
         .select('pid')
-        .where('poachid', claim.uid)
+        .where('poach_id', claim.uid)
 
       await processPoach({
         release: release.map((r) => r.pid),

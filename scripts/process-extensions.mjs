@@ -21,7 +21,7 @@ import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
-// Auto-process retry window: keep attempting for this many days past ext_date
+// Auto-process retry window: keep attempting for this many days past extension_deadline_at
 // in case the cron is missed (e.g., outage). The notification marker still
 // guarantees one-shot semantics within the window.
 const AUTO_PROCESS_WINDOW_DAYS = 14
@@ -84,7 +84,7 @@ const createTransaction = async ({ roster_player, tid, league }) => {
   })
 
   return {
-    userid: 0,
+    user_id: 0,
     tid,
     lid: league.uid,
     pid,
@@ -92,7 +92,7 @@ const createTransaction = async ({ roster_player, tid, league }) => {
     player_salary: extensionValue,
     week: current_season.week,
     season_year: current_season.year,
-    occurred_at: league.ext_date
+    occurred_at: league.extension_deadline_at
   }
 }
 
@@ -113,7 +113,7 @@ const run = async ({ lid }) => {
   })
   await db('transactions')
     .where({
-      userid: 0,
+      user_id: 0,
       lid,
       season_year: current_season.year
     })
@@ -146,7 +146,7 @@ const run = async ({ lid }) => {
   }
 }
 
-// Auto-process extensions for any hosted league whose ext_date has passed and
+// Auto-process extensions for any hosted league whose extension_deadline_at has passed and
 // has not yet been processed for this season. Idempotent at three levels:
 // (1) `run({ lid })` itself rebuilds the year's tag/extension transactions from
 // rosters_players state (DELETE-then-INSERT); (2) the notification marker below
@@ -159,7 +159,8 @@ const run = async ({ lid }) => {
 // written (silent partial-success).
 const process_extensions_for_due_leagues = async () => {
   const now = Math.round(Date.now() / 1000)
-  const window_end = (ext_date) => ext_date + AUTO_PROCESS_WINDOW_DAYS * 86400
+  const window_end = (extension_deadline_at) =>
+    extension_deadline_at + AUTO_PROCESS_WINDOW_DAYS * 86400
 
   const eligible = await db('seasons')
     .join('leagues', 'leagues.uid', 'seasons.lid')
@@ -167,30 +168,30 @@ const process_extensions_for_due_leagues = async () => {
       'seasons.season_year': current_season.year,
       'leagues.is_hosted': true
     })
-    .whereNotNull('seasons.ext_date')
-    .select('seasons.lid', 'seasons.ext_date')
+    .whereNotNull('seasons.extension_deadline_at')
+    .select('seasons.lid', 'seasons.extension_deadline_at')
 
   // Track leagues that are inside the processing window and not yet marked done
   // before this run starts. These are the leagues we must successfully process.
   const due_leagues = []
 
-  for (const { lid, ext_date: ext_date_instant } of eligible) {
-    // seasons.ext_date is timestamptz as of the 2026-08-07 conformance pass.
+  for (const { lid, extension_deadline_at: ext_date_instant } of eligible) {
+    // seasons.extension_deadline_at is timestamptz as of the 2026-08-07 conformance pass.
     // Converting once here keeps the deadline comparison, the retry-window
     // arithmetic and the epoch-seconds marker key all in one unit — read as a
-    // Date, `now < ext_date` coerces to milliseconds and is ALWAYS true, which
+    // Date, `now < extension_deadline_at` coerces to milliseconds and is ALWAYS true, which
     // silently skipped every league.
-    const ext_date = timestamptz_to_epoch(ext_date_instant)
+    const extension_deadline_at = timestamptz_to_epoch(ext_date_instant)
 
-    if (now < ext_date) {
+    if (now < extension_deadline_at) {
       log(
-        `league ${lid}: ext_date ${ext_date} not yet reached (now=${now}); skipping`
+        `league ${lid}: extension_deadline_at ${extension_deadline_at} not yet reached (now=${now}); skipping`
       )
       continue
     }
-    if (now > window_end(ext_date)) {
+    if (now > window_end(extension_deadline_at)) {
       log(
-        `league ${lid}: ext_date ${ext_date} more than ${AUTO_PROCESS_WINDOW_DAYS} days past; skipping`
+        `league ${lid}: extension_deadline_at ${extension_deadline_at} more than ${AUTO_PROCESS_WINDOW_DAYS} days past; skipping`
       )
       continue
     }
@@ -198,11 +199,11 @@ const process_extensions_for_due_leagues = async () => {
       lid,
       season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_EXTENSIONS_PROCESSED,
-      event_timestamp: ext_date
+      event_timestamp: extension_deadline_at
     })
     if (already_processed) {
       log(
-        `league ${lid}: extensions already processed for ext_date ${ext_date}`
+        `league ${lid}: extensions already processed for extension_deadline_at ${extension_deadline_at}`
       )
       continue
     }
@@ -216,17 +217,19 @@ const process_extensions_for_due_leagues = async () => {
       continue
     }
 
-    due_leagues.push({ lid, ext_date })
+    due_leagues.push({ lid, extension_deadline_at })
 
-    log(`league ${lid}: processing extensions (ext_date ${ext_date} reached)`)
+    log(
+      `league ${lid}: processing extensions (extension_deadline_at ${extension_deadline_at} reached)`
+    )
     await run({ lid })
     await record_league_notification_sent({
       lid,
       season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_EXTENSIONS_PROCESSED,
-      event_timestamp: ext_date,
-      message: `Extensions auto-applied at ext_date for league ${lid}`,
-      metadata: { ext_date, processed_at: now }
+      event_timestamp: extension_deadline_at,
+      message: `Extensions auto-applied at extension_deadline_at for league ${lid}`,
+      metadata: { extension_deadline_at, processed_at: now }
     })
   }
 
@@ -240,16 +243,16 @@ const process_extensions_for_due_leagues = async () => {
   // record_league_notification_sent call was skipped or the script short-
   // circuited before reaching it — silent partial-success.
   const shortfalls = []
-  for (const { lid, ext_date } of due_leagues) {
+  for (const { lid, extension_deadline_at } of due_leagues) {
     const marker_written = await has_league_notification_been_sent({
       lid,
       season_year: current_season.year,
       notification_type: NOTIFICATION_TYPE_EXTENSIONS_PROCESSED,
-      event_timestamp: ext_date
+      event_timestamp: extension_deadline_at
     })
     if (!marker_written) {
       shortfalls.push(
-        `league ${lid}: extensions due (ext_date=${ext_date}) but notification marker absent after run`
+        `league ${lid}: extensions due (extension_deadline_at=${extension_deadline_at}) but notification marker absent after run`
       )
     }
   }

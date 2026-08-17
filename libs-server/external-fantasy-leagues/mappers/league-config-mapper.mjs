@@ -128,7 +128,7 @@ export default class LeagueConfigMapper {
         TE: 'starter_slots_tight_end',
         FLEX: 'starter_slots_running_back_wide_receiver_flex',
         REC_FLEX: 'starter_slots_wide_receiver_tight_end_flex',
-        SUPER_FLEX: 'sqbrbwrte',
+        SUPER_FLEX: 'starter_slots_superflex',
         WR_TE_FLEX: 'starter_slots_wide_receiver_tight_end_flex',
         DEF: 'starter_slots_defense_special_teams',
         K: 'starter_slots_kicker',
@@ -144,7 +144,7 @@ export default class LeagueConfigMapper {
         WR: 'starter_slots_wide_receiver',
         'WR/TE': 'starter_slots_wide_receiver_tight_end_flex',
         TE: 'starter_slots_tight_end',
-        OP: 'sqbrbwrte',
+        OP: 'starter_slots_superflex',
         'D/ST': 'starter_slots_defense_special_teams',
         K: 'starter_slots_kicker',
         BE: 'bench_slot_count',
@@ -157,8 +157,8 @@ export default class LeagueConfigMapper {
         TE: 'starter_slots_tight_end',
         'W/R': 'starter_slots_running_back_wide_receiver_flex',
         'W/T': 'starter_slots_wide_receiver_tight_end_flex',
-        'W/R/T': 'srbwrte',
-        'Q/W/R/T': 'sqbrbwrte',
+        'W/R/T': 'starter_slots_running_back_wide_receiver_tight_end_flex',
+        'Q/W/R/T': 'starter_slots_superflex',
         DEF: 'starter_slots_defense_special_teams',
         K: 'starter_slots_kicker',
         BN: 'bench_slot_count',
@@ -171,7 +171,7 @@ export default class LeagueConfigMapper {
    * Map external platform league configuration to internal format hashes
    * @param {Object} params - Parameters object
    * @param {string} params.platform - Platform identifier (sleeper, espn, yahoo)
-   * @param {Object} params.league_config - External league configuration (num_teams, salary_cap, etc.)
+   * @param {Object} params.league_config - External league configuration (number_teams, salary_cap, etc.)
    * @param {Object} params.scoring_config - External scoring configuration (points per stat)
    * @param {Object} params.roster_config - External roster configuration (position counts)
    * @returns {Object} Object containing:
@@ -270,10 +270,10 @@ export default class LeagueConfigMapper {
     const league_params = this.get_default_league_params()
 
     // Set number of teams from league config
-    if (league_config.num_teams) {
-      league_params.num_teams = league_config.num_teams
+    if (league_config.number_teams) {
+      league_params.number_teams = league_config.number_teams
     } else if (league_config.total_rosters) {
-      league_params.num_teams = league_config.total_rosters
+      league_params.number_teams = league_config.total_rosters
     }
 
     // Map roster positions
@@ -303,7 +303,7 @@ export default class LeagueConfigMapper {
 
     // Set salary cap if available
     if (league_config.salary_cap) {
-      league_params.cap = league_config.salary_cap
+      league_params.salary_cap = league_config.salary_cap
     }
 
     // Set minimum bid if available
@@ -432,14 +432,14 @@ export default class LeagueConfigMapper {
    */
   get_default_league_params() {
     return {
-      num_teams: 12,
+      number_teams: 12,
       starter_slots_quarterback: 0,
       starter_slots_running_back: 0,
       starter_slots_wide_receiver: 0,
       starter_slots_tight_end: 0,
       starter_slots_running_back_wide_receiver_flex: 0,
-      srbwrte: 0,
-      sqbrbwrte: 0,
+      starter_slots_running_back_wide_receiver_tight_end_flex: 0,
+      starter_slots_superflex: 0,
       starter_slots_wide_receiver_tight_end_flex: 0,
       starter_slots_defense_special_teams: 0,
       starter_slots_kicker: 0,
@@ -447,7 +447,7 @@ export default class LeagueConfigMapper {
       practice_squad_slot_count: 0,
       ir: 0,
       reserve_short_term_limit: 0,
-      cap: 0,
+      salary_cap: 0,
       min_bid: 0
     }
   }
@@ -475,8 +475,8 @@ export default class LeagueConfigMapper {
       league_params.starter_slots_wide_receiver +
       league_params.starter_slots_tight_end +
       league_params.starter_slots_running_back_wide_receiver_flex +
-      league_params.srbwrte +
-      league_params.sqbrbwrte +
+      league_params.starter_slots_running_back_wide_receiver_tight_end_flex +
+      league_params.starter_slots_superflex +
       league_params.starter_slots_wide_receiver_tight_end_flex +
       league_params.starter_slots_defense_special_teams +
       league_params.starter_slots_kicker
