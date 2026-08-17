@@ -168,17 +168,22 @@ const compose_slate_message = ({
   return lines.join('\n')
 }
 
+const NOTHING_DUE = { announced_boundary: null, is_missing_webhook: false }
+
 /**
  * One league's publication, if it has one that has not been announced.
  *
- * Returns the boundary it announced for, or null when nothing was due, so the
- * caller can assert a marker exists for every league it counted as due.
+ * Returns `{ announced_boundary, is_missing_webhook }`. The boundary is what
+ * lets the caller assert a marker exists for every league it counted as due;
+ * the flag is raised ONLY once every gate has passed and a post was actually
+ * owed, so an unconfigured webhook is reported when it costs an announcement
+ * rather than merely because a draft exists.
  */
 export const announce_draft_slate = async ({ lid, dry_run = false }) => {
   const league = await getLeague({ lid })
 
-  if (!league.draft_start) return null
-  if (dayjs().isBefore(dayjs(league.draft_start))) return null
+  if (!league.draft_start) return NOTHING_DUE
+  if (dayjs().isBefore(dayjs(league.draft_start))) return NOTHING_DUE
 
   const season = await db('seasons')
     .where({ lid, season_year: current_season.year })
@@ -186,7 +191,7 @@ export const announce_draft_slate = async ({ lid, dry_run = false }) => {
 
   if (season && season.rookie_draft_completed_at) {
     log(`league ${lid}: rookie draft already complete; skipping`)
-    return null
+    return NOTHING_DUE
   }
 
   // A paused league has no live board to publish and every write to it is
@@ -195,7 +200,7 @@ export const announce_draft_slate = async ({ lid, dry_run = false }) => {
   const open_pause = await get_open_league_pause({ league_id: lid })
   if (open_pause) {
     log(`league ${lid}: LEAGUE PAUSED -- not announcing a slate`)
-    return null
+    return NOTHING_DUE
   }
 
   const window_config = get_draft_window_config(league)
@@ -203,7 +208,7 @@ export const announce_draft_slate = async ({ lid, dry_run = false }) => {
   const boundary = get_publication_boundary(window_config)
   if (!boundary) {
     log(`league ${lid}: no publication governs yet; skipping`)
-    return null
+    return NOTHING_DUE
   }
 
   const draft_picks = await db('draft')
@@ -232,7 +237,7 @@ export const announce_draft_slate = async ({ lid, dry_run = false }) => {
 
   if (!outstanding.length) {
     log(`league ${lid}: no outstanding picks; skipping`)
-    return null
+    return NOTHING_DUE
   }
 
   // The close after this one. Everything the CURRENT publication placed inside
@@ -265,7 +270,7 @@ export const announce_draft_slate = async ({ lid, dry_run = false }) => {
 
   if (!slots.length) {
     log(`league ${lid}: no windows fall before the next publication; skipping`)
-    return null
+    return NOTHING_DUE
   }
 
   const frontier = outstanding[0]
@@ -290,7 +295,19 @@ export const announce_draft_slate = async ({ lid, dry_run = false }) => {
   if (dry_run) {
     log(`league ${lid}: DRY RUN, boundary ${boundary.format()}`)
     console.log(message)
-    return null
+    return NOTHING_DUE
+  }
+
+  // The webhook is checked HERE, after every gate, because this is the first
+  // point at which its absence costs anything: a league with a live draft and
+  // no announcements webhook would otherwise go dark forever with a clean exit
+  // code. Checking it earlier would red the job every ten minutes for a paused
+  // league, or one with nothing to announce, which is noise rather than news.
+  if (!league.discord_announcements_webhook_url) {
+    log(
+      `league ${lid}: slate is due for ${boundary.format()} but no announcements webhook is configured`
+    )
+    return { announced_boundary: null, is_missing_webhook: true }
   }
 
   // Claim before sending. A duplicate schedule post to the whole league is the
@@ -311,17 +328,27 @@ export const announce_draft_slate = async ({ lid, dry_run = false }) => {
 
   if (!claimed) {
     log(`league ${lid}: slate for ${boundary.format()} already announced`)
-    return null
+    return NOTHING_DUE
   }
 
-  await send_discord_message({
+  // The claim is already written, so nothing will retry this post -- which
+  // makes an UNVERIFIED send the worst shape available here. `fetch` resolves a
+  // 404 from a stale webhook exactly like a 204, so without reading the result
+  // a permanently lost announcement is recorded as delivered.
+  const { is_sent } = await send_discord_message({
     discord_webhook_url: league.discord_announcements_webhook_url,
     message
   })
 
+  if (!is_sent) {
+    throw new Error(
+      `league ${lid}: Discord refused the slate post for ${boundary.format()}; the notification is claimed, so this publication will NOT be retried`
+    )
+  }
+
   log(`league ${lid}: announced slate for ${boundary.format()}`)
 
-  return boundary.unix()
+  return { announced_boundary: boundary.unix(), is_missing_webhook: false }
 }
 
 const process_all_leagues = async ({ dry_run = false } = {}) => {
@@ -336,37 +363,29 @@ const process_all_leagues = async ({ dry_run = false } = {}) => {
     .whereNotNull('seasons.draft_start')
     .where('seasons.draft_start', '<', new Date())
     .whereNull('seasons.rookie_draft_completed_at')
-    .select('leagues.uid', 'leagues.discord_announcements_webhook_url')
+    .select('leagues.uid')
 
   const announced = []
   const shortfalls = []
 
   for (const league of leagues) {
-    // A league that posts nothing to Discord is not misconfigured, it just does
-    // not use the channel. A league with a live draft and NO announcements
-    // webhook is: it would go dark here forever with a clean exit code, which
-    // is the silent-no-op class this repo reports rather than tolerates.
-    if (!league.discord_announcements_webhook_url) {
-      const has_league_channel = await db('leagues')
-        .where({ uid: league.uid })
-        .whereNotNull('discord_webhook_url')
-        .first()
+    const { announced_boundary, is_missing_webhook } =
+      await announce_draft_slate({ lid: league.uid, dry_run })
 
-      if (has_league_channel) {
-        shortfalls.push(
-          `league ${league.uid}: draft is live and the league posts to Discord, but discord_announcements_webhook_url is unset -- no slate can be announced`
-        )
-      }
-      continue
+    // A league that posts nothing to Discord is not misconfigured, it just does
+    // not use the channel — so this is raised by the announcer only once a post
+    // was actually owed, never merely because a draft is open.
+    if (is_missing_webhook) {
+      shortfalls.push(
+        `league ${league.uid}: a draft slate was due but discord_announcements_webhook_url is unset -- the announcement did not reach anyone`
+      )
     }
 
-    const boundary_timestamp = await announce_draft_slate({
-      lid: league.uid,
-      dry_run
-    })
-
-    if (boundary_timestamp) {
-      announced.push({ lid: league.uid, boundary_timestamp })
+    if (announced_boundary) {
+      announced.push({
+        lid: league.uid,
+        boundary_timestamp: announced_boundary
+      })
     }
   }
 
