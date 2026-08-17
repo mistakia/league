@@ -1030,6 +1030,7 @@ const domain_words = [
   'pre',
   'rankings',
   'redzone',
+  'seasonlog',
   'startable',
   'stat',
   'superflex',
