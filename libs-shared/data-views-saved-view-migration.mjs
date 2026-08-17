@@ -414,12 +414,80 @@ const SCORING_FORMAT_HASH_TO_ID = {
 // can persist any of them at any time, so a value with no occurrences today is a
 // latent instance rather than a non-case -- the same reasoning that put all 18
 // keys in SHORTHAND_PARAM_RENAMES rather than only the 5 with production hits.
+// The 2026-08-17 abbreviation-token conform then moved 31 columns on the same two
+// tables (ot -> overtime, rb -> running_back, te -> tight_end, wrN ->
+// wide_receiver_N, and a `mid` SENSE SPLIT: second_and_mid / third_and_mid ->
+// _medium, team_rush_mid_guard -> middle_guard, mid_zone KEPT). Every one of them
+// is reachable as a dvoa_type value, so every one needs an entry here.
+//
+// ALL 31 rather than the 4 in the SPA dropdown, and that is not caution: the
+// server validates dvoa_type by SHAPE, not by membership
+// (team-dvoa-column-definitions.mjs splices it into identifier position after
+// sql_identifier_param), so any of the ~175 columns on those tables can be
+// persisted. test/data-view-queries/team-dova.json carries `pass_wr3_dvoa` —
+// a value the dropdown never offered — which is the proof rather than the theory.
+// Production held ZERO occurrences of any of the 31 on either surface when this
+// shipped (against a positive control of 6 URLs and 29 saved views carrying
+// dvoa_type at all), which makes them latent instances, not non-cases.
+//
+// `team_rush_mid_guard_dvoa` CHAINS: it is the 2026-08-08 legacy key, and its
+// target moved again today. apply_dvoa_type_value_renames is a SINGLE-PASS
+// lookup, so the chain is collapsed here at authoring time — pointing it at the
+// intermediate `team_rush_mid_guard_yards` would strand a saved view on a name
+// the registry no longer carries, which is the stale-target class that blanked
+// filters before. Both hops therefore resolve to today's name in one step.
+//
+// NOTE this map is NOT covered by the `rename-map target liveness` test in
+// test/data-views-saved-view-migration.spec.mjs: that suite filters exports on
+// `_PARAM_RENAMES` and this is a `_VALUE_RENAMES` map, so it is the ninth map
+// against those eight. Its liveness assertion lives in
+// test/data-views.dvoa-type-value-migration.spec.mjs instead, resolving each
+// legacy key THROUGH the migrator and requiring the result to be a column the
+// two DVOA tables actually carry.
 export const DVOA_TYPE_VALUE_RENAMES = {
   team_rush_left_end_dvoa: 'team_rush_left_end_yards',
   team_rush_left_tackle_dvoa: 'team_rush_left_tackle_yards',
-  team_rush_mid_guard_dvoa: 'team_rush_mid_guard_yards',
+  team_rush_mid_guard_dvoa: 'team_rush_middle_guard_yards',
   team_rush_right_tackle_dvoa: 'team_rush_right_tackle_yards',
-  team_rush_right_end_dvoa: 'team_rush_right_end_yards'
+  team_rush_right_end_dvoa: 'team_rush_right_end_yards',
+
+  fourth_quarter_ot_dvoa: 'fourth_quarter_overtime_dvoa',
+  fourth_quarter_ot_dvoa_rank: 'fourth_quarter_overtime_dvoa_rank',
+  pass_points_allowed_per_game_rb: 'pass_points_allowed_per_game_running_back',
+  pass_points_allowed_per_game_te: 'pass_points_allowed_per_game_tight_end',
+  pass_points_allowed_per_game_wr1:
+    'pass_points_allowed_per_game_wide_receiver_1',
+  pass_points_allowed_per_game_wr2:
+    'pass_points_allowed_per_game_wide_receiver_2',
+  pass_points_allowed_per_game_wr3:
+    'pass_points_allowed_per_game_wide_receiver_3',
+  pass_rb_dvoa: 'pass_running_back_dvoa',
+  pass_rb_dvoa_rank: 'pass_running_back_dvoa_rank',
+  pass_te_dvoa: 'pass_tight_end_dvoa',
+  pass_te_dvoa_rank: 'pass_tight_end_dvoa_rank',
+  pass_wr1_dvoa: 'pass_wide_receiver_1_dvoa',
+  pass_wr1_dvoa_rank: 'pass_wide_receiver_1_dvoa_rank',
+  pass_wr2_dvoa: 'pass_wide_receiver_2_dvoa',
+  pass_wr2_dvoa_rank: 'pass_wide_receiver_2_dvoa_rank',
+  pass_wr3_dvoa: 'pass_wide_receiver_3_dvoa',
+  pass_wr3_dvoa_rank: 'pass_wide_receiver_3_dvoa_rank',
+  pass_yards_allowed_per_game_rb: 'pass_yards_allowed_per_game_running_back',
+  pass_yards_allowed_per_game_te: 'pass_yards_allowed_per_game_tight_end',
+  pass_yards_allowed_per_game_wr1:
+    'pass_yards_allowed_per_game_wide_receiver_1',
+  pass_yards_allowed_per_game_wr2:
+    'pass_yards_allowed_per_game_wide_receiver_2',
+  pass_yards_allowed_per_game_wr3:
+    'pass_yards_allowed_per_game_wide_receiver_3',
+  second_and_mid_dvoa: 'second_and_medium_dvoa',
+  second_and_mid_dvoa_rank: 'second_and_medium_dvoa_rank',
+  team_rb_yards: 'team_running_back_yards',
+  team_rb_yards_rank: 'team_running_back_yards_rank',
+  team_rush_mid_guard_percentage: 'team_rush_middle_guard_percentage',
+  team_rush_mid_guard_yards: 'team_rush_middle_guard_yards',
+  team_rush_mid_guard_yards_rank: 'team_rush_middle_guard_yards_rank',
+  third_and_mid_dvoa: 'third_and_medium_dvoa',
+  third_and_mid_dvoa_rank: 'third_and_medium_dvoa_rank'
 }
 
 // Rewrites a params object's dvoa_type value(s), returning the params unchanged
