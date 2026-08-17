@@ -326,6 +326,8 @@ Otherwise, a Process that closes with votes cast has produced a result, whether 
 
     4.  Ballots in the Admission Vote are confidential, notwithstanding any requirement of this Article that a vote be conducted by poll on the Boards. The Commissioner shall give Notice of the admitted Candidate alone, or of the fact that he has passed, and shall show to any Manager upon request the number of points recorded for each Candidate. He shall not disclose how a Team voted.
 
+    5.  Notwithstanding this Section, where only one (1) Candidate is nominated within the nomination period, the Commissioner may admit him without holding an Admission Vote, or may hold one. Where he admits him without an Admission Vote, he shall give Notice of the admission, and that Candidate is treated as an admitted Candidate for the purposes of Section 11, Subsections (d) through (h), so far as they are applicable. Where an Admission Vote is held and no Team has cast a ballot in it, the Commissioner may close it before the expiry of the three (3) days upon Notice, and Section 11 applies to an Admission Vote so closed as it applies to one closed upon the expiry of that period.
+
 11. At the close of the Admission Vote the Commissioner shall rank the Candidates by most points; among Candidates tied on points, as the Commissioner shall determine.
 
     1.  Notwithstanding Article III, Section 5, the Commissioner may admit the highest ranked Candidate, or may pass. He shall admit or pass within seven (7) days of the close of the Admission Vote, and where he does neither he is deemed to have passed.
@@ -1083,5 +1085,6 @@ The current Buy-In rate, Buy-In due date, and Commissioner contact information a
 | XLII      | Restricted Free Agency Reveal-and-Match                   |            |            |
 | XLIII     | Admission of Managers                                     | 2026-08-16 | 2026-08-16 |
 | XLV       | Commissioner Entrenchment                                 | 2026-08-16 | 2026-08-16 |
+| XLVI      | Single-Candidate Admission                                | 2026-08-17 | 2026-08-17 |
 
 Amendments are folded into the articles above as they are ratified; this appendix records the amendment history. Amendments VII and XXXVI were drafted but never ratified.
