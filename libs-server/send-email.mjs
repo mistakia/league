@@ -1,10 +1,15 @@
 import { Resend } from 'resend'
 import config from '#config'
 
-const resend =
-  config.email && config.email.resend_api_key
-    ? new Resend(config.email.resend_api_key)
-    : null
+// Resolved PER CALL rather than once at module load. Binding the client at
+// import time made "no mail provider" a property of the process rather than of
+// the config, so the not-configured branch below was unreachable for anything
+// that had already imported this module -- including a spec, which is why the
+// branch went uncovered while a caller silently ignored it in production.
+const get_client = () => {
+  const api_key = config.email && config.email.resend_api_key
+  return api_key ? new Resend(api_key) : null
+}
 
 /**
  * Hands one message to the mail provider.
@@ -30,6 +35,8 @@ const resend =
  * that turns every dev-mode form into a 500.
  */
 export default async function ({ to, subject, message }) {
+  const resend = get_client()
+
   if (!resend) {
     return { is_sent: false, reason: 'no mail provider is configured' }
   }

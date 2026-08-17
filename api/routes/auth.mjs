@@ -402,12 +402,47 @@ router.post('/reset-password', async (req, res) => {
     // and the operator gets a signal. Deliberately no email address in it -- a
     // signal is synced and indexed, and the address is the thing this route is
     // careful about.
+    // A NOT-CONFIGURED MAILER IS THE THIRD OUTCOME, and ignoring the return
+    // value left it the only silent one. sendEmail THROWS on a provider refusal
+    // but RESOLVES `is_sent: false` when there is no mail provider at all --
+    // deliberately, so a dev-mode form is not a 500. So if config.email or its
+    // resend_api_key ever goes missing in production (a failed sops decrypt, a
+    // rotated key, config drift), every reset request no-ops while still
+    // answering "a password reset email has been sent": no throw, no signal, no
+    // log line. That is the same both-paths-one-observable shape 61bb435b4
+    // closed on the refusal branch, left open on this one.
+    //
+    // AND RECORD THE ACCEPTED MESSAGE ID, because this app receives no Resend
+    // delivery webhook. `email_id` is the only handle that can answer "what
+    // happened to that particular email" in the provider's own records later --
+    // without it an accepted send leaves no trace at all, which is exactly why
+    // a 2026-08-17 report of a missing reset email could not be answered from
+    // anything this app had written down. Deliberately no email address in
+    // either the log line or the signal: both are synced and indexed, and the
+    // address is the thing this route is careful about.
     try {
-      await sendEmail({
+      const { is_sent, email_id, reason } = await sendEmail({
         to: user.email,
         subject: 'Password Reset Request',
         message: `Click the following link to reset your password: ${reset_link}. If you did not request a password reset, please ignore this email.`
       })
+
+      if (is_sent) {
+        logger(
+          'password reset email accepted by provider user_id=%s email_id=%s',
+          user.id,
+          email_id
+        )
+      } else {
+        auth_error_logger.error(
+          `the password reset email was not sent: ${reason}`,
+          {
+            severity: 'high',
+            fingerprint_override: 'auth-reset-password-send-unconfigured',
+            context: { user_id: user.id }
+          }
+        )
+      }
     } catch (email_error) {
       auth_error_logger.error(email_error, {
         severity: 'high',
