@@ -864,7 +864,6 @@ const english_words = [
   'targeted',
   'targets',
   'taxi',
-  'tds',
   'team',
   'teams',
   'temperature',
