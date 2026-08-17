@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import RepeatIcon from '@mui/icons-material/Repeat'
+import Tooltip from '@mui/material/Tooltip'
 
 import TeamName from '@components/team-name'
 import DraftPickSheet from '@components/draft-pick-sheet'
@@ -13,9 +14,9 @@ export default function DraftPick({
   pick,
   team,
   is_active,
+  is_next_up,
   is_user,
-  trade_count,
-  draft_clock_now
+  trade_count
 }) {
   const [sheet_open, set_sheet_open] = useState(false)
 
@@ -39,50 +40,63 @@ export default function DraftPick({
   const pos = player_map.get('primary_position')
   if (pos) class_names.push(pos)
 
+  // Hover names when the pick is currently scheduled to be on the clock. A
+  // null window is a fact about the board, not a missing value: between a
+  // resume and the next published slate every pick is void.
+  const tooltip = pick.pid
+    ? `Drafted: ${player_map.get('first_name')} ${player_map.get('last_name')}`
+    : is_active
+      ? 'On the clock now'
+      : pick.draftWindow
+        ? `Scheduled on the clock: ${pick.draftWindow.format('dddd, MMM D [at] h:mm A')}`
+        : 'No published window yet'
+
   return (
     <>
-      <div
-        className={class_names.join(' ')}
-        onClick={handle_pick_click}
-        style={{ cursor: 'pointer' }}
-      >
-        <div className='draft__pick-num formatted'>
-          {pick.pick_string || pick.pick || '-'}
-        </div>
-        <div className='draft__pick-num pick'>{`#${pick.pick}`}</div>
-        <div className='draft__pick-main'>
-          {Boolean(player_map.get('pid')) && (
-            <div className='draft__pick-player'>
-              <div className='draft__pick-player-name last'>
-                {player_map.get('last_name')}
-              </div>
-              <div className='draft__pick-player-name first'>
-                {player_map.get('first_name')}
-              </div>
-            </div>
-          )}
-          {is_active && !pick.pid && (
-            <div className='draft__pick-window active'>On the clock</div>
-          )}
-          {!is_active &&
-            !pick.pid &&
-            Boolean(pick.pick) &&
-            Boolean(pick.draftWindow) && (
-              <div className='draft__pick-window'>
-                {draft_clock_now.to(pick.draftWindow)}
+      <Tooltip title={tooltip} placement='top' arrow>
+        <div
+          className={class_names.join(' ')}
+          onClick={handle_pick_click}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className='draft__pick-num formatted'>
+            {pick.pick_string || pick.pick || '-'}
+          </div>
+          <div className='draft__pick-num pick'>{`#${pick.pick}`}</div>
+          <div className='draft__pick-main'>
+            {Boolean(player_map.get('pid')) && (
+              <div className='draft__pick-player'>
+                <div className='draft__pick-player-name last'>
+                  {player_map.get('last_name')}
+                </div>
+                <div className='draft__pick-player-name first'>
+                  {player_map.get('first_name')}
+                </div>
               </div>
             )}
-          <div className='draft__pick-team'>
-            <TeamName tid={team.uid} abbrv />
+            {is_active && !pick.pid && (
+              <div className='draft__pick-window active'>On the clock</div>
+            )}
+            {is_next_up &&
+              !pick.pid &&
+              Boolean(pick.pick) &&
+              Boolean(pick.draftWindow) && (
+                <div className='draft__pick-window'>
+                  {pick.draftWindow.format('ddd h:mm A')}
+                </div>
+              )}
+            <div className='draft__pick-team'>
+              <TeamName tid={team.uid} abbrv />
+            </div>
           </div>
+          {trade_count > 0 && (
+            <div className='draft__pick-trades'>
+              <RepeatIcon />
+              <span>{trade_count}</span>
+            </div>
+          )}
         </div>
-        {trade_count > 0 && (
-          <div className='draft__pick-trades'>
-            <RepeatIcon />
-            <span>{trade_count}</span>
-          </div>
-        )}
-      </div>
+      </Tooltip>
 
       <DraftPickSheet
         pick={pick}
@@ -98,7 +112,7 @@ DraftPick.propTypes = {
   pick: PropTypes.object,
   team: ImmutablePropTypes.record,
   is_active: PropTypes.bool,
+  is_next_up: PropTypes.bool,
   is_user: PropTypes.bool,
-  trade_count: PropTypes.number,
-  draft_clock_now: PropTypes.object
+  trade_count: PropTypes.number
 }

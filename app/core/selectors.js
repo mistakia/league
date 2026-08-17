@@ -378,43 +378,29 @@ export const is_free_agent_period = createSelector(
 //   }
 // )
 
-// How many picks past the ones on the clock the rail labels with their window.
-const UPCOMING_PICK_WINDOWS = 2
-
 export const getPicks = createSelector(
   get_draft_state,
   get_current_league,
   (draft, league) => {
     const { picks } = draft
-    let previousSelected = true
-    let previousActive = true
-    let previousNotActive = false
-    let upcoming_windows_placed = 0
     const draft_picks = picks.toJS()
     // Frozen at the pause instant while the league is paused, so the rail's
-    // windows and its active flags stop advancing for the duration.
+    // windows stop advancing for the duration.
     const draft_clock_now = get_draft_clock_now({
       paused_at: league.paused_at,
       now: current_season.now
     })
 
+    // Every unmade pick carries its currently-scheduled window, so the rail
+    // can label the next one to be on the clock and hover can name any pick's
+    // slot. A window is null until a slate publishes — between a resume and
+    // the next close every pick is void — and it only ever moves EARLIER as
+    // the picks ahead land, so a displayed time is the current schedule, not
+    // a guarantee.
     return picks
       .sort((a, b) => a.pick - b.pick)
       .map((p) => {
         if (p.pid) {
-          return p
-        }
-
-        // A pick carries a draftWindow exactly when the rail should label it:
-        // the picks still on the clock, plus the next UPCOMING_PICK_WINDOWS to
-        // reach it. Today's slate is frozen and will be honoured to the
-        // minute, but a pick far enough down the board sits on a later day,
-        // and a window only ever moves EARLIER as the picks ahead land — so
-        // the rail says nothing rather than advertising a date it will beat.
-        if (
-          previousNotActive &&
-          upcoming_windows_placed >= UPCOMING_PICK_WINDOWS
-        ) {
           return p
         }
 
@@ -426,33 +412,6 @@ export const getPicks = createSelector(
             until: draft_clock_now
           })
         }
-
-        if (previousNotActive) {
-          upcoming_windows_placed += 1
-          return p
-        }
-
-        // A pick goes on the clock at the start of its published window,
-        // whether or not the pick ahead of it has been selected. There is no
-        // band condition on the current time: every window is itself a slot
-        // inside the band, so a check on the hour is inert against the window
-        // check it guards -- and the symbol it called was deleted with the
-        // floor, so it threw on the one branch it was reached from.
-        //
-        // Note the clock is granted for the DAY, not until the pick is made:
-        // the next midnight re-lays this pick onto its own slate, which on a
-        // day where nobody picked is 24 hours later.
-        const isActive =
-          previousSelected || draft_clock_now.isAfter(p.draftWindow)
-
-        previousNotActive = !isActive && previousActive
-        // This pick is the first one off the clock, so it is the first of the
-        // upcoming windows the rail shows.
-        if (previousNotActive) {
-          upcoming_windows_placed += 1
-        }
-        previousActive = isActive
-        previousSelected = Boolean(p.pid)
 
         return p
       })
