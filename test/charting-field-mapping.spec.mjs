@@ -231,9 +231,9 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       expect(result.coverage_type).to.equal('COVER_3')
       expect(result.man_zone).to.equal('ZONE')
       expect(result.qb_position).to.equal('SHOTGUN')
-      expect(result.off_formation).to.equal('SINGLEBACK')
-      expect(result.off_personnel).to.equal('11')
-      expect(result.def_personnel).to.equal('Nickel')
+      expect(result.offense_formation).to.equal('SINGLEBACK')
+      expect(result.offense_personnel).to.equal('11')
+      expect(result.defense_personnel).to.equal('Nickel')
     })
 
     it('maps new charting-exclusive columns', () => {

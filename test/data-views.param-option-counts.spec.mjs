@@ -33,7 +33,7 @@ describe('serialize_preset_value', function () {
     const value_object = { rb: 1, te: 1, wr: 3 }
     const sig = serialize_preset_value(value_object)
     const key = get_stats_column_param_key({
-      params: { off_personnel: [value_object] }
+      params: { offense_personnel: [value_object] }
     })
     expect(key).to.include(sig)
   })

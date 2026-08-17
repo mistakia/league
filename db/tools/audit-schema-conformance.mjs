@@ -393,7 +393,7 @@ const accepted_column_tokens = new Map([
   ['nfl_games.away_qb_pid', new Set(['qb'])],
   ['nfl_games.home_qb_pid', new Set(['qb'])],
   ['nfl_plays_player.player_get_off', new Set(['off'])],
-  ['nfl_team_gamelogs.def_avg_get_off', new Set(['off'])],
+  ['nfl_team_gamelogs.defense_avg_get_off', new Set(['off'])],
   ['player_defender_gamelogs.pass_rush_get_off', new Set(['off'])],
   [
     'player_prospect_profile.positional_factor_off_man_coverage',

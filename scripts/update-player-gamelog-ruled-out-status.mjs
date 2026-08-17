@@ -139,7 +139,13 @@ const load_games = async ({ year, week, seas_type }) => {
  */
 const load_active_gamelogs = async (esbids) => {
   const gamelogs = await db('player_gamelogs')
-    .select('esbid', 'pid', 'is_active', 'is_ruled_out_in_game', 'snaps_off')
+    .select(
+      'esbid',
+      'pid',
+      'is_active',
+      'is_ruled_out_in_game',
+      'snaps_offense'
+    )
     .whereIn('esbid', esbids)
     .where('is_active', true)
 
@@ -257,11 +263,11 @@ const process_game = async (game, gamelogs) => {
           injury_body_part: out_status.injury_body_part,
           status_timestamp: out_status.observed_at,
           status_date,
-          snaps_off: gamelog.snaps_off
+          snaps_offense: gamelog.snaps_offense
         })
 
         log(
-          `  Flagging ${gamelog.pid} as ruled out (status updated ${status_date}, injury: ${out_status.injury_body_part || 'unknown'}, snaps: ${gamelog.snaps_off || 0})`
+          `  Flagging ${gamelog.pid} as ruled out (status updated ${status_date}, injury: ${out_status.injury_body_part || 'unknown'}, snaps: ${gamelog.snaps_offense || 0})`
         )
       } else {
         log(`  Skipping ${gamelog.pid} - already flagged as ruled out`)

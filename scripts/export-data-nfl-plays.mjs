@@ -40,9 +40,9 @@ const nfl_play_fields = [
 
   'yards_to_go',
 
-  'off_formation',
-  'off_personnel',
-  'def_personnel',
+  'offense_formation',
+  'offense_personnel',
+  'defense_personnel',
   'box_defenders',
   'ngs_pass_rushers',
   'air_yards',
@@ -300,17 +300,17 @@ const nfl_play_fields = [
   'home_timeouts_remaining',
   'away_timeouts_remaining',
   'pos_timeouts_remaining',
-  'def_timeouts_remaining',
+  'defense_timeouts_remaining',
   'is_timeout',
   'timeout_team',
 
   'home_score',
   'away_score',
   'pos_score',
-  'def_score',
+  'defense_score',
   'score_difference',
   'pos_score_post',
-  'def_score_post',
+  'defense_score_post',
   'score_difference_post',
 
   'no_score_prob',

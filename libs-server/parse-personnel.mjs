@@ -1,4 +1,4 @@
-// Parse NFL-feed personnel strings (off_personnel / def_personnel) into
+// Parse NFL-feed personnel strings (offense_personnel / defense_personnel) into
 // position-count objects. The NFL feed is the authoritative source; PlayerProfiler
 // counts (which use a different snap-classification convention) live in separate
 // _pp columns and are not produced by this parser.
@@ -15,18 +15,18 @@ const DEF_SOFTMAP = {
   '7+db': { db: 7 }
 }
 
-export const PERSONNEL_OFF_COLUMNS = {
-  qb: 'off_personnel_qb_count',
-  rb: 'off_personnel_rb_count',
-  te: 'off_personnel_te_count',
-  wr: 'off_personnel_wr_count',
-  ol: 'off_personnel_ol_count'
+export const PERSONNEL_OFFENSE_COLUMNS = {
+  qb: 'offense_personnel_qb_count',
+  rb: 'offense_personnel_rb_count',
+  te: 'offense_personnel_te_count',
+  wr: 'offense_personnel_wr_count',
+  ol: 'offense_personnel_ol_count'
 }
 
-export const PERSONNEL_DEF_COLUMNS = {
-  dl: 'def_personnel_dl_count',
-  lb: 'def_personnel_lb_count',
-  db: 'def_personnel_db_count'
+export const PERSONNEL_DEFENSE_COLUMNS = {
+  dl: 'defense_personnel_dl_count',
+  lb: 'defense_personnel_lb_count',
+  db: 'defense_personnel_db_count'
 }
 
 const parse_offensive = (value) => {
@@ -67,18 +67,24 @@ export const parse_personnel_string = ({ value, side }) => {
   if (value === null || value === undefined) return null
   if (typeof value !== 'string') return null
   if (value.trim() === '') return null
-  if (side !== 'off' && side !== 'def') {
+  if (side !== 'offense' && side !== 'defense') {
     throw new Error(`parse_personnel_string: invalid side '${side}'`)
   }
-  return side === 'off' ? parse_offensive(value) : parse_defensive(value)
+  return side === 'offense' ? parse_offensive(value) : parse_defensive(value)
 }
 
 export const add_personnel_counts_to_play_data = (play) => {
   if (!play) return play
 
+  // `side` is BOTH the parser's dispatch value and the prefix of the physical
+  // column it reads (`${side}_personnel`), so the 2026-08-16 side-prefix conform
+  // had to move it with the columns. It is a computed key, which is exactly the
+  // shape a name-anchored sweep cannot reach: renaming the columns alone left
+  // this loop reading `off_personnel`, finding undefined, and writing NOTHING --
+  // silently, since the miss takes the `continue` branch.
   for (const [side, column_map] of [
-    ['off', PERSONNEL_OFF_COLUMNS],
-    ['def', PERSONNEL_DEF_COLUMNS]
+    ['offense', PERSONNEL_OFFENSE_COLUMNS],
+    ['defense', PERSONNEL_DEFENSE_COLUMNS]
   ]) {
     const value = play[`${side}_personnel`]
     if (!value) continue

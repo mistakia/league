@@ -516,12 +516,12 @@ const process_week = async ({
         name: row.head_coach,
         role: 'head_coach'
       }),
-      off_play_caller_id: resolve_coach({
+      offense_play_caller_id: resolve_coach({
         ...ctx,
         name: row.off_play_caller,
         role: 'off_play_caller'
       }),
-      def_play_caller_id: resolve_coach({
+      defense_play_caller_id: resolve_coach({
         ...ctx,
         name: row.def_play_caller,
         role: 'def_play_caller'
@@ -545,8 +545,8 @@ const process_week = async ({
       .onConflict(['nflverse_game_id', 'nfl_team'])
       .merge([
         'head_coach_id',
-        'off_play_caller_id',
-        'def_play_caller_id',
+        'offense_play_caller_id',
+        'defense_play_caller_id',
         'ingested_at'
       ])
 
@@ -559,7 +559,7 @@ const process_week = async ({
       `UPDATE nfl_games AS g
        SET home_play_caller = c.full_name
        FROM nfl_game_coaches gc
-       JOIN nfl_coaches c ON c.coach_id = gc.off_play_caller_id
+       JOIN nfl_coaches c ON c.coach_id = gc.offense_play_caller_id
        WHERE gc.nflverse_game_id = g.nflverse_game_id
          AND gc.nfl_team = g.home_nfl_team
          AND g.nflverse_game_id = ANY(?)`,
@@ -569,7 +569,7 @@ const process_week = async ({
       `UPDATE nfl_games AS g
        SET away_play_caller = c.full_name
        FROM nfl_game_coaches gc
-       JOIN nfl_coaches c ON c.coach_id = gc.off_play_caller_id
+       JOIN nfl_coaches c ON c.coach_id = gc.offense_play_caller_id
        WHERE gc.nflverse_game_id = g.nflverse_game_id
          AND gc.nfl_team = g.away_nfl_team
          AND g.nflverse_game_id = ANY(?)`,

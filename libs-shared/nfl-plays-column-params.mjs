@@ -409,34 +409,34 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
   },
-  off_personnel: {
+  offense_personnel: {
     data_type: table_constants.TABLE_DATA_TYPES.OBJECT_PRESET,
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL],
     column_specs: [
       {
         key: 'rb',
-        column: 'off_personnel_rb_count',
+        column: 'offense_personnel_rb_count',
         label: 'RB',
         min: 0,
         max: 4
       },
       {
         key: 'te',
-        column: 'off_personnel_te_count',
+        column: 'offense_personnel_te_count',
         label: 'TE',
         min: 0,
         max: 5
       },
       {
         key: 'wr',
-        column: 'off_personnel_wr_count',
+        column: 'offense_personnel_wr_count',
         label: 'WR',
         min: 0,
         max: 5
       },
       {
         key: 'qb',
-        column: 'off_personnel_qb_count',
+        column: 'offense_personnel_qb_count',
         label: 'Extra QB',
         min: 0,
         max: 2,
@@ -444,7 +444,7 @@ export default {
       },
       {
         key: 'ol',
-        column: 'off_personnel_ol_count',
+        column: 'offense_personnel_ol_count',
         label: 'Extra OL (6+)',
         min: 6,
         max: 8,
@@ -462,27 +462,27 @@ export default {
       { label: 'Empty (5 WR)', value: { rb: 0, te: 0, wr: 5 }, n: 496 }
     ]
   },
-  def_personnel: {
+  defense_personnel: {
     data_type: table_constants.TABLE_DATA_TYPES.OBJECT_PRESET,
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL],
     column_specs: [
       {
         key: 'dl',
-        column: 'def_personnel_dl_count',
+        column: 'defense_personnel_dl_count',
         label: 'DL',
         min: 0,
         max: 8
       },
       {
         key: 'lb',
-        column: 'def_personnel_lb_count',
+        column: 'defense_personnel_lb_count',
         label: 'LB',
         min: 0,
         max: 6
       },
       {
         key: 'db',
-        column: 'def_personnel_db_count',
+        column: 'defense_personnel_db_count',
         label: 'DB',
         min: 3,
         max: 8
@@ -1913,7 +1913,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
-  def_timeouts_remaining: {
+  defense_timeouts_remaining: {
     label: 'Defending TOs Remaining',
     short_label: 'Def TO',
     show_key_in_short: true,
@@ -1957,7 +1957,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
-  def_score: {
+  defense_score: {
     label: 'Defending Team Score',
     short_label: 'Def Score',
     show_key_in_short: true,
@@ -1984,7 +1984,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
-  def_score_post: {
+  defense_score_post: {
     label: 'Defending Score (post)',
     short_label: 'Def post',
     show_key_in_short: true,

@@ -20,23 +20,33 @@ const get_snaps_config = (pos) => {
     case 'K':
       return {
         types: ['DEF', 'ST'],
-        fields: ['snaps_def', 'snaps_st']
+        fields: ['snaps_defense', 'snaps_special_teams']
       }
     case 'QB':
       return {
         types: ['OFF', 'PASS', 'RUSH'],
-        fields: ['snaps_off', 'snaps_pass', 'snaps_rush']
+        fields: ['snaps_offense', 'snaps_pass', 'snaps_rush']
       }
     case 'RB':
       return {
         types: ['OFF', 'PASS', 'RUSH', 'ST'],
-        fields: ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st']
+        fields: [
+          'snaps_offense',
+          'snaps_pass',
+          'snaps_rush',
+          'snaps_special_teams'
+        ]
       }
     case 'WR':
     case 'TE':
       return {
         types: ['OFF', 'REC', 'RUSH', 'ST'],
-        fields: ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st']
+        fields: [
+          'snaps_offense',
+          'snaps_pass',
+          'snaps_rush',
+          'snaps_special_teams'
+        ]
       }
     default:
       return { types: [], fields: [] }
@@ -83,7 +93,7 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
     )
     const gamelogs = years[year]
     gamelogs.forEach((game, gameIndex) => {
-      const snaps_off_percentage = game.snaps_off_percentage
+      const snaps_offense_percentage = game.snaps_offense_percentage
       const lead = (
         <>
           <div className='table__cell metric sticky__column game__day'>
@@ -113,8 +123,8 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
           <div className='row__group'>
             <div className='row__group-body'>
               <div className='table__cell metric'>
-                {snaps_off_percentage != null
-                  ? `${(snaps_off_percentage * 100).toFixed(0)}%`
+                {snaps_offense_percentage != null
+                  ? `${(snaps_offense_percentage * 100).toFixed(0)}%`
                   : '-'}
               </div>
               {snaps_config.fields.map((field) => (

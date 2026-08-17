@@ -261,7 +261,7 @@ describe('SCRIPTS generate-player-snaps', function () {
       .first()
 
     expect(row).to.not.equal(undefined)
-    expect(row.snaps_off).to.equal(plays.length)
+    expect(row.snaps_offense).to.equal(plays.length)
   })
 
   it('writes the conformed column names, not their pre-rename spellings', async () => {
@@ -288,7 +288,7 @@ describe('SCRIPTS generate-player-snaps', function () {
       .first()
 
     expect(row).to.not.equal(undefined)
-    expect(row.snaps_def).to.equal(defense_play_ids.length)
+    expect(row.snaps_defense).to.equal(defense_play_ids.length)
   })
 
   // The three tests below are the ones the fixture above was widened for. Until
@@ -306,10 +306,10 @@ describe('SCRIPTS generate-player-snaps', function () {
     // The computed key `q${quarter}_off` is the specific thing worth pinning:
     // it is built by template literal from a renamed variable, so neither a
     // grep for the old name nor a column-existence check can reach it.
-    expect(row.q1_snaps_off).to.equal(1)
-    expect(row.q2_snaps_off).to.equal(1)
-    expect(row.q3_snaps_off).to.equal(2)
-    expect(row.q4_snaps_off).to.equal(1)
+    expect(row.q1_snaps_offense).to.equal(1)
+    expect(row.q2_snaps_offense).to.equal(1)
+    expect(row.q3_snaps_offense).to.equal(2)
+    expect(row.q4_snaps_offense).to.equal(1)
   })
 
   it('counts defensive snaps into the quarter the play was in', async () => {
@@ -319,10 +319,10 @@ describe('SCRIPTS generate-player-snaps', function () {
       .where({ esbid, pid: defense_pid, season_year })
       .first()
 
-    expect(row.q1_snaps_def).to.equal(0)
-    expect(row.q2_snaps_def).to.equal(1)
-    expect(row.q3_snaps_def).to.equal(1)
-    expect(row.q4_snaps_def).to.equal(0)
+    expect(row.q1_snaps_defense).to.equal(0)
+    expect(row.q2_snaps_defense).to.equal(1)
+    expect(row.q3_snaps_defense).to.equal(1)
+    expect(row.q4_snaps_defense).to.equal(0)
   })
 
   // Added 2026-08-15 with the pct -> percentage conform. Every assertion above
@@ -347,27 +347,27 @@ describe('SCRIPTS generate-player-snaps', function () {
       .first()
 
     // Sole offensive player: his share of every offensive bucket is the whole.
-    expect(Number(offense.snaps_off_percentage)).to.equal(1)
-    expect(Number(offense.q1_snaps_off_percentage)).to.equal(1)
-    expect(Number(offense.q2_snaps_off_percentage)).to.equal(1)
-    expect(Number(offense.q3_snaps_off_percentage)).to.equal(1)
-    expect(Number(offense.q4_snaps_off_percentage)).to.equal(1)
+    expect(Number(offense.snaps_offense_percentage)).to.equal(1)
+    expect(Number(offense.q1_snaps_offense_percentage)).to.equal(1)
+    expect(Number(offense.q2_snaps_offense_percentage)).to.equal(1)
+    expect(Number(offense.q3_snaps_offense_percentage)).to.equal(1)
+    expect(Number(offense.q4_snaps_offense_percentage)).to.equal(1)
     // He took no defensive snap, but the defense HAS a total, so this is a real
     // zero rather than the null a missing denominator produces.
-    expect(Number(offense.snaps_def_percentage)).to.equal(0)
+    expect(Number(offense.snaps_defense_percentage)).to.equal(0)
 
     const defense = await db('player_gamelogs')
       .where({ esbid, pid: defense_pid, season_year })
       .first()
 
     // Two of the five defensive snaps.
-    expect(Number(defense.snaps_def_percentage)).to.equal(0.4)
-    expect(Number(defense.q1_snaps_def_percentage)).to.equal(0)
-    expect(Number(defense.q2_snaps_def_percentage)).to.equal(1)
+    expect(Number(defense.snaps_defense_percentage)).to.equal(0.4)
+    expect(Number(defense.q1_snaps_defense_percentage)).to.equal(0)
+    expect(Number(defense.q2_snaps_defense_percentage)).to.equal(1)
     // The one value that separates a correct quarter mapping from a plausible
     // wrong one: q3 is the only quarter with two team snaps.
-    expect(Number(defense.q3_snaps_def_percentage)).to.equal(0.5)
-    expect(Number(defense.q4_snaps_def_percentage)).to.equal(0)
+    expect(Number(defense.q3_snaps_defense_percentage)).to.equal(0.5)
+    expect(Number(defense.q4_snaps_defense_percentage)).to.equal(0)
   })
 
   it('splits neutral snaps on down and counts the low win-probability play', async () => {
@@ -404,7 +404,7 @@ describe('SCRIPTS generate-player-snaps', function () {
     })
 
     expect(rows).to.have.length(1)
-    expect(rows[0].snaps_off).to.equal(plays.length)
+    expect(rows[0].snaps_offense).to.equal(plays.length)
     // A column the writer does not name must survive the merge.
     expect(rows[0].targets).to.equal(7)
   })

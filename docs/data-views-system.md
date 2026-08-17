@@ -1528,7 +1528,7 @@ Direct `joinRaw` / inline `where('seas_type', 'REG')` fragments on week-keyed ta
 
 ## OBJECT_PRESET Data Type
 
-The `OBJECT_PRESET` data type (`TABLE_DATA_TYPES.OBJECT_PRESET = 9`, formerly `PERSONNEL_GROUP`) is a multi-column conjunctive filter for value-object presets such as offensive and defensive personnel packages. Used by the `off_personnel` and `def_personnel` column params in `libs-shared/nfl-plays-column-params.mjs`. The data type is generic in `react-table`; football-specific key whitelisting lives in `libs-shared/validators/personnel-group.mjs`.
+The `OBJECT_PRESET` data type (`TABLE_DATA_TYPES.OBJECT_PRESET = 9`, formerly `PERSONNEL_GROUP`) is a multi-column conjunctive filter for value-object presets such as offensive and defensive personnel packages. Used by the `offense_personnel` and `defense_personnel` column params in `libs-shared/nfl-plays-column-params.mjs`. The data type is generic in `react-table`; football-specific key whitelisting lives in `libs-shared/validators/personnel-group.mjs`.
 
 ### Value Shape
 
@@ -1545,9 +1545,9 @@ Translates to:
 
 ```sql
 WHERE (
-  (off_personnel_rb_count = 1 AND off_personnel_te_count = 1 AND off_personnel_wr_count = 3)
+  (offense_personnel_rb_count = 1 AND offense_personnel_te_count = 1 AND offense_personnel_wr_count = 3)
   OR
-  (off_personnel_rb_count = 1 AND off_personnel_te_count = 2 AND off_personnel_wr_count = 2)
+  (offense_personnel_rb_count = 1 AND offense_personnel_te_count = 2 AND offense_personnel_wr_count = 2)
 )
 ```
 
@@ -1562,16 +1562,16 @@ Each OBJECT_PRESET param specifies:
 
 ### Backing Columns
 
-Authoritative columns (parsed from the NFL-feed `off_personnel` / `def_personnel` strings):
+Authoritative columns (parsed from the NFL-feed `offense_personnel` / `defense_personnel` strings):
 
-- `off_personnel_qb_count`, `off_personnel_rb_count`, `off_personnel_te_count`, `off_personnel_wr_count`, `off_personnel_ol_count`
-- `def_personnel_dl_count`, `def_personnel_lb_count`, `def_personnel_db_count`
+- `offense_personnel_qb_count`, `offense_personnel_rb_count`, `offense_personnel_te_count`, `offense_personnel_wr_count`, `offense_personnel_ol_count`
+- `defense_personnel_dl_count`, `defense_personnel_lb_count`, `defense_personnel_db_count`
 
 PlayerProfiler-source columns (preserved snap-classification counts, not used by the filter):
 
-- `off_personnel_rb_count_per_play`, `off_personnel_te_count_per_play`, `off_personnel_wr_count_per_play`
+- `offense_personnel_rb_count_per_play`, `offense_personnel_te_count_per_play`, `offense_personnel_wr_count_per_play`
 
-Per-partition composite indexes cover `(off_personnel_rb_count, off_personnel_te_count, off_personnel_wr_count)` and `(def_personnel_dl_count, def_personnel_lb_count, def_personnel_db_count)`.
+Per-partition composite indexes cover `(offense_personnel_rb_count, offense_personnel_te_count, offense_personnel_wr_count)` and `(defense_personnel_dl_count, defense_personnel_lb_count, defense_personnel_db_count)`.
 
 ### Discrepancy Log
 
@@ -1592,7 +1592,7 @@ The param option counts endpoint provides live row-count previews for `OBJECT_PR
 Request body:
 
 ```json
-{ "table_state": { "where": [ ... ] }, "target_param_name": "off_personnel" }
+{ "table_state": { "where": [ ... ] }, "target_param_name": "offense_personnel" }
 ```
 
 Response:

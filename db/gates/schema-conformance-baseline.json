@@ -1,7 +1,7 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-16T22:32:41.192Z",
-  "count": 601,
+  "generated_at": "2026-08-17T01:11:07.752Z",
+  "count": 498,
   "violations": [
     {
       "table": "adp_format",
@@ -364,21 +364,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "historical_injury_index",
-      "column": "snaps_def",
-      "rule": "shorthand"
-    },
-    {
-      "table": "historical_injury_index",
-      "column": "snaps_off",
-      "rule": "shorthand"
-    },
-    {
-      "table": "historical_injury_index",
-      "column": "snaps_st",
-      "rule": "shorthand"
-    },
-    {
       "table": "keeptradecut_liquidity",
       "column": "std_liquidity",
       "rule": "shorthand"
@@ -559,16 +544,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "nfl_game_coaches",
-      "column": "def_play_caller_id",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_game_coaches",
-      "column": "off_play_caller_id",
-      "rule": "shorthand"
-    },
-    {
       "table": "nfl_games",
       "column": "time_est",
       "rule": "shorthand"
@@ -620,37 +595,17 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "def_personnel_db_count",
+      "column": "defense_personnel_db_count",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "def_personnel_dl_count",
+      "column": "defense_personnel_dl_count",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "def_personnel_lb_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "def_personnel",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "def_score_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "def_score",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "def_timeouts_remaining",
+      "column": "defense_personnel_lb_count",
       "rule": "shorthand"
     },
     {
@@ -690,52 +645,32 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "off_formation",
+      "column": "offense_personnel_ol_count",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "off_personnel_ol_count",
+      "column": "offense_personnel_qb_count",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "off_personnel_qb_count",
+      "column": "offense_personnel_rb_count_per_play",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "off_personnel_rb_count_per_play",
+      "column": "offense_personnel_rb_count",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "off_personnel_rb_count",
+      "column": "offense_personnel_wr_count_per_play",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "off_personnel_te_count_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "off_personnel_te_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "off_personnel_wr_count_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "off_personnel_wr_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "off_personnel",
+      "column": "offense_personnel_wr_count",
       "rule": "shorthand"
     },
     {
@@ -935,16 +870,6 @@
     },
     {
       "table": "nfl_plays_player",
-      "column": "is_st_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "player_get_off",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_player",
       "column": "separation_to_qb",
       "rule": "shorthand"
     },
@@ -1035,37 +960,17 @@
     },
     {
       "table": "nfl_plays",
-      "column": "def_personnel_db_count",
+      "column": "defense_personnel_db_count",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
-      "column": "def_personnel_dl_count",
+      "column": "defense_personnel_dl_count",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
-      "column": "def_personnel_lb_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "def_personnel",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "def_score_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "def_score",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "def_timeouts_remaining",
+      "column": "defense_personnel_lb_count",
       "rule": "shorthand"
     },
     {
@@ -1140,52 +1045,32 @@
     },
     {
       "table": "nfl_plays",
-      "column": "off_formation",
+      "column": "offense_personnel_ol_count",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
-      "column": "off_personnel_ol_count",
+      "column": "offense_personnel_qb_count",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
-      "column": "off_personnel_qb_count",
+      "column": "offense_personnel_rb_count_per_play",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
-      "column": "off_personnel_rb_count_per_play",
+      "column": "offense_personnel_rb_count",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
-      "column": "off_personnel_rb_count",
+      "column": "offense_personnel_wr_count_per_play",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
-      "column": "off_personnel_te_count_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "off_personnel_te_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "off_personnel_wr_count_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "off_personnel_wr_count",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "off_personnel",
+      "column": "offense_personnel_wr_count",
       "rule": "shorthand"
     },
     {
@@ -1380,377 +1265,37 @@
     },
     {
       "table": "nfl_team_gamelogs",
-      "column": "def_avg_get_off",
+      "column": "defense_avg_get_off",
       "rule": "shorthand"
     },
     {
       "table": "nfl_team_gamelogs",
-      "column": "def_avg_target_separation",
+      "column": "defense_avg_target_separation",
       "rule": "shorthand"
     },
     {
       "table": "nfl_team_gamelogs",
-      "column": "def_avg_time_to_pressure",
+      "column": "defense_avg_time_to_pressure",
       "rule": "shorthand"
     },
     {
       "table": "nfl_team_gamelogs",
-      "column": "def_avg_time_to_throw",
+      "column": "defense_avg_time_to_throw",
       "rule": "shorthand"
     },
     {
       "table": "nfl_team_gamelogs",
-      "column": "def_blitz_rate",
+      "column": "offense_avg_target_separation",
       "rule": "shorthand"
     },
     {
       "table": "nfl_team_gamelogs",
-      "column": "def_pass_epa_per_play",
+      "column": "offense_avg_time_to_pressure",
       "rule": "shorthand"
     },
     {
       "table": "nfl_team_gamelogs",
-      "column": "def_pass_epa",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_pass_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_pass_plays",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_pass_touchdowns",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_pass_yards_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_pass_yards",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_pressure_rate",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_pressures",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_run_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_run_plays",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_attempts_inside_tackles_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_attempts_light_box_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_attempts_outside_tackles_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_attempts_stacked_box_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_epa_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_epa",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_stuffed_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_touchdowns",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_yards_10_plus",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_yards_after_contact_per_attempt",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_yards_before_contact_per_attempt",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_yards_over_expected_per_attempt",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_yards_over_expected",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_yards_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_rush_yards",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_sack_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_sack_yards",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_sacks",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_tight_window_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_yards_after_catch_over_expected",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "def_yards_after_catch",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_avg_target_separation",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_avg_time_to_pressure",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_avg_time_to_throw",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_blitz_rate",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_pass_attempts",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_pass_epa_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_pass_epa",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_pass_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_pass_plays",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_pass_touchdowns",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_pass_yards_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_pass_yards",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_play_action_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_pressure_rate",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_pressures",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_run_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_run_plays",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_attempts_inside_tackles_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_attempts_light_box_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_attempts_outside_tackles_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_attempts_stacked_box_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_attempts_stuffed_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_epa_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_epa",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_success_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_touchdowns",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_yards_10_plus",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_yards_after_contact_per_attempt",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_yards_before_contact_per_attempt",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_yards_over_expected_per_attempt",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_yards_over_expected",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_yards_per_play",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_rush_yards",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_sack_rate",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_sack_yards",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_sacks",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_yards_after_catch_over_expected",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_team_gamelogs",
-      "column": "off_yards_after_catch",
+      "column": "offense_avg_time_to_throw",
       "rule": "shorthand"
     },
     {
@@ -2040,16 +1585,6 @@
     },
     {
       "table": "player_college_careerlogs",
-      "column": "run_def_points_rating",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_careerlogs",
-      "column": "run_def_points",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_careerlogs",
       "column": "vert_jump_is_pro_day",
       "rule": "shorthand"
     },
@@ -2175,16 +1710,6 @@
     },
     {
       "table": "player_college_seasonlogs",
-      "column": "run_def_points_rating",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
-      "column": "run_def_points",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
       "column": "vert_jump_is_pro_day",
       "rule": "shorthand"
     },
@@ -2201,11 +1726,6 @@
     {
       "table": "player_defender_gamelogs",
       "column": "avg_target_separation_allowed",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_defender_gamelogs",
-      "column": "pass_rush_get_off",
       "rule": "shorthand"
     },
     {
@@ -2240,92 +1760,82 @@
     },
     {
       "table": "player_gamelogs",
-      "column": "q1_snaps_def_percentage",
+      "column": "q1_snaps_defense_percentage",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q1_snaps_def",
+      "column": "q1_snaps_defense",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q1_snaps_off_percentage",
+      "column": "q1_snaps_offense_percentage",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q1_snaps_off",
+      "column": "q1_snaps_offense",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q2_snaps_def_percentage",
+      "column": "q2_snaps_defense_percentage",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q2_snaps_def",
+      "column": "q2_snaps_defense",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q2_snaps_off_percentage",
+      "column": "q2_snaps_offense_percentage",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q2_snaps_off",
+      "column": "q2_snaps_offense",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q3_snaps_def_percentage",
+      "column": "q3_snaps_defense_percentage",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q3_snaps_def",
+      "column": "q3_snaps_defense",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q3_snaps_off_percentage",
+      "column": "q3_snaps_offense_percentage",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q3_snaps_off",
+      "column": "q3_snaps_offense",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q4_snaps_def_percentage",
+      "column": "q4_snaps_defense_percentage",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q4_snaps_def",
+      "column": "q4_snaps_defense",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q4_snaps_off_percentage",
+      "column": "q4_snaps_offense_percentage",
       "rule": "shorthand"
     },
     {
       "table": "player_gamelogs",
-      "column": "q4_snaps_off",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "snaps_def_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "snaps_def",
+      "column": "q4_snaps_offense",
       "rule": "shorthand"
     },
     {
@@ -2336,26 +1846,6 @@
     {
       "table": "player_gamelogs",
       "column": "snaps_low_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "snaps_off_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "snaps_off",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "snaps_st_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "snaps_st",
       "rule": "shorthand"
     },
     {
@@ -2421,11 +1911,6 @@
     {
       "table": "player_passing_gamelogs",
       "column": "pass_epa_per_db",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_prospect_profile",
-      "column": "positional_factor_off_man_coverage",
       "rule": "shorthand"
     },
     {

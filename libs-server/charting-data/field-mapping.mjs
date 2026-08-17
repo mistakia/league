@@ -192,25 +192,25 @@ export function map_charting_play_to_db_fields(source_play) {
     result.qb_position = map_qb_alignment(source_play.quarterbackAlignment)
   }
 
-  // formation -> off_formation
+  // formation -> offense_formation
   if ('formation' in source_play && source_play.formation !== undefined) {
-    result.off_formation = source_play.formation
+    result.offense_formation = source_play.formation
   }
 
-  // offensivePersonnelBasic -> off_personnel
+  // offensivePersonnelBasic -> offense_personnel
   if (
     'offensivePersonnelBasic' in source_play &&
     source_play.offensivePersonnelBasic !== undefined
   ) {
-    result.off_personnel = source_play.offensivePersonnelBasic
+    result.offense_personnel = source_play.offensivePersonnelBasic
   }
 
-  // defensivePersonnelPackage -> def_personnel
+  // defensivePersonnelPackage -> defense_personnel
   if (
     'defensivePersonnelPackage' in source_play &&
     source_play.defensivePersonnelPackage !== undefined
   ) {
-    result.def_personnel = source_play.defensivePersonnelPackage
+    result.defense_personnel = source_play.defensivePersonnelPackage
   }
 
   // runSide -> run_location

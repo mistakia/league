@@ -580,7 +580,7 @@ const format_timeout_data = (play) => {
         ? play.defteam_timeouts_remaining
         : play.posteam_timeouts_remaining
     ),
-    def_timeouts_remaining: format_number(
+    defense_timeouts_remaining: format_number(
       is_kickoff
         ? play.posteam_timeouts_remaining
         : play.defteam_timeouts_remaining
@@ -598,7 +598,7 @@ const format_score_data = (play) => {
     pos_score: format_number(
       is_kickoff ? play.defteam_score : play.posteam_score
     ),
-    def_score: format_number(
+    defense_score: format_number(
       is_kickoff ? play.posteam_score : play.defteam_score
     ),
     score_difference: format_number(
@@ -607,7 +607,7 @@ const format_score_data = (play) => {
     pos_score_post: format_number(
       is_kickoff ? play.defteam_score_post : play.posteam_score_post
     ),
-    def_score_post: format_number(
+    defense_score_post: format_number(
       is_kickoff ? play.posteam_score_post : play.defteam_score_post
     ),
     score_difference_post: format_number(

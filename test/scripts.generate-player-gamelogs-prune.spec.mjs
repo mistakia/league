@@ -57,7 +57,7 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
     nfl_team: 'NE',
     opponent_nfl_team: 'BUF',
     player_position: 'DE',
-    snaps_def: 48
+    snaps_defense: 48
   })
 
   const player_row = ({ pid, last_name, date_of_birth }) => ({
@@ -157,7 +157,7 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
   it('never claims a snap-only row, which another writer also produces', async () => {
     await run_prune(produced_pids)
 
-    // `generate-player-snaps.mjs` writes `snaps_off`/`snaps_def`/`snaps_st` from
+    // `generate-player-snaps.mjs` writes `snaps_offense`/`snaps_defense`/`snaps_special_teams` from
     // its own derivation, sets no `source`, and runs AFTER this script in both
     // pipelines. Reading a snap count as proof of ownership let a single-game
     // regeneration delete that writer's data.
@@ -166,7 +166,7 @@ describe('SCRIPTS generate-player-gamelogs prune', function () {
       .first()
 
     expect(survivor).to.not.equal(undefined)
-    expect(survivor.snaps_def).to.equal(48)
+    expect(survivor.snaps_defense).to.equal(48)
   })
 
   it('deletes nothing for a game the run produced no rows for', async () => {

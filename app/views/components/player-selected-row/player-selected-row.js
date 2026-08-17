@@ -285,12 +285,12 @@ const get_stat_fields = (pos, fantasy_stats_filter = null) => {
 
 const get_snaps_fields = (pos) => {
   const snaps_configs = {
-    DST: ['snaps_def', 'snaps_st'],
-    K: ['snaps_def', 'snaps_st'],
-    QB: ['snaps_off', 'snaps_pass', 'snaps_rush'],
-    RB: ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st'],
-    WR: ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st'],
-    TE: ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st']
+    DST: ['snaps_defense', 'snaps_special_teams'],
+    K: ['snaps_defense', 'snaps_special_teams'],
+    QB: ['snaps_offense', 'snaps_pass', 'snaps_rush'],
+    RB: ['snaps_offense', 'snaps_pass', 'snaps_rush', 'snaps_special_teams'],
+    WR: ['snaps_offense', 'snaps_pass', 'snaps_rush', 'snaps_special_teams'],
+    TE: ['snaps_offense', 'snaps_pass', 'snaps_rush', 'snaps_special_teams']
   }
 
   return snaps_configs[pos] || []

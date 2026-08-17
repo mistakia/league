@@ -57,7 +57,7 @@ export const player_years_teams_cte_sql = ({ year_range }) => {
 // week). `columns` is an extension point: each entry contributes an inner
 // projection (`inner`, selected from the gamelog source) and an outer aggregate
 // (`outer`, in the grouped SELECT) so the sibling active/started/snaps task can
-// add started / snaps_off without editing this builder. The raw `active`
+// add started / snaps_offense without editing this builder. The raw `active`
 // boolean is available directly — no enum decoding required.
 export const player_participation_weeks_cte_sql = ({
   year_range,

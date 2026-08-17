@@ -69,7 +69,7 @@ CREATE TABLE public.nfl_plays_player (
 );
 
 CREATE TABLE public.nfl_team_gamelogs (
-    def_avg_get_off numeric(5,2),
+    defense_avg_get_off numeric(5,2),
     off_pass_epa numeric(5,2)
 );
 `
@@ -203,10 +203,12 @@ describe('schema conformance audit -- 2026-08-15 oracle repair', function () {
     // a get_off column AND an `avg`/`def` column, both owned by later batches;
     // accepting the whole column would silently retire debt this cluster still
     // owes. Pinned as the exact token list so a widening to column scope fails.
-    expect(shorthand_columns).to.include('nfl_team_gamelogs.def_avg_get_off')
-    expect(shorthand_tokens.get('nfl_team_gamelogs.def_avg_get_off')).to.equal(
-      'def, avg'
+    expect(shorthand_columns).to.include(
+      'nfl_team_gamelogs.defense_avg_get_off'
     )
+    expect(
+      shorthand_tokens.get('nfl_team_gamelogs.defense_avg_get_off')
+    ).to.equal('avg')
   })
 
   it('still flags `off` where the sense exemption does not apply', function () {
@@ -230,7 +232,7 @@ describe('schema conformance audit -- 2026-08-15 oracle repair', function () {
       'nfl_plays.second_and_mid',
       'nfl_plays.starter_slots_qb',
       'nfl_plays.userid',
-      'nfl_team_gamelogs.def_avg_get_off',
+      'nfl_team_gamelogs.defense_avg_get_off',
       'nfl_team_gamelogs.off_pass_epa'
     ])
   })

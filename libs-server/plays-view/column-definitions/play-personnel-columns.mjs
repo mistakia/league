@@ -2,22 +2,22 @@ import db from '#db'
 
 export default {
   play_off_formation: {
-    column_name: 'off_formation',
+    column_name: 'offense_formation',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.off_formation as play_off_formation'],
-    main_where: () => 'nfl_plays.off_formation'
+    main_select: () => ['nfl_plays.offense_formation as play_off_formation'],
+    main_where: () => 'nfl_plays.offense_formation'
   },
   play_off_personnel: {
-    column_name: 'off_personnel',
+    column_name: 'offense_personnel',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.off_personnel as play_off_personnel'],
-    main_where: () => 'nfl_plays.off_personnel'
+    main_select: () => ['nfl_plays.offense_personnel as play_off_personnel'],
+    main_where: () => 'nfl_plays.offense_personnel'
   },
   play_def_personnel: {
-    column_name: 'def_personnel',
+    column_name: 'defense_personnel',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.def_personnel as play_def_personnel'],
-    main_where: () => 'nfl_plays.def_personnel'
+    main_select: () => ['nfl_plays.defense_personnel as play_def_personnel'],
+    main_where: () => 'nfl_plays.defense_personnel'
   },
   play_box_defenders: {
     column_name: 'box_defenders',

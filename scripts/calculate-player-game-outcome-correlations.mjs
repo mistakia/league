@@ -53,11 +53,11 @@ const calculate_player_game_outcome_correlations = async ({
     )
     .whereNotNull('player_gamelogs.snaps_leading')
     .whereNotNull('player_gamelogs.snaps_trailing')
-    .where('player_gamelogs.snaps_off', '>', 0)
+    .where('player_gamelogs.snaps_offense', '>', 0)
     .select(
       'player_gamelogs.pid',
       'player_gamelogs.esbid',
-      'player_gamelogs.snaps_off',
+      'player_gamelogs.snaps_offense',
       'player_gamelogs.snaps_leading',
       'player_gamelogs.snaps_trailing',
       'scoring_format_player_gamelogs.points'
@@ -76,7 +76,7 @@ const calculate_player_game_outcome_correlations = async ({
 
     const snaps_leading = gl.snaps_leading || 0
     const snaps_trailing = gl.snaps_trailing || 0
-    const total_snaps = gl.snaps_off || 1
+    const total_snaps = gl.snaps_offense || 1
 
     // Calculate game script score: ranges from -1 (all trailing) to +1 (all leading)
     const script_score = (snaps_leading - snaps_trailing) / total_snaps

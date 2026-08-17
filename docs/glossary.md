@@ -330,49 +330,49 @@
 
 ### Situation
 
-| column                    | name                          | description                                                                  | coverage | since      |
-| ------------------------- | ----------------------------- | ---------------------------------------------------------------------------- | -------- | ---------- |
-| down_number               | Down                          | Current down in the play                                                     | 99.99%   | 2001/01/06 |
-| quarter                   | Quarter                       | Current quarter of the game                                                  | 100.00%  | 2001/01/06 |
-| yard_line_num             | Yard Line Number              | Numeric distance in yards from the closest endzone                           | 99.93%   | 2001/01/06 |
-| yard_line_side            | Yard Line Side                | Side of the field for the yard line (e.g., home or away)                     | 99.93%   | 2001/01/06 |
-| yard_line_start           | Yard Line Start               | Starting yard line for the play                                              | 99.15%   | 2001/01/06 |
-| yard_line_end             | Yard Line End                 | Ending yard line after the play                                              | 98.13%   | 2001/01/06 |
-| yard_line_100             | Yard Line 100                 | Numeric distance in yards from the opponent's endzone for the posteam        | 99.15%   | 2001/01/06 |
-| starting_hash             | Starting Hash                 | Starting hash location LEFT, RIGHT, or MIDDLE (in-between)                   | 83.72%   | 2021/09/09 |
-| yards_to_go               | Yards to Go                   | Yards remaining to achieve a first down                                      | 99.99%   | 2001/01/06 |
-| yards_from_own_goal       | Yards from Own Goal           | Yards from the team's own goal line                                          | -        | -          |
-| is_goal_to_go             | Goal to Go                    | Indicator if the team is in a goal-to-go situation                           | 99.15%   | 2001/01/06 |
-| game_clock_start          | Game Clock Start              | Game time at the start of the play                                           | 94.66%   | 2001/01/06 |
-| game_clock_end            | Game Clock End                | Game time at the end of the play                                             | 70.02%   | 2001/09/09 |
-| seconds_remaining_quarter | Seconds Remaining Quarter     | Seconds remaining in the quarter                                             | 83.93%   | 2001/01/06 |
-| seconds_remaining_half    | Seconds Remaining Half        | Seconds remaining in the half                                                | 83.93%   | 2001/01/06 |
-| seconds_remaining_game    | Seconds Remaining Game        | Seconds remaining in the game                                                | 83.93%   | 2001/01/06 |
-| play_clock                | Play Clock                    | Time on the play clock when the ball was snapped                             | 71.39%   | 2001/01/06 |
-| home_timeouts_remaining   | Home Timeouts Remaining       | Numeric timeouts remaining in the half for the home team.                    | 83.52%   | 2001/01/06 |
-| away_timeouts_remaining   | Away Timeouts Remaining       | Numeric timeouts remaining in the half for the away team.                    | 83.52%   | 2001/01/06 |
-| pos_timeouts_remaining    | Possession Timeouts Remaining | Number of timeouts remaining for the possession team.                        | 83.52%   | 2001/01/06 |
-| def_timeouts_remaining    | Defense Timeouts Remaining    | Number of timeouts remaining for the team on defense.                        | 83.52%   | 2001/01/06 |
-| home_score                | Home Score                    | Score for the home team at the end of the play.                              | 98.59%   | 2001/01/06 |
-| away_score                | Away Score                    | Score for the away team at the end of the play.                              | 98.59%   | 2001/01/06 |
-| pos_score                 | Possession Team Score         | Score the posteam at the start of the play.                                  | 83.52%   | 2001/01/06 |
-| def_score                 | Defense Team Score            | Score the defteam at the start of the play.                                  | 83.52%   | 2001/01/06 |
-| score_difference          | Score Difference              | Score differential between the posteam and defteam at the start of the play. | 83.52%   | 2001/01/06 |
-| pos_score_post            | Possession Team Score Post    | Score for the posteam at the end of the play.                                | 83.52%   | 2001/01/06 |
-| def_score_post            | Defense Team Score Post       | Score for the defteam at the end of the play.                                | 83.52%   | 2001/01/06 |
-| score_difference_post     | Score Difference Post         | Score differential between the posteam and defteam at the end of the play.   | 83.52%   | 2001/01/06 |
-| is_third_down_converted   | Third Down Converted          | Indicator if the play was a third down conversion                            | 83.52%   | 2001/01/06 |
-| is_third_down_failed      | Third Down Failed             | Indicator if the play was a third down failed conversion                     | 83.52%   | 2001/01/06 |
-| is_fourth_down_converted  | Fourth Down Converted         | Indicator if the play was a fourth down conversion                           | 83.52%   | 2001/01/06 |
-| is_fourth_down_failed     | Fourth Down Failed            | Indicator if the play was a fourth down failed conversion                    | 83.52%   | 2001/01/06 |
+| column                     | name                          | description                                                                  | coverage | since      |
+| -------------------------- | ----------------------------- | ---------------------------------------------------------------------------- | -------- | ---------- |
+| down_number                | Down                          | Current down in the play                                                     | 99.99%   | 2001/01/06 |
+| quarter                    | Quarter                       | Current quarter of the game                                                  | 100.00%  | 2001/01/06 |
+| yard_line_num              | Yard Line Number              | Numeric distance in yards from the closest endzone                           | 99.93%   | 2001/01/06 |
+| yard_line_side             | Yard Line Side                | Side of the field for the yard line (e.g., home or away)                     | 99.93%   | 2001/01/06 |
+| yard_line_start            | Yard Line Start               | Starting yard line for the play                                              | 99.15%   | 2001/01/06 |
+| yard_line_end              | Yard Line End                 | Ending yard line after the play                                              | 98.13%   | 2001/01/06 |
+| yard_line_100              | Yard Line 100                 | Numeric distance in yards from the opponent's endzone for the posteam        | 99.15%   | 2001/01/06 |
+| starting_hash              | Starting Hash                 | Starting hash location LEFT, RIGHT, or MIDDLE (in-between)                   | 83.72%   | 2021/09/09 |
+| yards_to_go                | Yards to Go                   | Yards remaining to achieve a first down                                      | 99.99%   | 2001/01/06 |
+| yards_from_own_goal        | Yards from Own Goal           | Yards from the team's own goal line                                          | -        | -          |
+| is_goal_to_go              | Goal to Go                    | Indicator if the team is in a goal-to-go situation                           | 99.15%   | 2001/01/06 |
+| game_clock_start           | Game Clock Start              | Game time at the start of the play                                           | 94.66%   | 2001/01/06 |
+| game_clock_end             | Game Clock End                | Game time at the end of the play                                             | 70.02%   | 2001/09/09 |
+| seconds_remaining_quarter  | Seconds Remaining Quarter     | Seconds remaining in the quarter                                             | 83.93%   | 2001/01/06 |
+| seconds_remaining_half     | Seconds Remaining Half        | Seconds remaining in the half                                                | 83.93%   | 2001/01/06 |
+| seconds_remaining_game     | Seconds Remaining Game        | Seconds remaining in the game                                                | 83.93%   | 2001/01/06 |
+| play_clock                 | Play Clock                    | Time on the play clock when the ball was snapped                             | 71.39%   | 2001/01/06 |
+| home_timeouts_remaining    | Home Timeouts Remaining       | Numeric timeouts remaining in the half for the home team.                    | 83.52%   | 2001/01/06 |
+| away_timeouts_remaining    | Away Timeouts Remaining       | Numeric timeouts remaining in the half for the away team.                    | 83.52%   | 2001/01/06 |
+| pos_timeouts_remaining     | Possession Timeouts Remaining | Number of timeouts remaining for the possession team.                        | 83.52%   | 2001/01/06 |
+| defense_timeouts_remaining | Defense Timeouts Remaining    | Number of timeouts remaining for the team on defense.                        | 83.52%   | 2001/01/06 |
+| home_score                 | Home Score                    | Score for the home team at the end of the play.                              | 98.59%   | 2001/01/06 |
+| away_score                 | Away Score                    | Score for the away team at the end of the play.                              | 98.59%   | 2001/01/06 |
+| pos_score                  | Possession Team Score         | Score the posteam at the start of the play.                                  | 83.52%   | 2001/01/06 |
+| defense_score              | Defense Team Score            | Score the defteam at the start of the play.                                  | 83.52%   | 2001/01/06 |
+| score_difference           | Score Difference              | Score differential between the posteam and defteam at the start of the play. | 83.52%   | 2001/01/06 |
+| pos_score_post             | Possession Team Score Post    | Score for the posteam at the end of the play.                                | 83.52%   | 2001/01/06 |
+| defense_score_post         | Defense Team Score Post       | Score for the defteam at the end of the play.                                | 83.52%   | 2001/01/06 |
+| score_difference_post      | Score Difference Post         | Score differential between the posteam and defteam at the end of the play.   | 83.52%   | 2001/01/06 |
+| is_third_down_converted    | Third Down Converted          | Indicator if the play was a third down conversion                            | 83.52%   | 2001/01/06 |
+| is_third_down_failed       | Third Down Failed             | Indicator if the play was a third down failed conversion                     | 83.52%   | 2001/01/06 |
+| is_fourth_down_converted   | Fourth Down Converted         | Indicator if the play was a fourth down conversion                           | 83.52%   | 2001/01/06 |
+| is_fourth_down_failed      | Fourth Down Failed            | Indicator if the play was a fourth down failed conversion                    | 83.52%   | 2001/01/06 |
 
 ### Personnel, Formation & Coverage
 
 | column                   | name                  | description                                                                              | coverage | since      |
 | ------------------------ | --------------------- | ---------------------------------------------------------------------------------------- | -------- | ---------- |
-| off_formation            | Offensive Formation   | Description of the offensive formation                                                   | 98.03%   | 2016/08/11 |
-| off_personnel            | Offensive Personnel   | Description of the offensive personnel involved                                          | 98.06%   | 2016/08/11 |
-| def_personnel            | Defensive Personnel   | Description of the defensive personnel involved                                          | 98.03%   | 2016/08/11 |
+| offense_formation        | Offensive Formation   | Description of the offensive formation                                                   | 98.03%   | 2016/08/11 |
+| offense_personnel        | Offensive Personnel   | Description of the offensive personnel involved                                          | 98.06%   | 2016/08/11 |
+| defense_personnel        | Defensive Personnel   | Description of the defensive personnel involved                                          | 98.03%   | 2016/08/11 |
 | man_zone                 | Man Zone Coverage     | Man or zone coverage designation                                                         | 95.01%   | 2018/08/09 |
 | cov_type                 | Coverage Type         | Type of coverage scheme used                                                             | 94.97%   | 2018/08/09 |
 | cov_type_charted         | Coverage Type Charted | Type of coverage according to Charted Stats                                              | 13.91%   | 2021/09/09 |

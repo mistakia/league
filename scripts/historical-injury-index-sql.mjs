@@ -14,7 +14,7 @@ WITH reg_games AS (
 ),
 gl AS (
   SELECT pg.pid, pg.esbid, pg.season_year AS year, pg.nfl_team, pg.is_active,
-         pg.snaps_off, pg.snaps_def, pg.snaps_st,
+         pg.snaps_offense, pg.snaps_defense, pg.snaps_special_teams,
          pg.is_ruled_out_in_game,
          (COALESCE(pg.passing_attempts,0)+COALESCE(pg.rushing_attempts,0)+COALESCE(pg.targets,0)
           +COALESCE(pg.receptions,0)+COALESCE(pg.field_goals_made,0)+COALESCE(pg.extra_points_made,0)
@@ -81,14 +81,14 @@ SELECT
   s.nfl_team,
   CASE
     WHEN gl.pid IS NULL THEN false
-    WHEN gl.snaps_off IS NULL AND gl.snaps_def IS NULL AND gl.snaps_st IS NULL
+    WHEN gl.snaps_offense IS NULL AND gl.snaps_defense IS NULL AND gl.snaps_special_teams IS NULL
       THEN (gl.any_stat_count > 0)
-    ELSE COALESCE(gl.snaps_off,0) + COALESCE(gl.snaps_def,0) + COALESCE(gl.snaps_st,0) > 0
+    ELSE COALESCE(gl.snaps_offense,0) + COALESCE(gl.snaps_defense,0) + COALESCE(gl.snaps_special_teams,0) > 0
   END AS is_played,
   CASE WHEN gl.pid IS NULL THEN NULL
-       ELSE COALESCE(gl.snaps_off,0) + COALESCE(gl.snaps_def,0) + COALESCE(gl.snaps_st,0)
+       ELSE COALESCE(gl.snaps_offense,0) + COALESCE(gl.snaps_defense,0) + COALESCE(gl.snaps_special_teams,0)
   END AS snap_count,
-  gl.snaps_off, gl.snaps_def, gl.snaps_st,
+  gl.snaps_offense, gl.snaps_defense, gl.snaps_special_teams,
   gl.is_active AS is_gamelog_active,
   gl.is_ruled_out_in_game,
   COALESCE(ps.has_practice_listed_injury, false) AS has_practice_listed_injury,
@@ -104,7 +104,7 @@ SELECT
     WHEN gl.is_ruled_out_in_game                                         THEN 'in-game-injury'
     WHEN ps.is_practice_questionable_or_worse                            THEN 'practice-report-out'
     WHEN cs.is_changelog_unavailable                                     THEN 'changelog-out'
-    WHEN (COALESCE(gl.snaps_off,0) + COALESCE(gl.snaps_def,0) + COALESCE(gl.snaps_st,0)) = 0
+    WHEN (COALESCE(gl.snaps_offense,0) + COALESCE(gl.snaps_defense,0) + COALESCE(gl.snaps_special_teams,0)) = 0
          AND gl.pid IS NOT NULL                                          THEN 'zero-snap'
     ELSE NULL
   END AS missed_reason,

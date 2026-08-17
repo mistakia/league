@@ -194,7 +194,7 @@ export const PLAYS_LOCAL_PARAM_RENAMES = {
   away_to_rem: 'away_timeouts_remaining',
   away_wp: 'away_win_probability',
   away_wp_post: 'away_win_probability_post',
-  def_to_rem: 'def_timeouts_remaining',
+  def_to_rem: 'defense_timeouts_remaining',
   drive_end_qtr: 'drive_end_quarter',
   drive_fds: 'drive_first_downs',
   drive_seq: 'drive_sequence',
@@ -219,6 +219,32 @@ export const PLAYS_LOCAL_PARAM_RENAMES = {
   xyac_succ_prob: 'xyac_success_prob',
   ydl_100: 'yard_line_100',
   ydl_num: 'yard_line_num'
+}
+
+// Side-of-the-ball prefixes, renamed by the 2026-08-16 conform
+// (db/adhoc/2026-08-16-conform-side-prefix-tokens.sql): off -> offense,
+// def -> defense, st -> special_teams across 141 columns. Five of them are
+// registry KEYS in nfl-plays-column-params.mjs, so a saved view persisting the
+// old key loses its filter silently -- the 45-view failure the maps above
+// record, which is why these ship in the same change as the DDL.
+//
+// Note def_to_rem in PLAYS_LOCAL_PARAM_RENAMES was repointed from
+// def_timeouts_remaining to defense_timeouts_remaining in this same change
+// rather than being left to chain through the entry below. A rename map's
+// TARGET must always be the name the registry carries TODAY: chaining works
+// here only because the merge order happens to place that map first, and a map
+// whose target is itself legacy is one reordering away from silently resolving
+// to a key nothing recognises.
+//
+// No column ID moves: the plays-view ids are the play_* spellings and the
+// from-plays ids are semantic stat_names, neither of which embeds a side
+// prefix. Only these five param keys rename.
+export const SIDE_PREFIX_PARAM_RENAMES = {
+  def_personnel: 'defense_personnel',
+  def_score: 'defense_score',
+  def_score_post: 'defense_score_post',
+  def_timeouts_remaining: 'defense_timeouts_remaining',
+  off_personnel: 'offense_personnel'
 }
 
 // scoring_format_hash -> scoring_format_id, stranded by the format-id migration
@@ -415,7 +441,8 @@ const PARAM_KEY_RENAMES = {
   ...PLAY_FILTER_PARAM_RENAMES,
   ...BOOLEAN_PREFIX_PARAM_RENAMES,
   ...SHORTHAND_PARAM_RENAMES,
-  ...PLAYS_LOCAL_PARAM_RENAMES
+  ...PLAYS_LOCAL_PARAM_RENAMES,
+  ...SIDE_PREFIX_PARAM_RENAMES
 }
 
 // Every legacy param key this module rewrites at read time, exported so

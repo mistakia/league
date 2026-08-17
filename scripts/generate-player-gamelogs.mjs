@@ -1173,7 +1173,7 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['is_active']
 // status and never one of these, so a stat-bearing row can only have come from
 // a play-stat build.
 //
-// `snaps_off` / `snaps_def` / `snaps_st` are deliberately ABSENT, and the
+// `snaps_offense` / `snaps_defense` / `snaps_special_teams` are deliberately ABSENT, and the
 // omission is the point. This script's snap path writes them, but so does
 // `scripts/generate-player-snaps.mjs`, which derives them from `nfl_snaps`
 // joined to `nfl_plays` -- a different derivation -- with a bare `.merge()`,
@@ -1181,7 +1181,7 @@ export const GAMELOG_COLUMNS_NOT_MERGED = ['is_active']
 // (`libs-server/finalize-game.mjs`, `scripts/process-stats-for-week.mjs`).
 // Treating a snap count as proof of ownership let this script claim that
 // writer's rows: a later single-game regeneration that failed to reproduce a
-// player would see `snaps_def > 0`, call the row its own, and delete snap data
+// player would see `snaps_defense > 0`, call the row its own, and delete snap data
 // it never wrote.
 //
 // The cost is that a snap-only row predating the `source` stamp is no longer
