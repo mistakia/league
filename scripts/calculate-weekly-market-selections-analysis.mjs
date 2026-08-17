@@ -293,11 +293,11 @@ const format_prop_row = ({
     overall_hit_weeks_hard: overall_data.hit_weeks_hard,
     overall_weeks_played: overall_data.weeks_played,
 
-    current_season_hits_opp: opponent_hit_weeks.length,
-    current_season_opp_hit_weeks: opponent_hit_weeks.length
+    current_season_hits_opponent: opponent_hit_weeks.length,
+    current_season_opponent_hit_weeks: opponent_hit_weeks.length
       ? JSON.stringify(opponent_hit_weeks.sort())
       : null,
-    current_season_opp_weeks_played: JSON.stringify(
+    current_season_opponent_weeks_played: JSON.stringify(
       opponent_weeks_played.sort()
     )
   }

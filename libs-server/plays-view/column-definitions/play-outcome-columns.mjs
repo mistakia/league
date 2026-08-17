@@ -101,12 +101,14 @@ export default {
     use_having: true
   },
   play_xpass_prob: {
-    column_name: 'xpass_prob',
+    column_name: 'expected_pass_probability',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.xpass_prob as play_xpass_prob'],
-    main_where: () => 'nfl_plays.xpass_prob',
+    main_select: () => [
+      'nfl_plays.expected_pass_probability as play_xpass_prob'
+    ],
+    main_where: () => 'nfl_plays.expected_pass_probability',
     aggregate_select: () =>
-      db.raw('AVG(nfl_plays.xpass_prob) as play_xpass_prob'),
+      db.raw('AVG(nfl_plays.expected_pass_probability) as play_xpass_prob'),
     use_having: true
   },
   play_pass_oe: {

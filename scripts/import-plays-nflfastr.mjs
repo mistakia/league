@@ -468,9 +468,7 @@ const format_epa_data = (play) => {
     total_home_pass_epa: format_number(play.total_home_pass_epa),
     total_away_pass_epa: format_number(play.total_away_pass_epa),
     quarterback_epa: format_number(
-      is_kickoff && play.quarterback_epa != null
-        ? -play.quarterback_epa
-        : play.quarterback_epa
+      is_kickoff && play.qb_epa != null ? -play.qb_epa : play.qb_epa
     ),
     air_epa: format_number(
       is_kickoff && play.air_epa != null ? -play.air_epa : play.air_epa
@@ -479,30 +477,22 @@ const format_epa_data = (play) => {
       is_kickoff && play.yac_epa != null ? -play.yac_epa : play.yac_epa
     ),
     completion_air_epa: format_number(
-      is_kickoff && play.completion_air_epa != null
-        ? -play.completion_air_epa
-        : play.completion_air_epa
+      is_kickoff && play.comp_air_epa != null
+        ? -play.comp_air_epa
+        : play.comp_air_epa
     ),
     completion_yac_epa: format_number(
-      is_kickoff && play.completion_yac_epa != null
-        ? -play.completion_yac_epa
-        : play.completion_yac_epa
+      is_kickoff && play.comp_yac_epa != null
+        ? -play.comp_yac_epa
+        : play.comp_yac_epa
     ),
     xyac_epa: format_number(
       is_kickoff && play.xyac_epa != null ? -play.xyac_epa : play.xyac_epa
     ),
-    total_home_completion_air_epa: format_number(
-      play.total_home_completion_air_epa
-    ),
-    total_away_completion_air_epa: format_number(
-      play.total_away_completion_air_epa
-    ),
-    total_home_completion_yac_epa: format_number(
-      play.total_home_completion_yac_epa
-    ),
-    total_away_completion_yac_epa: format_number(
-      play.total_away_completion_yac_epa
-    ),
+    total_home_completion_air_epa: format_number(play.total_home_comp_air_epa),
+    total_away_completion_air_epa: format_number(play.total_away_comp_air_epa),
+    total_home_completion_yac_epa: format_number(play.total_home_comp_yac_epa),
+    total_away_completion_yac_epa: format_number(play.total_away_comp_yac_epa),
     total_home_raw_air_epa: format_number(play.total_home_raw_air_epa),
     total_away_raw_air_epa: format_number(play.total_away_raw_air_epa),
     total_home_raw_yac_epa: format_number(play.total_home_raw_yac_epa),
@@ -515,20 +505,18 @@ const format_wpa_data = (play) => {
   return {
     wp: format_number(is_kickoff && play.wp != null ? 1 - play.wp : play.wp),
     wpa: format_number(is_kickoff && play.wpa != null ? -play.wpa : play.wpa),
-    home_win_probability: format_number(play.home_win_probability),
-    away_win_probability: format_number(play.away_win_probability),
+    home_win_probability: format_number(play.home_wp),
+    away_win_probability: format_number(play.away_wp),
     vegas_wpa: format_number(
       is_kickoff && play.vegas_wpa != null ? -play.vegas_wpa : play.vegas_wpa
     ),
     vegas_home_wpa: format_number(play.vegas_home_wpa),
-    home_win_probability_post: format_number(play.home_win_probability_post),
-    away_win_probability_post: format_number(play.away_win_probability_post),
+    home_win_probability_post: format_number(play.home_wp_post),
+    away_win_probability_post: format_number(play.away_wp_post),
     vegas_win_probability: format_number(
-      is_kickoff && play.vegas_win_probability != null
-        ? 1 - play.vegas_win_probability
-        : play.vegas_win_probability
+      is_kickoff && play.vegas_wp != null ? 1 - play.vegas_wp : play.vegas_wp
     ),
-    vegas_home_win_probability: format_number(play.vegas_home_win_probability),
+    vegas_home_win_probability: format_number(play.vegas_home_wp),
     total_home_rush_wpa: format_number(play.total_home_rush_wpa),
     total_away_rush_wpa: format_number(play.total_away_rush_wpa),
     total_home_pass_wpa: format_number(play.total_home_pass_wpa),
@@ -540,27 +528,19 @@ const format_wpa_data = (play) => {
       is_kickoff && play.yac_wpa != null ? -play.yac_wpa : play.yac_wpa
     ),
     completion_air_wpa: format_number(
-      is_kickoff && play.completion_air_wpa != null
-        ? -play.completion_air_wpa
-        : play.completion_air_wpa
+      is_kickoff && play.comp_air_wpa != null
+        ? -play.comp_air_wpa
+        : play.comp_air_wpa
     ),
     completion_yac_wpa: format_number(
-      is_kickoff && play.completion_yac_wpa != null
-        ? -play.completion_yac_wpa
-        : play.completion_yac_wpa
+      is_kickoff && play.comp_yac_wpa != null
+        ? -play.comp_yac_wpa
+        : play.comp_yac_wpa
     ),
-    total_home_completion_air_wpa: format_number(
-      play.total_home_completion_air_wpa
-    ),
-    total_away_completion_air_wpa: format_number(
-      play.total_away_completion_air_wpa
-    ),
-    total_home_completion_yac_wpa: format_number(
-      play.total_home_completion_yac_wpa
-    ),
-    total_away_completion_yac_wpa: format_number(
-      play.total_away_completion_yac_wpa
-    ),
+    total_home_completion_air_wpa: format_number(play.total_home_comp_air_wpa),
+    total_away_completion_air_wpa: format_number(play.total_away_comp_air_wpa),
+    total_home_completion_yac_wpa: format_number(play.total_home_comp_yac_wpa),
+    total_away_completion_yac_wpa: format_number(play.total_away_comp_yac_wpa),
     total_home_raw_air_wpa: format_number(play.total_home_raw_air_wpa),
     total_away_raw_air_wpa: format_number(play.total_away_raw_air_wpa),
     total_home_raw_yac_wpa: format_number(play.total_home_raw_yac_wpa),
@@ -637,29 +617,29 @@ const format_score_data = (play) => {
 const format_probability_data = (play) => {
   const is_kickoff = play.play_type === 'kickoff'
   return {
-    no_score_prob: format_number(play.no_score_prob),
-    opp_field_goal_prob: format_number(
-      is_kickoff ? play.field_goal_prob : play.opp_field_goal_prob
+    no_score_probability: format_number(play.no_score_prob),
+    opponent_field_goal_probability: format_number(
+      is_kickoff ? play.fg_prob : play.opp_fg_prob
     ),
-    opp_safety_prob: format_number(
+    opponent_safety_probability: format_number(
       is_kickoff ? play.safety_prob : play.opp_safety_prob
     ),
-    opp_touchdown_prob: format_number(
-      is_kickoff ? play.touchdown_prob : play.opp_touchdown_prob
+    opponent_touchdown_probability: format_number(
+      is_kickoff ? play.td_prob : play.opp_td_prob
     ),
-    field_goal_prob: format_number(
-      is_kickoff ? play.opp_field_goal_prob : play.field_goal_prob
+    field_goal_probability: format_number(
+      is_kickoff ? play.opp_fg_prob : play.fg_prob
     ),
-    safety_prob: format_number(
+    safety_probability: format_number(
       is_kickoff ? play.opp_safety_prob : play.safety_prob
     ),
-    touchdown_prob: format_number(
-      is_kickoff ? play.opp_touchdown_prob : play.touchdown_prob
+    touchdown_probability: format_number(
+      is_kickoff ? play.opp_td_prob : play.td_prob
     ),
-    extra_point_prob: format_number(play.extra_point_prob),
-    two_conversion_prob: format_number(play.two_conversion_prob),
-    xpass_prob: format_number(play.xpass),
-    pass_over_expected: format_number(play.pass_over_expected),
+    extra_point_probability: format_number(play.extra_point_prob),
+    two_conversion_probability: format_number(play.two_point_conversion_prob),
+    expected_pass_probability: format_number(play.xpass),
+    pass_over_expected: format_number(play.pass_oe),
     completion_probability: format_number(play.cp),
     completion_percentage_over_expected: format_number(play.cpoe)
   }

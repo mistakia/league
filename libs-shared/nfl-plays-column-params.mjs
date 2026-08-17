@@ -1820,7 +1820,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
-  xyac_success_prob: {
+  xyac_success_probability: {
     label: 'xYAC Success Prob',
     show_key_in_short: true,
     min: 0,
@@ -1829,7 +1829,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
-  xyac_first_down_prob: {
+  xyac_first_down_probability: {
     label: 'xYAC First Down Prob',
     short_label: 'xYAC FD',
     show_key_in_short: true,
@@ -2004,63 +2004,63 @@ export default {
     preset_values: score_diff_preset_values
   },
 
-  no_score_prob: {
+  no_score_probability: {
     min: 0,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  opp_field_goal_prob: {
+  opponent_field_goal_probability: {
     min: 0,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  opp_safety_prob: {
+  opponent_safety_probability: {
     min: 0,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  opp_touchdown_prob: {
+  opponent_touchdown_probability: {
     min: 0,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  field_goal_prob: {
+  field_goal_probability: {
     min: 0,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  safety_prob: {
+  safety_probability: {
     min: 0,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  touchdown_prob: {
+  touchdown_probability: {
     min: 0,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  extra_point_prob: {
+  extra_point_probability: {
     min: 0,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  two_conversion_prob: {
+  two_conversion_probability: {
     min: 0,
     max: 1,
     step: 0.01,
@@ -2068,7 +2068,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
 
-  xpass_prob: {
+  expected_pass_probability: {
     label: 'xPass Prob',
     show_key_in_short: true,
     min: 0,

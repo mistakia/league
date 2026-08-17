@@ -5299,7 +5299,7 @@
           },
           {
             "params": {
-              "xpass_prob": [0.7, 1],
+              "expected_pass_probability": [0.7, 1],
               "nfl_week_id": [
                 "2024_REG_WEEK_1",
                 "2024_REG_WEEK_2",

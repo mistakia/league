@@ -63,8 +63,8 @@ const get_stats_for_props = async ({ props, week }) => {
         prop[`${period}_hit_weeks_hard`].forEach(
           (week) => (hits_index_hard[week] = true)
         )
-      if (prop[`${period}_opp_hit_weeks`])
-        prop[`${period}_opp_hit_weeks`].forEach(
+      if (prop[`${period}_opponent_hit_weeks`])
+        prop[`${period}_opponent_hit_weeks`].forEach(
           (week) => (opponent_hits_index[week] = true)
         )
 
@@ -74,8 +74,8 @@ const get_stats_for_props = async ({ props, week }) => {
         )
       }
 
-      if (prop[`${period}_opp_weeks_played`]) {
-        prop[`${period}_opp_weeks_played`].forEach(
+      if (prop[`${period}_opponent_weeks_played`]) {
+        prop[`${period}_opponent_weeks_played`].forEach(
           (week) => (opponent_weeks_index[week] = true)
         )
       }
@@ -100,9 +100,9 @@ const get_stats_for_props = async ({ props, week }) => {
     const opponent_hits = Object.keys(opponent_hits_index)
 
     stats[period] = {
-      hist_rate_soft: hits_soft.length / weeks.length || 0,
-      hist_rate_hard: hits_hard.length / weeks.length || 0,
-      opp_allow_rate: opponent_hits.length / opponent_weeks.length || 0,
+      historical_rate_soft: hits_soft.length / weeks.length || 0,
+      historical_rate_hard: hits_hard.length / weeks.length || 0,
+      opponent_allow_rate: opponent_hits.length / opponent_weeks.length || 0,
       total_games: weeks.length,
       week_last_hit: hits_soft.length
         ? Math.max(...hits_soft.map(extract_week))
@@ -110,7 +110,7 @@ const get_stats_for_props = async ({ props, week }) => {
       week_first_hit: hits_soft.length
         ? Math.min(...hits_soft.map(extract_week))
         : null,
-      joint_hist_rate_soft:
+      joint_historical_rate_soft:
         joint_week_soft_hits.length / joint_weeks.length || 0,
       joint_games: joint_weeks.length
     }
@@ -135,7 +135,7 @@ const format_prop_pairing = ({
     return 1 - implied_probability
   })
   const prop_odds_combined = prop_odds_array.reduce((a, b) => a * b, 1)
-  const market_prob = 1 - prop_odds_combined
+  const market_probability = 1 - prop_odds_combined
 
   const props_totals = props.reduce(
     (accumulator, prop) => ({
@@ -171,11 +171,11 @@ const format_prop_pairing = ({
       ? 'last_season_hit_rate_hard'
       : 'current_season_hit_rate_hard'
 
-  const sum_hist_rate_soft = props.reduce(
+  const sum_historical_rate_soft = props.reduce(
     (accumulator, prop) => accumulator + (prop[hit_rate_soft_field] || 0),
     0
   )
-  const sum_hist_rate_hard = props.reduce(
+  const sum_historical_rate_hard = props.reduce(
     (accumulator, prop) => accumulator + (prop[hit_rate_hard_field] || 0),
     0
   )
@@ -196,42 +196,46 @@ const format_prop_pairing = ({
     season_year: year,
     season_type: seas_type,
     week,
-    market_prob,
+    market_probability,
     ...props_totals,
-    current_season_hist_rate_soft: current_stats.hist_rate_soft || 0,
-    current_season_hist_rate_hard: current_stats.hist_rate_hard || 0,
-    current_season_opp_allow_rate: current_stats.opp_allow_rate || 0,
+    current_season_historical_rate_soft:
+      current_stats.historical_rate_soft || 0,
+    current_season_historical_rate_hard:
+      current_stats.historical_rate_hard || 0,
+    current_season_opponent_allow_rate: current_stats.opponent_allow_rate || 0,
     current_season_total_games: current_stats.total_games || 0,
     current_season_week_last_hit: current_stats.week_last_hit,
     current_season_week_first_hit: current_stats.week_first_hit,
-    current_season_joint_hist_rate_soft:
-      current_stats.joint_hist_rate_soft || 0,
+    current_season_joint_historical_rate_soft:
+      current_stats.joint_historical_rate_soft || 0,
     current_season_joint_games: current_stats.joint_games || 0,
     size: props.length,
-    current_season_hist_edge_soft:
-      (current_stats.hist_rate_soft || 0) - market_prob,
-    current_season_hist_edge_hard:
-      (current_stats.hist_rate_hard || 0) - market_prob,
+    current_season_historical_edge_soft:
+      (current_stats.historical_rate_soft || 0) - market_probability,
+    current_season_historical_edge_hard:
+      (current_stats.historical_rate_hard || 0) - market_probability,
     // TODO fix
     // is_pending,
     // is_success,
     highest_payout: sorted_payouts[sorted_payouts.length - 1],
     lowest_payout: sorted_payouts[0],
     second_lowest_payout: sorted_payouts[1],
-    current_season_sum_hist_rate_soft: sum_hist_rate_soft,
-    current_season_sum_hist_rate_hard: sum_hist_rate_hard
+    current_season_sum_historical_rate_soft: sum_historical_rate_soft,
+    current_season_sum_historical_rate_hard: sum_historical_rate_hard
   }
 
   // Add stats for other periods
   for (const period of ['last_five', 'last_ten', 'last_season']) {
-    pairing[`${period}_hist_rate_soft`] = prop_stats[period].hist_rate_soft
-    pairing[`${period}_hist_rate_hard`] = prop_stats[period].hist_rate_hard
-    pairing[`${period}_joint_hist_rate_soft`] =
-      prop_stats[period].joint_hist_rate_soft
-    pairing[`${period}_hist_edge_soft`] =
-      prop_stats[period].hist_rate_soft - market_prob
-    pairing[`${period}_hist_edge_hard`] =
-      prop_stats[period].hist_rate_hard - market_prob
+    pairing[`${period}_historical_rate_soft`] =
+      prop_stats[period].historical_rate_soft
+    pairing[`${period}_historical_rate_hard`] =
+      prop_stats[period].historical_rate_hard
+    pairing[`${period}_joint_historical_rate_soft`] =
+      prop_stats[period].joint_historical_rate_soft
+    pairing[`${period}_historical_edge_soft`] =
+      prop_stats[period].historical_rate_soft - market_probability
+    pairing[`${period}_historical_edge_hard`] =
+      prop_stats[period].historical_rate_hard - market_probability
   }
 
   return {
@@ -601,24 +605,24 @@ const generate_prop_pairings = async ({
             'season_year',
             'season_type',
             'week',
-            'market_prob',
+            'market_probability',
             'risk_total',
             'payout_total',
-            'current_season_hist_rate_soft',
-            'current_season_hist_rate_hard',
-            'current_season_opp_allow_rate',
+            'current_season_historical_rate_soft',
+            'current_season_historical_rate_hard',
+            'current_season_opponent_allow_rate',
             'current_season_total_games',
             'current_season_week_last_hit',
             'current_season_week_first_hit',
-            'current_season_joint_hist_rate_soft',
+            'current_season_joint_historical_rate_soft',
             'current_season_joint_games',
-            'current_season_hist_edge_soft',
-            'current_season_hist_edge_hard',
+            'current_season_historical_edge_soft',
+            'current_season_historical_edge_hard',
             'highest_payout',
             'lowest_payout',
             'second_lowest_payout',
-            'current_season_sum_hist_rate_soft',
-            'current_season_sum_hist_rate_hard'
+            'current_season_sum_historical_rate_soft',
+            'current_season_sum_historical_rate_hard'
           ])
       }
 

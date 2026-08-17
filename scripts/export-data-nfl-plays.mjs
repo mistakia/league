@@ -282,8 +282,8 @@ const nfl_play_fields = [
 
   'xyac_mean_yards',
   'xyac_median_yards',
-  'xyac_success_prob',
-  'xyac_first_down_prob',
+  'xyac_success_probability',
+  'xyac_first_down_probability',
 
   'is_extra_point_attempt',
   'is_two_point_conversion_attempt',
@@ -313,17 +313,17 @@ const nfl_play_fields = [
   'defense_score_post',
   'score_difference_post',
 
-  'no_score_prob',
-  'opp_field_goal_prob',
-  'opp_safety_prob',
-  'opp_touchdown_prob',
-  'field_goal_prob',
-  'safety_prob',
-  'touchdown_prob',
-  'extra_point_prob',
-  'two_conversion_prob',
+  'no_score_probability',
+  'opponent_field_goal_probability',
+  'opponent_safety_probability',
+  'opponent_touchdown_probability',
+  'field_goal_probability',
+  'safety_probability',
+  'touchdown_probability',
+  'extra_point_probability',
+  'two_conversion_probability',
 
-  'xpass_prob',
+  'expected_pass_probability',
   'pass_over_expected',
 
   'completion_probability',

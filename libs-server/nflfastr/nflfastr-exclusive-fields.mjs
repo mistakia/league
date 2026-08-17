@@ -85,22 +85,22 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   // Expected Yardage (XYAC) Metrics
   'xyac_mean_yards', // Expected mean yards after catch
   'xyac_median_yards', // Expected median yards after catch
-  'xyac_success_prob', // Expected YAC success probability
-  'xyac_first_down_prob', // Expected probability of first down with YAC
+  'xyac_success_probability', // Expected YAC success probability
+  'xyac_first_down_probability', // Expected probability of first down with YAC
 
   // Scoring Probability Metrics
-  'no_score_prob', // Probability of no score on drive
-  'opp_field_goal_prob', // Probability opponent scores field goal
-  'opp_safety_prob', // Probability opponent scores safety
-  'opp_touchdown_prob', // Probability opponent scores touchdown
-  'field_goal_prob', // Probability of field goal
-  'safety_prob', // Probability of safety
-  'touchdown_prob', // Probability of touchdown
-  'extra_point_prob', // Probability of successful extra point
-  'two_conversion_prob', // Probability of successful two-point conversion
+  'no_score_probability', // Probability of no score on drive
+  'opponent_field_goal_probability', // Probability opponent scores field goal
+  'opponent_safety_probability', // Probability opponent scores safety
+  'opponent_touchdown_probability', // Probability opponent scores touchdown
+  'field_goal_probability', // Probability of field goal
+  'safety_probability', // Probability of safety
+  'touchdown_probability', // Probability of touchdown
+  'extra_point_probability', // Probability of successful extra point
+  'two_conversion_probability', // Probability of successful two-point conversion
 
   // Play Type Probability Metrics
-  'xpass_prob', // Expected pass play probability (pass over run decision value)
+  'expected_pass_probability', // Expected pass play probability (pass over run decision value)
   'pass_over_expected', // Pass play over expected
 
   // Completion Probability Metrics

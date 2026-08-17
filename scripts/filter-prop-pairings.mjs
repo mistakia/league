@@ -422,27 +422,27 @@ const fetch_prop_pairing_props = async (pairing_ids) => {
 const apply_threshold_filters = (query, opts) => {
   const threshold_filters = [
     {
-      field: 'market_prob',
+      field: 'market_probability',
       threshold: opts.market_odds_max_threshold,
       operator: '<='
     },
     {
-      field: 'current_season_hist_rate_soft',
+      field: 'current_season_historical_rate_soft',
       threshold: opts.current_season_soft_hit_rate_min_threshold,
       operator: '>='
     },
     {
-      field: 'current_season_hist_rate_hard',
+      field: 'current_season_historical_rate_hard',
       threshold: opts.current_season_hard_hit_rate_min_threshold,
       operator: '>='
     },
     {
-      field: 'current_season_opp_allow_rate',
+      field: 'current_season_opponent_allow_rate',
       threshold: opts.current_season_opponent_allowed_rate_min_threshold,
       operator: '>='
     },
     {
-      field: 'current_season_joint_hist_rate_soft',
+      field: 'current_season_joint_historical_rate_soft',
       threshold: opts.current_season_joint_historical_rate_min_threshold,
       operator: '>='
     },
@@ -462,7 +462,7 @@ const apply_threshold_filters = (query, opts) => {
       operator: '>='
     },
     {
-      field: 'current_season_hist_edge_soft',
+      field: 'current_season_historical_edge_soft',
       threshold: opts.current_season_edge_min_threshold,
       operator: '>='
     },
@@ -482,42 +482,42 @@ const apply_threshold_filters = (query, opts) => {
       operator: '<='
     },
     {
-      field: 'current_season_sum_hist_rate_soft',
+      field: 'current_season_sum_historical_rate_soft',
       threshold: opts.current_season_sum_hist_rate_soft_min_threshold,
       operator: '>='
     },
     {
-      field: 'current_season_sum_hist_rate_hard',
+      field: 'current_season_sum_historical_rate_hard',
       threshold: opts.current_season_sum_hist_rate_hard_min_threshold,
       operator: '>='
     },
     {
-      field: 'last_ten_hist_rate_soft',
+      field: 'last_ten_historical_rate_soft',
       threshold: opts.last_ten_hist_rate_soft_min_threshold,
       operator: '>='
     },
     {
-      field: 'last_ten_hist_rate_hard',
+      field: 'last_ten_historical_rate_hard',
       threshold: opts.last_ten_hist_rate_hard_min_threshold,
       operator: '>='
     },
     {
-      field: 'last_five_hist_rate_soft',
+      field: 'last_five_historical_rate_soft',
       threshold: opts.last_five_hist_rate_soft_min_threshold,
       operator: '>='
     },
     {
-      field: 'last_five_hist_rate_hard',
+      field: 'last_five_historical_rate_hard',
       threshold: opts.last_five_hist_rate_hard_min_threshold,
       operator: '>='
     },
     {
-      field: 'last_season_hist_rate_soft',
+      field: 'last_season_historical_rate_soft',
       threshold: opts.last_season_hist_rate_soft_min_threshold,
       operator: '>='
     },
     {
-      field: 'last_season_hist_rate_hard',
+      field: 'last_season_historical_rate_hard',
       threshold: opts.last_season_hist_rate_hard_min_threshold,
       operator: '>='
     }
@@ -561,10 +561,10 @@ const build_prop_pairing_query = (opts, week, source, year, seas_type) => {
     .where('season_year', year)
     .where('season_type', seas_type)
     .where('week', week)
-    .orderBy('current_season_hist_rate_hard', 'DESC')
-    .orderBy('current_season_hist_rate_soft', 'DESC')
-    .orderBy('current_season_hist_edge_soft', 'DESC')
-    .orderBy('current_season_sum_hist_rate_soft', 'DESC')
+    .orderBy('current_season_historical_rate_hard', 'DESC')
+    .orderBy('current_season_historical_rate_soft', 'DESC')
+    .orderBy('current_season_historical_edge_soft', 'DESC')
+    .orderBy('current_season_sum_historical_rate_soft', 'DESC')
     .orderBy('lowest_payout', 'DESC')
 
   apply_threshold_filters(query, opts)
@@ -719,13 +719,15 @@ const filter_prop_pairings = async ({
             hits: prop_pairing.is_success
               ? summary_stats.hits + 1
               : summary_stats.hits,
-            current_season_hist_rate_soft:
-              summary_stats.current_season_hist_rate_soft +
-              prop_pairing.current_season_hist_rate_soft,
-            current_season_hist_rate_hard:
-              summary_stats.current_season_hist_rate_hard +
-              prop_pairing.current_season_hist_rate_hard,
-            market_prob: summary_stats.market_prob + prop_pairing.market_prob,
+            current_season_historical_rate_soft:
+              summary_stats.current_season_historical_rate_soft +
+              prop_pairing.current_season_historical_rate_soft,
+            current_season_historical_rate_hard:
+              summary_stats.current_season_historical_rate_hard +
+              prop_pairing.current_season_historical_rate_hard,
+            market_probability:
+              summary_stats.market_probability +
+              prop_pairing.market_probability,
             completed: summary_stats.completed + 1,
             total_payout:
               summary_stats.total_payout + prop_pairing.payout_total,
@@ -739,9 +741,9 @@ const filter_prop_pairings = async ({
         pending: 0,
         total_payout: 0,
         total_risk: 0,
-        current_season_hist_rate_soft: 0,
-        current_season_hist_rate_hard: 0,
-        market_prob: 0
+        current_season_historical_rate_soft: 0,
+        current_season_historical_rate_hard: 0,
+        market_probability: 0
       }
     )
   }
@@ -758,12 +760,12 @@ const filter_prop_pairings = async ({
   )
   log(
     `Hits Over Market Expectation: ${(
-      summary_stats.hits - summary_stats.market_prob
+      summary_stats.hits - summary_stats.market_probability
     ).toFixed(2)}`
   )
   log(
     `Hits Over Historical Expectation: ${(
-      summary_stats.hits - summary_stats.current_season_hist_rate_soft
+      summary_stats.hits - summary_stats.current_season_historical_rate_soft
     ).toFixed(2)}`
   )
   log(
@@ -806,14 +808,14 @@ const filter_prop_pairings = async ({
         prop_1: formatted_prop_names[0] || '',
         prop_2: formatted_prop_names[1] || '',
         prop_3: formatted_prop_names[2] || '',
-        current_season_soft: `${Math.round(prop_pairing.current_season_hist_rate_soft * 100)}%`,
-        current_season_hard: `${Math.round(prop_pairing.current_season_hist_rate_hard * 100)}%`,
-        current_season_edge: `${(prop_pairing.current_season_hist_edge_soft * 100).toFixed(1)}%`,
-        last_5_soft: `${Math.round(prop_pairing.last_five_hist_rate_soft * 100)}%`,
-        last_10_soft: `${Math.round(prop_pairing.last_ten_hist_rate_soft * 100)}%`,
+        current_season_soft: `${Math.round(prop_pairing.current_season_historical_rate_soft * 100)}%`,
+        current_season_hard: `${Math.round(prop_pairing.current_season_historical_rate_hard * 100)}%`,
+        current_season_edge: `${(prop_pairing.current_season_historical_edge_soft * 100).toFixed(1)}%`,
+        last_5_soft: `${Math.round(prop_pairing.last_five_historical_rate_soft * 100)}%`,
+        last_10_soft: `${Math.round(prop_pairing.last_ten_historical_rate_soft * 100)}%`,
         high: prop_pairing.highest_payout,
         low: prop_pairing.lowest_payout,
-        current_season_sum: `${Math.round(prop_pairing.current_season_sum_hist_rate_soft * 100)}%`
+        current_season_sum: `${Math.round(prop_pairing.current_season_sum_historical_rate_soft * 100)}%`
       })
     })
 

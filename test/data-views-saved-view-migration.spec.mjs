@@ -6,6 +6,7 @@ import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import {
   BOOLEAN_PREFIX_PARAM_RENAMES,
   COUNTING_STAT_PARAM_RENAMES,
+  MARKETS_PARAM_RENAMES,
   PLAYS_LOCAL_PARAM_RENAMES,
   SHORTHAND_PARAM_RENAMES,
   migrate_column_entry,
@@ -310,8 +311,9 @@ describe('data-views saved-view migrator', () => {
       for (const [legacy_key, current_key] of Object.entries(
         PLAYS_LOCAL_PARAM_RENAMES
       )) {
-        const final_key =
+        const counting_key =
           COUNTING_STAT_PARAM_RENAMES[current_key] ?? current_key
+        const final_key = MARKETS_PARAM_RENAMES[counting_key] ?? counting_key
         const result = migrate_column_entry({
           column_id: 'player_pass_attempts_from_plays',
           params: { [legacy_key]: [1] }
@@ -346,18 +348,19 @@ describe('data-views saved-view migrator', () => {
       for (const [legacy_key, current_key] of Object.entries(
         COUNTING_STAT_PARAM_RENAMES
       )) {
+        const final_key = MARKETS_PARAM_RENAMES[current_key] ?? current_key
         const result = migrate_column_entry({
           column_id: 'player_pass_attempts_from_plays',
           params: { [legacy_key]: [1] }
         })
         expect(result.changed, legacy_key).to.equal(true)
-        expect(result.params, legacy_key).to.deep.equal({ [current_key]: [1] })
+        expect(result.params, legacy_key).to.deep.equal({ [final_key]: [1] })
         expect(
           Object.prototype.hasOwnProperty.call(
             nfl_plays_column_params,
-            current_key
+            final_key
           ),
-          `${current_key} is not a registry key`
+          `${final_key} is not a registry key`
         ).to.equal(true)
       }
     })

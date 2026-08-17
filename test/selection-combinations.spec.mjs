@@ -70,7 +70,7 @@ describe('API /selection-combinations', function () {
     week: 14,
     decimal_odds: '15.500',
     american_odds: 1450,
-    is_sgp: true,
+    is_same_game_parlay: true,
     observed_at: new Date(1764963500 * 1000)
   }
 
@@ -233,7 +233,7 @@ describe('API /selection-combinations', function () {
         week: 14,
         decimal_odds: '5.000',
         american_odds: 400,
-        is_sgp: true,
+        is_same_game_parlay: true,
         observed_at: new Date(1764963501 * 1000)
       }
 

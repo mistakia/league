@@ -309,6 +309,34 @@ export const COUNTING_STAT_PARAM_RENAMES = {
   yds_gained: 'yards_gained'
 }
 
+// Markets-and-props vocabulary, renamed by the 2026-08-17 conform
+// (db/adhoc/2026-08-17-conform-markets-prop-tokens.sql): prob -> probability,
+// opp -> opponent, xpass_prob -> expected_pass_probability. Twelve live registry
+// keys in libs-shared/nfl-plays-column-params.mjs rename, and the registry key
+// IS the persisted key, so every saved view carrying one would otherwise lose
+// its filter silently.
+//
+// Applied AFTER COUNTING_STAT_PARAM_RENAMES, and that ordering is load-bearing:
+// a view saved before 2026-08-17 persists fg_prob / opp_fg_prob / td_prob /
+// opp_td_prob, which that map rewrites to field_goal_prob / opp_field_goal_prob
+// / touchdown_prob / opp_touchdown_prob, which this map then rewrites to the
+// probability spellings. The single migrate_params pass resolves the chain only
+// in this order.
+export const MARKETS_PARAM_RENAMES = {
+  extra_point_prob: 'extra_point_probability',
+  field_goal_prob: 'field_goal_probability',
+  no_score_prob: 'no_score_probability',
+  opp_field_goal_prob: 'opponent_field_goal_probability',
+  opp_safety_prob: 'opponent_safety_probability',
+  opp_touchdown_prob: 'opponent_touchdown_probability',
+  safety_prob: 'safety_probability',
+  touchdown_prob: 'touchdown_probability',
+  two_conversion_prob: 'two_conversion_probability',
+  xpass_prob: 'expected_pass_probability',
+  xyac_first_down_prob: 'xyac_first_down_probability',
+  xyac_success_prob: 'xyac_success_probability'
+}
+
 export const SIDE_PREFIX_PARAM_RENAMES = {
   def_personnel: 'defense_personnel',
   def_score: 'defense_score',
@@ -515,7 +543,8 @@ const PARAM_KEY_RENAMES = {
   ...PLAYS_LOCAL_PARAM_RENAMES,
   ...SIDE_PREFIX_PARAM_RENAMES,
   ...POSITION_CODE_PARAM_RENAMES,
-  ...COUNTING_STAT_PARAM_RENAMES
+  ...COUNTING_STAT_PARAM_RENAMES,
+  ...MARKETS_PARAM_RENAMES
 }
 
 // Every legacy param key this module rewrites at read time, exported so

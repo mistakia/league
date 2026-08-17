@@ -1,7 +1,7 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
   "generated_at": "2026-08-17T01:37:59.701Z",
-  "count": 322,
+  "count": 252,
   "violations": [
     {
       "table": "adp_format",
@@ -535,36 +535,6 @@
     },
     {
       "table": "nfl_plays_current_week",
-      "column": "extra_point_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "field_goal_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "no_score_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "opp_field_goal_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "opp_safety_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "opp_touchdown_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
       "column": "pos_score_post",
       "rule": "shorthand"
     },
@@ -581,36 +551,6 @@
     {
       "table": "nfl_plays_current_week",
       "column": "recv_yards",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "safety_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "touchdown_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "two_conversion_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "xpass_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "xyac_first_down_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "xyac_success_prob",
       "rule": "shorthand"
     },
     {
@@ -625,16 +565,6 @@
     },
     {
       "table": "nfl_plays",
-      "column": "away_win_prob_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "away_win_prob_pre",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
       "column": "ep_ngs",
       "rule": "shorthand"
     },
@@ -645,62 +575,12 @@
     },
     {
       "table": "nfl_plays",
-      "column": "extra_point_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "field_goal_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "home_win_prob_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "home_win_prob_pre",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "no_score_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
       "column": "num_high_safeties",
       "rule": "shorthand"
     },
     {
       "table": "nfl_plays",
       "column": "num_shifted_players",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "opp_field_goal_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "opp_safety_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "opp_touchdown_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "pass_prob_non_tracking",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "pass_prob_tracking",
       "rule": "shorthand"
     },
     {
@@ -721,36 +601,6 @@
     {
       "table": "nfl_plays",
       "column": "recv_yards",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "safety_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "touchdown_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "two_conversion_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "xpass_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "xyac_first_down_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "xyac_success_prob",
       "rule": "shorthand"
     },
     {
@@ -1059,16 +909,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "player_gamelogs",
-      "column": "snaps_low_prob_percentage",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "snaps_low_prob",
-      "rule": "shorthand"
-    },
-    {
       "table": "player_pair_correlations",
       "column": "nfl_team_a",
       "rule": "shorthand"
@@ -1224,173 +1064,8 @@
       "rule": "shorthand"
     },
     {
-      "table": "prop_pairings",
-      "column": "current_season_hist_edge_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "current_season_hist_edge_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "current_season_hist_rate_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "current_season_hist_rate_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "current_season_joint_hist_rate_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "current_season_opp_allow_rate",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "current_season_sum_hist_rate_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "current_season_sum_hist_rate_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_five_hist_edge_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_five_hist_edge_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_five_hist_rate_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_five_hist_rate_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_five_joint_hist_rate_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_season_hist_edge_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_season_hist_edge_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_season_hist_rate_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_season_hist_rate_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_season_joint_hist_rate_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_ten_hist_edge_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_ten_hist_edge_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_ten_hist_rate_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_ten_hist_rate_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "last_ten_joint_hist_rate_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "prop_pairings",
-      "column": "market_prob",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props_index",
-      "column": "hist_edge_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props_index",
-      "column": "hist_edge_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props_index",
-      "column": "hist_rate_hard",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props_index",
-      "column": "hist_rate_soft",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props_index",
-      "column": "hits_opp",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props_index",
-      "column": "market_prob",
-      "rule": "shorthand"
-    },
-    {
       "table": "props_index",
       "column": "o_am",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props_index",
-      "column": "opp_allow_rate",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props_index",
-      "column": "opp_hit_weeks",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props_index",
-      "column": "opp_weeks",
       "rule": "shorthand"
     },
     {
@@ -1504,16 +1179,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "selection_combination_odds_history",
-      "column": "is_sgp",
-      "rule": "shorthand"
-    },
-    {
-      "table": "selection_combination_odds_index",
-      "column": "is_sgp",
-      "rule": "shorthand"
-    },
-    {
       "table": "teams",
       "column": "faab_balance",
       "rule": "shorthand"
@@ -1596,21 +1261,6 @@
     {
       "table": "waivers",
       "column": "userid",
-      "rule": "shorthand"
-    },
-    {
-      "table": "weekly_market_selections_analysis_cache",
-      "column": "current_season_hits_opp",
-      "rule": "shorthand"
-    },
-    {
-      "table": "weekly_market_selections_analysis_cache",
-      "column": "current_season_opp_hit_weeks",
-      "rule": "shorthand"
-    },
-    {
-      "table": "weekly_market_selections_analysis_cache",
-      "column": "current_season_opp_weeks_played",
       "rule": "shorthand"
     }
   ]

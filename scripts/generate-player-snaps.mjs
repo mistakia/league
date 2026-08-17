@@ -372,7 +372,7 @@ const generate_player_snaps_for_week = async ({
       snaps_neutral: player_snaps.neutral.size,
       snaps_no_huddle: player_snaps.no_huddle.size,
       snaps_under_two_minutes: player_snaps.under_two_minutes.size,
-      snaps_low_prob: player_snaps.low_prob.size,
+      snaps_low_probability: player_snaps.low_prob.size,
       snaps_neutral_short: player_snaps.neutral_short.size,
       snaps_neutral_long: player_snaps.neutral_long.size,
       snaps_neutral_early_down: player_snaps.neutral_early_down.size,
@@ -427,7 +427,7 @@ const generate_player_snaps_for_week = async ({
         ? player_snaps.under_five_minutes.size /
             team_total.off.snaps_under_five_minutes || 0
         : null,
-      snaps_low_prob_percentage: team_total.off.snaps_low_prob
+      snaps_low_probability_percentage: team_total.off.snaps_low_prob
         ? player_snaps.low_prob.size / team_total.off.snaps_low_prob || 0
         : null,
       snaps_neutral_short_percentage: team_total.off.snaps_neutral_short

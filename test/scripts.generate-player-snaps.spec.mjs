@@ -87,7 +87,7 @@ describe('SCRIPTS generate-player-snaps', function () {
   })
 
   // The thresholds are read off the script, not guessed: `snaps_neutral` is
-  // `win_probability > 0.2 && < 0.8`, `snaps_low_prob` is `< 0.2`, and the
+  // `win_probability > 0.2 && < 0.8`, `snaps_low_probability` is `< 0.2`, and the
   // early/late down split is that same neutral band plus `down_number <= 2` /
   // `> 2`. NEUTRAL_WP sits inside the band and LOW_WP below it.
   const NEUTRAL_WP = 0.5
@@ -103,7 +103,7 @@ describe('SCRIPTS generate-player-snaps', function () {
   //
   // Read as quarters, the down column would put 2 snaps in q1 and 1 in q3 --
   // the mirror image of the truth. Play 5 is the win-probability play: it is
-  // the only one below the neutral band, so it lands in `snaps_low_prob` and in
+  // the only one below the neutral band, so it lands in `snaps_low_probability` and in
   // NEITHER down bucket, which is what pins the wp half of the early/late-down
   // predicate rather than just the down half.
   const plays = [
@@ -382,7 +382,7 @@ describe('SCRIPTS generate-player-snaps', function () {
     expect(row.snaps_neutral).to.equal(4)
     expect(row.snaps_neutral_early_down).to.equal(3)
     expect(row.snaps_neutral_late_down).to.equal(1)
-    expect(row.snaps_low_prob).to.equal(1)
+    expect(row.snaps_low_probability).to.equal(1)
   })
 
   it('merges onto an existing gamelog rather than failing its conflict target', async () => {

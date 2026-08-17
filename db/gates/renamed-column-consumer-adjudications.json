@@ -1404,6 +1404,110 @@
       "sites": ["api/routes/leagues/team-daily-values.mjs"],
       "verdict": "already-swept",
       "reason": "The route echoes observed_at wholesale and app/core/league-team-daily-values/reducer.js:29 maps it to a millisecond `timestamp` store key by construction, which is what keeps app/core/selectors.js:2864,2867 correct -- those read the store shape, not the column."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "no_score_prob",
+      "sites": [
+        "api/routes/plays.mjs",
+        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
+        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
+        "libs-server/get-play.mjs",
+        "libs-server/play-cache.mjs",
+        "libs-server/plays-view/get-plays-view-results.mjs",
+        "libs-server/update-play.mjs",
+        "scripts/audit-drive-seq-coherence.mjs",
+        "scripts/backfill-role-pids.mjs",
+        "scripts/export-data-nfl-plays.mjs",
+        "scripts/import-plays-nfl-v1.mjs",
+        "scripts/nfl-plays-coverage-report.mjs",
+        "scripts/process-plays.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "The old name survives only as the nflverse CSV vendor key (play.no_score_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to no_score_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column; the row carries the new key and no consumer reads the old one."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "opp_safety_prob",
+      "sites": [
+        "api/routes/plays.mjs",
+        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
+        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
+        "libs-server/get-play.mjs",
+        "libs-server/play-cache.mjs",
+        "libs-server/plays-view/get-plays-view-results.mjs",
+        "libs-server/update-play.mjs",
+        "scripts/audit-drive-seq-coherence.mjs",
+        "scripts/backfill-role-pids.mjs",
+        "scripts/export-data-nfl-plays.mjs",
+        "scripts/import-plays-nfl-v1.mjs",
+        "scripts/nfl-plays-coverage-report.mjs",
+        "scripts/process-plays.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "The old name survives only as the nflverse CSV vendor key (play.opp_safety_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to opponent_safety_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "safety_prob",
+      "sites": [
+        "api/routes/plays.mjs",
+        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
+        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
+        "libs-server/get-play.mjs",
+        "libs-server/play-cache.mjs",
+        "libs-server/plays-view/get-plays-view-results.mjs",
+        "libs-server/update-play.mjs",
+        "scripts/audit-drive-seq-coherence.mjs",
+        "scripts/backfill-role-pids.mjs",
+        "scripts/export-data-nfl-plays.mjs",
+        "scripts/import-plays-nfl-v1.mjs",
+        "scripts/nfl-plays-coverage-report.mjs",
+        "scripts/process-plays.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "The old name survives only as the nflverse CSV vendor key (play.safety_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to safety_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "extra_point_prob",
+      "sites": [
+        "api/routes/plays.mjs",
+        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
+        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
+        "libs-server/get-play.mjs",
+        "libs-server/play-cache.mjs",
+        "libs-server/plays-view/get-plays-view-results.mjs",
+        "libs-server/update-play.mjs",
+        "scripts/audit-drive-seq-coherence.mjs",
+        "scripts/backfill-role-pids.mjs",
+        "scripts/export-data-nfl-plays.mjs",
+        "scripts/import-plays-nfl-v1.mjs",
+        "scripts/nfl-plays-coverage-report.mjs",
+        "scripts/process-plays.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "The old name survives only as the nflverse CSV vendor key (play.extra_point_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to extra_point_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column."
+    },
+    {
+      "table": "player_gamelogs",
+      "column": "snaps_low_prob",
+      "sites": [
+        "api/routes/players.mjs",
+        "api/routes/stats.mjs",
+        "scripts/audit-player-gamelogs.mjs",
+        "scripts/calculate-historical-hit-rates.mjs",
+        "scripts/calculate-player-archetypes.mjs",
+        "scripts/calculate-points.mjs",
+        "scripts/calculate-weekly-market-selections-analysis.mjs",
+        "scripts/export-data-player-gamelogs.mjs",
+        "scripts/generate-nfl-team-seasonlogs.mjs",
+        "scripts/process-matchups.mjs",
+        "scripts/process-player-seasonlogs.mjs",
+        "scripts/process-playoffs.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "The old name survives only as local intermediate Set keys (snaps_low_prob) inside scripts/generate-player-snaps.mjs; the emitted payload keys were renamed to snaps_low_probability / snaps_low_probability_percentage. Every flagged query site reads player_gamelogs wholesale with no explicit projection of this column."
     }
   ]
 }
