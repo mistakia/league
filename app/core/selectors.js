@@ -18,7 +18,6 @@ import {
   getDraftDates,
   get_free_agent_period,
   getDraftWindow,
-  is_within_daily_window,
   get_draft_clock_now,
   groupBy,
   fixTeam,
@@ -434,15 +433,18 @@ export const getPicks = createSelector(
           return p
         }
 
-        // A jump pick is only active inside the daily window hours; an
-        // in-sequence pick (previousSelected) stays active at any time.
+        // A pick goes on the clock at the start of its published window,
+        // whether or not the pick ahead of it has been selected. There is no
+        // band condition on the current time: every window is itself a slot
+        // inside the band, so a check on the hour is inert against the window
+        // check it guards -- and the symbol it called was deleted with the
+        // floor, so it threw on the one branch it was reached from.
+        //
+        // Note the clock is granted for the DAY, not until the pick is made:
+        // the next midnight re-lays this pick onto its own slate, which on a
+        // day where nobody picked is 24 hours later.
         const isActive =
-          previousSelected ||
-          (draft_clock_now.isAfter(p.draftWindow) &&
-            is_within_daily_window(
-              draft_clock_now,
-              get_draft_window_config(league)
-            ))
+          previousSelected || draft_clock_now.isAfter(p.draftWindow)
 
         previousNotActive = !isActive && previousActive
         // This pick is the first one off the clock, so it is the first of the

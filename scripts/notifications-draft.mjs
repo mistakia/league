@@ -12,7 +12,7 @@ import {
   where_outstanding_draft_pick,
   throw_if_shortfall
 } from '#libs-server'
-import { get_draft_pass_window } from '#libs-shared'
+import { getDraftWindow, get_draft_pass_window } from '#libs-shared'
 import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
@@ -47,7 +47,7 @@ const run = async () => {
   const due_announcements = []
 
   for (const league_season of league_seasons) {
-    const { lid, draft_start } = league_season
+    const { lid } = league_season
 
     const league = await getLeague({ lid })
 
@@ -84,25 +84,37 @@ const run = async () => {
       .where({ lid: league.uid, season_year: current_season.year })
       .orderBy('pick', 'asc')
 
-    // The window opens the instant the preceding pick is made (draft_start when
-    // none is), per Article XI Section 8. That timestamp is the true on-clock
-    // time and doubles as the stable, unique idempotency key for this pick.
-    // Carried in both units on purpose: the calculator takes the selection as
-    // an instant, while the marker key and the clock arithmetic below are epoch
-    // seconds. Read as the last MADE pick rather than `frontier.pick - 1`, which
-    // names a pick that may be unmade or absent from the board entirely.
-    const preceding_selection = draft_picks
-      .filter(
-        (draft_pick) =>
-          draft_pick.pick < frontier.pick && draft_pick.selection_timestamp
+    // A pick goes on the clock at the START OF ITS OWN PUBLISHED WINDOW,
+    // whether or not the pick ahead of it has been selected. This used to read
+    // the preceding SELECTION instant instead, which was the pre-slate rule and
+    // is now wrong in both directions: it announced a length measured from
+    // whenever the last team happened to click, so a pick behind a multi-day
+    // stall was told it had a window of a hundred hours when the slate gives it
+    // one interval.
+    const on_clock_window = getDraftWindow({
+      ...get_draft_window_config(league),
+      draft_picks,
+      pick_number: frontier.pick
+    })
+
+    // Null between a resume and the next publication boundary, when the pick
+    // has no window at all and so is not yet on the clock.
+    if (!on_clock_window) {
+      log(
+        `league ${lid}: no published slate yet for pick #${frontier.pick}; skipping`
       )
-      .pop()
-    const on_clock_instant =
-      preceding_selection?.selection_timestamp || draft_start
-    const on_clock_at = timestamptz_to_epoch(on_clock_instant)
+      continue
+    }
 
-    if (on_clock_at > now) continue // window has not opened yet
+    const on_clock_at = on_clock_window.unix()
 
+    if (on_clock_at > now) continue // the window has not opened yet
+
+    // The idempotency key, and it is the WINDOW rather than anything about the
+    // board on purpose. A pick still unmade at the next boundary is
+    // republished onto an earlier slot, which is a new deadline its manager has
+    // not been told; keying on the window re-announces it once per publication
+    // rather than staying silent on the strength of yesterday's message.
     const event_timestamp = on_clock_at
 
     const already_sent = await has_league_notification_been_sent({
@@ -139,7 +151,7 @@ const run = async () => {
     // next cycle picks it up once the slate publishes.
     if (!pass_window) {
       log(
-        `league ${lid}: no published slate yet for pick #${frontier.pick}; skipping`
+        `league ${lid}: nobody can pass pick #${frontier.pick} (it is the last outstanding pick); skipping`
       )
       continue
     }

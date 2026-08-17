@@ -529,10 +529,14 @@ describe('LIBS-SHARED getDraftWindow', function () {
     })
   })
 
-  describe('the only movement is the once-per-day republication', function () {
-    // Windows move exactly once a day, at the boundary, and only ever UP — the
-    // picks made during the day leave the outstanding set, which shrinks every
-    // later pick's index.
+  describe('the once-per-day republication', function () {
+    // The boundary re-lays the picks still unmade onto the slots from THAT
+    // midnight forward. So a window's absolute movement is the net of two
+    // things: the boundary advancing a full day, and the pick's index shrinking
+    // by however many picks were made. It moves EARLIER only when the day
+    // consumed more than a day's worth of slots, and otherwise moves later —
+    // "windows only ever move up" is false and the cases below pin both
+    // directions.
     const draft_picks = board({
       total: 8,
       made: {
@@ -568,10 +572,11 @@ describe('LIBS-SHARED getDraftWindow', function () {
       expect(evening).to.deep.equal(morning)
     })
 
-    it('moves every remaining window UP at the boundary', () => {
-      // Picks 2 and 3 were made during Aug 18, so the Aug 19 publication lays
-      // 4-8 onto the day from its first slot. Each window moves earlier by
-      // exactly the two slots the two made picks vacated.
+    it('re-lays the outstanding picks from the new midnight', () => {
+      // Picks 2 and 3 were made during Aug 18, so pick 4 heads the Aug 19
+      // slate and takes its first slot. Note this is LATER in absolute time
+      // than the Aug 18 17:00 it held during the day: two picks freed two
+      // slots, and the boundary advanced five.
       expect(slate('2026-08-19 00:00')).to.deep.equal([
         '2026-08-19 11:00',
         '2026-08-19 14:00',
@@ -581,9 +586,10 @@ describe('LIBS-SHARED getDraftWindow', function () {
       ])
     })
 
-    it('moves nothing at a boundary that no pick was made before', () => {
-      // Aug 20 publishes from the same outstanding set as Aug 19, so the
-      // republication is a day later and not a slot earlier.
+    it('rolls a window a full day LATER when nobody picks', () => {
+      // The plain case, and the one that shows the boundary is not a ratchet.
+      // Nothing is made on Aug 19, so Aug 20 republishes the identical
+      // outstanding set onto its own day and every window moves back 24 hours.
       expect(slate('2026-08-20 00:00')).to.deep.equal([
         '2026-08-20 11:00',
         '2026-08-20 14:00',
@@ -591,6 +597,35 @@ describe('LIBS-SHARED getDraftWindow', function () {
         '2026-08-20 20:00',
         '2026-08-20 23:00'
       ])
+    })
+
+    it('moves a window EARLIER only past a full day of slots', () => {
+      // Six picks in one day against five slots, so pick 8's index falls
+      // further than the boundary advances and its window genuinely moves up.
+      const fast = board({
+        total: 12,
+        made: {
+          1: '2026-08-18 11:05',
+          2: '2026-08-18 11:10',
+          3: '2026-08-18 11:15',
+          4: '2026-08-18 11:20',
+          5: '2026-08-18 11:25',
+          6: '2026-08-18 11:30'
+        }
+      })
+      const window_at = (until) =>
+        format(
+          getDraftWindow({
+            ...live_2026,
+            draft_picks: fast,
+            resumed_at: null,
+            until: eastern(until),
+            pick_number: 8
+          })
+        )
+
+      expect(window_at('2026-08-18 23:59')).to.equal('2026-08-19 17:00')
+      expect(window_at('2026-08-19 00:30')).to.equal('2026-08-19 14:00')
     })
   })
 

@@ -271,12 +271,20 @@ export function get_draft_slot_at_index({ from, index, slot_hours }) {
  * instead would shrink a jumped pick out of the set and pull later windows
  * EARLIER between boundaries — the freeze is what "publication" means.
  *
+ * A pick is ON THE CLOCK from the start of its window, whether or not the pick
+ * ahead of it has been selected. Slots are one interval apart, so each pick has
+ * the clock to itself for a full interval before the next one joins it — the
+ * exclusive interval is a property of the slate's SPACING, which is why no
+ * separate floor term is needed to produce it.
+ *
  * The invariant, stated exactly: BETWEEN two boundaries `window(P)` is
  * CONSTANT, because the only inputs that could move it — the outstanding set
- * and the boundary — are both fixed for the day. AT a boundary a window may
- * move EARLIER, because picks made since the last publication shrink P's index;
- * it can never move later. That move-up happens once a day, is calculated once,
- * and the slate announces it the night before.
+ * and the boundary — are both fixed for the day. AT a boundary it is re-laid
+ * from the new midnight, so its absolute movement is the net of the boundary
+ * advancing one day against P's index shrinking by the picks that were made.
+ * It moves EARLIER only when the day consumed more than a day of slots, and
+ * otherwise moves LATER. "Windows only ever move up" is false and must not be
+ * said: a day on which nobody picks rolls every window forward 24 hours.
  *
  * @param {Object} args
  * @param {number} args.draft_start_timestamp - Unix timestamp (seconds) the draft opens.
