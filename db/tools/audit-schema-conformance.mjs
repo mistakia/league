@@ -41,7 +41,16 @@ const allowlisted_identifiers = new Set([
   'esbid',
   'lid', // league id -- app key
   'tid', // team id -- app key
-  'uid' // user id -- app key
+  // UNIQUE id -- the row's own surrogate primary key, NEVER a user reference.
+  // Verified 2026-08-17 across all 17 tables carrying it: every one declares it
+  // as its PRIMARY KEY (`teams` composite with season_year; pff_team_gamelogs and
+  // pff_team_seasonlogs drive it from a `_uid_seq`), and `users` does not carry it
+  // at all -- the users key is `users.id`. A user REFERENCE is spelled `userid`,
+  // which coexists with `uid` on five tables (poaches, restricted_free_agency_bids,
+  // trades, transactions, waivers). This comment read "user id" until 2026-08-17,
+  // which made conforming `userid` -> `user_id` look like a collision with `uid`
+  // and blocked the keys batch on a question that does not exist.
+  'uid'
 ])
 
 // Reserved words used as identifiers (must be quoted in SQL, which is the tell).
