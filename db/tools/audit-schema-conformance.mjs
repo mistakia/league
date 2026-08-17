@@ -401,10 +401,24 @@ const accepted_non_timestamp_columns = new Set([
 // which mis-documents the columns rather than conforming them. Same reasoning as
 // the `mid_zone` KEEP and the `pass_epa_per_dropback` sense split: the audit's token
 // view cannot see a sense, so the sense is settled here.
+//
+// PUBLISHED-SCHEME `mid`, settled 2026-08-17 on the DVOA team-unit batch. `mid` is
+// ruled EXPAND and takes three targets by sense on these two tables:
+// `second_and_mid` / `third_and_mid` are distance-to-go and become `_medium`,
+// `team_rush_mid_guard` is the interior gap and becomes `middle_guard`, and
+// `mid_zone` is KEPT. "Mid zone" is the published Football Outsiders blocking
+// scheme -- two words rather than an abbreviation of one -- so `middle_zone`
+// would rename a vendor term rather than conform shorthand, and it would also
+// split the column from the `mid_zone` its own source publishes. Token-scoped, so
+// these columns still report any other debt they carry.
 const accepted_column_tokens = new Map([
   ['nfl_plays.qb_pid', new Set(['qb'])],
   ['nfl_games.away_qb_pid', new Set(['qb'])],
   ['nfl_games.home_qb_pid', new Set(['qb'])],
+  ['dvoa_team_unit_seasonlogs_history.mid_zone_dvoa', new Set(['mid'])],
+  ['dvoa_team_unit_seasonlogs_history.mid_zone_dvoa_rank', new Set(['mid'])],
+  ['dvoa_team_unit_seasonlogs_index.mid_zone_dvoa', new Set(['mid'])],
+  ['dvoa_team_unit_seasonlogs_index.mid_zone_dvoa_rank', new Set(['mid'])],
   ['nfl_plays_player.player_get_off', new Set(['off'])],
   ['nfl_team_gamelogs.defense_average_get_off', new Set(['off'])],
   ['player_defender_gamelogs.pass_rush_get_off', new Set(['off'])],
