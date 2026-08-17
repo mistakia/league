@@ -357,19 +357,48 @@ const accepted_non_timestamp_columns = new Set([
   'nfl_plays_passer.air_time'
 ])
 
-// Role-pid columns carrying a position token, ratified by operator ruling
-// 2026-08-15. The `{role}_pid` pattern is already conformed schema-wide
-// (`ball_carrier_pid`, `passer_pid`, `target_pid`, `interceptor_pid`, the
-// tackle-attribution family), and `qb` in these three is the ROLE rather than
-// shorthand, so the interior-token rule flagging them contradicts an existing
-// settled ruling. Keyed table.column, precedented by
+// Columns on which a NAMED token is accepted, keyed `table.column` and scoped to
+// the specific token so the rest of the column still reports. Precedented by
 // `accepted_non_timestamp_columns`, so the exemption cannot widen silently --
-// and validated in main() so an entry naming a column the schema does not have
-// fails the run rather than sitting stale.
-const accepted_role_pid_columns = new Set([
-  'nfl_plays.qb_pid',
-  'nfl_games.away_qb_pid',
-  'nfl_games.home_qb_pid'
+// and validated in main() so an entry naming a column the schema does not have,
+// or naming a token that column does not carry, fails the run rather than
+// sitting stale.
+//
+// Scoping to the TOKEN rather than the column is what makes this usable on a
+// column carrying more than one kind of debt. `nfl_team_gamelogs.def_avg_get_off`
+// is a `get_off` column AND an `avg` column: accepting the whole column would
+// silently retire an `avg` finding the counting-stat batch owns, which is the
+// hide-real-debt failure `non_team_columns` states as its own reason.
+//
+// Two rulings live here.
+//
+// ROLE-PID (`qb`), operator ruling 2026-08-15. The `{role}_pid` pattern is
+// already conformed schema-wide (`ball_carrier_pid`, `passer_pid`, `target_pid`,
+// `interceptor_pid`, the tackle-attribution family), and `qb` in these three is
+// the ROLE rather than shorthand, so the interior-token rule flagging them
+// contradicts an existing settled ruling.
+//
+// ORDINARY-WORD `off`, settled 2026-08-16 on the side-prefix batch. `off` is
+// ruled EXPAND -> `offense`, and on four columns the token is not the side of
+// the ball at all but the ordinary English word, inside a published two-word
+// term. `get_off` is the NGS metric (`gamelog.go` / `prGo`, the time from snap
+// to a pass rusher's first movement) and `off_man` is the SIS coverage call
+// ("Off-Man", a defensive back aligned off the receiver). A uniform token rename
+// writes `player_get_offense` and `positional_factor_offense_man_coverage`,
+// which mis-documents the columns rather than conforming them. Same reasoning as
+// the `mid_zone` KEEP and the `pass_epa_per_db` sense split: the audit's token
+// view cannot see a sense, so the sense is settled here.
+const accepted_column_tokens = new Map([
+  ['nfl_plays.qb_pid', new Set(['qb'])],
+  ['nfl_games.away_qb_pid', new Set(['qb'])],
+  ['nfl_games.home_qb_pid', new Set(['qb'])],
+  ['nfl_plays_player.player_get_off', new Set(['off'])],
+  ['nfl_team_gamelogs.def_avg_get_off', new Set(['off'])],
+  ['player_defender_gamelogs.pass_rush_get_off', new Set(['off'])],
+  [
+    'player_prospect_profile.positional_factor_off_man_coverage',
+    new Set(['off'])
+  ]
 ])
 
 // External-id columns that end in _id but do not follow {system}_{entitytype}_id.
@@ -655,16 +684,16 @@ function check_column(table, col, entity_type_vocabulary) {
     // branches take precedence for the same reason -- a name the abbreviation
     // map can NAME gets the map's concrete full-word hint, which is strictly
     // more useful than a token list.
-    // Two operator-ruled exemptions, neither expressible as a vocabulary entry:
-    // the is_qb_* charting booleans are a SHAPE carve-out (ratifying `qb`
-    // would also stop the gate flagging the format/settings position codes),
-    // and the role-pid columns are keyed table.column because `qb` there is the
-    // role rather than shorthand.
-    if (
-      !is_qb_charting_boolean(col) &&
-      !accepted_role_pid_columns.has(`${table}.${lower}`)
-    ) {
-      const offending_tokens = nonconforming_tokens(lower)
+    // Two ruled exemptions, neither expressible as a vocabulary entry: the
+    // is_qb_* charting booleans are a SHAPE carve-out (ratifying `qb` would also
+    // stop the gate flagging the format/settings position codes), and
+    // `accepted_column_tokens` carries the per-column sense rulings, subtracted
+    // token by token so a column's OTHER debt still reports.
+    if (!is_qb_charting_boolean(col)) {
+      const accepted = accepted_column_tokens.get(`${table}.${lower}`)
+      const offending_tokens = nonconforming_tokens(lower).filter(
+        (t) => !accepted || !accepted.has(t)
+      )
       if (offending_tokens.length) {
         findings.push({
           rule: 'shorthand',
@@ -899,16 +928,40 @@ function audit(tables, partition_children, filter) {
 // An exemption entry that names a column the schema does not have would sit
 // silent forever, so it fails the run rather than decaying into a stale
 // exemption -- the same stale-adjudication backstop the consumer gates apply.
-function validate_role_pid_exemptions(tables) {
-  for (const key of accepted_role_pid_columns) {
+// An entry naming a token the column does not carry is stale in the same way,
+// and is the shape a RENAME leaves behind: conforming the column's other tokens
+// rewrites the key, so the old entry stops matching anything. Checking the token
+// as well as the column is what makes the backstop survive this cluster, whose
+// whole business is renaming the columns these entries name.
+//
+// An entry is checked when its TABLE is in scope. A schema declaring the table
+// and not the column is making a claim the entry contradicts, which is the
+// staleness worth failing on -- including the rehearsal path, where the
+// candidate-schema recipe copies the candidate OVER the tracked path (the tool
+// ignores LEAGUE_SCHEMA_FILE by design), so a rename that moves an exempted
+// column fails the rehearsal rather than landing a key matching nothing. A
+// schema that never mentions the table is a synthetic fixture or a partial
+// candidate saying nothing either way, and holding it to the full exemption
+// roster would couple every fixture to every future ruling.
+function validate_column_token_exemptions(tables) {
+  for (const [key, accepted] of accepted_column_tokens) {
     const dot = key.indexOf('.')
     const table = key.slice(0, dot)
     const column = key.slice(dot + 1)
     const columns = tables.get(table)
-    if (!columns || !columns.some((c) => c.name === column)) {
+    if (!columns) continue
+    if (!columns.some((c) => c.name === column)) {
       throw new Error(
         `stale conformance exemption ${key}: schema has no such column`
       )
+    }
+    const carried = new Set(nonconforming_tokens(column))
+    for (const token of accepted) {
+      if (!carried.has(token)) {
+        throw new Error(
+          `stale conformance exemption ${key}: column does not carry token '${token}'`
+        )
+      }
     }
   }
 }
@@ -933,7 +986,7 @@ function main() {
   const sql = fs.readFileSync(argv.schemaFile || schema_path, 'utf8')
   const tables = parse_schema(sql)
   const partition_children = parse_partition_children(sql)
-  validate_role_pid_exemptions(tables)
+  validate_column_token_exemptions(tables)
   const findings = audit(tables, partition_children, argv.table)
   const logical_table_count = tables.size - partition_children.size
 

@@ -63,6 +63,15 @@ CREATE TABLE public.league_formats (
     is_qb_not_boolean integer,
     sourceid integer
 );
+
+CREATE TABLE public.nfl_plays_player (
+    player_get_off numeric(10,3)
+);
+
+CREATE TABLE public.nfl_team_gamelogs (
+    def_avg_get_off numeric(5,2),
+    off_pass_epa numeric(5,2)
+);
 `
 
 const run_audit = (schema_file) => {
@@ -180,6 +189,35 @@ describe('schema conformance audit -- 2026-08-15 oracle repair', function () {
     expect(shorthand_columns).to.not.include('nfl_plays.trade_uid')
   })
 
+  it('leaves the ordinary-word `off` columns clean by table.column exemption', function () {
+    // `off` is ruled EXPAND -> `offense`, but in `get_off` the token is the
+    // ordinary English word inside a published two-word term: the NGS get-off
+    // metric, the time from snap to a pass rusher's first movement. A uniform
+    // token rename writes `player_get_offense`, which mis-documents the column
+    // rather than conforming it -- the same sense split as `pass_epa_per_db`.
+    expect(shorthand_columns).to.not.include('nfl_plays_player.player_get_off')
+  })
+
+  it('still flags the OTHER tokens on an `off`-exempted column', function () {
+    // The exemption is scoped to the TOKEN, not the column. def_avg_get_off is
+    // a get_off column AND an `avg`/`def` column, both owned by later batches;
+    // accepting the whole column would silently retire debt this cluster still
+    // owes. Pinned as the exact token list so a widening to column scope fails.
+    expect(shorthand_columns).to.include('nfl_team_gamelogs.def_avg_get_off')
+    expect(shorthand_tokens.get('nfl_team_gamelogs.def_avg_get_off')).to.equal(
+      'def, avg'
+    )
+  })
+
+  it('still flags `off` where the sense exemption does not apply', function () {
+    // The side-prefix class the batch renames must stay flagged -- the carve-out
+    // is four named columns, not the token.
+    expect(shorthand_columns).to.include('nfl_team_gamelogs.off_pass_epa')
+    expect(shorthand_tokens.get('nfl_team_gamelogs.off_pass_epa')).to.equal(
+      'off'
+    )
+  })
+
   it('reports every flagged column and nothing else', function () {
     // Asserted as an exact set so the over-permissive direction is pinned too:
     // a vocabulary widened too far, or a carve-out that leaked, would satisfy
@@ -191,32 +229,55 @@ describe('schema conformance audit -- 2026-08-15 oracle repair', function () {
       'league_formats.sourceid',
       'nfl_plays.second_and_mid',
       'nfl_plays.starter_slots_qb',
-      'nfl_plays.userid'
+      'nfl_plays.userid',
+      'nfl_team_gamelogs.def_avg_get_off',
+      'nfl_team_gamelogs.off_pass_epa'
     ])
   })
 
-  it('fails the run on a stale role-pid exemption entry', function () {
-    // A schema missing one of the exempted columns must fail the run rather
-    // than let the exemption sit inert -- the same stale-adjudication backstop
-    // the consumer gates apply. Run against a schema that omits the role-pid
-    // columns entirely.
-    const minimal = path.join(
-      fs.mkdtempSync(path.join(os.tmpdir(), 'schema-conformance-')),
-      'schema.postgres.sql'
-    )
-    fs.writeFileSync(
-      minimal,
-      `CREATE TABLE public.nfl_plays ( play_id integer );\n`
-    )
+  // The audit's schema parser only recognises the multi-line `CREATE TABLE`
+  // shape the pg_dump emits; a one-line `CREATE TABLE t ( c integer );` parses
+  // to ZERO tables. This fixture was written that way and so exercised an empty
+  // schema rather than the missing-column path it names -- it passed because an
+  // absent table also threw. Keep the dump shape in any fixture asserting on a
+  // named column, and check the parsed table count when a fixture-driven
+  // assertion looks too easy.
+  const run_audit_on = (schema_sql) => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'schema-conformance-'))
+    const file = path.join(dir, 'schema.postgres.sql')
+    fs.writeFileSync(file, schema_sql)
     try {
-      const result = spawnSync(
+      return spawnSync(
         'node',
-        [audit_script, '--json', '--schema-file', minimal],
+        [audit_script, '--json', '--schema-file', file],
         { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }
       )
-      expect(result.stderr).to.include('stale conformance exemption')
     } finally {
-      fs.rmSync(path.dirname(minimal), { recursive: true, force: true })
+      fs.rmSync(dir, { recursive: true, force: true })
     }
+  }
+
+  it('fails the run on a stale exemption entry', function () {
+    // A schema that DECLARES an exempted column's table without the column is
+    // making a claim the entry contradicts, so it must fail the run rather than
+    // let the exemption sit inert -- the same stale-adjudication backstop the
+    // consumer gates apply. This is the shape a rename leaves behind, which is
+    // why it matters to a cluster whose business is renaming these columns.
+    const result = run_audit_on(
+      `CREATE TABLE public.nfl_plays (\n    play_id integer\n);\n`
+    )
+    expect(result.stderr).to.include('stale conformance exemption')
+  })
+
+  it('does not fail on a schema that omits the exempted table entirely', function () {
+    // An entry is checked when its TABLE is in scope. A fixture that never
+    // mentions the table says nothing either way, and holding every synthetic
+    // schema to the full exemption roster would couple each one to every future
+    // ruling -- the coupling that made this spec carry role-pid columns it does
+    // not otherwise test.
+    const result = run_audit_on(
+      `CREATE TABLE public.some_other_table (\n    play_id integer\n);\n`
+    )
+    expect(result.stderr).to.not.include('stale conformance exemption')
   })
 })
