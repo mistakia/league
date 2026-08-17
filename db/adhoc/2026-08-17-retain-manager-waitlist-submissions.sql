@@ -1,0 +1,44 @@
+-- STATUS: APPLIED 2026-08-17 against league_production
+--
+-- Reverses the round-close retention policy on manager_waitlist_submissions.
+-- Questionnaire responses are now RETAINED INDEFINITELY and carry across
+-- recruiting rounds as the standing candidate pool a future admission round
+-- draws from. Operator decision, 2026-08-17.
+--
+-- This file changes a COMMENT and nothing else. It is here because the table's
+-- comment is the database's own statement of its retention policy, and that
+-- statement is currently false in the one direction that matters: it promises a
+-- deletion that will never happen, to a reader who has no other source for the
+-- answer. The companion changes are a file removal
+-- (db/adhoc/2026-08-15-purge-manager-waitlist-submissions.sql, deleted -- it
+-- must never run) and the prose in
+-- user:task/home-dynasty-league/league-operations/run-waiting-list-selection-and-seating.md.
+--
+-- WHAT THIS DOES NOT FIX, and must not be read as fixing.
+--
+-- The emailed edit link is a signed JWT with deliberately NO EXPIRY.
+-- api/routes/waitlist.mjs states the reasoning and states the mitigation in the
+-- same breath: "the row itself is the lifetime, since the table is emptied when
+-- the recruiting round closes". db/adhoc/2026-08-16-waitlist-edit-link-revocation-and-lookup.sql
+-- then went further and relaxed an FK to ON DELETE SET NULL for the express
+-- purpose of letting that purge run against candidates who had reached a ballot
+-- -- it says "the only revocation the design has".
+--
+-- Retiring the purge therefore removes the ONLY revocation mechanism this
+-- feature has. Every edit link ever emailed is now valid forever, and anyone
+-- holding one -- a forwarded message, a shared inbox, an abandoned mailbox --
+-- can edit that candidate's submission indefinitely. No expiry, no flag, no
+-- rotation, nothing to check.
+--
+-- That is a code change (an expiry claim on the token, or a revoked_at column
+-- the route reads), not a comment change, and it is deliberately NOT bundled
+-- here. Applying this file makes the database honest about retention; it does
+-- not make retention safe.
+--
+-- Second consequence, unchanged by this file: league_reader reads every row via
+-- pg_read_all_data, so every read-only analysis session in the fleet can see
+-- candidate PII. Under the purge that exposure was bounded to one round. It is
+-- now permanent.
+
+COMMENT ON TABLE public.manager_waitlist_submissions IS
+  'Prospective manager questionnaire responses feeding the Article IV waiting-list ranking vote. Candidate PII: the API exposes it only to the league''s sitting managers, but league_reader can read it directly via pg_read_all_data. RETAINED INDEFINITELY as the standing candidate pool for future admission rounds -- there is no round-close purge. Note the emailed edit token has no expiry and the purge was its only revocation.';
