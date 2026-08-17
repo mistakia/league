@@ -113,20 +113,20 @@ const get_cache_info = create_season_cache_info({
 const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
   'pass_rating',
   'pass_yards_per_attempt',
-  'pass_comp_percentage',
-  'expected_pass_comp',
+  'pass_completion_percentage',
+  'expected_pass_completion',
   'completion_percentage_over_expected',
   'pass_epa_per_dropback',
-  'avg_time_to_throw',
-  'avg_time_to_pressure',
-  'avg_time_to_sack',
+  'average_time_to_throw',
+  'average_time_to_pressure',
+  'average_time_to_sack',
   'pressure_rate_against',
   'blitz_rate',
   'drop_rate',
   'pass_yards_after_catch_percentage',
-  'air_yards_per_pass_att',
-  'avg_target_separation',
-  'deep_pass_att_percentage',
+  'air_yards_per_pass_attempt',
+  'average_target_separation',
+  'deep_pass_attempt_percentage',
   'tight_window_percentage',
   'play_action_percentage',
   'rush_epa_per_attempt',
@@ -135,7 +135,7 @@ const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
   'rush_yards_after_contact_per_attempt',
   'rush_yards_before_contact_per_attempt',
   'rush_success_rate',
-  'rush_avg_time_to_line_of_scrimmage',
+  'rush_average_time_to_line_of_scrimmage',
   'rush_attempts_inside_tackles_percentage',
   'rush_attempts_stacked_box_percentage',
   'rush_attempts_under_center_percentage',
@@ -151,10 +151,10 @@ const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
   'recv_epa_per_route',
   'recv_drop_rate',
   'recv_yards_after_catch_per_reception',
-  'recv_avg_target_separation',
+  'recv_average_target_separation',
   'recv_air_yards_per_target',
   'target_rate',
-  'avg_route_depth',
+  'average_route_depth',
   'team_target_share',
   'team_air_yard_share',
   'recv_deep_target_percentage',
@@ -274,11 +274,12 @@ export default {
   nfl_team_seasonlogs_pass_yards_per_attempt:
     create_field_from_nfl_team_seasonlogs('pass_yards_per_attempt'),
   nfl_team_seasonlogs_pass_comp_percentage:
-    create_field_from_nfl_team_seasonlogs('pass_comp_percentage'),
+    create_field_from_nfl_team_seasonlogs('pass_completion_percentage'),
   nfl_team_seasonlogs_sacks:
     create_field_from_nfl_team_seasonlogs('sacks_taken'),
-  nfl_team_seasonlogs_expected_pass_comp:
-    create_field_from_nfl_team_seasonlogs('expected_pass_comp'),
+  nfl_team_seasonlogs_expected_pass_comp: create_field_from_nfl_team_seasonlogs(
+    'expected_pass_completion'
+  ),
   nfl_team_seasonlogs_completion_percentage_over_expected:
     create_field_from_nfl_team_seasonlogs(
       'completion_percentage_over_expected'
@@ -290,12 +291,14 @@ export default {
   nfl_team_seasonlogs_pass_epa_per_db: create_field_from_nfl_team_seasonlogs(
     'pass_epa_per_dropback'
   ),
-  nfl_team_seasonlogs_avg_time_to_throw:
-    create_field_from_nfl_team_seasonlogs('avg_time_to_throw'),
+  nfl_team_seasonlogs_avg_time_to_throw: create_field_from_nfl_team_seasonlogs(
+    'average_time_to_throw'
+  ),
   nfl_team_seasonlogs_avg_time_to_pressure:
-    create_field_from_nfl_team_seasonlogs('avg_time_to_pressure'),
-  nfl_team_seasonlogs_avg_time_to_sack:
-    create_field_from_nfl_team_seasonlogs('avg_time_to_sack'),
+    create_field_from_nfl_team_seasonlogs('average_time_to_pressure'),
+  nfl_team_seasonlogs_avg_time_to_sack: create_field_from_nfl_team_seasonlogs(
+    'average_time_to_sack'
+  ),
   nfl_team_seasonlogs_pressures_against:
     create_field_from_nfl_team_seasonlogs('pressures_against'),
   nfl_team_seasonlogs_pressure_rate_against:
@@ -315,11 +318,11 @@ export default {
   nfl_team_seasonlogs_pass_yards_after_catch_percentage:
     create_field_from_nfl_team_seasonlogs('pass_yards_after_catch_percentage'),
   nfl_team_seasonlogs_air_yards_per_pass_att:
-    create_field_from_nfl_team_seasonlogs('air_yards_per_pass_att'),
+    create_field_from_nfl_team_seasonlogs('air_yards_per_pass_attempt'),
   nfl_team_seasonlogs_avg_target_separation:
-    create_field_from_nfl_team_seasonlogs('avg_target_separation'),
+    create_field_from_nfl_team_seasonlogs('average_target_separation'),
   nfl_team_seasonlogs_deep_pass_att_percentage:
-    create_field_from_nfl_team_seasonlogs('deep_pass_att_percentage'),
+    create_field_from_nfl_team_seasonlogs('deep_pass_attempt_percentage'),
   nfl_team_seasonlogs_tight_window_percentage:
     create_field_from_nfl_team_seasonlogs('tight_window_percentage'),
   nfl_team_seasonlogs_play_action_percentage:
@@ -359,7 +362,9 @@ export default {
   nfl_team_seasonlogs_rush_attempts_speed_20_plus_mph:
     create_field_from_nfl_team_seasonlogs('rush_attempts_speed_20_plus_mph'),
   nfl_team_seasonlogs_rush_avg_time_to_line_of_scrimmage:
-    create_field_from_nfl_team_seasonlogs('rush_avg_time_to_line_of_scrimmage'),
+    create_field_from_nfl_team_seasonlogs(
+      'rush_average_time_to_line_of_scrimmage'
+    ),
   nfl_team_seasonlogs_rush_attempts_inside_tackles_percentage:
     create_field_from_nfl_team_seasonlogs(
       'rush_attempts_inside_tackles_percentage'
@@ -414,19 +419,20 @@ export default {
       'recv_yards_after_catch_per_reception'
     ),
   nfl_team_seasonlogs_recv_avg_target_separation:
-    create_field_from_nfl_team_seasonlogs('recv_avg_target_separation'),
+    create_field_from_nfl_team_seasonlogs('recv_average_target_separation'),
   nfl_team_seasonlogs_recv_air_yards:
     create_field_from_nfl_team_seasonlogs('recv_air_yards'),
   nfl_team_seasonlogs_recv_air_yards_per_target:
     create_field_from_nfl_team_seasonlogs('recv_air_yards_per_target'),
   nfl_team_seasonlogs_target_rate:
     create_field_from_nfl_team_seasonlogs('target_rate'),
-  nfl_team_seasonlogs_avg_route_depth:
-    create_field_from_nfl_team_seasonlogs('avg_route_depth'),
+  nfl_team_seasonlogs_avg_route_depth: create_field_from_nfl_team_seasonlogs(
+    'average_route_depth'
+  ),
   nfl_team_seasonlogs_endzone_targets:
     create_field_from_nfl_team_seasonlogs('endzone_targets'),
   nfl_team_seasonlogs_endzone_recs:
-    create_field_from_nfl_team_seasonlogs('endzone_recs'),
+    create_field_from_nfl_team_seasonlogs('endzone_receptions'),
   nfl_team_seasonlogs_team_target_share:
     create_field_from_nfl_team_seasonlogs('team_target_share'),
   nfl_team_seasonlogs_team_air_yard_share:

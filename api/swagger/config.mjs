@@ -1579,19 +1579,19 @@ const options = {
                   description: 'Ball carrier player ID',
                   example: 'PATR-MAHO-005785'
                 },
-                pass_yds: {
+                pass_yards: {
                   type: 'integer',
                   nullable: true,
                   description: 'Passing yards on the play',
                   example: 15
                 },
-                rush_yds: {
+                rush_yards: {
                   type: 'integer',
                   nullable: true,
                   description: 'Rushing yards on the play',
                   example: 7
                 },
-                recv_yds: {
+                recv_yards: {
                   type: 'integer',
                   nullable: true,
                   description: 'Receiving yards on the play',
@@ -1717,7 +1717,7 @@ const options = {
                   description: 'Yards gained after any contact',
                   example: 3
                 },
-                cov_type: {
+                coverage_type_ngs: {
                   type: 'string',
                   nullable: true,
                   description: 'Coverage type',

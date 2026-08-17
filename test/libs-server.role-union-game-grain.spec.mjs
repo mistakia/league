@@ -41,18 +41,18 @@ const query_context = { row_axes: [], nfl_week_ids: [] }
 // A milestone: +20 when the player-game passing total reaches 300. Referenced
 // off the per-game stage's alias, which is what the stage exists to expose.
 const passing_milestone =
-  'CASE WHEN role_union.pass_yds >= 300 THEN 20 ELSE 0 END'
+  'CASE WHEN role_union.pass_yards >= 300 THEN 20 ELSE 0 END'
 
 const passing_role = {
   pid_column: 'passer_pid',
-  measure_expr: 'COALESCE(pass_yds, 0) * 0.04',
-  game_aggregates: { pass_yds: 'COALESCE(pass_yds, 0)' }
+  measure_expr: 'COALESCE(pass_yards, 0) * 0.04',
+  game_aggregates: { pass_yards: 'COALESCE(pass_yards, 0)' }
 }
 
 const rushing_role = {
   pid_column: 'ball_carrier_pid',
-  measure_expr: 'COALESCE(rush_yds, 0) * 0.1',
-  game_aggregates: { rush_yds: 'COALESCE(rush_yds, 0)' }
+  measure_expr: 'COALESCE(rush_yards, 0) * 0.1',
+  game_aggregates: { rush_yards: 'COALESCE(rush_yards, 0)' }
 }
 
 // Returns the knex builder rather than its rows: a spec that awaits it gets an
@@ -107,16 +107,16 @@ describe('role-union per-game grain stage', () => {
     await db('nfl_plays').insert([
       // Game one: 350 passing yards over two plays -- clears 300 as a GAME
       // total, which no single play does.
-      play(GAME_ONE, 1, { passer_pid: PASSER, pass_yds: 200 }),
-      play(GAME_ONE, 2, { passer_pid: PASSER, pass_yds: 150 }),
+      play(GAME_ONE, 1, { passer_pid: PASSER, pass_yards: 200 }),
+      play(GAME_ONE, 2, { passer_pid: PASSER, pass_yards: 150 }),
       // Game two: 100 passing yards. Season total is 450, so a milestone
       // evaluated at season grain would fire here and must not.
-      play(GAME_TWO, 1, { passer_pid: PASSER, pass_yds: 100 }),
+      play(GAME_TWO, 1, { passer_pid: PASSER, pass_yards: 100 }),
       // A rusher in game one only, for the cross-role case.
       play(GAME_ONE, 3, {
         play_type: 'RUSH',
         ball_carrier_pid: RUSHER,
-        rush_yds: 40
+        rush_yards: 40
       })
     ])
   })
@@ -131,7 +131,7 @@ describe('role-union per-game grain stage', () => {
       role_attributions: [
         {
           pid_column: 'passer_pid',
-          measure_expr: 'COALESCE(pass_yds, 0) * 0.04'
+          measure_expr: 'COALESCE(pass_yards, 0) * 0.04'
         }
       ],
       period: 'season'
@@ -153,7 +153,7 @@ describe('role-union per-game grain stage', () => {
     const sql = sub.toString()
 
     expect(sql).to.include('role_plays')
-    expect(sql).to.include('SUM(role_plays.pass_yds) AS pass_yds')
+    expect(sql).to.include('SUM(role_plays.pass_yards) AS pass_yards')
     // The conditional sits INSIDE the outer SUM, so it is summed once per
     // qualifying game rather than tested once against the period total.
     expect(sql).to.include(
@@ -182,7 +182,7 @@ describe('role-union per-game grain stage', () => {
     const rows = await build_cte({
       role_attributions: [passing_role],
       game_conditional_expr:
-        'CASE WHEN role_union.pass_yds >= 400 THEN 20 ELSE 0 END',
+        'CASE WHEN role_union.pass_yards >= 400 THEN 20 ELSE 0 END',
       period: 'season'
     })
 
@@ -201,7 +201,7 @@ describe('role-union per-game grain stage', () => {
     const sub = build_cte({
       role_attributions: [passing_role, rushing_role],
       game_conditional_expr:
-        'CASE WHEN role_union.pass_yds + role_union.rush_yds >= 380 THEN 10 ELSE 0 END',
+        'CASE WHEN role_union.pass_yards + role_union.rush_yards >= 380 THEN 10 ELSE 0 END',
       period: 'season'
     })
     const sql = sub.toString()
@@ -209,8 +209,8 @@ describe('role-union per-game grain stage', () => {
     // Both arms project both aliases -- two occurrences of each literal 0 cast
     // would be brittle to assert, so pin the shape that matters: every alias is
     // summed once at the game stage.
-    expect(sql).to.include('SUM(role_plays.pass_yds) AS pass_yds')
-    expect(sql).to.include('SUM(role_plays.rush_yds) AS rush_yds')
+    expect(sql).to.include('SUM(role_plays.pass_yards) AS pass_yards')
+    expect(sql).to.include('SUM(role_plays.rush_yards) AS rush_yards')
 
     const rows = await sub
     const passer = rows.find((r) => r.pid === PASSER)

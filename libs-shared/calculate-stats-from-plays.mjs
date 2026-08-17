@@ -49,9 +49,9 @@ const calculateStatsFromPlays = (plays) => {
       case 'RUSH': {
         playerToTeam[play.ball_carrier_pid] = play.offense_nfl_team
         addTeamStat(play.offense_nfl_team, 'rushing_attempts', 1)
-        addTeamStat(play.offense_nfl_team, 'rushing_yards', play.yds_gained)
+        addTeamStat(play.offense_nfl_team, 'rushing_yards', play.yards_gained)
         addStat(play.ball_carrier_pid, 'rushing_attempts', 1)
-        addStat(play.ball_carrier_pid, 'rushing_yards', play.rush_yds)
+        addStat(play.ball_carrier_pid, 'rushing_yards', play.rush_yards)
         if (play.yards_after_any_contact)
           addStat(play.ball_carrier_pid, 'ryaco', play.yards_after_any_contact)
         if (play.is_first_down) {
@@ -64,7 +64,7 @@ const calculateStatsFromPlays = (plays) => {
         }
         if (play.missed_or_broken_tackle)
           addStat(play.ball_carrier_pid, 'mbt', play.missed_or_broken_tackle)
-        if (play.rush_yds > 0) addStat(play.ball_carrier_pid, 'posra', 1)
+        if (play.rush_yards > 0) addStat(play.ball_carrier_pid, 'posra', 1)
         if (play.is_first_down) addStat(play.ball_carrier_pid, 'rfd', 1)
         if (play.is_touchdown)
           addStat(play.ball_carrier_pid, 'rushing_touchdowns', 1)
@@ -116,7 +116,7 @@ const calculateStatsFromPlays = (plays) => {
           // TODO deprecate - temp fix for missing trg
           // receiver
           addStat(play.target_pid, 'receptions', 1)
-          addStat(play.target_pid, 'receiving_yards', play.recv_yds)
+          addStat(play.target_pid, 'receiving_yards', play.recv_yards)
           addStat(play.target_pid, 'ryac', play.yards_after_catch)
           addStat(play.target_pid, 'rcay', play.depth_of_target)
           if (play.missed_or_broken_tackle)
@@ -124,7 +124,7 @@ const calculateStatsFromPlays = (plays) => {
 
           // passer
           addStat(play.passer_pid, 'passing_attempts', 1)
-          addStat(play.passer_pid, 'passing_yards', play.pass_yds)
+          addStat(play.passer_pid, 'passing_yards', play.pass_yards)
           addStat(play.passer_pid, 'passing_completions', 1)
           addStat(play.passer_pid, 'pcay', play.depth_of_target)
           if (play.yards_after_catch)
@@ -143,7 +143,7 @@ const calculateStatsFromPlays = (plays) => {
           }
         } else if (play.is_sack) {
           addStat(play.passer_pid, 'sk', 1)
-          addStat(play.passer_pid, 'sky', Math.abs(play.yds_gained))
+          addStat(play.passer_pid, 'sky', Math.abs(play.yards_gained))
         } else {
           addStat(play.passer_pid, 'passing_attempts', 1)
         }

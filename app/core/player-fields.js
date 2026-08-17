@@ -1053,8 +1053,8 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'passing efficiency matchup',
       column_header: 'COMP%',
       csv_header: 'Opponent pass completion percentage over average',
-      percentile_field: 'pass_comp_percentage',
-      ...opponent_field('pass_comp_percentage')
+      percentile_field: 'pass_completion_percentage',
+      ...opponent_field('pass_completion_percentage')
     },
     opponent_completion_percentage_over_expectation: {
       category: 'passing efficiency matchup',
@@ -1077,22 +1077,22 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'passing usage matchup',
       column_header: 'TTT',
       csv_header: 'Opponent average time to throw over average',
-      percentile_field: 'avg_time_to_throw',
-      ...opponent_field('avg_time_to_throw')
+      percentile_field: 'average_time_to_throw',
+      ...opponent_field('average_time_to_throw')
     },
     opponent_avg_time_to_pressure: {
       category: 'passing usage matchup',
       column_header: 'TTP',
       csv_header: 'Opponent average time to pressure over average',
-      percentile_field: 'avg_time_to_pressure',
-      ...opponent_field('avg_time_to_pressure')
+      percentile_field: 'average_time_to_pressure',
+      ...opponent_field('average_time_to_pressure')
     },
     opponent_avg_time_to_sack: {
       category: 'passing usage matchup',
       column_header: 'TTS',
       csv_header: 'Opponent average time to sack over average',
-      percentile_field: 'avg_time_to_sack',
-      ...opponent_field('avg_time_to_sack')
+      percentile_field: 'average_time_to_sack',
+      ...opponent_field('average_time_to_sack')
     },
     opponent_pressure_rate_against: {
       category: 'passing usage matchup',
@@ -1112,22 +1112,22 @@ function PlayerFields({ week, opponent_time_period, state }) {
       category: 'passing usage matchup',
       column_header: 'AY/PA',
       csv_header: 'Opponent air yards per pass attempt over average',
-      percentile_field: 'air_yards_per_pass_att',
-      ...opponent_field('air_yards_per_pass_att')
+      percentile_field: 'air_yards_per_pass_attempt',
+      ...opponent_field('air_yards_per_pass_attempt')
     },
     opponent_avg_target_separation: {
       category: 'passing usage matchup',
       column_header: 'TSEP',
       csv_header: 'Opponent average target separation over average',
-      percentile_field: 'avg_target_separation',
-      ...opponent_field('avg_target_separation')
+      percentile_field: 'average_target_separation',
+      ...opponent_field('average_target_separation')
     },
     opponent_deep_pass_att_pct: {
       category: 'passing usage matchup',
       column_header: 'DP%',
       csv_header: 'Opponent deep pass attempts percentage over average',
-      percentile_field: 'deep_pass_att_percentage',
-      ...opponent_field('deep_pass_att_percentage')
+      percentile_field: 'deep_pass_attempt_percentage',
+      ...opponent_field('deep_pass_attempt_percentage')
     },
     opponent_tight_window_pct: {
       category: 'passing usage matchup',

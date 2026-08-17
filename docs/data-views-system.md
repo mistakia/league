@@ -190,7 +190,7 @@ For complex aggregations that benefit from CTEs (see [Fantasy Points Column Defi
     query.with(with_table_name, (qb) => {
       qb.select([
         'nfl_plays.possession_nfl_team',
-        db.raw('SUM(nfl_plays.rush_yds) as rushing_yards'),
+        db.raw('SUM(nfl_plays.rush_yards) as rushing_yards'),
         db.raw('COUNT(*) as play_count')
       ])
       .from('nfl_plays')

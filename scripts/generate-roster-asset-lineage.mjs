@@ -146,7 +146,7 @@ const generate_roster_asset_lineage = async ({
       weeks_practice_squad: snap.weeks_practice_squad || 0,
       weeks_reserve_short_term: snap.weeks_reserve_short_term || 0,
       weeks_reserve_long_term: snap.weeks_reserve_long_term || 0,
-      weeks_cov: snap.weeks_cov || 0,
+      weeks_covid_reserve: snap.weeks_covid_reserve || 0,
       weeks_started: snap.weeks_started || 0,
       projected_pts_added_at_acquisition:
         snap.projected_pts_added_at_acquisition ?? null,

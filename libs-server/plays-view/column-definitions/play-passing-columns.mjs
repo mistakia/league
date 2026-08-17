@@ -30,11 +30,12 @@ export default {
     main_where: () => 'nfl_plays.passer_pid'
   },
   play_pass_yds: {
-    column_name: 'pass_yds',
+    column_name: 'pass_yards',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.pass_yds as play_pass_yds'],
-    main_where: () => 'nfl_plays.pass_yds',
-    aggregate_select: () => db.raw('SUM(nfl_plays.pass_yds) as play_pass_yds'),
+    main_select: () => ['nfl_plays.pass_yards as play_pass_yds'],
+    main_where: () => 'nfl_plays.pass_yards',
+    aggregate_select: () =>
+      db.raw('SUM(nfl_plays.pass_yards) as play_pass_yds'),
     use_having: true
   },
   play_air_yards: {

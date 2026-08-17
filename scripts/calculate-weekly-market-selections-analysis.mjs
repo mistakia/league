@@ -106,18 +106,18 @@ const format_prop_row = ({
         if (play.quarter === 1) {
           if (play.passer_pid === prop_row.selection_pid) {
             acc[play.esbid].first_quarter_stats.passing_yards +=
-              play.pass_yds || 0
+              play.pass_yards || 0
           }
           if (play.ball_carrier_pid === prop_row.selection_pid) {
             acc[play.esbid].first_quarter_stats.rushing_yards +=
-              play.rush_yds || 0
+              play.rush_yards || 0
           }
           if (
             play.target_pid === prop_row.selection_pid &&
             play.ball_carrier_pid === prop_row.selection_pid
           ) {
             acc[play.esbid].first_quarter_stats.receiving_yards +=
-              play.recv_yds || 0
+              play.recv_yards || 0
           }
         }
 
@@ -369,9 +369,9 @@ const calculate_weekly_market_selections_analysis = async ({
       'season_year',
       'season_type',
       'quarter',
-      'pass_yds',
-      'recv_yds',
-      'rush_yds',
+      'pass_yards',
+      'recv_yards',
+      'rush_yards',
       'passer_pid',
       'target_pid',
       'ball_carrier_pid'

@@ -27,19 +27,19 @@ const backfill_penalty_type = async ({
   const table_name = `nfl_plays_year_${year}`
 
   // Query penalty plays that need backfill
-  // Only process enforced penalties (pen_team IS NOT NULL)
-  // Declined penalties have pen_team = NULL and don't need penalty_type
+  // Only process enforced penalties (penalty_team IS NOT NULL)
+  // Declined penalties have penalty_team = NULL and don't need penalty_type
   let query = db(table_name)
     .select(
       'esbid',
       'play_id',
       'play_description',
       'play_description_nflfastr',
-      'pen_team',
+      'penalty_team',
       'offense_nfl_team'
     )
     .where('is_penalty', true)
-    .whereNotNull('pen_team')
+    .whereNotNull('penalty_team')
 
   if (!force) {
     query = query.whereNull('penalty_type')
@@ -61,7 +61,7 @@ const backfill_penalty_type = async ({
     const penalty_type = get_canonical_penalty_type({
       desc: play.play_description,
       play_description_nflfastr: play.play_description_nflfastr,
-      pen_team: play.pen_team,
+      penalty_team: play.penalty_team,
       off_team: play.offense_nfl_team
     })
 

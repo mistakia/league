@@ -111,7 +111,7 @@ const get_effective_posteam = (play) => {
 /**
  * Checks whether a touchdown was scored by the defense.
  *
- * Requires td_nfl_team to be populated -- an unattributed touchdown is treated as
+ * Requires touchdown_nfl_team to be populated -- an unattributed touchdown is treated as
  * not-defensive rather than defensive, so that plays with a missing scoring
  * team fall through to the ordinary possession-change rule instead of
  * suppressing every drive boundary that follows a touchdown.
@@ -119,8 +119,8 @@ const get_effective_posteam = (play) => {
 const is_defensive_td = (play) =>
   Boolean(
     play.is_touchdown &&
-      play.td_nfl_team &&
-      play.offense_nfl_team !== play.td_nfl_team
+      play.touchdown_nfl_team &&
+      play.offense_nfl_team !== play.touchdown_nfl_team
   )
 
 /**

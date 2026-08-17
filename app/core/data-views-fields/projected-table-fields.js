@@ -175,7 +175,7 @@ export default function ({ week }) {
       label: 'ATT'
     }),
     ...create_field({
-      base_name: 'pass_yds',
+      base_name: 'pass_yards',
       title: 'Passing Yards',
       groups: [COLUMN_GROUPS.PASSING],
       label: 'YDS'
@@ -201,7 +201,7 @@ export default function ({ week }) {
       label: 'ATT'
     }),
     ...create_field({
-      base_name: 'rush_yds',
+      base_name: 'rush_yards',
       title: 'Rushing Yards',
       groups: [COLUMN_GROUPS.RUSHING],
       label: 'YDS'

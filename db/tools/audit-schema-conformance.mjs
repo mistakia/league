@@ -259,7 +259,7 @@ function is_bare_shorthand(name) {
 //
 // The carve-out is SHAPE, not identity. A name carrying `_is_` / `_has_` in the
 // middle is a qualified predicate -- a subject followed by the predicate marker,
-// as in `combine_height_is_pro_day` or `forty_yd_dash_is_unofficial`. Those read
+// as in `combine_height_is_pro_day` or `forty_yard_dash_is_unofficial`. Those read
 // correctly, are unambiguously boolean at a glance, and the prefixed rewrite
 // (`is_combine_height_pro_day`) is strictly worse English: it detaches the
 // predicate from the measurement it qualifies. 50 columns across 30 names take
@@ -397,7 +397,7 @@ const accepted_column_tokens = new Map([
   ['nfl_games.away_qb_pid', new Set(['qb'])],
   ['nfl_games.home_qb_pid', new Set(['qb'])],
   ['nfl_plays_player.player_get_off', new Set(['off'])],
-  ['nfl_team_gamelogs.defense_avg_get_off', new Set(['off'])],
+  ['nfl_team_gamelogs.defense_average_get_off', new Set(['off'])],
   ['player_defender_gamelogs.pass_rush_get_off', new Set(['off'])],
   [
     'player_prospect_profile.positional_factor_off_man_coverage',

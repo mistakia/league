@@ -1286,7 +1286,7 @@
           {
             "params": {
               "year": [2025],
-              "cov_type": ["COVER_1", "COVER_3"],
+              "coverage_type_ngs": ["COVER_1", "COVER_3"],
               "man_zone": null,
               "seas_type": ["REG"],
               "team_unit": ["def"],
@@ -1301,7 +1301,7 @@
           {
             "params": {
               "year": [2025],
-              "cov_type": ["COVER_2", "COVER_4"],
+              "coverage_type_ngs": ["COVER_2", "COVER_4"],
               "man_zone": null,
               "seas_type": ["REG"],
               "team_unit": ["def"],
@@ -1316,7 +1316,7 @@
           {
             "params": {
               "year": [2025],
-              "cov_type": ["2_MAN"],
+              "coverage_type_ngs": ["2_MAN"],
               "man_zone": null,
               "seas_type": ["REG"],
               "team_unit": ["def"],
@@ -1331,7 +1331,7 @@
           {
             "params": {
               "year": [2025],
-              "cov_type": ["COVER_0"],
+              "coverage_type_ngs": ["COVER_0"],
               "man_zone": null,
               "seas_type": ["REG"],
               "team_unit": ["def"],
@@ -1346,7 +1346,7 @@
           {
             "params": {
               "year": [2025],
-              "cov_type": ["COVER_1"],
+              "coverage_type_ngs": ["COVER_1"],
               "man_zone": null,
               "seas_type": ["REG"],
               "team_unit": ["def"],
@@ -1361,7 +1361,7 @@
           {
             "params": {
               "year": [2025],
-              "cov_type": ["COVER_2"],
+              "coverage_type_ngs": ["COVER_2"],
               "man_zone": null,
               "seas_type": ["REG"],
               "team_unit": ["def"],
@@ -1376,7 +1376,7 @@
           {
             "params": {
               "year": [2025],
-              "cov_type": ["COVER_3"],
+              "coverage_type_ngs": ["COVER_3"],
               "man_zone": null,
               "seas_type": ["REG"],
               "team_unit": ["def"],
@@ -1391,7 +1391,7 @@
           {
             "params": {
               "year": [2025],
-              "cov_type": ["COVER_4"],
+              "coverage_type_ngs": ["COVER_4"],
               "man_zone": null,
               "seas_type": ["REG"],
               "team_unit": ["def"],
@@ -1406,7 +1406,7 @@
           {
             "params": {
               "year": [2025],
-              "cov_type": ["COVER_6"],
+              "coverage_type_ngs": ["COVER_6"],
               "man_zone": null,
               "seas_type": ["REG"],
               "team_unit": ["def"],
@@ -1421,7 +1421,7 @@
           {
             "params": {
               "year": [2025],
-              "cov_type": ["PREVENT"],
+              "coverage_type_ngs": ["PREVENT"],
               "man_zone": null,
               "seas_type": ["REG"],
               "team_unit": ["def"],
@@ -6183,7 +6183,7 @@
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_1"],
               "seconds_remaining_half": [112, 1800],
-              "cov_type": ["COVER_1"],
+              "coverage_type_ngs": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
                 "aggregation": "rate",
@@ -6198,7 +6198,7 @@
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_2"],
               "seconds_remaining_half": [112, 1800],
-              "cov_type": ["COVER_1"],
+              "coverage_type_ngs": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
                 "aggregation": "rate",
@@ -6213,7 +6213,7 @@
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_3"],
               "seconds_remaining_half": [112, 1800],
-              "cov_type": ["COVER_1"],
+              "coverage_type_ngs": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
                 "aggregation": "rate",
@@ -6228,7 +6228,7 @@
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_4"],
               "seconds_remaining_half": [112, 1800],
-              "cov_type": ["COVER_1"],
+              "coverage_type_ngs": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
                 "aggregation": "rate",
@@ -6243,7 +6243,7 @@
               "team_unit": ["def"],
               "nfl_week_id": ["2024_REG_WEEK_5"],
               "seconds_remaining_half": [112, 1800],
-              "cov_type": ["COVER_1"],
+              "coverage_type_ngs": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
                 "aggregation": "rate",
@@ -6258,7 +6258,7 @@
               "year": [2024],
               "team_unit": ["def"],
               "seconds_remaining_half": [112, 1800],
-              "cov_type": ["COVER_1"],
+              "coverage_type_ngs": ["COVER_1"],
               "output": {
                 "period": "team_pass_play",
                 "aggregation": "rate",
@@ -7019,7 +7019,7 @@
               "seas_type": ["REG"],
               "man_zone": null,
               "matchup_opponent_type": ["current_week_opponent_total"],
-              "cov_type": ["COVER_1", "COVER_3"],
+              "coverage_type_ngs": ["COVER_1", "COVER_3"],
               "output": {
                 "period": "team_pass_play",
                 "aggregation": "rate",
@@ -7035,7 +7035,7 @@
               "seas_type": ["REG"],
               "man_zone": null,
               "matchup_opponent_type": ["current_week_opponent_total"],
-              "cov_type": ["COVER_2", "COVER_4"],
+              "coverage_type_ngs": ["COVER_2", "COVER_4"],
               "output": {
                 "period": "team_pass_play",
                 "aggregation": "rate",

@@ -21,13 +21,13 @@ describe('data-views measure-contract', () => {
     it('emits a bare SUM season render when decimals is null', () => {
       const result = derive_measure({
         stat_name: 'rush_yds_from_plays',
-        measure: { kind: 'additive', expr: 'rush_yds' },
+        measure: { kind: 'additive', expr: 'rush_yards' },
         supports_periods: TEAM_PERIODS
       })
-      expect(result.with_select).to.equal('SUM(rush_yds)')
+      expect(result.with_select).to.equal('SUM(rush_yards)')
       expect(result.aggregate).to.equal('sum')
       expect(result.decimals).to.equal(null)
-      expect(result.measure_expr()).to.equal('rush_yds')
+      expect(result.measure_expr()).to.equal('rush_yards')
     })
 
     it('rounds the season render when decimals is set', () => {
@@ -99,7 +99,7 @@ describe('data-views measure-contract', () => {
     it('prepends game/season to the declared period list and echoes supports_periods', () => {
       const result = derive_measure({
         stat_name: 'rush_yds_from_plays',
-        measure: { kind: 'additive', expr: 'rush_yds' },
+        measure: { kind: 'additive', expr: 'rush_yards' },
         supports_periods: TEAM_PERIODS
       })
       expect(result.supports_output.aggregations).to.deep.equal([

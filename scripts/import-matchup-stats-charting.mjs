@@ -150,7 +150,8 @@ function map_matchup_to_db_fields(matchup) {
   if (matchup.defenseInterceptions != null)
     result.defense_interceptions = matchup.defenseInterceptions
   if (matchup.defenseAverageTimeToPressure != null)
-    result.defense_avg_time_to_pressure = matchup.defenseAverageTimeToPressure
+    result.defense_average_time_to_pressure =
+      matchup.defenseAverageTimeToPressure
   if (matchup.defenseFumblesForced != null)
     result.defense_fumbles_forced = matchup.defenseFumblesForced
 

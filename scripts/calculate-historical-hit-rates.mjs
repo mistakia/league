@@ -200,9 +200,9 @@ const calculate_historical_hit_rates = async ({
   const first_quarter_stats = await db('nfl_plays')
     .select(
       'esbid',
-      'pass_yds',
-      'recv_yds',
-      'rush_yds',
+      'pass_yards',
+      'recv_yards',
+      'rush_yards',
       'passer_pid',
       'target_pid',
       'ball_carrier_pid'
@@ -235,14 +235,14 @@ const calculate_historical_hit_rates = async ({
       )
 
       if (play.passer_pid) {
-        acc[play.esbid][play.passer_pid].passing_yards += play.pass_yds || 0
+        acc[play.esbid][play.passer_pid].passing_yards += play.pass_yards || 0
       }
       if (play.ball_carrier_pid) {
         acc[play.esbid][play.ball_carrier_pid].rushing_yards +=
-          play.rush_yds || 0
+          play.rush_yards || 0
       }
       if (play.target_pid) {
-        acc[play.esbid][play.target_pid].receiving_yards += play.recv_yds || 0
+        acc[play.esbid][play.target_pid].receiving_yards += play.recv_yards || 0
       }
 
       return acc
@@ -254,9 +254,9 @@ const calculate_historical_hit_rates = async ({
   const first_half_stats = await db('nfl_plays')
     .select(
       'esbid',
-      'pass_yds',
-      'recv_yds',
-      'rush_yds',
+      'pass_yards',
+      'recv_yards',
+      'rush_yards',
       'passer_pid',
       'target_pid',
       'ball_carrier_pid'
@@ -288,13 +288,14 @@ const calculate_historical_hit_rates = async ({
     )
 
     if (play.passer_pid) {
-      acc[play.esbid][play.passer_pid].passing_yards += play.pass_yds || 0
+      acc[play.esbid][play.passer_pid].passing_yards += play.pass_yards || 0
     }
     if (play.ball_carrier_pid) {
-      acc[play.esbid][play.ball_carrier_pid].rushing_yards += play.rush_yds || 0
+      acc[play.esbid][play.ball_carrier_pid].rushing_yards +=
+        play.rush_yards || 0
     }
     if (play.target_pid) {
-      acc[play.esbid][play.target_pid].receiving_yards += play.recv_yds || 0
+      acc[play.esbid][play.target_pid].receiving_yards += play.recv_yards || 0
     }
 
     return acc

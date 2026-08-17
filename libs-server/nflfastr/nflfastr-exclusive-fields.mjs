@@ -13,7 +13,7 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   // Note: 'is_incompletion' is shared with Sportradar - both pipelines report physical outcome
   'is_field_goal_attempt',
   'is_out_of_bounds',
-  'drive_yds_penalized',
+  'drive_yards_penalized',
   'is_punt_attempt',
   'is_qb_scramble', // nflfastR is authoritative - parses "scrambles" from play description; Sportradar over-reports (marks designed runs/sacks as scrambles)
 
@@ -34,15 +34,15 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   'quarterback_epa', // QB-specific EPA
   'air_epa', // EPA from air yards
   'yac_epa', // EPA from yards after catch
-  'comp_air_epa', // EPA on completed air yards
-  'comp_yac_epa', // EPA on completed YAC
+  'completion_air_epa', // EPA on completed air yards
+  'completion_yac_epa', // EPA on completed YAC
   'xyac_epa', // Expected YAC EPA
 
   // EPA Home/Away Team Completion-Based
-  'total_home_comp_air_epa',
-  'total_away_comp_air_epa',
-  'total_home_comp_yac_epa',
-  'total_away_comp_yac_epa',
+  'total_home_completion_air_epa',
+  'total_away_completion_air_epa',
+  'total_home_completion_yac_epa',
+  'total_away_completion_yac_epa',
   'total_home_raw_air_epa',
   'total_away_raw_air_epa',
   'total_home_raw_yac_epa',
@@ -63,8 +63,8 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   // WPA Component Metrics
   'air_wpa', // WPA from air yards
   'yac_wpa', // WPA from yards after catch
-  'comp_air_wpa', // WPA on completed air yards
-  'comp_yac_wpa', // WPA on completed YAC
+  'completion_air_wpa', // WPA on completed air yards
+  'completion_yac_wpa', // WPA on completed YAC
 
   // WPA Home/Away Team Totals
   'total_home_rush_wpa',
@@ -73,29 +73,29 @@ export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
   'total_away_pass_wpa',
 
   // WPA Home/Away Team Completion-Based
-  'total_home_comp_air_wpa',
-  'total_away_comp_air_wpa',
-  'total_home_comp_yac_wpa',
-  'total_away_comp_yac_wpa',
+  'total_home_completion_air_wpa',
+  'total_away_completion_air_wpa',
+  'total_home_completion_yac_wpa',
+  'total_away_completion_yac_wpa',
   'total_home_raw_air_wpa',
   'total_away_raw_air_wpa',
   'total_home_raw_yac_wpa',
   'total_away_raw_yac_wpa',
 
   // Expected Yardage (XYAC) Metrics
-  'xyac_mean_yds', // Expected mean yards after catch
-  'xyac_median_yds', // Expected median yards after catch
+  'xyac_mean_yards', // Expected mean yards after catch
+  'xyac_median_yards', // Expected median yards after catch
   'xyac_success_prob', // Expected YAC success probability
   'xyac_first_down_prob', // Expected probability of first down with YAC
 
   // Scoring Probability Metrics
   'no_score_prob', // Probability of no score on drive
-  'opp_fg_prob', // Probability opponent scores field goal
+  'opp_field_goal_prob', // Probability opponent scores field goal
   'opp_safety_prob', // Probability opponent scores safety
-  'opp_td_prob', // Probability opponent scores touchdown
-  'fg_prob', // Probability of field goal
+  'opp_touchdown_prob', // Probability opponent scores touchdown
+  'field_goal_prob', // Probability of field goal
   'safety_prob', // Probability of safety
-  'td_prob', // Probability of touchdown
+  'touchdown_prob', // Probability of touchdown
   'extra_point_prob', // Probability of successful extra point
   'two_conversion_prob', // Probability of successful two-point conversion
 

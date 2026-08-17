@@ -26,15 +26,15 @@ const build = (measures) =>
 describe('data-views distinct-count numerator', () => {
   it('emits SUM(expr) for an additive measure (unchanged default)', () => {
     const sql = build([
-      { alias: 'm_sum', measure_expr: 'rush_yds', aggregate: 'sum' }
+      { alias: 'm_sum', measure_expr: 'rush_yards', aggregate: 'sum' }
     ])
-    expect(sql).to.match(/SUM\(rush_yds\) AS m_sum/)
+    expect(sql).to.match(/SUM\(rush_yards\) AS m_sum/)
     expect(sql).to.not.match(/COUNT\(DISTINCT/)
   })
 
   it('defaults to SUM when no aggregate is supplied (back-compat)', () => {
-    const sql = build([{ alias: 'm_sum', measure_expr: 'rush_yds' }])
-    expect(sql).to.match(/SUM\(rush_yds\) AS m_sum/)
+    const sql = build([{ alias: 'm_sum', measure_expr: 'rush_yards' }])
+    expect(sql).to.match(/SUM\(rush_yards\) AS m_sum/)
   })
 
   it('emits COUNT(DISTINCT expr) for a count_distinct measure', () => {
@@ -52,14 +52,14 @@ describe('data-views distinct-count numerator', () => {
 
   it('co-locates a sum and a count_distinct measure in one CTE', () => {
     const sql = build([
-      { alias: 'm_sum', measure_expr: 'rush_yds', aggregate: 'sum' },
+      { alias: 'm_sum', measure_expr: 'rush_yards', aggregate: 'sum' },
       {
         alias: 'm_dc',
         measure_expr: "CONCAT(esbid, '_', series_sequence)",
         aggregate: 'count_distinct'
       }
     ])
-    expect(sql).to.match(/SUM\(rush_yds\) AS m_sum/)
+    expect(sql).to.match(/SUM\(rush_yards\) AS m_sum/)
     expect(sql).to.match(
       /COUNT\(DISTINCT CONCAT\(esbid, '_', series_sequence\)\) AS m_dc/
     )

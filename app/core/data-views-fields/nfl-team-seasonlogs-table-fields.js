@@ -347,7 +347,7 @@ export default {
   nfl_team_seasonlogs_pass_comp_percentage: create_seasonlog_field({
     column_title: 'Pass Completion % Generated/Allowed By Position',
     header_label: 'Comp%',
-    player_value_path: 'nfl_team_seasonlogs_pass_comp_percentage'
+    player_value_path: 'nfl_team_seasonlogs_pass_completion_percentage'
   }),
   nfl_team_seasonlogs_sacks: create_seasonlog_field({
     column_title: 'Sacks Generated/Allowed By Position',
@@ -359,7 +359,7 @@ export default {
   nfl_team_seasonlogs_expected_pass_comp: create_seasonlog_field({
     column_title: 'Expected Pass Completions Generated/Allowed By Position',
     header_label: 'xComp',
-    player_value_path: 'nfl_team_seasonlogs_expected_pass_comp'
+    player_value_path: 'nfl_team_seasonlogs_expected_pass_completion'
   }),
   nfl_team_seasonlogs_completion_percentage_over_expected:
     create_seasonlog_field({
@@ -386,17 +386,17 @@ export default {
   nfl_team_seasonlogs_avg_time_to_throw: create_seasonlog_field({
     column_title: 'Average Time to Throw Generated/Allowed By Position',
     header_label: 'TTT',
-    player_value_path: 'nfl_team_seasonlogs_avg_time_to_throw'
+    player_value_path: 'nfl_team_seasonlogs_average_time_to_throw'
   }),
   nfl_team_seasonlogs_avg_time_to_pressure: create_seasonlog_field({
     column_title: 'Average Time to Pressure Generated/Allowed By Position',
     header_label: 'TTP',
-    player_value_path: 'nfl_team_seasonlogs_avg_time_to_pressure'
+    player_value_path: 'nfl_team_seasonlogs_average_time_to_pressure'
   }),
   nfl_team_seasonlogs_avg_time_to_sack: create_seasonlog_field({
     column_title: 'Average Time to Sack Generated/Allowed By Position',
     header_label: 'TTS',
-    player_value_path: 'nfl_team_seasonlogs_avg_time_to_sack'
+    player_value_path: 'nfl_team_seasonlogs_average_time_to_sack'
   }),
   nfl_team_seasonlogs_pressures_against: create_seasonlog_field({
     column_title: 'Pressures Against Generated/Allowed By Position',
@@ -448,17 +448,17 @@ export default {
   nfl_team_seasonlogs_air_yards_per_pass_att: create_seasonlog_field({
     column_title: 'Air Yards per Pass Attempt Generated/Allowed By Position',
     header_label: 'AY/Att',
-    player_value_path: 'nfl_team_seasonlogs_air_yards_per_pass_att'
+    player_value_path: 'nfl_team_seasonlogs_air_yards_per_pass_attempt'
   }),
   nfl_team_seasonlogs_avg_target_separation: create_seasonlog_field({
     column_title: 'Average Target Separation Generated/Allowed By Position',
     header_label: 'Sep',
-    player_value_path: 'nfl_team_seasonlogs_avg_target_separation'
+    player_value_path: 'nfl_team_seasonlogs_average_target_separation'
   }),
   nfl_team_seasonlogs_deep_pass_att_percentage: create_seasonlog_field({
     column_title: 'Deep Pass Attempt % Generated/Allowed By Position',
     header_label: 'Deep%',
-    player_value_path: 'nfl_team_seasonlogs_deep_pass_att_percentage'
+    player_value_path: 'nfl_team_seasonlogs_deep_pass_attempt_percentage'
   }),
   nfl_team_seasonlogs_tight_window_percentage: create_seasonlog_field({
     column_title: 'Tight Window % Generated/Allowed By Position',
@@ -556,7 +556,7 @@ export default {
         'Average Time to Line of Scrimmage Generated/Allowed By Position',
       header_label: 'TTLOS',
       player_value_path:
-        'nfl_team_seasonlogs_rush_avg_time_to_line_of_scrimmage'
+        'nfl_team_seasonlogs_rush_average_time_to_line_of_scrimmage'
     }),
   nfl_team_seasonlogs_rush_attempts_inside_tackles_percentage:
     create_seasonlog_field({
@@ -684,7 +684,7 @@ export default {
   nfl_team_seasonlogs_recv_avg_target_separation: create_seasonlog_field({
     column_title: 'Average Target Separation Generated/Allowed By Position',
     header_label: 'Sep',
-    player_value_path: 'nfl_team_seasonlogs_recv_avg_target_separation'
+    player_value_path: 'nfl_team_seasonlogs_recv_average_target_separation'
   }),
   nfl_team_seasonlogs_recv_air_yards: create_seasonlog_field({
     column_title: 'Receiving Air Yards Generated/Allowed By Position',
@@ -705,7 +705,7 @@ export default {
   nfl_team_seasonlogs_avg_route_depth: create_seasonlog_field({
     column_title: 'Average Route Depth Generated/Allowed By Position',
     header_label: 'AvgDepth',
-    player_value_path: 'nfl_team_seasonlogs_avg_route_depth'
+    player_value_path: 'nfl_team_seasonlogs_average_route_depth'
   }),
   nfl_team_seasonlogs_endzone_targets: create_seasonlog_field({
     column_title: 'Endzone Targets Generated/Allowed By Position',
@@ -715,7 +715,7 @@ export default {
   nfl_team_seasonlogs_endzone_recs: create_seasonlog_field({
     column_title: 'Endzone Receptions Generated/Allowed By Position',
     header_label: 'EZRec',
-    player_value_path: 'nfl_team_seasonlogs_endzone_recs'
+    player_value_path: 'nfl_team_seasonlogs_endzone_receptions'
   }),
   nfl_team_seasonlogs_team_target_share: create_seasonlog_field({
     column_title: 'Team Target Share Generated/Allowed By Position',

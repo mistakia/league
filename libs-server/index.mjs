@@ -182,10 +182,10 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.offense_nfl_team',
       'nfl_plays.play_type',
       'nfl_plays.ball_carrier_pid',
-      'nfl_plays.pass_yds',
-      'nfl_plays.rush_yds',
-      'nfl_plays.recv_yds',
-      'nfl_plays.yds_gained',
+      'nfl_plays.pass_yards',
+      'nfl_plays.rush_yards',
+      'nfl_plays.recv_yards',
+      'nfl_plays.yards_gained',
       'nfl_plays.is_first_down',
       'nfl_plays.is_successful_play',
       'nfl_plays.passer_pid',
@@ -212,7 +212,7 @@ export const getChartedPlayByPlayQuery = (db) =>
       // Canonical week identifier, consumed by the client-side week filter in
       // app/core/stats. Generated column, so it never drifts from the parts.
       'nfl_games.nfl_week_id',
-      'nfl_plays.cov_type',
+      'nfl_plays.coverage_type_ngs',
       'nfl_plays.receiver_separation',
       'nfl_plays.yard_line_100'
     )

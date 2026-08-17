@@ -768,7 +768,7 @@ const process_special_dvoa = async (worksheet, { dry_run, observed_at }) => {
         last_week_special_teams_dvoa: row[5],
         special_teams_weighted_dvoa: row[6],
         special_teams_weighted_dvoa_rank: row[7],
-        fg_xp_dvoa: row[8],
+        field_goal_extra_point_dvoa: row[8],
         kick_dvoa: row[9],
         kick_return_dvoa: row[10],
         punt_dvoa: row[11],

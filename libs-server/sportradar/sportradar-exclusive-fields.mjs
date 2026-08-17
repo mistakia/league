@@ -24,7 +24,7 @@ export const SPORTRADAR_EXCLUSIVE_FIELDS = new Set([
 
   // Advanced Contact Metrics
   'yards_after_any_contact', // Yards after any contact (also set by import-charted-plays-from-csv)
-  'broken_tackles_rec', // Broken tackles on receptions
+  'broken_tackles_receiving', // Broken tackles on receptions
   'broken_tackles_rush', // Broken tackles on rushes
 
   // Special Teams
@@ -33,7 +33,7 @@ export const SPORTRADAR_EXCLUSIVE_FIELDS = new Set([
   'is_punt_touchback', // Punt touchback
   'is_kickoff_onside', // Onside kick attempt
   'is_kickoff_touchback', // Kickoff touchback
-  'fg_result_detail', // Detailed FG miss reason
+  'field_goal_result_detail', // Detailed FG miss reason
 
   // Defensive Player Tracking
   'sack_1_sportradar_player_id',

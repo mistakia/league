@@ -504,7 +504,7 @@ router.get('/stats', async (req, res) => {
  *                     play_type: "RUSH"
  *                     yards_gained: 7
  *                     ball_carrier_pid: "PATR-MAHO-005785"
- *                     rush_yds: 7
+ *                     rush_yards: 7
  *                     is_first_down: false
  *                     is_successful_play: true
  *                     down_number: 1

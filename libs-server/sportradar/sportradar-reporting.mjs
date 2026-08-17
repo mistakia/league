@@ -98,17 +98,17 @@ export const print_dry_mode_comparison = ({ sample_plays_by_type }) => {
     'pocket_time',
     'yards_after_catch',
     'broken_tackles_rush',
-    'broken_tackles_rec',
+    'broken_tackles_receiving',
     'missed_or_broken_tackle',
     'kicker_sportradar_player_id',
     'punter_sportradar_player_id',
     'returner_sportradar_player_id',
     'penalty_sportradar_player_id',
     'incomplete_pass_type',
-    'fg_result_detail',
-    'punt_yds',
+    'field_goal_result_detail',
+    'punt_yards',
     'punt_hang_time',
-    'kickoff_yds',
+    'kickoff_yards',
     'play_direction'
   ]
 

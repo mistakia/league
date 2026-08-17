@@ -387,9 +387,9 @@ const map_drive_data = ({ drive_context }) => {
     drive_sequence: drive_context.sequence,
     drive_play_count: drive_context.play_count,
     drive_top: normalize_drive_duration(drive_context.duration),
-    drive_yds: drive_context.gain,
+    drive_yards: drive_context.gain,
     drive_first_downs: drive_context.first_downs,
-    drive_yds_penalized: drive_context.penalty_yards
+    drive_yards_penalized: drive_context.penalty_yards
   }
 
   if (drive_context.start_reason) {
@@ -513,9 +513,9 @@ const map_sportradar_play_to_nfl_play = async ({
   }
 
   const broken_tackles_rush = mapped.broken_tackles_rush || 0
-  const broken_tackles_rec = mapped.broken_tackles_rec || 0
-  if (broken_tackles_rush > 0 || broken_tackles_rec > 0) {
-    mapped.mbt = broken_tackles_rush + broken_tackles_rec
+  const broken_tackles_receiving = mapped.broken_tackles_receiving || 0
+  if (broken_tackles_rush > 0 || broken_tackles_receiving > 0) {
+    mapped.mbt = broken_tackles_rush + broken_tackles_receiving
   }
 
   const fumble_stats =
@@ -611,11 +611,11 @@ const find_time_matches = (db_plays, sportradar_sec_rem) => {
 }
 
 const find_yards_matches = (time_matches, mapped_play) => {
-  if (mapped_play.yds_gained == null) return []
+  if (mapped_play.yards_gained == null) return []
 
   return time_matches.filter((m) => {
-    if (m.play.yds_gained == null) return false
-    const yards_diff = Math.abs(m.play.yds_gained - mapped_play.yds_gained)
+    if (m.play.yards_gained == null) return false
+    const yards_diff = Math.abs(m.play.yards_gained - mapped_play.yards_gained)
     return yards_diff <= FUZZY_YARDS_TOLERANCE
   })
 }
@@ -665,7 +665,7 @@ const resolve_multiple_matches = ({
       if (yards_matches.length === 1) {
         const match = yards_matches[0]
         log(
-          `Resolved multiple matches using yards gained (${match.time_diff}s time diff, ${Math.abs(match.play.yds_gained - mapped_play.yds_gained)} yards diff): ${match.play.game_clock_start || 'N/A'}`
+          `Resolved multiple matches using yards gained (${match.time_diff}s time diff, ${Math.abs(match.play.yards_gained - mapped_play.yards_gained)} yards diff): ${match.play.game_clock_start || 'N/A'}`
         )
         return match.play
       } else if (yards_matches.length > 1) {
@@ -1199,9 +1199,9 @@ const process_play = async ({
         update: mapped_play,
         overwrite_existing: stats.overwrite_existing,
         // Use modern overwrite_fields approach for Sportradar-exclusive fields
-        // drive_yds: Sportradar provides accurate final drive total vs NFL v1 stale snapshots
+        // drive_yards: Sportradar provides accurate final drive total vs NFL v1 stale snapshots
         overwrite_fields: [
-          'drive_yds',
+          'drive_yards',
           ...(stats.ignore_sportradar_field_conflicts
             ? Array.from(SPORTRADAR_EXCLUSIVE_FIELDS)
             : [])

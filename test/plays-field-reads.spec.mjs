@@ -52,12 +52,12 @@ describe('get-play-from-play-stats scoring/return team attribution', function ()
   ]
 
   for (const stat_id of td_tm_stat_ids) {
-    it(`statId ${stat_id} sets td_nfl_team from the stat row nfl_team`, () => {
+    it(`statId ${stat_id} sets touchdown_nfl_team from the stat row nfl_team`, () => {
       const play_row = getPlayFromPlayStats({
         playStats: [play_stat_row({ stat_id, nfl_team: 'KC', stat_yards: 7 })]
       })
 
-      expect(play_row.td_nfl_team).to.equal('KC')
+      expect(play_row.touchdown_nfl_team).to.equal('KC')
     })
   }
 
@@ -78,15 +78,15 @@ describe('get-play-from-play-stats scoring/return team attribution', function ()
       playStats: [{ stat_id: 11, teamAbbr: 'KC', stat_yards: 7 }]
     })
 
-    expect(play_row.td_nfl_team).to.equal(undefined)
+    expect(play_row.touchdown_nfl_team).to.equal(undefined)
   })
 
-  it('leaves td_nfl_team unset when the stat row has no team', () => {
+  it('leaves touchdown_nfl_team unset when the stat row has no team', () => {
     const play_row = getPlayFromPlayStats({
       playStats: [play_stat_row({ stat_id: 11, stat_yards: 7 })]
     })
 
-    expect(play_row.td_nfl_team).to.equal(null)
+    expect(play_row.touchdown_nfl_team).to.equal(null)
   })
 })
 
@@ -178,7 +178,7 @@ describe('fixed-drive-enrichment drive boundaries', function () {
         play_type: 'PASS',
         offense_nfl_team: 'KC',
         is_touchdown: true,
-        td_nfl_team: 'KC'
+        touchdown_nfl_team: 'KC'
       }),
       build_play({ play_id: 2, play_type: 'CONV', offense_nfl_team: 'NE' })
     ]
@@ -195,7 +195,7 @@ describe('fixed-drive-enrichment drive boundaries', function () {
         play_type: 'PASS',
         offense_nfl_team: 'KC',
         is_touchdown: true,
-        td_nfl_team: 'NE'
+        touchdown_nfl_team: 'NE'
       }),
       build_play({ play_id: 2, play_type: 'CONV', offense_nfl_team: 'NE' })
     ]
@@ -204,7 +204,7 @@ describe('fixed-drive-enrichment drive boundaries', function () {
   })
 
   it('falls back to the possession rule when a touchdown has no scoring team', () => {
-    // td_nfl_team is unpopulated for historical plays. An unattributed touchdown must
+    // touchdown_nfl_team is unpopulated for historical plays. An unattributed touchdown must
     // not be read as a defensive touchdown, which would suppress the drive
     // boundary on every play that follows a score.
     const plays = [
@@ -213,7 +213,7 @@ describe('fixed-drive-enrichment drive boundaries', function () {
         play_type: 'PASS',
         offense_nfl_team: 'KC',
         is_touchdown: true,
-        td_nfl_team: null
+        touchdown_nfl_team: null
       }),
       build_play({ play_id: 2, play_type: 'CONV', offense_nfl_team: 'NE' })
     ]
@@ -394,10 +394,16 @@ describe('import-plays-nfl-v1 live upsert drive_sequence protection', function (
   it('leaves every other column on blanket-merge semantics', async () => {
     const build_plays_merge = await load_build_plays_merge()
     const merge = build_plays_merge('nfl_plays', [
-      { esbid: 1, play_id: 2, drive_sequence: null, drive_yds: 30, quarter: 1 }
+      {
+        esbid: 1,
+        play_id: 2,
+        drive_sequence: null,
+        drive_yards: 30,
+        quarter: 1
+      }
     ])
 
-    expect(merge_sql(merge, 'drive_yds')).to.equal('EXCLUDED."drive_yds"')
+    expect(merge_sql(merge, 'drive_yards')).to.equal('EXCLUDED."drive_yards"')
     expect(merge_sql(merge, 'quarter')).to.equal('EXCLUDED."quarter"')
   })
 
@@ -606,8 +612,8 @@ describe('calculate-stats-from-plays interception attribution', function () {
       pass_play({
         is_completion: true,
         target_pid: 'TARG-ET-000003',
-        recv_yds: 12,
-        pass_yds: 12
+        recv_yards: 12,
+        pass_yards: 12
       })
     ])
 

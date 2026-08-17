@@ -277,7 +277,7 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
     weeks_practice_squad: 0,
     weeks_reserve_short_term: 0,
     weeks_reserve_long_term: 0,
-    weeks_cov: 0,
+    weeks_covid_reserve: 0,
     weeks_started: 0,
     initial_slot_type: null,
     ps_slot_subtype: null,
@@ -336,7 +336,7 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
           result.weeks_reserve_short_term++
         else if (slot === roster_slot_types.RESERVE_LONG_TERM)
           result.weeks_reserve_long_term++
-        else if (slot === roster_slot_types.COV) result.weeks_cov++
+        else if (slot === roster_slot_types.COV) result.weeks_covid_reserve++
         else if (ACTIVE_SLOT_SET.has(slot)) result.weeks_active++
         if (STARTING_SLOT_SET.has(slot)) result.weeks_started++
 

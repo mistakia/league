@@ -109,12 +109,12 @@ const PLAYS_SOURCED_ROLES = [
     // test environment. Not derived from the terms -- it predates them and
     // carries its own values.
     fallback:
-      'COALESCE(pass_yds, 0) * 0.04 + COALESCE(is_passing_touchdown::int, 0) * 4 + COALESCE("is_interception"::int, 0) * -1',
+      'COALESCE(pass_yards, 0) * 0.04 + COALESCE(is_passing_touchdown::int, 0) * 4 + COALESCE("is_interception"::int, 0) * -1',
     terms: [
       {
         column: 'passing_yards',
         kind: 'rate',
-        expr: 'COALESCE(pass_yds, 0)',
+        expr: 'COALESCE(pass_yards, 0)',
         always: true
       },
       {
@@ -138,18 +138,18 @@ const PLAYS_SOURCED_ROLES = [
         expr: 'COALESCE(is_completion::int, 0)'
       }
     ],
-    bonus_stat: { stat: 'passing_yards', yards_expr: 'COALESCE(pass_yds, 0)' }
+    bonus_stat: { stat: 'passing_yards', yards_expr: 'COALESCE(pass_yards, 0)' }
   },
   {
     name: 'rushing',
     pid_column: 'ball_carrier_pid',
     fallback:
-      'COALESCE(rush_yds, 0) * 0.1 + COALESCE(is_rushing_touchdown::int, 0) * 6',
+      'COALESCE(rush_yards, 0) * 0.1 + COALESCE(is_rushing_touchdown::int, 0) * 6',
     terms: [
       {
         column: 'rushing_yards',
         kind: 'rate',
-        expr: 'COALESCE(rush_yds, 0)',
+        expr: 'COALESCE(rush_yards, 0)',
         always: true
       },
       {
@@ -173,18 +173,18 @@ const PLAYS_SOURCED_ROLES = [
     ],
     // The per-play yardage a bonus rule for this role reads. `stat` is the
     // vocabulary a bonus rule names; `yards_expr` is how this role measures it.
-    bonus_stat: { stat: 'rushing_yards', yards_expr: 'COALESCE(rush_yds, 0)' }
+    bonus_stat: { stat: 'rushing_yards', yards_expr: 'COALESCE(rush_yards, 0)' }
   },
   {
     name: 'receiving',
     pid_column: 'target_pid',
     fallback:
-      'COALESCE(is_completion::int, 0) * 1 + COALESCE(recv_yds, 0) * 0.1 + COALESCE(is_passing_touchdown::int, 0) * 6',
+      'COALESCE(is_completion::int, 0) * 1 + COALESCE(recv_yards, 0) * 0.1 + COALESCE(is_passing_touchdown::int, 0) * 6',
     terms: [
       {
         column: 'receiving_yards',
         kind: 'rate',
-        expr: 'COALESCE(recv_yds, 0)',
+        expr: 'COALESCE(recv_yards, 0)',
         always: true
       },
       {
@@ -237,7 +237,10 @@ const PLAYS_SOURCED_ROLES = [
         }
       }
     ],
-    bonus_stat: { stat: 'receiving_yards', yards_expr: 'COALESCE(recv_yds, 0)' }
+    bonus_stat: {
+      stat: 'receiving_yards',
+      yards_expr: 'COALESCE(recv_yards, 0)'
+    }
   }
 ]
 

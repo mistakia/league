@@ -214,8 +214,8 @@
 | is_trick_play           | Trick Play              | Indicator if the play was a trick play                                            | 83.72%   | 2021/09/09 |
 | missed_or_broken_tackle | Missed or Broken Tackle | Indicator if the tackle was missed or broken                                      | 30.82%   | 2021/09/09 |
 | is_out_of_bounds        | Out of Bounds           | Indicator if the play ended out of bounds                                         | 83.52%   | 2001/01/06 |
-| pen_team                | Penalty Team            | Team that was penalized                                                           | 83.49%   | 2001/01/06 |
-| pen_yds                 | Penalty Yards           | Yards gained by the team after the penalty                                        | 83.49%   | 2001/01/06 |
+| penalty_team            | Penalty Team            | Team that was penalized                                                           | 83.49%   | 2001/01/06 |
+| penalty_yards           | Penalty Yards           | Yards gained by the team after the penalty                                        | 83.49%   | 2001/01/06 |
 | is_penalty              | Penalty                 | Indicator if the play was a penalty                                               | 99.15%   | 2001/01/06 |
 | is_return_touchdown     | Return Touchdown        | Indicator if the return was a touchdown                                           | 22.59%   | 2001/01/06 |
 | return_nfl_team         | Return Team             | Team that was returned to                                                         | 83.62%   | 2001/01/06 |
@@ -248,7 +248,7 @@
 | is_out_of_pocket_pass   | Out of Pocket Pass              | Indicator if the pass was out of pocket                                                                                                                                                                                                                                                                | 83.72%   | 2021/09/09 |
 | is_passing_play         | Pass Play                       | Indicator if the play was a pass attempt (includes sacks)                                                                                                                                                                                                                                              | 83.52%   | 2001/01/06 |
 | is_passing_touchdown    | Pass Touchdown                  | Indicator if the pass was a touchdown                                                                                                                                                                                                                                                                  | 98.00%   | 2001/01/06 |
-| pass_yds                | Pass Yards                      | Pass yards attributed to the quarterback                                                                                                                                                                                                                                                               | 99.79%   | 2001/01/06 |
+| pass_yards              | Pass Yards                      | Pass yards attributed to the quarterback                                                                                                                                                                                                                                                               | 99.79%   | 2001/01/06 |
 | is_qb_hit               | Quarterback Hit                 | Indicator if the quarterback was hit by the pass                                                                                                                                                                                                                                                       | 31.69%   | 2021/09/09 |
 | is_qb_hurry             | Quarterback Hurry               | Indicator if the quarterback was hurried by the pass                                                                                                                                                                                                                                                   | 100.00%  | 2025/09/04 |
 | is_qb_pressure          | Quarterback Pressure            | Indicator if the quarterback was pressed by the pass                                                                                                                                                                                                                                                   | 51.78%   | 2021/09/09 |
@@ -260,7 +260,7 @@
 | is_qb_spike             | Quarterback Spike               | Indicator if the quarterback spiked on the play                                                                                                                                                                                                                                                        | 83.60%   | 2001/01/06 |
 | is_qb_fault_sack        | Quarterback Sack                | Indicator if the quarterback sacked on the play                                                                                                                                                                                                                                                        | 83.72%   | 2021/09/09 |
 | is_throw_away           | Quarterback Throwaway           | Indicator if the quarterback threw away on the play                                                                                                                                                                                                                                                    | 83.97%   | 2021/09/09 |
-| recv_yds                | Receiver Yards                  | Receiver yards attributed to the receiver                                                                                                                                                                                                                                                              | 99.79%   | 2001/01/06 |
+| recv_yards              | Receiver Yards                  | Receiver yards attributed to the receiver                                                                                                                                                                                                                                                              | 99.79%   | 2001/01/06 |
 | is_screen_pass          | Screen Pass                     | Indicator if the pass was a screen pass                                                                                                                                                                                                                                                                | 83.72%   | 2021/09/09 |
 | is_shovel_pass          | Shovel Pass                     | Indicator if the pass was a shovel pass                                                                                                                                                                                                                                                                | 13.91%   | 2021/09/09 |
 | is_sideline_pass        | Sideline Pass                   | Indicator if the pass was a sideline pass                                                                                                                                                                                                                                                              | 13.91%   | 2021/09/09 |
@@ -278,7 +278,7 @@
 | -------------------- | -------------- | ----------------------------------------------------- | -------- | ---------- |
 | is_rushing_play      | Rush Attempt   | Indicator if the play was a rush attempt              | 83.52%   | 2001/01/06 |
 | is_rushing_touchdown | Rush Touchdown | Indicator if the rush was a touchdown                 | 96.13%   | 2001/01/06 |
-| rush_yds             | Rush Yards     | Rush yards attributed to the rusher                   | 99.79%   | 2001/01/06 |
+| rush_yards           | Rush Yards     | Rush yards attributed to the rusher                   | 99.79%   | 2001/01/06 |
 | run_gap              | Run Gap        | Indicator for line gap of run: end, guard, or tackle  | 83.14%   | 2001/01/06 |
 | run_location         | Run Location   | Indicator for location of run: left, middle, or right | 83.51%   | 2001/01/06 |
 
@@ -298,7 +298,7 @@
 | play_type_nfl         | Play Type NFL      | NFL-defined type of play                                      | 99.07%   | 2001/01/06 |
 | play_type_ngs         | Play Type NGS      | Next Gen Stats defined type of play                           | 99.23%   | 2002/08/03 |
 | next_play_type        | Next Play Type     | Type of the next play                                         | 98.32%   | 2001/01/06 |
-| yds_gained            | Yards Gained       | Yardage gained or lost by the possessing team during the play | 99.75%   | 2001/01/06 |
+| yards_gained          | Yards Gained       | Yardage gained or lost by the possessing team during the play | 99.75%   | 2001/01/06 |
 | is_fumble             | Fumble Occurred    | Indicator if a fumble occurred during the play                | 83.52%   | 2001/01/06 |
 | is_fumble_lost        | Fumble Lost        | Indicator if the fumble was lost to the opposing team         | 71.92%   | 2001/01/06 |
 | is_interception       | Interception       | Indicator if an interception occurred during the play         | 84.20%   | 2001/01/06 |
@@ -318,7 +318,7 @@
 | is_first_down_pass    | First Down Pass    | Indicator if the play was a first down pass                   | 83.52%   | 2001/01/06 |
 | is_first_down_penalty | First Down Penalty | Indicator if the play was a first down penalty                | 83.52%   | 2001/01/06 |
 | is_touchdown          | Touchdown          | Indicator if the play was a touchdown                         | 99.21%   | 2001/01/06 |
-| td_nfl_team           | Touchdown Team     | Team that scored the touchdown                                | 99.02%   | 2001/01/06 |
+| touchdown_nfl_team    | Touchdown Team     | Team that scored the touchdown                                | 99.02%   | 2001/01/06 |
 
 ### Game
 
@@ -374,8 +374,8 @@
 | offense_personnel        | Offensive Personnel   | Description of the offensive personnel involved                                          | 98.06%   | 2016/08/11 |
 | defense_personnel        | Defensive Personnel   | Description of the defensive personnel involved                                          | 98.03%   | 2016/08/11 |
 | man_zone                 | Man Zone Coverage     | Man or zone coverage designation                                                         | 95.01%   | 2018/08/09 |
-| cov_type                 | Coverage Type         | Type of coverage scheme used                                                             | 94.97%   | 2018/08/09 |
-| cov_type_charted         | Coverage Type Charted | Type of coverage according to Charted Stats                                              | 13.91%   | 2021/09/09 |
+| coverage_type_ngs        | Coverage Type         | Type of coverage scheme used                                                             | 94.97%   | 2018/08/09 |
+| coverage_type_charted    | Coverage Type Charted | Type of coverage according to Charted Stats                                              | 13.91%   | 2021/09/09 |
 | coverage_on_target       | Coverage on Target    | Coverage on the targeted receiver (0: Uncovered, 1: Single, 2: Double)                   | 13.91%   | 2021/09/09 |
 | box_defenders            | Defenders in the Box  | Number of defenders in the box at snap                                                   | 98.12%   | 2016/08/11 |
 | ngs_pass_rushers         | Pass Rushers          | Number of pass rushers on the play                                                       | 98.00%   | 2016/08/11 |
@@ -399,7 +399,7 @@
 | column                 | name                     | description                                                         | coverage | since      |
 | ---------------------- | ------------------------ | ------------------------------------------------------------------- | -------- | ---------- |
 | drive_sequence         | Drive Sequence           | Drive count within the game                                         | 99.18%   | 2001/01/06 |
-| drive_yds              | Drive Yards              | Yards gained or lost during the drive                               | 96.17%   | 2001/01/06 |
+| drive_yards            | Drive Yards              | Yards gained or lost during the drive                               | 96.17%   | 2001/01/06 |
 | drive_play_count       | Drive Play Count         | Number of plays in the drive                                        | 99.18%   | 2001/01/06 |
 | drive_result           | Drive Result             | Outcome of the drive (e.g., touchdown, field goal)                  | 83.52%   | 2001/01/06 |
 | drive_top              | Drive Time of Possession | Time of possession during the drive                                 | 83.52%   | 2001/01/06 |
@@ -408,7 +408,7 @@
 | is_drive_score         | Drive Score              | Indicator if the drive ended with a score                           | 83.52%   | 2001/01/06 |
 | drive_start_quarter    | Drive Start Quarter      | Quarter in which the drive started                                  | 83.52%   | 2001/01/06 |
 | drive_end_quarter      | Drive End Quarter        | Quarter in which the drive ended                                    | 83.52%   | 2001/01/06 |
-| drive_yds_penalized    | Drive Yards Penalized    | Yards penalized during the drive                                    | 84.16%   | 2001/09/09 |
+| drive_yards_penalized  | Drive Yards Penalized    | Yards penalized during the drive                                    | 84.16%   | 2001/09/09 |
 | drive_start_transition | Drive Start Transition   | How the offense got the ball at the start of the drive              | 83.52%   | 2001/01/06 |
 | drive_end_transition   | Drive End Transition     | How the offense lost the ball at the end of the drive               | 83.52%   | 2001/01/06 |
 | drive_game_clock_start | Drive Game Clock Start   | Game time at the beginning of the drive                             | 83.52%   | 2001/01/06 |
@@ -420,78 +420,78 @@
 
 ### Expected Points
 
-| column                  | name                         | description                                                                                  | coverage | since      |
-| ----------------------- | ---------------------------- | -------------------------------------------------------------------------------------------- | -------- | ---------- |
-| expected_points         | Expected Points              | Expected points with respect to the possession team for the given play                       | 83.52%   | 2001/01/06 |
-| epa                     | Expected Points Added        | Expected points added by the posteam for the given play                                      | 83.52%   | 2001/01/06 |
-| is_epa_successful       | EPA Success                  | Indicator whether EPA > 0 in the given play                                                  | 83.52%   | 2001/01/06 |
-| total_home_epa          | Total Home EPA               | Cumulative total EPA for the home team in the game so far                                    | 83.52%   | 2001/01/06 |
-| total_away_epa          | Total Away EPA               | Cumulative total EPA for the away team in the game so far                                    | 83.52%   | 2001/01/06 |
-| total_home_rush_epa     | Total Home Rush EPA          | Cumulative total rushing EPA for the home team in the game so far                            | 83.52%   | 2001/01/06 |
-| total_away_rush_epa     | Total Away Rush EPA          | Cumulative total rushing EPA for the away team in the game so far                            | 83.52%   | 2001/01/06 |
-| total_home_pass_epa     | Total Home Pass EPA          | Cumulative total passing EPA for the home team in the game so far                            | 83.52%   | 2001/01/06 |
-| total_away_pass_epa     | Total Away Pass EPA          | Cumulative total passing EPA for the away team in the game so far                            | 83.52%   | 2001/01/06 |
-| quarterback_epa         | QB EPA                       | EPA credited to the quarterback up to the point where a receiver lost a fumble after a catch | 83.52%   | 2001/01/06 |
-| air_epa                 | Air EPA                      | EPA from the air yards alone                                                                 | 83.52%   | 2001/01/06 |
-| yac_epa                 | YAC EPA                      | EPA from the yards after catch alone                                                         | 83.52%   | 2001/01/06 |
-| comp_air_epa            | Completed Air EPA            | EPA from the air yards alone only for completions                                            | 83.52%   | 2001/01/06 |
-| comp_yac_epa            | Completed YAC EPA            | EPA from the yards after catch alone only for completions                                    | 83.52%   | 2001/01/06 |
-| xyac_epa                | Expected YAC EPA             | Expected value of EPA gained after the catch                                                 | 83.52%   | 2001/01/06 |
-| total_home_comp_air_epa | Total Home Completed Air EPA | Cumulative total completions air EPA for the home team in the game so far                    | 67.64%   | 2001/09/09 |
-| total_away_comp_air_epa | Total Away Completed Air EPA | Cumulative total completions air EPA for the away team in the game so far                    | 67.64%   | 2001/09/09 |
-| total_home_comp_yac_epa | Total Home Completed YAC EPA | Cumulative total completions yac EPA for the home team in the game so far                    | 67.64%   | 2001/09/09 |
-| total_away_comp_yac_epa | Total Away Completed YAC EPA | Cumulative total completions yac EPA for the away team in the game so far                    | 67.64%   | 2001/09/09 |
-| total_home_raw_air_epa  | Total Home Raw Air EPA       | Cumulative total raw air EPA for the home team in the game so far                            | 67.64%   | 2001/09/09 |
-| total_away_raw_air_epa  | Total Away Raw Air EPA       | Cumulative total raw air EPA for the away team in the game so far                            | 67.64%   | 2001/09/09 |
-| total_home_raw_yac_epa  | Total Home Raw YAC EPA       | Cumulative total raw yac EPA for the home team in the game so far                            | 67.64%   | 2001/09/09 |
-| total_away_raw_yac_epa  | Total Away Raw YAC EPA       | Cumulative total raw yac EPA for the away team in the game so far                            | 67.64%   | 2001/09/09 |
+| column                        | name                         | description                                                                                  | coverage | since      |
+| ----------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------- | -------- | ---------- |
+| expected_points               | Expected Points              | Expected points with respect to the possession team for the given play                       | 83.52%   | 2001/01/06 |
+| epa                           | Expected Points Added        | Expected points added by the posteam for the given play                                      | 83.52%   | 2001/01/06 |
+| is_epa_successful             | EPA Success                  | Indicator whether EPA > 0 in the given play                                                  | 83.52%   | 2001/01/06 |
+| total_home_epa                | Total Home EPA               | Cumulative total EPA for the home team in the game so far                                    | 83.52%   | 2001/01/06 |
+| total_away_epa                | Total Away EPA               | Cumulative total EPA for the away team in the game so far                                    | 83.52%   | 2001/01/06 |
+| total_home_rush_epa           | Total Home Rush EPA          | Cumulative total rushing EPA for the home team in the game so far                            | 83.52%   | 2001/01/06 |
+| total_away_rush_epa           | Total Away Rush EPA          | Cumulative total rushing EPA for the away team in the game so far                            | 83.52%   | 2001/01/06 |
+| total_home_pass_epa           | Total Home Pass EPA          | Cumulative total passing EPA for the home team in the game so far                            | 83.52%   | 2001/01/06 |
+| total_away_pass_epa           | Total Away Pass EPA          | Cumulative total passing EPA for the away team in the game so far                            | 83.52%   | 2001/01/06 |
+| quarterback_epa               | QB EPA                       | EPA credited to the quarterback up to the point where a receiver lost a fumble after a catch | 83.52%   | 2001/01/06 |
+| air_epa                       | Air EPA                      | EPA from the air yards alone                                                                 | 83.52%   | 2001/01/06 |
+| yac_epa                       | YAC EPA                      | EPA from the yards after catch alone                                                         | 83.52%   | 2001/01/06 |
+| completion_air_epa            | Completed Air EPA            | EPA from the air yards alone only for completions                                            | 83.52%   | 2001/01/06 |
+| completion_yac_epa            | Completed YAC EPA            | EPA from the yards after catch alone only for completions                                    | 83.52%   | 2001/01/06 |
+| xyac_epa                      | Expected YAC EPA             | Expected value of EPA gained after the catch                                                 | 83.52%   | 2001/01/06 |
+| total_home_completion_air_epa | Total Home Completed Air EPA | Cumulative total completions air EPA for the home team in the game so far                    | 67.64%   | 2001/09/09 |
+| total_away_completion_air_epa | Total Away Completed Air EPA | Cumulative total completions air EPA for the away team in the game so far                    | 67.64%   | 2001/09/09 |
+| total_home_completion_yac_epa | Total Home Completed YAC EPA | Cumulative total completions yac EPA for the home team in the game so far                    | 67.64%   | 2001/09/09 |
+| total_away_completion_yac_epa | Total Away Completed YAC EPA | Cumulative total completions yac EPA for the away team in the game so far                    | 67.64%   | 2001/09/09 |
+| total_home_raw_air_epa        | Total Home Raw Air EPA       | Cumulative total raw air EPA for the home team in the game so far                            | 67.64%   | 2001/09/09 |
+| total_away_raw_air_epa        | Total Away Raw Air EPA       | Cumulative total raw air EPA for the away team in the game so far                            | 67.64%   | 2001/09/09 |
+| total_home_raw_yac_epa        | Total Home Raw YAC EPA       | Cumulative total raw yac EPA for the home team in the game so far                            | 67.64%   | 2001/09/09 |
+| total_away_raw_yac_epa        | Total Away Raw YAC EPA       | Cumulative total raw yac EPA for the away team in the game so far                            | 67.64%   | 2001/09/09 |
 
 ### Win Probability
 
-| column                     | name                             | description                                                                                    | coverage | since      |
-| -------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------- | -------- | ---------- |
-| win_probability            | Win Probability                  | Estimated win probability for the posteam given the current situation at the start of the play | 83.52%   | 2001/01/06 |
-| win_probability_added      | Win Probability Added            | Win probability added for the posteam                                                          | 83.52%   | 2001/01/06 |
-| home_win_probability       | Home Win Probability             | Estimated win probability for the home team                                                    | 83.52%   | 2001/01/06 |
-| away_win_probability       | Away Win Probability             | Estimated win probability for the away team                                                    | 83.52%   | 2001/01/06 |
-| vegas_wpa                  | Vegas Win Probability Added      | Win probability added for the posteam: spread_adjusted model                                   | 83.52%   | 2001/01/06 |
-| vegas_home_wpa             | Vegas Home Win Probability Added | Win probability added for the home team: spread_adjusted model                                 | 83.52%   | 2001/01/06 |
-| home_win_probability_post  | Home Win Probability Post        | Estimated win probability for the home team at the end of the play                             | 83.52%   | 2001/01/06 |
-| away_win_probability_post  | Away Win Probability Post        | Estimated win probability for the away team at the end of the play                             | 83.52%   | 2001/01/06 |
-| vegas_win_probability      | Vegas Win Probability            | Estimated win probability for the posteam incorporating pre-game Vegas line                    | 83.52%   | 2001/01/06 |
-| vegas_home_win_probability | Vegas Home Win Probability       | Estimated win probability for the home team incorporating pre-game Vegas line                  | 83.52%   | 2001/01/06 |
-| total_home_rush_wpa        | Total Home Rush WPA              | Cumulative total rushing WPA for the home team in the game so far                              | 83.52%   | 2001/01/06 |
-| total_away_rush_wpa        | Total Away Rush WPA              | Cumulative total rushing WPA for the away team in the game so far                              | 83.52%   | 2001/01/06 |
-| total_home_pass_wpa        | Total Home Pass WPA              | Cumulative total passing WPA for the home team in the game so far                              | 83.52%   | 2001/01/06 |
-| total_away_pass_wpa        | Total Away Pass WPA              | Cumulative total passing WPA for the away team in the game so far                              | 83.52%   | 2001/01/06 |
-| air_wpa                    | Air WPA                          | WPA through the air (same logic as air_epa)                                                    | 83.52%   | 2001/01/06 |
-| yac_wpa                    | YAC WPA                          | WPA from yards after the catch (same logic as yac_epa)                                         | 83.52%   | 2001/01/06 |
-| comp_air_wpa               | Completed Air WPA                | The air_wpa for completions only                                                               | 83.52%   | 2001/01/06 |
-| comp_yac_wpa               | Completed YAC WPA                | The yac_wpa for completions only                                                               | 83.52%   | 2001/01/06 |
-| total_home_comp_air_wpa    | Total Home Completed Air WPA     | Cumulative total completions air WPA for the home team in the game so far                      | 67.64%   | 2001/09/09 |
-| total_away_comp_air_wpa    | Total Away Completed Air WPA     | Cumulative total completions air WPA for the away team in the game so far                      | 67.64%   | 2001/09/09 |
-| total_home_comp_yac_wpa    | Total Home Completed YAC WPA     | Cumulative total completions yac WPA for the home team in the game so far                      | 67.64%   | 2001/09/09 |
-| total_away_comp_yac_wpa    | Total Away Completed YAC WPA     | Cumulative total completions yac WPA for the away team in the game so far                      | 67.64%   | 2001/09/09 |
-| total_home_raw_air_wpa     | Total Home Raw Air WPA           | Cumulative total raw air WPA for the home team in the game so far                              | 67.64%   | 2001/09/09 |
-| total_away_raw_air_wpa     | Total Away Raw Air WPA           | Cumulative total raw air WPA for the away team in the game so far                              | 67.64%   | 2001/09/09 |
-| total_home_raw_yac_wpa     | Total Home Raw YAC WPA           | Cumulative total raw yac WPA for the home team in the game so far                              | 67.64%   | 2001/09/09 |
-| total_away_raw_yac_wpa     | Total Away Raw YAC WPA           | Cumulative total raw yac WPA for the away team in the game so far                              | 67.64%   | 2001/09/09 |
+| column                        | name                             | description                                                                                    | coverage | since      |
+| ----------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------- | -------- | ---------- |
+| win_probability               | Win Probability                  | Estimated win probability for the posteam given the current situation at the start of the play | 83.52%   | 2001/01/06 |
+| win_probability_added         | Win Probability Added            | Win probability added for the posteam                                                          | 83.52%   | 2001/01/06 |
+| home_win_probability          | Home Win Probability             | Estimated win probability for the home team                                                    | 83.52%   | 2001/01/06 |
+| away_win_probability          | Away Win Probability             | Estimated win probability for the away team                                                    | 83.52%   | 2001/01/06 |
+| vegas_wpa                     | Vegas Win Probability Added      | Win probability added for the posteam: spread_adjusted model                                   | 83.52%   | 2001/01/06 |
+| vegas_home_wpa                | Vegas Home Win Probability Added | Win probability added for the home team: spread_adjusted model                                 | 83.52%   | 2001/01/06 |
+| home_win_probability_post     | Home Win Probability Post        | Estimated win probability for the home team at the end of the play                             | 83.52%   | 2001/01/06 |
+| away_win_probability_post     | Away Win Probability Post        | Estimated win probability for the away team at the end of the play                             | 83.52%   | 2001/01/06 |
+| vegas_win_probability         | Vegas Win Probability            | Estimated win probability for the posteam incorporating pre-game Vegas line                    | 83.52%   | 2001/01/06 |
+| vegas_home_win_probability    | Vegas Home Win Probability       | Estimated win probability for the home team incorporating pre-game Vegas line                  | 83.52%   | 2001/01/06 |
+| total_home_rush_wpa           | Total Home Rush WPA              | Cumulative total rushing WPA for the home team in the game so far                              | 83.52%   | 2001/01/06 |
+| total_away_rush_wpa           | Total Away Rush WPA              | Cumulative total rushing WPA for the away team in the game so far                              | 83.52%   | 2001/01/06 |
+| total_home_pass_wpa           | Total Home Pass WPA              | Cumulative total passing WPA for the home team in the game so far                              | 83.52%   | 2001/01/06 |
+| total_away_pass_wpa           | Total Away Pass WPA              | Cumulative total passing WPA for the away team in the game so far                              | 83.52%   | 2001/01/06 |
+| air_wpa                       | Air WPA                          | WPA through the air (same logic as air_epa)                                                    | 83.52%   | 2001/01/06 |
+| yac_wpa                       | YAC WPA                          | WPA from yards after the catch (same logic as yac_epa)                                         | 83.52%   | 2001/01/06 |
+| completion_air_wpa            | Completed Air WPA                | The air_wpa for completions only                                                               | 83.52%   | 2001/01/06 |
+| completion_yac_wpa            | Completed YAC WPA                | The yac_wpa for completions only                                                               | 83.52%   | 2001/01/06 |
+| total_home_completion_air_wpa | Total Home Completed Air WPA     | Cumulative total completions air WPA for the home team in the game so far                      | 67.64%   | 2001/09/09 |
+| total_away_completion_air_wpa | Total Away Completed Air WPA     | Cumulative total completions air WPA for the away team in the game so far                      | 67.64%   | 2001/09/09 |
+| total_home_completion_yac_wpa | Total Home Completed YAC WPA     | Cumulative total completions yac WPA for the home team in the game so far                      | 67.64%   | 2001/09/09 |
+| total_away_completion_yac_wpa | Total Away Completed YAC WPA     | Cumulative total completions yac WPA for the away team in the game so far                      | 67.64%   | 2001/09/09 |
+| total_home_raw_air_wpa        | Total Home Raw Air WPA           | Cumulative total raw air WPA for the home team in the game so far                              | 67.64%   | 2001/09/09 |
+| total_away_raw_air_wpa        | Total Away Raw Air WPA           | Cumulative total raw air WPA for the away team in the game so far                              | 67.64%   | 2001/09/09 |
+| total_home_raw_yac_wpa        | Total Home Raw YAC WPA           | Cumulative total raw yac WPA for the home team in the game so far                              | 67.64%   | 2001/09/09 |
+| total_away_raw_yac_wpa        | Total Away Raw YAC WPA           | Cumulative total raw yac WPA for the away team in the game so far                              | 67.64%   | 2001/09/09 |
 
 ### Expected Models & Probabilities
 
 | column                              | name                             | description                                                                                                                                                                                                                                 | coverage | since      |
 | ----------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------- |
-| xyac_mean_yds                       | XYAC Mean Yards                  | Average expected yards after the catch based on where the ball was caught                                                                                                                                                                   | 67.58%   | 2001/09/09 |
-| xyac_median_yds                     | XYAC Median Yards                | Median expected yards after the catch based on where the ball was caught                                                                                                                                                                    | 67.58%   | 2001/09/09 |
+| xyac_mean_yards                     | XYAC Mean Yards                  | Average expected yards after the catch based on where the ball was caught                                                                                                                                                                   | 67.58%   | 2001/09/09 |
+| xyac_median_yards                   | XYAC Median Yards                | Median expected yards after the catch based on where the ball was caught                                                                                                                                                                    | 67.58%   | 2001/09/09 |
 | xyac_success_prob                   | XYAC Success Probability         | Probability play earns positive EPA (relative to where play started) based on where ball was caught                                                                                                                                         | 67.58%   | 2001/09/09 |
 | xyac_first_down_prob                | XYAC First Down Probability      | Probability play earns a first down based on where the ball was caught                                                                                                                                                                      | 67.58%   | 2001/09/09 |
 | no_score_prob                       | No Score Probability             | Predicted probability of no score occurring for the rest of the half.                                                                                                                                                                       | 83.52%   | 2001/01/06 |
-| opp_fg_prob                         | Opponent FG Probability          | Predicted probability of the defteam scoring a FG next.                                                                                                                                                                                     | 83.52%   | 2001/01/06 |
+| opp_field_goal_prob                 | Opponent FG Probability          | Predicted probability of the defteam scoring a FG next.                                                                                                                                                                                     | 83.52%   | 2001/01/06 |
 | opp_safety_prob                     | Opponent Safety Probability      | Predicted probability of the defteam scoring a safety next.                                                                                                                                                                                 | 83.52%   | 2001/01/06 |
-| opp_td_prob                         | Opponent TD Probability          | Predicted probability of the defteam scoring a TD next.                                                                                                                                                                                     | 83.52%   | 2001/01/06 |
-| fg_prob                             | FG Probability                   | Predicted probability of the posteam scoring a FG next.                                                                                                                                                                                     | 83.52%   | 2001/01/06 |
+| opp_touchdown_prob                  | Opponent TD Probability          | Predicted probability of the defteam scoring a TD next.                                                                                                                                                                                     | 83.52%   | 2001/01/06 |
+| field_goal_prob                     | FG Probability                   | Predicted probability of the posteam scoring a FG next.                                                                                                                                                                                     | 83.52%   | 2001/01/06 |
 | safety_prob                         | Safety Probability               | Predicted probability of the posteam scoring a safety next.                                                                                                                                                                                 | 83.52%   | 2001/01/06 |
-| td_prob                             | TD Probability                   | Predicted probability of the posteam scoring a TD next.                                                                                                                                                                                     | 83.52%   | 2001/01/06 |
+| touchdown_prob                      | TD Probability                   | Predicted probability of the posteam scoring a TD next.                                                                                                                                                                                     | 83.52%   | 2001/01/06 |
 | extra_point_prob                    | Extra Point Probability          | Predicted probability of the posteam scoring an extra point.                                                                                                                                                                                | 83.52%   | 2001/01/06 |
 | two_conversion_prob                 | Two Point Conversion Probability | Predicted probability of the posteam scoring the two point conversion.                                                                                                                                                                      | -        | -          |
 | xpass_prob                          | Pass Probability                 | Probability of dropback scaled from 0 to 1.                                                                                                                                                                                                 | 67.64%   | 2001/09/09 |
@@ -520,14 +520,14 @@
 | ------------------------------- | ---------------------------- | ---------------------------------------------------------------------------- | -------- | ---------- |
 | is_special_teams_play           | Special Teams Play           | Indicator if a special teams play occurred                                   | 98.60%   | 2001/01/06 |
 | special_play_type               | Special Play Type            | -                                                                            | 14.45%   | 2001/01/06 |
-| return_yds                      | Return Yards                 | Yards gained by the team after the return                                    | 84.20%   | 2001/01/06 |
+| return_yards                    | Return Yards                 | Yards gained by the team after the return                                    | 84.20%   | 2001/01/06 |
 | is_touchback                    | Touchback                    | Indicator if a touchback occurred                                            | 83.52%   | 2001/01/06 |
 | is_extra_point_attempt          | Extra Point Attempt          | Binary indicator for extra point attempt.                                    | 83.52%   | 2001/01/06 |
 | is_two_point_conversion_attempt | Two Point Conversion Attempt | Binary indicator for two point conversion attempt.                           | 83.52%   | 2001/01/06 |
 | is_field_goal_attempt           | Field Goal Attempt           | Binary indicator for field goal attempt.                                     | 83.52%   | 2001/01/06 |
 | is_kickoff_attempt              | Kickoff Attempt              | Binary indicator for kickoff.                                                | 83.52%   | 2001/01/06 |
 | is_punt_attempt                 | Punt Attempt                 | Binary indicator for punts.                                                  | 83.52%   | 2001/01/06 |
-| fg_result                       | Field Goal Result            | String indicator for result of field goal attempt: made, missed, or blocked. | 82.24%   | 2001/01/06 |
+| field_goal_result               | Field Goal Result            | String indicator for result of field goal attempt: made, missed, or blocked. | 82.24%   | 2001/01/06 |
 | kick_distance                   | Kick Distance                | Numeric distance in yards for kickoffs, field goals, and punts.              | 83.50%   | 2001/01/06 |
 | ep_result                       | Extra Point Result           | String indicator for the result of the extra point attempt.                  | 82.84%   | 2001/01/06 |
 | two_point_result                | Two Point Conversion Result  | String indicator for result of two point conversion attempt.                 | 23.34%   | 2001/01/06 |

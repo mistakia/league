@@ -340,7 +340,7 @@ const format_drive_data = (play) => ({
   is_drive_score: format_boolean(play.drive_ended_with_score),
   drive_start_quarter: format_number(play.drive_quarter_start),
   drive_end_quarter: format_number(play.drive_quarter_end),
-  drive_yds_penalized: format_number(play.drive_yards_penalized),
+  drive_yards_penalized: format_number(play.drive_yards_penalized),
   drive_start_transition: normalize_drive_start_transition(
     play.drive_start_transition
   ),
@@ -387,8 +387,8 @@ const format_play_events = (play) => {
     format_boolean(play.incomplete_pass) ||
     (play.play_type === 'no_play' && pass_attempted && !pass_completed)
 
-  // Calculate pen_team and off_team for penalty normalization
-  const pen_team = play.penalty_team ? fixTeam(play.penalty_team) : null
+  // Calculate penalty_team and off_team for penalty normalization
+  const penalty_team = play.penalty_team ? fixTeam(play.penalty_team) : null
   const off_team = get_offensive_team(play)
 
   return {
@@ -403,11 +403,11 @@ const format_play_events = (play) => {
     is_passing_play: pass_attempted,
     is_solo_tackle: format_boolean(play.solo_tackle),
     is_assist_tackle: format_boolean(play.assist_tackle),
-    pen_team,
-    pen_yds: format_number(play.penalty_yards),
+    penalty_team,
+    penalty_yards: format_number(play.penalty_yards),
     penalty_type: normalize_penalty_type({
       raw_penalty_type: play.penalty_type,
-      pen_team,
+      penalty_team,
       off_team
     }),
     penalty_player_gsis: play.penalty_player_id || null
@@ -417,9 +417,9 @@ const format_play_events = (play) => {
 const format_scoring_yards = (play) => ({
   is_passing_touchdown: format_boolean(play.pass_touchdown),
   is_rushing_touchdown: format_boolean(play.rush_touchdown),
-  pass_yds: format_number(play.passing_yards),
-  recv_yds: format_number(play.receiving_yards),
-  rush_yds: format_number(play.rushing_yards)
+  pass_yards: format_number(play.passing_yards),
+  recv_yards: format_number(play.receiving_yards),
+  rush_yards: format_number(play.rushing_yards)
 })
 
 const format_qb_play_data = (play) => ({
@@ -478,23 +478,31 @@ const format_epa_data = (play) => {
     yac_epa: format_number(
       is_kickoff && play.yac_epa != null ? -play.yac_epa : play.yac_epa
     ),
-    comp_air_epa: format_number(
-      is_kickoff && play.comp_air_epa != null
-        ? -play.comp_air_epa
-        : play.comp_air_epa
+    completion_air_epa: format_number(
+      is_kickoff && play.completion_air_epa != null
+        ? -play.completion_air_epa
+        : play.completion_air_epa
     ),
-    comp_yac_epa: format_number(
-      is_kickoff && play.comp_yac_epa != null
-        ? -play.comp_yac_epa
-        : play.comp_yac_epa
+    completion_yac_epa: format_number(
+      is_kickoff && play.completion_yac_epa != null
+        ? -play.completion_yac_epa
+        : play.completion_yac_epa
     ),
     xyac_epa: format_number(
       is_kickoff && play.xyac_epa != null ? -play.xyac_epa : play.xyac_epa
     ),
-    total_home_comp_air_epa: format_number(play.total_home_comp_air_epa),
-    total_away_comp_air_epa: format_number(play.total_away_comp_air_epa),
-    total_home_comp_yac_epa: format_number(play.total_home_comp_yac_epa),
-    total_away_comp_yac_epa: format_number(play.total_away_comp_yac_epa),
+    total_home_completion_air_epa: format_number(
+      play.total_home_completion_air_epa
+    ),
+    total_away_completion_air_epa: format_number(
+      play.total_away_completion_air_epa
+    ),
+    total_home_completion_yac_epa: format_number(
+      play.total_home_completion_yac_epa
+    ),
+    total_away_completion_yac_epa: format_number(
+      play.total_away_completion_yac_epa
+    ),
     total_home_raw_air_epa: format_number(play.total_home_raw_air_epa),
     total_away_raw_air_epa: format_number(play.total_away_raw_air_epa),
     total_home_raw_yac_epa: format_number(play.total_home_raw_yac_epa),
@@ -531,20 +539,28 @@ const format_wpa_data = (play) => {
     yac_wpa: format_number(
       is_kickoff && play.yac_wpa != null ? -play.yac_wpa : play.yac_wpa
     ),
-    comp_air_wpa: format_number(
-      is_kickoff && play.comp_air_wpa != null
-        ? -play.comp_air_wpa
-        : play.comp_air_wpa
+    completion_air_wpa: format_number(
+      is_kickoff && play.completion_air_wpa != null
+        ? -play.completion_air_wpa
+        : play.completion_air_wpa
     ),
-    comp_yac_wpa: format_number(
-      is_kickoff && play.comp_yac_wpa != null
-        ? -play.comp_yac_wpa
-        : play.comp_yac_wpa
+    completion_yac_wpa: format_number(
+      is_kickoff && play.completion_yac_wpa != null
+        ? -play.completion_yac_wpa
+        : play.completion_yac_wpa
     ),
-    total_home_comp_air_wpa: format_number(play.total_home_comp_air_wpa),
-    total_away_comp_air_wpa: format_number(play.total_away_comp_air_wpa),
-    total_home_comp_yac_wpa: format_number(play.total_home_comp_yac_wpa),
-    total_away_comp_yac_wpa: format_number(play.total_away_comp_yac_wpa),
+    total_home_completion_air_wpa: format_number(
+      play.total_home_completion_air_wpa
+    ),
+    total_away_completion_air_wpa: format_number(
+      play.total_away_completion_air_wpa
+    ),
+    total_home_completion_yac_wpa: format_number(
+      play.total_home_completion_yac_wpa
+    ),
+    total_away_completion_yac_wpa: format_number(
+      play.total_away_completion_yac_wpa
+    ),
     total_home_raw_air_wpa: format_number(play.total_home_raw_air_wpa),
     total_away_raw_air_wpa: format_number(play.total_away_raw_air_wpa),
     total_home_raw_yac_wpa: format_number(play.total_home_raw_yac_wpa),
@@ -553,8 +569,8 @@ const format_wpa_data = (play) => {
 }
 
 const format_xyac_data = (play) => ({
-  xyac_mean_yds: format_number(play.xyac_mean_yardage),
-  xyac_median_yds: format_number(play.xyac_median_yardage),
+  xyac_mean_yards: format_number(play.xyac_mean_yardage),
+  xyac_median_yards: format_number(play.xyac_median_yardage),
   xyac_success_prob: format_number(play.xyac_success),
   xyac_first_down_prob: format_number(play.xyac_fd)
 })
@@ -565,7 +581,7 @@ const format_special_teams = (play) => ({
   is_field_goal_attempt: format_boolean(play.field_goal_attempt),
   is_kickoff_attempt: format_boolean(play.kickoff_attempt),
   is_punt_attempt: format_boolean(play.punt_attempt),
-  fg_result: standardize_kick_result(play.field_goal_result),
+  field_goal_result: standardize_kick_result(play.field_goal_result),
   kick_distance: format_number(play.kick_distance),
   ep_result: standardize_kick_result(play.extra_point_result),
   two_point_result: standardize_two_point_result(play.two_point_conv_result),
@@ -622,16 +638,24 @@ const format_probability_data = (play) => {
   const is_kickoff = play.play_type === 'kickoff'
   return {
     no_score_prob: format_number(play.no_score_prob),
-    opp_fg_prob: format_number(is_kickoff ? play.fg_prob : play.opp_fg_prob),
+    opp_field_goal_prob: format_number(
+      is_kickoff ? play.field_goal_prob : play.opp_field_goal_prob
+    ),
     opp_safety_prob: format_number(
       is_kickoff ? play.safety_prob : play.opp_safety_prob
     ),
-    opp_td_prob: format_number(is_kickoff ? play.td_prob : play.opp_td_prob),
-    fg_prob: format_number(is_kickoff ? play.opp_fg_prob : play.fg_prob),
+    opp_touchdown_prob: format_number(
+      is_kickoff ? play.touchdown_prob : play.opp_touchdown_prob
+    ),
+    field_goal_prob: format_number(
+      is_kickoff ? play.opp_field_goal_prob : play.field_goal_prob
+    ),
     safety_prob: format_number(
       is_kickoff ? play.opp_safety_prob : play.safety_prob
     ),
-    td_prob: format_number(is_kickoff ? play.opp_td_prob : play.td_prob),
+    touchdown_prob: format_number(
+      is_kickoff ? play.opp_touchdown_prob : play.touchdown_prob
+    ),
     extra_point_prob: format_number(play.extra_point_prob),
     two_conversion_prob: format_number(play.two_conversion_prob),
     xpass_prob: format_number(play.xpass),

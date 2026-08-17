@@ -169,7 +169,7 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
     seconds_remaining_game: time_fields.seconds_remaining_game,
     // TODO this might not match the drive sequence number in nflfastr
     drive_sequence: play.driveSequenceNumber,
-    drive_yds: play.driveNetYards,
+    drive_yards: play.driveNetYards,
     yard_line_end: normalize_yardline(clean_string(play.endYardLine)),
     yard_line_start: clean_string(play.yardLine),
     is_first_down: play.firstDown,

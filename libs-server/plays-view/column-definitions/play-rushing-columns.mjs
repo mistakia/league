@@ -34,11 +34,12 @@ export default {
     main_where: () => 'nfl_plays.ball_carrier_pid'
   },
   play_rush_yds: {
-    column_name: 'rush_yds',
+    column_name: 'rush_yards',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.rush_yds as play_rush_yds'],
-    main_where: () => 'nfl_plays.rush_yds',
-    aggregate_select: () => db.raw('SUM(nfl_plays.rush_yds) as play_rush_yds'),
+    main_select: () => ['nfl_plays.rush_yards as play_rush_yds'],
+    main_where: () => 'nfl_plays.rush_yards',
+    aggregate_select: () =>
+      db.raw('SUM(nfl_plays.rush_yards) as play_rush_yds'),
     use_having: true
   },
   play_yards_after_contact: {

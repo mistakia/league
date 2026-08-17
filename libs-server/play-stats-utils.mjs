@@ -35,24 +35,24 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
 }
 
 export const is_successful_play = ({
-  yds_gained,
+  yards_gained,
   yards_to_go,
   down_number
 }) => {
   if (
     !down_number ||
     !yards_to_go ||
-    yds_gained === null ||
-    yds_gained === undefined
+    yards_gained === null ||
+    yards_gained === undefined
   )
     return null
 
   if (down_number === 1) {
-    return yds_gained >= 0.4 * yards_to_go
+    return yards_gained >= 0.4 * yards_to_go
   } else if (down_number === 2) {
-    return yds_gained >= 0.6 * yards_to_go
+    return yards_gained >= 0.6 * yards_to_go
   } else if (down_number === 3 || down_number === 4) {
-    return yds_gained >= yards_to_go
+    return yards_gained >= yards_to_go
   }
 
   return null

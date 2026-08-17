@@ -2,21 +2,21 @@ import db from '#db'
 
 export default {
   play_yds_gained: {
-    column_name: 'yds_gained',
+    column_name: 'yards_gained',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.yds_gained as play_yds_gained'],
-    main_where: () => 'nfl_plays.yds_gained',
+    main_select: () => ['nfl_plays.yards_gained as play_yds_gained'],
+    main_where: () => 'nfl_plays.yards_gained',
     aggregate_select: () =>
-      db.raw('SUM(nfl_plays.yds_gained) as play_yds_gained'),
+      db.raw('SUM(nfl_plays.yards_gained) as play_yds_gained'),
     use_having: true
   },
   play_yds_gained_avg: {
-    column_name: 'yds_gained',
+    column_name: 'yards_gained',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.yds_gained as play_yds_gained_avg'],
-    main_where: () => 'nfl_plays.yds_gained',
+    main_select: () => ['nfl_plays.yards_gained as play_yds_gained_avg'],
+    main_where: () => 'nfl_plays.yards_gained',
     aggregate_select: () =>
-      db.raw('AVG(nfl_plays.yds_gained) as play_yds_gained_avg'),
+      db.raw('AVG(nfl_plays.yards_gained) as play_yds_gained_avg'),
     use_having: true
   },
   play_first_down: {

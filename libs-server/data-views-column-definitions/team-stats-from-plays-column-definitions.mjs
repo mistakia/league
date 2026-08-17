@@ -340,7 +340,7 @@ const team_stat_from_plays = ({
 //                                       saved entries onto the new id.
 const stat_specs = {
   team_pass_yards_from_plays: {
-    measure: { kind: 'additive', expr: `pass_yds` },
+    measure: { kind: 'additive', expr: `pass_yards` },
     stat_name: 'team_pass_yds_from_plays'
   },
   team_pass_rate_over_expected_from_plays: {
@@ -390,7 +390,7 @@ const stat_specs = {
     stat_name: 'team_yards_after_catch_from_plays'
   },
   team_rush_yards_from_plays: {
-    measure: { kind: 'additive', expr: `rush_yds` },
+    measure: { kind: 'additive', expr: `rush_yards` },
     stat_name: 'team_rush_yds_from_plays'
   },
   team_rush_attempts_from_plays: {
@@ -435,7 +435,7 @@ const stat_specs = {
   },
   team_explosive_play_rate_from_plays: {
     rate_with_selects: [
-      `SUM(CASE WHEN pass_yds >= 20 OR rush_yds >= 10 THEN 1 ELSE 0 END) as team_explosive_play_rate_from_plays_numerator`,
+      `SUM(CASE WHEN pass_yards >= 20 OR rush_yards >= 10 THEN 1 ELSE 0 END) as team_explosive_play_rate_from_plays_numerator`,
       `COUNT(*) as team_explosive_play_rate_from_plays_denominator`
     ],
     stat_name: 'team_explosive_play_rate_from_plays',

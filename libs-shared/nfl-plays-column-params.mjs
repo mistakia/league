@@ -579,7 +579,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.COVERAGE]
   },
-  cov_type: {
+  coverage_type_ngs: {
     values: [
       '2_MAN',
       'COVER_0',
@@ -618,7 +618,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
-  drive_yds: {
+  drive_yards: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -673,7 +673,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
-  drive_yds_penalized: {
+  drive_yards_penalized: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -855,7 +855,7 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
 
-  yds_gained: {
+  yards_gained: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -942,12 +942,12 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
 
-  pen_team: {
+  penalty_team: {
     values: nfl_team_abbreviations,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PENALTY]
   },
-  pen_yds: {
+  penalty_yards: {
     min: 0,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -971,11 +971,11 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   // TODO look into this
-  // td_nfl_team: {
+  // touchdown_nfl_team: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
 
-  pass_yds: {
+  pass_yards: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -999,7 +999,7 @@ export default {
       }
     ]
   },
-  recv_yds: {
+  recv_yards: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1023,7 +1023,7 @@ export default {
       }
     ]
   },
-  rush_yds: {
+  rush_yards: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1097,7 +1097,7 @@ export default {
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
-  return_yds: {
+  return_yards: {
     min: -100,
     max: 120,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1519,13 +1519,13 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
-  comp_air_epa: {
+  completion_air_epa: {
     min: -80,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
-  comp_yac_epa: {
+  completion_yac_epa: {
     min: -80,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1537,25 +1537,25 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
-  total_home_comp_air_epa: {
+  total_home_completion_air_epa: {
     min: -80,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
-  total_away_comp_air_epa: {
+  total_away_completion_air_epa: {
     min: -80,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
-  total_home_comp_yac_epa: {
+  total_home_completion_yac_epa: {
     min: -80,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
-  total_away_comp_yac_epa: {
+  total_away_completion_yac_epa: {
     min: -80,
     max: 80,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1737,42 +1737,42 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
-  comp_air_wpa: {
+  completion_air_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
-  comp_yac_wpa: {
+  completion_yac_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
-  total_home_comp_air_wpa: {
+  total_home_completion_air_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
-  total_away_comp_air_wpa: {
+  total_away_completion_air_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
-  total_home_comp_yac_wpa: {
+  total_home_completion_yac_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
-  total_away_comp_yac_wpa: {
+  total_away_completion_yac_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
@@ -1808,13 +1808,13 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
 
-  xyac_mean_yds: {
+  xyac_mean_yards: {
     min: 0,
     max: 100,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
-  xyac_median_yds: {
+  xyac_median_yards: {
     min: 0,
     max: 100,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1861,7 +1861,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
 
-  fg_result: {
+  field_goal_result: {
     values: ['blocked', 'made', 'missed'],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
@@ -2011,7 +2011,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  opp_fg_prob: {
+  opp_field_goal_prob: {
     min: 0,
     max: 1,
     step: 0.01,
@@ -2025,14 +2025,14 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  opp_td_prob: {
+  opp_touchdown_prob: {
     min: 0,
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  fg_prob: {
+  field_goal_prob: {
     min: 0,
     max: 1,
     step: 0.01,
@@ -2046,7 +2046,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
-  td_prob: {
+  touchdown_prob: {
     min: 0,
     max: 1,
     step: 0.01,

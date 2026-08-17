@@ -11,7 +11,7 @@ const make_column_def = (decimals) => ({
   column_id: 'synthetic_col',
   column_name: 'synthetic_col',
   measure_source: 'plays',
-  measure_expr: () => 'rush_yds',
+  measure_expr: () => 'rush_yards',
   decimals
 })
 

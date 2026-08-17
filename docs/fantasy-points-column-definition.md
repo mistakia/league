@@ -39,9 +39,9 @@ Several optimizations ensure fast query execution:
 ```sql
 -- Only include plays that can generate fantasy points
 WHERE (
-  (ball_carrier_pid IS NOT NULL AND (rush_yds > 0 OR is_rushing_touchdown = true)) OR
-  (passer_pid IS NOT NULL AND (pass_yds > 0 OR is_passing_touchdown = true OR is_interception = true)) OR
-  (target_pid IS NOT NULL AND (recv_yds > 0 OR is_completion = true)) OR
+  (ball_carrier_pid IS NOT NULL AND (rush_yards > 0 OR is_rushing_touchdown = true)) OR
+  (passer_pid IS NOT NULL AND (pass_yards > 0 OR is_passing_touchdown = true OR is_interception = true)) OR
+  (target_pid IS NOT NULL AND (recv_yards > 0 OR is_completion = true)) OR
   fumble_lost_pid IS NOT NULL
 )
 ```

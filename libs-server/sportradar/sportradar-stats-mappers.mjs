@@ -46,7 +46,7 @@ export const map_passing_stats = async ({
   }
 
   // Pass metrics
-  mapped.pass_yds = pass_stats.yards || null
+  mapped.pass_yards = pass_stats.yards || null
   mapped.is_completion = pass_stats.complete === 1
   mapped.is_incompletion = pass_stats.complete === 0
   mapped.is_passing_touchdown = pass_stats.touchdown === 1
@@ -55,7 +55,7 @@ export const map_passing_stats = async ({
 
   // Sack yards (already negative from API)
   if (pass_stats.sack_yards !== undefined && pass_stats.sack_yards !== null) {
-    mapped.yds_gained = pass_stats.sack_yards
+    mapped.yards_gained = pass_stats.sack_yards
   }
 
   // Pocket time (air_yards skipped - less accurate than nflfastR/NGS sources)
@@ -103,10 +103,10 @@ export const map_receiving_stats = async ({
   }
 
   // Receiving metrics
-  mapped.recv_yds = receive_stats.yards || null
+  mapped.recv_yards = receive_stats.yards || null
   mapped.yards_after_catch = receive_stats.yards_after_catch || null
   mapped.yards_after_any_contact = receive_stats.yards_after_contact || null
-  mapped.broken_tackles_rec = receive_stats.broken_tackles || 0
+  mapped.broken_tackles_receiving = receive_stats.broken_tackles || 0
   mapped.is_touchdown = receive_stats.touchdown === 1
   mapped.is_first_down_pass = receive_stats.firstdown === 1
   mapped.is_catchable_ball = map_sportradar_flag(receive_stats.catchable)
@@ -147,7 +147,7 @@ export const map_rushing_stats = async ({
   }
 
   // Rushing metrics
-  mapped.rush_yds = rush_stats.yards || null
+  mapped.rush_yards = rush_stats.yards || null
   mapped.is_rushing_touchdown = rush_stats.touchdown === 1
   mapped.broken_tackles_rush = rush_stats.broken_tackles || 0
   mapped.is_qb_kneel = rush_stats.kneel_down === 1
@@ -165,9 +165,9 @@ export const map_rushing_stats = async ({
     mapped.yards_after_any_contact = rush_stats.yards_after_contact
   }
 
-  // If no sack, use rush yards for yds_gained
+  // If no sack, use rush yards for yards_gained
   if (!is_sack && rush_stats.yards !== undefined) {
-    mapped.yds_gained = rush_stats.yards
+    mapped.yards_gained = rush_stats.yards
   }
 
   return mapped
@@ -207,11 +207,11 @@ export const map_field_goal_stats = async ({
 
   // Map result to enum
   if (field_goal_stats.made === 1) {
-    mapped.fg_result = 'made'
+    mapped.field_goal_result = 'made'
   } else if (field_goal_stats.missed === 1) {
-    mapped.fg_result = 'missed'
+    mapped.field_goal_result = 'missed'
   } else if (field_goal_stats.blocked === 1) {
-    mapped.fg_result = 'blocked'
+    mapped.field_goal_result = 'blocked'
   }
 
   return mapped
@@ -246,7 +246,7 @@ export const map_punt_stats = async ({
   }
 
   // Punt metrics
-  mapped.punt_yds = punt_stats.yards || null
+  mapped.punt_yards = punt_stats.yards || null
   mapped.punt_hang_time = punt_stats.hang_time || null
   mapped.is_punt_blocked = punt_stats.blocked === 1
   mapped.is_punt_inside_20 = punt_stats.inside_20 === 1
@@ -284,7 +284,7 @@ export const map_kickoff_stats = async ({
   }
 
   // Kickoff metrics
-  mapped.kickoff_yds = kick_stats.yards || null
+  mapped.kickoff_yards = kick_stats.yards || null
   mapped.is_kickoff_onside = kick_stats.onside_attempt === 1
   mapped.is_kickoff_touchback = kick_stats.touchback === 1
 
@@ -318,7 +318,7 @@ export const map_return_stats = async ({
   }
 
   // Return metrics
-  mapped.return_yds = return_stats.yards || null
+  mapped.return_yards = return_stats.yards || null
   mapped.is_return_touchdown = return_stats.touchdown === 1
   mapped.is_touchback = return_stats.touchback === 1
   mapped.is_punt_fair_catch = return_stats.faircatch === 1
@@ -356,7 +356,7 @@ export const map_penalty_stats = async ({
 
   // Take first penalty for detailed tracking
   const primary_penalty = penalty_stats[0]
-  mapped.pen_yds = primary_penalty.yards || null
+  mapped.penalty_yards = primary_penalty.yards || null
 
   // Penalty player
   if (primary_penalty.player) {
@@ -393,16 +393,16 @@ export const map_play_details = async ({
   // Penalty details
   const penalty_detail = details.find((d) => d.category === 'penalty')
   if (penalty_detail?.penalty) {
-    const pen_team = get_team_abbrev({
+    const penalty_team = get_team_abbrev({
       sportradar_team_id: penalty_detail.penalty.team?.id,
       sportradar_alias: penalty_detail.penalty.team?.alias
     })
-    mapped.pen_team = pen_team
+    mapped.penalty_team = penalty_team
 
     // Normalize penalty type to canonical format
     mapped.penalty_type = normalize_penalty_type({
       raw_penalty_type: penalty_detail.penalty.description,
-      pen_team,
+      penalty_team,
       off_team
     })
 
@@ -423,7 +423,9 @@ export const map_play_details = async ({
   // Field goal result detail
   const fg_detail = details.find((d) => d.category === 'field_goal')
   if (fg_detail?.reason_missed) {
-    mapped.fg_result_detail = transform_to_enum_value(fg_detail.reason_missed)
+    mapped.field_goal_result_detail = transform_to_enum_value(
+      fg_detail.reason_missed
+    )
   }
 
   // Play direction from pass details

@@ -87,16 +87,16 @@ const FIELD_MAPPINGS = {
   distance: 'yards_to_go',
   isPassAttempt: 'is_passing_play',
   rushAttempt: 'is_rushing_play',
-  passingYards: 'pass_yds',
-  rushYards: 'rush_yds',
+  passingYards: 'pass_yards',
+  rushYards: 'rush_yards',
   isPenalty: 'is_penalty',
-  penaltyYards: 'pen_yds',
+  penaltyYards: 'penalty_yards',
   isTouchdown: 'is_touchdown',
   isFumble: 'is_fumble',
   fumbleLost: 'is_fumble_lost',
   isInterception: 'is_interception',
   isSack: 'is_sack',
-  offensiveYards: 'yds_gained',
+  offensiveYards: 'yards_gained',
   isCompletePass: 'is_completion',
   screen: 'is_screen_pass',
   playAction: 'is_play_action',
@@ -228,9 +228,11 @@ export function map_charting_play_to_db_fields(source_play) {
     }
   }
 
-  // fieldGoalMade -> fg_result
+  // fieldGoalMade -> field_goal_result
   if ('fieldGoalMade' in source_play) {
-    result.fg_result = map_boolean_to_kick_result(source_play.fieldGoalMade)
+    result.field_goal_result = map_boolean_to_kick_result(
+      source_play.fieldGoalMade
+    )
   }
 
   // extraPointMade -> ep_result

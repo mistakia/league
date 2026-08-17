@@ -147,7 +147,7 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       expect(result.yards_to_go).to.equal(7)
       expect(result.is_passing_play).to.equal(true)
       expect(result.is_rushing_play).to.equal(false)
-      expect(result.pass_yds).to.equal(15)
+      expect(result.pass_yards).to.equal(15)
       expect(result.is_completion).to.equal(true)
       expect(result.is_touchdown).to.equal(false)
       expect(result.is_penalty).to.equal(false)
@@ -174,7 +174,7 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
 
       const result = map_charting_play_to_db_fields(source)
       expect(result.is_rushing_play).to.equal(true)
-      expect(result.rush_yds).to.equal(5)
+      expect(result.rush_yards).to.equal(5)
       expect(result.run_concept).to.equal('OUTSIDE_ZONE')
       expect(result.run_gap_intent).to.equal('C_GAP')
       expect(result.run_gap_intent_side).to.equal('LEFT')
@@ -193,7 +193,7 @@ describe('LIBS-SERVER charting-data field-mapping', function () {
       }
 
       const result = map_charting_play_to_db_fields(source)
-      expect(result.fg_result).to.equal('made')
+      expect(result.field_goal_result).to.equal('made')
       expect(result.ep_result).to.equal('missed')
       expect(result.two_point_result).to.equal(null)
       expect(result.home_score).to.equal(14)

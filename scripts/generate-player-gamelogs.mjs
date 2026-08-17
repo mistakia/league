@@ -1459,7 +1459,7 @@ const generate_player_gamelogs = async ({
   // gsis_player_id) are empty but whose sibling nfl_plays row has the role _pid resolved (via the
   // sportradar supplemental pass on sportradar_id, or any other enrichment
   // path). Without this, the per-player groupings below skip these rows and
-  // counters (ra, py, recv_yds, etc.) under-report for affected players. See
+  // counters (ra, py, recv_yards, etc.) under-report for affected players. See
   // user:text/league/data-quality-and-validation.md
   // [plays_excess_residual_after_gsisid_backfill].
   await patch_play_stats_from_role_pid(playStats)

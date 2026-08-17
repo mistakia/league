@@ -23,7 +23,7 @@ export const PENALTY_TYPE_CANONICAL_MAP = {
   'Player Out of Bounds on a Punt': 'Player Out of Bounds on Kick',
 
   // Sportradar-specific variants - strip prefix and normalize to base name
-  // Dynamic suffix will be added by SIDE_SPECIFIC_PENALTIES logic based on pen_team/off_team
+  // Dynamic suffix will be added by SIDE_SPECIFIC_PENALTIES logic based on penalty_team/off_team
   // This ensures convergence with nflfastr and extraction pipelines
   'Offensive Facemask': 'Face Mask (15 Yards)',
   'Offensive Illegal Block Above the Waist': 'Illegal Block Above the Waist',
@@ -177,13 +177,13 @@ const has_unit_designation = (penalty_type) => {
  * Normalize penalty type to canonical name with unit designation
  * @param {Object} params
  * @param {string} params.raw_penalty_type - Raw penalty type name
- * @param {string} [params.pen_team] - Team that committed the penalty
+ * @param {string} [params.penalty_team] - Team that committed the penalty
  * @param {string} [params.off_team] - Team on offense during the play
  * @returns {string|null} Canonical penalty type or null if input is null
  */
 export const normalize_penalty_type = ({
   raw_penalty_type,
-  pen_team,
+  penalty_team,
   off_team
 }) => {
   if (!raw_penalty_type) {
@@ -218,11 +218,11 @@ export const normalize_penalty_type = ({
     return normalized + ' / Defense'
   }
 
-  // Side-specific penalties need dynamic suffix based on pen_team vs off_team
+  // Side-specific penalties need dynamic suffix based on penalty_team vs off_team
   if (SIDE_SPECIFIC_PENALTIES.has(normalized)) {
-    if (pen_team && off_team) {
+    if (penalty_team && off_team) {
       const is_offense_penalty =
-        pen_team.toUpperCase() === off_team.toUpperCase()
+        penalty_team.toUpperCase() === off_team.toUpperCase()
       const suffix = is_offense_penalty ? ' / Offense' : ' / Defense'
       return normalized + suffix
     }
@@ -238,14 +238,14 @@ export const normalize_penalty_type = ({
  * @param {Object} params
  * @param {string} [params.desc] - Play description text (NGS/NFL v1 source)
  * @param {string} [params.play_description_nflfastr] - nflfastr play description (preferred, more complete)
- * @param {string} [params.pen_team] - Team that committed the penalty
+ * @param {string} [params.penalty_team] - Team that committed the penalty
  * @param {string} [params.off_team] - Team on offense during the play
  * @returns {string|null} Canonical penalty type or null if not extractable
  */
 export const get_canonical_penalty_type = ({
   desc,
   play_description_nflfastr,
-  pen_team,
+  penalty_team,
   off_team
 }) => {
   const raw_penalty_type = extract_penalty_from_desc({
@@ -258,7 +258,7 @@ export const get_canonical_penalty_type = ({
 
   return normalize_penalty_type({
     raw_penalty_type,
-    pen_team,
+    penalty_team,
     off_team
   })
 }

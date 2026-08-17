@@ -73,7 +73,8 @@ CREATE TABLE public.nfl_plays_player (
 );
 
 CREATE TABLE public.nfl_team_gamelogs (
-    defense_avg_get_off numeric(5,2),
+    defense_average_get_off numeric(5,2),
+    rush_avg_get_off numeric(5,2),
     off_pass_epa numeric(5,2)
 );
 `
@@ -202,17 +203,30 @@ describe('schema conformance audit -- 2026-08-15 oracle repair', function () {
     expect(shorthand_columns).to.not.include('nfl_plays_player.player_get_off')
   })
 
-  it('still flags the OTHER tokens on an `off`-exempted column', function () {
-    // The exemption is scoped to the TOKEN, not the column. def_avg_get_off is
-    // a get_off column AND an `avg`/`def` column, both owned by later batches;
-    // accepting the whole column would silently retire debt this cluster still
-    // owes. Pinned as the exact token list so a widening to column scope fails.
-    expect(shorthand_columns).to.include(
-      'nfl_team_gamelogs.defense_avg_get_off'
+  it('leaves the exempted get_off column clean once its other debt is conformed', function () {
+    // This column used to carry `avg` as well, and the assertion here pinned
+    // that the exemption suppressed ONLY `off`. The 2026-08-17 counting-stat
+    // conform spelled that token out (def_avg_get_off -> defense_average_get_off),
+    // so the column's other debt is gone and it is now legitimately clean. The
+    // token-scoping property it proved is pinned by the sibling test below,
+    // which needs no second token on an exempted column to observe it.
+    expect(shorthand_columns).to.not.include(
+      'nfl_team_gamelogs.defense_average_get_off'
     )
-    expect(
-      shorthand_tokens.get('nfl_team_gamelogs.defense_avg_get_off')
-    ).to.equal('avg')
+  })
+
+  it('does not extend the get_off carve-out to an unexempted column', function () {
+    // The carve-out is a set of four named `table.column` entries, NOT a
+    // `get_off` SHAPE rule -- a shape rule would accept any column someone later
+    // spells with those two tokens, which is exactly the silent widening the
+    // exemption list exists to prevent. rush_avg_get_off is not in the list, so
+    // both of its tokens must still report. This is the guard the assertion
+    // above used to carry, and it is strictly stronger: it fails on a widening
+    // to shape scope as well as on a widening to column scope.
+    expect(shorthand_columns).to.include('nfl_team_gamelogs.rush_avg_get_off')
+    expect(shorthand_tokens.get('nfl_team_gamelogs.rush_avg_get_off')).to.equal(
+      'avg, off'
+    )
   })
 
   it('still flags `off` where the sense exemption does not apply', function () {
@@ -266,8 +280,8 @@ describe('schema conformance audit -- 2026-08-15 oracle repair', function () {
       'nfl_plays.second_and_mid',
       'nfl_plays.starter_slots_qb',
       'nfl_plays.userid',
-      'nfl_team_gamelogs.defense_avg_get_off',
-      'nfl_team_gamelogs.off_pass_epa'
+      'nfl_team_gamelogs.off_pass_epa',
+      'nfl_team_gamelogs.rush_avg_get_off'
     ])
   })
 

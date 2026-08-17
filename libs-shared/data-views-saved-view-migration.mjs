@@ -249,6 +249,66 @@ export const POSITION_CODE_PARAM_RENAMES = {
   num_qb: 'num_quarterback'
 }
 
+// Counting-stat vocabulary, renamed by the 2026-08-17 conform
+// (db/adhoc/2026-08-17-conform-counting-stat-tokens.sql). 29 of the 148 renamed
+// columns are LIVE registry keys in libs-shared/nfl-plays-column-params.mjs, and
+// the
+// registry key IS the persisted key, so every saved view carrying one would
+// otherwise silently lose its filter -- the failure mode recorded at the head of
+// this file, which is why these rules ship in the same change as the DDL.
+//
+// Applied AFTER PLAY_FILTER_PARAM_RENAMES, and that ordering is load-bearing for
+// one key: a view saved before 2025-07-24 persists cov_type_ngs, which that map
+// rewrites to cov_type, which this map then rewrites to coverage_type_ngs. The
+// single migrate_params pass resolves the chain only in this order.
+//
+// The rename gives cov_type its source qualifier back rather than the plain
+// expansion, because nfl_plays already carries a coverage_type of enum type
+// public.coverage_type from the PlayerProfiler charting mapping -- the
+// mechanical target was taken. Its sibling cov_type_charted takes the plain
+// expansion, so the two stay distinguishable.
+//
+// td_nfl_team is deliberately absent even though its column renames: its
+// registry entry is commented out (`// TODO look into this`), so it is not a
+// live param key and no saved view can persist it. A rule for it would suppress
+// nothing and rewrite to a key that is equally not live -- the
+// adjudication-that-suppresses-nothing shape this repo reports as a finding
+// elsewhere.
+//
+// The value vocabularies are unchanged across every rename here, so rewriting
+// the key alone is lossless.
+export const COUNTING_STAT_PARAM_RENAMES = {
+  comp_air_epa: 'completion_air_epa',
+  comp_air_wpa: 'completion_air_wpa',
+  comp_yac_epa: 'completion_yac_epa',
+  comp_yac_wpa: 'completion_yac_wpa',
+  cov_type: 'coverage_type_ngs',
+  drive_yds: 'drive_yards',
+  drive_yds_penalized: 'drive_yards_penalized',
+  fg_prob: 'field_goal_prob',
+  fg_result: 'field_goal_result',
+  opp_fg_prob: 'opp_field_goal_prob',
+  opp_td_prob: 'opp_touchdown_prob',
+  pass_yds: 'pass_yards',
+  pen_team: 'penalty_team',
+  pen_yds: 'penalty_yards',
+  recv_yds: 'recv_yards',
+  return_yds: 'return_yards',
+  rush_yds: 'rush_yards',
+  td_prob: 'touchdown_prob',
+  total_away_comp_air_epa: 'total_away_completion_air_epa',
+  total_away_comp_air_wpa: 'total_away_completion_air_wpa',
+  total_away_comp_yac_epa: 'total_away_completion_yac_epa',
+  total_away_comp_yac_wpa: 'total_away_completion_yac_wpa',
+  total_home_comp_air_epa: 'total_home_completion_air_epa',
+  total_home_comp_air_wpa: 'total_home_completion_air_wpa',
+  total_home_comp_yac_epa: 'total_home_completion_yac_epa',
+  total_home_comp_yac_wpa: 'total_home_completion_yac_wpa',
+  xyac_mean_yds: 'xyac_mean_yards',
+  xyac_median_yds: 'xyac_median_yards',
+  yds_gained: 'yards_gained'
+}
+
 export const SIDE_PREFIX_PARAM_RENAMES = {
   def_personnel: 'defense_personnel',
   def_score: 'defense_score',
@@ -446,14 +506,16 @@ export const apply_column_id_rename = (column_id) =>
 // Merge order is load-bearing: a legacy key may chain through two maps in the
 // single migrate_params pass below, and only this order resolves the chains
 // (qb_pressure_ngs -> qb_pressure_tracking -> is_qb_pressure_tracking;
-// route_ngs -> route -> charted_route; pru_ngs -> pru -> ngs_pass_rushers).
+// route_ngs -> route -> charted_route; pru_ngs -> pru -> ngs_pass_rushers;
+// cov_type_ngs -> cov_type -> coverage_type_ngs).
 const PARAM_KEY_RENAMES = {
   ...PLAY_FILTER_PARAM_RENAMES,
   ...BOOLEAN_PREFIX_PARAM_RENAMES,
   ...SHORTHAND_PARAM_RENAMES,
   ...PLAYS_LOCAL_PARAM_RENAMES,
   ...SIDE_PREFIX_PARAM_RENAMES,
-  ...POSITION_CODE_PARAM_RENAMES
+  ...POSITION_CODE_PARAM_RENAMES,
+  ...COUNTING_STAT_PARAM_RENAMES
 }
 
 // Every legacy param key this module rewrites at read time, exported so

@@ -187,7 +187,7 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Offensive Facemask',
-            pen_team: 'DAL',
+            penalty_team: 'DAL',
             off_team: 'DAL'
           })
         ).to.equal('Face Mask (15 Yards) / Offense')
@@ -195,7 +195,7 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Offensive Facemask',
-            pen_team: 'NYG',
+            penalty_team: 'NYG',
             off_team: 'DAL'
           })
         ).to.equal('Face Mask (15 Yards) / Defense')
@@ -205,7 +205,7 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Offensive Illegal Block Above the Waist',
-            pen_team: 'DAL',
+            penalty_team: 'DAL',
             off_team: 'DAL'
           })
         ).to.equal('Illegal Block Above the Waist / Offense')
@@ -213,7 +213,7 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Offensive Illegal Block Above the Waist',
-            pen_team: 'NYG',
+            penalty_team: 'NYG',
             off_team: 'DAL'
           })
         ).to.equal('Illegal Block Above the Waist / Defense')
@@ -223,7 +223,7 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Defensive Illegal Blindside Block',
-            pen_team: 'DAL',
+            penalty_team: 'DAL',
             off_team: 'DAL'
           })
         ).to.equal('Illegal Blindside Block / Offense')
@@ -231,7 +231,7 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Defensive Illegal Blindside Block',
-            pen_team: 'NYG',
+            penalty_team: 'NYG',
             off_team: 'DAL'
           })
         ).to.equal('Illegal Blindside Block / Defense')
@@ -241,7 +241,7 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Offensive Low Block',
-            pen_team: 'DAL',
+            penalty_team: 'DAL',
             off_team: 'DAL'
           })
         ).to.equal('Low Block / Offense')
@@ -251,7 +251,7 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Defensive Chop Block',
-            pen_team: 'NYG',
+            penalty_team: 'NYG',
             off_team: 'DAL'
           })
         ).to.equal('Chop Block / Defense')
@@ -259,21 +259,21 @@ describe('LIBS-SHARED penalty_utils', function () {
     })
 
     describe('side-specific penalties', function () {
-      it('adds / Offense suffix when pen_team equals off_team', () => {
+      it('adds / Offense suffix when penalty_team equals off_team', () => {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Unnecessary Roughness',
-            pen_team: 'DAL',
+            penalty_team: 'DAL',
             off_team: 'DAL'
           })
         ).to.equal('Unnecessary Roughness / Offense')
       })
 
-      it('adds / Defense suffix when pen_team differs from off_team', () => {
+      it('adds / Defense suffix when penalty_team differs from off_team', () => {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Unnecessary Roughness',
-            pen_team: 'NYG',
+            penalty_team: 'NYG',
             off_team: 'DAL'
           })
         ).to.equal('Unnecessary Roughness / Defense')
@@ -283,7 +283,7 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Taunting',
-            pen_team: 'dal',
+            penalty_team: 'dal',
             off_team: 'DAL'
           })
         ).to.equal('Taunting / Offense')
@@ -293,17 +293,17 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Unsportsmanlike Conduct',
-            pen_team: 'DAL',
+            penalty_team: 'DAL',
             off_team: null
           })
         ).to.equal('Unsportsmanlike Conduct')
       })
 
-      it('returns without suffix when pen_team is missing', () => {
+      it('returns without suffix when penalty_team is missing', () => {
         expect(
           normalize_penalty_type({
             raw_penalty_type: 'Personal Foul',
-            pen_team: null,
+            penalty_team: null,
             off_team: 'DAL'
           })
         ).to.equal('Personal Foul')
@@ -313,14 +313,14 @@ describe('LIBS-SHARED penalty_utils', function () {
         for (const penalty of SIDE_SPECIFIC_PENALTIES) {
           const result_offense = normalize_penalty_type({
             raw_penalty_type: penalty,
-            pen_team: 'DAL',
+            penalty_team: 'DAL',
             off_team: 'DAL'
           })
           expect(result_offense).to.include('/ Offense')
 
           const result_defense = normalize_penalty_type({
             raw_penalty_type: penalty,
-            pen_team: 'NYG',
+            penalty_team: 'NYG',
             off_team: 'DAL'
           })
           expect(result_defense).to.include('/ Defense')
@@ -405,7 +405,7 @@ describe('LIBS-SHARED penalty_utils', function () {
       expect(
         get_canonical_penalty_type({
           desc,
-          pen_team: 'LAC',
+          penalty_team: 'LAC',
           off_team: 'LAC'
         })
       ).to.equal('Illegal Formation / Offense')
@@ -417,7 +417,7 @@ describe('LIBS-SHARED penalty_utils', function () {
       expect(
         get_canonical_penalty_type({
           desc,
-          pen_team: 'BUF',
+          penalty_team: 'BUF',
           off_team: 'BUF'
         })
       ).to.equal('Unnecessary Roughness / Offense')
@@ -425,7 +425,7 @@ describe('LIBS-SHARED penalty_utils', function () {
       expect(
         get_canonical_penalty_type({
           desc,
-          pen_team: 'BUF',
+          penalty_team: 'BUF',
           off_team: 'MIA'
         })
       ).to.equal('Unnecessary Roughness / Defense')
@@ -436,7 +436,7 @@ describe('LIBS-SHARED penalty_utils', function () {
       expect(
         get_canonical_penalty_type({
           desc,
-          pen_team: 'BUF',
+          penalty_team: 'BUF',
           off_team: 'BUF'
         })
       ).to.equal(null)
@@ -449,7 +449,7 @@ describe('LIBS-SHARED penalty_utils', function () {
         expect(
           get_canonical_penalty_type({
             play_description_nflfastr,
-            pen_team: 'TEN',
+            penalty_team: 'TEN',
             off_team: 'TEN'
           })
         ).to.equal('Offside on Free Kick / Defense')
@@ -466,7 +466,7 @@ describe('LIBS-SHARED penalty_utils', function () {
           get_canonical_penalty_type({
             desc,
             play_description_nflfastr,
-            pen_team: 'TEN',
+            penalty_team: 'TEN',
             off_team: 'TEN'
           })
         ).to.equal('Offside on Free Kick / Defense')
@@ -479,7 +479,7 @@ describe('LIBS-SHARED penalty_utils', function () {
           get_canonical_penalty_type({
             desc,
             play_description_nflfastr: null,
-            pen_team: 'CAR',
+            penalty_team: 'CAR',
             off_team: 'LAC'
           })
         ).to.equal('Illegal Use of Hands / Defense')
@@ -511,27 +511,27 @@ describe('LIBS-SHARED penalty_utils', function () {
     // all produce the same canonical output for the same penalty scenario
 
     it('converges on Face Mask penalty (offense commits)', () => {
-      const pen_team = 'DAL'
+      const penalty_team = 'DAL'
       const off_team = 'DAL'
 
       // Extraction pipeline: extracts "Face Mask" from description
       const extraction_result = normalize_penalty_type({
         raw_penalty_type: 'Face Mask',
-        pen_team,
+        penalty_team,
         off_team
       })
 
       // nflfastr pipeline: receives "Face Mask (15 Yards)" from CSV
       const nflfastr_result = normalize_penalty_type({
         raw_penalty_type: 'Face Mask (15 Yards)',
-        pen_team,
+        penalty_team,
         off_team
       })
 
       // sportradar pipeline: receives "Offensive Facemask" from API
       const sportradar_result = normalize_penalty_type({
         raw_penalty_type: 'Offensive Facemask',
-        pen_team,
+        penalty_team,
         off_team
       })
 
@@ -541,26 +541,26 @@ describe('LIBS-SHARED penalty_utils', function () {
     })
 
     it('converges on Face Mask penalty (defense commits)', () => {
-      const pen_team = 'NYG'
+      const penalty_team = 'NYG'
       const off_team = 'DAL'
 
       const extraction_result = normalize_penalty_type({
         raw_penalty_type: 'Face Mask',
-        pen_team,
+        penalty_team,
         off_team
       })
 
       const nflfastr_result = normalize_penalty_type({
         raw_penalty_type: 'Face Mask (15 Yards)',
-        pen_team,
+        penalty_team,
         off_team
       })
 
       // Even if sportradar incorrectly labels it "Offensive Facemask",
-      // we use pen_team vs off_team to determine the correct side
+      // we use penalty_team vs off_team to determine the correct side
       const sportradar_result = normalize_penalty_type({
         raw_penalty_type: 'Offensive Facemask',
-        pen_team,
+        penalty_team,
         off_team
       })
 
@@ -570,24 +570,24 @@ describe('LIBS-SHARED penalty_utils', function () {
     })
 
     it('converges on Illegal Block Above the Waist', () => {
-      const pen_team = 'BAL'
+      const penalty_team = 'BAL'
       const off_team = 'BAL'
 
       const extraction_result = normalize_penalty_type({
         raw_penalty_type: 'Illegal Block Above the Waist',
-        pen_team,
+        penalty_team,
         off_team
       })
 
       const nflfastr_result = normalize_penalty_type({
         raw_penalty_type: 'Illegal Block Above the Waist',
-        pen_team,
+        penalty_team,
         off_team
       })
 
       const sportradar_result = normalize_penalty_type({
         raw_penalty_type: 'Offensive Illegal Block Above the Waist',
-        pen_team,
+        penalty_team,
         off_team
       })
 
@@ -603,16 +603,16 @@ describe('LIBS-SHARED penalty_utils', function () {
     })
 
     it('converges on False Start (offense-only penalty)', () => {
-      // False Start is always offense, so pen_team/off_team shouldn't matter
+      // False Start is always offense, so penalty_team/off_team shouldn't matter
       const extraction_result = normalize_penalty_type({
         raw_penalty_type: 'False Start',
-        pen_team: 'DAL',
+        penalty_team: 'DAL',
         off_team: 'DAL'
       })
 
       const nflfastr_result = normalize_penalty_type({
         raw_penalty_type: 'False Start',
-        pen_team: 'DAL',
+        penalty_team: 'DAL',
         off_team: 'DAL'
       })
 
@@ -623,13 +623,13 @@ describe('LIBS-SHARED penalty_utils', function () {
     it('converges on Encroachment (defense-only penalty)', () => {
       const extraction_result = normalize_penalty_type({
         raw_penalty_type: 'Encroachment',
-        pen_team: 'NYG',
+        penalty_team: 'NYG',
         off_team: 'DAL'
       })
 
       const nflfastr_result = normalize_penalty_type({
         raw_penalty_type: 'Encroachment',
-        pen_team: 'NYG',
+        penalty_team: 'NYG',
         off_team: 'DAL'
       })
 
@@ -643,7 +643,7 @@ describe('LIBS-SHARED penalty_utils', function () {
       expect(
         normalize_penalty_type({
           raw_penalty_type: 'Offensive Holding',
-          pen_team: 'DAL',
+          penalty_team: 'DAL',
           off_team: 'DAL'
         })
       ).to.equal('Offensive Holding')
@@ -651,7 +651,7 @@ describe('LIBS-SHARED penalty_utils', function () {
       expect(
         normalize_penalty_type({
           raw_penalty_type: 'Defensive Pass Interference',
-          pen_team: 'NYG',
+          penalty_team: 'NYG',
           off_team: 'DAL'
         })
       ).to.equal('Defensive Pass Interference')

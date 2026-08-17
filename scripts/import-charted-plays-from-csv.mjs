@@ -80,7 +80,7 @@ const formatPlay = (play) => ({
   defensive_back_blitzers: parseInt(play.dblz, 10) || null,
   out_of_pocket_details: play.oopd || null,
   coverage_on_target: play.cov || null,
-  cov_type_charted: play.cov_type || null,
+  coverage_type_charted: play.coverage_type_ngs || null,
   receiver_separation: play.sep || null
 })
 

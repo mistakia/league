@@ -9,10 +9,10 @@ const log = debug('play-enrichment:yardage-stats')
  * Enriches plays with yardage statistics from play_stats using GSIS statId mappings
  *
  * Extracts yardage data from NFL API playStats based on statId:
- * - statId 10/11: Rushing yards → rush_yds
- * - statId 15/16: Passing yards → pass_yds
- * - statId 21/22: Receiving yards → recv_yds
- * - Aggregates yds_gained from all yardage plays
+ * - statId 10/11: Rushing yards → rush_yards
+ * - statId 15/16: Passing yards → pass_yards
+ * - statId 21/22: Receiving yards → recv_yards
+ * - Aggregates yards_gained from all yardage plays
  *
  * Also enriches completion status (comp), touchdowns (td, rush_td, pass_td),
  * and other play outcome fields from playStats.
@@ -57,16 +57,16 @@ export const enrich_yardage_stats = (plays, play_stats) => {
     const enrichment_data = {}
 
     // Yardage fields
-    if (stats_data.rush_yds != null)
-      enrichment_data.rush_yds = stats_data.rush_yds
-    if (stats_data.pass_yds != null)
-      enrichment_data.pass_yds = stats_data.pass_yds
-    if (stats_data.recv_yds != null)
-      enrichment_data.recv_yds = stats_data.recv_yds
-    if (stats_data.yds_gained != null)
-      enrichment_data.yds_gained = stats_data.yds_gained
-    if (stats_data.return_yds != null)
-      enrichment_data.return_yds = stats_data.return_yds
+    if (stats_data.rush_yards != null)
+      enrichment_data.rush_yards = stats_data.rush_yards
+    if (stats_data.pass_yards != null)
+      enrichment_data.pass_yards = stats_data.pass_yards
+    if (stats_data.recv_yards != null)
+      enrichment_data.recv_yards = stats_data.recv_yards
+    if (stats_data.yards_gained != null)
+      enrichment_data.yards_gained = stats_data.yards_gained
+    if (stats_data.return_yards != null)
+      enrichment_data.return_yards = stats_data.return_yards
 
     // Completion and outcome fields
     if (stats_data.is_completion != null)
@@ -97,17 +97,17 @@ export const enrich_yardage_stats = (plays, play_stats) => {
     // task/league/redesign-role-attribution-ownership.md Phase B.
 
     // Scoring team
-    if (stats_data.td_nfl_team != null)
-      enrichment_data.td_nfl_team = stats_data.td_nfl_team
+    if (stats_data.touchdown_nfl_team != null)
+      enrichment_data.touchdown_nfl_team = stats_data.touchdown_nfl_team
     if (stats_data.return_nfl_team != null)
       enrichment_data.return_nfl_team = stats_data.return_nfl_team
 
     // Only count as enriched if we actually got yardage data
     if (
-      enrichment_data.rush_yds !== undefined ||
-      enrichment_data.pass_yds !== undefined ||
-      enrichment_data.recv_yds !== undefined ||
-      enrichment_data.yds_gained !== undefined
+      enrichment_data.rush_yards !== undefined ||
+      enrichment_data.pass_yards !== undefined ||
+      enrichment_data.recv_yards !== undefined ||
+      enrichment_data.yards_gained !== undefined
     ) {
       enriched_count++
     } else {

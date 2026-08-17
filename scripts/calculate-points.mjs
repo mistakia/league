@@ -36,17 +36,17 @@ if (!process.env.DEBUG) {
 const BIG_PLAY_ROLES = {
   passing_yards: {
     pid_column: 'passer_pid',
-    yards_column: 'pass_yds',
+    yards_column: 'pass_yards',
     stats_key: 'pass_play_yards'
   },
   rushing_yards: {
     pid_column: 'ball_carrier_pid',
-    yards_column: 'rush_yds',
+    yards_column: 'rush_yards',
     stats_key: 'rush_play_yards'
   },
   receiving_yards: {
     pid_column: 'target_pid',
-    yards_column: 'recv_yds',
+    yards_column: 'recv_yards',
     stats_key: 'recv_play_yards'
   }
 }
