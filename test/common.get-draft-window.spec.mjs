@@ -96,14 +96,18 @@ describe('LIBS-SHARED get_publication_boundary', function () {
     ).to.equal('2026-08-15 00:00')
   })
 
-  it('is null between a resume and the next close', () => {
+  it('is the first close at or after a resume, effective immediately', () => {
+    // The resume seeds an initial publication at the first close at or after
+    // it, so the lead-up has a board rather than a void.
     expect(
-      get_publication_boundary({
-        ...live_2026,
-        resumed_at: eastern('2026-08-17 09:00').toDate(),
-        until: eastern('2026-08-17 23:59')
-      })
-    ).to.equal(null)
+      format(
+        get_publication_boundary({
+          ...live_2026,
+          resumed_at: eastern('2026-08-17 09:00').toDate(),
+          until: eastern('2026-08-17 23:59')
+        })
+      )
+    ).to.equal('2026-08-18 00:00')
   })
 
   describe('the resume comparison is >=, to the second', function () {
@@ -119,14 +123,18 @@ describe('LIBS-SHARED get_publication_boundary', function () {
       ).to.equal('2026-08-18 00:00')
     })
 
-    it('withholds one landing a second before it', () => {
+    it('withholds one landing a second before it, seeding the next close', () => {
+      // The close a second before the resume is not adopted; the first close
+      // at or after it becomes the initial publication.
       expect(
-        get_publication_boundary({
-          ...live_2026,
-          resumed_at: eastern('2026-08-18 00:00:01').toDate(),
-          until: eastern('2026-08-18 09:00')
-        })
-      ).to.equal(null)
+        format(
+          get_publication_boundary({
+            ...live_2026,
+            resumed_at: eastern('2026-08-18 00:00:01').toDate(),
+            until: eastern('2026-08-18 09:00')
+          })
+        )
+      ).to.equal('2026-08-19 00:00')
     })
   })
 })
@@ -345,21 +353,21 @@ describe('LIBS-SHARED getDraftWindow', function () {
     })
   })
 
-  describe('a resume voids the standing publication', function () {
+  describe('a resume seeds an initial publication', function () {
     const args = {
       ...live_2026,
       draft_picks: board({ total: 12 }),
       pick_number: 1
     }
 
-    it('leaves every pick without a window until the next close', () => {
+    it('gives every pick a window laid from the first close, in the lead-up', () => {
       expect(
-        getDraftWindow({
+        window_for({
           ...args,
           resumed_at: eastern('2026-08-17 09:00').toDate(),
           until: eastern('2026-08-17 23:59')
         })
-      ).to.equal(null)
+      ).to.equal('2026-08-18 11:00')
     })
 
     it('restarts the ratchet, which is the one way a window moves later', () => {
@@ -489,10 +497,12 @@ describe('LIBS-SHARED get_draft_pass_window', function () {
     expect(format(get_draft_pass_window(args))).to.equal('2026-08-18 14:00')
   })
 
-  it('returns null when no slate is published', () => {
+  it('returns the pass window in the lead-up, seeded from the first close', () => {
     expect(
-      get_draft_pass_window({ ...args, until: eastern('2026-08-17 12:00') })
-    ).to.equal(null)
+      format(
+        get_draft_pass_window({ ...args, until: eastern('2026-08-17 12:00') })
+      )
+    ).to.equal('2026-08-18 14:00')
   })
 
   it('returns null when only one pick is outstanding', () => {
