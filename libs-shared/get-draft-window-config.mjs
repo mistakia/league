@@ -23,8 +23,7 @@
  * @param {Object} draft_settings
  * @param {Date|string} draft_settings.draft_start - When the draft opens; a Date
  *   on the server, an ISO string once through JSON.
- * @param {number} [draft_settings.draft_pick_interval] - Hours between slots, and
- *   the exclusive-clock floor.
+ * @param {number} [draft_settings.draft_pick_interval] - Hours between slots.
  * @param {number} draft_settings.draft_hour_min - First hour a slot may fall on (inclusive).
  * @param {number} draft_settings.draft_hour_max - Hour the band closes (exclusive),
  *   which is also the daily publication boundary.

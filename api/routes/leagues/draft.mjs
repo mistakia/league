@@ -580,8 +580,9 @@ router.post('/?', async (req, res) => {
     const isPreviousSelectionMade =
       pick.pick === 1 || Boolean(prev_pick && prev_pick.pid)
 
-    // the whole board, which is what places a window: the reference is the last
-    // pick made before this one and the step count is the unmade picks between
+    // the whole board, which is what places a window: a pick's slot is decided
+    // by its position in the set of picks still unmade AS OF the governing
+    // publication boundary, so a partial board mis-indexes the slate
     const draft_picks = await db('draft')
       .where({ lid, season_year: current_season.year })
       .orderBy('pick', 'asc')

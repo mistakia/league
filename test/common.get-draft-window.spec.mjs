@@ -336,22 +336,18 @@ describe('LIBS-SHARED getDraftWindow', function () {
       expect(after[2]).to.equal('2026-08-18 17:00')
       expect(after[3]).to.equal('2026-08-18 20:00')
 
-      // Pick 3 moves LATER, not earlier: its exclusive-interval floor now
-      // reads the 12:30 selection, which is 15:30 plus the interval and snaps
-      // to 17:00. That is the invariant exactly -- monotone non-decreasing
-      // between boundaries, never unchanged.
-      expect(after[1]).to.equal('2026-08-18 17:00')
-      for (const index of [0, 1, 2, 3]) {
-        expect(
-          after[index] >= before[index],
-          `index ${index} moved earlier within a boundary`
-        ).to.equal(true)
-      }
+      // Pick 3 does not move either. The slate takes no selection time as an
+      // input, so the pick behind a just-made pick keeps the slot it was
+      // published in — the whole board is frozen, not merely held against
+      // moving up.
+      expect(after[1]).to.equal('2026-08-18 14:00')
+      expect(after).to.deep.equal(before)
     })
 
-    it('no window is EARLIER than its published slot within a boundary', () => {
-      // Sweep the day: every window is at or after the slate's own placement,
-      // because the floor term can only ever push a window later.
+    it('every window IS its published slot, exactly', () => {
+      // Sweep the day: a pick's window is the (index)-th slot after the
+      // governing boundary and nothing else, so there is no term that can
+      // move it off that slot in either direction.
       const draft_picks = boundary_board
       for (const pick_number of [2, 3, 4, 5, 6, 7, 8]) {
         const window = getDraftWindow({
@@ -365,9 +361,9 @@ describe('LIBS-SHARED getDraftWindow', function () {
           slot_hours: get_draft_slot_hours(live_2026)
         })
         expect(
-          window.isBefore(slot),
-          `pick ${pick_number} moved earlier than its published slot`
-        ).to.equal(false)
+          format(window),
+          `pick ${pick_number} is not its published slot`
+        ).to.equal(format(slot))
       }
     })
 
@@ -410,81 +406,81 @@ describe('LIBS-SHARED getDraftWindow', function () {
     })
   })
 
-  describe('the exclusive-interval floor', function () {
-    // Without it the slate has a hole: the midnight boundary publishes picks at
-    // 11:00, 14:00, 17:00 and 20:00; the 11:00 pick is finally made at 20:00,
-    // so the second pick comes on the clock for the first time — and the third
-    // and fourth picks' windows opened at 17:00 and 20:00, so two teams can
-    // pass it the same second. `governance-reference.md:59` promises the
-    // opposite.
-    const draft_picks = board({
-      total: 6,
-      made: { 1: '2026-08-18 20:00' }
-    })
+  describe('the slate takes no selection time as an input', function () {
+    // The rule the operator elected: window(P) is P's published slot and
+    // nothing else. A pick's actual selection instant is irrelevant to every
+    // window on the board, so a slow board does not push anything back and a
+    // fast one does not pull anything forward until the next publication.
     const args = {
       ...live_2026,
-      draft_picks,
       resumed_at: null,
       until: eastern('2026-08-18 20:05')
     }
 
-    it('gives the pick behind a 20:00 selection its full interval alone', () => {
-      // Published slot is 11:00 (index 0 of the day). Floor is 20:00 plus three
-      // hours = 23:00, which IS a slot, so the window is 23:00.
-      expect(format(getDraftWindow({ ...args, pick_number: 2 }))).to.equal(
-        '2026-08-18 23:00'
+    it('leaves the picks behind a LATE selection on their published slots', () => {
+      // The midnight boundary published picks 1-4 at 11:00, 14:00, 17:00 and
+      // 20:00. Pick 1 is not finally made until 20:00 — nine hours after its
+      // own slot — and that lateness moves nothing: picks 2, 3 and 4 sit where
+      // the slate put them the night before.
+      const draft_picks = board({
+        total: 6,
+        made: { 1: '2026-08-18 20:00' }
+      })
+      expect(
+        [2, 3, 4].map((pick_number) =>
+          format(getDraftWindow({ ...args, draft_picks, pick_number }))
+        )
+      ).to.deep.equal([
+        '2026-08-18 14:00',
+        '2026-08-18 17:00',
+        '2026-08-18 20:00'
+      ])
+    })
+
+    it('gives the same windows for wildly different selection times', () => {
+      // The same board, made at 11:05 and at 23:30 — the two extremes of the
+      // day. Every outstanding pick's window is identical, which is the rule
+      // stated as a property rather than as a table of slots.
+      const windows_for = (selected_at) => {
+        const draft_picks = board({ total: 6, made: { 1: selected_at } })
+        return [2, 3, 4, 5, 6].map((pick_number) =>
+          format(
+            getDraftWindow({
+              ...args,
+              draft_picks,
+              until: eastern('2026-08-18 23:45'),
+              pick_number
+            })
+          )
+        )
+      }
+
+      expect(windows_for('2026-08-18 23:30')).to.deep.equal(
+        windows_for('2026-08-18 11:05')
       )
     })
 
-    it('holds picks 3 and 4 back too, which is what makes it exclusive', () => {
-      // Without the floor this is the hole: the slate published picks 2, 3 and
-      // 4 at 14:00, 17:00 and 20:00, so at 20:05 all three are already open and
-      // pick 2 -- on the clock for the first time -- can be passed the same
-      // second it arrives. The floor anchors on the highest-numbered MADE pick
-      // below each of them, which is pick 1 for all three, so all three move to
-      // the first slot at or after 23:00.
-      expect(
-        [2, 3, 4].map((pick_number) =>
-          format(getDraftWindow({ ...args, pick_number }))
-        )
-      ).to.deep.equal([
-        '2026-08-18 23:00',
-        '2026-08-18 23:00',
-        '2026-08-18 23:00'
-      ])
-
-      // Pick 2 therefore has the board to itself for its full interval.
-      const exclusive_seconds = getDraftWindow({
-        ...args,
-        pick_number: 2
-      }).diff(eastern('2026-08-18 20:00'), 'second')
-      expect(exclusive_seconds).to.equal(3 * 60 * 60)
-    })
-
-    it('snaps a floor that lands outside the band onto the next slot', () => {
-      // A selection at 23:00 plus three hours is 02:00, outside the band; the
-      // first slot at or after it is 11:00 the next morning.
+    it('holds a late selection off the following morning entirely', () => {
+      // A 23:00 selection is the case the removed floor moved to 11:00 the
+      // next day, because 23:00 plus the three-hour interval falls outside the
+      // band. The slate publishes pick 2 at 14:00 and it stays there.
       const late = board({ total: 6, made: { 1: '2026-08-18 23:00' } })
       expect(
         format(
           getDraftWindow({
-            ...live_2026,
+            ...args,
             draft_picks: late,
-            resumed_at: null,
             until: eastern('2026-08-18 23:05'),
             pick_number: 2
           })
         )
-      ).to.equal('2026-08-19 11:00')
+      ).to.equal('2026-08-18 14:00')
     })
 
-    it('anchors on the HIGHEST-NUMBERED made pick, not the latest by time', () => {
-      // The two differ on a gap board where a lower pick lands after a higher
-      // one — which is the live 2026 board, where pick 5 (19:11) was taken
-      // before pick 4 (19:14). The pick behind pick 5 must measure from pick 5.
-      // Picks 1-3 landed before the boundary so they are out of the
-      // outstanding set, which puts pick 6 at index 2 -- a 17:00 published
-      // slot the floor can then override.
+    it('is unmoved by a gap board whose picks land out of order', () => {
+      // Picks 4 and 5 land in the reverse of pick order, which is the live
+      // 2026 board's shape. Under an anchored rule the order of those two
+      // decides pick 6's window; under the slate neither is read at all.
       const gap = board({
         total: 8,
         made: {
@@ -495,22 +491,16 @@ describe('LIBS-SHARED getDraftWindow', function () {
           5: '2026-08-18 19:11'
         }
       })
-      const floor_args = {
-        ...live_2026,
+      const gap_args = {
+        ...args,
         draft_picks: gap,
-        resumed_at: null,
         until: eastern('2026-08-18 21:05'),
         pick_number: 6
       }
-      // 19:11 plus three hours is 22:11, whose first slot is 23:00. Anchoring
-      // on the latest selection by TIME (19:14) gives the same slot here, so
-      // the discriminating case is the reordered board below.
-      expect(format(getDraftWindow(floor_args))).to.equal('2026-08-18 23:00')
+      // Picks 1-3 were made before the boundary, so the outstanding set is
+      // 4, 5, 6, 7, 8 and pick 6 takes the third slot: 17:00.
+      expect(format(getDraftWindow(gap_args))).to.equal('2026-08-18 17:00')
 
-      // Move pick 4 to 21:00, AFTER pick 5. The highest-numbered made pick
-      // below 6 is still pick 5 at 19:11, so the answer must not move; a
-      // most-recent-by-time anchor would read 21:00, land at midnight, and
-      // snap to the next morning's 11:00.
       const reordered = gap.map((draft_pick) =>
         draft_pick.pick === 4
           ? {
@@ -520,11 +510,11 @@ describe('LIBS-SHARED getDraftWindow', function () {
           : draft_pick
       )
       expect(
-        format(getDraftWindow({ ...floor_args, draft_picks: reordered }))
-      ).to.equal('2026-08-18 23:00')
+        format(getDraftWindow({ ...gap_args, draft_picks: reordered }))
+      ).to.equal('2026-08-18 17:00')
     })
 
-    it('anchors pick 1 on draft_start when nothing is made', () => {
+    it('places pick 1 on the first slot of the opening publication', () => {
       expect(
         format(
           getDraftWindow({
@@ -539,40 +529,106 @@ describe('LIBS-SHARED getDraftWindow', function () {
     })
   })
 
-  describe('Article XI Section 8 becomes provable', function () {
-    // "the next midnight Eastern that occurs at least 24 hours after the start
-    // of the draft window". Under a full-day band with a 24-hour interval the
-    // floor term alone IS the constitutional rule, and all four rows agree —
-    // each also inside Amendment XXXI's 48-hour ceiling.
+  describe('the only movement is the once-per-day republication', function () {
+    // Windows move exactly once a day, at the boundary, and only ever UP — the
+    // picks made during the day leave the outstanding set, which shrinks every
+    // later pick's index.
+    const draft_picks = board({
+      total: 8,
+      made: {
+        1: '2026-08-17 12:00',
+        2: '2026-08-18 11:30',
+        3: '2026-08-18 19:00'
+      }
+    })
+    const base = { ...live_2026, draft_picks, resumed_at: null }
+
+    const slate = (until) =>
+      [4, 5, 6, 7, 8].map((pick_number) =>
+        format(getDraftWindow({ ...base, until: eastern(until), pick_number }))
+      )
+
+    it('holds one slate for the whole day, however many picks land', () => {
+      // Three readings spanning the day, with picks 2 and 3 landing between the
+      // first and the last. Nothing moves.
+      const morning = slate('2026-08-18 00:30')
+      const midday = slate('2026-08-18 12:00')
+      const evening = slate('2026-08-18 23:59')
+
+      // Picks 2 and 3 were still outstanding at the Aug 18 boundary, so they
+      // hold indices 0 and 1 all day and pick 4 starts at the third slot.
+      expect(morning).to.deep.equal([
+        '2026-08-18 17:00',
+        '2026-08-18 20:00',
+        '2026-08-18 23:00',
+        '2026-08-19 11:00',
+        '2026-08-19 14:00'
+      ])
+      expect(midday).to.deep.equal(morning)
+      expect(evening).to.deep.equal(morning)
+    })
+
+    it('moves every remaining window UP at the boundary', () => {
+      // Picks 2 and 3 were made during Aug 18, so the Aug 19 publication lays
+      // 4-8 onto the day from its first slot. Each window moves earlier by
+      // exactly the two slots the two made picks vacated.
+      expect(slate('2026-08-19 00:00')).to.deep.equal([
+        '2026-08-19 11:00',
+        '2026-08-19 14:00',
+        '2026-08-19 17:00',
+        '2026-08-19 20:00',
+        '2026-08-19 23:00'
+      ])
+    })
+
+    it('moves nothing at a boundary that no pick was made before', () => {
+      // Aug 20 publishes from the same outstanding set as Aug 19, so the
+      // republication is a day later and not a slot earlier.
+      expect(slate('2026-08-20 00:00')).to.deep.equal([
+        '2026-08-20 11:00',
+        '2026-08-20 14:00',
+        '2026-08-20 17:00',
+        '2026-08-20 20:00',
+        '2026-08-20 23:00'
+      ])
+    })
+  })
+
+  describe('the constitutional cadence publishes one slot a day', function () {
+    // A full-day band with a 24-hour interval derives exactly one slot, at
+    // midnight, which is the Article XI Section 8 cadence. Under the slate a
+    // pick's window is its published midnight and the selection instant that
+    // preceded it is not read at all, so the answer depends only on which picks
+    // were outstanding at the governing boundary.
     const cases = [
       {
+        // Made BEFORE the boundary, so pick 2 heads the outstanding set and
+        // takes the boundary's own midnight.
         previous: '2026-09-08 23:00',
         until: '2026-09-09 06:00',
-        section_8: '2026-09-10 00:00',
-        exclusive_hours: 25
+        published: '2026-09-09 00:00'
       },
       {
+        // Made AFTER the boundary, so pick 1 is still in the set and pick 2
+        // takes the following midnight.
         previous: '2026-09-09 00:30',
         until: '2026-09-09 06:00',
-        section_8: '2026-09-11 00:00',
-        exclusive_hours: 47.5
+        published: '2026-09-10 00:00'
       },
       {
         previous: '2026-09-09 14:00',
         until: '2026-09-09 18:00',
-        section_8: '2026-09-11 00:00',
-        exclusive_hours: 34
+        published: '2026-09-10 00:00'
       },
       {
         previous: '2026-09-09 23:58',
         until: '2026-09-09 23:59',
-        section_8: '2026-09-11 00:00',
-        exclusive_hours: 24 + 2 / 60
+        published: '2026-09-10 00:00'
       }
     ]
 
-    for (const { previous, until, section_8, exclusive_hours } of cases) {
-      it(`a selection at ${previous} yields ${section_8}`, () => {
+    for (const { previous, until, published } of cases) {
+      it(`a selection at ${previous} publishes pick 2 at ${published}`, () => {
         const draft_picks = board({ total: 4, made: { 1: previous } })
         const window = getDraftWindow({
           ...article_xi_section_8,
@@ -582,13 +638,27 @@ describe('LIBS-SHARED getDraftWindow', function () {
           pick_number: 2
         })
 
-        expect(format(window)).to.equal(section_8)
-        expect(window.diff(eastern(previous), 'minute') / 60).to.be.closeTo(
-          exclusive_hours,
-          0.001
-        )
+        expect(format(window)).to.equal(published)
       })
     }
+
+    it('is frozen across the day like every other cadence', () => {
+      const draft_picks = board({ total: 4, made: { 1: '2026-09-09 00:30' } })
+      const window_at = (until) =>
+        format(
+          getDraftWindow({
+            ...article_xi_section_8,
+            draft_picks,
+            resumed_at: null,
+            until: eastern(until),
+            pick_number: 2
+          })
+        )
+
+      expect(window_at('2026-09-09 23:59')).to.equal(
+        window_at('2026-09-09 00:01')
+      )
+    })
   })
 
   describe('a resume voids the standing publication', function () {
@@ -809,10 +879,10 @@ describe('LIBS-SHARED getDraftWindow', function () {
     })
 
     it('places the 61st outstanding pick inside the hard end', () => {
-      // Five slots a day from Aug 18 puts the last pick's floor at Aug 30
-      // 11:00, ahead of the announced Aug 31 23:59 hard end. The floor only
-      // advances as picks land, so this is a ceiling on the pace, not a
-      // forecast.
+      // Five slots a day from Aug 18 puts the last pick at Aug 30 11:00,
+      // ahead of the announced Aug 31 23:59 hard end. Every midnight
+      // republication can only move it earlier, so this is the LATEST the
+      // board can reach its last pick, not a forecast of when it will.
       expect(format(getDraftWindow({ ...args, pick_number: 65 }))).to.equal(
         '2026-08-30 11:00'
       )

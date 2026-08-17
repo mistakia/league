@@ -248,25 +248,22 @@ export function get_draft_slot_at_index({ from, index, slot_hours }) {
  * preceding pick has already been made is on the clock regardless of the
  * window; the window governs only jumping a stalled team ahead of you.
  *
- * The rule is a published slate with an exclusive-clock floor:
+ * The rule is a frozen daily slate, and nothing else:
  *
- *   window(P) = max(published, floor)
+ *   window(P) = published
  *
  *     boundary    the latest publication boundary at or before now that is also
  *                 at or after the latest resume; `draft_start` counts as one
  *     outstanding the picks with no selection AS OF that boundary, in pick order
  *     index       P's position within `outstanding`
  *     published   the index-th slot at or after `boundary`
- *     floor       the first slot at or after (the last selection made before P,
- *                 plus one interval)
  *
- * The published term is what makes the schedule knowable a day ahead. The floor
- * term is what keeps the exclusive-clock guarantee the 2026-08-02 election
- * promises — without it the 11:00 pick made at 20:00 puts the next pick on the
- * clock at an instant when two later windows have already opened, so two teams
- * can pass it the same second. Taking the LATER of the two is what lets both
- * hold at once: the floor can only ever delay a window, never pull one forward,
- * so the published slate remains the earliest anything can happen.
+ * There is no second term, and in particular no selection-time input. A pick's
+ * window is the slot the slate published for it, however fast or slow the board
+ * then goes: a pick made nine hours after its own slot does not push the picks
+ * behind it back, and a board that races ahead does not pull anything forward.
+ * That is what makes the day's schedule knowable the night before, which is the
+ * property the notice publishes.
  *
  * The outstanding set is computed as of the BOUNDARY, not as of now. A pick made
  * after the boundary stays in the set and keeps its index, so no later pick's
@@ -274,19 +271,17 @@ export function get_draft_slot_at_index({ from, index, slot_hours }) {
  * instead would shrink a jumped pick out of the set and pull later windows
  * EARLIER between boundaries — the freeze is what "publication" means.
  *
- * The invariant, stated exactly, because "windows never move up" is false as a
- * blanket claim: BETWEEN two boundaries `window(P)` is monotone non-decreasing,
- * since the published term is frozen and the floor reads the last selection
- * before P, which only ever gets later. AT a boundary a window may move
- * earlier, because picks made since the last publication shrink P's index. That
- * is the move-up, it happens once a day, and the slate announces it the night
- * before.
+ * The invariant, stated exactly: BETWEEN two boundaries `window(P)` is
+ * CONSTANT, because the only inputs that could move it — the outstanding set
+ * and the boundary — are both fixed for the day. AT a boundary a window may
+ * move EARLIER, because picks made since the last publication shrink P's index;
+ * it can never move later. That move-up happens once a day, is calculated once,
+ * and the slate announces it the night before.
  *
  * @param {Object} args
  * @param {number} args.draft_start_timestamp - Unix timestamp (seconds) the draft opens.
  * @param {number} args.pick_number - 1-based pick number to calculate the window for.
- * @param {number} [args.pick_interval_hours=1] - Hours between slots, and the
- *   exclusive-clock floor.
+ * @param {number} [args.pick_interval_hours=1] - Hours between slots.
  * @param {number} [args.daily_window_start_hour=11] - First hour of the day a slot may fall on (inclusive).
  * @param {number} [args.daily_window_end_hour=16] - Hour of the day the band closes (EXCLUSIVE), and the publication boundary.
  *
@@ -369,21 +364,11 @@ export default function getDraftWindow({
     pick_interval_hours
   })
 
-  const published = get_draft_slot_at_index({
+  return get_draft_slot_at_index({
     from: boundary,
     index,
     slot_hours
   })
-
-  const floor = resolve_exclusive_floor({
-    draft_start_timestamp,
-    draft_picks,
-    pick_number,
-    pick_interval_hours,
-    slot_hours
-  })
-
-  return floor.isAfter(published) ? floor : published
 }
 
 /**
@@ -485,58 +470,6 @@ function resolve_published_index({ draft_picks, pick_number, boundary }) {
   const index = outstanding.indexOf(pick_number)
 
   return index === -1 ? null : index
-}
-
-/**
- * The earliest slot this pick's predecessor's interval allows.
- *
- * The anchor is the HIGHEST-NUMBERED made pick below P — `resolve_reference`'s
- * long-standing convention — and not the most recent selection by TIME. The two
- * differ on a gap board where a lower pick lands after a higher one, and the
- * pick-order anchor is the one that preserves each team's interval: the pick
- * behind a just-made pick X is X+1, whose highest-numbered made predecessor is
- * X itself. Pre-draft, or with nothing made ahead of it, the anchor is
- * `draft_start`, standing in for the completion of a notional pick 0.
- *
- * The result SNAPS FORWARD to a slot. A selection at 23:00 plus a 3-hour
- * interval lands at 02:00, outside the band; the first slot at or after it is
- * 11:00 the next morning. Snapping keeps every window on a slot time and makes
- * the exclusive interval a floor rather than an exact quantity.
- *
- * Unlike the published term this reads the LIVE board rather than the board as
- * of the boundary, and that is deliberate: a selection can only ever push the
- * floor later, so reading it live cannot pull a window forward — which is the
- * property the monotonicity invariant needs.
- */
-function resolve_exclusive_floor({
-  draft_start_timestamp,
-  draft_picks,
-  pick_number,
-  pick_interval_hours,
-  slot_hours
-}) {
-  const interval = resolve_pick_interval_hours(pick_interval_hours)
-
-  const preceding_selections = (draft_picks ?? [])
-    .filter(
-      (draft_pick) =>
-        draft_pick.pick < pick_number && draft_pick.selection_timestamp
-    )
-    .sort((a, b) => a.pick - b.pick)
-
-  const anchor_timestamp = preceding_selections.length
-    ? timestamptz_to_epoch(
-        preceding_selections[preceding_selections.length - 1]
-          .selection_timestamp
-      )
-    : draft_start_timestamp
-
-  const anchor = dayjs
-    .unix(anchor_timestamp)
-    .tz(DRAFT_TIMEZONE)
-    .add(interval, 'hour')
-
-  return get_draft_slot_at_index({ from: anchor, index: 0, slot_hours })
 }
 
 /**
