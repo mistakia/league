@@ -49,10 +49,15 @@
 // column_id" on any saved view still holding one (signal 124653). Both pairs are
 // covered below.
 //
-// The value-path assertion stays scoped to the player table on purpose. Every
-// scoring-format-logs definition carries a `select_as`, and the existing rule
-// skips those because the result key is built from a parameter rather than being
-// the physical column name -- there is no single alias to compare against.
+// The value-path assertion was scoped to the player table on the grounds that
+// every scoring-format-logs definition carries a `select_as` and the player-table
+// rule skips those, because a result key built from a PARAMETER has no single
+// alias to compare against. That reasoning does not transfer: both
+// scoring-format-logs factories build `select_as` from the column name alone and
+// take no arguments, so there is exactly one alias per column. The exemption was
+// removed on 2026-08-17 after the long-tail conform left all four rank columns
+// reading a value path nothing answers. Check the ARITY of a `select_as` before
+// concluding a family is unassertable.
 
 import fs from 'node:fs'
 import path from 'node:path'
@@ -125,12 +130,27 @@ const practice_fields_source = fs.readFileSync(
 // A parser anchored on `<key>: <helper>({` on one line silently drops exactly
 // the longest ids, which are the ones most likely to be missing, so the key is
 // matched alone and the wrap is not part of the pattern.
-const parse_export_default_field_ids = (source) => {
-  const ids = new Set()
+//
+// It returns a Map of id -> player_value_path (null when the field declares
+// none), the same shape `parse_frontend_fields` returns, so the id-only
+// assertions read it through `.has` / `.size` / `.keys` unchanged. Each entry's
+// body is bounded by the NEXT key match rather than by a brace scan: the wrapped
+// form puts the opening brace on the following line, so there is no `\n  },` at
+// this indent to anchor on, and slicing to the next key cannot swallow a
+// sibling's value path.
+const parse_export_default_fields = (source) => {
+  const fields = new Map()
   const key_pattern = /^ {2}(player_[a-z0-9_]+):/gm
-  let match
-  while ((match = key_pattern.exec(source)) !== null) ids.add(match[1])
-  return ids
+  const matches = [...source.matchAll(key_pattern)]
+
+  for (const [index, match] of matches.entries()) {
+    const body_end = matches[index + 1]?.index ?? source.length
+    const body = source.slice(match.index, body_end)
+    const value_path_match = body.match(/player_value_path: '([^']+)'/)
+    fields.set(match[1], value_path_match ? value_path_match[1] : null)
+  }
+
+  return fields
 }
 
 // The REVERSE direction of every assertion in this file, and the one nothing
@@ -278,7 +298,7 @@ describe('data view player field parity', function () {
 })
 
 describe('data view scoring format logs field parity', function () {
-  const frontend_field_ids = parse_export_default_field_ids(
+  const frontend_fields = parse_export_default_fields(
     scoring_format_logs_fields_source
   )
   const server_column_ids = Object.keys(
@@ -288,22 +308,29 @@ describe('data view scoring format logs field parity', function () {
   it('parses the frontend field file', function () {
     // Positive control, same reasoning as the player-table one: a parser that
     // matches nothing passes both assertions below by vacuous iteration.
-    expect(frontend_field_ids.size).to.be.greaterThan(10)
+    expect(frontend_fields.size).to.be.greaterThan(10)
     // The same-line form.
     expect(
-      frontend_field_ids.has('player_fantasy_points_rank_from_seasonlogs')
+      frontend_fields.has('player_fantasy_points_rank_from_seasonlogs')
     ).to.equal(true)
     // The prettier-wrapped form, which a one-line pattern would miss.
     expect(
-      frontend_field_ids.has(
+      frontend_fields.has(
         'player_fantasy_points_per_game_position_rank_from_seasonlogs'
       )
     ).to.equal(true)
+    // A value path off the wrapped form, so a parser that finds every id and no
+    // path cannot pass the assertion below by iterating nulls.
+    expect(
+      frontend_fields.get(
+        'player_fantasy_points_per_game_position_rank_from_seasonlogs'
+      )
+    ).to.equal('points_per_game_position_rank_from_seasonlogs')
   })
 
   it('registers every server column in the frontend field file', function () {
     const missing = server_column_ids.filter(
-      (column_id) => !frontend_field_ids.has(column_id)
+      (column_id) => !frontend_fields.has(column_id)
     )
     expect(
       missing,
@@ -323,8 +350,47 @@ describe('data view scoring format logs field parity', function () {
 
   it('backs every frontend field with a server column definition', function () {
     expect(
-      find_orphaned_frontend_fields(frontend_field_ids),
+      find_orphaned_frontend_fields(frontend_fields),
       'scoring format logs frontend fields with no server column definition'
+    ).to.deep.equal([])
+  })
+
+  // The value path IS checkable here, and the comment on the pff block below
+  // said otherwise until 2026-08-17 -- which is what left this family uncovered
+  // while its two neighbours were gated. Every definition carries a select_as,
+  // but both factories build it from the column name alone and take no
+  // arguments (`${column_name}_from_{season,career}logs`), so there is exactly
+  // one alias per column and CALLING it is an exact oracle rather than a
+  // restatement of the derivation.
+  //
+  // The gap was live: the 2026-08-17 long-tail conform moved points_rnk /
+  // points_pos_rnk / points_per_game_rnk / points_per_game_pos_rnk to their
+  // full-word names and swept the server definitions, the fields index and the
+  // goldens, but not this file -- a word-bounded rewrite of `points_rnk` cannot
+  // match `points_rnk_from_seasonlogs`, because the next character is an
+  // underscore. All four rank columns rendered an empty cell in the default
+  // data view, with the API returning the values correctly.
+  it('matches each frontend value path to the emitted alias', function () {
+    const mismatched = []
+
+    for (const column_id of server_column_ids) {
+      const definition =
+        player_scoring_format_logs_column_definitions[column_id]
+
+      const value_path = frontend_fields.get(column_id)
+      if (!value_path) continue
+
+      const expected_path = definition.select_as()
+      if (value_path !== expected_path) {
+        mismatched.push(
+          `${column_id}: frontend reads '${value_path}', server emits '${expected_path}'`
+        )
+      }
+    }
+
+    expect(
+      mismatched,
+      `frontend value paths that render an empty cell: ${mismatched.join('; ')}`
     ).to.deep.equal([])
   })
 })
@@ -337,10 +403,12 @@ describe('data view scoring format logs field parity', function () {
 // speed, position, unit, meets_snap_minimum), and three stale entries in the
 // aggregate map below.
 //
-// Unlike scoring-format-logs, the value path IS checkable here even though every
-// definition carries a select_as: create_field_from_pff_player_seasonlogs builds
-// it as `pff_${column_name}`, deterministically, so there is exactly one alias
-// to compare against. That derivation is the whole reason a repoint moves the
+// The value path is checkable here even though every definition carries a
+// select_as: create_field_from_pff_player_seasonlogs builds it as
+// `pff_${column_name}`, deterministically, so there is exactly one alias to
+// compare against. (This said "unlike scoring-format-logs" until 2026-08-17;
+// that family's select_as is equally deterministic and is now gated too, and
+// the false exemption is what left four of its columns rendering blank.) That derivation is the whole reason a repoint moves the
 // payload key, which is what makes this assertion load-bearing rather than
 // decorative.
 describe('data view pff seasonlogs field parity', function () {
