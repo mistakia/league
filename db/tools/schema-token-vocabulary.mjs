@@ -290,6 +290,7 @@ const english_words = [
   'during',
   'early',
   'earned',
+  'eastern',
   'edge',
   // A real word, and the same lifecycle-participle class the list already
   // carries in announced / created / deleted / processed / submitted / updated
@@ -835,6 +836,7 @@ const english_words = [
   'stoutness',
   'strength',
   'strengths',
+  'string',
   'stuffed',
   'stunt',
   'style',
