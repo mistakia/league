@@ -61,7 +61,11 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
 
 CREATE TABLE public.league_formats (
     is_qb_not_boolean integer,
-    sourceid integer
+    sourceid integer,
+    starter_slots_te integer,
+    starter_slots_k integer,
+    starter_slots_kicker integer,
+    starter_slots_team integer
 );
 
 CREATE TABLE public.nfl_plays_player (
@@ -220,6 +224,34 @@ describe('schema conformance audit -- 2026-08-15 oracle repair', function () {
     )
   })
 
+  it('flags the position codes `te` and `k`, which the bootstrap admitted', function () {
+    // Both were bootstrapped from the system dictionary -- `te` and `k` are
+    // entries there -- so the audit was blind to them while flagging every
+    // sibling position code. The vocabulary file's own comment asserted the
+    // opposite ("Position abbreviations (`qb`, `rb`, `te`, `wr`) stay flagged"),
+    // so the list contradicted its documented intent.
+    //
+    // The cost is the split-sibling-set failure, not the missing count: a batch
+    // renaming starter_slots_qb/rb/wr/dst and leaving starter_slots_te/k beside
+    // them ships one family under two spellings, and the audit cannot show you
+    // the members it did not flag.
+    expect(shorthand_columns).to.include('league_formats.starter_slots_te')
+    expect(shorthand_columns).to.include('league_formats.starter_slots_k')
+  })
+
+  it('leaves the spelled-out position words clean', function () {
+    // The repair must remove the ABBREVIATIONS without touching the real words
+    // beside them in the list -- `kicker` and `team` are ordinary vocabulary and
+    // a widening that took them too would be a false positive on conformed
+    // names.
+    expect(shorthand_columns).to.not.include(
+      'league_formats.starter_slots_kicker'
+    )
+    expect(shorthand_columns).to.not.include(
+      'league_formats.starter_slots_team'
+    )
+  })
+
   it('reports every flagged column and nothing else', function () {
     // Asserted as an exact set so the over-permissive direction is pinned too:
     // a vocabulary widened too far, or a carve-out that leaked, would satisfy
@@ -229,6 +261,8 @@ describe('schema conformance audit -- 2026-08-15 oracle repair', function () {
       'dvoa_team_unit_seasonlogs_history.second_and_mid_dvoa',
       'league_formats.is_qb_not_boolean',
       'league_formats.sourceid',
+      'league_formats.starter_slots_k',
+      'league_formats.starter_slots_te',
       'nfl_plays.second_and_mid',
       'nfl_plays.starter_slots_qb',
       'nfl_plays.userid',

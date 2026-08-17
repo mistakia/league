@@ -1,7 +1,7 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
-  "generated_at": "2026-08-17T01:11:07.752Z",
-  "count": 498,
+  "generated_at": "2026-08-17T01:22:18.404Z",
+  "count": 517,
   "violations": [
     {
       "table": "adp_format",
@@ -70,6 +70,11 @@
     },
     {
       "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_points_allowed_per_game_te",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
       "column": "pass_points_allowed_per_game_wr1",
       "rule": "shorthand"
     },
@@ -91,6 +96,16 @@
     {
       "table": "dvoa_team_unit_seasonlogs_history",
       "column": "pass_rb_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_te_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_te_dvoa",
       "rule": "shorthand"
     },
     {
@@ -126,6 +141,11 @@
     {
       "table": "dvoa_team_unit_seasonlogs_history",
       "column": "pass_yards_allowed_per_game_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_history",
+      "column": "pass_yards_allowed_per_game_te",
       "rule": "shorthand"
     },
     {
@@ -215,6 +235,11 @@
     },
     {
       "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_points_allowed_per_game_te",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
       "column": "pass_points_allowed_per_game_wr1",
       "rule": "shorthand"
     },
@@ -236,6 +261,16 @@
     {
       "table": "dvoa_team_unit_seasonlogs_index",
       "column": "pass_rb_dvoa",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_te_dvoa_rank",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_te_dvoa",
       "rule": "shorthand"
     },
     {
@@ -271,6 +306,11 @@
     {
       "table": "dvoa_team_unit_seasonlogs_index",
       "column": "pass_yards_allowed_per_game_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "dvoa_team_unit_seasonlogs_index",
+      "column": "pass_yards_allowed_per_game_te",
       "rule": "shorthand"
     },
     {
@@ -405,6 +445,11 @@
     },
     {
       "table": "league_formats",
+      "column": "starter_slots_k",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
       "column": "starter_slots_qb",
       "rule": "shorthand"
     },
@@ -416,6 +461,11 @@
     {
       "table": "league_formats",
       "column": "starter_slots_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_formats",
+      "column": "starter_slots_te",
       "rule": "shorthand"
     },
     {
@@ -510,12 +560,22 @@
     },
     {
       "table": "league_team_seasonlogs",
+      "column": "starter_points_k",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_seasonlogs",
       "column": "starter_points_qb",
       "rule": "shorthand"
     },
     {
       "table": "league_team_seasonlogs",
       "column": "starter_points_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "league_team_seasonlogs",
+      "column": "starter_points_te",
       "rule": "shorthand"
     },
     {
@@ -661,6 +721,16 @@
     {
       "table": "nfl_plays_current_week",
       "column": "offense_personnel_rb_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "offense_personnel_te_count_per_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays_current_week",
+      "column": "offense_personnel_te_count",
       "rule": "shorthand"
     },
     {
@@ -1061,6 +1131,16 @@
     {
       "table": "nfl_plays",
       "column": "offense_personnel_rb_count",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "offense_personnel_te_count_per_play",
+      "rule": "shorthand"
+    },
+    {
+      "table": "nfl_plays",
+      "column": "offense_personnel_te_count",
       "rule": "shorthand"
     },
     {
@@ -2350,6 +2430,11 @@
     },
     {
       "table": "seasons",
+      "column": "franchise_tag_salary_te",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
       "column": "franchise_tag_salary_wr",
       "rule": "shorthand"
     },
@@ -2360,12 +2445,22 @@
     },
     {
       "table": "seasons",
+      "column": "max_roster_k",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
       "column": "max_roster_qb",
       "rule": "shorthand"
     },
     {
       "table": "seasons",
       "column": "max_roster_rb",
+      "rule": "shorthand"
+    },
+    {
+      "table": "seasons",
+      "column": "max_roster_te",
       "rule": "shorthand"
     },
     {
