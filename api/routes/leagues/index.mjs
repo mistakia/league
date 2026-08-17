@@ -390,7 +390,7 @@ router.put('/:leagueId', async (req, res) => {
  *               practice_squad_slot_count: 4
  *               reserve_short_term_limit: 3
  *               salary_cap: 200
- *               starting_faab_budget: 200
+ *               starting_free_agent_acquisition_budget: 200
  *               years: [2022, 2023, 2024]
  *       400:
  *         $ref: '#/components/responses/BadRequestError'
@@ -459,7 +459,7 @@ router.get('/:leagueId/?', async (req, res) => {
  *               practice_squad_slot_count: 4
  *               reserve_short_term_limit: 3
  *               salary_cap: 200
- *               starting_faab_budget: 200
+ *               starting_free_agent_acquisition_budget: 200
  *               league_format_id: "b5310a7f7c47c20ce372e47e8a0a188b22b78b1d34e2ea18829d94b94ffdc342"
  *               scoring_format_id: "eb75c8fd2acb21fea5d8754f53e9aa2e5d7c40327d5853c58592f658235ba756"
  *       400:

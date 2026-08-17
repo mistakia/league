@@ -100,7 +100,7 @@ const import_cbs_adp = async ({
   for (const { url, ranking_type } of adp_types) {
     const players = await fetch_cbs_data(url)
 
-    const adp_format_id = await find_or_create_adp_format(
+    const average_draft_position_format_id = await find_or_create_adp_format(
       db,
       adp_format.decode_adp_type(ranking_type)
     )
@@ -133,11 +133,11 @@ const import_cbs_adp = async ({
           average_draft_position: source_player.adp,
           min_pick: source_player.low_adp,
           max_pick: source_player.high_adp,
-          std_dev: null,
+          standard_deviation: null,
           sample_size: null,
           percent_drafted: source_player.percent_drafted,
           source_id: 'CBS',
-          adp_format_id
+          average_draft_position_format_id
         })
       } else {
         unmatched_players.push(source_player)
@@ -189,11 +189,11 @@ const import_cbs_adp = async ({
           average_draft_position: source_player.adp,
           min_pick: source_player.low_adp,
           max_pick: source_player.high_adp,
-          std_dev: null,
+          standard_deviation: null,
           sample_size: null,
           percent_drafted: source_player.percent_drafted,
           source_id: 'CBS',
-          adp_format_id
+          average_draft_position_format_id
         })
       }
     }
@@ -214,7 +214,12 @@ const import_cbs_adp = async ({
         save: async (batch) => {
           await db('player_adp_index')
             .insert(batch)
-            .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
+            .onConflict([
+              'season_year',
+              'source_id',
+              'average_draft_position_format_id',
+              'pid'
+            ])
             .merge()
         }
       })

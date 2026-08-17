@@ -79,7 +79,7 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
         name: `team ${uid}`,
         abbreviation: `T${uid}`,
         salary_cap: 200,
-        faab_balance: 200
+        free_agent_acquisition_budget_balance: 200
       })
     }
   })

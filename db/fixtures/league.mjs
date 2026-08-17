@@ -104,7 +104,8 @@ export default async function (knex, league_params = {}) {
       waiver_order: i,
       draft_order: i,
       salary_cap: league.salary_cap,
-      faab_balance: league.starting_faab_budget,
+      free_agent_acquisition_budget_balance:
+        league.starting_free_agent_acquisition_budget,
       division: (i % 4) + 1,
       name: `Team${i}`,
       abbreviation: `TM${i}`

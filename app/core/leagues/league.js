@@ -48,7 +48,7 @@ export const League = new Record({
   max_roster_defense_special_teams: null,
   max_roster_kicker: null,
 
-  starting_faab_budget: null,
+  starting_free_agent_acquisition_budget: null,
   salary_cap: null,
 
   // Playoff format, from the seasons row. These MUST be declared here or
@@ -174,7 +174,7 @@ export function createLeague(league_data = {}) {
     max_roster_defense_special_teams,
     max_roster_kicker,
 
-    starting_faab_budget,
+    starting_free_agent_acquisition_budget,
     salary_cap,
 
     playoff_team_count,
@@ -282,7 +282,7 @@ export function createLeague(league_data = {}) {
     max_roster_defense_special_teams,
     max_roster_kicker,
 
-    starting_faab_budget,
+    starting_free_agent_acquisition_budget,
     salary_cap,
 
     playoff_team_count,

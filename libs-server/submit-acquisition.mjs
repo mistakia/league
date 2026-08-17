@@ -63,7 +63,7 @@ export default async function ({
     .limit(1)
   const team = teams[0]
 
-  if (team.faab_balance - bid < 0) {
+  if (team.free_agent_acquisition_budget_balance - bid < 0) {
     throw new Error('exceeds available free agent auction budget')
   }
 

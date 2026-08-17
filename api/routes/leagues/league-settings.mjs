@@ -29,19 +29,19 @@
  *           items:
  *             type: string
  *           description: Season-specific configuration fields
- *           example: ["max_roster_quarterback", "max_roster_running_back", "max_roster_wide_receiver", "max_roster_tight_end", "max_roster_defense_special_teams", "max_roster_kicker", "starting_faab_budget"]
+ *           example: ["max_roster_quarterback", "max_roster_running_back", "max_roster_wide_receiver", "max_roster_tight_end", "max_roster_defense_special_teams", "max_roster_kicker", "starting_free_agent_acquisition_budget"]
  *         integer_fields:
  *           type: array
  *           items:
  *             type: string
  *           description: Fields that must be integer values
- *           example: ["number_teams", "starter_slots_quarterback", "starter_slots_running_back", "bench_slot_count", "salary_cap", "starting_faab_budget"]
+ *           example: ["number_teams", "starter_slots_quarterback", "starter_slots_running_back", "bench_slot_count", "salary_cap", "starting_free_agent_acquisition_budget"]
  *         positive_integer_fields:
  *           type: array
  *           items:
  *             type: string
  *           description: Fields that must be positive integer values
- *           example: ["starter_slots_quarterback", "starter_slots_running_back", "starter_slots_wide_receiver", "bench_slot_count", "salary_cap", "starting_faab_budget"]
+ *           example: ["starter_slots_quarterback", "starter_slots_running_back", "starter_slots_wide_receiver", "bench_slot_count", "salary_cap", "starting_free_agent_acquisition_budget"]
  *         float_fields:
  *           type: array
  *           items:
@@ -150,7 +150,7 @@
  *                   league_fields: ["name", "espn_league_id", "sleeper_league_id", "mfl_league_id", "fleaflicker_league_id"]
  *                   league_format_fields: ["number_teams", "starter_slots_quarterback", "starter_slots_running_back", "starter_slots_wide_receiver", "starter_slots_tight_end", "bench_slot_count", "practice_squad_slot_count", "reserve_short_term_limit", "salary_cap", "min_bid"]
  *                   league_scoring_format_fields: ["passing_attempts", "passing_completions", "passing_yards", "passing_touchdowns", "rushing_attempts", "rushing_yards", "rushing_touchdowns", "receptions", "receiving_yards", "receiving_touchdowns"]
- *                   season_fields: ["max_roster_quarterback", "max_roster_running_back", "max_roster_wide_receiver", "max_roster_tight_end", "max_roster_defense_special_teams", "max_roster_kicker", "starting_faab_budget"]
+ *                   season_fields: ["max_roster_quarterback", "max_roster_running_back", "max_roster_wide_receiver", "max_roster_tight_end", "max_roster_defense_special_teams", "max_roster_kicker", "starting_free_agent_acquisition_budget"]
  *                   integer_fields: ["number_teams", "starter_slots_quarterback", "starter_slots_running_back", "starter_slots_wide_receiver", "starter_slots_tight_end", "bench_slot_count", "practice_squad_slot_count", "reserve_short_term_limit", "salary_cap", "passing_attempts", "passing_completions", "passing_yards", "passing_touchdowns", "espn_league_id", "sleeper_league_id"]
  *                   positive_integer_fields: ["starter_slots_quarterback", "starter_slots_running_back", "starter_slots_wide_receiver", "starter_slots_tight_end", "bench_slot_count", "practice_squad_slot_count", "reserve_short_term_limit", "salary_cap", "min_bid", "espn_league_id", "sleeper_league_id", "mfl_league_id"]
  *                   float_fields: ["passing_attempts", "passing_completions", "passing_yards", "rushing_attempts", "rushing_yards", "receptions", "receiving_yards"]
@@ -234,7 +234,7 @@ export const season_fields = [
   'max_roster_tight_end',
   'max_roster_defense_special_teams',
   'max_roster_kicker',
-  'starting_faab_budget',
+  'starting_free_agent_acquisition_budget',
   'playoff_team_count',
   'bye_count',
   'bye_candidate_pool',
@@ -273,7 +273,7 @@ export const integer_fields = [
   'max_roster_tight_end',
   'max_roster_defense_special_teams',
   'max_roster_kicker',
-  'starting_faab_budget',
+  'starting_free_agent_acquisition_budget',
   'playoff_team_count',
   'bye_count',
   'head_to_head_berth_count',
@@ -307,7 +307,7 @@ export const positive_integer_fields = [
   'max_roster_tight_end',
   'max_roster_defense_special_teams',
   'max_roster_kicker',
-  'starting_faab_budget',
+  'starting_free_agent_acquisition_budget',
   'playoff_team_count',
   'salary_cap',
   'min_bid',

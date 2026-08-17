@@ -38,7 +38,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     max_roster_tight_end: 0,
     max_roster_defense_special_teams: 3,
     max_roster_kicker: 3,
-    starting_faab_budget: 200,
+    starting_free_agent_acquisition_budget: 200,
     salary_cap: 200,
     passing_attempts: 0.0,
     passing_completions: 0.0,

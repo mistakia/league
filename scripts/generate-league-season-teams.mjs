@@ -91,7 +91,8 @@ const generate_league_season_teams = async ({
       waiver_order: i + 1,
       draft_order: i + 1,
       salary_cap: league.salary_cap,
-      faab_balance: league.starting_faab_budget
+      free_agent_acquisition_budget_balance:
+        league.starting_free_agent_acquisition_budget
     })
 
     // Get user associations for this team from previous year

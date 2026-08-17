@@ -855,7 +855,7 @@ router.put('/:waiverId', async (req, res) => {
     const waiver = waivers[0]
 
     // if bid - make sure it is below available faab
-    if (bid > team.faab_balance) {
+    if (bid > team.free_agent_acquisition_budget_balance) {
       return res.status(400).send({ error: 'bid exceeds available faab' })
     }
 

@@ -64,7 +64,7 @@ const import_rts_adp = async ({
   for (const { url, ranking_type } of adp_types) {
     const players = await fetch_rts_data(url)
 
-    const adp_format_id = await find_or_create_adp_format(
+    const average_draft_position_format_id = await find_or_create_adp_format(
       db,
       adp_format.decode_adp_type(ranking_type)
     )
@@ -97,11 +97,11 @@ const import_rts_adp = async ({
           average_draft_position: Number(player.avg),
           min_pick: null,
           max_pick: null,
-          std_dev: null,
+          standard_deviation: null,
           sample_size: null,
           percent_drafted: null,
           source_id: 'RTS',
-          adp_format_id
+          average_draft_position_format_id
         })
       } else {
         unmatched_players.push(player)
@@ -153,11 +153,11 @@ const import_rts_adp = async ({
           average_draft_position: Number(player.avg),
           min_pick: null,
           max_pick: null,
-          std_dev: null,
+          standard_deviation: null,
           sample_size: null,
           percent_drafted: null,
           source_id: 'RTS',
-          adp_format_id
+          average_draft_position_format_id
         })
       } else {
         log(
@@ -182,7 +182,12 @@ const import_rts_adp = async ({
         save: async (batch) => {
           await db('player_adp_index')
             .insert(batch)
-            .onConflict(['season_year', 'source_id', 'adp_format_id', 'pid'])
+            .onConflict([
+              'season_year',
+              'source_id',
+              'average_draft_position_format_id',
+              'pid'
+            ])
             .merge()
         }
       })

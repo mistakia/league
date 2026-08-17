@@ -32,7 +32,7 @@ export default function LeagueSettingsGeneral({
       />
       <EditableLeagueField
         label='FAAB Budget'
-        field='starting_faab_budget'
+        field='starting_free_agent_acquisition_budget'
         type='int'
         max={1000000}
         min={0}

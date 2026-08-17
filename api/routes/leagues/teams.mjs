@@ -274,7 +274,7 @@ const router = express.Router({
  *                       waiver_order: 5
  *                       draft_order: 3
  *                       salary_cap: 200
- *                       faab_balance: 150
+ *                       free_agent_acquisition_budget_balance: 150
  *                       primary_color: null
  *                       accent_color: null
  *                       playoff_odds: 0.85
@@ -459,7 +459,7 @@ router.get('/?', async (req, res) => {
  *                     waiver_order: 5
  *                     draft_order: 5
  *                     salary_cap: 200
- *                     faab_balance: 200
+ *                     free_agent_acquisition_budget_balance: 200
  *                     lid: 2
  *                   roster:
  *                     uid: 1234
@@ -531,7 +531,8 @@ router.post('/?', async (req, res) => {
       waiver_order: count,
       draft_order: count,
       salary_cap: league.salary_cap,
-      faab_balance: league.starting_faab_budget,
+      free_agent_acquisition_budget_balance:
+        league.starting_free_agent_acquisition_budget,
       lid: leagueId
     }
 

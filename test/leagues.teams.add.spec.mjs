@@ -58,7 +58,7 @@ describe('API /leagues/teams - add', function () {
       res.body.team.waiver_order.should.equal(1)
       res.body.team.draft_order.should.equal(1)
       res.body.team.salary_cap.should.equal(200)
-      res.body.team.faab_balance.should.equal(200)
+      res.body.team.free_agent_acquisition_budget_balance.should.equal(200)
       res.body.team.lid.should.equal(leagueId)
 
       const teams = await knex('teams').where({

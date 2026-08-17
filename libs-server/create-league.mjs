@@ -67,7 +67,8 @@ export default async function ({ lid, commishid, ...params } = {}) {
       league_params.max_roster_defense_special_teams,
     max_roster_kicker: league_params.max_roster_kicker,
 
-    starting_faab_budget: league_params.starting_faab_budget,
+    starting_free_agent_acquisition_budget:
+      league_params.starting_free_agent_acquisition_budget,
 
     franchise_tag_limit: league_params.franchise_tag_limit,
     rookie_tag_limit: league_params.rookie_tag_limit,

@@ -105,7 +105,7 @@ These definitions are defined in each schema's `definitions` section and ensure 
       "division": "string|null", // Division name if applicable
       "draft_position": "number|null", // Draft position
       "waiver_priority": "number|null", // Current waiver priority
-      "faab_balance": "number|null" // Remaining FAAB budget
+      "free_agent_acquisition_budget_balance": "number|null" // Remaining FAAB budget
     }
   ],
   "platform_data": "object" // Original platform data for reference

@@ -320,7 +320,7 @@
       "max_roster_tight_end": "keep",
       "max_roster_defense_special_teams": "keep",
       "max_roster_kicker": "keep",
-      "starting_faab_budget": "keep",
+      "starting_free_agent_acquisition_budget": "keep",
       "franchise_tag_limit": "keep",
       "rookie_tag_limit": "keep",
       "restricted_free_agency_tag_limit": "keep",
@@ -361,7 +361,7 @@
       "waiver_order": "keep",
       "draft_order": "keep",
       "salary_cap": "keep",
-      "faab_balance": "keep",
+      "free_agent_acquisition_budget_balance": "keep",
       "primary_color": "keep",
       "accent_color": "keep"
     },

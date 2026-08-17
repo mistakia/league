@@ -99,7 +99,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       })
 
       // verify team faab budget
-      expect(team1.faab_balance).to.equal(200 - value)
+      expect(team1.free_agent_acquisition_budget_balance).to.equal(200 - value)
     })
 
     it('process multiple faab waivers', async () => {

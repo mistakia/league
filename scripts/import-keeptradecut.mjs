@@ -520,7 +520,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
             db('keeptradecut_liquidity')
               .insert(batch)
               .onConflict(['pid', 'is_superflex', 'observed_at'])
-              .merge(['raw_liquidity', 'std_liquidity', 'trade_count'])
+              .merge(['raw_liquidity', 'standardized_liquidity', 'trade_count'])
         })
       }
     }

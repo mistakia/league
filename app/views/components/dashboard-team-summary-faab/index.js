@@ -9,7 +9,11 @@ const map_state_to_props = createSelector(
   get_teams_for_current_league,
   (teams) => {
     const list = teams.toList()
-    const sorted = list.sort((a, b) => b.faab_balance - a.faab_balance)
+    const sorted = list.sort(
+      (a, b) =>
+        b.free_agent_acquisition_budget_balance -
+        a.free_agent_acquisition_budget_balance
+    )
     return { teams: sorted }
   }
 )

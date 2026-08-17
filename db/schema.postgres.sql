@@ -2107,12 +2107,12 @@ CREATE TABLE public.composite_market_value_blend_weights (
     format_category smallint,
     effective_from date NOT NULL,
     ktc_weight numeric(4,3) NOT NULL,
-    adp_weight numeric(4,3) NOT NULL,
+    average_draft_position_weight numeric(4,3) NOT NULL,
     rankings_weight numeric(4,3) NOT NULL,
     props_weight numeric(4,3) NOT NULL,
     draft_pick_model_weight numeric(4,3) NOT NULL,
     notes text,
-    CONSTRAINT cmv_weights_sum_one CHECK ((abs((((((ktc_weight + adp_weight) + rankings_weight) + props_weight) + draft_pick_model_weight) - 1.000)) < 0.005))
+    CONSTRAINT cmv_weights_sum_one CHECK ((abs((((((ktc_weight + average_draft_position_weight) + rankings_weight) + props_weight) + draft_pick_model_weight) - 1.000)) < 0.005))
 );
 
 
@@ -2187,7 +2187,7 @@ CREATE TABLE public.composite_market_value_daily (
     pick_original_owner_tid integer,
     date date NOT NULL,
     ktc_value numeric(8,1),
-    adp_value numeric(8,1),
+    average_draft_position_value numeric(8,1),
     rankings_value numeric(8,1),
     props_value numeric(8,1),
     draft_pick_model_value numeric(8,1),
@@ -3270,9 +3270,9 @@ CREATE TABLE public.external_league_trade_legs (
     pick_season_year smallint,
     pick_round smallint,
     pick_original_roster_id smallint,
-    faab_amount integer,
+    free_agent_acquisition_budget_amount integer,
     CONSTRAINT external_league_trade_legs_leg_type_check CHECK (((leg_type)::text = ANY ((ARRAY['player'::character varying, 'pick'::character varying, 'faab'::character varying])::text[]))),
-    CONSTRAINT external_league_trade_legs_payload_check CHECK (((((leg_type)::text = 'player'::text) AND (external_player_id IS NOT NULL) AND (pick_round IS NULL) AND (faab_amount IS NULL)) OR (((leg_type)::text = 'pick'::text) AND (pick_season_year IS NOT NULL) AND (pick_round IS NOT NULL) AND (external_player_id IS NULL) AND (pid IS NULL) AND (faab_amount IS NULL)) OR (((leg_type)::text = 'faab'::text) AND (faab_amount IS NOT NULL) AND (external_player_id IS NULL) AND (pid IS NULL) AND (pick_round IS NULL))))
+    CONSTRAINT external_league_trade_legs_payload_check CHECK (((((leg_type)::text = 'player'::text) AND (external_player_id IS NOT NULL) AND (pick_round IS NULL) AND (free_agent_acquisition_budget_amount IS NULL)) OR (((leg_type)::text = 'pick'::text) AND (pick_season_year IS NOT NULL) AND (pick_round IS NOT NULL) AND (external_player_id IS NULL) AND (pid IS NULL) AND (free_agent_acquisition_budget_amount IS NULL)) OR (((leg_type)::text = 'faab'::text) AND (free_agent_acquisition_budget_amount IS NOT NULL) AND (external_player_id IS NULL) AND (pid IS NULL) AND (pick_round IS NULL))))
 );
 
 
@@ -3408,7 +3408,7 @@ CREATE TABLE public.format_category_signal_mapping (
     ktc_quarterback_axis smallint NOT NULL,
     ranking_type text NOT NULL,
     props_scoring_formula_template text,
-    adp_format_id text
+    average_draft_position_format_id text
 );
 
 
@@ -4037,7 +4037,7 @@ CREATE TABLE public.keeptradecut_liquidity (
     is_superflex boolean NOT NULL,
     observed_at timestamp with time zone NOT NULL,
     raw_liquidity numeric NOT NULL,
-    std_liquidity numeric NOT NULL,
+    standardized_liquidity numeric NOT NULL,
     trade_count integer NOT NULL
 );
 
@@ -20062,12 +20062,12 @@ CREATE TABLE public.player_adp_history (
     average_draft_position numeric(5,2),
     min_pick integer,
     max_pick integer,
-    std_dev numeric(5,2),
+    standard_deviation numeric(5,2),
     sample_size integer,
     percent_drafted numeric(5,2),
     observed_at timestamp with time zone NOT NULL,
     source_id public.adp_source_id,
-    adp_format_id text NOT NULL,
+    average_draft_position_format_id text NOT NULL,
     CONSTRAINT player_adp_history_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -20090,11 +20090,11 @@ CREATE TABLE public.player_adp_index (
     average_draft_position numeric(5,2),
     min_pick integer,
     max_pick integer,
-    std_dev numeric(5,2),
+    standard_deviation numeric(5,2),
     sample_size integer,
     percent_drafted numeric(5,2),
     source_id public.adp_source_id NOT NULL,
-    adp_format_id text NOT NULL,
+    average_draft_position_format_id text NOT NULL,
     CONSTRAINT player_adp_index_pos_vocabulary CHECK (((player_position IS NULL) OR ((player_position)::text = ANY ((ARRAY['QB'::character varying, 'RB'::character varying, 'FB'::character varying, 'WR'::character varying, 'TE'::character varying, 'OL'::character varying, 'T'::character varying, 'G'::character varying, 'C'::character varying, 'DL'::character varying, 'DE'::character varying, 'DT'::character varying, 'NT'::character varying, 'EDGE'::character varying, 'LB'::character varying, 'OLB'::character varying, 'ILB'::character varying, 'MLB'::character varying, 'DB'::character varying, 'CB'::character varying, 'S'::character varying, 'K'::character varying, 'P'::character varying, 'LS'::character varying, 'DST'::character varying])::text[]))))
 );
 
@@ -20128,10 +20128,10 @@ COMMENT ON COLUMN public.player_adp_index.max_pick IS 'Latest draft position obs
 
 
 --
--- Name: COLUMN player_adp_index.std_dev; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player_adp_index.standard_deviation; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player_adp_index.std_dev IS 'Standard deviation of draft positions';
+COMMENT ON COLUMN public.player_adp_index.standard_deviation IS 'Standard deviation of draft positions';
 
 
 --
@@ -26854,7 +26854,7 @@ CREATE TABLE public.seasons (
     max_roster_tight_end smallint NOT NULL,
     max_roster_defense_special_teams smallint NOT NULL,
     max_roster_kicker smallint NOT NULL,
-    starting_faab_budget integer NOT NULL,
+    starting_free_agent_acquisition_budget integer NOT NULL,
     franchise_tag_limit smallint DEFAULT '1'::smallint NOT NULL,
     rookie_tag_limit smallint DEFAULT '1'::smallint NOT NULL,
     restricted_free_agency_tag_limit smallint DEFAULT '2'::smallint NOT NULL,
@@ -27143,7 +27143,7 @@ CREATE TABLE public.teams (
     waiver_order smallint,
     draft_order smallint,
     salary_cap integer DEFAULT 0 NOT NULL,
-    faab_balance integer DEFAULT 0 NOT NULL,
+    free_agent_acquisition_budget_balance integer DEFAULT 0 NOT NULL,
     primary_color character varying(6),
     accent_color character varying(6)
 );
@@ -29488,7 +29488,7 @@ ALTER TABLE ONLY public.play_changelog
 --
 
 ALTER TABLE ONLY public.player_adp_index
-    ADD CONSTRAINT player_adp_index_unique UNIQUE (season_year, source_id, adp_format_id, pid);
+    ADD CONSTRAINT player_adp_index_unique UNIQUE (season_year, source_id, average_draft_position_format_id, pid);
 
 
 --
@@ -31831,7 +31831,7 @@ CREATE INDEX idx_player_adp_history_pid ON public.player_adp_history USING btree
 -- Name: idx_player_adp_history_source_format; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_adp_history_source_format ON public.player_adp_history USING btree (source_id, adp_format_id);
+CREATE INDEX idx_player_adp_history_source_format ON public.player_adp_history USING btree (source_id, average_draft_position_format_id);
 
 
 --
@@ -31852,7 +31852,7 @@ CREATE INDEX idx_player_adp_index_season_year ON public.player_adp_index USING b
 -- Name: idx_player_adp_index_source_format; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_player_adp_index_source_format ON public.player_adp_index USING btree (source_id, adp_format_id);
+CREATE INDEX idx_player_adp_index_source_format ON public.player_adp_index USING btree (source_id, average_draft_position_format_id);
 
 
 --
@@ -57836,7 +57836,7 @@ ALTER TABLE ONLY public.selection_combination_odds_index
 --
 
 ALTER TABLE ONLY public.format_category_signal_mapping
-    ADD CONSTRAINT format_category_signal_mapping_adp_format_id_fkey FOREIGN KEY (adp_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
+    ADD CONSTRAINT format_category_signal_mapping_adp_format_id_fkey FOREIGN KEY (average_draft_position_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
 
 
 --
@@ -57964,7 +57964,7 @@ ALTER TABLE ONLY public.ngs_prospect_scores_index
 --
 
 ALTER TABLE ONLY public.player_adp_history
-    ADD CONSTRAINT player_adp_history_adp_format_id_fkey FOREIGN KEY (adp_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
+    ADD CONSTRAINT player_adp_history_adp_format_id_fkey FOREIGN KEY (average_draft_position_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
 
 
 --
@@ -57972,7 +57972,7 @@ ALTER TABLE ONLY public.player_adp_history
 --
 
 ALTER TABLE ONLY public.player_adp_index
-    ADD CONSTRAINT player_adp_index_adp_format_id_fkey FOREIGN KEY (adp_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
+    ADD CONSTRAINT player_adp_index_adp_format_id_fkey FOREIGN KEY (average_draft_position_format_id) REFERENCES public.adp_format(id) ON UPDATE CASCADE;
 
 
 --

@@ -226,10 +226,12 @@ const handle_tied_waivers = async (waiver) => {
 }
 
 const update_team_budget = async (team_id, bid) => {
-  await db('teams').decrement('faab_balance', bid).where({
-    uid: team_id,
-    season_year: current_season.year
-  })
+  await db('teams')
+    .decrement('free_agent_acquisition_budget_balance', bid)
+    .where({
+      uid: team_id,
+      season_year: current_season.year
+    })
 }
 
 const cancel_other_pending_waivers = async (lid, pid, waiver_id, timestamp) => {

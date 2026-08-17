@@ -341,7 +341,7 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
       })
 
       const faab = result.legs.find((l) => l.leg_type === 'faab')
-      expect(faab.faab_amount).to.equal(15)
+      expect(faab.free_agent_acquisition_budget_amount).to.equal(15)
       expect(faab.from_roster_id).to.equal(1)
       expect(faab.to_roster_id).to.equal(2)
     })

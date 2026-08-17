@@ -157,7 +157,7 @@ export default async function generate_team_context({
             : `Cap space (${year})`,
           `$${roster.availableCap} of $${league.salary_cap}`
         ],
-        ['FAAB remaining', `$${team.faab_balance}`]
+        ['FAAB remaining', `$${team.free_agent_acquisition_budget_balance}`]
       ]
     )
   ])

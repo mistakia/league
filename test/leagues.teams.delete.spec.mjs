@@ -150,7 +150,7 @@ describe('API /leagues/teams - delete', function () {
           name: 'Team1',
           abbreviation: 'TM1',
           salary_cap: 200,
-          faab_balance: 200
+          free_agent_acquisition_budget_balance: 200
         })
         .returning('uid')
 

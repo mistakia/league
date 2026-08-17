@@ -24,7 +24,7 @@ const router = express.Router()
  *           minimum: 0
  *           description: Salary cap limit
  *           example: 200
- *         starting_faab_budget:
+ *         starting_free_agent_acquisition_budget:
  *           type: integer
  *           minimum: 0
  *           description: Free agent acquisition budget
@@ -141,7 +141,7 @@ const router = express.Router()
  *           type: integer
  *           minimum: 0
  *           description: Salary cap limit
- *         starting_faab_budget:
+ *         starting_free_agent_acquisition_budget:
  *           type: integer
  *           minimum: 0
  *           description: Free agent acquisition budget
@@ -209,7 +209,7 @@ const router = express.Router()
  *                   name: "Dynasty Warriors League"
  *                   number_teams: 12
  *                   salary_cap: 200
- *                   starting_faab_budget: 100
+ *                   starting_free_agent_acquisition_budget: 100
  *                   starter_slots_quarterback: 1
  *                   starter_slots_running_back: 2
  *                   starter_slots_wide_receiver: 2
@@ -304,7 +304,7 @@ const router = express.Router()
  *               summary: Update financial settings
  *               value:
  *                 salary_cap: 250
- *                 starting_faab_budget: 150
+ *                 starting_free_agent_acquisition_budget: 150
  *     responses:
  *       200:
  *         description: League settings updated successfully

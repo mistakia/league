@@ -114,7 +114,10 @@ export default async function generate_league_rules({
       ['Setting', 'Value'],
       [
         ['Salary cap', `$${league.salary_cap}`],
-        ['Free agency budget (FAAB)', `$${league.starting_faab_budget}`],
+        [
+          'Free agency budget (FAAB)',
+          `$${league.starting_free_agent_acquisition_budget}`
+        ],
         ['Minimum bid', `$${league.min_bid}`],
         [
           'Salary attribution rule',

@@ -81,7 +81,7 @@ const tuple = ({
 // decode to duration=DYNASTY with draft_pool=ROOKIE (distinguishing them from
 // the *_DYNASTY types, which keep draft_pool=ALL). This map is injective:
 // distinct literals decode to distinct tuples, so the narrowed unique
-// constraint (year, source_id, adp_format_id, pid) cannot collapse rows.
+// constraint (year, source_id, average_draft_position_format_id, pid) cannot collapse rows.
 export const ADP_TYPE_DECODE_MAP = Object.freeze({
   STANDARD_REDRAFT: tuple({
     scoring_class: 'STANDARD',

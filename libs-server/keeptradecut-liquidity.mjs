@@ -151,14 +151,14 @@ export const build_liquidity_inserts = ({
     if (!values) continue
 
     const raw_liquidity = Number(values.rawLiquidity)
-    const std_liquidity = Number(values.stdLiquidity)
+    const standardized_liquidity = Number(values.stdLiquidity)
     const trade_count = Number(values.tradeCount)
 
     // absent fields arrive as undefined; writing them as 0 would fabricate a
     // measurement, so skip the row entirely
     if (
       !Number.isFinite(raw_liquidity) ||
-      !Number.isFinite(std_liquidity) ||
+      !Number.isFinite(standardized_liquidity) ||
       !Number.isFinite(trade_count)
     ) {
       continue
@@ -169,7 +169,7 @@ export const build_liquidity_inserts = ({
       is_superflex,
       observed_at,
       raw_liquidity,
-      std_liquidity,
+      standardized_liquidity,
       trade_count
     })
   }

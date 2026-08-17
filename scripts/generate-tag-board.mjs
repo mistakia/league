@@ -35,7 +35,13 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
   }
 
   const teams = await db('teams')
-    .select('uid', 'name', 'salary_cap', 'faab_balance', 'draft_order')
+    .select(
+      'uid',
+      'name',
+      'salary_cap',
+      'free_agent_acquisition_budget_balance',
+      'draft_order'
+    )
     .where({ lid, season_year: year })
     .orderBy('uid')
 

@@ -503,7 +503,7 @@ const options = {
               description: 'Salary cap',
               example: 200
             },
-            starting_faab_budget: {
+            starting_free_agent_acquisition_budget: {
               type: 'integer',
               description: 'Free Agent Acquisition Budget',
               example: 200
@@ -568,7 +568,7 @@ const options = {
               description: 'Fantasy team salary cap',
               example: 200
             },
-            faab_balance: {
+            free_agent_acquisition_budget_balance: {
               type: 'integer',
               description: 'Free Agent Acquisition Budget remaining',
               example: 150
@@ -3227,7 +3227,7 @@ const options = {
               description: 'Salary cap limit',
               example: 200
             },
-            starting_faab_budget: {
+            starting_free_agent_acquisition_budget: {
               type: 'integer',
               minimum: 0,
               description: 'Free agent acquisition budget',
@@ -3370,7 +3370,7 @@ const options = {
               minimum: 0,
               description: 'Salary cap limit'
             },
-            starting_faab_budget: {
+            starting_free_agent_acquisition_budget: {
               type: 'integer',
               minimum: 0,
               description: 'Free agent acquisition budget'

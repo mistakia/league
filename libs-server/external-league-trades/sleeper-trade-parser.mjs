@@ -364,7 +364,7 @@ export const parse_sleeper_trade = ({
       pick_season_year: null,
       pick_round: null,
       pick_original_roster_id: null,
-      faab_amount: null
+      free_agent_acquisition_budget_amount: null
     })
   }
 
@@ -382,7 +382,7 @@ export const parse_sleeper_trade = ({
       pick_season_year: Number(pick.season),
       pick_round: pick.round,
       pick_original_roster_id: pick.roster_id ?? null,
-      faab_amount: null
+      free_agent_acquisition_budget_amount: null
     })
   }
 
@@ -397,7 +397,7 @@ export const parse_sleeper_trade = ({
       pick_season_year: null,
       pick_round: null,
       pick_original_roster_id: null,
-      faab_amount: budget.amount
+      free_agent_acquisition_budget_amount: budget.amount
     })
   }
 
