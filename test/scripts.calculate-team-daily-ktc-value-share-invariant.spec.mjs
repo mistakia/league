@@ -208,6 +208,17 @@ describe('SCRIPTS - calculate team daily ktc value - share invariant', function 
   })
 
   it('reports no shortfall on a run whose every day balances', async function () {
+    // The two players added on `boundary_date` and `last_date` are unranked in
+    // the shared fixture, which the coverage oracle reads as a partial
+    // keeptradecut import once the replay emits the final transaction's own
+    // day. Rank them here so this test's run is fully covered — its subject is
+    // the SHARE invariant, and an unrelated coverage shortfall would mask it.
+    for (const pid of ['PLAY-THRE-000003', 'PLAY-FOUR-000004']) {
+      for (const date of [first_date, boundary_date, last_date]) {
+        await insert_keeptradecut_valuation({ pid, date })
+      }
+    }
+
     // The share oracle reads the table back, so it is the run's own verdict on
     // the invariant the two tests above assert row by row. It cannot be driven
     // red from a test -- the run owns every row for the league, so a row written

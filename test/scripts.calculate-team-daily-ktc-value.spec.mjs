@@ -237,6 +237,29 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
         share_total.should.be.closeTo(1, 1e-4)
       }
     })
+
+    it('emits the final transaction own day', async function () {
+      // The replay emits a day only on a date TRANSITION, so the last date it
+      // sees has nothing following it to trigger the emission. Left unflushed,
+      // the newest written day trails the last transaction by one — which is
+      // what desynchronized the trailing-gap filler (anchored on the last
+      // transaction) from the staleness oracle (anchored on max(date)) and
+      // fired signal #125844 as a false alarm. day_three carries the fixture's
+      // last transaction, so it is the day that used to go missing.
+      await calculate_team_daily_ktc_value({ lid })
+
+      const rows = await get_rows(day_three)
+      rows.length.should.equal(
+        3,
+        'the last transaction own day was not emitted'
+      )
+
+      const max_date = await knex('league_team_daily_values')
+        .where({ lid })
+        .max('date as max_date')
+        .first()
+      dayjs(max_date.max_date).format('YYYY-MM-DD').should.equal(day_three)
+    })
   })
 
   describe('absent teams', function () {
