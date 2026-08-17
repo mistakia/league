@@ -132,8 +132,13 @@ const SPEC_BOUNDS = {
   updated_by_sleeper_id_floor: 0,
   skipped_exists_floor: 0,
   skipped_exists_ceiling: 1000,
+  skipped_unknown_floor: 0,
   skipped_unknown_ceiling: 1000,
-  created_ceiling: 1000
+  created_ceiling: 1000,
+  // Neutralised for the same reason as the rest: at spec scale one added
+  // no-position fixture crosses the shipped 10% ratio, so leaving it live would
+  // turn a behaviour test red on an unrelated fixture edit.
+  unusable_entry_ceiling_ratio: 1
 }
 
 const spec_run = ({ payload_floor = 1, bounds = {} } = {}) =>
@@ -691,6 +696,65 @@ describe('SCRIPTS import-players-sleeper', function () {
       })
 
       expect(shortfall.split(' | ').length).to.be.greaterThan(2)
+    })
+
+    it('raises a shortfall when skipped_unknown falls BELOW its floor', async function () {
+      /*
+        The unknown buckets are where the resolver refuses instead of creating,
+        so a regression collapsing any unknown rung toward `new` mints duplicate
+        people. A ceiling alone cannot see that -- turning rung 6 back into a
+        create sends skipped_unknown DOWN while skipped_exists holds and created
+        stays well under its ceiling, so every other bound reads green.
+      */
+      stub_payload([
+        ...injury_filler(),
+        sleeper_item({
+          sleeper_id: next_sleeper_id(),
+          first_name: 'Nounknown',
+          last_name: next_fixture_name('Bucket'),
+          birth_date: '2003-03-03',
+          rookie_year: '2026'
+        })
+      ])
+
+      const { shortfall, counts } = await spec_run({
+        bounds: { skipped_unknown_floor: 1 }
+      })
+
+      expect(counts.skipped_unknown).to.equal(0)
+      expect(shortfall).to.be.a('string')
+      expect(shortfall).to.include('could not adjudicate')
+      expect(shortfall).to.include('outside the expected')
+    })
+
+    it('MERGES a partial bounds override onto the defaults rather than replacing them', async function () {
+      /*
+        `bounds = DEFAULT_BOUNDS` as a default parameter only fires when the whole
+        object is absent, so overriding ONE knob used to leave every other bound
+        `undefined` -- and both `x < undefined` and `x > undefined` are false, so
+        each unnamed check became unfireable while reading green. Driven through
+        run() directly, NOT spec_run, because spec_run spreads a full object and
+        so cannot see this.
+      */
+      stub_payload([
+        sleeper_item({
+          sleeper_id: next_sleeper_id(),
+          first_name: 'Partial',
+          last_name: next_fixture_name('Bounds'),
+          birth_date: '2004-04-04',
+          rookie_year: '2026'
+        })
+      ])
+
+      const { shortfall } = await run({
+        payload_floor: 1,
+        bounds: { created_ceiling: 1000 }
+      })
+
+      // skipped_exists is 0 and unnamed by the override, so it must still be
+      // judged against the shipped floor of 50.
+      expect(shortfall).to.be.a('string')
+      expect(shortfall).to.include('existence check resolved')
     })
   })
 })

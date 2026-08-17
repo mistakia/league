@@ -201,8 +201,12 @@ JOB_PROJECT=league
 ## 3:30am daily plus game-day 12:15/17:10/20:00 in-season.  Mirrors Sleeper cadence.
 ## DISABLED 2026-06-20 pending NFL /v3/shield restoration: upstream returns HTTP 500
 ## "Fastly error: unknown domain shield-jarvis-api.nfl.com" (CDN backend deregistered).
-## Player rows stay covered by import-players-sleeper + nflverse. Gated re-enable/teardown:
-## see user:task/league/retire-or-reenable-nfl-shield-player-import.md
+## The redundancy claim made here at disable time was FALSE: import-players-sleeper's
+## create path was already broken (it passed a renamed-away `start` key into createPlayer
+## and raised 42703 on every creation), and import-players-nflverse calls createPlayer
+## zero times.  So disabling this left ZERO working scheduled creators, not one.  Sleeper's
+## create path was repaired 2026-08-17 and is now the only scheduled creator of player rows.
+## Gated re-enable/teardown: see user:task/league/retire-or-reenable-nfl-shield-player-import.md
 # 30 3 * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1
 # 15 12 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1
 # 10 17 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/import-players-nfl.mjs >> /var/log/league/import-players-nfl.log 2>&1

@@ -65,21 +65,25 @@ export const DEFAULT_BOUNDS = {
   updated_by_sleeper_id_floor: 8_500,
   skipped_exists_floor: 50,
   skipped_exists_ceiling: 120,
+  skipped_unknown_floor: 10,
   skipped_unknown_ceiling: 40,
-  created_ceiling: 550
+  created_ceiling: 550,
+  unusable_entry_ceiling_ratio: 0.1
 }
-
-export const UNUSABLE_ENTRY_CEILING_RATIO = 0.1
-export const UPDATED_BY_SLEEPER_ID_FLOOR = 8_500
-export const SKIPPED_EXISTS_FLOOR = 50
-export const SKIPPED_EXISTS_CEILING = 120
-export const SKIPPED_UNKNOWN_CEILING = 40
-export const CREATED_CEILING = 550
 
 const run = async ({
   payload_floor = DEFAULT_PAYLOAD_FLOOR,
-  bounds = DEFAULT_BOUNDS
+  bounds: bounds_override = {}
 } = {}) => {
+  /*
+    MERGED, not substituted. `bounds = DEFAULT_BOUNDS` as a default parameter
+    only fires when the whole object is absent, so a caller overriding ONE knob
+    left every other bound `undefined` -- and both `x < undefined` and
+    `x > undefined` evaluate false, so each unnamed check became unfireable and
+    read as green. That is the same fails-silently shape this oracle exists to
+    remove, one layer down in its own plumbing.
+  */
+  const bounds = { ...DEFAULT_BOUNDS, ...bounds_override }
   const URL = 'https://api.sleeper.app/v1/players/nfl'
   // use_proxy: false -- Sleeper documents this as a public bulk-polling
   // endpoint (no auth, no per-IP restriction called out), unlike the
@@ -492,9 +496,9 @@ const run = async ({
   const unusable_ratio = counts.considered
     ? counts.skipped_no_name_or_pos / counts.considered
     : 0
-  if (unusable_ratio > UNUSABLE_ENTRY_CEILING_RATIO) {
+  if (unusable_ratio > bounds.unusable_entry_ceiling_ratio) {
     shortfalls.push(
-      `Sleeper payload arrived at ${counts.considered} entries but ${counts.skipped_no_name_or_pos} carry no name or position (${(unusable_ratio * 100).toFixed(1)}%, ceiling ${UNUSABLE_ENTRY_CEILING_RATIO * 100}%) -- the payload is full but its contents are degraded`
+      `Sleeper payload arrived at ${counts.considered} entries but ${counts.skipped_no_name_or_pos} carry no name or position (${(unusable_ratio * 100).toFixed(1)}%, ceiling ${bounds.unusable_entry_ceiling_ratio * 100}%) -- the payload is full but its contents are degraded`
     )
   }
 
@@ -521,9 +525,22 @@ const run = async ({
     )
   }
 
-  if (counts.skipped_unknown > bounds.skipped_unknown_ceiling) {
+  /*
+    Bounded in BOTH directions for the same reason skipped_exists is, and the
+    FLOOR is again the one that matters. The unknown buckets are where the
+    resolver refuses rather than creates, so a regression collapsing any unknown
+    rung toward `new` mints duplicate people -- and it does so with every other
+    bound green. Turning rung 6 (BIRTH_DATES_DIFFER) back into a create, the
+    exact design resolve-canonical-player records as tried and rejected, reads
+    skipped_unknown 26 -> ~10, created ~0 -> ~16 and skipped_exists unmoved at
+    83: inside 50-120, under the 40 ceiling, under the 550 ceiling. Silent.
+  */
+  if (
+    counts.skipped_unknown < bounds.skipped_unknown_floor ||
+    counts.skipped_unknown > bounds.skipped_unknown_ceiling
+  ) {
     shortfalls.push(
-      `Sleeper existence check could not adjudicate ${counts.skipped_unknown} candidates, above the expected ceiling of ${bounds.skipped_unknown_ceiling}`
+      `Sleeper existence check could not adjudicate ${counts.skipped_unknown} candidates, outside the expected ${bounds.skipped_unknown_floor}-${bounds.skipped_unknown_ceiling} -- a refusal rung has moved in one direction or the other`
     )
   }
 

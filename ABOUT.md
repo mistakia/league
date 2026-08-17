@@ -649,12 +649,18 @@ observations:
     source-scan spec that requires the symbol to be READ: landing.js lost league_season_phrase that
     way and turned master red on libs-shared.social-meta-copy, so check for a spec asserting the
     symbol before removing it rather than after.
+  - >-
+    [decision] 2026-08-17 The sleeper importer create path is repaired in league 87a6cc39a: it named
+    a renamed-away start column and raised Postgres 42703 on every creation since 2025-06-16, so no
+    scheduled job created a player row while report_job recorded success — the fix names
+    nfl_draft_year, adds a skip-only resolve_canonical_player whose only power is to refuse a
+    create, and gives the run a disposition partition with bounds in both directions.
 public_read: false
 relations:
   - follows [[user:guideline/directory-markdown-standards.md]]
 tags:
   - user:tag/league-xo-football.md
-updated_at: '2026-08-16T05:21:34.923Z'
+updated_at: '2026-08-17T15:41:30.410Z'
 user_public_key: 10ba842b1307fd60475b887df61ccc7e697970a2d222e7cbf011e51f5de3349b
 ---
 
