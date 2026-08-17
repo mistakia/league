@@ -206,7 +206,12 @@ const seed_full_league = async () => {
         .toDate(),
       free_agency_period_end: t.subtract(2, 'weeks').toDate(),
       restricted_free_agency_period_start: t.subtract(4, 'weeks').toDate(),
+      restricted_free_agency_first_window_at: t
+        .subtract(4, 'weeks')
+        .add(21, 'hours')
+        .toDate(),
       restricted_free_agency_period_end: t.subtract(3, 'weeks').toDate(),
+      rookie_draft_end_at: t.subtract(1, 'weeks').toDate(),
       season_finalized_at: t.add(20, 'weeks').toDate(),
       wildcard_round: 15,
       championship_round: [16, 17]
@@ -376,21 +381,27 @@ describe('context documents', function () {
       const doc = await generate_league_schedule({ db: knex, lid: 1, base_url })
       parse_frontmatter(doc).type.should.equal('league_schedule')
 
+      // Anchored on the whole table cell (`| <label> |`) rather than a bare
+      // substring: 'Rookie Draft' is a prefix of 'Rookie Draft Begins' and of
+      // 'Rookie Draft Ends', so a substring assertion passes over a renamed or
+      // missing label and cannot tell the draft's start from its end.
       const expected_events = [
         'Season Begins',
-        'Rookie Draft',
+        'Rookie Draft Begins',
+        'Rookie Draft Ends',
         'Extension Deadline',
         'Free Agency Period Begins',
         'Free Agency Live Auction',
         'Free Agency Auction Ends',
         'Free Agency Period Ends',
         'Restricted Free Agency Begins',
+        'Restricted Free Agency First Window Opens',
         'Restricted Free Agency Ends',
         'Trade Deadline',
         'Season Finalized'
       ]
       for (const event of expected_events) {
-        doc.should.include(event)
+        doc.should.include(`| ${event} |`)
       }
 
       // matchup names resolved (not raw tids)

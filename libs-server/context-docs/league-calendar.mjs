@@ -7,10 +7,20 @@ import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 // calendar) and the league index (current phase + a few upcoming dates). The
 // event set is the enumerated list of `seasons` timestamp fields; labels match
 // the app's `get_league_events` vocabulary so the docs and SPA agree.
+//
+// The set is a SUBSET of the table's timestamptz columns, and the exclusions are
+// deliberate rather than an oversight — a calendar states when something is
+// SCHEDULED to happen. `rookie_draft_completed_at` is a completion stamp (it
+// records that the draft finished, and is null while one is in progress), and
+// `restricted_free_agency_processing_paused_at` / `_paused_until` are pause
+// state belonging to the processing pause feature. Adding any of the three would
+// put a fact about what already happened into a list of dates to plan against.
+// When a new `seasons` timestamp column lands, decide which of the two it is.
 
 export const league_calendar_events = [
   { field: 'season_started_at', label: 'Season Begins' },
-  { field: 'draft_start', label: 'Rookie Draft' },
+  { field: 'draft_start', label: 'Rookie Draft Begins' },
+  { field: 'rookie_draft_end_at', label: 'Rookie Draft Ends' },
   { field: 'ext_date', label: 'Extension Deadline' },
   { field: 'free_agency_period_start', label: 'Free Agency Period Begins' },
   {
@@ -22,6 +32,10 @@ export const league_calendar_events = [
   {
     field: 'restricted_free_agency_period_start',
     label: 'Restricted Free Agency Begins'
+  },
+  {
+    field: 'restricted_free_agency_first_window_at',
+    label: 'Restricted Free Agency First Window Opens'
   },
   {
     field: 'restricted_free_agency_period_end',
