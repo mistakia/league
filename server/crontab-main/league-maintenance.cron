@@ -105,6 +105,20 @@
 ## clock matching the league timezone.
 */5 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-restricted-free-agent.mjs >> /var/log/league/announce-restricted-free-agent.log 2>&1
 
+## Announce the rookie draft's published slate to the announcements channel (every 10 minutes,
+## year-round; self-gating). Posts the coming day's windows once per publication.
+##
+## NOT hour-pinned to the band close, even though that is the only instant it can fire. The close
+## is derived from each league's own draft_hour_max and moves with it -- pinning the cron to
+## today's 21:00 would silently stop announcing the moment that setting changed, which is the
+## failure the RFA lines above already record. The script recomputes the boundary itself and
+## claims it exactly once via league_notifications, so polling is idempotent.
+##
+## */10 rather than */5 because the event is once a day: the whole cost of the coarser poll is up
+## to ten minutes of latency on a schedule for the following morning, and report_job writes a runs
+## row per invocation. Matches notifications-draft.mjs, the other draft-clock poller.
+*/10 * * * * NODE_ENV=production /root/.nvm/versions/node/current/bin/node /root/league/scripts/announce-draft-slate.mjs >> /var/log/league/announce-draft-slate.log 2>&1
+
 ## Process restricted free agency bids (check every 5 minutes, year-round; self-gating).
 ## Same reasoning as above: each bid's processing time is derived from its own window and
 ## falls restricted_free_agency_processing_lead_hours before the next announcement, so

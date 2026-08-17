@@ -4864,7 +4864,8 @@ CREATE TABLE public.leagues (
     sleeper_league_id bigint,
     mfl_league_id bigint,
     fleaflicker_league_id bigint,
-    salary_attribution_rule smallint DEFAULT 0 NOT NULL
+    salary_attribution_rule smallint DEFAULT 0 NOT NULL,
+    discord_announcements_webhook_url character varying(255)
 );
 
 

@@ -71,6 +71,7 @@ const english_words = [
   'anchor',
   'and',
   'announced',
+  'announcements',
   'annual',
   'any',
   'applied',
