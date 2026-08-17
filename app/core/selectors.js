@@ -409,9 +409,8 @@ export const getPicks = createSelector(
         // the picks still on the clock, plus the next UPCOMING_PICK_WINDOWS to
         // reach it. Today's slate is frozen and will be honoured to the
         // minute, but a pick far enough down the board sits on a later day,
-        // and every midnight republication moves it EARLIER as the picks ahead
-        // land — so the rail says nothing rather than advertising a date it
-        // will beat.
+        // and a window only ever moves EARLIER as the picks ahead land — so
+        // the rail says nothing rather than advertising a date it will beat.
         if (
           previousNotActive &&
           upcoming_windows_placed >= UPCOMING_PICK_WINDOWS

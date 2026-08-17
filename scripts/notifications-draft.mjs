@@ -111,10 +111,11 @@ const run = async () => {
     if (on_clock_at > now) continue // the window has not opened yet
 
     // The idempotency key, and it is the WINDOW rather than anything about the
-    // board on purpose. A pick still unmade at the next boundary is
-    // republished onto an earlier slot, which is a new deadline its manager has
-    // not been told; keying on the window re-announces it once per publication
-    // rather than staying silent on the strength of yesterday's message.
+    // board on purpose. A window ratchets, so under an ordinary board this key
+    // announces exactly once — but a resume restarts the ratchet and moves the
+    // window, which is a new deadline its manager has not been told, and
+    // keying on the window re-announces it rather than staying silent on the
+    // strength of a message about a schedule the pause voided.
     const event_timestamp = on_clock_at
 
     const already_sent = await has_league_notification_been_sent({

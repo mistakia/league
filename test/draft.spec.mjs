@@ -236,13 +236,18 @@ describe('API /draft', function () {
       await error(request, 'draft pick not on the clock')
     })
 
-    it('jump blocked outside the daily window even after its window has opened', async () => {
-      // Pick 1 was made by "make selection" at 00:10 7/25, so pick 3 is a real
-      // jump (pick 2 unmade) whose window — reference pick 1 snapped to 11:00
-      // 7/25, plus one hourly step — opened at 12:00 7/25. The clock is 00:00
-      // 7/26, outside the default daily window [11,16): the jump must be
-      // blocked even though its window moment has passed. Under the old code
-      // (window passed ⇒ jumpable at any hour) this test failed.
+    it('jump stays allowed outside the band once the window has opened', async () => {
+      // Pick 3 is a real jump — pick 2 is unmade. The draft opened 00:00 7/25,
+      // and that first publication seated pick 3 third in the queue, at 13:00
+      // on the default [11,16) band. The clock is 00:00 7/26, outside the band.
+      //
+      // A window is an OPENING, not an interval: it ratchets, so nothing the
+      // band or a later publication does can take it back once it has passed.
+      // The old rule re-anchored on the preceding SELECTION each night and
+      // rolled this window forward to 12:00 7/26, which is the backwards move
+      // the frozen slate exists to remove — so a request that used to be
+      // refused as "not on the clock" now clears the gate and is refused on
+      // the bogus pid instead, which is what this asserts.
       MockDate.set(
         regular_season_start
           .subtract('1', 'month')
@@ -255,7 +260,7 @@ describe('API /draft', function () {
         .set('Authorization', `Bearer ${user3}`)
         .send({ teamId: 3, pid: 'xx', pickId: 3 })
 
-      await error(request, 'draft pick not on the clock')
+      await error(request, 'invalid pid')
     })
 
     it('pick is already selected', async () => {
