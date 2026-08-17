@@ -6,9 +6,9 @@ import PercentileMetric from '@components/percentile-metric'
 // Stat field groupings by category
 const FANTASY_STATS = [
   'points',
-  'points_pos_rnk',
+  'points_position_rank',
   'points_per_game',
-  'points_per_game_pos_rnk',
+  'points_per_game_position_rank',
   'points_added_earned',
   'points_added_earned_rank',
   'points_added_earned_position_rank',
@@ -111,7 +111,7 @@ const RUSHING_EXPLOSIVENESS = [
   'rush_attempts_speed_20_plus_mph'
 ]
 
-const RUSHING_REDZONE = ['rush_attempts_redzone', 'rush_attempts_goaline']
+const RUSHING_REDZONE = ['rush_attempts_redzone', 'rush_attempts_goal_line']
 
 const RECEIVING_PRODUCTION = [
   'targets',
@@ -158,8 +158,8 @@ const RECEIVING_REDZONE = ['redzone_targets', 'endzone_targets']
 
 // Field configuration
 const POSITION_RANK_FIELDS = [
-  'points_pos_rnk',
-  'points_per_game_pos_rnk',
+  'points_position_rank',
+  'points_per_game_position_rank',
   'points_added_earned_position_rank',
   'points_added_earned_per_game_position_rank'
 ]

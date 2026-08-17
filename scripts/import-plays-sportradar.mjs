@@ -315,7 +315,7 @@ const map_contextual_data = ({
     )
     Object.assign(mapped, {
       yard_line_side: start_ydl.yard_line_side,
-      yard_line_num: start_ydl.yard_line_num,
+      yard_line_number: start_ydl.yard_line_number,
       yard_line_100: start_ydl.yard_line_100,
       yard_line_start: start_ydl.ydl_str
     })
@@ -1101,9 +1101,9 @@ const print_sportradar_player_resolution_summary = ({
 // ============================================================================
 
 const should_skip_game = (game) => {
-  if (!game.date || !game.time_est) return false
+  if (!game.date || !game.time_eastern) return false
 
-  const time_str = `${game.date} ${game.time_est}`
+  const time_str = `${game.date} ${game.time_eastern}`
   const game_start = dayjs.tz(
     time_str,
     'YYYY/MM/DD HH:mm:SS',
@@ -1357,7 +1357,7 @@ const build_games_query = ({ game_id, year, week, all, seas_type }) => {
       'v',
       'h',
       'date',
-      'time_est'
+      'time_eastern'
     )
 
   if (game_id) {

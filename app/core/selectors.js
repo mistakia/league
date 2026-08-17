@@ -640,13 +640,17 @@ export const get_draft_pick_value_by_pick = createSelector(
 
 export const is_before_extension_deadline = createSelector(
   (state) =>
-    state.getIn(['leagues', state.getIn(['app', 'leagueId']), 'ext_date']),
-  (ext_date) => {
-    if (!ext_date) {
+    state.getIn([
+      'leagues',
+      state.getIn(['app', 'leagueId']),
+      'extension_deadline_at'
+    ]),
+  (extension_deadline_at) => {
+    if (!extension_deadline_at) {
       return true
     }
 
-    const deadline = dayjs(ext_date)
+    const deadline = dayjs(extension_deadline_at)
     return current_season.now.isBefore(deadline)
   }
 )
@@ -700,12 +704,12 @@ export const get_league_events = createSelector(
     const events = []
     const now = dayjs()
 
-    if (league.ext_date) {
-      const ext_date = dayjs(league.ext_date)
-      if (now.isBefore(ext_date)) {
+    if (league.extension_deadline_at) {
+      const extension_deadline_at = dayjs(league.extension_deadline_at)
+      if (now.isBefore(extension_deadline_at)) {
         events.push({
           detail: 'Extension Deadline',
-          date: ext_date
+          date: extension_deadline_at
         })
       }
     }
@@ -1164,7 +1168,7 @@ export function isPlayerLocked(state, { player_map = new Map(), pid }) {
   }
 
   const gameStart = dayjs.tz(
-    `${game.date} ${game.time_est}`,
+    `${game.date} ${game.time_eastern}`,
     'YYYY/MM/DD HH:mm:SS',
     'America/New_York'
   )
@@ -2479,7 +2483,7 @@ export function getStartersByMatchupId(state, { mid }) {
       week: matchup.week
     })
     if (!game) continue
-    const dateStr = `${game.date} ${game.time_est}`
+    const dateStr = `${game.date} ${game.time_eastern}`
     if (!games[dateStr]) games[dateStr] = []
     games[dateStr].push(player_map)
   }
@@ -2890,7 +2894,8 @@ export const get_team_value_deltas_by_team_id = createSelector(
     const team_values = league_team_daily_values.get(tid)
     if (!team_values) return new Map()
 
-    const league_total_due_amount = league.num_teams * league.season_due_amount
+    const league_total_due_amount =
+      league.number_teams * league.season_due_amount
 
     let result = new Map()
 
@@ -4082,7 +4087,7 @@ export const get_league_user_historical_ranks = createSelector(
       'championships',
       'championship_rounds',
       'regular_season_leader',
-      'num_byes',
+      'number_byes',
       'best_season_win_percentage',
       'best_season_all_play_percentage',
       'wildcards',
@@ -4118,7 +4123,7 @@ export const get_league_user_historical_ranks = createSelector(
       // Add non-rankable fields
       result.first_season_year = user_careerlog.first_season_year
       result.last_season_year = user_careerlog.last_season_year
-      result.num_seasons = user_careerlog.num_seasons
+      result.number_seasons = user_careerlog.number_seasons
       result.userid = user_careerlog.userid
       result.username = user_careerlog.username
 
@@ -4160,7 +4165,7 @@ export const get_league_team_historical_ranks = createSelector(
       'championships',
       'championship_rounds',
       'regular_season_leader',
-      'num_byes',
+      'number_byes',
       'best_season_win_percentage',
       'best_season_all_play_percentage',
       'wildcards',
@@ -4196,7 +4201,7 @@ export const get_league_team_historical_ranks = createSelector(
       // Add non-rankable fields
       result.first_season_year = team_careerlog.first_season_year
       result.last_season_year = team_careerlog.last_season_year
-      result.num_seasons = team_careerlog.num_seasons
+      result.number_seasons = team_careerlog.number_seasons
       result.tid = team_careerlog.tid
 
       ranks[team_careerlog.tid] = result

@@ -124,7 +124,7 @@ export default function DraftPage({
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
-              Next: Pick #{nextPick.pick} ({nextPick.pick_str})
+              Next: Pick #{nextPick.pick} ({nextPick.pick_string})
             </div>
             <div>
               {is_paused
@@ -148,7 +148,7 @@ export default function DraftPage({
         draftInfo = (
           <div className='draft__side-top-pick'>
             <div className='draft__side-top-pick-title'>
-              Pick #{nextPick.pick} ({nextPick.pick_str})
+              Pick #{nextPick.pick} ({nextPick.pick_string})
             </div>
             {!windowEnd && <div>Cannot be passed yet</div>}
             {windowEnd && !isWindowClosed && (

@@ -30,7 +30,7 @@ const format = (item) => {
   const date = datetime ? datetime.format('YYYY/MM/DD') : null
   const seas_type = item.seasonType
   const week_type = item.weekType
-  const time_est = datetime ? datetime.format('HH:mm:ss') : null
+  const time_eastern = datetime ? datetime.format('HH:mm:ss') : null
   const year = item.season
   const score = item.detail || {}
 
@@ -39,7 +39,7 @@ const format = (item) => {
     .id
 
   const day = date
-    ? getGameDayAbbreviation({ seas_type, date, time_est, week_type })
+    ? getGameDayAbbreviation({ seas_type, date, time_eastern, week_type })
     : null
 
   return {
@@ -53,7 +53,7 @@ const format = (item) => {
     // and the insert failed the NOT NULL constraint on nfl_games.week.
     ...(item.week != null && { week: item.week }),
     ...(date && { date }),
-    ...(time_est && { time_est }),
+    ...(time_eastern && { time_eastern }),
     ...(day && { day }),
     ...(datetime && { kickoff_at: datetime.toDate() }),
 

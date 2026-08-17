@@ -13,7 +13,7 @@ const { ADP_FORMAT_TUPLE_COLUMNS } = adp_format
 // second SELECT). Never a content-derived hash -- see
 // user:guideline/schema/avoid-content-derived-identity.md.
 //
-// NULLS NOT DISTINCT (PG 16.14+) lets the null scoring_format_id / num_teams
+// NULLS NOT DISTINCT (PG 16.14+) lets the null scoring_format_id / number_teams
 // columns participate in the conflict target directly, so ON CONFLICT targets
 // the plain column tuple with no COALESCE sentinels.
 

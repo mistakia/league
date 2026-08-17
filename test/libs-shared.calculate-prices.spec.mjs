@@ -11,8 +11,8 @@ const expect = chai.expect
 // the discretionary cap equal to the full cap, which makes the expected dollar
 // figures below readable by hand.
 const league_format = {
-  num_teams: 10,
-  cap: 200,
+  number_teams: 10,
+  salary_cap: 200,
   min_bid: 0,
   starter_slots_quarterback: 1,
   starter_slots_running_back: 2,

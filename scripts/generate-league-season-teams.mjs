@@ -90,7 +90,7 @@ const generate_league_season_teams = async ({
       // reset team stats
       waiver_order: i + 1,
       draft_order: i + 1,
-      salary_cap: league.cap,
+      salary_cap: league.salary_cap,
       faab_balance: league.starting_faab_budget
     })
 

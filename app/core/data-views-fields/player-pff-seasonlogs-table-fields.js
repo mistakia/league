@@ -32,7 +32,7 @@ export default function ({ is_logged_in }) {
     player_pff_fg_ep_kicker: pff_seasonlog_field({
       column_title: 'PFF FG/EP Kicker',
       header_label: 'FG EP',
-      player_value_path: 'pff_field_goal_ep_kicker'
+      player_value_path: 'pff_field_goal_extra_point_kicker'
     }),
     player_pff_defense_rank: pff_seasonlog_field({
       column_title: 'PFF Defense Rank',

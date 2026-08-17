@@ -68,14 +68,15 @@ describe('LIBS-SERVER get_top_practice_squad_waiver postseason', function () {
 
         expect(result).to.be.an('object')
         expect(result.pid).to.equal(player.pid)
-        // Gate widening contract: nfl_games.date and time_est are populated
+        // Gate widening contract: nfl_games.date and time_eastern are populated
         // for a player whose team has a game in the current POST week.
         // Null values here would mean the join returned no row (gate failure).
         expect(result.date, 'nfl_games.date populated').to.not.equal(null)
         expect(result.date, 'nfl_games.date populated').to.not.equal(undefined)
-        expect(result.time_est, 'nfl_games.time_est populated').to.not.equal(
-          null
-        )
+        expect(
+          result.time_eastern,
+          'nfl_games.time_eastern populated'
+        ).to.not.equal(null)
       })
     },
     { seed_nfl_games: false }

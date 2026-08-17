@@ -209,7 +209,7 @@ describe('API /teams - restricted free agency', function () {
         player: cutlistPlayer,
         teamId,
         userId,
-        value: league.cap - bid + 1
+        value: league.salary_cap - bid + 1
       })
       exclude_pids.push(cutlistPlayer.pid)
 
@@ -991,7 +991,7 @@ describe('API /teams - restricted free agency', function () {
      *     player,
      *     teamId,
      *     userId,
-     *     value: league.cap
+     *     value: league.salary_cap
      *   })
 
      *   await addPlayer({
@@ -1035,7 +1035,7 @@ describe('API /teams - restricted free agency', function () {
      *     player,
      *     teamId,
      *     userId,
-     *     value: league.cap + cutlistPlayerValue
+     *     value: league.salary_cap + cutlistPlayerValue
      *   })
 
      *   await addPlayer({
@@ -1098,7 +1098,7 @@ describe('API /teams - restricted free agency', function () {
      *     player,
      *     teamId,
      *     userId,
-     *     value: league.cap + releasePlayerValue
+     *     value: league.salary_cap + releasePlayerValue
      *   })
 
      *   await addPlayer({

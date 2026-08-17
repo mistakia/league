@@ -239,6 +239,7 @@ const english_words = [
   'data',
   'date',
   'day',
+  'deadline',
   'decided',
   'decimal',
   'decision',

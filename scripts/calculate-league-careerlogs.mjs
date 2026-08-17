@@ -71,13 +71,13 @@ const calculate_league_careerlogs = async ({ lid }) => {
       worst_overall_finish: 0,
       first_season_year: Number.MAX_VALUE,
       last_season_year: 0,
-      num_seasons: league_team_seasonlogs.length,
+      number_seasons: league_team_seasonlogs.length,
       weekly_high_scores: 0,
       post_seasons: 0,
       championships: 0,
       championship_rounds: 0,
       regular_season_leader: 0,
-      num_byes: 0,
+      number_byes: 0,
       best_season_win_percentage: 0,
       best_season_all_play_percentage: 0,
       wildcards: 0,
@@ -156,7 +156,7 @@ const calculate_league_careerlogs = async ({ lid }) => {
         league_team_seasonlog.overall_finish <= 4 ? 1 : 0
       careerlog.regular_season_leader +=
         league_team_seasonlog.regular_season_finish === 1 ? 1 : 0
-      careerlog.num_byes +=
+      careerlog.number_byes +=
         league_team_seasonlog.regular_season_finish <= 2 ? 1 : 0
       careerlog.best_season_win_percentage = Math.max(
         careerlog.best_season_win_percentage,

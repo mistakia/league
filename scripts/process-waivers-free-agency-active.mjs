@@ -153,7 +153,7 @@ const get_active_waiver_shortfall = async () => {
 // Helper functions
 const validate_game_timing = async (waiver_id) => {
   const waiver_game_query = db('waivers')
-    .select('waivers.*', 'nfl_games.date', 'nfl_games.time_est')
+    .select('waivers.*', 'nfl_games.date', 'nfl_games.time_eastern')
     .join('player', 'waivers.pid', 'player.pid')
   apply_nfl_games_current_week_join({ db, query: waiver_game_query })
   const waiver_with_game_info = await waiver_game_query
@@ -167,7 +167,7 @@ const validate_game_timing = async (waiver_id) => {
 
     const now = dayjs.default()
     const game_start = dayjs.default.tz(
-      `${waiver_with_game_info.date} ${waiver_with_game_info.time_est}`,
+      `${waiver_with_game_info.date} ${waiver_with_game_info.time_eastern}`,
       'YYYY/MM/DD HH:mm:SS',
       'America/New_York'
     )

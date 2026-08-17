@@ -24,7 +24,7 @@ export const League = new Record({
   uid: null,
   commishid: null,
   name: null,
-  num_teams: null,
+  number_teams: null,
 
   starter_slots_quarterback: null,
   starter_slots_running_back: null,
@@ -49,7 +49,7 @@ export const League = new Record({
   max_roster_kicker: null,
 
   starting_faab_budget: null,
-  cap: null,
+  salary_cap: null,
 
   // Playoff format, from the seasons row. These MUST be declared here or
   // Immutable's Record silently drops them from the constructor payload and
@@ -105,7 +105,7 @@ export const League = new Record({
   restricted_free_agency_period_start: null,
   restricted_free_agency_period_end: null,
   restricted_free_agency_first_window_at: null,
-  ext_date: null,
+  extension_deadline_at: null,
 
   b_QB: null,
   b_RB: null,
@@ -150,7 +150,7 @@ export function createLeague(league_data = {}) {
     uid,
     commishid,
     name,
-    num_teams,
+    number_teams,
 
     starter_slots_quarterback,
     starter_slots_running_back,
@@ -175,7 +175,7 @@ export function createLeague(league_data = {}) {
     max_roster_kicker,
 
     starting_faab_budget,
-    cap,
+    salary_cap,
 
     playoff_team_count,
     bye_count,
@@ -223,7 +223,7 @@ export function createLeague(league_data = {}) {
     restricted_free_agency_period_start,
     restricted_free_agency_period_end,
     restricted_free_agency_first_window_at,
-    ext_date,
+    extension_deadline_at,
 
     processed_at,
 
@@ -258,7 +258,7 @@ export function createLeague(league_data = {}) {
     uid,
     commishid,
     name,
-    num_teams,
+    number_teams,
 
     starter_slots_quarterback,
     starter_slots_running_back,
@@ -283,7 +283,7 @@ export function createLeague(league_data = {}) {
     max_roster_kicker,
 
     starting_faab_budget,
-    cap,
+    salary_cap,
 
     playoff_team_count,
     bye_count,
@@ -336,7 +336,7 @@ export function createLeague(league_data = {}) {
     restricted_free_agency_period_start,
     restricted_free_agency_period_end,
     restricted_free_agency_first_window_at,
-    ext_date,
+    extension_deadline_at,
 
     processed_at,
 

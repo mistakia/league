@@ -563,7 +563,7 @@ const format_special_teams = (play) => ({
   is_punt_attempt: format_boolean(play.punt_attempt),
   field_goal_result: standardize_kick_result(play.field_goal_result),
   kick_distance: format_number(play.kick_distance),
-  ep_result: standardize_kick_result(play.extra_point_result),
+  extra_point_result: standardize_kick_result(play.extra_point_result),
   two_point_result: standardize_two_point_result(play.two_point_conv_result),
   is_punt_blocked: format_boolean(play.punt_blocked)
 })
@@ -573,7 +573,7 @@ const format_timeout_data = (play) => {
   return {
     home_timeouts_remaining: format_number(play.home_timeouts_remaining),
     away_timeouts_remaining: format_number(play.away_timeouts_remaining),
-    pos_timeouts_remaining: format_number(
+    possession_timeouts_remaining: format_number(
       is_kickoff
         ? play.defteam_timeouts_remaining
         : play.posteam_timeouts_remaining
@@ -593,7 +593,7 @@ const format_score_data = (play) => {
   return {
     home_score: format_number(play.total_home_score),
     away_score: format_number(play.total_away_score),
-    pos_score: format_number(
+    possession_score: format_number(
       is_kickoff ? play.defteam_score : play.posteam_score
     ),
     defense_score: format_number(
@@ -602,7 +602,7 @@ const format_score_data = (play) => {
     score_difference: format_number(
       is_kickoff ? -play.score_differential : play.score_differential
     ),
-    pos_score_post: format_number(
+    possession_score_post: format_number(
       is_kickoff ? play.defteam_score_post : play.posteam_score_post
     ),
     defense_score_post: format_number(

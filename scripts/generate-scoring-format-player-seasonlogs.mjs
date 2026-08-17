@@ -85,12 +85,12 @@ const generate_scoring_format_player_seasonlogs = async ({
     .sort((a, b) => b - a)
 
   for (const insert of inserts) {
-    insert.points_rnk = sorted_by_points.indexOf(insert.points) + 1
-    insert.points_pos_rnk =
+    insert.points_rank = sorted_by_points.indexOf(insert.points) + 1
+    insert.points_position_rank =
       sorted_by_points_by_pos[insert.pos].indexOf(insert.points) + 1
-    insert.points_per_game_rnk =
+    insert.points_per_game_rank =
       sorted_by_points_per_game.indexOf(insert.points_per_game) + 1
-    insert.points_per_game_pos_rnk =
+    insert.points_per_game_position_rank =
       sorted_by_points_per_game_by_pos[insert.pos].indexOf(
         insert.points_per_game
       ) + 1

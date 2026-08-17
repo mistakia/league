@@ -67,7 +67,7 @@ export default async function (knex, league_params = {}) {
     draft_hour_max: 24,
     free_agency_live_auction_start: null,
     tddate: current_season.regular_season_start.add('12', 'weeks').unix(),
-    ext_date: current_season.now.subtract('1', 'week').unix(),
+    extension_deadline_at: current_season.now.subtract('1', 'week').unix(),
     ...league_params
   }
 
@@ -103,7 +103,7 @@ export default async function (knex, league_params = {}) {
       lid: 1,
       waiver_order: i,
       draft_order: i,
-      salary_cap: league.cap,
+      salary_cap: league.salary_cap,
       faab_balance: league.starting_faab_budget,
       division: (i % 4) + 1,
       name: `Team${i}`,

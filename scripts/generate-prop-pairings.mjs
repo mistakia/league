@@ -432,9 +432,9 @@ const generate_prop_pairings = async ({
 
     const pids = Object.keys(props_by_pid)
     for (let i = 0; i < pids.length; i++) {
-      const pid_a = pids[i]
+      const pid_first = pids[i]
 
-      for (const prop_a of props_by_pid[pid_a]) {
+      for (const prop_a of props_by_pid[pid_first]) {
         const props = [prop_a]
 
         const prop_stats = await get_stats_for_props({
@@ -459,10 +459,10 @@ const generate_prop_pairings = async ({
       }
 
       for (let j = i + 1; j < pids.length; j++) {
-        const pid_b = pids[j]
+        const pid_second = pids[j]
 
-        for (const prop_a of props_by_pid[pid_a]) {
-          for (const prop_b of props_by_pid[pid_b]) {
+        for (const prop_a of props_by_pid[pid_first]) {
+          for (const prop_b of props_by_pid[pid_second]) {
             const props = [prop_a, prop_b]
 
             const prop_stats = await get_stats_for_props({
@@ -492,8 +492,8 @@ const generate_prop_pairings = async ({
         for (let k = j + 1; k < pids.length; k++) {
           const pid_c = pids[k]
 
-          for (const prop_a of props_by_pid[pid_a]) {
-            for (const prop_b of props_by_pid[pid_b]) {
+          for (const prop_a of props_by_pid[pid_first]) {
+            for (const prop_b of props_by_pid[pid_second]) {
               for (const prop_c of props_by_pid[pid_c]) {
                 const props = [prop_a, prop_b, prop_c]
 

@@ -32,8 +32,8 @@ export default class TradeSelectPick extends React.Component {
           {pick.pick && (
             <span className='pick__number'>
               #{pick.pick}
-              {pick.pick_str && (
-                <span className='pick__str'>({pick.pick_str})</span>
+              {pick.pick_string && (
+                <span className='pick__str'>({pick.pick_string})</span>
               )}
             </span>
           )}

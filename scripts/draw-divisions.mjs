@@ -43,12 +43,12 @@ const initialize_cli = () => {
 }
 
 // Article V Section 13, subsections (a) through (c).
-export const division_count_for_league_size = (num_teams) => {
-  if (num_teams === 10) return 0
-  if (num_teams === 12) return 4
+export const division_count_for_league_size = (number_teams) => {
+  if (number_teams === 10) return 0
+  if (number_teams === 12) return 4
 
   throw new Error(
-    `Article V Section 13(c) bars a LEAGUE of ${num_teams} Teams: the constitution prescribes ` +
+    `Article V Section 13(c) bars a LEAGUE of ${number_teams} Teams: the constitution prescribes ` +
       'a Division structure at ten (none) and at twelve (four of three) only. An amendment is ' +
       'needed before this league size can be drawn.'
   )

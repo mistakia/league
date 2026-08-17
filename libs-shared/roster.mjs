@@ -99,7 +99,7 @@ export default class Roster {
       (a, b) => a + (b.player_salary === null ? 0 : b.player_salary),
       0
     )
-    return this._league.cap - used
+    return this._league.salary_cap - used
   }
 
   get availablePracticeSpace() {

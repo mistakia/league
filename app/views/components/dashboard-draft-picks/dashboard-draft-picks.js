@@ -15,7 +15,9 @@ function SeasonDraftPicks({ picks, year }) {
       <div key={pick.uid} className='player__item table__row'>
         {/* <div className='metric table__cell'>{pick.pick || '-'}</div> */}
         <div className='metric table__cell'>
-          {pick.pick_str ? pick.pick_str : `${pick.round}${nth(pick.round)}`}
+          {pick.pick_string
+            ? pick.pick_string
+            : `${pick.round}${nth(pick.round)}`}
         </div>
         <div className='table__cell draft-pick__team'>
           <TeamName tid={pick.original_team_id} />

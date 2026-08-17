@@ -47,7 +47,7 @@ export default function DraftPick({
         style={{ cursor: 'pointer' }}
       >
         <div className='draft__pick-num formatted'>
-          {pick.pick_str || pick.pick || '-'}
+          {pick.pick_string || pick.pick || '-'}
         </div>
         <div className='draft__pick-num pick'>{`#${pick.pick}`}</div>
         <div className='draft__pick-main'>

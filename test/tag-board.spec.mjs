@@ -30,7 +30,7 @@ const season = {
   restricted_free_agency_tag_limit: 2,
   // These stand in for `seasons` timestamptz columns, so the fixture carries
   // Dates exactly as node-pg would hand them back.
-  ext_date: new Date(1785470399 * 1000),
+  extension_deadline_at: new Date(1785470399 * 1000),
   restricted_free_agency_period_start: new Date(1785556800 * 1000),
   restricted_free_agency_period_end: new Date(1787371199 * 1000),
   draft_start: new Date(1787371200 * 1000)
@@ -38,12 +38,12 @@ const season = {
 
 // `season` carries Dates (the columns are timestamptz); the build_tag_board
 // contract is still epoch seconds for `now_unix`.
-const ext_date_unix = Math.round(season.ext_date.getTime() / 1000)
+const ext_date_unix = Math.round(season.extension_deadline_at.getTime() / 1000)
 
 // 9 starters + 7 bench = an active roster limit of 16.
 const league_format = {
   id: 'genesis_10_team',
-  cap: 200,
+  salary_cap: 200,
   format_category: 5,
   starter_slots_quarterback: 1,
   starter_slots_running_back: 2,
@@ -365,7 +365,7 @@ describe('tag board', function () {
     // the stored values are still pre-extension. A clock-keyed branch returns
     // them as-is and understates the whole board. Both the ladder and the
     // franchise price must still be projected here.
-    it('projects the ladder past ext_date while nothing is processed', function () {
+    it('projects the ladder past extension_deadline_at while nothing is processed', function () {
       const board = build_tag_board(
         build_fixture({
           teams: two_teams,
@@ -1522,8 +1522,10 @@ describe('tag board', function () {
       freshness.read_at_iso.should.equal(
         new Date(now_unix * 1000).toISOString()
       )
-      freshness.next_deadline.field.should.equal('ext_date')
-      freshness.next_deadline.at_iso.should.equal(season.ext_date.toISOString())
+      freshness.next_deadline.field.should.equal('extension_deadline_at')
+      freshness.next_deadline.at_iso.should.equal(
+        season.extension_deadline_at.toISOString()
+      )
     })
   })
 

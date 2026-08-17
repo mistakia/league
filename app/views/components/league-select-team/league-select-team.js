@@ -68,7 +68,7 @@ export default function LeagueSelectTeam({
               <ArrowDropDownIcon />
             </div>
             <div className='league-select-team-meta'>
-              <div>{historical_rank.num_seasons} Seasons</div>
+              <div>{historical_rank.number_seasons} Seasons</div>
               <div>
                 {historical_rank.first_season_year}-
                 {historical_rank.last_season_year}

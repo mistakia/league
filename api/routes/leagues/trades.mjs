@@ -178,7 +178,7 @@ const router = express.Router({ mergeParams: true })
  *                         season_year: 2025
  *                         round: 1
  *                         pick: 4
- *                         pick_str: "1.04"
+ *                         pick_string: "1.04"
  *                         original_team_id: 13
  *                         pid: null
  *                     proposingTeamReleasePlayers: []
@@ -247,7 +247,7 @@ router.get('/?', async (req, res) => {
         'trades_picks.*',
         'draft.uid',
         'draft.pick',
-        'draft.pick_str',
+        'draft.pick_string',
         'draft.round',
         'draft.season_year',
         'draft.lid',

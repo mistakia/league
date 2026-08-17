@@ -170,7 +170,7 @@ describe('SCRIPTS /reset-protected-designation', function () {
     it('leaves protections in place before the extension deadline', async () => {
       MockDate.set(offseason_date())
       await league(knex, {
-        ext_date: current_season.now.add('1', 'week').unix()
+        extension_deadline_at: current_season.now.add('1', 'week').unix()
       })
       await knex('league_notifications').del()
       await seed_slice({ week: 0 })

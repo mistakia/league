@@ -55,12 +55,12 @@ const format = (item) => {
   const week_type = ['REG', 'PRE'].includes(seas_type)
     ? seas_type
     : item.weekNameAbbr
-  const time_est = item.gameTimeEastern
+  const time_eastern = item.gameTimeEastern
   const week = getWeek(item.week, week_type)
   const year = item.season
   const score = item.score || {}
   const day = date
-    ? getGameDayAbbreviation({ seas_type, date, time_est, week_type })
+    ? getGameDayAbbreviation({ seas_type, date, time_eastern, week_type })
     : null
 
   const datetime = dayjs(
@@ -77,7 +77,7 @@ const format = (item) => {
     season_year: year,
     week,
     date,
-    time_est,
+    time_eastern,
     day,
     kickoff_at: datetime.isValid() ? datetime.toDate() : null,
 

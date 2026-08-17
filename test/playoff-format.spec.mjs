@@ -16,8 +16,8 @@ const expect = chai.expect
 // num_divisions of 0 means the league has no Divisions at all, which is what
 // Article V Section 13(a) prescribes at ten teams -- distinct from one Division
 // holding everybody, a structure the constitution does not describe.
-const make_teams = (num_teams, num_divisions) =>
-  Array.from({ length: num_teams }, (unused, i) => ({
+const make_teams = (number_teams, num_divisions) =>
+  Array.from({ length: number_teams }, (unused, i) => ({
     uid: i + 1,
     division: num_divisions ? (i % num_divisions) + 1 : null
   }))

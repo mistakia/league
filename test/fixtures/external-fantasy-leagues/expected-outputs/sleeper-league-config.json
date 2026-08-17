@@ -6,7 +6,7 @@
   "input": {
     "platform": "sleeper",
     "league_config": {
-      "num_teams": 12
+      "number_teams": 12
     },
     "scoring_config": {
       "sack": 1,
@@ -108,7 +108,7 @@
       "exclude_qb_kneels": false
     },
     "league_params": {
-      "num_teams": 12,
+      "number_teams": 12,
       "starter_slots_quarterback": 1,
       "starter_slots_running_back": 2,
       "starter_slots_wide_receiver": 3,
@@ -123,7 +123,7 @@
       "practice_squad_slot_count": 0,
       "ir": 0,
       "reserve_short_term_limit": 0,
-      "cap": 0,
+      "salary_cap": 0,
       "min_bid": 0
     }
   }

@@ -11,7 +11,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
   const league_params = {
     commishid,
     name: 'SUPERFLEX DYNASTY LEAGUE',
-    num_teams: 12,
+    number_teams: 12,
     playoff_team_count: 6,
     bye_count: 2,
     bye_candidate_pool: 'league',
@@ -39,7 +39,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     max_roster_defense_special_teams: 3,
     max_roster_kicker: 3,
     starting_faab_budget: 200,
-    cap: 200,
+    salary_cap: 200,
     passing_attempts: 0.0,
     passing_completions: 0.0,
     passing_yards: 0.05,

@@ -46,7 +46,7 @@ const create_player_adp_field = (props) => ({
       default_value: 'PPR',
       label: 'Scoring'
     },
-    num_quarterback: {
+    number_quarterback: {
       values: [1, 2],
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
       single: true,

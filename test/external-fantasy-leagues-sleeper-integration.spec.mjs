@@ -59,8 +59,8 @@ describe('External Fantasy Leagues - Sleeper integration (authentic fixtures)', 
       result.should.have.property('year', expected.year)
       result.teams.should.have.length(expected.teams.length)
       result.settings.should.have.property(
-        'num_teams',
-        expected.settings.num_teams
+        'number_teams',
+        expected.settings.number_teams
       )
       result.should.have.property('commissioner_id', expected.commissioner_id)
     })

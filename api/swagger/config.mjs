@@ -443,7 +443,7 @@ const options = {
               example:
                 'eb75c8fd2acb21fea5d8754f53e9aa2e5d7c40327d5853c58592f658235ba756'
             },
-            num_teams: {
+            number_teams: {
               type: 'integer',
               description: 'Number of fantasy teams in league',
               example: 14
@@ -498,7 +498,7 @@ const options = {
               description: 'Short term reserve spots limit (99+ = unlimited)',
               example: 3
             },
-            cap: {
+            salary_cap: {
               type: 'integer',
               description: 'Salary cap',
               example: 200
@@ -2037,7 +2037,7 @@ const options = {
                   description: 'Draft pick number',
                   example: 15
                 },
-                pick_str: {
+                pick_string: {
                   type: 'string',
                   description: 'Draft pick string (round.pick)',
                   example: '1.15'
@@ -2124,7 +2124,7 @@ const options = {
                 'Fantasy points based on league scoring (when leagueId provided)',
               example: 18.5
             },
-            pos_rnk: {
+            position_rank: {
               type: 'integer',
               nullable: true,
               description:
@@ -3214,14 +3214,14 @@ const options = {
               description: 'League name',
               example: 'Dynasty Warriors League'
             },
-            num_teams: {
+            number_teams: {
               type: 'integer',
               minimum: 4,
               maximum: 32,
               description: 'Number of teams in the league',
               example: 12
             },
-            cap: {
+            salary_cap: {
               type: 'integer',
               minimum: 0,
               description: 'Salary cap limit',
@@ -3359,13 +3359,13 @@ const options = {
               description: 'League name',
               example: 'Dynasty Warriors League'
             },
-            num_teams: {
+            number_teams: {
               type: 'integer',
               minimum: 4,
               maximum: 32,
               description: 'Number of teams in the league'
             },
-            cap: {
+            salary_cap: {
               type: 'integer',
               minimum: 0,
               description: 'Salary cap limit'

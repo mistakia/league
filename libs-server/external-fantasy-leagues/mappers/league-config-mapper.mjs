@@ -171,7 +171,7 @@ export default class LeagueConfigMapper {
    * Map external platform league configuration to internal format hashes
    * @param {Object} params - Parameters object
    * @param {string} params.platform - Platform identifier (sleeper, espn, yahoo)
-   * @param {Object} params.league_config - External league configuration (num_teams, salary_cap, etc.)
+   * @param {Object} params.league_config - External league configuration (number_teams, salary_cap, etc.)
    * @param {Object} params.scoring_config - External scoring configuration (points per stat)
    * @param {Object} params.roster_config - External roster configuration (position counts)
    * @returns {Object} Object containing:
@@ -270,10 +270,10 @@ export default class LeagueConfigMapper {
     const league_params = this.get_default_league_params()
 
     // Set number of teams from league config
-    if (league_config.num_teams) {
-      league_params.num_teams = league_config.num_teams
+    if (league_config.number_teams) {
+      league_params.number_teams = league_config.number_teams
     } else if (league_config.total_rosters) {
-      league_params.num_teams = league_config.total_rosters
+      league_params.number_teams = league_config.total_rosters
     }
 
     // Map roster positions
@@ -303,7 +303,7 @@ export default class LeagueConfigMapper {
 
     // Set salary cap if available
     if (league_config.salary_cap) {
-      league_params.cap = league_config.salary_cap
+      league_params.salary_cap = league_config.salary_cap
     }
 
     // Set minimum bid if available
@@ -432,7 +432,7 @@ export default class LeagueConfigMapper {
    */
   get_default_league_params() {
     return {
-      num_teams: 12,
+      number_teams: 12,
       starter_slots_quarterback: 0,
       starter_slots_running_back: 0,
       starter_slots_wide_receiver: 0,
@@ -447,7 +447,7 @@ export default class LeagueConfigMapper {
       practice_squad_slot_count: 0,
       ir: 0,
       reserve_short_term_limit: 0,
-      cap: 0,
+      salary_cap: 0,
       min_bid: 0
     }
   }

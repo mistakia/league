@@ -12,7 +12,7 @@ const map_state_to_props = createSelector(
   getRosterPositionalValueByTeamId,
   get_current_league,
   (summary, league) => {
-    const quarterOfLeague = Math.ceil(league.num_teams / 4)
+    const quarterOfLeague = Math.ceil(league.number_teams / 4)
     const allValues = Object.values(summary.total).sort((a, b) => b - a)
     const allRank = allValues.indexOf(summary.team_total) + 1
 

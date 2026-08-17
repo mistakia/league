@@ -78,7 +78,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
     .sort(compare_player_week_points_desc(week))
 
   const rows = []
-  for (let i = 0; i < league.num_teams; i++) {
+  for (let i = 0; i < league.number_teams; i++) {
     rows.push(rosterRows[i] || { players: [] })
   }
 

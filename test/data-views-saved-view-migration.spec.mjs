@@ -1,8 +1,11 @@
 /* global describe it */
 
+import fs from 'fs'
+
 import * as chai from 'chai'
 
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
+import * as migration_module from '#libs-shared/data-views-saved-view-migration.mjs'
 import {
   BOOLEAN_PREFIX_PARAM_RENAMES,
   COUNTING_STAT_PARAM_RENAMES,
@@ -715,5 +718,77 @@ describe('data-views saved-view migrator', () => {
         table_state: null
       })
     })
+  })
+})
+
+// Every legacy param key must RESOLVE to a name a live registry carries today.
+//
+// This is the file-wide form of the rule stated beside PLAYS_LOCAL_PARAM_RENAMES:
+// a map whose target is itself legacy is one reordering away from resolving to a
+// key nothing recognises, and a saved view carrying it then loses its filter
+// silently. The per-map specs above cover four of the eight maps by hand, which
+// is why three stale targets shipped during the 2026-08-17 conform campaign --
+// `pos_to_rem` and `ydl_num` (repointed with the long-tail batch) and `num_qb`,
+// whose target sat stale with no spec covering POSITION_CODE_PARAM_RENAMES at all.
+//
+// Resolution rather than the raw target is the assertion, because CHAINS are
+// legitimate here: eight entries deliberately target another map's legacy key and
+// the merge order resolves them in one pass (fg_prob -> field_goal_prob ->
+// field_goal_probability). Asserting on the raw target would forbid those.
+describe('rename-map target liveness', () => {
+  // `num_qb` is the one legacy key whose column is not on nfl_plays -- it is the
+  // ADP table's, whose registry lives in an `app/` module that imports
+  // extensionless paths and so cannot be imported here. Read from source.
+  const adp_source = fs.readFileSync(
+    new URL(
+      '../app/core/data-views-fields/player-adp-table-fields.js',
+      import.meta.url
+    ),
+    'utf8'
+  )
+  const is_adp_param = (name) =>
+    new RegExp(`^\\s{4}${name}: \\{$`, 'm').test(adp_source)
+
+  const rename_maps = Object.entries(migration_module).filter(
+    ([name, value]) =>
+      name.endsWith('_PARAM_RENAMES') && value && typeof value === 'object'
+  )
+
+  it('covers every exported rename map', () => {
+    // A map added without being exported, or renamed out of the suffix
+    // convention, would silently leave this whole check asserting nothing.
+    expect(rename_maps.length).to.equal(8)
+  })
+
+  it('resolves every legacy key to a live registry key', () => {
+    const stranded = []
+    for (const [map_name, map] of rename_maps) {
+      for (const legacy_key of Object.keys(map)) {
+        const result = migrate_column_entry({
+          column_id: 'player_pass_attempts_from_plays',
+          params: { [legacy_key]: [1] }
+        })
+        const resolved = Object.keys(result.params)
+        if (resolved.length !== 1) {
+          stranded.push(
+            `${map_name}.${legacy_key} resolved to ${resolved.length} keys`
+          )
+          continue
+        }
+        const [current_key] = resolved
+        const is_live =
+          Object.prototype.hasOwnProperty.call(
+            nfl_plays_column_params,
+            current_key
+          ) || is_adp_param(current_key)
+        if (!is_live) {
+          stranded.push(`${map_name}.${legacy_key} -> ${current_key}`)
+        }
+      }
+    }
+    expect(
+      stranded,
+      'legacy keys resolving to a name no registry carries'
+    ).to.deep.equal([])
   })
 })

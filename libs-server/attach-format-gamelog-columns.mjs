@@ -49,7 +49,7 @@ export default function attach_format_gamelog_columns({ query, league }) {
     })
     .select(
       'scoring_format_player_gamelogs.points',
-      'scoring_format_player_gamelogs.pos_rnk',
+      'scoring_format_player_gamelogs.position_rank',
       'league_format_player_gamelogs.points_added_earned',
       'league_format_player_gamelogs.points_added_net'
     )

@@ -1,7 +1,7 @@
 import db from '#db'
 
 // Point-in-time KTC value for a draft pick keyed by
-// (pick_year, pick_round, pick_draft_overall_position, num_teams, target_unix).
+// (pick_year, pick_round, pick_draft_overall_position, number_teams, target_unix).
 //
 // KTC publishes pick rankings as synthetic "players" registered in
 // `keeptradecut_pick` -- `(year, round, slot)` where slot is 1=Early / 2=Mid /
@@ -9,16 +9,16 @@ import db from '#db'
 // record in this database is 2023-09-08; pre-2023 trades therefore have no
 // direct KTC pick data and require an analog-year fallback.
 //
-// Slot derivation: thirds of `num_teams`, over the pick's position WITHIN its
+// Slot derivation: thirds of `number_teams`, over the pick's position WITHIN its
 // own round. For 10-team: positions 1-3 = Early, 4-7 = Mid, 8-10 = Late. For
 // 12-team: 1-4 = Early, 5-8 = Mid, 9-12 = Late.
 
 export const PICK_SLOT = { EARLY: 1, MID: 2, LATE: 3 }
 
-export const slot_from_position = (position_in_round, num_teams) => {
-  if (position_in_round == null || num_teams == null || num_teams <= 0)
+export const slot_from_position = (position_in_round, number_teams) => {
+  if (position_in_round == null || number_teams == null || number_teams <= 0)
     return null
-  const third = num_teams / 3
+  const third = number_teams / 3
   if (position_in_round <= third) return PICK_SLOT.EARLY
   if (position_in_round <= 2 * third) return PICK_SLOT.MID
   return PICK_SLOT.LATE
@@ -31,11 +31,15 @@ export const slot_from_position = (position_in_round, num_teams) => {
 // bucketing: overall 13 in a 10-team league is round 2 pick 3 -- an EARLY pick,
 // not the LATE one its raw overall rank buckets to. Passing the overall rank
 // straight through put every pick outside round 1 in the LATE slot, since an
-// overall rank in round 2 or beyond always exceeds two thirds of num_teams.
-const position_within_round = ({ overall_position, pick_round, num_teams }) => {
-  if (overall_position == null || pick_round == null || num_teams == null)
+// overall rank in round 2 or beyond always exceeds two thirds of number_teams.
+const position_within_round = ({
+  overall_position,
+  pick_round,
+  number_teams
+}) => {
+  if (overall_position == null || pick_round == null || number_teams == null)
     return null
-  return overall_position - (pick_round - 1) * num_teams
+  return overall_position - (pick_round - 1) * number_teams
 }
 
 // A pick for a future draft has no assigned overall position yet -- the order is
@@ -44,20 +48,20 @@ const position_within_round = ({ overall_position, pick_round, num_teams }) => {
 // dropped one whole side of any trade involving one. KTC itself quotes an
 // unassigned future pick at the middle tier, so that is the honest default.
 //
-// The same default covers a within-round position outside 1..num_teams, which
+// The same default covers a within-round position outside 1..number_teams, which
 // means the overall rank and the round disagree -- a pick recorded against a
 // league size it was not endowed under, say. Pricing that at the middle tier
 // beats pricing it at whichever edge the out-of-range value buckets to.
-const resolve_slot = ({ pick_overall_position, pick_round, num_teams }) => {
+const resolve_slot = ({ pick_overall_position, pick_round, number_teams }) => {
   if (pick_overall_position == null) return PICK_SLOT.MID
   const within_round = position_within_round({
     overall_position: pick_overall_position,
     pick_round,
-    num_teams
+    number_teams
   })
   if (within_round == null) return null
-  if (within_round < 1 || within_round > num_teams) return PICK_SLOT.MID
-  return slot_from_position(within_round, num_teams)
+  if (within_round < 1 || within_round > number_teams) return PICK_SLOT.MID
+  return slot_from_position(within_round, number_teams)
 }
 
 // Load all KTCPICK indexes once. Keys:
@@ -139,7 +143,7 @@ export const ktc_pick_at = ({
   pick_year,
   pick_round,
   pick_overall_position,
-  num_teams,
+  number_teams,
   target_unix,
   idx
 }) => {
@@ -147,7 +151,7 @@ export const ktc_pick_at = ({
   const slot = resolve_slot({
     pick_overall_position,
     pick_round,
-    num_teams
+    number_teams
   })
   if (slot == null) return null
 

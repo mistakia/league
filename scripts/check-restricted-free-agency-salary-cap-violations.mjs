@@ -158,7 +158,7 @@ const check_team_salary_cap = async ({ tid, lid, league }) => {
       )
 
       log(`   - Total salary: $${total_salary}`)
-      log(`   - Salary cap: $${league.cap}`)
+      log(`   - Salary cap: $${league.salary_cap}`)
       log(`   - Overage: $${overage}`)
       log(`   - Active players: ${active_players.length}`)
 

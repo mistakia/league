@@ -378,7 +378,7 @@ router.put('/:leagueId', async (req, res) => {
  *               name: "TEFLON LEAGUE"
  *               commishid: 5
  *               is_hosted: false
- *               num_teams: 14
+ *               number_teams: 14
  *               starter_slots_quarterback: 1
  *               starter_slots_running_back: 2
  *               starter_slots_wide_receiver: 3
@@ -389,7 +389,7 @@ router.put('/:leagueId', async (req, res) => {
  *               bench_slot_count: 6
  *               practice_squad_slot_count: 4
  *               reserve_short_term_limit: 3
- *               cap: 200
+ *               salary_cap: 200
  *               starting_faab_budget: 200
  *               years: [2022, 2023, 2024]
  *       400:
@@ -447,7 +447,7 @@ router.get('/:leagueId/?', async (req, res) => {
  *               name: "TEFLON LEAGUE"
  *               commishid: 5
  *               is_hosted: false
- *               num_teams: 14
+ *               number_teams: 14
  *               starter_slots_quarterback: 1
  *               starter_slots_running_back: 2
  *               starter_slots_wide_receiver: 3
@@ -458,7 +458,7 @@ router.get('/:leagueId/?', async (req, res) => {
  *               bench_slot_count: 6
  *               practice_squad_slot_count: 4
  *               reserve_short_term_limit: 3
- *               cap: 200
+ *               salary_cap: 200
  *               starting_faab_budget: 200
  *               league_format_id: "b5310a7f7c47c20ce372e47e8a0a188b22b78b1d34e2ea18829d94b94ffdc342"
  *               scoring_format_id: "eb75c8fd2acb21fea5d8754f53e9aa2e5d7c40327d5853c58592f658235ba756"

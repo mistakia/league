@@ -148,7 +148,7 @@ const router = express.Router({ mergeParams: true })
  *                     season_year: 2024
  *                     timestamp: 1698765432
  *                     pick: 15
- *                     pick_str: "2.03"
+ *                     pick_string: "2.03"
  *                   - uid: 12344
  *                     tid: 14
  *                     lid: 2
@@ -160,7 +160,7 @@ const router = express.Router({ mergeParams: true })
  *                     season_year: 2024
  *                     timestamp: 1698765400
  *                     pick: null
- *                     pick_str: null
+ *                     pick_string: null
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -192,7 +192,7 @@ router.get('/?', async (req, res) => {
             db.raw('?', [transaction_types.DRAFT])
           )
       })
-      .select('transactions.*', 'draft.pick', 'draft.pick_str')
+      .select('transactions.*', 'draft.pick', 'draft.pick_string')
       .where({ 'transactions.lid': leagueId })
       .orderBy('transactions.occurred_at', 'desc')
       .orderBy('transactions.uid', 'desc')
@@ -288,7 +288,7 @@ router.get('/?', async (req, res) => {
  *                     season_year: 2024
  *                     timestamp: 1698765000
  *                     pick: null
- *                     pick_str: null
+ *                     pick_string: null
  *                   - uid: 12349
  *                     tid: 14
  *                     lid: 2
@@ -300,7 +300,7 @@ router.get('/?', async (req, res) => {
  *                     season_year: 2024
  *                     timestamp: 1698764800
  *                     pick: null
- *                     pick_str: null
+ *                     pick_string: null
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
@@ -402,7 +402,7 @@ router.get('/release', async (req, res) => {
  *                       season_year: 2024
  *                       timestamp: 1698600000
  *                       pick: null
- *                       pick_str: null
+ *                       pick_string: null
  *                   sinceAcquisition:
  *                     - uid: 12340
  *                       tid: 13
@@ -415,7 +415,7 @@ router.get('/release', async (req, res) => {
  *                       season_year: 2024
  *                       timestamp: 1698600000
  *                       pick: null
- *                       pick_str: null
+ *                       pick_string: null
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */

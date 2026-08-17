@@ -200,13 +200,13 @@ describe('LIBS-SHARED restricted free agency windows', function () {
   })
 
   describe('nominating team rotation', function () {
-    const num_teams = 10
+    const number_teams = 10
 
     it('repeats descending draft order every round', () => {
       const order = [...Array(20)].map((ignore, window_index) =>
         get_restricted_free_agency_nominating_team_index({
           window_index,
-          num_teams
+          number_teams
         })
       )
 
@@ -225,13 +225,13 @@ describe('LIBS-SHARED restricted free agency windows', function () {
       for (let window_index = 0; window_index < 20; window_index++) {
         const team_index = get_restricted_free_agency_nominating_team_index({
           window_index,
-          num_teams
+          number_teams
         })
         slots_by_team[team_index] = slots_by_team[team_index] || []
         slots_by_team[team_index].push(window_index % 2)
       }
 
-      expect(Object.keys(slots_by_team).length).to.equal(num_teams)
+      expect(Object.keys(slots_by_team).length).to.equal(number_teams)
 
       for (const team_index of Object.keys(slots_by_team)) {
         expect(slots_by_team[team_index]).to.deep.equal(
@@ -242,14 +242,14 @@ describe('LIBS-SHARED restricted free agency windows', function () {
     })
 
     it('gives every team exactly one window per round', () => {
-      const first_round = [...Array(num_teams)].map((ignore, window_index) =>
+      const first_round = [...Array(number_teams)].map((ignore, window_index) =>
         get_restricted_free_agency_nominating_team_index({
           window_index,
-          num_teams
+          number_teams
         })
       )
 
-      expect([...new Set(first_round)].length).to.equal(num_teams)
+      expect([...new Set(first_round)].length).to.equal(number_teams)
     })
   })
 
@@ -266,7 +266,7 @@ describe('LIBS-SHARED restricted free agency windows', function () {
       restricted_free_agency_first_window_at: et_date('2026-08-01 17:00'),
       restricted_free_agency_window_hours: 12,
       restricted_free_agency_processing_lead_hours: 1,
-      num_teams: 2
+      number_teams: 2
     }
 
     const window_for = (team_id, current_timestamp) =>

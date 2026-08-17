@@ -32,7 +32,7 @@ const dynasty_superflex_league = {
   season: '2025',
   total_rosters: 12,
   previous_league_id: '1048178518657568768',
-  settings: { type: 2, num_teams: 12, taxi_slots: 4, best_ball: 0 },
+  settings: { type: 2, number_teams: 12, taxi_slots: 4, best_ball: 0 },
   roster_positions: [
     'QB',
     'RB',
@@ -177,7 +177,7 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
       expect(row.points_per_reception).to.equal(1)
       expect(row.tight_end_premium).to.equal(0.5)
       expect(row.passing_touchdown_points).to.equal(4)
-      expect(row.num_teams).to.equal(12)
+      expect(row.number_teams).to.equal(12)
       expect(row.taxi_slots).to.equal(4)
       expect(row.previous_external_league_id).to.equal('1048178518657568768')
       expect(row.discovered_via).to.equal('seed')
@@ -241,7 +241,7 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
       expect(parsed.trade.external_league_id).to.equal('1182953443152855040')
       expect(parsed.trade.season_year).to.equal(2025)
       expect(parsed.trade.platform_transaction_bucket).to.equal(1)
-      expect(parsed.trade.num_sides).to.equal(2)
+      expect(parsed.trade.number_sides).to.equal(2)
       expect(parsed.trade.processed_at.getTime()).to.equal(1757378217901)
     })
 
@@ -423,7 +423,7 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
         season_year: 2025,
         platform_transaction_bucket: 1
       })
-      expect(result.trade.num_sides).to.equal(3)
+      expect(result.trade.number_sides).to.equal(3)
       expect(result.legs).to.have.lengthOf(3)
     })
   })
@@ -758,7 +758,7 @@ describe('libs-server external-league-trades sleeper-trade-parser', function () 
         season_year: 2025,
         league_format: 'dynasty',
         is_superflex: true,
-        num_teams: 12,
+        number_teams: 12,
         previous_external_league_id: '1048178518657568768'
       })
     })

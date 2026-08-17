@@ -57,7 +57,9 @@ describe('SCRIPTS - restricted free agency processing pause', function () {
         restricted_free_agency_period_end: regular_season_start
           .subtract('1', 'month')
           .toDate(),
-        ext_date: regular_season_start.subtract('4', 'month').toDate(),
+        extension_deadline_at: regular_season_start
+          .subtract('4', 'month')
+          .toDate(),
         restricted_free_agency_first_window_at: dayjs.unix(tran_date).toDate(),
         restricted_free_agency_window_hours: 24,
         restricted_free_agency_processing_lead_hours: 3,

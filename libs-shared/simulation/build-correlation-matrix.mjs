@@ -22,7 +22,7 @@ const log = debug('simulation:build-correlation-matrix')
 
 /**
  * Get normalized cache key for correlation lookup.
- * Enforces pid_a < pid_b ordering to match database constraint.
+ * Enforces pid_first < pid_second ordering to match database constraint.
  *
  * @param {Object} params
  * @param {string} params.player_id_a - First player ID
@@ -263,18 +263,18 @@ export function build_correlation_matrix({
  * @param {Object} params
  * @param {number[][]} params.matrix - Correlation matrix
  * @param {Map} params.player_indices - Map of pid -> index
- * @param {string} params.pid_a - First player ID
- * @param {string} params.pid_b - Second player ID
+ * @param {string} params.pid_first - First player ID
+ * @param {string} params.pid_second - Second player ID
  * @returns {number|null} Correlation value or null if player not in matrix
  */
 export function get_correlation_from_matrix({
   matrix,
   player_indices,
-  pid_a,
-  pid_b
+  pid_first,
+  pid_second
 }) {
-  const index_a = player_indices.get(pid_a)
-  const index_b = player_indices.get(pid_b)
+  const index_a = player_indices.get(pid_first)
+  const index_b = player_indices.get(pid_second)
 
   if (index_a === undefined || index_b === undefined) {
     return null

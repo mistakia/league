@@ -25,7 +25,7 @@ const calculateStatsFromPlayStats = (playStats) => {
   stats.recv_yards_15_plus_count = 0
   stats.longest_rush = 0
   stats.rush_attempts_redzone = 0
-  stats.rush_attempts_goaline = 0
+  stats.rush_attempts_goal_line = 0
 
   // New statistics for fantasy points support
   stats.rushing_first_downs = 0
@@ -108,7 +108,7 @@ const calculateStatsFromPlayStats = (playStats) => {
           stats.rush_attempts_redzone += 1
         }
         if (playStat.yard_line_100 <= 5) {
-          stats.rush_attempts_goaline += 1
+          stats.rush_attempts_goal_line += 1
         }
         break
 
@@ -132,7 +132,7 @@ const calculateStatsFromPlayStats = (playStats) => {
           stats.rush_attempts_redzone += 1
         }
         if (playStat.yard_line_100 <= 5) {
-          stats.rush_attempts_goaline += 1
+          stats.rush_attempts_goal_line += 1
         }
         stats.rushing_touchdowns += 1
         break

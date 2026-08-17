@@ -110,10 +110,10 @@ const scoring_format_player_careerlogs_source = {
 // produces a multi-row window for them -- they keep the SUM default untouched.
 const SCORING_FORMAT_SEASONLOGS_RANGE_OFFSET_AGGREGATE = {
   points_per_game: 'AVG',
-  points_rnk: 'AVG',
-  points_pos_rnk: 'AVG',
-  points_per_game_rnk: 'AVG',
-  points_per_game_pos_rnk: 'AVG'
+  points_rank: 'AVG',
+  points_position_rank: 'AVG',
+  points_per_game_rank: 'AVG',
+  points_per_game_position_rank: 'AVG'
 }
 
 const create_field_from_scoring_format_player_seasonlogs = (column_name) => ({
@@ -145,14 +145,14 @@ export default {
   player_fantasy_points_per_game_from_seasonlogs:
     create_field_from_scoring_format_player_seasonlogs('points_per_game'),
   player_fantasy_points_rank_from_seasonlogs:
-    create_field_from_scoring_format_player_seasonlogs('points_rnk'),
+    create_field_from_scoring_format_player_seasonlogs('points_rank'),
   player_fantasy_points_position_rank_from_seasonlogs:
-    create_field_from_scoring_format_player_seasonlogs('points_pos_rnk'),
+    create_field_from_scoring_format_player_seasonlogs('points_position_rank'),
   player_fantasy_points_per_game_rank_from_seasonlogs:
-    create_field_from_scoring_format_player_seasonlogs('points_per_game_rnk'),
+    create_field_from_scoring_format_player_seasonlogs('points_per_game_rank'),
   player_fantasy_points_per_game_position_rank_from_seasonlogs:
     create_field_from_scoring_format_player_seasonlogs(
-      'points_per_game_pos_rnk'
+      'points_per_game_position_rank'
     ),
 
   player_fantasy_points_from_careerlogs:

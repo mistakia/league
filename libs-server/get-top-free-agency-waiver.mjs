@@ -29,7 +29,7 @@ export default async function (leagueId) {
       'waivers.userid',
       'waivers.type as waiver_type',
       'nfl_games.date',
-      'nfl_games.time_est'
+      'nfl_games.time_eastern'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
     .join('player', 'waivers.pid', 'player.pid')
@@ -69,7 +69,7 @@ export default async function (leagueId) {
   const filtered = waiver_rows.filter((waiver_row_player) => {
     if (!waiver_row_player.date) return true
     const gameStart = dayjs.tz(
-      `${waiver_row_player.date} ${waiver_row_player.time_est}`,
+      `${waiver_row_player.date} ${waiver_row_player.time_eastern}`,
       'YYYY/MM/DD HH:mm:SS',
       'America/New_York'
     )

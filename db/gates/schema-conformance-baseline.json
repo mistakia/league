@@ -1,18 +1,8 @@
 {
   "note": "Checked-in ratchet baseline for db/tools/audit-schema-conformance.mjs, enforced by db/gates/check-schema-conformance-ratchet.mjs in CI. Regenerate with `node db/gates/check-schema-conformance-ratchet.mjs --rebaseline` -- never hand-edit. Clearing a violation needs no edit here; only a deliberate widening of the audit (a new rule, a broadened heuristic) should add entries.",
   "generated_at": "2026-08-17T01:37:59.701Z",
-  "count": 236,
+  "count": 171,
   "violations": [
-    {
-      "table": "adp_format",
-      "column": "num_quarterback",
-      "rule": "shorthand"
-    },
-    {
-      "table": "adp_format",
-      "column": "num_teams",
-      "rule": "shorthand"
-    },
     {
       "table": "composite_market_value_blend_weights",
       "column": "adp_weight",
@@ -21,16 +11,6 @@
     {
       "table": "composite_market_value_daily",
       "column": "adp_value",
-      "rule": "shorthand"
-    },
-    {
-      "table": "composite_market_value_daily",
-      "column": "cmv_row_id",
-      "rule": "shorthand"
-    },
-    {
-      "table": "draft",
-      "column": "pick_str",
       "rule": "shorthand"
     },
     {
@@ -374,16 +354,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "external_league_trades",
-      "column": "num_sides",
-      "rule": "shorthand"
-    },
-    {
-      "table": "external_leagues",
-      "column": "num_teams",
-      "rule": "shorthand"
-    },
-    {
       "table": "format_category_signal_mapping",
       "column": "adp_format_id",
       "rule": "shorthand"
@@ -401,16 +371,6 @@
     {
       "table": "league_format_player_projection_values",
       "column": "pts_added",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_formats",
-      "column": "cap",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_formats",
-      "column": "num_teams",
       "rule": "shorthand"
     },
     {
@@ -459,16 +419,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "league_team_careerlogs",
-      "column": "num_byes",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_team_careerlogs",
-      "column": "num_seasons",
-      "rule": "shorthand"
-    },
-    {
       "table": "league_team_player_seasonlogs",
       "column": "pts_added_earned_optimal",
       "rule": "shorthand"
@@ -500,16 +450,6 @@
     },
     {
       "table": "league_user_careerlogs",
-      "column": "num_byes",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_user_careerlogs",
-      "column": "num_seasons",
-      "rule": "shorthand"
-    },
-    {
-      "table": "league_user_careerlogs",
       "column": "userid",
       "rule": "shorthand"
     },
@@ -519,93 +459,13 @@
       "rule": "shorthand"
     },
     {
-      "table": "nfl_games",
-      "column": "time_est",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_games",
-      "column": "time_tz_offset",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "ep_result",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "pos_score_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "pos_score",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_current_week",
-      "column": "pos_timeouts_remaining",
-      "rule": "shorthand"
-    },
-    {
       "table": "nfl_plays_current_week",
       "column": "recv_yards",
       "rule": "shorthand"
     },
     {
-      "table": "nfl_plays_current_week",
-      "column": "yard_line_num",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays_player",
-      "column": "in_play_dist",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "ep_ngs",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "ep_result",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "num_high_safeties",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "num_shifted_players",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "pos_score_post",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "pos_score",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "pos_timeouts_remaining",
-      "rule": "shorthand"
-    },
-    {
       "table": "nfl_plays",
       "column": "recv_yards",
-      "rule": "shorthand"
-    },
-    {
-      "table": "nfl_plays",
-      "column": "yard_line_num",
       "rule": "shorthand"
     },
     {
@@ -694,11 +554,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "pff_player_seasonlogs",
-      "column": "field_goal_ep_kicker",
-      "rule": "shorthand"
-    },
-    {
       "table": "placed_wagers",
       "column": "userid",
       "rule": "shorthand"
@@ -724,86 +579,6 @@
       "rule": "shorthand"
     },
     {
-      "table": "player_college_careerlogs",
-      "column": "broken_missed_tackles_per_100db",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_careerlogs",
-      "column": "broken_tackles_per_100touches",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_careerlogs",
-      "column": "dropped_int",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_careerlogs",
-      "column": "fumbles_per_100touches",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_careerlogs",
-      "column": "missed_tackles_per_100touches",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_careerlogs",
-      "column": "vert_jump_is_pro_day",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_careerlogs",
-      "column": "vert_jump_is_unofficial",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_careerlogs",
-      "column": "vert_jump",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
-      "column": "broken_missed_tackles_per_100db",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
-      "column": "broken_tackles_per_100touches",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
-      "column": "dropped_int",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
-      "column": "fumbles_per_100touches",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
-      "column": "missed_tackles_per_100touches",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
-      "column": "vert_jump_is_pro_day",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
-      "column": "vert_jump_is_unofficial",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_college_seasonlogs",
-      "column": "vert_jump",
-      "rule": "shorthand"
-    },
-    {
       "table": "player_defender_gamelogs",
       "column": "recv_touchdowns_nearest_defender",
       "rule": "shorthand"
@@ -811,41 +586,6 @@
     {
       "table": "player_defender_gamelogs",
       "column": "recv_yards_nearest_defender",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_game_outcome_correlations",
-      "column": "leading_fpg",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_game_outcome_correlations",
-      "column": "overall_fpg",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_game_outcome_correlations",
-      "column": "trailing_fpg",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_pair_correlations",
-      "column": "nfl_team_a",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_pair_correlations",
-      "column": "nfl_team_b",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_pair_correlations",
-      "column": "pid_a",
-      "rule": "shorthand"
-    },
-    {
-      "table": "player_pair_correlations",
-      "column": "pid_b",
       "rule": "shorthand"
     },
     {
@@ -939,18 +679,8 @@
       "rule": "shorthand"
     },
     {
-      "table": "player_rushing_gamelogs",
-      "column": "rush_attempts_goaline",
-      "rule": "shorthand"
-    },
-    {
       "table": "player_seasonlogs",
       "column": "espn_rtm_recv_yards",
-      "rule": "shorthand"
-    },
-    {
-      "table": "players_status",
-      "column": "exp_return",
       "rule": "shorthand"
     },
     {
@@ -984,28 +714,8 @@
       "rule": "shorthand"
     },
     {
-      "table": "props_index",
-      "column": "o_am",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props_index",
-      "column": "u_am",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props",
-      "column": "o_am",
-      "rule": "shorthand"
-    },
-    {
       "table": "props",
       "column": "sourceid",
-      "rule": "shorthand"
-    },
-    {
-      "table": "props",
-      "column": "u_am",
       "rule": "shorthand"
     },
     {
@@ -1026,11 +736,6 @@
     {
       "table": "roster_asset_holding",
       "column": "projected_pts_added_remaining_at_termination",
-      "rule": "shorthand"
-    },
-    {
-      "table": "roster_asset_holding",
-      "column": "ps_slot_subtype",
       "rule": "shorthand"
     },
     {
@@ -1056,36 +761,6 @@
     {
       "table": "roster_asset_holding",
       "column": "realized_pts_added_net_through_termination",
-      "rule": "shorthand"
-    },
-    {
-      "table": "scoring_format_player_gamelogs",
-      "column": "pos_rnk",
-      "rule": "shorthand"
-    },
-    {
-      "table": "scoring_format_player_seasonlogs",
-      "column": "points_per_game_pos_rnk",
-      "rule": "shorthand"
-    },
-    {
-      "table": "scoring_format_player_seasonlogs",
-      "column": "points_per_game_rnk",
-      "rule": "shorthand"
-    },
-    {
-      "table": "scoring_format_player_seasonlogs",
-      "column": "points_pos_rnk",
-      "rule": "shorthand"
-    },
-    {
-      "table": "scoring_format_player_seasonlogs",
-      "column": "points_rnk",
-      "rule": "shorthand"
-    },
-    {
-      "table": "seasons",
-      "column": "ext_date",
       "rule": "shorthand"
     },
     {

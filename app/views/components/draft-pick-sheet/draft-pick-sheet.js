@@ -189,7 +189,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
         const pick_data = {
           ...historical_pick.toJS(),
           pick: historical_pick.get('pick'),
-          pick_str: historical_pick.get('pick_str'),
+          pick_string: historical_pick.get('pick_string'),
           tid: historical_pick.get('tid')
         }
         return (

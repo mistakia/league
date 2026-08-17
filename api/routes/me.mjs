@@ -143,7 +143,7 @@ const router = express.Router()
  *                   leagues:
  *                     - uid: 2
  *                       name: 'TEFLON LEAGUE'
- *                       num_teams: 14
+ *                       number_teams: 14
  *                       years: [2020, 2021, 2022, 2023, 2024]
  *                       division_1_name: 'NFC North'
  *                       division_2_name: 'AFC South'

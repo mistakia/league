@@ -46,7 +46,7 @@ const generate_scoring_format_title = (scoring_format) => {
 
 const generate_league_formats = async () => {
   const options = {
-    num_teams: [10, 12],
+    number_teams: [10, 12],
     starter_slots_quarterback: [1],
     starter_slots_running_back: [2],
     starter_slots_wide_receiver: [2],
@@ -88,7 +88,7 @@ const generate_league_formats = async () => {
     rushing_first_downs: [0],
     receiving_first_downs: [0],
     is_excluding_quarterback_kneels: [false],
-    cap: [200],
+    salary_cap: [200],
     min_bid: [0]
   }
 
@@ -153,7 +153,7 @@ const generate_league_formats = async () => {
   })
 
   const extract_league = (c) => ({
-    num_teams: c.num_teams,
+    number_teams: c.number_teams,
     starter_slots_quarterback: c.starter_slots_quarterback,
     starter_slots_running_back: c.starter_slots_running_back,
     starter_slots_wide_receiver: c.starter_slots_wide_receiver,
@@ -169,7 +169,7 @@ const generate_league_formats = async () => {
     bench_slot_count: c.bench_slot_count,
     practice_squad_slot_count: c.practice_squad_slot_count,
     reserve_short_term_limit: c.reserve_short_term_limit,
-    cap: c.cap,
+    salary_cap: c.salary_cap,
     min_bid: c.min_bid
   })
 

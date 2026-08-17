@@ -133,7 +133,7 @@ export default class SleeperAdapter extends BaseAdapter {
       name: league_data.name,
       year: Number(league_data.season),
       settings: {
-        num_teams: league_data.total_rosters,
+        number_teams: league_data.total_rosters,
         season_type: this.map_season_type(league_data.settings),
         playoff_teams: league_data.settings?.playoff_teams || 6,
         playoff_week_start: league_data.settings?.playoff_week_start || 15,

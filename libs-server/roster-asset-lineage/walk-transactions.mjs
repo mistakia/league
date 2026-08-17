@@ -64,7 +64,7 @@ import {
 // team the chain lands on after the last accepted trade must equal `draft.tid`.
 // The identity-preserving way to restate draft order is to fix
 // `teams.draft_order` and re-run scripts/set-draft-pick-number.mjs, which
-// derives `pick`/`pick_str` from `draft.original_team_id` keyed on `draft.uid`.
+// derives `pick`/`pick_string` from `draft.original_team_id` keyed on `draft.uid`.
 //   Unhandled flows (super-priority chains, decommission_reassignment,
 //   failed_poach_sanctuary, auto_cap_release, season_rollover for picks):
 //   accumulated as coverage_warnings; surfaced by the generator's row-count

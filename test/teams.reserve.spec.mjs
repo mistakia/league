@@ -696,7 +696,7 @@ describe('API /teams - reserve', function () {
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
-        time_est: '13:00:00',
+        time_eastern: '13:00:00',
         kickoff_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000) // 3 days from now (Sunday)
       })
 
@@ -789,7 +789,7 @@ describe('API /teams - reserve', function () {
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
-        time_est: '13:00:00',
+        time_eastern: '13:00:00',
         kickoff_at: new Date(1640700000 * 1000) // Static kickoff for current week game
       })
 
@@ -880,7 +880,7 @@ describe('API /teams - reserve', function () {
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
-        time_est: '13:00:00',
+        time_eastern: '13:00:00',
         kickoff_at: new Date(1640700000 * 1000) // Static kickoff for current week game
       })
 
@@ -969,7 +969,7 @@ describe('API /teams - reserve', function () {
         home_nfl_team: player.current_nfl_team,
         away_nfl_team: 'OPP',
         date: gameDate.format('YYYY/MM/DD'),
-        time_est: '20:15:00',
+        time_eastern: '20:15:00',
         kickoff_at: new Date(1640700000 * 1000) // Static kickoff for current week game
       })
 

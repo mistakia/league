@@ -160,7 +160,7 @@ export const calculate_time_remaining = (qtr, seconds_remaining_quarter) => {
 export const parse_yardline = (location, pos_team) => {
   if (!location || !location.yardline) return {}
 
-  const yard_line_num = location.yardline
+  const yard_line_number = location.yardline
   const yard_line_side = location.alias
 
   // Normalize team abbreviation (JAC → JAX, etc.) for comparison
@@ -169,15 +169,17 @@ export const parse_yardline = (location, pos_team) => {
   // Calculate 100-yard scale per nflfastR convention:
   // 0 = at opponent's goal line, 100 = at own goal line
   const yard_line_100 =
-    normalized_ydl_side === pos_team ? 100 - yard_line_num : yard_line_num
+    normalized_ydl_side === pos_team ? 100 - yard_line_number : yard_line_number
 
   // Build raw yardline string
   const raw_ydl_str =
-    yard_line_num === 50 ? '50' : `${normalized_ydl_side} ${yard_line_num}`
+    yard_line_number === 50
+      ? '50'
+      : `${normalized_ydl_side} ${yard_line_number}`
 
   return {
-    yard_line_side: yard_line_num === 50 ? null : normalized_ydl_side,
-    yard_line_num,
+    yard_line_side: yard_line_number === 50 ? null : normalized_ydl_side,
+    yard_line_number,
     yard_line_100,
     ydl_str: normalize_yardline(raw_ydl_str)
   }

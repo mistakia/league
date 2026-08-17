@@ -286,14 +286,14 @@ describe('roster salary consumer contract', function () {
   // and really does not expose `value`. Cheap to pin, and it is what makes a
   // `.value` read a defect rather than a style preference.
   describe('Roster player shape', function () {
-    // `ext_date` in the past puts the roster on the recorded-salary basis, so
+    // `extension_deadline_at` in the past puts the roster on the recorded-salary basis, so
     // the arithmetic below is the stored salary rather than extension pricing.
     // That is the basis the four consumers read; extension pricing has its own
     // coverage in libs-shared.get-extension-amount.spec.mjs.
     const league = {
-      ext_date: new Date(1577854800 * 1000), // 2020-01-01
-      cap: 200,
-      num_teams: 12,
+      extension_deadline_at: new Date(1577854800 * 1000), // 2020-01-01
+      salary_cap: 200,
+      number_teams: 12,
       sqb: 1,
       srb: 2,
       swr: 2,
@@ -376,7 +376,7 @@ describe('roster salary consumer contract', function () {
       )
       // QB-1 (34) and QB-2 (11) are active; the practice-squad player is not.
       expect(total).to.equal(45)
-      expect(roster.availableCap).to.equal(league.cap - total)
+      expect(roster.availableCap).to.equal(league.salary_cap - total)
     })
   })
 })

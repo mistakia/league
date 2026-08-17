@@ -143,8 +143,9 @@ const calculate_player_game_outcome_correlations = async ({
       .filter((g) => g.is_trailing)
       .reduce((sum, g) => sum + g.points, 0)
 
-    const leading_fpg = leading_games > 0 ? leading_points / leading_games : 0
-    const trailing_fpg =
+    const leading_fantasy_points_per_game =
+      leading_games > 0 ? leading_points / leading_games : 0
+    const trailing_fantasy_points_per_game =
       trailing_games > 0 ? trailing_points / trailing_games : 0
 
     // Calculate confidence (0-1) based on sample size
@@ -168,9 +169,11 @@ const calculate_player_game_outcome_correlations = async ({
       games_sample: games.length,
       leading_games,
       trailing_games,
-      leading_fpg: leading_fpg.toFixed(2),
-      trailing_fpg: trailing_fpg.toFixed(2),
-      overall_fpg: mean_points.toFixed(2),
+      leading_fantasy_points_per_game:
+        leading_fantasy_points_per_game.toFixed(2),
+      trailing_fantasy_points_per_game:
+        trailing_fantasy_points_per_game.toFixed(2),
+      overall_fantasy_points_per_game: mean_points.toFixed(2),
       confidence: confidence.toFixed(3),
       calculated_at: new Date()
     })

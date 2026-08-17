@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 
 export default function getGameDayAbbreviation({
   date,
-  time_est,
+  time_eastern,
   week_type,
   seas_type
 }) {
@@ -14,12 +14,12 @@ export default function getGameDayAbbreviation({
     return week_type
   }
 
-  if (!date || !time_est) {
+  if (!date || !time_eastern) {
     return null
   }
 
   const gameDate = dayjs.tz(
-    `${date} ${time_est}`,
+    `${date} ${time_eastern}`,
     'YYYY/MM/DD HH:mm:SS',
     'America/New_York'
   )

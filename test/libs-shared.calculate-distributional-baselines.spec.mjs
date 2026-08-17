@@ -13,7 +13,7 @@ const expect = chai.expect
 
 // A two-team league: one QB, one RB, one WR, one TE and one superflex per team.
 const two_team_league = {
-  num_teams: 2,
+  number_teams: 2,
   starter_slots_quarterback: 1,
   starter_slots_running_back: 1,
   starter_slots_wide_receiver: 1,

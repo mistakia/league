@@ -196,7 +196,7 @@ export const get_trade = async (req, res) => {
         'trades_picks.*',
         'draft.uid',
         'draft.pick',
-        'draft.pick_str',
+        'draft.pick_string',
         'draft.round',
         'draft.season_year',
         'draft.lid',
@@ -327,7 +327,7 @@ export const get_trade = async (req, res) => {
  *                       season_year: 2025
  *                       round: 1
  *                       pick: 4
- *                       pick_str: "1.04"
+ *                       pick_string: "1.04"
  *                       original_team_id: 13
  *                       pid: null
  *                   proposingTeamReleasePlayers: []
@@ -1127,20 +1127,20 @@ router.post(
       )
       for (const pick of picks) {
         const pick_team = teams.find((t) => t.uid === pick.original_team_id)
-        let pick_str = pick.pick_str
-          ? `${pick.pick_str}`
+        let pick_string = pick.pick_string
+          ? `${pick.pick_string}`
           : `${pick.season_year} ${pick.round}${nth(pick.round)}`
 
         if (pick_team) {
-          pick_str = `${pick_str} (${pick_team.name})`
+          pick_string = `${pick_string} (${pick_team.name})`
         }
 
         // pick.tid is the team the pick belongs to
         const pickTradeInfo = pickRows.find((p) => p.pickid === pick.uid)
         if (pickTradeInfo.tid === trade.propose_tid) {
-          proposingTeamItems.push(pick_str)
+          proposingTeamItems.push(pick_string)
         } else {
-          acceptingTeamItems.push(pick_str)
+          acceptingTeamItems.push(pick_string)
         }
       }
       const proposingTeamStr = toStringArray(proposingTeamItems)

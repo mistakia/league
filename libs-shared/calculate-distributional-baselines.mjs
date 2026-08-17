@@ -103,7 +103,7 @@ const slot_accepts = (slot, position) => slot.includes(position)
 export const build_league_starting_slots = ({ league }) => {
   const per_team = get_eligible_slots({ pos: 'ALL', league })
   const slots = []
-  for (let team = 0; team < league.num_teams; team++) {
+  for (let team = 0; team < league.number_teams; team++) {
     for (const slot of per_team) {
       if (fantasy_positions.some((position) => slot_accepts(slot, position))) {
         slots.push(slot)

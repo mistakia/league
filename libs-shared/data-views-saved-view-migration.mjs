@@ -204,7 +204,7 @@ export const PLAYS_LOCAL_PARAM_RENAMES = {
   home_wp_post: 'home_win_probability_post',
   n_offense_backfield: 'number_offense_backfield',
   pass_oe: 'pass_over_expected',
-  pos_to_rem: 'pos_timeouts_remaining',
+  pos_to_rem: 'possession_timeouts_remaining',
   ret_yds: 'return_yds',
   score_diff: 'score_difference',
   score_diff_post: 'score_difference_post',
@@ -218,7 +218,7 @@ export const PLAYS_LOCAL_PARAM_RENAMES = {
   xyac_fd_prob: 'xyac_first_down_prob',
   xyac_succ_prob: 'xyac_success_prob',
   ydl_100: 'yard_line_100',
-  ydl_num: 'yard_line_num'
+  ydl_num: 'yard_line_number'
 }
 
 // Side-of-the-ball prefixes, renamed by the 2026-08-16 conform
@@ -246,7 +246,7 @@ export const PLAYS_LOCAL_PARAM_RENAMES = {
 // persist. The rest are physical columns behind semantic column ids, and no
 // column id embeds a position code, so nothing moves in COLUMN_ID_RENAMES.
 export const POSITION_CODE_PARAM_RENAMES = {
-  num_qb: 'num_quarterback'
+  num_qb: 'number_quarterback'
 }
 
 // Counting-stat vocabulary, renamed by the 2026-08-17 conform
@@ -343,6 +343,22 @@ export const SIDE_PREFIX_PARAM_RENAMES = {
   def_score_post: 'defense_score_post',
   def_timeouts_remaining: 'defense_timeouts_remaining',
   off_personnel: 'offense_personnel'
+}
+
+// The 2026-08-17 long-tail conform. Five of its nfl_plays renames are live play
+// FILTER params, so a saved view carrying one drops that filter silently
+// without a rule here -- the `qtr` and `dwn` failure the gate exists to catch.
+// The other 41 columns in that batch back no param key.
+//
+// `pos_score` / `pos_score_post` / `pos_timeouts_remaining` chain off the side
+// batch's `def_score` family: both sides of the possession/defense pair now
+// spell their side in full.
+export const LONG_TAIL_PARAM_RENAMES = {
+  ep_result: 'extra_point_result',
+  pos_score: 'possession_score',
+  pos_score_post: 'possession_score_post',
+  pos_timeouts_remaining: 'possession_timeouts_remaining',
+  yard_line_num: 'yard_line_number'
 }
 
 // scoring_format_hash -> scoring_format_id, stranded by the format-id migration
@@ -544,7 +560,8 @@ const PARAM_KEY_RENAMES = {
   ...SIDE_PREFIX_PARAM_RENAMES,
   ...POSITION_CODE_PARAM_RENAMES,
   ...COUNTING_STAT_PARAM_RENAMES,
-  ...MARKETS_PARAM_RENAMES
+  ...MARKETS_PARAM_RENAMES,
+  ...LONG_TAIL_PARAM_RENAMES
 }
 
 // Every legacy param key this module rewrites at read time, exported so

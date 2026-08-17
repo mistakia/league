@@ -13,7 +13,8 @@ const map_state_to_props = createSelector(
   (state, props) => props.tid,
   get_current_league,
   (league_team_daily_values, tid, league) => {
-    const league_total_due_amount = league.num_teams * league.season_due_amount
+    const league_total_due_amount =
+      league.number_teams * league.season_due_amount
     const filtered_values = league_team_daily_values
       .get(tid, new List())
       .filter((item) => item.timestamp > timestamp_1y_cutoff)

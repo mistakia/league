@@ -16,7 +16,7 @@ export default async function ({
   down_number,
   yards_to_go,
   play_type,
-  yard_line_num,
+  yard_line_number,
   yard_line_side,
   yard_line_100,
   seconds_remaining_quarter
@@ -63,8 +63,8 @@ export default async function ({
     query.where({ play_type })
   }
 
-  if (yard_line_num) {
-    query.where({ yard_line_num })
+  if (yard_line_number) {
+    query.where({ yard_line_number })
   }
 
   if (yard_line_side) {

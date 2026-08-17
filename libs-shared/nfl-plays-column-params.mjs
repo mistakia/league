@@ -320,7 +320,7 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
 
-  yard_line_num: {
+  yard_line_number: {
     label: 'Yardline (from 50)',
     short_label: 'YL from 50',
     show_key_in_short: true,
@@ -1872,7 +1872,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
-  ep_result: {
+  extra_point_result: {
     values: ['blocked', 'failed', 'good'],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
@@ -1904,7 +1904,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
-  pos_timeouts_remaining: {
+  possession_timeouts_remaining: {
     label: 'Possession TOs Remaining',
     short_label: 'Pos TO',
     show_key_in_short: true,
@@ -1948,7 +1948,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
-  pos_score: {
+  possession_score: {
     label: 'Possession Team Score',
     short_label: 'Pos Score',
     show_key_in_short: true,
@@ -1975,7 +1975,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.SCORE],
     preset_values: score_diff_preset_values
   },
-  pos_score_post: {
+  possession_score_post: {
     label: 'Possession Score (post)',
     short_label: 'Pos post',
     show_key_in_short: true,

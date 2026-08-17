@@ -29,7 +29,7 @@ const nfl_play_fields = [
   'play_description',
   'play_description_nflfastr',
 
-  'yard_line_num',
+  'yard_line_number',
   'yard_line_side',
   'yard_line_start',
   'yard_line_end',
@@ -293,23 +293,23 @@ const nfl_play_fields = [
 
   'field_goal_result',
   'kick_distance',
-  'ep_result',
+  'extra_point_result',
   'two_point_result',
   'is_punt_blocked',
 
   'home_timeouts_remaining',
   'away_timeouts_remaining',
-  'pos_timeouts_remaining',
+  'possession_timeouts_remaining',
   'defense_timeouts_remaining',
   'is_timeout',
   'timeout_team',
 
   'home_score',
   'away_score',
-  'pos_score',
+  'possession_score',
   'defense_score',
   'score_difference',
-  'pos_score_post',
+  'possession_score_post',
   'defense_score_post',
   'score_difference_post',
 

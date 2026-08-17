@@ -13,8 +13,8 @@ import { format_date_et } from './markdown.mjs'
  */
 export function resolve_salary_basis({ league, year }) {
   const before_deadline = is_before_extension_deadline({ league })
-  const deadline = league.ext_date
-    ? format_date_et(timestamptz_to_epoch(league.ext_date))
+  const deadline = league.extension_deadline_at
+    ? format_date_et(timestamptz_to_epoch(league.extension_deadline_at))
     : 'not configured'
 
   return {

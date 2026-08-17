@@ -11,7 +11,7 @@ const log = debug('simulation:load-player-game-outcome-correlations')
  * @param {string[]} params.player_ids - Array of player IDs to load correlations for
  * @param {number} params.year - Year for correlation data
  * @param {string} [params.outcome_type='game_script'] - Type of outcome correlation
- * @returns {Promise<Map>} Map of pid -> { correlation, confidence, leading_fpg, trailing_fpg }
+ * @returns {Promise<Map>} Map of pid -> { correlation, confidence, leading_fantasy_points_per_game, trailing_fantasy_points_per_game }
  */
 export async function load_player_game_outcome_correlations({
   player_ids,
@@ -40,9 +40,9 @@ export async function load_player_game_outcome_correlations({
       'games_sample',
       'leading_games',
       'trailing_games',
-      'leading_fpg',
-      'trailing_fpg',
-      'overall_fpg'
+      'leading_fantasy_points_per_game',
+      'trailing_fantasy_points_per_game',
+      'overall_fantasy_points_per_game'
     )
 
   // Deduplicate by player (prefer more recent year)
@@ -61,9 +61,15 @@ export async function load_player_game_outcome_correlations({
       games_sample: row.games_sample,
       leading_games: row.leading_games,
       trailing_games: row.trailing_games,
-      leading_fpg: parseFloat(row.leading_fpg),
-      trailing_fpg: parseFloat(row.trailing_fpg),
-      overall_fpg: parseFloat(row.overall_fpg),
+      leading_fantasy_points_per_game: parseFloat(
+        row.leading_fantasy_points_per_game
+      ),
+      trailing_fantasy_points_per_game: parseFloat(
+        row.trailing_fantasy_points_per_game
+      ),
+      overall_fantasy_points_per_game: parseFloat(
+        row.overall_fantasy_points_per_game
+      ),
       data_year: row.season_year
     })
   }

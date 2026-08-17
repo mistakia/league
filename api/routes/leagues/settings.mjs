@@ -13,13 +13,13 @@ const router = express.Router()
  *           type: string
  *           description: League name
  *           example: "Dynasty Warriors League"
- *         num_teams:
+ *         number_teams:
  *           type: integer
  *           minimum: 4
  *           maximum: 32
  *           description: Number of teams in the league
  *           example: 12
- *         cap:
+ *         salary_cap:
  *           type: integer
  *           minimum: 0
  *           description: Salary cap limit
@@ -132,12 +132,12 @@ const router = express.Router()
  *           type: string
  *           description: League name
  *           example: "Dynasty Warriors League"
- *         num_teams:
+ *         number_teams:
  *           type: integer
  *           minimum: 4
  *           maximum: 32
  *           description: Number of teams in the league
- *         cap:
+ *         salary_cap:
  *           type: integer
  *           minimum: 0
  *           description: Salary cap limit
@@ -207,8 +207,8 @@ const router = express.Router()
  *                 summary: Complete league configuration
  *                 value:
  *                   name: "Dynasty Warriors League"
- *                   num_teams: 12
- *                   cap: 200
+ *                   number_teams: 12
+ *                   salary_cap: 200
  *                   starting_faab_budget: 100
  *                   starter_slots_quarterback: 1
  *                   starter_slots_running_back: 2
@@ -303,7 +303,7 @@ const router = express.Router()
  *             budget_update:
  *               summary: Update financial settings
  *               value:
- *                 cap: 250
+ *                 salary_cap: 250
  *                 starting_faab_budget: 150
  *     responses:
  *       200:

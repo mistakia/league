@@ -52,7 +52,7 @@ describe('LIBS-SERVER simulation integration', function () {
         season_type: 'REG',
         away_nfl_team: 'DEN',
         home_nfl_team: 'KC',
-        time_est: '13:00:00'
+        time_eastern: '13:00:00'
       })
     })
 
@@ -283,7 +283,7 @@ describe('LIBS-SERVER simulation integration', function () {
         season_type: 'REG',
         away_nfl_team: 'DEN',
         home_nfl_team: 'KC',
-        time_est: '13:00:00'
+        time_eastern: '13:00:00'
       })
     })
 

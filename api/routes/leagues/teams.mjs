@@ -519,7 +519,7 @@ router.post('/?', async (req, res) => {
       lid: leagueId,
       season_year: current_season.year
     })
-    if (teams.length >= league.num_teams) {
+    if (teams.length >= league.number_teams) {
       return res.status(400).send({ error: 'league is full' })
     }
 
@@ -530,7 +530,7 @@ router.post('/?', async (req, res) => {
       abbreviation: `TM${count}`,
       waiver_order: count,
       draft_order: count,
-      salary_cap: league.cap,
+      salary_cap: league.salary_cap,
       faab_balance: league.starting_faab_budget,
       lid: leagueId
     }

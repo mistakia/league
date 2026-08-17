@@ -60,8 +60,8 @@ export default function LeagueHeader({ league, is_in_league }) {
       <h1>{league.name}</h1>
       {!is_in_league && (
         <Stack direction='row' spacing={1} className='league__chips'>
-          {Boolean(league.num_teams) && (
-            <Chip variant='outlined' label={`${league.num_teams} Teams`} />
+          {Boolean(league.number_teams) && (
+            <Chip variant='outlined' label={`${league.number_teams} Teams`} />
           )}
           {isHalfPPR && <Chip size='small' label='Half PPR' />}
           {isFullPPR && <Chip size='small' label='Full PPR' />}

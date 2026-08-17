@@ -219,21 +219,21 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
   if (play.yardLine && data.possession_nfl_team) {
     const cleaned_yard_line = clean_string(play.yardLine)
     if (cleaned_yard_line === '50') {
-      data.yard_line_num = 50
+      data.yard_line_number = 50
       data.yard_line_100 = 50
       data.yard_line_side = null
       data.yard_line_start = '50'
     } else {
       const ydl_parts = cleaned_yard_line.split(' ')
-      data.yard_line_num = parseInt(ydl_parts[1], 10)
+      data.yard_line_number = parseInt(ydl_parts[1], 10)
       data.yard_line_side = fixTeam(clean_string(ydl_parts[0]))
       data.yard_line_100 =
         data.yard_line_side === data.possession_nfl_team
-          ? 100 - data.yard_line_num
-          : data.yard_line_num
+          ? 100 - data.yard_line_number
+          : data.yard_line_number
       // Normalize yardline format (handles team abbreviation normalization)
       data.yard_line_start = normalize_yardline(
-        `${data.yard_line_side} ${data.yard_line_num}`
+        `${data.yard_line_side} ${data.yard_line_number}`
       )
     }
   }
@@ -345,7 +345,7 @@ const importPlaysForWeek = async ({
   const missing_esbids = new Set()
 
   for (const game of games) {
-    const timeStr = `${game.date} ${game.time_est}`
+    const timeStr = `${game.date} ${game.time_eastern}`
     const gameStart = dayjs.tz(
       timeStr,
       'YYYY/MM/DD HH:mm:SS',

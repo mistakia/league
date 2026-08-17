@@ -163,7 +163,7 @@ export const parse_sleeper_league = ({ league, discovered_via = null }) => {
     external_league_id: String(league.league_id),
     season_year: Number(league.season),
     league_name: league.name || null,
-    num_teams: league.total_rosters ?? league.settings?.num_teams ?? null,
+    number_teams: league.total_rosters ?? league.settings?.number_teams ?? null,
     league_format,
     is_superflex: derive_is_superflex(roster_positions),
     has_individual_defensive_players:
@@ -419,7 +419,8 @@ export const parse_sleeper_trade = ({
     season_year,
     platform_transaction_bucket,
     processed_at: new Date(transaction.created),
-    num_sides: (transaction.roster_ids || []).length || receiving_rosters.size
+    number_sides:
+      (transaction.roster_ids || []).length || receiving_rosters.size
   }
 
   return {

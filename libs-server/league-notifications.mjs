@@ -5,7 +5,7 @@ const log = debug('league-notifications')
 
 // league_notifications.event_timestamp and .sent_timestamp are timestamptz.
 // Every caller derives its event instant from an epoch-seconds source --
-// dayjs().unix(), getDraftWindow().unix(), or the bigint seasons.ext_date --
+// dayjs().unix(), getDraftWindow().unix(), or the bigint seasons.extension_deadline_at --
 // so this module keeps epoch seconds as its JS contract and converts once here
 // at the database boundary rather than threading Dates through four scripts.
 // Same shape as the nfl_games kickoff_at retype (b09fdbce).

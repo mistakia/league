@@ -38,7 +38,7 @@ const JSONB_COLUMNS = new Set(
 )
 
 export const LEAGUE_COLUMNS = [
-  'num_teams',
+  'number_teams',
   'starter_slots_quarterback',
   'starter_slots_running_back',
   'starter_slots_wide_receiver',
@@ -52,7 +52,7 @@ export const LEAGUE_COLUMNS = [
   'bench_slot_count',
   'practice_squad_slot_count',
   'reserve_short_term_limit',
-  'cap',
+  'salary_cap',
   'min_bid'
 ]
 

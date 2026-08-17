@@ -86,7 +86,12 @@ export const cluster_columns = [
     rename: null
   },
   { table: 'seasons', column: 'season_started_at', audit: true, rename: null },
-  { table: 'seasons', column: 'ext_date', audit: true, rename: null },
+  {
+    table: 'seasons',
+    column: 'ext_date',
+    audit: true,
+    rename: 'extension_deadline_at'
+  },
   {
     table: 'seasons',
     column: 'rookie_draft_completed_at',

@@ -71,7 +71,7 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
 
   // Whether the extension deadline has actually been PROCESSED, which is a
   // database question and not a clock question. process-extensions.mjs runs on a
-  // */5 cron, so there is a window in which now is past `season.ext_date` and no
+  // */5 cron, so there is a window in which now is past `season.extension_deadline_at` and no
   // extension has been written. Reading the deadline off the clock makes the
   // board understate every contract for the length of that window.
   const extension_row = await db('transactions')

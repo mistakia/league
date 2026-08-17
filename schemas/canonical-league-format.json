@@ -36,7 +36,7 @@
       "type": "object",
       "description": "League configuration settings",
       "required": [
-        "num_teams",
+        "number_teams",
         "season_type",
         "playoff_teams",
         "playoff_week_start",
@@ -44,7 +44,7 @@
         "trade_deadline"
       ],
       "properties": {
-        "num_teams": {
+        "number_teams": {
           "type": "integer",
           "minimum": 2,
           "maximum": 32,

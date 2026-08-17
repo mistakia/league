@@ -307,10 +307,10 @@ export default async function ({
     const scoring_format_player_seasonlogs_selects = [
       'scoring_format_player_seasonlogs.points',
       'scoring_format_player_seasonlogs.points_per_game',
-      'scoring_format_player_seasonlogs.points_rnk',
-      'scoring_format_player_seasonlogs.points_pos_rnk',
-      'scoring_format_player_seasonlogs.points_per_game_rnk',
-      'scoring_format_player_seasonlogs.points_per_game_pos_rnk'
+      'scoring_format_player_seasonlogs.points_rank',
+      'scoring_format_player_seasonlogs.points_position_rank',
+      'scoring_format_player_seasonlogs.points_per_game_rank',
+      'scoring_format_player_seasonlogs.points_per_game_position_rank'
     ]
 
     query

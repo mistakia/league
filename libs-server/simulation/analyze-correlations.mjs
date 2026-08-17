@@ -42,14 +42,14 @@ export async function get_correlation_opportunities({
   const opportunities = []
 
   for (const row of correlations) {
-    const is_bench_a = bench_pids.includes(row.pid_a)
-    const is_bench_b = bench_pids.includes(row.pid_b)
-    const is_opp_a = opponent_player_ids.includes(row.pid_a)
-    const is_opp_b = opponent_player_ids.includes(row.pid_b)
+    const is_bench_a = bench_pids.includes(row.pid_first)
+    const is_bench_b = bench_pids.includes(row.pid_second)
+    const is_opp_a = opponent_player_ids.includes(row.pid_first)
+    const is_opp_b = opponent_player_ids.includes(row.pid_second)
 
     if ((is_bench_a && is_opp_b) || (is_bench_b && is_opp_a)) {
-      const bench_pid = is_bench_a ? row.pid_a : row.pid_b
-      const opp_pid = is_opp_a ? row.pid_a : row.pid_b
+      const bench_pid = is_bench_a ? row.pid_first : row.pid_second
+      const opp_pid = is_opp_a ? row.pid_first : row.pid_second
 
       opportunities.push({
         bench_player: bench_pid,
@@ -97,10 +97,10 @@ export async function get_same_team_correlations({ player_ids, year }) {
   })
 
   const same_team_correlations = correlations.map((row) => ({
-    player_a: row.pid_a,
-    player_a_position: player_info.get(row.pid_a)?.position,
-    player_b: row.pid_b,
-    player_b_position: player_info.get(row.pid_b)?.position,
+    player_a: row.pid_first,
+    player_a_position: player_info.get(row.pid_first)?.position,
+    player_b: row.pid_second,
+    player_b_position: player_info.get(row.pid_second)?.position,
     correlation: row.correlation,
     games_together: row.games_together,
     data_year: row.data_year
@@ -145,18 +145,18 @@ export async function get_correlation_insights({
   }
 
   for (const row of correlations) {
-    const is_my_player_a = player_ids.includes(row.pid_a)
-    const is_my_player_b = player_ids.includes(row.pid_b)
-    const is_opp_player_a = opponent_player_ids.includes(row.pid_a)
-    const is_opp_player_b = opponent_player_ids.includes(row.pid_b)
+    const is_my_player_a = player_ids.includes(row.pid_first)
+    const is_my_player_b = player_ids.includes(row.pid_second)
+    const is_opp_player_a = opponent_player_ids.includes(row.pid_first)
+    const is_opp_player_b = opponent_player_ids.includes(row.pid_second)
 
     // Only interested in my player vs opponent player
     if (
       (is_my_player_a && is_opp_player_b) ||
       (is_my_player_b && is_opp_player_a)
     ) {
-      const my_pid = is_my_player_a ? row.pid_a : row.pid_b
-      const opp_pid = is_opp_player_a ? row.pid_a : row.pid_b
+      const my_pid = is_my_player_a ? row.pid_first : row.pid_second
+      const opp_pid = is_opp_player_a ? row.pid_first : row.pid_second
 
       const insight = {
         my_player: my_pid,

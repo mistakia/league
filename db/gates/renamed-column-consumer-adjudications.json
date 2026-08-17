@@ -32,6 +32,35 @@
       "reason": "Every config consumer reads config_row.config_value (libs-server/4for4.mjs:12, libs-server/espn.mjs:104, scripts/import-fbg-projections.mjs:55). The flagged .value reads are an HTTP cache payload (libs-server/cache.mjs:23) and the data-views filter-param DSL object (libs-server/data-views/select-string.mjs:50)."
     },
     {
+      "table": "draft",
+      "column": "year",
+      "sites": [
+        "api/routes/leagues/draft.mjs",
+        "api/routes/leagues/teams.mjs",
+        "api/routes/leagues/trade.mjs",
+        "api/routes/leagues/trades.mjs",
+        "api/routes/leagues/waivers/index.mjs",
+        "libs-server/context-docs/generate-team-context.mjs",
+        "libs-server/get-draft-data-with-history.mjs",
+        "libs-server/get-top-practice-squad-waiver.mjs",
+        "libs-server/submit-acquisition.mjs",
+        "libs-server/where-outstanding-draft-pick.mjs",
+        "scripts/close-expired-rookie-drafts.mjs",
+        "scripts/generate-draft-picks.mjs",
+        "scripts/notifications-draft.mjs",
+        "scripts/set-draft-pick-number.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Server consumers were repointed to season_year by the season_grain cluster. The original reason claimed every flagged read of the old name was current_season.year, a request/CLI parameter, or a same-named column surviving on another table -- that was FALSE when written: dashboard-draft-picks.js:53 read groupBy(picks, 'year') and draft-pick-sheet.js:197,200 read historical_pick.get('year') off draft rows, so the team page grouped every pick under one 'undefined' heading until de3e0bb32 (2026-08-06). The claim was unfalsifiable because the entry records query sites only, and the gate showed the SPA reads as a bare count of 198. Both are repointed and the gate now lists accessor/field-argument SPA reads explicitly (1974ccb88). The one remaining high-signal SPA read of 'year' is restricted-free-agency/index.js:13, which is the redux store's own UI selection key and not a draft row."
+    },
+    {
+      "table": "jobs",
+      "column": "timestamp",
+      "sites": ["libs-server/report-job.mjs"],
+      "verdict": "already-swept",
+      "reason": "report-job.mjs writes run_at; the only wholesale reader is libs-server/get-jobs.mjs, whose consumer api/routes/status.mjs echoes the row and whose BackgroundJob swagger schema was repointed to run_at in this same commit."
+    },
+    {
       "table": "league_baselines",
       "column": "pos",
       "sites": [
@@ -40,6 +69,37 @@
       ],
       "verdict": "not-a-db-read",
       "reason": "Neither wholesale site (api/routes/leagues/baselines.mjs:66, scripts/project-lineups.mjs:32) has a consumer reading .pos off its rows."
+    },
+    {
+      "table": "league_baselines",
+      "column": "year",
+      "sites": [
+        "api/routes/leagues/baselines.mjs",
+        "scripts/project-lineups.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
+      "table": "league_divisions",
+      "column": "year",
+      "sites": ["api/routes/me.mjs"],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
+      "table": "league_format_player_projection_values",
+      "column": "year",
+      "sites": ["libs-server/get-players.mjs"],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
+      "table": "league_format_player_seasonlogs",
+      "column": "year",
+      "sites": ["scripts/generate-league-format-player-careerlogs.mjs"],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
     },
     {
       "table": "league_formats",
@@ -56,6 +116,29 @@
       ],
       "verdict": "not-a-db-read",
       "reason": "All reads take .bench off a Roster instance (libs-shared/roster.mjs:190 getter) or an Immutable player map, never off a league_formats row."
+    },
+    {
+      "table": "league_formats",
+      "column": "cap",
+      "sites": [
+        "libs-server/format-data-generation/cleanup-manager.mjs",
+        "libs-server/format-data-generation/data-checker.mjs",
+        "libs-server/format-data-generation/format-resolver.mjs",
+        "libs-server/get-league-format.mjs",
+        "scripts/generate-league-format-player-seasonlogs.mjs",
+        "scripts/generate-league-team-player-seasonlogs.mjs",
+        "scripts/generate-tag-board.mjs",
+        "scripts/verify-named-format-catalog.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "Every league_formats consumer reads league_format.salary_cap after the 2026-08-17 long-tail conform (libs-shared/get-discretionary-cap.mjs:17, libs-server/tag-board/build-tag-board.mjs:311, libs-shared/roster.mjs:102). The surviving bare `cap` reads are a DIFFERENT quantity on a different object: the app-side AVAILABLE cap a team has left, assigned from Roster#availableCap at api/sockets/auction.mjs:1163 and rebuilt locally at app/views/components/dashboard-team-summary-salary/index.js:25. `teams` itself carries salary_cap and always has, so no team read resolves to this column."
+    },
+    {
+      "table": "league_player_projection_values",
+      "column": "year",
+      "sites": ["libs-server/get-players.mjs"],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
     },
     {
       "table": "league_team_careerlogs",
@@ -79,6 +162,34 @@
       "reason": "GET /api/leagues/:id/careerlogs sends the rows to the SPA, and app/core/selectors.js:4001 ranks on regular_season_wins -- the new name. No server consumer reads .wins off a careerlog row; generate-league-context.mjs never queries careerlogs at all."
     },
     {
+      "table": "league_team_daily_values",
+      "column": "timestamp",
+      "sites": ["api/routes/leagues/team-daily-values.mjs"],
+      "verdict": "already-swept",
+      "reason": "The route echoes observed_at wholesale and app/core/league-team-daily-values/reducer.js:29 maps it to a millisecond `timestamp` store key by construction, which is what keeps app/core/selectors.js:2864,2867 correct -- those read the store shape, not the column."
+    },
+    {
+      "table": "league_team_lineup_contribution_weeks",
+      "column": "year",
+      "sites": ["libs-server/get-players.mjs"],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
+      "table": "league_team_lineup_contributions",
+      "column": "year",
+      "sites": ["libs-server/get-players.mjs"],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
+      "table": "league_team_lineup_starters",
+      "column": "year",
+      "sites": ["libs-server/get-league-rosters-from-database.mjs"],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
       "table": "league_team_lineups",
       "column": "total",
       "sites": ["libs-server/get-league-rosters-from-database.mjs"],
@@ -94,6 +205,17 @@
       ],
       "verdict": "not-a-db-read",
       "reason": "Both read .baseline_total, which was not renamed; neither reads .total off the lineup row."
+    },
+    {
+      "table": "league_team_lineups",
+      "column": "year",
+      "sites": [
+        "libs-server/get-league-rosters-from-database.mjs",
+        "scripts/calculate-matchup-projection.mjs",
+        "scripts/calculate-playoff-matchup-projection.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
     },
     {
       "table": "league_team_seasonlogs",
@@ -150,6 +272,24 @@
       "reason": "libs-server/context-docs/generate-league-context.mjs:57 and scripts/draw-divisions.mjs:67 build a local standings object from regular_season_wins; the flagged .wins reads consume that local field. simulate-season-forecast derives from matchups, and espn.mjs reads the ESPN payload."
     },
     {
+      "table": "league_team_seasonlogs",
+      "column": "year",
+      "sites": [
+        "api/routes/leagues/team-stats.mjs",
+        "libs-server/context-docs/generate-league-context.mjs",
+        "libs-server/context-docs/generate-team-context.mjs",
+        "libs-server/simulation/simulate-playoff-forecast.mjs",
+        "libs-server/simulation/simulate-season-forecast.mjs",
+        "scripts/calculate-league-careerlogs.mjs",
+        "scripts/draw-divisions.mjs",
+        "scripts/export-data-league-team-seasonlogs.mjs",
+        "scripts/generate-league-season-teams.mjs",
+        "scripts/process-playoffs.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
       "table": "league_user_careerlogs",
       "column": "losses",
       "sites": ["api/routes/leagues/careerlogs.mjs"],
@@ -171,6 +311,62 @@
       "reason": "Same route and same SPA selector as the team careerlogs; the rankable-field list is on the new names."
     },
     {
+      "table": "leagues",
+      "column": "espn_id",
+      "sites": [
+        "api/routes/me.mjs",
+        "libs-server/get-league.mjs",
+        "scripts/generate-draft-picks.mjs",
+        "scripts/generate-rosters.mjs",
+        "scripts/generate-seasons.mjs",
+        "scripts/notifications-draft.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
+    },
+    {
+      "table": "leagues",
+      "column": "fleaflicker_id",
+      "sites": [
+        "api/routes/me.mjs",
+        "libs-server/get-league.mjs",
+        "scripts/generate-draft-picks.mjs",
+        "scripts/generate-rosters.mjs",
+        "scripts/generate-seasons.mjs",
+        "scripts/notifications-draft.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
+    },
+    {
+      "table": "leagues",
+      "column": "mfl_id",
+      "sites": [
+        "api/routes/me.mjs",
+        "libs-server/get-league.mjs",
+        "scripts/generate-draft-picks.mjs",
+        "scripts/generate-rosters.mjs",
+        "scripts/generate-seasons.mjs",
+        "scripts/notifications-draft.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
+    },
+    {
+      "table": "leagues",
+      "column": "sleeper_id",
+      "sites": [
+        "api/routes/me.mjs",
+        "libs-server/get-league.mjs",
+        "scripts/generate-draft-picks.mjs",
+        "scripts/generate-rosters.mjs",
+        "scripts/generate-seasons.mjs",
+        "scripts/notifications-draft.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
+    },
+    {
       "table": "matchups",
       "column": "app",
       "sites": [
@@ -184,6 +380,21 @@
       ],
       "verdict": "not-a-db-read",
       "reason": "The rename was app -> away_potential_points. Every flagged read is req.app.locals -- Express's own app object -- including the two same-file ones at api/routes/leagues/matchups.mjs:210,337, the second of which sits three lines above the wholesale select and still reads req.app. A repo-wide grep for matchup.app / m.app row access returns zero. Independently confirmed by a second reviewer over 38 of the 40 read sites."
+    },
+    {
+      "table": "matchups",
+      "column": "year",
+      "sites": [
+        "api/routes/leagues/matchups.mjs",
+        "libs-server/context-docs/generate-league-schedule.mjs",
+        "libs-server/context-docs/generate-team-context.mjs",
+        "libs-server/simulation/simulate-season-forecast.mjs",
+        "scripts/calculate-matchup-projection.mjs",
+        "scripts/export-data-league-matchups.mjs",
+        "scripts/process-matchups.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
     },
     {
       "table": "nfl_games",
@@ -460,6 +671,27 @@
     },
     {
       "table": "nfl_plays",
+      "column": "extra_point_prob",
+      "sites": [
+        "api/routes/plays.mjs",
+        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
+        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
+        "libs-server/get-play.mjs",
+        "libs-server/play-cache.mjs",
+        "libs-server/plays-view/get-plays-view-results.mjs",
+        "libs-server/update-play.mjs",
+        "scripts/audit-drive-seq-coherence.mjs",
+        "scripts/backfill-role-pids.mjs",
+        "scripts/export-data-nfl-plays.mjs",
+        "scripts/import-plays-nfl-v1.mjs",
+        "scripts/nfl-plays-coverage-report.mjs",
+        "scripts/process-plays.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "The old name survives only as the nflverse CSV vendor key (play.extra_point_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to extra_point_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column."
+    },
+    {
+      "table": "nfl_plays",
       "column": "mbt",
       "sites": [
         "api/routes/plays.mjs",
@@ -481,6 +713,27 @@
     },
     {
       "table": "nfl_plays",
+      "column": "no_score_prob",
+      "sites": [
+        "api/routes/plays.mjs",
+        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
+        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
+        "libs-server/get-play.mjs",
+        "libs-server/play-cache.mjs",
+        "libs-server/plays-view/get-plays-view-results.mjs",
+        "libs-server/update-play.mjs",
+        "scripts/audit-drive-seq-coherence.mjs",
+        "scripts/backfill-role-pids.mjs",
+        "scripts/export-data-nfl-plays.mjs",
+        "scripts/import-plays-nfl-v1.mjs",
+        "scripts/nfl-plays-coverage-report.mjs",
+        "scripts/process-plays.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "The old name survives only as the nflverse CSV vendor key (play.no_score_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to no_score_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column; the row carries the new key and no consumer reads the old one."
+    },
+    {
+      "table": "nfl_plays",
       "column": "oopd",
       "sites": [
         "api/routes/plays.mjs",
@@ -499,6 +752,27 @@
       ],
       "verdict": "not-a-db-read",
       "reason": "The read sites take this off a raw vendor row on the WRITE side -- scripts/import-charted-plays-from-csv.mjs parsing its own CSV, or import-plays-nflfastr/-sportradar mapping a vendor field onto the new column name -- never off a queried nfl_plays row."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "opp_safety_prob",
+      "sites": [
+        "api/routes/plays.mjs",
+        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
+        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
+        "libs-server/get-play.mjs",
+        "libs-server/play-cache.mjs",
+        "libs-server/plays-view/get-plays-view-results.mjs",
+        "libs-server/update-play.mjs",
+        "scripts/audit-drive-seq-coherence.mjs",
+        "scripts/backfill-role-pids.mjs",
+        "scripts/export-data-nfl-plays.mjs",
+        "scripts/import-plays-nfl-v1.mjs",
+        "scripts/nfl-plays-coverage-report.mjs",
+        "scripts/process-plays.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "The old name survives only as the nflverse CSV vendor key (play.opp_safety_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to opponent_safety_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column."
     },
     {
       "table": "nfl_plays",
@@ -547,6 +821,27 @@
       ],
       "verdict": "not-a-db-read",
       "reason": "None of the twelve remaining wholesale sites contains a .qtr read at all -- verified by grep across each. The one genuine reader was scripts/import-plays-sportradar.mjs off libs-server/play-cache.mjs, adjudicated separately as consumer-repointed."
+    },
+    {
+      "table": "nfl_plays",
+      "column": "safety_prob",
+      "sites": [
+        "api/routes/plays.mjs",
+        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
+        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
+        "libs-server/get-play.mjs",
+        "libs-server/play-cache.mjs",
+        "libs-server/plays-view/get-plays-view-results.mjs",
+        "libs-server/update-play.mjs",
+        "scripts/audit-drive-seq-coherence.mjs",
+        "scripts/backfill-role-pids.mjs",
+        "scripts/export-data-nfl-plays.mjs",
+        "scripts/import-plays-nfl-v1.mjs",
+        "scripts/nfl-plays-coverage-report.mjs",
+        "scripts/process-plays.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "The old name survives only as the nflverse CSV vendor key (play.safety_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to safety_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column."
     },
     {
       "table": "nfl_plays",
@@ -689,6 +984,26 @@
       "reason": "Of the eleven remaining wholesale sites, only two contain a .pos read at all and neither is off a player_gamelogs row: scripts/audit-player-gamelogs.mjs:139 iterates pfr_player_gamelogs_for_season (PFR vendor data, a different variable than the wildcard select above it), and scripts/process-matchups.mjs:42,47 map roster.starters/roster.active, which are Roster instances carrying libs-shared/roster.mjs's own in-memory pos vocabulary. The one genuine defect in this pair was scripts/calculate-weekly-market-selections-analysis.mjs, adjudicated separately as consumer-repointed."
     },
     {
+      "table": "player_gamelogs",
+      "column": "snaps_low_prob",
+      "sites": [
+        "api/routes/players.mjs",
+        "api/routes/stats.mjs",
+        "scripts/audit-player-gamelogs.mjs",
+        "scripts/calculate-historical-hit-rates.mjs",
+        "scripts/calculate-player-archetypes.mjs",
+        "scripts/calculate-points.mjs",
+        "scripts/calculate-weekly-market-selections-analysis.mjs",
+        "scripts/export-data-player-gamelogs.mjs",
+        "scripts/generate-nfl-team-seasonlogs.mjs",
+        "scripts/process-matchups.mjs",
+        "scripts/process-player-seasonlogs.mjs",
+        "scripts/process-playoffs.mjs"
+      ],
+      "verdict": "not-a-db-read",
+      "reason": "The old name survives only as local intermediate Set keys (snaps_low_prob) inside scripts/generate-player-snaps.mjs; the emitted payload keys were renamed to snaps_low_probability / snaps_low_probability_percentage. Every flagged query site reads player_gamelogs wholesale with no explicit projection of this column."
+    },
+    {
       "table": "player_passing_gamelogs",
       "column": "cpoe",
       "sites": ["scripts/generate-nfl-team-seasonlogs.mjs"],
@@ -703,6 +1018,21 @@
       "reason": "api/routes/players.mjs:1101 selects player_seasonlogs.* and sends it straight to the client at line 1160 with no server-side .pos read. No bare pos column remains anywhere in the schema."
     },
     {
+      "table": "playoffs",
+      "column": "year",
+      "sites": [
+        "api/routes/leagues/matchups.mjs",
+        "libs-server/simulation/load-simulation-data.mjs",
+        "libs-server/simulation/simulate-playoff-forecast.mjs",
+        "libs-server/simulation/simulate-season-forecast.mjs",
+        "scripts/calculate-league-careerlogs.mjs",
+        "scripts/calculate-playoff-matchup-projection.mjs",
+        "scripts/process-playoffs.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
       "table": "restricted_free_agency_bids",
       "column": "bid",
       "sites": [
@@ -715,6 +1045,36 @@
       ],
       "verdict": "already-swept",
       "reason": "Same two assignment sites as waivers.bid. Several flagged lines are a regex match on the spread `...bid` rather than a property read."
+    },
+    {
+      "table": "restricted_free_agency_bids",
+      "column": "year",
+      "sites": [
+        "api/routes/teams/restricted-free-agency.mjs",
+        "libs-server/get-restricted-free-agency-signings.mjs",
+        "libs-server/get-top-restricted-free-agency-bids.mjs",
+        "libs-server/restricted-free-agency-bids-query.mjs",
+        "libs-server/verify-restricted-free-agency.mjs",
+        "scripts/process-restricted-free-agency-bids.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
+      "table": "rosters",
+      "column": "year",
+      "sites": [
+        "api/routes/leagues/rosters.mjs",
+        "libs-server/get-league-rosters-from-database.mjs",
+        "libs-server/get-roster.mjs",
+        "libs-server/process-poach.mjs",
+        "libs-server/process-release.mjs",
+        "libs-server/process-super-priority.mjs",
+        "scripts/calculate-player-extension-count.mjs",
+        "scripts/generate-rosters.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
     },
     {
       "table": "rosters_players",
@@ -779,11 +1139,86 @@
       "reason": "Both reads take .rid off a transaction/bid object built in api/sockets/auction.mjs, never off a rosters_players row; auction.mjs:835 carries a comment confirming bid.rid has never come from the database."
     },
     {
+      "table": "rosters_players",
+      "column": "year",
+      "sites": [
+        "api/routes/leagues/draft.mjs",
+        "api/routes/leagues/trades.mjs",
+        "api/routes/leagues/waivers/index.mjs",
+        "api/routes/teams/transactions.mjs",
+        "api/sockets/auction.mjs",
+        "libs-server/external-fantasy-leagues/sync/roster-sync.mjs",
+        "libs-server/get-league-rosters-from-database.mjs",
+        "libs-server/get-players.mjs",
+        "libs-server/get-roster.mjs",
+        "libs-server/get-super-priority-status.mjs",
+        "libs-server/is-player-rostered.mjs",
+        "libs-server/process-poach.mjs",
+        "libs-server/process-release.mjs",
+        "libs-server/submit-acquisition.mjs",
+        "libs-server/submit-poach.mjs",
+        "scripts/calculate-franchise-tag.mjs",
+        "scripts/calculate-player-extension-count.mjs",
+        "scripts/generate-league-player-seasonlogs.mjs",
+        "scripts/generate-league-team-player-seasonlogs.mjs",
+        "scripts/generate-rosters.mjs",
+        "scripts/release-player.mjs",
+        "scripts/reset-player-restricted-free-agency-tags.mjs",
+        "scripts/reset-protected-designation.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
       "table": "scoring_format_player_seasonlogs",
       "column": "games",
       "sites": ["scripts/generate-scoring-format-player-careerlogs.mjs"],
       "verdict": "not-a-db-read",
       "reason": "The wholesale site scripts/generate-scoring-format-player-careerlogs.mjs:30 has zero .games accesses; every flagged read is a locally built accumulator or an external payload."
+    },
+    {
+      "table": "scoring_format_player_seasonlogs",
+      "column": "year",
+      "sites": ["scripts/generate-scoring-format-player-careerlogs.mjs"],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
+    },
+    {
+      "table": "seasons",
+      "column": "year",
+      "sites": ["scripts/generate-tag-board.mjs"],
+      "verdict": "consumer-repointed",
+      "reason": "The seasons predicate was swept but the row read at :25 was not, so the find() matched nothing and every tag board threw. Repointed to row.season_year in this cluster."
+    },
+    {
+      "table": "seasons",
+      "column": "year",
+      "sites": [
+        "api/routes/leagues/draft.mjs",
+        "api/routes/leagues/index.mjs",
+        "api/routes/leagues/waivers/index.mjs",
+        "api/routes/me.mjs",
+        "libs-server/close-rookie-draft.mjs",
+        "libs-server/derive-league-format-is-superflex.mjs",
+        "libs-server/get-season-playoff-weeks.mjs",
+        "libs-server/get-top-practice-squad-waiver.mjs",
+        "libs-server/simulation/analyze-lineup-decisions.mjs",
+        "libs-server/simulation/simulation-helpers.mjs",
+        "libs-server/submit-acquisition.mjs",
+        "scripts/announce-free-agency-period-start.mjs",
+        "scripts/announce-restricted-free-agent.mjs",
+        "scripts/calculate-franchise-tag.mjs",
+        "scripts/calculate-player-correlations.mjs",
+        "scripts/calculate-player-game-outcome-correlations.mjs",
+        "scripts/calculate-player-variance.mjs",
+        "scripts/check-restricted-free-agency-salary-cap-violations.mjs",
+        "scripts/close-expired-rookie-drafts.mjs",
+        "scripts/generate-league-team-player-seasonlogs.mjs",
+        "scripts/generate-seasons.mjs",
+        "scripts/process-restricted-free-agency-bids.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
     },
     {
       "table": "teams",
@@ -884,306 +1319,6 @@
       "reason": "app/core/selectors.js:1998,2044 read values.div and values.div_avg off a locally built aggregation object, never off a queried teams row."
     },
     {
-      "table": "transactions",
-      "column": "value",
-      "sites": [
-        "api/routes/leagues/poaches.mjs",
-        "api/routes/leagues/transactions.mjs",
-        "api/routes/leagues/waivers/index.mjs",
-        "api/routes/teams/lineups.mjs",
-        "api/sockets/auction.mjs",
-        "libs-server/context-docs/generate-league-context.mjs",
-        "libs-server/context-docs/generate-team-context.mjs",
-        "libs-server/data-views-column-definitions/player-extended-salary-column-definitions.mjs",
-        "libs-server/get-acquisition-transaction.mjs",
-        "libs-server/get-last-transaction.mjs",
-        "libs-server/get-roster.mjs",
-        "libs-server/get-super-priority-status.mjs",
-        "libs-server/get-top-free-agency-waiver.mjs",
-        "libs-server/get-top-poaching-waiver.mjs",
-        "libs-server/get-top-practice-squad-waiver.mjs",
-        "libs-server/get-transactions-since-acquisition.mjs",
-        "libs-server/get-transactions-since-free-agent.mjs",
-        "libs-server/is-player-on-waivers.mjs",
-        "libs-server/process-release.mjs",
-        "libs-server/process-super-priority.mjs",
-        "libs-server/submit-poach.mjs",
-        "libs-server/validate-franchise-tag.mjs",
-        "scripts/check-restricted-free-agency-salary-cap-violations.mjs",
-        "scripts/generate-league-player-seasonlogs.mjs",
-        "scripts/generate-tag-board.mjs",
-        "scripts/populate-super-priority-table.mjs",
-        "scripts/process-waivers-free-agency-practice.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "CORRECTED 2026-08-06 -- the original verdict was WRONG in its reasoning and incomplete in its scope, and the defect it missed shipped. It read: libs-server/get-roster.mjs:47 explicitly aliases transactions.player_salary as value, so roster_entry.value reads are correct. That reasons from ONE producer to a whole consumer class. The second producer of the Roster constructor, libs-server/get-league-rosters-from-database.mjs:51, selected transactions.player_salary with no alias, so every player arrived with value: undefined, availableCap summed to NaN, and NaN || 0 at libs-shared/roster.mjs:97 collapsed it to 0 -- every team rendered the raw $200 cap as its salary space. The reviewer could not have found it from this gate: gate 2 anchors its candidate set on db(<table>) FROM-target literals, and that file reaches transactions through .leftJoin off db(rosters_players), so it is not in the 36 sites listed above and never could have been. This entry stands as already-swept for the sites it names, which are correctly adjudicated. The JOIN blind spot is tracked in user:task/league/collapse-column-alias-layer-and-gate-rename-residue.md; do not read this verdict as covering any producer reached through a join. SECOND CORRECTION 2026-08-06, after the value -> player_salary migration (8643dc8a7, 33721c0b9) swept the class for real: the original reason's closing clause -- Every other .value read is req.body, a socket message, a cookie/Set/Map, or the data-views param DSL -- was FALSE when written, and it is the exact assertion league CLAUDE.md forbids, because this entry records QUERY sites and can say nothing about read sites the reviewer did not open. At 62ca45544 app/core/rosters/reducer.js:28 already destructured value off a transaction row on the LOAD_ROSTERS path, and the migration went on to find TEN live consumer sites in total, six of them (app/core/selectors.js get_cutlist_total_salary, the restricted-free-agency-confirmation charge, settings-teams-team, check-restricted-free-agency-salary-cap-violations, scripts/process-projections.mjs, libs-server/roster-asset-lineage/walk-transactions.mjs) surviving a full suite that was GREEN at 3304 passing. Treat this entry as settling the query sites listed above and NOTHING else."
-    },
-    {
-      "table": "waivers",
-      "column": "bid",
-      "sites": [
-        "api/routes/leagues/waivers/index.mjs",
-        "api/routes/leagues/waivers/report.mjs",
-        "api/routes/me.mjs",
-        "api/routes/teams/add.mjs",
-        "libs-server/get-top-free-agency-waiver.mjs",
-        "libs-server/get-top-poaching-waiver.mjs",
-        "libs-server/get-top-practice-squad-waiver.mjs",
-        "libs-server/get-waiver-by-id.mjs",
-        "libs-server/submit-deactivate.mjs",
-        "libs-server/submit-poach.mjs",
-        "scripts/process-waivers-free-agency-active.mjs",
-        "scripts/process-waivers-free-agency-practice.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "libs-server/get-roster.mjs:127 and libs-server/get-league-rosters-from-database.mjs:147 assign from bid.bid_amount before any consumer runs. Every flagged .bid read is req.body input, local component/redux state, or a synthesized lineage event."
-    },
-    {
-      "table": "draft",
-      "column": "year",
-      "sites": [
-        "api/routes/leagues/draft.mjs",
-        "api/routes/leagues/teams.mjs",
-        "api/routes/leagues/trade.mjs",
-        "api/routes/leagues/trades.mjs",
-        "api/routes/leagues/waivers/index.mjs",
-        "libs-server/context-docs/generate-team-context.mjs",
-        "libs-server/get-draft-data-with-history.mjs",
-        "libs-server/get-top-practice-squad-waiver.mjs",
-        "libs-server/submit-acquisition.mjs",
-        "libs-server/where-outstanding-draft-pick.mjs",
-        "scripts/close-expired-rookie-drafts.mjs",
-        "scripts/generate-draft-picks.mjs",
-        "scripts/notifications-draft.mjs",
-        "scripts/set-draft-pick-number.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "Server consumers were repointed to season_year by the season_grain cluster. The original reason claimed every flagged read of the old name was current_season.year, a request/CLI parameter, or a same-named column surviving on another table -- that was FALSE when written: dashboard-draft-picks.js:53 read groupBy(picks, 'year') and draft-pick-sheet.js:197,200 read historical_pick.get('year') off draft rows, so the team page grouped every pick under one 'undefined' heading until de3e0bb32 (2026-08-06). The claim was unfalsifiable because the entry records query sites only, and the gate showed the SPA reads as a bare count of 198. Both are repointed and the gate now lists accessor/field-argument SPA reads explicitly (1974ccb88). The one remaining high-signal SPA read of 'year' is restricted-free-agency/index.js:13, which is the redux store's own UI selection key and not a draft row."
-    },
-    {
-      "table": "league_baselines",
-      "column": "year",
-      "sites": [
-        "api/routes/leagues/baselines.mjs",
-        "scripts/project-lineups.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "league_divisions",
-      "column": "year",
-      "sites": ["api/routes/me.mjs"],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "league_format_player_projection_values",
-      "column": "year",
-      "sites": ["libs-server/get-players.mjs"],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "league_format_player_seasonlogs",
-      "column": "year",
-      "sites": ["scripts/generate-league-format-player-careerlogs.mjs"],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "league_player_projection_values",
-      "column": "year",
-      "sites": ["libs-server/get-players.mjs"],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "league_team_lineup_contribution_weeks",
-      "column": "year",
-      "sites": ["libs-server/get-players.mjs"],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "league_team_lineup_contributions",
-      "column": "year",
-      "sites": ["libs-server/get-players.mjs"],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "league_team_lineup_starters",
-      "column": "year",
-      "sites": ["libs-server/get-league-rosters-from-database.mjs"],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "league_team_lineups",
-      "column": "year",
-      "sites": [
-        "libs-server/get-league-rosters-from-database.mjs",
-        "scripts/calculate-matchup-projection.mjs",
-        "scripts/calculate-playoff-matchup-projection.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "league_team_seasonlogs",
-      "column": "year",
-      "sites": [
-        "api/routes/leagues/team-stats.mjs",
-        "libs-server/context-docs/generate-league-context.mjs",
-        "libs-server/context-docs/generate-team-context.mjs",
-        "libs-server/simulation/simulate-playoff-forecast.mjs",
-        "libs-server/simulation/simulate-season-forecast.mjs",
-        "scripts/calculate-league-careerlogs.mjs",
-        "scripts/draw-divisions.mjs",
-        "scripts/export-data-league-team-seasonlogs.mjs",
-        "scripts/generate-league-season-teams.mjs",
-        "scripts/process-playoffs.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "matchups",
-      "column": "year",
-      "sites": [
-        "api/routes/leagues/matchups.mjs",
-        "libs-server/context-docs/generate-league-schedule.mjs",
-        "libs-server/context-docs/generate-team-context.mjs",
-        "libs-server/simulation/simulate-season-forecast.mjs",
-        "scripts/calculate-matchup-projection.mjs",
-        "scripts/export-data-league-matchups.mjs",
-        "scripts/process-matchups.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "playoffs",
-      "column": "year",
-      "sites": [
-        "api/routes/leagues/matchups.mjs",
-        "libs-server/simulation/load-simulation-data.mjs",
-        "libs-server/simulation/simulate-playoff-forecast.mjs",
-        "libs-server/simulation/simulate-season-forecast.mjs",
-        "scripts/calculate-league-careerlogs.mjs",
-        "scripts/calculate-playoff-matchup-projection.mjs",
-        "scripts/process-playoffs.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "restricted_free_agency_bids",
-      "column": "year",
-      "sites": [
-        "api/routes/teams/restricted-free-agency.mjs",
-        "libs-server/get-restricted-free-agency-signings.mjs",
-        "libs-server/get-top-restricted-free-agency-bids.mjs",
-        "libs-server/restricted-free-agency-bids-query.mjs",
-        "libs-server/verify-restricted-free-agency.mjs",
-        "scripts/process-restricted-free-agency-bids.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "rosters_players",
-      "column": "year",
-      "sites": [
-        "api/routes/leagues/draft.mjs",
-        "api/routes/leagues/trades.mjs",
-        "api/routes/leagues/waivers/index.mjs",
-        "api/routes/teams/transactions.mjs",
-        "api/sockets/auction.mjs",
-        "libs-server/external-fantasy-leagues/sync/roster-sync.mjs",
-        "libs-server/get-league-rosters-from-database.mjs",
-        "libs-server/get-players.mjs",
-        "libs-server/get-roster.mjs",
-        "libs-server/get-super-priority-status.mjs",
-        "libs-server/is-player-rostered.mjs",
-        "libs-server/process-poach.mjs",
-        "libs-server/process-release.mjs",
-        "libs-server/submit-acquisition.mjs",
-        "libs-server/submit-poach.mjs",
-        "scripts/calculate-franchise-tag.mjs",
-        "scripts/calculate-player-extension-count.mjs",
-        "scripts/generate-league-player-seasonlogs.mjs",
-        "scripts/generate-league-team-player-seasonlogs.mjs",
-        "scripts/generate-rosters.mjs",
-        "scripts/release-player.mjs",
-        "scripts/reset-player-restricted-free-agency-tags.mjs",
-        "scripts/reset-protected-designation.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "rosters",
-      "column": "year",
-      "sites": [
-        "api/routes/leagues/rosters.mjs",
-        "libs-server/get-league-rosters-from-database.mjs",
-        "libs-server/get-roster.mjs",
-        "libs-server/process-poach.mjs",
-        "libs-server/process-release.mjs",
-        "libs-server/process-super-priority.mjs",
-        "scripts/calculate-player-extension-count.mjs",
-        "scripts/generate-rosters.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "scoring_format_player_seasonlogs",
-      "column": "year",
-      "sites": ["scripts/generate-scoring-format-player-careerlogs.mjs"],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
-      "table": "seasons",
-      "column": "year",
-      "sites": ["scripts/generate-tag-board.mjs"],
-      "verdict": "consumer-repointed",
-      "reason": "The seasons predicate was swept but the row read at :25 was not, so the find() matched nothing and every tag board threw. Repointed to row.season_year in this cluster."
-    },
-    {
-      "table": "seasons",
-      "column": "year",
-      "sites": [
-        "api/routes/leagues/draft.mjs",
-        "api/routes/leagues/index.mjs",
-        "api/routes/leagues/waivers/index.mjs",
-        "api/routes/me.mjs",
-        "libs-server/close-rookie-draft.mjs",
-        "libs-server/derive-league-format-is-superflex.mjs",
-        "libs-server/get-season-playoff-weeks.mjs",
-        "libs-server/get-top-practice-squad-waiver.mjs",
-        "libs-server/simulation/analyze-lineup-decisions.mjs",
-        "libs-server/simulation/simulation-helpers.mjs",
-        "libs-server/submit-acquisition.mjs",
-        "scripts/announce-free-agency-period-start.mjs",
-        "scripts/announce-restricted-free-agent.mjs",
-        "scripts/calculate-franchise-tag.mjs",
-        "scripts/calculate-player-correlations.mjs",
-        "scripts/calculate-player-game-outcome-correlations.mjs",
-        "scripts/calculate-player-variance.mjs",
-        "scripts/check-restricted-free-agency-salary-cap-violations.mjs",
-        "scripts/close-expired-rookie-drafts.mjs",
-        "scripts/generate-league-team-player-seasonlogs.mjs",
-        "scripts/generate-seasons.mjs",
-        "scripts/process-restricted-free-agency-bids.mjs"
-      ],
-      "verdict": "already-swept",
-      "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
-    },
-    {
       "table": "teams",
       "column": "year",
       "sites": [
@@ -1248,6 +1383,76 @@
     },
     {
       "table": "transactions",
+      "column": "timestamp",
+      "sites": [
+        "api/routes/leagues/poaches.mjs",
+        "api/routes/leagues/transactions.mjs",
+        "api/routes/leagues/waivers/index.mjs",
+        "api/routes/teams/lineups.mjs",
+        "api/sockets/auction.mjs",
+        "libs-server/context-docs/generate-league-context.mjs",
+        "libs-server/context-docs/generate-team-context.mjs",
+        "libs-server/data-views-column-definitions/player-extended-salary-column-definitions.mjs",
+        "libs-server/get-acquisition-transaction.mjs",
+        "libs-server/get-last-transaction.mjs",
+        "libs-server/get-roster.mjs",
+        "libs-server/get-super-priority-status.mjs",
+        "libs-server/get-top-free-agency-waiver.mjs",
+        "libs-server/get-top-poaching-waiver.mjs",
+        "libs-server/get-top-practice-squad-waiver.mjs",
+        "libs-server/get-transactions-since-acquisition.mjs",
+        "libs-server/get-transactions-since-free-agent.mjs",
+        "libs-server/is-player-on-waivers.mjs",
+        "libs-server/process-release.mjs",
+        "libs-server/process-super-priority.mjs",
+        "libs-server/submit-poach.mjs",
+        "libs-server/validate-franchise-tag.mjs",
+        "scripts/check-restricted-free-agency-salary-cap-violations.mjs",
+        "scripts/generate-league-player-seasonlogs.mjs",
+        "scripts/generate-tag-board.mjs",
+        "scripts/populate-super-priority-table.mjs",
+        "scripts/process-waivers-free-agency-practice.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "Consumers were repointed to occurred_at by the timestamptz conform. Every server-side read of the bare old name was opened and resolves to an unrelated object: libs-server/external-fantasy-leagues/mappers/player-id-mapper.mjs:66,232,252,274 is an in-memory cache entry aged against Date.now(), libs-shared/data-view-storage/storage.mjs:160 is a browser localStorage snapshot record, and the libs-server/draftkings and process-restricted-free-agency-bids hits are JSDoc @param lines. get-roster.mjs is wholesale but reads only .pid off the transactions rows. The SPA sites are the documented global-list artifact rather than a measurement; the two that touch a real row are app/core/rosters/sagas.js:551 (rosterPlayer.timestamp, where rosters_players has never carried a timestamp column, so it predates this cluster) and app/core/selectors.js:2733 (game.timestamp on nfl_games, renamed to kickoff_at by b09fdbce3 -- a pre-existing live defect recorded on the task, needing its own fix)."
+    },
+    {
+      "table": "transactions",
+      "column": "value",
+      "sites": [
+        "api/routes/leagues/poaches.mjs",
+        "api/routes/leagues/transactions.mjs",
+        "api/routes/leagues/waivers/index.mjs",
+        "api/routes/teams/lineups.mjs",
+        "api/sockets/auction.mjs",
+        "libs-server/context-docs/generate-league-context.mjs",
+        "libs-server/context-docs/generate-team-context.mjs",
+        "libs-server/data-views-column-definitions/player-extended-salary-column-definitions.mjs",
+        "libs-server/get-acquisition-transaction.mjs",
+        "libs-server/get-last-transaction.mjs",
+        "libs-server/get-roster.mjs",
+        "libs-server/get-super-priority-status.mjs",
+        "libs-server/get-top-free-agency-waiver.mjs",
+        "libs-server/get-top-poaching-waiver.mjs",
+        "libs-server/get-top-practice-squad-waiver.mjs",
+        "libs-server/get-transactions-since-acquisition.mjs",
+        "libs-server/get-transactions-since-free-agent.mjs",
+        "libs-server/is-player-on-waivers.mjs",
+        "libs-server/process-release.mjs",
+        "libs-server/process-super-priority.mjs",
+        "libs-server/submit-poach.mjs",
+        "libs-server/validate-franchise-tag.mjs",
+        "scripts/check-restricted-free-agency-salary-cap-violations.mjs",
+        "scripts/generate-league-player-seasonlogs.mjs",
+        "scripts/generate-tag-board.mjs",
+        "scripts/populate-super-priority-table.mjs",
+        "scripts/process-waivers-free-agency-practice.mjs"
+      ],
+      "verdict": "already-swept",
+      "reason": "CORRECTED 2026-08-06 -- the original verdict was WRONG in its reasoning and incomplete in its scope, and the defect it missed shipped. It read: libs-server/get-roster.mjs:47 explicitly aliases transactions.player_salary as value, so roster_entry.value reads are correct. That reasons from ONE producer to a whole consumer class. The second producer of the Roster constructor, libs-server/get-league-rosters-from-database.mjs:51, selected transactions.player_salary with no alias, so every player arrived with value: undefined, availableCap summed to NaN, and NaN || 0 at libs-shared/roster.mjs:97 collapsed it to 0 -- every team rendered the raw $200 cap as its salary space. The reviewer could not have found it from this gate: gate 2 anchors its candidate set on db(<table>) FROM-target literals, and that file reaches transactions through .leftJoin off db(rosters_players), so it is not in the 36 sites listed above and never could have been. This entry stands as already-swept for the sites it names, which are correctly adjudicated. The JOIN blind spot is tracked in user:task/league/collapse-column-alias-layer-and-gate-rename-residue.md; do not read this verdict as covering any producer reached through a join. SECOND CORRECTION 2026-08-06, after the value -> player_salary migration (8643dc8a7, 33721c0b9) swept the class for real: the original reason's closing clause -- Every other .value read is req.body, a socket message, a cookie/Set/Map, or the data-views param DSL -- was FALSE when written, and it is the exact assertion league CLAUDE.md forbids, because this entry records QUERY sites and can say nothing about read sites the reviewer did not open. At 62ca45544 app/core/rosters/reducer.js:28 already destructured value off a transaction row on the LOAD_ROSTERS path, and the migration went on to find TEN live consumer sites in total, six of them (app/core/selectors.js get_cutlist_total_salary, the restricted-free-agency-confirmation charge, settings-teams-team, check-restricted-free-agency-salary-cap-violations, scripts/process-projections.mjs, libs-server/roster-asset-lineage/walk-transactions.mjs) surviving a full suite that was GREEN at 3304 passing. Treat this entry as settling the query sites listed above and NOTHING else."
+    },
+    {
+      "table": "transactions",
       "column": "year",
       "sites": ["scripts/generate-tag-board.mjs"],
       "verdict": "consumer-repointed",
@@ -1301,213 +1506,24 @@
       "reason": "Consumers were repointed to season_year by the season_grain cluster; every flagged read of the old name is current_season.year, a request/CLI parameter, or a same-named column that survives on another table."
     },
     {
-      "table": "leagues",
-      "column": "espn_id",
+      "table": "waivers",
+      "column": "bid",
       "sites": [
-        "api/routes/me.mjs",
-        "libs-server/get-league.mjs",
-        "scripts/generate-draft-picks.mjs",
-        "scripts/generate-rosters.mjs",
-        "scripts/generate-seasons.mjs",
-        "scripts/notifications-draft.mjs"
-      ],
-      "verdict": "not-a-db-read",
-      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
-    },
-    {
-      "table": "leagues",
-      "column": "sleeper_id",
-      "sites": [
-        "api/routes/me.mjs",
-        "libs-server/get-league.mjs",
-        "scripts/generate-draft-picks.mjs",
-        "scripts/generate-rosters.mjs",
-        "scripts/generate-seasons.mjs",
-        "scripts/notifications-draft.mjs"
-      ],
-      "verdict": "not-a-db-read",
-      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
-    },
-    {
-      "table": "leagues",
-      "column": "mfl_id",
-      "sites": [
-        "api/routes/me.mjs",
-        "libs-server/get-league.mjs",
-        "scripts/generate-draft-picks.mjs",
-        "scripts/generate-rosters.mjs",
-        "scripts/generate-seasons.mjs",
-        "scripts/notifications-draft.mjs"
-      ],
-      "verdict": "not-a-db-read",
-      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
-    },
-    {
-      "table": "leagues",
-      "column": "fleaflicker_id",
-      "sites": [
-        "api/routes/me.mjs",
-        "libs-server/get-league.mjs",
-        "scripts/generate-draft-picks.mjs",
-        "scripts/generate-rosters.mjs",
-        "scripts/generate-seasons.mjs",
-        "scripts/notifications-draft.mjs"
-      ],
-      "verdict": "not-a-db-read",
-      "reason": "All 13 cited read sites were opened individually and every one reads the name off a VENDOR PAYLOAD object, never off a leagues row: player_data.espn_id/.sleeper_id/.mfl_id/.fleaflicker_id (scripts/audit-player-ids-dynastyprocess-repo.mjs:66,70,72,73,78; libs-server/external-fantasy-leagues/adapters/sleeper.mjs:345), source_player.espn_id/.sleeper_id (scripts/import-espn-adp.mjs:66,75,125; scripts/resolve-player-match.mjs:648), r.espn_id/.sleeper_id (scripts/backfill-players-from-nflverse-weekly-rosters.mjs:144,151) and sample_player.player_ids.espn_id (libs-server/external-fantasy-leagues/adapters/espn.mjs:466). These are the PLAYER-level cross-platform id bag documented in docs/canonical-data-schemas.md, a different (table, column) from the leagues columns this cluster renamed -- the finding is the documented non-table-aware read list. A repo-wide sweep for the old names read off any object found no live read off a league row. The leagues row itself is consumed through app/core/leagues/league.js, whose Immutable Record and createLeague field list both moved to the conformed names in this cluster."
-    },
-    {
-      "table": "transactions",
-      "column": "timestamp",
-      "sites": [
-        "api/routes/leagues/poaches.mjs",
-        "api/routes/leagues/transactions.mjs",
         "api/routes/leagues/waivers/index.mjs",
-        "api/routes/teams/lineups.mjs",
-        "api/sockets/auction.mjs",
-        "libs-server/context-docs/generate-league-context.mjs",
-        "libs-server/context-docs/generate-team-context.mjs",
-        "libs-server/data-views-column-definitions/player-extended-salary-column-definitions.mjs",
-        "libs-server/get-acquisition-transaction.mjs",
-        "libs-server/get-last-transaction.mjs",
-        "libs-server/get-roster.mjs",
-        "libs-server/get-super-priority-status.mjs",
+        "api/routes/leagues/waivers/report.mjs",
+        "api/routes/me.mjs",
+        "api/routes/teams/add.mjs",
         "libs-server/get-top-free-agency-waiver.mjs",
         "libs-server/get-top-poaching-waiver.mjs",
         "libs-server/get-top-practice-squad-waiver.mjs",
-        "libs-server/get-transactions-since-acquisition.mjs",
-        "libs-server/get-transactions-since-free-agent.mjs",
-        "libs-server/is-player-on-waivers.mjs",
-        "libs-server/process-release.mjs",
-        "libs-server/process-super-priority.mjs",
+        "libs-server/get-waiver-by-id.mjs",
+        "libs-server/submit-deactivate.mjs",
         "libs-server/submit-poach.mjs",
-        "libs-server/validate-franchise-tag.mjs",
-        "scripts/check-restricted-free-agency-salary-cap-violations.mjs",
-        "scripts/generate-league-player-seasonlogs.mjs",
-        "scripts/generate-tag-board.mjs",
-        "scripts/populate-super-priority-table.mjs",
+        "scripts/process-waivers-free-agency-active.mjs",
         "scripts/process-waivers-free-agency-practice.mjs"
       ],
       "verdict": "already-swept",
-      "reason": "Consumers were repointed to occurred_at by the timestamptz conform. Every server-side read of the bare old name was opened and resolves to an unrelated object: libs-server/external-fantasy-leagues/mappers/player-id-mapper.mjs:66,232,252,274 is an in-memory cache entry aged against Date.now(), libs-shared/data-view-storage/storage.mjs:160 is a browser localStorage snapshot record, and the libs-server/draftkings and process-restricted-free-agency-bids hits are JSDoc @param lines. get-roster.mjs is wholesale but reads only .pid off the transactions rows. The SPA sites are the documented global-list artifact rather than a measurement; the two that touch a real row are app/core/rosters/sagas.js:551 (rosterPlayer.timestamp, where rosters_players has never carried a timestamp column, so it predates this cluster) and app/core/selectors.js:2733 (game.timestamp on nfl_games, renamed to kickoff_at by b09fdbce3 -- a pre-existing live defect recorded on the task, needing its own fix)."
-    },
-    {
-      "table": "jobs",
-      "column": "timestamp",
-      "sites": ["libs-server/report-job.mjs"],
-      "verdict": "already-swept",
-      "reason": "report-job.mjs writes run_at; the only wholesale reader is libs-server/get-jobs.mjs, whose consumer api/routes/status.mjs echoes the row and whose BackgroundJob swagger schema was repointed to run_at in this same commit."
-    },
-    {
-      "table": "league_team_daily_values",
-      "column": "timestamp",
-      "sites": ["api/routes/leagues/team-daily-values.mjs"],
-      "verdict": "already-swept",
-      "reason": "The route echoes observed_at wholesale and app/core/league-team-daily-values/reducer.js:29 maps it to a millisecond `timestamp` store key by construction, which is what keeps app/core/selectors.js:2864,2867 correct -- those read the store shape, not the column."
-    },
-    {
-      "table": "nfl_plays",
-      "column": "no_score_prob",
-      "sites": [
-        "api/routes/plays.mjs",
-        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
-        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
-        "libs-server/get-play.mjs",
-        "libs-server/play-cache.mjs",
-        "libs-server/plays-view/get-plays-view-results.mjs",
-        "libs-server/update-play.mjs",
-        "scripts/audit-drive-seq-coherence.mjs",
-        "scripts/backfill-role-pids.mjs",
-        "scripts/export-data-nfl-plays.mjs",
-        "scripts/import-plays-nfl-v1.mjs",
-        "scripts/nfl-plays-coverage-report.mjs",
-        "scripts/process-plays.mjs"
-      ],
-      "verdict": "not-a-db-read",
-      "reason": "The old name survives only as the nflverse CSV vendor key (play.no_score_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to no_score_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column; the row carries the new key and no consumer reads the old one."
-    },
-    {
-      "table": "nfl_plays",
-      "column": "opp_safety_prob",
-      "sites": [
-        "api/routes/plays.mjs",
-        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
-        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
-        "libs-server/get-play.mjs",
-        "libs-server/play-cache.mjs",
-        "libs-server/plays-view/get-plays-view-results.mjs",
-        "libs-server/update-play.mjs",
-        "scripts/audit-drive-seq-coherence.mjs",
-        "scripts/backfill-role-pids.mjs",
-        "scripts/export-data-nfl-plays.mjs",
-        "scripts/import-plays-nfl-v1.mjs",
-        "scripts/nfl-plays-coverage-report.mjs",
-        "scripts/process-plays.mjs"
-      ],
-      "verdict": "not-a-db-read",
-      "reason": "The old name survives only as the nflverse CSV vendor key (play.opp_safety_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to opponent_safety_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column."
-    },
-    {
-      "table": "nfl_plays",
-      "column": "safety_prob",
-      "sites": [
-        "api/routes/plays.mjs",
-        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
-        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
-        "libs-server/get-play.mjs",
-        "libs-server/play-cache.mjs",
-        "libs-server/plays-view/get-plays-view-results.mjs",
-        "libs-server/update-play.mjs",
-        "scripts/audit-drive-seq-coherence.mjs",
-        "scripts/backfill-role-pids.mjs",
-        "scripts/export-data-nfl-plays.mjs",
-        "scripts/import-plays-nfl-v1.mjs",
-        "scripts/nfl-plays-coverage-report.mjs",
-        "scripts/process-plays.mjs"
-      ],
-      "verdict": "not-a-db-read",
-      "reason": "The old name survives only as the nflverse CSV vendor key (play.safety_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to safety_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column."
-    },
-    {
-      "table": "nfl_plays",
-      "column": "extra_point_prob",
-      "sites": [
-        "api/routes/plays.mjs",
-        "libs-server/data-views-column-definitions/player-fantasy-points-from-plays-column-definitions.mjs",
-        "libs-server/data-views/rate-type/rate-type-per-player.mjs",
-        "libs-server/get-play.mjs",
-        "libs-server/play-cache.mjs",
-        "libs-server/plays-view/get-plays-view-results.mjs",
-        "libs-server/update-play.mjs",
-        "scripts/audit-drive-seq-coherence.mjs",
-        "scripts/backfill-role-pids.mjs",
-        "scripts/export-data-nfl-plays.mjs",
-        "scripts/import-plays-nfl-v1.mjs",
-        "scripts/nfl-plays-coverage-report.mjs",
-        "scripts/process-plays.mjs"
-      ],
-      "verdict": "not-a-db-read",
-      "reason": "The old name survives only as the nflverse CSV vendor key (play.extra_point_prob) in scripts/import-plays-nflfastr.mjs, deliberately kept when the importer LHS renamed to extra_point_probability. Every flagged query site reads nfl_plays wholesale with no explicit projection of this column."
-    },
-    {
-      "table": "player_gamelogs",
-      "column": "snaps_low_prob",
-      "sites": [
-        "api/routes/players.mjs",
-        "api/routes/stats.mjs",
-        "scripts/audit-player-gamelogs.mjs",
-        "scripts/calculate-historical-hit-rates.mjs",
-        "scripts/calculate-player-archetypes.mjs",
-        "scripts/calculate-points.mjs",
-        "scripts/calculate-weekly-market-selections-analysis.mjs",
-        "scripts/export-data-player-gamelogs.mjs",
-        "scripts/generate-nfl-team-seasonlogs.mjs",
-        "scripts/process-matchups.mjs",
-        "scripts/process-player-seasonlogs.mjs",
-        "scripts/process-playoffs.mjs"
-      ],
-      "verdict": "not-a-db-read",
-      "reason": "The old name survives only as local intermediate Set keys (snaps_low_prob) inside scripts/generate-player-snaps.mjs; the emitted payload keys were renamed to snaps_low_probability / snaps_low_probability_percentage. Every flagged query site reads player_gamelogs wholesale with no explicit projection of this column."
+      "reason": "libs-server/get-roster.mjs:127 and libs-server/get-league-rosters-from-database.mjs:147 assign from bid.bid_amount before any consumer runs. Every flagged .bid read is req.body input, local component/redux state, or a synthesized lineage event."
     }
   ]
 }

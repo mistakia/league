@@ -43,17 +43,17 @@ export default async function generate_league_rosters({
       league_id: league.uid,
       league_name: league.name,
       year,
-      num_teams: team_rosters.length,
+      number_teams: team_rosters.length,
       num_rostered_players: team_rosters.reduce(
         (sum, { rows }) => sum + rows.length,
         0
       ),
       salary_basis: salary_basis.frontmatter_value,
       salary_year: year,
-      // seasons.ext_date is timestamptz, so it is already an instant; Number()
+      // seasons.extension_deadline_at is timestamptz, so it is already an instant; Number()
       // on it would have yielded milliseconds and landed in the year 55000.
-      extension_deadline: league.ext_date
-        ? new Date(league.ext_date).toISOString()
+      extension_deadline: league.extension_deadline_at
+        ? new Date(league.extension_deadline_at).toISOString()
         : null
     },
     related: {
@@ -79,7 +79,7 @@ export default async function generate_league_rosters({
   const cap_rows = team_rosters
     .map(({ team, roster }) => ({
       name: team.name,
-      committed: league.cap - roster.availableCap,
+      committed: league.salary_cap - roster.availableCap,
       space: roster.availableCap,
       active: roster.active.length,
       practice_squad: roster.practice.length,
@@ -107,7 +107,7 @@ export default async function generate_league_rosters({
         row.reserve
       ])
     ),
-    `Cap: $${league.cap} per team. Committed is the sum of active-roster salaries on the basis stated above; practice-squad and reserve contracts do not count against it.`
+    `Cap: $${league.salary_cap} per team. Committed is the sum of active-roster salaries on the basis stated above; practice-squad and reserve contracts do not count against it.`
   ])
 
   const roster_sections = team_rosters.map(({ team, rows }) =>

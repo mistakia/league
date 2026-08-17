@@ -63,12 +63,12 @@ const generate_scoring_format_player_careerlogs = async ({
     const draft_rank =
       sorted_pids_by_draft_classes[draft_class].indexOf(pid) + 1
 
-    const top_1 = seasons.filter((s) => s.points_pos_rnk <= 1).length
-    const top_3 = seasons.filter((s) => s.points_pos_rnk <= 3).length
-    const top_6 = seasons.filter((s) => s.points_pos_rnk <= 6).length
-    const top_12 = seasons.filter((s) => s.points_pos_rnk <= 12).length
-    const top_24 = seasons.filter((s) => s.points_pos_rnk <= 24).length
-    const top_36 = seasons.filter((s) => s.points_pos_rnk <= 36).length
+    const top_1 = seasons.filter((s) => s.points_position_rank <= 1).length
+    const top_3 = seasons.filter((s) => s.points_position_rank <= 3).length
+    const top_6 = seasons.filter((s) => s.points_position_rank <= 6).length
+    const top_12 = seasons.filter((s) => s.points_position_rank <= 12).length
+    const top_24 = seasons.filter((s) => s.points_position_rank <= 24).length
+    const top_36 = seasons.filter((s) => s.points_position_rank <= 36).length
 
     inserts.push({
       pid,

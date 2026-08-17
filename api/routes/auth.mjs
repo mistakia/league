@@ -237,7 +237,7 @@ router.post('/register', async (req, res) => {
         if (!teams.find((t) => t.uid === team_id)) {
           return res.status(400).send({ error: 'team does not exist' })
         }
-      } else if (teams.length === league.num_teams) {
+      } else if (teams.length === league.number_teams) {
         return res.status(400).send({ error: 'league full' })
       }
     }

@@ -143,7 +143,7 @@ export const PFF_PLAYER_RANGE_OFFSET_AGGREGATE = {
   coverage: 'AVG',
   receiving: 'AVG',
   punter: 'AVG',
-  field_goal_ep_kicker: 'AVG',
+  field_goal_extra_point_kicker: 'AVG',
   kickoff_kicker: 'AVG',
   speed_rating: 'AVG',
   offense_rank: 'AVG',
@@ -205,7 +205,7 @@ const create_field_from_pff_player_seasonlogs = (column_name) => {
 
 export default {
   player_pff_fg_ep_kicker: create_field_from_pff_player_seasonlogs(
-    'field_goal_ep_kicker'
+    'field_goal_extra_point_kicker'
   ),
   player_pff_defense_rank:
     create_field_from_pff_player_seasonlogs('defense_rank'),

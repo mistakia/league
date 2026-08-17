@@ -132,7 +132,7 @@ const franchise_price_for = ({ pos, season }) => {
  * salary, for every tag.
  *
  * The predicate is whether those transactions EXIST, never the clock. Keying it
- * on `now_unix >= season.ext_date` is wrong for the whole window between the
+ * on `now_unix >= season.extension_deadline_at` is wrong for the whole window between the
  * deadline and the five-minute cron that processes it: the branch flips on time,
  * the data lands minutes later, and in between the board returns a value that
  * has not been extended yet. That understates every regular contract by its
@@ -308,7 +308,7 @@ export default function build_tag_board({
   viewer_cutlist = null,
   viewer_rfa_bids = null
 }) {
-  const cap_total = league_format.cap
+  const cap_total = league_format.salary_cap
   const active_roster_limit = get_active_roster_limit(league_format)
   const franchise_prices = {
     QB: season.franchise_tag_salary_quarterback,
@@ -661,7 +661,7 @@ export default function build_tag_board({
       // gate as a third condition, which was meaningful only while the
       // designation window was open: the restricted-free-agency tag is applied
       // BEFORE the extension deadline (`api/routes/teams/tag.mjs` refuses every
-      // tag once `ext_date` passes) and the nomination schedule then governs
+      // tag once `extension_deadline_at` passes) and the nomination schedule then governs
       // when an already-tagged player is announced. Carrying the gate past the
       // deadline would empty the flag on every roster in the league, which is
       // the one thing it must not do — who fits the profile is exactly what a
@@ -679,7 +679,7 @@ export default function build_tag_board({
       // pool. It does NOT read "untagged and fits the profile", and it is not a
       // statement that the owner may still designate one — though as of
       // 2026-07-31 he generally may, since `restricted-free-agency.mjs` carries
-      // no `ext_date` guard and designations stay open to the period end.
+      // no `extension_deadline_at` guard and designations stay open to the period end.
       //
       // The `under_pressure` precondition was dropped with the same change and
       // was always redundant: the nomination minimum gap ($6) is strictly above
@@ -1192,7 +1192,7 @@ export const build_rfa_schedule = ({ season, teams }) => {
 }
 
 const CALENDAR_EVENTS = [
-  ['Extension Deadline', 'ext_date'],
+  ['Extension Deadline', 'extension_deadline_at'],
   ['Restricted Free Agency Begins', 'restricted_free_agency_period_start'],
   ['Restricted Free Agency Ends', 'restricted_free_agency_period_end'],
   ['Rookie Draft', 'draft_start'],
@@ -1265,7 +1265,7 @@ export const build_considerations = ({
     exposure.post_extension_room < 0 ? -exposure.post_extension_room : 0
 
   // The franchise and rookie tags are extension-window designations: the tag
-  // route refuses every application once `ext_date` passes, and by then the
+  // route refuses every application once `extension_deadline_at` passes, and by then the
   // ladder has already been applied. Every rule below that reasons about them
   // is therefore gated on the window still being open, or it fires post-deadline
   // stating a lever that does not exist — "your remaining tags can remove at

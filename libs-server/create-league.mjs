@@ -93,7 +93,9 @@ export default async function ({ lid, commishid, ...params } = {}) {
       league_params.restricted_free_agency_period_end
     ),
 
-    ext_date: epoch_to_timestamptz(league_params.ext_date),
+    extension_deadline_at: epoch_to_timestamptz(
+      league_params.extension_deadline_at
+    ),
 
     draft_start: epoch_to_timestamptz(league_params.draft_start),
     draft_type: league_params.draft_type,

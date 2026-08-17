@@ -56,7 +56,7 @@ const router = express.Router({ mergeParams: true })
  *           type: integer
  *           description: Overall pick number
  *           example: 3
- *         pick_str:
+ *         pick_string:
  *           type: string
  *           description: Formatted pick string (e.g., "1.03")
  *           example: "1.03"
@@ -197,7 +197,7 @@ const router = express.Router({ mergeParams: true })
  *                       season_year: 2024
  *                       round: 1
  *                       pick: 3
- *                       pick_str: "1.03"
+ *                       pick_string: "1.03"
  *                       original_team_id: null
  *                       pid: "4017"
  *                       selection_timestamp: 1698765432
@@ -207,7 +207,7 @@ const router = express.Router({ mergeParams: true })
  *                       season_year: 2024
  *                       round: 1
  *                       pick: 4
- *                       pick_str: "1.04"
+ *                       pick_string: "1.04"
  *                       original_team_id: 13
  *                       pid: null
  *                       selection_timestamp: null
@@ -631,8 +631,8 @@ router.post('/?', async (req, res) => {
     })
     const roster = new Roster({ roster: rosterRow, league })
     const value =
-      league.num_teams - pick.pick + 1 > 0
-        ? league.num_teams - pick.pick + 1
+      league.number_teams - pick.pick + 1 > 0
+        ? league.number_teams - pick.pick + 1
         : 1
 
     await db('rosters_players').insert({
@@ -726,7 +726,7 @@ router.post('/?', async (req, res) => {
     if (pick.pick === 1) {
       message += 'the first overall pick '
     } else {
-      message += `pick #${pick.pick} (${pick.pick_str}) `
+      message += `pick #${pick.pick} (${pick.pick_string}) `
     }
     message += `in the ${current_season.year} draft`
 

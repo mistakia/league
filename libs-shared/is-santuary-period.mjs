@@ -3,9 +3,9 @@ import get_free_agent_period from './get-free-agent-period.mjs'
 
 export default function isSantuaryPeriod(league) {
   // If there is no extension date or its before, then it is santuary period
-  if (!league.ext_date) {
+  if (!league.extension_deadline_at) {
     return true
-  } else if (current_season.now.isBefore(league.ext_date)) {
+  } else if (current_season.now.isBefore(league.extension_deadline_at)) {
     return true
   }
 

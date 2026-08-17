@@ -141,7 +141,7 @@ const generate_roster_asset_lineage = async ({
       salary_paid: draft.salary_paid ?? null,
       salary_basis: draft.salary_basis,
       initial_slot_type: snap.initial_slot_type ?? null,
-      ps_slot_subtype: snap.ps_slot_subtype ?? null,
+      practice_squad_slot_subtype: snap.practice_squad_slot_subtype ?? null,
       weeks_active: snap.weeks_active || 0,
       weeks_practice_squad: snap.weeks_practice_squad || 0,
       weeks_reserve_short_term: snap.weeks_reserve_short_term || 0,

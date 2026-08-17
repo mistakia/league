@@ -20,9 +20,9 @@ const snaps_header = (snaps_types) =>
 // Map fantasy stat fields to their header labels
 const FANTASY_STAT_HEADER_MAP = {
   points: 'FP',
-  points_pos_rnk: 'Rnk',
+  points_position_rank: 'Rnk',
   points_per_game: 'FP/G',
-  points_per_game_pos_rnk: 'Rnk',
+  points_per_game_position_rank: 'Rnk',
   points_added_earned: 'Pts+ Earned',
   points_added_earned_rank: 'Ovr',
   points_added_earned_position_rank: 'Rnk',
@@ -36,9 +36,9 @@ const FANTASY_STAT_HEADER_MAP = {
 // Order of fantasy stats (must match FANTASY_STATS in player-selected-row.js)
 const FANTASY_STATS_ORDER = [
   'points',
-  'points_pos_rnk',
+  'points_position_rank',
   'points_per_game',
-  'points_per_game_pos_rnk',
+  'points_per_game_position_rank',
   'points_added_earned',
   'points_added_earned_rank',
   'points_added_earned_position_rank',

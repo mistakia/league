@@ -64,7 +64,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 1     |
+| `number_teams`                                  | 1     |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 3     |
@@ -93,7 +93,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 10    |
+| `number_teams`                                  | 10    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -122,7 +122,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 10    |
+| `number_teams`                                  | 10    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -151,7 +151,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 10    |
+| `number_teams`                                  | 10    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -180,7 +180,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -209,7 +209,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -238,7 +238,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 10    |
+| `number_teams`                                  | 10    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -267,7 +267,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 10    |
+| `number_teams`                                  | 10    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -296,7 +296,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -325,7 +325,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -354,7 +354,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 10    |
+| `number_teams`                                  | 10    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -383,7 +383,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 10    |
+| `number_teams`                                  | 10    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -412,7 +412,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -441,7 +441,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -470,7 +470,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 10    |
+| `number_teams`                                  | 10    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -499,7 +499,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 10    |
+| `number_teams`                                  | 10    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -528,7 +528,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -557,7 +557,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -586,7 +586,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 0     |
 | `starter_slots_wide_receiver`                   | 0     |
@@ -615,7 +615,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 0     |
 | `starter_slots_wide_receiver`                   | 0     |
@@ -644,7 +644,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 0     |
 | `starter_slots_running_back`                    | 0     |
 | `starter_slots_wide_receiver`                   | 0     |
@@ -673,7 +673,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 0     |
 | `starter_slots_running_back`                    | 0     |
 | `starter_slots_wide_receiver`                   | 0     |
@@ -702,7 +702,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 10    |
+| `number_teams`                                  | 10    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |
@@ -731,7 +731,7 @@ This document shows the configuration for each named format in the system. Ident
 
 | Property                                        | Value |
 | ----------------------------------------------- | ----- |
-| `num_teams`                                     | 12    |
+| `number_teams`                                  | 12    |
 | `starter_slots_quarterback`                     | 1     |
 | `starter_slots_running_back`                    | 2     |
 | `starter_slots_wide_receiver`                   | 2     |

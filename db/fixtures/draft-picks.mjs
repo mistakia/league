@@ -10,15 +10,15 @@ export default async function (knex) {
   })
   const league = await getLeague({ lid })
   await knex('draft').del()
-  for (let i = 0; i < 3 * league.num_teams; i++) {
-    const idx = i % league.num_teams
+  for (let i = 0; i < 3 * league.number_teams; i++) {
+    const idx = i % league.number_teams
     const team = teams[idx]
     await knex('draft').insert({
       tid: team.uid,
       original_team_id: team.uid,
       lid: league.uid,
       pick: i + 1,
-      round: Math.ceil((i + 1) / league.num_teams),
+      round: Math.ceil((i + 1) / league.number_teams),
       season_year: current_season.year
     })
   }

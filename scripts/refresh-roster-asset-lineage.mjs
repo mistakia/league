@@ -60,7 +60,7 @@ SELECT md5(concat_ws('|',
      FROM draft WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', uid, pid, bid_amount, tid, season_year, is_successful, processed, cancelled, nomination_id, outcome), ',' ORDER BY uid))
      FROM restricted_free_agency_bids WHERE lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', season_year, draft_start, rookie_draft_completed_at, ext_date), ',' ORDER BY season_year))
+  (SELECT md5(string_agg(concat_ws(':', season_year, draft_start, rookie_draft_completed_at, extension_deadline_at), ',' ORDER BY season_year))
      FROM seasons WHERE lid = ?)
 )) AS input_hash`
 

@@ -113,7 +113,7 @@ export default async function generate_league_rules({
     markdown_table(
       ['Setting', 'Value'],
       [
-        ['Salary cap', `$${league.cap}`],
+        ['Salary cap', `$${league.salary_cap}`],
         ['Free agency budget (FAAB)', `$${league.starting_faab_budget}`],
         ['Minimum bid', `$${league.min_bid}`],
         [
@@ -131,7 +131,7 @@ export default async function generate_league_rules({
       [
         [
           'Extension deadline',
-          format_date_et(timestamptz_to_epoch(league.ext_date))
+          format_date_et(timestamptz_to_epoch(league.extension_deadline_at))
         ],
         ['Cost per extension', '$5 over the prior season salary']
       ]

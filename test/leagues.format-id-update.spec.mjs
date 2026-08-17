@@ -144,7 +144,7 @@ describe('API /leagues - format id update', function () {
       .execute(server)
       .put(`/api/leagues/${lid}`)
       .set('Authorization', `Bearer ${user1}`)
-      .send({ field: 'cap', value: 250 })
+      .send({ field: 'salary_cap', value: 250 })
 
     res.should.have.status(200)
     res.body.value.should.equal(250)

@@ -582,7 +582,7 @@ describe('LIBS-SHARED Roster', function () {
 
   describe('salary pricing', function () {
     const base_league = {
-      cap: 200,
+      salary_cap: 200,
       starter_slots_quarterback: 1,
       starter_slots_running_back: 2,
       starter_slots_wide_receiver: 2,
@@ -612,7 +612,7 @@ describe('LIBS-SHARED Roster', function () {
     it('charges a $0 restricted free agency bid as $0, not the prior salary', () => {
       const league = {
         ...base_league,
-        ext_date: past,
+        extension_deadline_at: past,
         restricted_free_agency_period_end: future
       }
 
@@ -650,7 +650,7 @@ describe('LIBS-SHARED Roster', function () {
     it('charges a practice squad player their value during the extension window', () => {
       const league = {
         ...base_league,
-        ext_date: future,
+        extension_deadline_at: future,
         restricted_free_agency_period_end: future
       }
 

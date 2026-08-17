@@ -54,7 +54,7 @@ These definitions are defined in each schema's `definitions` section and ensure 
   "name": "string", // League name
   "year": "number", // NFL season year
   "settings": {
-    "num_teams": "number", // Number of teams (8-32)
+    "number_teams": "number", // Number of teams (8-32)
     "season_type": "REDRAFT|KEEPER|DYNASTY",
     "playoff_teams": "number", // Teams making playoffs
     "playoff_week_start": "number", // First playoff week
@@ -116,14 +116,14 @@ These definitions are defined in each schema's `definitions` section and ensure 
 
 **Sleeper**:
 
-- Uses `total_rosters` for `num_teams`
+- Uses `total_rosters` for `number_teams`
 - Maps `settings.draft_type: 1` → `SNAKE_DRAFT`, `0` → `LINEAR_DRAFT`
 - Extracts scoring from `scoring_settings` object
 - Team objects in `teams` array use `external_team_id` matching `user_id`
 
 **ESPN**:
 
-- Uses `settings.size` for `num_teams`
+- Uses `settings.size` for `number_teams`
 - Maps complex `scoringSettings` array to canonical format
 - Extracts roster slots from `rosterSettings.lineupSlotCounts`
 - Team objects in `teams` array use `external_team_id` matching team `id`

@@ -156,7 +156,7 @@ export function auction_reducer(state = initialState(), { payload, type }) {
       }
 
       return state.merge({
-        lineupBudget: Math.round(payload.data.leagues[0].cap * 0.9)
+        lineupBudget: Math.round(payload.data.leagues[0].salary_cap * 0.9)
       })
 
     case auction_actions.AUCTION_SLOW_MODE_STATE_UPDATE:

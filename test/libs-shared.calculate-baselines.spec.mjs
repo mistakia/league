@@ -11,7 +11,7 @@ const expect = chai.expect
 // team. The superflex is what makes the cross-position baseline reachable: it
 // sits in QB's eligible-slot list and accepts RB, WR and TE as well.
 const two_team_league = {
-  num_teams: 2,
+  number_teams: 2,
   starter_slots_quarterback: 1,
   starter_slots_running_back: 1,
   starter_slots_wide_receiver: 1,
