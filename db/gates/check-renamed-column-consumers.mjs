@@ -257,11 +257,20 @@ const collect_local_aliases = (source) => {
 }
 
 // GATE 1 -- every table-qualified column literal must resolve against the schema.
-const run_gate_1 = (tables) => {
+//
+// `source_override` substitutes one file's contents for a mutated copy without
+// touching the tree, which is what lets the negative controls below drive the
+// real scan over real corpus material. Nothing was extracted to make the gate
+// testable; the scan a control exercises is the scan CI runs.
+const run_gate_1 = (tables, { source_override } = {}) => {
   const findings = []
   const qualified_re = /['"`]([a-z_][a-z_0-9]*)\.([a-z_][a-z_0-9]*)['"`]/g
   for (const file of walk_files(SERVER_ROOTS, ['.mjs', '.js'])) {
-    const source = fs.readFileSync(file, 'utf8')
+    const relative_path = path.relative(repo_root, file)
+    const source =
+      source_override && source_override.file === relative_path
+        ? source_override.source
+        : fs.readFileSync(file, 'utf8')
     const local_aliases = collect_local_aliases(source)
     const lines = source.split('\n')
     lines.forEach((line, index) => {
@@ -279,7 +288,7 @@ const run_gate_1 = (tables) => {
           gate: 1,
           table: table_name,
           column: column_name,
-          file: path.relative(repo_root, file),
+          file: relative_path,
           line: index + 1,
           text: line.trim().slice(0, 140)
         })
@@ -288,6 +297,186 @@ const run_gate_1 = (tables) => {
   }
   return findings
 }
+
+// ---------------------------------------------------------------------------
+// gate 1 negative controls
+// ---------------------------------------------------------------------------
+
+// Five controls over gate 1, run on EVERY invocation, and a control that does
+// not hold fails the gate.
+//
+// Gate 1 is the half that runs in CI on every push (`--gate 1`, see
+// .github/workflows/test.yml), and it is also the half with no acceptance test:
+// the named pre-fix revision at the top of this file exercises gate 2. Its
+// steady state is `none`, printed identically by a scan that resolved 900
+// literals and by a scan that walked an empty tree.
+//
+// ONE RED and FOUR SILENT, which is the right ratio for this gate rather than
+// an accident. Gate 1's oracle -- does this literal resolve against the schema
+// -- is one line, and everything difficult about it is the four exclusions that
+// decide a literal is NOT a finding: an unknown prefix, a locally aliased
+// subquery, a file extension, and a comment. Each of those fails in the
+// direction that looks like MORE coverage, and the header records what that
+// costs: the scan this replaced returned 129 findings on the revision of a live
+// defect and none of them named the defect.
+//
+// Every control mutates REAL corpus material, so an emptied or unreachable
+// corpus reports NO MATERIAL and fails rather than passing vacuously.
+const CONTROL_COLUMN = 'zzz_control_absent'
+
+// A real non-comment line carrying a qualified literal that RESOLVES today.
+// `extra` lets a control demand more of the file it picks -- the alias control
+// needs one that also shadows a table name locally.
+const pick_qualified_literal = ({ tables, extra }) => {
+  const qualified_re = /['"`]([a-z_][a-z_0-9]*)\.([a-z_][a-z_0-9]*)['"`]/g
+  for (const file of walk_files(SERVER_ROOTS, ['.mjs', '.js'])) {
+    const source = fs.readFileSync(file, 'utf8')
+    const local_aliases = collect_local_aliases(source)
+    const context = extra ? extra({ source, local_aliases, tables }) : {}
+    if (context === null) continue
+    const lines = source.split('\n')
+    for (const [index, line] of lines.entries()) {
+      if (is_comment(line)) continue
+      qualified_re.lastIndex = 0
+      let match
+      while ((match = qualified_re.exec(line)) !== null) {
+        const [literal, table_name, column_name] = match
+        if (!tables.has(table_name)) continue
+        if (local_aliases.has(table_name)) continue
+        if (FILE_EXTENSION_SUFFIXES.has(column_name)) continue
+        if (!tables.get(table_name).has(column_name)) continue
+        return {
+          file: path.relative(repo_root, file),
+          source,
+          lines,
+          line_index: index,
+          literal,
+          table: table_name,
+          column: column_name,
+          ...context
+        }
+      }
+    }
+  }
+  return null
+}
+
+// Rewrite the picked LINE and rebuild the source around it. Line-scoped because
+// gate 1 matches per line, and because a whole-source replace would also
+// rewrite the same literal wherever else the file spells it.
+const rewrite_line = (target, rewrite) => {
+  const lines = [...target.lines]
+  lines[target.line_index] = rewrite(lines[target.line_index])
+  return lines.join('\n')
+}
+
+const GATE_1_CONTROLS = [
+  {
+    name: 'a qualified literal naming a column the table does not have is reported',
+    direction: 'must-report',
+    mutate: (target) =>
+      rewrite_line(target, (line) =>
+        line.replace(target.literal, `'${target.table}.${CONTROL_COLUMN}'`)
+      )
+  },
+  {
+    // Without this exclusion every subquery prefix in the tree becomes a
+    // finding, since nothing binds it to a table.
+    name: 'a prefix that is not a table name is NOT reported',
+    direction: 'must-stay-silent',
+    mutate: (target) =>
+      rewrite_line(target, (line) =>
+        line.replace(
+          target.literal,
+          `'zzz_control_not_a_table.${CONTROL_COLUMN}'`
+        )
+      )
+  },
+  {
+    // `'rosters.csv'` parses as table-qualified because the stem is a table.
+    name: 'a file extension after a table name is NOT reported',
+    direction: 'must-stay-silent',
+    // The planted column IS the extension here, so the control has to watch for
+    // `csv` rather than the sentinel -- watching for the sentinel would make it
+    // pass over a scan that reports every `'rosters.csv'` in the tree.
+    expect_column: 'csv',
+    mutate: (target) =>
+      rewrite_line(target, (line) =>
+        line.replace(target.literal, `'${target.table}.csv'`)
+      )
+  },
+  {
+    name: 'an unresolvable literal inside a comment is NOT reported',
+    direction: 'must-stay-silent',
+    mutate: (target) =>
+      rewrite_line(
+        target,
+        (line) =>
+          `// ${line.replace(target.literal, `'${target.table}.${CONTROL_COLUMN}'`)}`
+      )
+  },
+  {
+    // A subquery aliased as a real table name legitimately projects columns the
+    // physical table does not have. Needs a file that actually declares such an
+    // alias, so it picks its own material.
+    name: 'a literal on a locally aliased subquery shadowing a table name is NOT reported',
+    direction: 'must-stay-silent',
+    extra: ({ local_aliases, tables }) => {
+      const shadow = [...local_aliases].find((alias) => tables.has(alias))
+      return shadow ? { shadow } : null
+    },
+    mutate: (target) =>
+      rewrite_line(target, (line) =>
+        line.replace(target.literal, `'${target.shadow}.${CONTROL_COLUMN}'`)
+      )
+  }
+]
+
+const run_gate_1_negative_controls = (tables) =>
+  GATE_1_CONTROLS.map((control) => {
+    const target = pick_qualified_literal({ tables, extra: control.extra })
+    if (!target) {
+      return {
+        name: control.name,
+        result: 'NO MATERIAL',
+        detail:
+          'no resolving qualified literal of this shape -- the scan may not be reaching the corpus',
+        passed: false
+      }
+    }
+
+    const mutated = control.mutate(target)
+    if (mutated === target.source) {
+      return {
+        name: control.name,
+        result: 'MUTATION DID NOT APPLY',
+        detail: `${target.file} unchanged -- the control proved nothing`,
+        passed: false
+      }
+    }
+
+    const findings = run_gate_1(tables, {
+      source_override: { file: target.file, source: mutated }
+    })
+    const expected_column = control.expect_column || CONTROL_COLUMN
+    const reported = findings.some(
+      (finding) =>
+        finding.file === target.file && finding.column === expected_column
+    )
+    const passed = control.direction === 'must-report' ? reported : !reported
+    return {
+      name: control.name,
+      result: passed
+        ? control.direction === 'must-report'
+          ? 'WENT RED'
+          : 'STAYED SILENT'
+        : control.direction === 'must-report'
+          ? 'STAYED GREEN'
+          : 'FALSE POSITIVE',
+      detail: `${target.file}:${target.line_index + 1}`,
+      passed
+    }
+  })
 
 const schema_at_ref = (ref) => {
   try {
@@ -620,6 +809,11 @@ const main = () => {
   const tables = parse_schema(fs.readFileSync(schema_path, 'utf8'))
 
   const gate_1_findings = argv.gate === 2 ? [] : run_gate_1(tables)
+  // Gate 2 has an acceptance test and a recorded adjudication-removal control
+  // (see the header); these cover gate 1, so they run whenever gate 1 does.
+  const gate_1_controls =
+    argv.gate === 2 ? [] : run_gate_1_negative_controls(tables)
+  const failed_controls = gate_1_controls.filter((control) => !control.passed)
   const gate_2 =
     argv.gate === 1
       ? { findings: [], removed_count: 0, unmatchable_count: 0 }
@@ -636,16 +830,37 @@ const main = () => {
   const all = [...gate_1_findings, ...unadjudicated]
   const reported = argv.unadjudicated ? unadjudicated : gate_2.findings
 
+  const control_summary = failed_controls.length
+    ? `\n${failed_controls.length} gate-1 negative control(s) did not hold. Until they do, ` +
+      'gate 1 cannot tell a clean tree from a scan that has stopped resolving.'
+    : ''
+
   if (argv.json) {
     console.log(
       JSON.stringify(
-        { tables: tables.size, gate_1: gate_1_findings, gate_2 },
+        {
+          tables: tables.size,
+          gate_1: gate_1_findings,
+          gate_1_controls,
+          gate_2
+        },
         null,
         2
       )
     )
   } else {
     console.log(`Parsed ${tables.size} tables from db/schema.postgres.sql\n`)
+
+    if (gate_1_controls.length) {
+      console.log('NEGATIVE CONTROLS -- gate 1')
+      for (const control of gate_1_controls) {
+        console.log(
+          `  [${control.passed ? 'ok' : 'FAIL'}] ${control.result}  ${control.name}`
+        )
+        if (!control.passed) console.log(`      ${control.detail}`)
+      }
+      console.log('')
+    }
 
     console.log(`GATE 1 -- table-qualified columns that do not resolve`)
     if (!gate_1_findings.length) console.log('  none\n')
@@ -658,12 +873,13 @@ const main = () => {
 
     if (argv.gate === 1) {
       console.log(`\nGATE 2 -- not run (--gate 1)`)
-      console.log(
-        all.length
-          ? `\nGATE FAIL: ${all.length} finding(s) -- repoint before shipping.`
-          : `\nGATE OK.`
-      )
-      process.exitCode = all.length ? 1 : 0
+      if (all.length)
+        console.log(
+          `\nGATE FAIL: ${all.length} finding(s) -- repoint before shipping.`
+        )
+      else if (!failed_controls.length) console.log(`\nGATE OK.`)
+      if (control_summary) console.error(control_summary)
+      process.exitCode = all.length || failed_controls.length ? 1 : 0
       return
     }
 
@@ -715,17 +931,18 @@ const main = () => {
       if (!reported.length) console.log('  none\n')
     }
 
-    console.log(
-      all.length
-        ? `\nGATE FAIL: ${all.length} finding(s) -- repoint or adjudicate before shipping.`
-        : `\nGATE OK.`
-    )
+    if (all.length)
+      console.log(
+        `\nGATE FAIL: ${all.length} finding(s) -- repoint or adjudicate before shipping.`
+      )
+    else if (!failed_controls.length) console.log(`\nGATE OK.`)
+    if (control_summary) console.error(control_summary)
   }
 
   // `process.exit` here TRUNCATES stdout at the pipe buffer (64KB) -- the JSON
   // report is well past that, so an exit call silently produced unparseable
   // output. Set the code and let the process drain.
-  process.exitCode = all.length ? 1 : 0
+  process.exitCode = all.length || failed_controls.length ? 1 : 0
 }
 
 main()
