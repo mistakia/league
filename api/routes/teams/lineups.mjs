@@ -78,6 +78,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
+ * /teams/{teamId}/lineups:
  *   put:
  *     tags:
  *       - Fantasy Teams

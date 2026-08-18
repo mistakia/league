@@ -66,9 +66,10 @@ const router = express.Router({ mergeParams: true })
  *                     description: Player ID
  *                     example: "JALE-HURT-003085"
  *                   submitted:
- *                     type: integer
- *                     description: Submission timestamp
- *                     example: 1640995200
+ *                     type: string
+ *                     format: date-time
+ *                     description: ISO-8601 timestamp when the bid was submitted
+ *                     example: "2022-01-01T00:00:00.000Z"
  *                   season_year:
  *                     type: integer
  *                     description: Year
@@ -134,6 +135,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
+ * /teams/{teamId}/tag/restricted-free-agency:
  *   post:
  *     tags:
  *       - Fantasy Teams
@@ -228,9 +230,10 @@ router.get('/?', async (req, res) => {
  *                   description: Player ID
  *                   example: "JALE-HURT-003085"
  *                 submitted:
- *                   type: integer
- *                   description: Submission timestamp
- *                   example: 1640995200
+ *                   type: string
+ *                   format: date-time
+ *                   description: ISO-8601 timestamp when the bid was submitted
+ *                   example: "2022-01-01T00:00:00.000Z"
  *                 season_year:
  *                   type: integer
  *                   description: Year
@@ -632,6 +635,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
+ * /teams/{teamId}/tag/restricted-free-agency:
  *   delete:
  *     tags:
  *       - Fantasy Teams
@@ -828,6 +832,7 @@ router.delete('/?', async (req, res) => {
 
 /**
  * @swagger
+ * /teams/{teamId}/tag/restricted-free-agency:
  *   put:
  *     tags:
  *       - Fantasy Teams
@@ -1299,6 +1304,7 @@ router.post('/nominate/?', async (req, res) => {
 
 /**
  * @swagger
+ * /teams/{teamId}/tag/restricted-free-agency/nominate:
  *   delete:
  *     tags:
  *       - Fantasy Teams

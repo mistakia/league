@@ -71,6 +71,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
+ * /teams/{teamId}/cutlist:
  *   post:
  *     tags:
  *       - Fantasy Teams

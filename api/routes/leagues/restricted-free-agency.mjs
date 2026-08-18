@@ -57,9 +57,11 @@ const router = express.Router({ mergeParams: true })
  *                   nominated_at:
  *                     type: string
  *                     format: date-time
+ *                     nullable: true
  *                   announced_at:
  *                     type: string
  *                     format: date-time
+ *                     nullable: true
  *                   processed_at:
  *                     type: string
  *                     format: date-time

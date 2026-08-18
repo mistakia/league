@@ -1275,9 +1275,10 @@ const options = {
               example: 'PARLAY'
             },
             placed_at: {
-              type: 'integer',
-              description: 'Unix timestamp when wager was placed',
-              example: 1640995200
+              type: 'string',
+              format: 'date-time',
+              description: 'ISO-8601 timestamp when wager was placed',
+              example: '2022-01-01T00:00:00.000Z'
             },
             bet_count: {
               type: 'integer',

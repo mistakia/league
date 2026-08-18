@@ -34,19 +34,18 @@ const router = express.Router()
  *                         last_visit_at:
  *                           type: string
  *                           format: date-time
+ *                           nullable: true
  *                           description: 'Last visit timestamp'
  *                         watchlist:
  *                           type: array
+ *                           nullable: true
  *                           items:
  *                             type: string
  *                           description: 'List of player IDs on user watchlist'
  *                 teams:
  *                   type: array
  *                   items:
- *                     allOf:
- *                       - $ref: '#/components/schemas/Team'
- *                       - type: object
- *                         properties:
+ *                     $ref: '#/components/schemas/Team'
  *                   description: 'Teams owned by the user in the current season'
  *                 leagues:
  *                   type: array
@@ -98,7 +97,8 @@ const router = express.Router()
  *                         type: integer
  *                         description: 'User ID making the poach'
  *                       submitted:
- *                         type: integer
+ *                         type: string
+ *                         format: date-time
  *                         description: 'ISO-8601 timestamp when poach was submitted'
  *                       release:
  *                         type: array

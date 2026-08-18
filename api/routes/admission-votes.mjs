@@ -168,12 +168,49 @@ const validate_ranking = ({ ranked_candidate_ids, vote, candidate_ids }) => {
  *     responses:
  *       200:
  *         description: The vote, or a null vote where the league has never held one
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 vote:
+ *                   type: object
+ *                   nullable: true
+ *                 candidates:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 totals:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 league_teams:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 viewer:
+ *                   type: object
+ *                   properties:
+ *                     is_commissioner:
+ *                       type: boolean
  *       400:
  *         description: Missing or malformed league_id
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       401:
  *         description: Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       403:
  *         description: The caller does not manage a team in this league
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -361,14 +398,39 @@ router.get('/', async (req, res) => {
  *     responses:
  *       200:
  *         description: The ballot was recorded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 admission_vote_id:
+ *                   type: integer
+ *                 team_id:
+ *                   type: integer
  *       400:
  *         description: Malformed request or an invalid ranking
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       401:
  *         description: Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       403:
  *         description: The caller's team is not entitled to a ballot
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       409:
  *         description: The admission vote is no longer open
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/:admission_vote_id/ballot', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -484,14 +546,39 @@ router.post('/:admission_vote_id/ballot', async (req, res) => {
  *     responses:
  *       200:
  *         description: The transcribed ballot was recorded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 admission_vote_id:
+ *                   type: integer
+ *                 team_id:
+ *                   type: integer
  *       400:
  *         description: Malformed request, an invalid ranking, or no reason given
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       401:
  *         description: Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       403:
  *         description: The caller is not the commissioner
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       409:
  *         description: The window has passed, or the team already has a ballot
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/:admission_vote_id/transcribed-ballot', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -631,14 +718,37 @@ router.post('/:admission_vote_id/transcribed-ballot', async (req, res) => {
  *     responses:
  *       200:
  *         description: The vote was opened
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 admission_vote_id:
+ *                   type: integer
  *       400:
  *         description: Malformed request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       401:
  *         description: Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       403:
  *         description: The caller is not the commissioner
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       409:
  *         description: The league already has an open admission vote
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -884,12 +994,35 @@ router.post('/', async (req, res) => {
  *     responses:
  *       200:
  *         description: The vote was closed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 admission_vote_id:
+ *                   type: integer
+ *                 decision_due_at:
+ *                   type: string
+ *                   format: date-time
+ *                   nullable: true
  *       401:
  *         description: Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       403:
  *         description: The caller is not the commissioner
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       409:
  *         description: The vote is already closed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/:admission_vote_id/close', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -965,14 +1098,42 @@ router.post('/:admission_vote_id/close', async (req, res) => {
  *     responses:
  *       200:
  *         description: The decision was recorded
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 admission_vote_id:
+ *                   type: integer
+ *                 decision_outcome:
+ *                   type: string
+ *                 admission_vote_candidate_id:
+ *                   type: integer
+ *                   nullable: true
  *       400:
  *         description: Malformed request, or an admission of a candidate who is not highest ranked
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       401:
  *         description: Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       403:
  *         description: The caller is not the commissioner
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       409:
  *         description: The vote is still open, already decided, or past its deadline
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/:admission_vote_id/decision', async (req, res) => {
   const { db, logger } = req.app.locals
