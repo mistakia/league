@@ -42,12 +42,14 @@ export default async function (knex, league_params = {}) {
   await reset_league_tables(knex)
 
   // Reset sequences for test isolation (teams_team_id_seq reset after team creation)
-  await knex.raw('ALTER SEQUENCE waivers_uid_seq RESTART WITH 1')
-  await knex.raw('ALTER SEQUENCE transactions_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE waivers_waiver_id_seq RESTART WITH 1')
+  await knex.raw(
+    'ALTER SEQUENCE transactions_transaction_id_seq RESTART WITH 1'
+  )
   await knex.raw('ALTER SEQUENCE rosters_roster_id_seq RESTART WITH 1')
-  await knex.raw('ALTER SEQUENCE trades_uid_seq RESTART WITH 1')
-  await knex.raw('ALTER SEQUENCE poaches_uid_seq RESTART WITH 1')
-  await knex.raw('ALTER SEQUENCE leagues_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE trades_trade_id_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE poaches_poach_id_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE leagues_league_id_seq RESTART WITH 1')
   await knex.raw(
     'ALTER SEQUENCE super_priority_super_priority_id_seq RESTART WITH 1'
   )

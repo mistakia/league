@@ -206,7 +206,8 @@ export function* init({ payload }) {
       payload: { teamId: team_id, leagueId: league_id }
     })
   }
-  if (league.uid) yield fork(api_get_baselines, { leagueId: league.uid })
+  if (league.league_id)
+    yield fork(api_get_baselines, { leagueId: league.league_id })
   if (app.teamId) yield fork(fetch_cutlist)
 
   const { watchlist } = payload.data.user

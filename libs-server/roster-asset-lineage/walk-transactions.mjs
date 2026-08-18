@@ -247,13 +247,13 @@ const walk_transactions = async ({ lid }) => {
     source_share,
     target_share,
     transaction_id = null,
-    trade_uid = null
+    trade_id = null
   }) => {
     ctx.transformation_drafts.push({
       transformation_id,
       lid,
       transaction_id,
-      trade_uid,
+      trade_id,
       transformation_type,
       occurred_at,
       source_draft_id,
@@ -655,7 +655,7 @@ const apply_trade = ({
       source_share: 1.0,
       target_share: 1.0,
       transaction_id: null,
-      trade_uid: event.trade_uid ?? null
+      trade_id: event.trade_id ?? null
     })
   }
 }
@@ -665,7 +665,7 @@ const build_event_stream = async ({ lid }) => {
 
   // 1. Trade lookup: trades_transactions links transaction_id -> trade_id.
   const trade_transactionids = await db('trades_transactions')
-    .join('trades', 'trades.uid', 'trades_transactions.trade_id')
+    .join('trades', 'trades.trade_id', 'trades_transactions.trade_id')
     .where('trades.lid', lid)
     .whereNotNull('trades.accepted')
     .select('trades_transactions.transaction_id')
@@ -701,7 +701,7 @@ const build_event_stream = async ({ lid }) => {
   )
   // Pair each suppressed transactions row (RESTRICTED_FREE_AGENCY_TAG) with
   // its bid event so the rfa_cross_team_win emitter can carry the
-  // transactions.uid forward on the RFA_WIN edge. Without this the 42-of-95
+  // transactions.transaction_id forward on the RFA_WIN edge. Without this the 42-of-95
   // cross-team RFA_WIN transformations stayed at transaction_id=NULL,
   // breaking the (edge -> transaction value) audit path.
   const cross_team_rfa_transaction_id_by_key = new Map()
@@ -709,7 +709,7 @@ const build_event_stream = async ({ lid }) => {
   // 2. Player transactions (excluding those that resolve via a trade).
   const transactions = await db('transactions')
     .select(
-      'uid',
+      'transaction_id',
       'tid',
       'pid',
       'type',
@@ -721,7 +721,7 @@ const build_event_stream = async ({ lid }) => {
     .whereNotNull('pid')
     .orderBy('occurred_at', 'asc')
   for (const tran of transactions) {
-    if (trade_tran_ids.has(tran.uid)) continue
+    if (trade_tran_ids.has(tran.transaction_id)) continue
     // The trades table is the canonical source for trade lineage. Some older
     // TRADE-type transactions (pre-linking import) lack trades_transactions
     // rows; we still skip them here so the trade walker resolves the basket
@@ -741,7 +741,7 @@ const build_event_stream = async ({ lid }) => {
         player_id: tran.pid,
         occurred_at: ts,
         year: tran.season_year,
-        transaction_id: tran.uid
+        transaction_id: tran.transaction_id
       })
       continue
     }
@@ -755,7 +755,7 @@ const build_event_stream = async ({ lid }) => {
         occurred_at: ts,
         year: tran.season_year,
         player_salary: tran.player_salary,
-        transaction_id: tran.uid
+        transaction_id: tran.transaction_id
       })
       continue
     }
@@ -772,7 +772,7 @@ const build_event_stream = async ({ lid }) => {
       // back to this transaction.
       cross_team_rfa_transaction_id_by_key.set(
         `${tran.tid}__${tran.pid}__${tran.season_year}`,
-        tran.uid
+        tran.transaction_id
       )
       events.push({
         sort_ts: tran_sort_ts,
@@ -791,7 +791,7 @@ const build_event_stream = async ({ lid }) => {
         tid: tran.tid,
         player_id: tran.pid,
         occurred_at: ts,
-        transaction_id: tran.uid
+        transaction_id: tran.transaction_id
       })
     } else if (PLAYER_ACQUISITION_TRANSACTION_TYPES[tran.type]) {
       events.push({
@@ -804,7 +804,7 @@ const build_event_stream = async ({ lid }) => {
         occurred_at: ts,
         year: tran.season_year,
         player_salary: tran.player_salary,
-        transaction_id: tran.uid
+        transaction_id: tran.transaction_id
       })
     } else if (tran.type === transaction_types.RESTRICTED_FREE_AGENCY_TAG) {
       // RFA tag rows are emitted via rfa_cross_team_win events below
@@ -819,7 +819,7 @@ const build_event_stream = async ({ lid }) => {
         occurred_at: ts,
         year: tran.season_year,
         player_salary: tran.player_salary,
-        transaction_id: tran.uid
+        transaction_id: tran.transaction_id
       })
     } else {
       events.push({
@@ -873,7 +873,7 @@ const build_event_stream = async ({ lid }) => {
     .whereNotNull('accepted')
     .select('uid', 'propose_tid', 'accept_tid', 'season_year', 'accepted')
     .orderBy('accepted', 'asc')
-  const trade_ids = trades.map((t) => t.uid)
+  const trade_ids = trades.map((t) => t.trade_id)
   const trade_players = trade_ids.length
     ? await db('trades_players').whereIn('trade_id', trade_ids)
     : []
@@ -910,7 +910,7 @@ const build_event_stream = async ({ lid }) => {
   // instead of `draft.original_team_id` so the first trade closes a holding the trade's own
   // participants own. See the chain-gap contract in this module's header.
   const endowment_holder_tid_by_pickid = new Map()
-  const trade_by_id = new Map(trades.map((t) => [t.uid, t]))
+  const trade_by_id = new Map(trades.map((t) => [t.trade_id, t]))
   const trades_for_pickid = new Map()
   const recorded_pick_tid_by_trade_pick = new Map()
   for (const tpi of trade_picks) {
@@ -1000,7 +1000,9 @@ const build_event_stream = async ({ lid }) => {
   }
   for (const trade of trades) {
     const legs = []
-    for (const tp of trade_players.filter((r) => r.trade_id === trade.uid)) {
+    for (const tp of trade_players.filter(
+      (r) => r.trade_id === trade.trade_id
+    )) {
       legs.push({
         asset_type: ASSET_TYPE.PLAYER,
         player_id: tp.pid,
@@ -1009,7 +1011,9 @@ const build_event_stream = async ({ lid }) => {
           tp.tid === trade.propose_tid ? trade.accept_tid : trade.propose_tid
       })
     }
-    for (const tpi of trade_picks.filter((r) => r.trade_id === trade.uid)) {
+    for (const tpi of trade_picks.filter(
+      (r) => r.trade_id === trade.trade_id
+    )) {
       const meta = pick_meta_by_id.get(tpi.draft_pick_id)
       if (!meta) {
         // Stray trades_picks row pointing at a draft row that no longer exists
@@ -1025,7 +1029,7 @@ const build_event_stream = async ({ lid }) => {
         })
         continue
       }
-      const dir = pick_leg_dir.get(`${trade.uid}__${tpi.draft_pick_id}`)
+      const dir = pick_leg_dir.get(`${trade.trade_id}__${tpi.draft_pick_id}`)
       legs.push({
         asset_type: ASSET_TYPE.PICK,
         draft_pick_id: tpi.draft_pick_id,
@@ -1043,7 +1047,7 @@ const build_event_stream = async ({ lid }) => {
       kind: 'trade',
       occurred_at: trade.accepted,
       year: trade.season_year,
-      trade_uid: trade.uid,
+      trade_id: trade.trade_id,
       propose_tid: trade.propose_tid,
       accept_tid: trade.accept_tid,
       legs
@@ -1075,7 +1079,9 @@ const build_event_stream = async ({ lid }) => {
   // the endowment back so the pre-trade ownership window exists.
   const earliest_trade_by_pickid = new Map()
   for (const trade of trades) {
-    for (const tpi of trade_picks.filter((r) => r.trade_id === trade.uid)) {
+    for (const tpi of trade_picks.filter(
+      (r) => r.trade_id === trade.trade_id
+    )) {
       const prior = earliest_trade_by_pickid.get(tpi.draft_pick_id)
       if (prior == null || trade.accepted < prior) {
         earliest_trade_by_pickid.set(tpi.draft_pick_id, trade.accepted)

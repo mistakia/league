@@ -65,9 +65,11 @@ const generate_seasons = async () => {
     .where({ 'leagues.is_hosted': 1 })
     .whereNull('leagues.archived_at')
     .whereExists(function () {
-      this.select('*').from('seasons').whereRaw('seasons.lid = leagues.uid')
+      this.select('*')
+        .from('seasons')
+        .whereRaw('seasons.lid = leagues.league_id')
     })
-    .pluck('leagues.uid')
+    .pluck('leagues.league_id')
 
   if (!expected_lids.length) {
     return { shortfall: null }

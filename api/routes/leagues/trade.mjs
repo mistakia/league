@@ -179,7 +179,7 @@ export const get_trade = async (req, res) => {
     const { tradeId } = req.params
 
     // validate trade exists
-    const trades = await db('trades').where({ uid: tradeId })
+    const trades = await db('trades').where({ trade_id: tradeId })
     const trade = trades[0]
     if (!trade) {
       return res
@@ -238,7 +238,7 @@ export const get_trade = async (req, res) => {
 
     // Load slot assignments for both teams
     const trades_slots_rows = await db('trades_slots').where({
-      trade_uid: tradeId
+      trade_id: tradeId
     })
 
     trade.proposingTeamSlots = {}
@@ -506,7 +506,7 @@ router.post(
             db.raw('users_teams.season_year = ?', [current_season.year])
           )
         })
-        .where('trades.uid', tradeId)
+        .where('trades.trade_id', tradeId)
         .where('users_teams.user_id', req.auth.userId)
         .whereNull('accepted')
         .whereNull('rejected')
@@ -594,7 +594,7 @@ router.post(
 
       // Load stored slot assignments from trades_slots table
       const trades_slots_rows = await db('trades_slots').where({
-        trade_uid: tradeId
+        trade_id: tradeId
       })
 
       // Build slot assignment maps for each team
@@ -663,7 +663,7 @@ router.post(
       }
 
       const sub = db('transactions')
-        .select(db.raw('max(uid) as uid'))
+        .select(db.raw('max(transaction_id) as transaction_id'))
         .whereIn('pid', all_pids)
         .where('lid', leagueId)
         .groupBy('pid')
@@ -676,7 +676,11 @@ router.post(
           'rosters_players.slot'
         )
         .from(sub)
-        .join('transactions', 'sub_query.uid', 'transactions.uid')
+        .join(
+          'transactions',
+          'sub_query.transaction_id',
+          'transactions.transaction_id'
+        )
         .join('player', 'transactions.pid', 'player.pid')
         .leftJoin('rosters_players', function () {
           this.on('player.pid', '=', 'rosters_players.pid')
@@ -875,7 +879,7 @@ router.post(
         }
 
         await trx('trades')
-          .where({ uid: tradeId })
+          .where({ trade_id: tradeId })
           .update({ accepted: new Date() })
 
         // Update slot assignments if accepting team made any overrides
@@ -885,7 +889,7 @@ router.post(
           )) {
             await trx('trades_slots')
               .where({
-                trade_uid: tradeId,
+                trade_id: tradeId,
                 pid,
                 tid: trade.accept_tid
               })
@@ -897,7 +901,7 @@ router.post(
         // move exactly. Written per pid across both sides of the trade.
         for (const [pid, origin_slot] of Object.entries(origin_slots)) {
           await trx('trades_slots')
-            .where({ trade_uid: tradeId, pid })
+            .where({ trade_id: tradeId, pid })
             .update({ origin_slot })
         }
 
@@ -911,7 +915,7 @@ router.post(
 
         const sub_query = trx('transactions')
           .select(
-            trx.raw('max(uid) AS maxuid'),
+            trx.raw('max(transaction_id) AS maxuid'),
             trx.raw("pid || '_' || lid AS group1")
           )
           .groupBy('group1')
@@ -923,7 +927,7 @@ router.post(
           .select('transactions.*')
           .from('transactions')
           .join(sub_query, function () {
-            this.on('transactions.uid', '=', 'sub_query.maxuid')
+            this.on('transactions.transaction_id', '=', 'sub_query.maxuid')
             this.andOn(
               trx.raw("transactions.pid || '_' || transactions.lid"),
               '=',
@@ -973,9 +977,12 @@ router.post(
         if (insertTransactions.length) {
           const tranIds = await trx('transactions')
             .insert(insertTransactions)
-            .returning('uid')
+            .returning('transaction_id')
           await trx('trades_transactions').insert(
-            tranIds.map((t) => ({ transaction_id: t.uid, trade_id: trade.uid }))
+            tranIds.map((t) => ({
+              transaction_id: t.transaction_id,
+              trade_id: trade.trade_id
+            }))
           )
         }
 
@@ -1046,7 +1053,7 @@ router.post(
 
         // cancel other trades that include any picks in this trade
         const pickTradeRows = await trx('trades')
-          .innerJoin('trades_picks', 'trades.uid', 'trades_picks.trade_id')
+          .innerJoin('trades_picks', 'trades.trade_id', 'trades_picks.trade_id')
           .whereIn(
             'trades_picks.draft_pick_id',
             pickRows.map((p) => p.draft_pick_id)
@@ -1059,15 +1066,19 @@ router.post(
         if (pickTradeRows.length) {
           // TODO - broadcast on WS
           // TODO - broadcast notifications
-          const tradeids = pickTradeRows.map((t) => t.uid)
+          const tradeids = pickTradeRows.map((t) => t.trade_id)
           await trx('trades')
-            .whereIn('uid', tradeids)
+            .whereIn('trade_id', tradeids)
             .update({ cancelled: new Date() })
         }
 
         // cancel other trades that include any players in this trade
         const playerTradeRows = await trx('trades')
-          .innerJoin('trades_players', 'trades.uid', 'trades_players.trade_id')
+          .innerJoin(
+            'trades_players',
+            'trades.trade_id',
+            'trades_players.trade_id'
+          )
           .whereIn('trades_players.pid', all_pids)
           .where('trades.lid', leagueId)
           .whereNull('trades.accepted')
@@ -1093,9 +1104,9 @@ router.post(
         if (playerTradeRows.length) {
           // TODO - broadcast on WS
           // TODO - broadcast notifications
-          const tradeids = playerTradeRows.map((t) => t.uid)
+          const tradeids = playerTradeRows.map((t) => t.trade_id)
           await trx('trades')
-            .whereIn('uid', tradeids)
+            .whereIn('trade_id', tradeids)
             .update({ cancelled: new Date() })
         }
       }) // Close transaction
@@ -1269,7 +1280,7 @@ router.post(
             db.raw('users_teams.season_year = ?', [current_season.year])
           )
         })
-        .where('trades.uid', tradeId)
+        .where('trades.trade_id', tradeId)
         .where('teams.season_year', current_season.year)
         .where('users_teams.user_id', req.auth.userId)
         .whereNull('accepted')
@@ -1297,7 +1308,7 @@ router.post(
       }
 
       await db('trades')
-        .where({ uid: tradeId })
+        .where({ trade_id: tradeId })
         .update({ rejected: new Date() })
 
       next()
@@ -1393,7 +1404,7 @@ router.post(
           )
         })
         .join('teams', 'trades.propose_tid', 'teams.team_id')
-        .where('trades.uid', tradeId)
+        .where('trades.trade_id', tradeId)
         .where('teams.season_year', current_season.year)
         .where('users_teams.user_id', req.auth.userId)
         .whereNull('accepted')
@@ -1421,7 +1432,7 @@ router.post(
       }
 
       await db('trades')
-        .where({ uid: tradeId })
+        .where({ trade_id: tradeId })
         .update({ cancelled: new Date() })
 
       next()
@@ -1529,7 +1540,10 @@ router.post(
           .send({ error: 'only the commissioner can veto trades' })
       }
 
-      const trades = await db('trades').where({ uid: tradeId, lid: leagueId })
+      const trades = await db('trades').where({
+        trade_id: tradeId,
+        lid: leagueId
+      })
       if (!trades.length) {
         return res
           .status(400)
@@ -1565,7 +1579,7 @@ router.post(
       // status change. Only an accepted trade needs reversing.
       if (!trade.accepted) {
         await db('trades')
-          .where({ uid: tradeId, lid: leagueId })
+          .where({ trade_id: tradeId, lid: leagueId })
           .update({ vetoed: vetoed_occurred_at })
 
         await sendNotifications({
@@ -1596,7 +1610,7 @@ router.post(
         trade_id: tradeId
       })
       const pick_rows = await db('trades_picks').where({ trade_id: tradeId })
-      const slot_rows = await db('trades_slots').where({ trade_uid: tradeId })
+      const slot_rows = await db('trades_slots').where({ trade_id: tradeId })
 
       const origin_slot_by_pid = new Map(
         slot_rows.map((row) => [row.pid, row.origin_slot])
@@ -1628,7 +1642,7 @@ router.post(
       const trade_transaction_rows = await db('transactions')
         .join(
           'trades_transactions',
-          'transactions.uid',
+          'transactions.transaction_id',
           'trades_transactions.transaction_id'
         )
         .where('trades_transactions.trade_id', tradeId)
@@ -1695,7 +1709,7 @@ router.post(
       try {
         await db.transaction(async (trx) => {
           const vetoed_count = await trx('trades')
-            .where({ uid: tradeId, lid: leagueId })
+            .where({ trade_id: tradeId, lid: leagueId })
             .whereNull('approved')
             .update({ vetoed: vetoed_occurred_at })
 
@@ -1744,11 +1758,11 @@ router.post(
           if (reversal_transactions.length) {
             const transaction_ids = await trx('transactions')
               .insert(reversal_transactions)
-              .returning('uid')
+              .returning('transaction_id')
             await trx('trades_transactions').insert(
               transaction_ids.map((t) => ({
-                transaction_id: t.uid,
-                trade_id: trade.uid
+                transaction_id: t.transaction_id,
+                trade_id: trade.trade_id
               }))
             )
           }
@@ -1895,7 +1909,10 @@ router.post(
           .send({ error: 'only the commissioner can approve trades' })
       }
 
-      const trades = await db('trades').where({ uid: tradeId, lid: leagueId })
+      const trades = await db('trades').where({
+        trade_id: tradeId,
+        lid: leagueId
+      })
       if (!trades.length) {
         return res
           .status(400)
@@ -1943,7 +1960,7 @@ router.post(
       // statement, so a 0-row result needs no rollback -- nothing else has
       // been written.
       const approved_count = await db('trades')
-        .where({ uid: tradeId, lid: leagueId })
+        .where({ trade_id: tradeId, lid: leagueId })
         .whereNull('approved')
         .whereNull('vetoed')
         .update({ approved: new Date() })

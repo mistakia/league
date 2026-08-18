@@ -43,7 +43,14 @@ const refresh_extension_state = async ({
   const query = trx || db
 
   const transactions = await query('transactions')
-    .select('uid', 'tid', 'pid', 'type', 'season_year', 'occurred_at')
+    .select(
+      'transaction_id',
+      'tid',
+      'pid',
+      'type',
+      'season_year',
+      'occurred_at'
+    )
     .where('lid', lid)
     .orderBy('occurred_at', 'asc')
 

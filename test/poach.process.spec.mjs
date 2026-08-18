@@ -66,7 +66,7 @@ describe('API /poaches - process', function () {
       // Process the poach
       const res = await chai_request
         .execute(server)
-        .post(`/api/leagues/${leagueId}/poaches/${poach.uid}/process`)
+        .post(`/api/leagues/${leagueId}/poaches/${poach.poach_id}/process`)
         .set('Authorization', `Bearer ${user1}`)
 
       // Check response
@@ -74,7 +74,9 @@ describe('API /poaches - process', function () {
       expect(res.body.processed).to.not.equal(null)
 
       // Check poaches table
-      const updatedPoach = await knex('poaches').where('uid', poach.uid).first()
+      const updatedPoach = await knex('poaches')
+        .where('poach_id', poach.poach_id)
+        .first()
       expect(updatedPoach.is_successful).to.equal(true)
       expect(updatedPoach.processed).to.not.equal(null)
 

@@ -761,10 +761,12 @@ export default class Auction {
       occurred_at: new Date()
     }
 
-    const insert_query = await db('transactions').insert(bid).returning('uid')
+    const insert_query = await db('transactions')
+      .insert(bid)
+      .returning('transaction_id')
     const bid_with_uid = {
       ...bid,
-      uid: insert_query[0].uid
+      transaction_id: insert_query[0].transaction_id
     }
 
     this.broadcast({
@@ -790,10 +792,12 @@ export default class Auction {
       occurred_at: new Date()
     }
 
-    const insert_query = await db('transactions').insert(bid).returning('uid')
+    const insert_query = await db('transactions')
+      .insert(bid)
+      .returning('transaction_id')
     const bid_with_uid = {
       ...bid,
-      uid: insert_query[0].uid
+      transaction_id: insert_query[0].transaction_id
     }
 
     this.broadcast({
@@ -858,14 +862,14 @@ export default class Auction {
 
     const insert_query = await db('transactions')
       .insert(transaction)
-      .returning('uid')
+      .returning('transaction_id')
 
     this.broadcast({
       type: 'AUCTION_PROCESSED',
       payload: {
         rid: bid.rid || 0, // This might need to be passed from the roster object
         pos: bid.pos || '', // This might need to be passed from player_info
-        uid: insert_query[0].uid,
+        transaction_id: insert_query[0].transaction_id,
         ...transaction
       }
     })
@@ -1124,7 +1128,7 @@ export default class Auction {
         transaction_types.AUCTION_PROCESSED
       ])
       .orderBy('occurred_at', 'desc')
-      .orderBy('uid', 'desc')
+      .orderBy('transaction_id', 'desc')
   }
 
   async _load_league() {

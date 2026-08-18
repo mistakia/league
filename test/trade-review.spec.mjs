@@ -186,7 +186,7 @@ const seed_trade = async () => {
       target_holding_id: HOLDING.SENT_PLAYER_RECEIVED,
       source_share: 1.0,
       target_share: 1.0,
-      trade_uid: TRADE_UID
+      trade_id: TRADE_UID
     },
     {
       transformation_id: knex.raw('gen_random_uuid()'),
@@ -197,7 +197,7 @@ const seed_trade = async () => {
       target_holding_id: HOLDING.SENT_PICK_RECEIVED,
       source_share: 1.0,
       target_share: 1.0,
-      trade_uid: TRADE_UID
+      trade_id: TRADE_UID
     },
     {
       transformation_id: knex.raw('gen_random_uuid()'),
@@ -235,7 +235,7 @@ const seed_trade = async () => {
   ])
 
   await knex('trades').insert({
-    uid: TRADE_UID,
+    trade_id: TRADE_UID,
     propose_tid: PROPOSE_TID,
     accept_tid: ACCEPT_TID,
     lid: LID,
@@ -340,7 +340,7 @@ const seed_zero_priced_trade = async ({ exclude_pids }) => {
       target_holding_id: HOLDING.ZERO_PRICED_RECEIVED,
       source_share: 1.0,
       target_share: 1.0,
-      trade_uid: ZERO_PRICED_TRADE_UID
+      trade_id: ZERO_PRICED_TRADE_UID
     },
     {
       transformation_id: knex.raw('gen_random_uuid()'),
@@ -351,12 +351,12 @@ const seed_zero_priced_trade = async ({ exclude_pids }) => {
       target_holding_id: HOLDING.PRICED_RECEIVED,
       source_share: 1.0,
       target_share: 1.0,
-      trade_uid: ZERO_PRICED_TRADE_UID
+      trade_id: ZERO_PRICED_TRADE_UID
     }
   ])
 
   await knex('trades').insert({
-    uid: ZERO_PRICED_TRADE_UID,
+    trade_id: ZERO_PRICED_TRADE_UID,
     propose_tid: PROPOSE_TID,
     accept_tid: ACCEPT_TID,
     lid: LID,
@@ -410,7 +410,7 @@ const build_lineage = () => {
   const trade_leg = ({
     from_holding,
     to_tid,
-    trade_uid,
+    trade_id,
     occurred_on,
     value_at_trade,
     // A trade transformation carrying no trade_uid: the onward trade cannot be
@@ -434,7 +434,7 @@ const build_lineage = () => {
       target_holding_id: to_holding.holding_id,
       source_share: 1.0,
       target_share: 1.0,
-      trade_uid: unresolvable ? null : trade_uid
+      trade_id: unresolvable ? null : trade_id
     })
     return to_holding
   }
@@ -453,9 +453,9 @@ const build_lineage = () => {
     })
   }
 
-  const trade = ({ uid, occurred_on, propose_tid, accept_tid }) => {
+  const trade = ({ trade_id, occurred_on, propose_tid, accept_tid }) => {
     trades.push({
-      uid,
+      trade_id,
       propose_tid,
       accept_tid,
       lid: LID,
@@ -509,9 +509,9 @@ describe('LIBS SERVER trade-review', function () {
   it('returns exactly two sign-inverted perspectives per trade', async () => {
     const results = await grade_trades({ lid: LID })
 
-    const trade_uids = new Set(results.map((record) => record.trade_uid))
+    const trade_uids = new Set(results.map((record) => record.trade_id))
     for (const trade_uid of trade_uids) {
-      const records = results.filter((record) => record.trade_uid === trade_uid)
+      const records = results.filter((record) => record.trade_id === trade_uid)
       expect(records.length).to.equal(2)
 
       const [first, second] = records
@@ -560,7 +560,7 @@ describe('LIBS SERVER trade-review', function () {
   // edges, so a join on bare target_holding_id emits the drafted player twice
   // and every value derived from the chain doubles.
   it('emits each reachable holding once per origin', async () => {
-    const results = await grade_trades({ lid: LID, trade_uid: TRADE_UID })
+    const results = await grade_trades({ lid: LID, trade_id: TRADE_UID })
     const seen = new Set()
 
     for (const record of results) {
@@ -594,9 +594,9 @@ describe('LIBS SERVER trade-review', function () {
     const unpriced_rows = await knex('view_trade_asset_flow')
       .where('lid', LID)
       .whereNull('keeptradecut_value_at_trade')
-      .select('trade_uid')
+      .select('trade_id')
     const unpriced_trade_uids = new Set(
-      unpriced_rows.map((row) => row.trade_uid)
+      unpriced_rows.map((row) => row.trade_id)
     )
     expect(unpriced_trade_uids.size).to.be.greaterThan(
       0,
@@ -605,7 +605,7 @@ describe('LIBS SERVER trade-review', function () {
 
     const results = await grade_trades({ lid: LID })
     for (const record of results) {
-      if (unpriced_trade_uids.has(record.trade_uid)) {
+      if (unpriced_trade_uids.has(record.trade_id)) {
         expect(record.net_value_at_trade).to.equal(null)
         expect(record.net_value_proceeds_change).to.equal(null)
         expect(record.unpriced_leg_count).to.be.greaterThan(0)
@@ -623,7 +623,7 @@ describe('LIBS SERVER trade-review', function () {
     })
 
     const zero_legs = await knex('view_trade_asset_flow')
-      .where({ lid: LID, trade_uid: ZERO_PRICED_TRADE_UID })
+      .where({ lid: LID, trade_id: ZERO_PRICED_TRADE_UID })
       .select('keeptradecut_value_at_trade')
     expect(
       zero_legs.some(
@@ -638,7 +638,7 @@ describe('LIBS SERVER trade-review', function () {
 
     const results = await grade_trades({
       lid: LID,
-      trade_uid: ZERO_PRICED_TRADE_UID
+      trade_id: ZERO_PRICED_TRADE_UID
     })
     expect(results.length).to.equal(2)
 
@@ -747,10 +747,10 @@ describe('API /leagues/:leagueId/trade-review', function () {
       'the seeded trade is missing from the list, so nothing below is tested'
     )
 
-    const trade_uid = list_res.body[0].trade_uid
+    const trade_id = list_res.body[0].trade_id
     const detail_res = await chai_request
       .execute(server)
-      .get(`/api/leagues/${LID}/trade-review/${trade_uid}`)
+      .get(`/api/leagues/${LID}/trade-review/${trade_id}`)
       .set('Authorization', `Bearer ${user1}`)
 
     detail_res.should.have.status(200)
@@ -941,18 +941,23 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
       opened_on: 0
     })
 
-    lineage.trade({ uid: 10, occurred_on: 10, propose_tid: 1, accept_tid: 2 })
+    lineage.trade({
+      trade_id: 10,
+      occurred_on: 10,
+      propose_tid: 1,
+      accept_tid: 2
+    })
     lineage.trade_leg({
       from_holding: sent,
       to_tid: 2,
-      trade_uid: 10,
+      trade_id: 10,
       occurred_on: 10,
       value_at_trade: 5000
     })
     const received = lineage.trade_leg({
       from_holding: received_origin,
       to_tid: 1,
-      trade_uid: 10,
+      trade_id: 10,
       occurred_on: 10,
       value_at_trade: 4500
     })
@@ -960,18 +965,23 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
     // Deliberately across a calendar year boundary from trade 10: consideration
     // chains cross years by construction, which is what a year-filtered list
     // truncates.
-    lineage.trade({ uid: 11, occurred_on: 200, propose_tid: 1, accept_tid: 3 })
+    lineage.trade({
+      trade_id: 11,
+      occurred_on: 200,
+      propose_tid: 1,
+      accept_tid: 3
+    })
     const passed_on = lineage.trade_leg({
       from_holding: received,
       to_tid: 3,
-      trade_uid: 11,
+      trade_id: 11,
       occurred_on: 200,
       value_at_trade: 4000
     })
     const middle = lineage.trade_leg({
       from_holding: middle_origin,
       to_tid: 1,
-      trade_uid: 11,
+      trade_id: 11,
       occurred_on: 200,
       value_at_trade: 3800
     })
@@ -980,18 +990,23 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
     // "consumed" beside a non-zero proceeds figure.
     lineage.release({ from_holding: passed_on, occurred_on: 210 })
 
-    lineage.trade({ uid: 12, occurred_on: 300, propose_tid: 1, accept_tid: 4 })
+    lineage.trade({
+      trade_id: 12,
+      occurred_on: 300,
+      propose_tid: 1,
+      accept_tid: 4
+    })
     lineage.trade_leg({
       from_holding: middle,
       to_tid: 4,
-      trade_uid: 12,
+      trade_id: 12,
       occurred_on: 300,
       value_at_trade: 3600
     })
     lineage.trade_leg({
       from_holding: final_origin,
       to_tid: 1,
-      trade_uid: 12,
+      trade_id: 12,
       occurred_on: 300,
       value_at_trade: 3400
     })
@@ -1000,11 +1015,11 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
     return { received_player, final_player }
   }
 
-  const acquired_leg = (records, { trade_uid, tid, player_id }) => {
+  const acquired_leg = (records, { trade_id, tid, player_id }) => {
     const record = records.find(
-      (row) => row.trade_uid === trade_uid && row.tid === tid
+      (row) => row.trade_id === trade_id && row.tid === tid
     )
-    expect(record, `no record for trade ${trade_uid} tid ${tid}`).to.exist
+    expect(record, `no record for trade ${trade_id} tid ${tid}`).to.exist
     const asset = record.acquired_assets.find(
       (row) => row.player_id === player_id
     )
@@ -1016,7 +1031,7 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
     const { received_player } = await seed_conversion_chain()
     const records = await grade_trades({ lid: LID })
     const { asset } = acquired_leg(records, {
-      trade_uid: 10,
+      trade_id: 10,
       tid: 1,
       player_id: received_player.pid
     })
@@ -1043,10 +1058,10 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
     const { received_player } = await seed_conversion_chain()
 
     const full_league = await grade_trades({ lid: LID })
-    const single_trade = await grade_trades({ lid: LID, trade_uid: 10 })
+    const single_trade = await grade_trades({ lid: LID, trade_id: 10 })
 
     const from_full = acquired_leg(full_league, {
-      trade_uid: 10,
+      trade_id: 10,
       tid: 1,
       player_id: received_player.pid
     })
@@ -1067,11 +1082,11 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
     )
 
     for (const [label, records] of [
-      ['trade_uid', single_trade],
+      ['trade_id', single_trade],
       ['year', by_year]
     ]) {
       const { record, asset } = acquired_leg(records, {
-        trade_uid: 10,
+        trade_id: 10,
         tid: 1,
         player_id: received_player.pid
       })
@@ -1114,52 +1129,67 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
       opened_on: 0
     })
 
-    lineage.trade({ uid: 20, occurred_on: 10, propose_tid: 1, accept_tid: 2 })
+    lineage.trade({
+      trade_id: 20,
+      occurred_on: 10,
+      propose_tid: 1,
+      accept_tid: 2
+    })
     lineage.trade_leg({
       from_holding: first_sent_holding,
       to_tid: 2,
-      trade_uid: 20,
+      trade_id: 20,
       occurred_on: 10,
       value_at_trade: 5000
     })
     const moved_to_one = lineage.trade_leg({
       from_holding: moved_origin,
       to_tid: 1,
-      trade_uid: 20,
+      trade_id: 20,
       occurred_on: 10,
       value_at_trade: 4800
     })
 
     // Team 1 trades the line away and takes back a different asset for it.
-    lineage.trade({ uid: 21, occurred_on: 20, propose_tid: 1, accept_tid: 2 })
+    lineage.trade({
+      trade_id: 21,
+      occurred_on: 20,
+      propose_tid: 1,
+      accept_tid: 2
+    })
     const moved_back_to_two = lineage.trade_leg({
       from_holding: moved_to_one,
       to_tid: 2,
-      trade_uid: 21,
+      trade_id: 21,
       occurred_on: 20,
       value_at_trade: 4600
     })
     lineage.trade_leg({
       from_holding: exchanged_origin,
       to_tid: 1,
-      trade_uid: 21,
+      trade_id: 21,
       occurred_on: 20,
       value_at_trade: 4400
     })
 
     // ...and later buys the same line back, which is the double count.
-    lineage.trade({ uid: 22, occurred_on: 30, propose_tid: 1, accept_tid: 2 })
+    lineage.trade({
+      trade_id: 22,
+      occurred_on: 30,
+      propose_tid: 1,
+      accept_tid: 2
+    })
     lineage.trade_leg({
       from_holding: buyback_holding,
       to_tid: 2,
-      trade_uid: 22,
+      trade_id: 22,
       occurred_on: 30,
       value_at_trade: 4200
     })
     lineage.trade_leg({
       from_holding: moved_back_to_two,
       to_tid: 1,
-      trade_uid: 22,
+      trade_id: 22,
       occurred_on: 30,
       value_at_trade: 4000
     })
@@ -1168,7 +1198,7 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
 
     const records = await grade_trades({ lid: LID })
     const { asset } = acquired_leg(records, {
-      trade_uid: 20,
+      trade_id: 20,
       tid: 1,
       player_id: moved.pid
     })
@@ -1219,41 +1249,51 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
       opened_on: 0
     })
 
-    lineage.trade({ uid: 40, occurred_on: 10, propose_tid: 1, accept_tid: 2 })
+    lineage.trade({
+      trade_id: 40,
+      occurred_on: 10,
+      propose_tid: 1,
+      accept_tid: 2
+    })
     lineage.trade_leg({
       from_holding: first_sent_holding,
       to_tid: 2,
-      trade_uid: 40,
+      trade_id: 40,
       occurred_on: 10,
       value_at_trade: 5000
     })
     const bundled_at_one = lineage.trade_leg({
       from_holding: bundled_origin,
       to_tid: 1,
-      trade_uid: 40,
+      trade_id: 40,
       occurred_on: 10,
       value_at_trade: 4700
     })
 
-    lineage.trade({ uid: 41, occurred_on: 20, propose_tid: 1, accept_tid: 3 })
+    lineage.trade({
+      trade_id: 41,
+      occurred_on: 20,
+      propose_tid: 1,
+      accept_tid: 3
+    })
     lineage.trade_leg({
       from_holding: bundled_at_one,
       to_tid: 3,
-      trade_uid: 41,
+      trade_id: 41,
       occurred_on: 20,
       value_at_trade: BUNDLE_SUBJECT_VALUE_AT_TRADE
     })
     lineage.trade_leg({
       from_holding: partner_holding,
       to_tid: 3,
-      trade_uid: 41,
+      trade_id: 41,
       occurred_on: 20,
       value_at_trade: partner_value_at_trade
     })
     lineage.trade_leg({
       from_holding: received_origin,
       to_tid: 1,
-      trade_uid: 41,
+      trade_id: 41,
       occurred_on: 20,
       value_at_trade: 9000
     })
@@ -1268,7 +1308,7 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
     })
     const records = await grade_trades({ lid: LID })
     const { asset } = acquired_leg(records, {
-      trade_uid: 40,
+      trade_id: 40,
       tid: 1,
       player_id: bundled.pid
     })
@@ -1285,7 +1325,7 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
     const { bundled } = await seed_bundle({ partner_value_at_trade: null })
     const records = await grade_trades({ lid: LID })
     const { record, asset } = acquired_leg(records, {
-      trade_uid: 40,
+      trade_id: 40,
       tid: 1,
       player_id: bundled.pid
     })
@@ -1314,18 +1354,23 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
       opened_on: 0
     })
 
-    lineage.trade({ uid: 30, occurred_on: 10, propose_tid: 1, accept_tid: 2 })
+    lineage.trade({
+      trade_id: 30,
+      occurred_on: 10,
+      propose_tid: 1,
+      accept_tid: 2
+    })
     lineage.trade_leg({
       from_holding: first_sent_holding,
       to_tid: 2,
-      trade_uid: 30,
+      trade_id: 30,
       occurred_on: 10,
       value_at_trade: 5000
     })
     const stranded_at_one = lineage.trade_leg({
       from_holding: stranded_origin,
       to_tid: 1,
-      trade_uid: 30,
+      trade_id: 30,
       occurred_on: 10,
       value_at_trade: 4800
     })
@@ -1336,7 +1381,7 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
     lineage.trade_leg({
       from_holding: stranded_at_one,
       to_tid: 3,
-      trade_uid: null,
+      trade_id: null,
       occurred_on: 20,
       value_at_trade: 4600,
       unresolvable: true
@@ -1346,7 +1391,7 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
 
     const records = await grade_trades({ lid: LID })
     const { asset } = acquired_leg(records, {
-      trade_uid: 30,
+      trade_id: 30,
       tid: 1,
       player_id: stranded.pid
     })
@@ -1361,8 +1406,8 @@ describe('LIBS SERVER trade-review consideration traversal', function () {
 
     const by_trade = new Map()
     for (const record of records) {
-      if (!by_trade.has(record.trade_uid)) by_trade.set(record.trade_uid, [])
-      by_trade.get(record.trade_uid).push(record)
+      if (!by_trade.has(record.trade_id)) by_trade.set(record.trade_id, [])
+      by_trade.get(record.trade_id).push(record)
     }
     expect(by_trade.size).to.be.greaterThan(0)
 

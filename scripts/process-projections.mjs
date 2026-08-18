@@ -635,7 +635,9 @@ const process_league = async ({ year, lid }) => {
   await run_season_forecast(lid)
 
   if (lid) {
-    await db('leagues').update({ processed_at: timestamp }).where({ uid: lid })
+    await db('leagues')
+      .update({ processed_at: timestamp })
+      .where({ league_id: lid })
   }
 }
 
@@ -662,7 +664,7 @@ const run = async ({ year = current_season.year } = {}) => {
     .select('uid')
     .where({ is_hosted: true })
     .whereNull('archived_at')
-  const lids = [0, ...hosted_league_rows.map((row) => row.uid)]
+  const lids = [0, ...hosted_league_rows.map((row) => row.league_id)]
 
   // league_formats values carry the pricing_model so process_league_format
   // can gate calculatePrices. Hosted leagues default to 'auction'; named
@@ -782,7 +784,7 @@ const check_oracle = async ({ seas_type }) => {
 
   if (stale_leagues.length > 0) {
     const details = stale_leagues
-      .map((l) => `lid=${l.uid} processed_at=${l.processed_at ?? 'null'}`)
+      .map((l) => `lid=${l.league_id} processed_at=${l.processed_at ?? 'null'}`)
       .join('; ')
     return `process-projections freshness oracle failed: ${details}`
   }
@@ -825,7 +827,7 @@ const check_lineup_starter_identity_oracle = async () => {
     )
     select l.lid, l.tid, count(*)::int as weeks
     from league_team_lineups l
-    join leagues lg on lg.uid = l.lid
+    join leagues lg on lg.league_id = l.lid
     join rostered_teams rt on rt.lid = l.lid and rt.tid = l.tid
     left join player_starters ps
       on ps.lid = l.lid and ps.tid = l.tid and ps.week = l.week

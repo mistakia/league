@@ -124,7 +124,7 @@ const get_team = ({ teams_index, tid, transaction, site }) => {
   const team = teams_index[tid]
   if (!team) {
     throw new Error(
-      `team ${tid} absent from league index while applying ${site} for transaction ${transaction.uid} (type ${transaction.type}, ${dayjs(transaction.occurred_at).format('YYYY-MM-DD')})`
+      `team ${tid} absent from league index while applying ${site} for transaction ${transaction.transaction_id} (type ${transaction.type}, ${dayjs(transaction.occurred_at).format('YYYY-MM-DD')})`
     )
   }
   return team
@@ -453,8 +453,8 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     }
 
     // check if transaction is part of a trade
-    const trade = trades_index[transaction.uid]
-    if (trade && !processed_trades_index[trade.uid]) {
+    const trade = trades_index[transaction.transaction_id]
+    if (trade && !processed_trades_index[trade.trade_id]) {
       // process players
       for (const player of trade.players) {
         const old_team_id = player.tid
@@ -486,7 +486,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
       // none it started with. Pick ownership is read from roster_asset_holding
       // in build_day_inserts instead, which walks all four.
 
-      processed_trades_index[trade.uid] = true
+      processed_trades_index[trade.trade_id] = true
     }
 
     // check if next tran date is larger than the max interval
@@ -711,7 +711,9 @@ const main = async () => {
         .whereNull('archived_at')
 
       for (const league of leagues) {
-        const result = await calculate_team_daily_ktc_value({ lid: league.uid })
+        const result = await calculate_team_daily_ktc_value({
+          lid: league.league_id
+        })
         if (result?.shortfall) shortfalls.push(result.shortfall)
       }
     }

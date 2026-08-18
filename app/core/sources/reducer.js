@@ -10,12 +10,14 @@ export function sources_reducer(state = initialState, { payload, type }) {
   switch (type) {
     case app_actions.AUTH_FULFILLED:
       return state.withMutations((state) => {
-        payload.data.sources.forEach((s) => state.set(s.uid, createSource(s)))
+        payload.data.sources.forEach((s) =>
+          state.set(s.source_id, createSource(s))
+        )
       })
 
     case source_actions.GET_SOURCES_FULFILLED:
       return state.withMutations((state) => {
-        payload.data.forEach((s) => state.set(s.uid, createSource(s)))
+        payload.data.forEach((s) => state.set(s.source_id, createSource(s)))
       })
 
     case source_actions.SET_SOURCE:

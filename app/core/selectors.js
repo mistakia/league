@@ -3914,7 +3914,10 @@ export const get_waiver_players_for_current_team = createSelector(
     for (const waiver of teamWaivers.values()) {
       const pid = waiver.pid
       const player_map = player_maps.get(pid, new Map())
-      teamWaivers = teamWaivers.setIn([waiver.uid, 'player_map'], player_map)
+      teamWaivers = teamWaivers.setIn(
+        [waiver.waiver_id, 'player_map'],
+        player_map
+      )
       if (waiver.release.size) {
         const releases = []
         for (const pid of waiver.release) {
@@ -3922,11 +3925,14 @@ export const get_waiver_players_for_current_team = createSelector(
           releases.push(player_map)
         }
         teamWaivers = teamWaivers.setIn(
-          [waiver.uid, 'release'],
+          [waiver.waiver_id, 'release'],
           new List(releases)
         )
       } else {
-        teamWaivers = teamWaivers.setIn([waiver.uid, 'release'], new List())
+        teamWaivers = teamWaivers.setIn(
+          [waiver.waiver_id, 'release'],
+          new List()
+        )
       }
     }
 
@@ -3935,7 +3941,7 @@ export const get_waiver_players_for_current_team = createSelector(
       (a, b) =>
         b.bid_amount - a.bid_amount ||
         a.priority_order - b.priority_order ||
-        a.uid - b.uid
+        a.waiver_id - b.waiver_id
     )
     let poach = new List()
     let active = new List()

@@ -232,7 +232,7 @@ router.get('/?', async (req, res) => {
     }
 
     const trades = await query
-    const tradeids = trades.map((t) => t.uid)
+    const tradeids = trades.map((t) => t.trade_id)
 
     const trade_releases_rows = await db('trade_releases').whereIn(
       'trade_id',
@@ -265,7 +265,7 @@ router.get('/?', async (req, res) => {
       trade.acceptingTeamPicks = []
 
       for (const row of trade_releases_rows) {
-        if (row.trade_id !== trade.uid) continue
+        if (row.trade_id !== trade.trade_id) continue
         if (row.tid === trade.propose_tid) {
           trade.proposingTeamReleasePlayers.push(row.pid)
         } else {
@@ -274,7 +274,7 @@ router.get('/?', async (req, res) => {
       }
 
       for (const row of trade_picks_rows) {
-        if (row.trade_id !== trade.uid) continue
+        if (row.trade_id !== trade.trade_id) continue
         if (row.tid === trade.propose_tid) {
           trade.proposingTeamPicks.push(row)
         } else {
@@ -283,7 +283,7 @@ router.get('/?', async (req, res) => {
       }
 
       for (const row of trade_players_rows) {
-        if (row.trade_id !== trade.uid) continue
+        if (row.trade_id !== trade.trade_id) continue
         if (row.tid === trade.propose_tid) {
           trade.proposingTeamPlayers.push(row.pid)
         } else {
@@ -699,7 +699,7 @@ router.post(
       const all_incoming_pids =
         acceptingTeamPlayers.concat(proposingTeamPlayers)
       const sub = db('transactions')
-        .select(db.raw('max(uid) as uid'))
+        .select(db.raw('max(transaction_id) as transaction_id'))
         .whereIn('pid', all_incoming_pids)
         .where('lid', leagueId)
         .groupBy('pid')
@@ -712,7 +712,11 @@ router.post(
           'rosters_players.slot'
         )
         .from(sub)
-        .join('transactions', 'sub_query.uid', 'transactions.uid')
+        .join(
+          'transactions',
+          'sub_query.transaction_id',
+          'transactions.transaction_id'
+        )
         .join('player', 'transactions.pid', 'player.pid')
         .leftJoin('rosters_players', function () {
           this.on('player.pid', '=', 'rosters_players.pid')
@@ -816,36 +820,36 @@ router.post(
             lid: leagueId,
             offered: new Date()
           })
-          .returning('uid')
-        const trade_uid = result[0].uid
+          .returning('trade_id')
+        const trade_id = result[0].trade_id
 
         // insert join entries
         const insertPlayers = []
         const insertPicks = []
         for (const pid of proposingTeamPlayers) {
           insertPlayers.push({
-            trade_id: trade_uid,
+            trade_id: trade_id,
             tid: propose_tid,
             pid
           })
         }
         for (const pid of acceptingTeamPlayers) {
           insertPlayers.push({
-            trade_id: trade_uid,
+            trade_id: trade_id,
             tid: accept_tid,
             pid
           })
         }
         for (const draft_pick_id of proposingTeamPicks) {
           insertPicks.push({
-            trade_id: trade_uid,
+            trade_id: trade_id,
             draft_pick_id,
             tid: propose_tid
           })
         }
         for (const draft_pick_id of acceptingTeamPicks) {
           insertPicks.push({
-            trade_id: trade_uid,
+            trade_id: trade_id,
             draft_pick_id,
             tid: accept_tid
           })
@@ -854,7 +858,7 @@ router.post(
         const insertReleases = []
         for (const pid of releasePlayers) {
           insertReleases.push({
-            trade_id: trade_uid,
+            trade_id: trade_id,
             pid,
             tid: propose_tid
           })
@@ -876,7 +880,7 @@ router.post(
         const insert_slot_assignments = []
         for (const pid of acceptingTeamPlayers) {
           insert_slot_assignments.push({
-            trade_uid,
+            trade_id,
             pid,
             tid: propose_tid, // proposing team receives these players
             slot: proposing_team_slots[pid]
@@ -884,7 +888,7 @@ router.post(
         }
         for (const pid of proposingTeamPlayers) {
           insert_slot_assignments.push({
-            trade_uid,
+            trade_id,
             pid,
             tid: accept_tid, // accepting team receives these players
             slot: accepting_team_slots[pid]
@@ -895,7 +899,7 @@ router.post(
           await trx('trades_slots').insert(insert_slot_assignments)
         }
 
-        return trade_uid
+        return trade_id
       })
 
       req.params.tradeId = trade_id
