@@ -129,6 +129,10 @@ LEAGUE_DB_HOST=127.0.0.1 LEAGUE_DB_PORT=54XX TZ=America/New_York NODE_ENV=test T
 
 **In a fresh worktree, invoke mocha's real entrypoint — the `node_modules/.bin` shims are broken there.** `.yarnrc.yml` sets `nmMode: hardlinks-global`, so `node_modules/.bin/mocha` is a hardlinked COPY rather than a symlink; its `require('../lib/cli/options')` then resolves against `node_modules/lib`, which does not exist, and both `yarn test` and `npx mocha` die with `Cannot find module '../lib/cli/options'`. The package is fine — `node_modules/mocha/lib/cli/options.js` is present. Run `node node_modules/mocha/bin/mocha.js` instead. Note also that a fresh worktree needs its own install first, and the bare command is blocked fleet-wide: use `sandbox-install yarn install`.
 
+**This is not a mocha quirk — EVERY `.bin` shim is broken in a worktree, and `prettier` and `eslint` fail the same way with a different missing path.** Both die on `Cannot find module '../package.json'`, which reads as a corrupt install rather than the same hardlink problem, so it gets rediscovered per tool. The real entrypoints are `node node_modules/prettier/bin/prettier.cjs` and `node node_modules/eslint/bin/eslint.js`. Reach for `node node_modules/<pkg>/<bin-path>` for anything you would otherwise run through `npx` or a `yarn` script in a worktree.
+
+**And when your change ADDS a dependency, install it in the MAIN checkout as soon as the merge lands — otherwise every sibling's next suite run dies at module load on a package their `node_modules` does not have.** The worktree install only covers the worktree; the shared checkout is where siblings run, and the failure there is an `ERR_MODULE_NOT_FOUND` naming a package that is correctly in `package.json`, which reads as a broken lockfile rather than a missing install. One `sandbox-install yarn install` in `repository/active/league` closes it. Seen 2026-08-18 landing `express-openapi-validator`.
+
 To run one spec against an already-running DB:
 
 ```bash
