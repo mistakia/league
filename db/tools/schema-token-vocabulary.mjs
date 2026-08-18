@@ -950,6 +950,7 @@ const english_words = [
   'uses',
   'valid',
   'validated',
+  'valuation',
   'value',
   'variance',
   'variation',
