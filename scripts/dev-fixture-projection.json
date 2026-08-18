@@ -7,7 +7,7 @@
       "updated_at": "keep"
     },
     "draft": {
-      "uid": "keep",
+      "draft_pick_id": "keep",
       "pid": "keep",
       "round": "keep",
       "is_compensatory": "keep",
@@ -197,7 +197,7 @@
       "salary_attribution_rule": "keep"
     },
     "matchups": {
-      "uid": "keep",
+      "matchup_id": "keep",
       "away_team_id": "keep",
       "home_team_id": "keep",
       "lid": "keep",
@@ -277,7 +277,7 @@
       "pid": "keep"
     },
     "rosters": {
-      "uid": "keep",
+      "roster_id": "keep",
       "tid": "keep",
       "lid": "keep",
       "week": "keep",
@@ -352,7 +352,7 @@
       "restricted_free_agency_processing_paused_at": "keep"
     },
     "teams": {
-      "uid": "keep",
+      "team_id": "keep",
       "season_year": "keep",
       "lid": "keep",
       "division": "keep",
