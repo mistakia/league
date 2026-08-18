@@ -667,7 +667,7 @@ const projection_points_year_offset_range_sql = ({
 }
 
 const player_projected_points_added = {
-  column_name: 'pts_added',
+  column_name: 'projected_points_added',
   table_alias_factory: league_format_player_projection_values_table_alias_for,
   source_factory: make_league_format_player_projection_source
 }
@@ -828,7 +828,7 @@ const create_projected_stat = (base, stat_name) => {
 // bracket reality rather than competing, and they are not a rescale of one
 // another: a player can carry a positive `ros` and a negative `ros_net`.
 const player_rest_of_season_projected_points_added_net = {
-  column_name: 'pts_added',
+  column_name: 'projected_points_added',
   table_alias: league_format_player_projection_values_table_alias_for({
     period_week: 'ros_net'
   }),

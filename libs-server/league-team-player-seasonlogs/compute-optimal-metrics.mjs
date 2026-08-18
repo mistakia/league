@@ -53,17 +53,18 @@ export default async function compute_optimal_metrics({
         if (!gl) continue
         const k = key(tid, pid)
         const existing = out.get(k) || {
-          pts_added_earned_optimal: null,
-          pts_added_net_optimal: null
+          realized_points_added_positive_optimal: null,
+          realized_points_added_net_optimal: null
         }
         if (gl.points_added_earned != null) {
-          existing.pts_added_earned_optimal =
-            (existing.pts_added_earned_optimal || 0) +
+          existing.realized_points_added_positive_optimal =
+            (existing.realized_points_added_positive_optimal || 0) +
             Number(gl.points_added_earned)
         }
         if (gl.points_added_net != null) {
-          existing.pts_added_net_optimal =
-            (existing.pts_added_net_optimal || 0) + Number(gl.points_added_net)
+          existing.realized_points_added_net_optimal =
+            (existing.realized_points_added_net_optimal || 0) +
+            Number(gl.points_added_net)
         }
         out.set(k, existing)
       }

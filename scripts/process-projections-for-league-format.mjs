@@ -91,7 +91,10 @@ const process_league_format_year = async ({
         season_year: year,
         league_format_id,
         week,
-        pts_added,
+        // Shorthand would key this `pts_added`, which is no longer the column.
+        // `player_row.pts_added` is the in-memory aggregate map and keeps its
+        // name; the COLUMN is projected_points_added.
+        projected_points_added: pts_added,
         market_salary: player_row.market_salary?.[week] ?? null
       }
 
@@ -122,7 +125,8 @@ const process_league_format_year = async ({
     Number.isFinite(Number(week))
   )
   const real_value_count = weekly_inserts.filter(
-    ({ pts_added }) => pts_added !== default_points_added
+    ({ projected_points_added }) =>
+      projected_points_added !== default_points_added
   ).length
   log(
     `year ${year}: ${source_point_row_count} scoring-format point rows in, ${value_inserts.length} values out, ${weekly_inserts.length} weekly, ${real_value_count} non-sentinel`

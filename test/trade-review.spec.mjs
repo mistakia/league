@@ -117,8 +117,8 @@ const seed_trade = async () => {
       weeks_started: 5,
       weeks_active: 10,
       weeks_practice_squad: 1,
-      realized_pts_added_net_through_termination: 45.5,
-      projected_pts_added_at_acquisition: 60.0,
+      realized_points_added_net_through_termination: 45.5,
+      projected_points_added_at_acquisition: 60.0,
       league_format_id
     },
     {
@@ -793,7 +793,7 @@ describe('API /leagues/:leagueId/trade-review', function () {
       weeks_started: 3,
       weeks_active: 3,
       weeks_practice_squad: 0,
-      realized_pts_added_net_through_termination: 33.3,
+      realized_points_added_net_through_termination: 33.3,
       league_format_id: drafted_holding.league_format_id
     })
 
@@ -838,7 +838,7 @@ describe('API /leagues/:leagueId/trade-review', function () {
             continue
           }
           expected_points += Number(
-            chain_row.realized_pts_added_net_through_termination ?? 0
+            chain_row.realized_points_added_net_through_termination ?? 0
           )
           expected_salary += Number(chain_row.salary_paid ?? 0)
         }

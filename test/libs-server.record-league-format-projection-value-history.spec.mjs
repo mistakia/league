@@ -17,7 +17,13 @@ const YEAR = 2026
 const read_as_of = async ({ league_format_id, observed_at }) =>
   knex(HISTORY_TABLE)
     .distinctOn('pid', 'week')
-    .select('pid', 'week', 'pts_added', 'market_salary', 'is_removed')
+    .select(
+      'pid',
+      'week',
+      'projected_points_added',
+      'market_salary',
+      'is_removed'
+    )
     .where({ league_format_id, season_year: YEAR })
     .where('observed_at', '<=', observed_at)
     .orderBy([
@@ -56,13 +62,13 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
         {
           pid: 'PATR-MAHO-005785',
           week: '0',
-          pts_added: 42.5,
+          projected_points_added: 42.5,
           market_salary: 31
         },
         {
           pid: 'PATR-MAHO-005785',
           week: '1',
-          pts_added: 2.25,
+          projected_points_added: 2.25,
           market_salary: 4
         }
       ]
@@ -81,7 +87,12 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
 
   it('writes nothing when values are unchanged', async () => {
     const value_rows = [
-      { pid: 'PATR-MAHO-005785', week: '0', pts_added: 42.5, market_salary: 31 }
+      {
+        pid: 'PATR-MAHO-005785',
+        week: '0',
+        projected_points_added: 42.5,
+        market_salary: 31
+      }
     ]
 
     await record_league_format_projection_value_history({
@@ -109,7 +120,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
   })
 
   it('treats a float that rounds to the stored scale as unchanged', async () => {
-    // pts_added is numeric(7,2); 42.499 is stored as 42.50 and must not read back
+    // projected_points_added is numeric(7,2); 42.499 is stored as 42.50 and must not read back
     // as a change on the next run.
     await record_league_format_projection_value_history({
       league_format_id,
@@ -118,7 +129,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
         {
           pid: 'PATR-MAHO-005785',
           week: '0',
-          pts_added: 42.5,
+          projected_points_added: 42.5,
           market_salary: 31
         }
       ],
@@ -132,7 +143,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
         {
           pid: 'PATR-MAHO-005785',
           week: '0',
-          pts_added: 42.499,
+          projected_points_added: 42.499,
           market_salary: 31
         }
       ],
@@ -150,10 +161,15 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
         {
           pid: 'PATR-MAHO-005785',
           week: '0',
-          pts_added: 42.5,
+          projected_points_added: 42.5,
           market_salary: 31
         },
-        { pid: 'JOSH-ALLE-005788', week: '0', pts_added: 40, market_salary: 29 }
+        {
+          pid: 'JOSH-ALLE-005788',
+          week: '0',
+          projected_points_added: 40,
+          market_salary: 29
+        }
       ],
       observed_at: new Date('2026-07-01T04:00:00Z')
     })
@@ -165,10 +181,15 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
         {
           pid: 'PATR-MAHO-005785',
           week: '0',
-          pts_added: 44,
+          projected_points_added: 44,
           market_salary: 33
         },
-        { pid: 'JOSH-ALLE-005788', week: '0', pts_added: 40, market_salary: 29 }
+        {
+          pid: 'JOSH-ALLE-005788',
+          week: '0',
+          projected_points_added: 40,
+          market_salary: 29
+        }
       ],
       observed_at: new Date('2026-07-02T04:00:00Z')
     })
@@ -189,7 +210,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
         {
           pid: 'PATR-MAHO-005785',
           week: '0',
-          pts_added: 42.5,
+          projected_points_added: 42.5,
           market_salary: 31
         }
       ],
@@ -199,7 +220,12 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
       league_format_id,
       year: YEAR,
       value_rows: [
-        { pid: 'PATR-MAHO-005785', week: '0', pts_added: 44, market_salary: 33 }
+        {
+          pid: 'PATR-MAHO-005785',
+          week: '0',
+          projected_points_added: 44,
+          market_salary: 33
+        }
       ],
       observed_at: new Date('2026-07-10T04:00:00Z')
     })
@@ -234,10 +260,15 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
         {
           pid: 'PATR-MAHO-005785',
           week: '0',
-          pts_added: 42.5,
+          projected_points_added: 42.5,
           market_salary: 31
         },
-        { pid: 'JOSH-ALLE-005788', week: '0', pts_added: 40, market_salary: 29 }
+        {
+          pid: 'JOSH-ALLE-005788',
+          week: '0',
+          projected_points_added: 40,
+          market_salary: 29
+        }
       ],
       observed_at: new Date('2026-07-01T04:00:00Z')
     })
@@ -249,7 +280,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
         {
           pid: 'PATR-MAHO-005785',
           week: '0',
-          pts_added: 42.5,
+          projected_points_added: 42.5,
           market_salary: 31
         }
       ],
@@ -275,7 +306,12 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
       league_format_id,
       year: YEAR,
       value_rows: [
-        { pid: 'JOSH-ALLE-005788', week: '0', pts_added: 40, market_salary: 29 }
+        {
+          pid: 'JOSH-ALLE-005788',
+          week: '0',
+          projected_points_added: 40,
+          market_salary: 29
+        }
       ],
       observed_at: new Date('2026-07-01T04:00:00Z')
     })
@@ -306,7 +342,12 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
       league_format_id,
       year: YEAR,
       value_rows: [
-        { pid: 'JOSH-ALLE-005788', week: '0', pts_added: 40, market_salary: 29 }
+        {
+          pid: 'JOSH-ALLE-005788',
+          week: '0',
+          projected_points_added: 40,
+          market_salary: 29
+        }
       ],
       observed_at: new Date('2026-07-01T04:00:00Z')
     })
@@ -323,7 +364,12 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
       league_format_id,
       year: YEAR,
       value_rows: [
-        { pid: 'JOSH-ALLE-005788', week: '0', pts_added: 40, market_salary: 29 }
+        {
+          pid: 'JOSH-ALLE-005788',
+          week: '0',
+          projected_points_added: 40,
+          market_salary: 29
+        }
       ],
       observed_at: new Date('2026-07-03T04:00:00Z')
     })
@@ -343,7 +389,7 @@ describe('LIBS SERVER record_league_format_projection_value_history', function (
       {
         pid: 'PATR-MAHO-005785',
         week: '0',
-        pts_added: 42.5,
+        projected_points_added: 42.5,
         market_salary: null
       }
     ]

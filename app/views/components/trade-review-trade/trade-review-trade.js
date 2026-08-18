@@ -241,7 +241,7 @@ StatChip.propTypes = {
 // meaning lived in a tooltip; a column under a header is labelled in place.
 //
 // The column semantics, since none is self-evident from its name:
-//   realized_pts_added_net_through_termination  summed over every week the team
+//   realized_points_added_net_through_termination  summed over every week the team
 //     held the player, BENCH WEEKS INCLUDED, and a week below replacement
 //     subtracts, so the figure can be negative.
 //   weeks_active   weeks in an active-roster slot, which in this league's slot
@@ -256,7 +256,9 @@ const HOLDING_COLUMNS = [
     title:
       'Points above replacement this team scored from the asset over the weeks it held him, bench weeks included. A week below replacement subtracts, so this can be negative.',
     read: (chain_row) => {
-      const value = chain_row.get('realized_pts_added_net_through_termination')
+      const value = chain_row.get(
+        'realized_points_added_net_through_termination'
+      )
       return value == null ? null : Number(value).toFixed(1)
     }
   },

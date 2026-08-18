@@ -7,7 +7,7 @@ const log = debug('record-league-format-projection-value-history')
 
 const HISTORY_TABLE = 'league_format_player_projection_values_history'
 
-// `league_format_player_projection_values` stores pts_added as numeric(7,2) and
+// `league_format_player_projection_values` stores projected_points_added as numeric(7,2) and
 // market_salary as numeric(6,2), and Postgres returns numerics as strings. Both
 // sides of the comparison are normalized to a fixed-2 string so a freshly computed
 // float compares equal to the value it would round to on write -- otherwise every
@@ -32,7 +32,7 @@ const normalize = (value) => {
  * instead of returning a stale value indefinitely.
  *
  * Point-in-time read:
- *   SELECT DISTINCT ON (pid, week) pid, week, pts_added, market_salary, removed
+ *   SELECT DISTINCT ON (pid, week) pid, week, projected_points_added, market_salary, removed
  *   FROM league_format_player_projection_values_history
  *   WHERE league_format_id = ? AND season_year = ? AND observed_at <= ?
  *   ORDER BY pid, week, observed_at DESC;
@@ -41,7 +41,7 @@ const normalize = (value) => {
  * @param {Object} params
  * @param {string} params.league_format_id
  * @param {number} params.year
- * @param {Array<Object>} params.value_rows - { pid, week, pts_added, market_salary }
+ * @param {Array<Object>} params.value_rows - { pid, week, projected_points_added, market_salary }
  * @param {Date} [params.observed_at] - observation instant, defaults to now
  * @returns {Promise<Object>} { observed, changed, tombstoned }
  */
@@ -57,7 +57,13 @@ export default async function record_league_format_projection_value_history({
 
   const previous_rows = await db(HISTORY_TABLE)
     .distinctOn('pid', 'week')
-    .select('pid', 'week', 'pts_added', 'market_salary', 'is_removed')
+    .select(
+      'pid',
+      'week',
+      'projected_points_added',
+      'market_salary',
+      'is_removed'
+    )
     .where({ league_format_id, season_year: year })
     .orderBy([
       { column: 'pid' },
@@ -77,14 +83,14 @@ export default async function record_league_format_projection_value_history({
     const key = `${value_row.pid}/${week}`
     seen_keys.add(key)
 
-    const pts_added = normalize(value_row.pts_added)
+    const projected_points_added = normalize(value_row.projected_points_added)
     const market_salary = normalize(value_row.market_salary)
     const previous = previous_by_key.get(key)
 
     const unchanged =
       previous &&
       !previous.is_removed &&
-      normalize(previous.pts_added) === pts_added &&
+      normalize(previous.projected_points_added) === projected_points_added &&
       normalize(previous.market_salary) === market_salary
 
     if (unchanged) continue
@@ -94,7 +100,7 @@ export default async function record_league_format_projection_value_history({
       league_format_id,
       season_year: year,
       week,
-      pts_added,
+      projected_points_added,
       market_salary,
       is_removed: false,
       observed_at
@@ -110,7 +116,7 @@ export default async function record_league_format_projection_value_history({
       league_format_id,
       season_year: year,
       week: previous.week,
-      pts_added: null,
+      projected_points_added: null,
       market_salary: null,
       is_removed: true,
       observed_at

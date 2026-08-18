@@ -1524,6 +1524,13 @@
       ],
       "verdict": "already-swept",
       "reason": "libs-server/get-roster.mjs:127 and libs-server/get-league-rosters-from-database.mjs:147 assign from bid.bid_amount before any consumer runs. Every flagged .bid read is req.body input, local component/redux state, or a synthesized lineage event."
+    },
+    {
+      "table": "league_format_player_projection_values",
+      "column": "pts_added",
+      "sites": ["libs-server/get-players.mjs"],
+      "verdict": "already-swept",
+      "reason": "The COLUMN read is repointed: libs-server/get-players.mjs:394 destructures projected_points_added off the row. The flagged old-name reads are the in-memory player.pts_added aggregate map, a DIFFERENT object -- keyed by aggregate_key ('ros', 'ros_net', numeric weeks) and emitted as the API property the SPA consumes, not a column. get-players.mjs:340 initializes it and :396 writes the repointed column value into it. Renaming that property is an API contract change across 30 SPA sites and belongs to task/league/restructure-points-added-pipeline, not to this schema conform; leaving it named pts_added is what lets the SPA survive this deploy without a lockstep frontend change."
     }
   ]
 }

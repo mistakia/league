@@ -60,7 +60,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     seeded_pids.forEach((pid, index) => {
       for (const week of WEEKS) {
         // A descending spread so the board has a real ordering to rank; a flat
-        // board would make every pts_added identical and hide an inversion.
+        // board would make every projected_points_added identical and hide an inversion.
         const total = 300 - index * 5 - week
         projection_rows.push({
           pid,
@@ -100,14 +100,14 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     // so land at 0, which reads as a real value -- asserting over every row
     // passes at the broken revision and proves nothing.
     const rows = await knex(VALUES_TABLE)
-      .select('pts_added')
+      .select('projected_points_added')
       .where({ league_format_id, season_year: YEAR })
       .whereRaw("week ~ '^[0-9]+$'")
 
     expect(rows.length).to.be.greaterThan(0)
 
     const non_sentinel = rows.filter(
-      (row) => Number(row.pts_added) !== default_points_added
+      (row) => Number(row.projected_points_added) !== default_points_added
     )
     expect(
       non_sentinel.length,
@@ -117,11 +117,13 @@ describe('SCRIPTS process-projections-for-league-format', function () {
 
   it('spreads values across the board rather than collapsing to one number', async () => {
     const rows = await knex(VALUES_TABLE)
-      .select('pts_added')
+      .select('projected_points_added')
       .where({ league_format_id, season_year: YEAR, week: '0' })
-      .whereNot({ pts_added: default_points_added })
+      .whereNot({ projected_points_added: default_points_added })
 
-    const distinct = new Set(rows.map((row) => Number(row.pts_added)))
+    const distinct = new Set(
+      rows.map((row) => Number(row.projected_points_added))
+    )
     expect(distinct.size).to.be.greaterThan(1)
   })
 
@@ -131,7 +133,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
   // denominator is nonzero, and none of them reach get_player_week_total.
   it('refuses to write, and preserves stored values, when points exist but no value is usable', async () => {
     const before_rows = await knex(VALUES_TABLE)
-      .select('pid', 'week', 'pts_added')
+      .select('pid', 'week', 'projected_points_added')
       .where({ league_format_id, season_year: YEAR })
       .orderBy(['pid', 'week'])
     expect(before_rows.length).to.be.greaterThan(0)
@@ -156,7 +158,7 @@ describe('SCRIPTS process-projections-for-league-format', function () {
     // The write is delete-then-reinsert, so the point of aborting before it is
     // that the prior year survives intact.
     const after_rows = await knex(VALUES_TABLE)
-      .select('pid', 'week', 'pts_added')
+      .select('pid', 'week', 'projected_points_added')
       .where({ league_format_id, season_year: YEAR })
       .orderBy(['pid', 'week'])
     expect(after_rows).to.deep.equal(before_rows)

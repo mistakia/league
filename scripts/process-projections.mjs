@@ -336,7 +336,11 @@ const process_league_format = async ({
         season_year: current_season.year,
         league_format_id,
         week,
-        pts_added,
+        // Shorthand would key this `pts_added`, which is no longer the column.
+        // `player_row.pts_added` is the in-memory aggregate map and keeps its
+        // name; the COLUMN is projected_points_added. The write below is
+        // delete-then-reinsert, so an unknown key here empties the table.
+        projected_points_added: pts_added,
         market_salary: player_row.market_salary?.[week] ?? null
       }
 
