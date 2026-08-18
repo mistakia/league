@@ -245,9 +245,9 @@ const load_lineage_chains = async ({ origin_holding_ids }) => {
       'h.period_start',
       'h.period_end',
       'h.terminated_by',
-      'h.realized_pts_added_net_through_termination',
-      'h.projected_pts_added_at_acquisition',
-      'h.projected_pts_added_remaining_at_termination',
+      'h.realized_points_added_net_through_termination',
+      'h.projected_points_added_at_acquisition',
+      'h.projected_points_added_remaining_at_termination',
       'h.weeks_started',
       'h.weeks_active',
       'h.weeks_practice_squad',
@@ -328,7 +328,7 @@ const production_while_held = ({ assets, tid }) => {
     for (const chain_row of asset.chain) {
       if (chain_row.tid !== tid) continue
       realized_points_added += Number(
-        chain_row.realized_pts_added_net_through_termination ?? 0
+        chain_row.realized_points_added_net_through_termination ?? 0
       )
       salary_paid += Number(chain_row.salary_paid ?? 0)
     }

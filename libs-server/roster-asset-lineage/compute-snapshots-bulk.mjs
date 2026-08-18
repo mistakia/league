@@ -181,12 +181,12 @@ const load_indexes = async ({
     }
   }
 
-  // projections: keyed `${pid}__${format_id}__${year}` -> pts_added.
+  // projections: keyed `${pid}__${format_id}__${year}` -> projected_points_added.
   //
   // Uses week='0' (preseason rest-of-season) rather than week='ros'. The 'ros'
   // rows are a current-state rollup that is only refreshed for the active
   // year of each league_format_id, so historical holdings never matched and
-  // projected_pts_added_at_acquisition stayed NULL across all 2020-2025 player
+  // projected_points_added_at_acquisition stayed NULL across all 2020-2025 player
   // holdings. week='0' is a per-year preseason ros snapshot that exists for
   // every historical year and is the projection the market was looking at the
   // start of the season -- the correct "what was knowable" oracle for the
@@ -195,14 +195,19 @@ const load_indexes = async ({
   idx.projections = new Map()
   if (player_ids.length && format_ids.length && years.length) {
     const proj_rows = await db('league_format_player_projection_values')
-      .select('pid', 'league_format_id', 'season_year', 'pts_added')
+      .select(
+        'pid',
+        'league_format_id',
+        'season_year',
+        'projected_points_added'
+      )
       .whereIn('pid', player_ids)
       .whereIn('league_format_id', format_ids)
       .whereIn('season_year', years)
       .where('week', '0')
     for (const r of proj_rows) {
-      if (r.pts_added == null) continue
-      const v = Number(r.pts_added)
+      if (r.projected_points_added == null) continue
+      const v = Number(r.projected_points_added)
       if (v <= -900) continue
       const k = `${r.pid}__${r.league_format_id}__${r.season_year}`
       idx.projections.set(k, v)
@@ -281,12 +286,12 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
     weeks_started: 0,
     initial_slot_type: null,
     practice_squad_slot_subtype: null,
-    realized_pts_added_net_through_termination: 0,
-    realized_pts_added_earned_through_termination: 0,
-    realized_pts_added_net_in_active_slot: 0,
-    realized_pts_added_net_in_started_slot: 0,
-    realized_pts_added_net_in_practice_squad_slot: 0,
-    projected_pts_added_at_acquisition: null,
+    realized_points_added_net_through_termination: 0,
+    realized_points_added_positive_through_termination: 0,
+    realized_points_added_net_in_active_slot: 0,
+    realized_points_added_net_in_started_slot: 0,
+    realized_points_added_net_in_practice_squad_slot: 0,
+    projected_points_added_at_acquisition: null,
     keeptradecut_value_at_acquisition: null,
     keeptradecut_value_at_termination: null
   }
@@ -306,7 +311,7 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
 
     if (draft.league_format_id) {
       const proj_key = `${draft.player_id}__${draft.league_format_id}__${draft.year}`
-      result.projected_pts_added_at_acquisition =
+      result.projected_points_added_at_acquisition =
         idx.projections.get(proj_key) ?? null
     }
 
@@ -351,15 +356,15 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
               if (yw.year !== y || yw.week !== r.week) continue
               const stats = gl.get(esbid)
               if (!stats) continue
-              result.realized_pts_added_net_through_termination += stats.net
-              result.realized_pts_added_earned_through_termination +=
+              result.realized_points_added_net_through_termination += stats.net
+              result.realized_points_added_positive_through_termination +=
                 stats.earned
               if (ACTIVE_SLOT_SET.has(slot))
-                result.realized_pts_added_net_in_active_slot += stats.net
+                result.realized_points_added_net_in_active_slot += stats.net
               if (STARTING_SLOT_SET.has(slot))
-                result.realized_pts_added_net_in_started_slot += stats.net
+                result.realized_points_added_net_in_started_slot += stats.net
               if (PS_SLOT_SET.has(slot))
-                result.realized_pts_added_net_in_practice_squad_slot +=
+                result.realized_points_added_net_in_practice_squad_slot +=
                   stats.net
             }
           }
@@ -379,7 +384,7 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
         if (nt) rank = (draft.pick_round - 1) * nt + Math.ceil(nt / 2)
       }
       if (rank != null) {
-        result.projected_pts_added_at_acquisition =
+        result.projected_points_added_at_acquisition =
           idx.pick_values.get(`${draft.league_format_id}__${rank}`) ?? null
       }
     }
@@ -410,11 +415,11 @@ const compute_snapshot_for_draft = ({ draft, idx }) => {
     }
     // Realized: NULL by design for picks (salary_paid stays NULL via the
     // draft, since open_pick_holding never sets it).
-    result.realized_pts_added_net_through_termination = null
-    result.realized_pts_added_earned_through_termination = null
-    result.realized_pts_added_net_in_active_slot = null
-    result.realized_pts_added_net_in_started_slot = null
-    result.realized_pts_added_net_in_practice_squad_slot = null
+    result.realized_points_added_net_through_termination = null
+    result.realized_points_added_positive_through_termination = null
+    result.realized_points_added_net_in_active_slot = null
+    result.realized_points_added_net_in_started_slot = null
+    result.realized_points_added_net_in_practice_squad_slot = null
   }
 
   return result

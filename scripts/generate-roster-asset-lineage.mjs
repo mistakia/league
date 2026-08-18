@@ -148,19 +148,19 @@ const generate_roster_asset_lineage = async ({
       weeks_reserve_long_term: snap.weeks_reserve_long_term || 0,
       weeks_covid_reserve: snap.weeks_covid_reserve || 0,
       weeks_started: snap.weeks_started || 0,
-      projected_pts_added_at_acquisition:
-        snap.projected_pts_added_at_acquisition ?? null,
-      realized_pts_added_net_through_termination:
-        snap.realized_pts_added_net_through_termination ?? null,
-      realized_pts_added_earned_through_termination:
-        snap.realized_pts_added_earned_through_termination ?? null,
-      realized_pts_added_net_in_active_slot:
-        snap.realized_pts_added_net_in_active_slot ?? null,
-      realized_pts_added_net_in_started_slot:
-        snap.realized_pts_added_net_in_started_slot ?? null,
-      realized_pts_added_net_in_practice_squad_slot:
-        snap.realized_pts_added_net_in_practice_squad_slot ?? null,
-      projected_pts_added_remaining_at_termination: null,
+      projected_points_added_at_acquisition:
+        snap.projected_points_added_at_acquisition ?? null,
+      realized_points_added_net_through_termination:
+        snap.realized_points_added_net_through_termination ?? null,
+      realized_points_added_positive_through_termination:
+        snap.realized_points_added_positive_through_termination ?? null,
+      realized_points_added_net_in_active_slot:
+        snap.realized_points_added_net_in_active_slot ?? null,
+      realized_points_added_net_in_started_slot:
+        snap.realized_points_added_net_in_started_slot ?? null,
+      realized_points_added_net_in_practice_squad_slot:
+        snap.realized_points_added_net_in_practice_squad_slot ?? null,
+      projected_points_added_remaining_at_termination: null,
       keeptradecut_value_at_acquisition:
         snap.keeptradecut_value_at_acquisition ?? null,
       keeptradecut_value_at_termination:

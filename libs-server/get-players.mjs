@@ -390,8 +390,10 @@ export default async function ({
       .whereIn('pid', returnedPlayerIds)
 
     for (const row of league_format_values) {
-      const { pid, week, pts_added, market_salary } = row
-      players_by_pid[pid].pts_added[week] = pts_added
+      const { pid, week, projected_points_added, market_salary } = row
+      // The COLUMN is projected_points_added; the in-memory player property
+      // stays `pts_added` -- it is the API shape the SPA reads.
+      players_by_pid[pid].pts_added[week] = projected_points_added
       players_by_pid[pid].market_salary[week] = market_salary
     }
   }

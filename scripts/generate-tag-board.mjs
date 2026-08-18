@@ -117,13 +117,13 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
   )
 
   // Season-long projection, week '0'. Two columns with two distinct uses:
-  //   pts_added     — the worth floor on the franchise screen; sign only.
+  //   projected_points_added — the worth floor on the franchise screen; sign only.
   //   market_salary — a single-season price, carried ONLY for the auction
   //                   supply view, where the horizon matches. It must never sit
   //                   beside a franchise or rookie price as a surplus; those
   //                   are multi-year decisions this column cannot price.
   const projection_rows = await db('league_format_player_projection_values')
-    .select('pid', 'pts_added', 'market_salary')
+    .select('pid', 'projected_points_added', 'market_salary')
     .where({
       league_format_id: season.league_format_id,
       season_year: year,
@@ -131,7 +131,7 @@ const load_board_inputs = async ({ lid, year, now_unix, viewer_tid }) => {
     })
     .whereIn('pid', pids)
   const projected_points_added = new Map(
-    projection_rows.map((row) => [row.pid, Number(row.pts_added)])
+    projection_rows.map((row) => [row.pid, Number(row.projected_points_added)])
   )
   const projected_market_salary = new Map(
     projection_rows.map((row) => [row.pid, Number(row.market_salary)])

@@ -30,12 +30,12 @@ const initialize_cli = () => {
 const empty_metrics = () => ({
   weeks_rostered: 0,
   weeks_started: 0,
-  pts_added_earned_rostered: null,
-  pts_added_net_rostered: null,
-  pts_added_earned_started: null,
-  pts_added_net_started: null,
-  pts_added_earned_optimal: null,
-  pts_added_net_optimal: null
+  realized_points_added_positive_rostered: null,
+  realized_points_added_net_rostered: null,
+  realized_points_added_positive_started: null,
+  realized_points_added_net_started: null,
+  realized_points_added_positive_optimal: null,
+  realized_points_added_net_optimal: null
 })
 
 const build_rows_for_slice = async ({
@@ -144,12 +144,15 @@ const build_rows_for_slice = async ({
       league_format_id,
       weeks_rostered: m.weeks_rostered,
       weeks_started: m.weeks_started,
-      pts_added_earned_rostered: m.pts_added_earned_rostered,
-      pts_added_net_rostered: m.pts_added_net_rostered,
-      pts_added_earned_started: m.pts_added_earned_started,
-      pts_added_net_started: m.pts_added_net_started,
-      pts_added_earned_optimal: m.pts_added_earned_optimal,
-      pts_added_net_optimal: m.pts_added_net_optimal,
+      realized_points_added_positive_rostered:
+        m.realized_points_added_positive_rostered,
+      realized_points_added_net_rostered: m.realized_points_added_net_rostered,
+      realized_points_added_positive_started:
+        m.realized_points_added_positive_started,
+      realized_points_added_net_started: m.realized_points_added_net_started,
+      realized_points_added_positive_optimal:
+        m.realized_points_added_positive_optimal,
+      realized_points_added_net_optimal: m.realized_points_added_net_optimal,
       salary_paid,
       acquisition_type,
       is_start_team,

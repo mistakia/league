@@ -75,11 +75,11 @@ export const SHED_POOL_MINIMUM_MARKET_GAP = 3
 //
 // A second condition was specified and then dropped as provably redundant:
 // "significantly below replacement AND priced at $0–2" selects ZERO rows this
-// ratio does not already select. `market_salary` is DERIVED from `pts_added`, so
+// ratio does not already select. `market_salary` is DERIVED from `projected_points_added`, so
 // a below-replacement player always prices at $0–2, and $0–2 against any
 // contract of $5 or more is always under half. Live check: 0 of 106 rows sit
 // below replacement priced above $2. If `market_salary` ever stops being derived
-// from `pts_added`, that redundancy breaks and the second condition must return.
+// from `projected_points_added`, that redundancy breaks and the second condition must return.
 export const RELEASABLE_MARKET_PRICE_RATIO = 0.5
 
 const RANK_BANDS = [
@@ -520,16 +520,16 @@ export default function build_tag_board({
   //
   // `under_pressure` was `market_gap > 0 AND pts_added > 0` until 2026-07-30.
   // The second condition tested nothing the first had not: `market_salary` is
-  // DERIVED from `pts_added`, so across the live board 0 of 121 rows differed
+  // DERIVED from `projected_points_added`, so across the live board 0 of 121 rows differed
   // either way. What it did do was drop every young ascending player, because a
   // one-season price cannot separate a rising rookie from a finished veteran —
   // both price at $0. L.Burden III (dynasty 34), R.Odunze (48), B.Thomas (51)
   // and M.Harrison (56) were screened out alongside J.Tonges at −83.9 points.
   //
-  // `pts_added` survives as a CONTINUOUS signal rather than a gate, and it is
+  // `projected_points_added` survives as a CONTINUOUS signal rather than a gate, and it is
   // the better one at the low end: `market_salary` clips at exactly $0 for
   // every below-replacement row and carries no ordering there, while
-  // `pts_added` still separates −6.9 from −83.9.
+  // `projected_points_added` still separates −6.9 from −83.9.
   //
   // Two axes, deliberately separate, because one screen was answering both
   // questions badly:
