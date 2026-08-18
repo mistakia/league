@@ -1,3 +1,9 @@
+// Registers the test-only webpack resolution hook before any spec file loads,
+// so a spec can `import` from `@core/...` the way the SPA does. Mocha loads
+// `--require` modules ahead of the spec files, which is what makes this the
+// right place for it. Strictly additive -- see the module's own header.
+import './webpack-resolve/register.mjs'
+
 import knex from '#db'
 import { assert_destructive_target_allowed } from '#db/guard-destructive-target.mjs'
 import path, { dirname } from 'path'
