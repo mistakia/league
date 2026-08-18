@@ -256,7 +256,7 @@ const main = async () => {
         .whereNull('archived_at')
       for (const league of leagues) {
         await generate_league_team_player_seasonlogs({
-          lid: league.uid,
+          lid: league.league_id,
           year: argv.year,
           with_optimal
         })

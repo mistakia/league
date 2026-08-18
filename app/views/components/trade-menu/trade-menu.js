@@ -32,14 +32,14 @@ function VetoableTrades({ trades, league, selectedTradeId, select }) {
       <div className='trade__menu-body'>
         {open.toArray().map((trade) => {
           const class_names = ['trade__menu-item']
-          if (selectedTradeId === trade.uid) class_names.push('selected')
+          if (selectedTradeId === trade.trade_id) class_names.push('selected')
           return (
             <div
-              key={trade.uid}
+              key={trade.trade_id}
               className={class_names.join(' ')}
-              onClick={() => select(trade.uid)}
+              onClick={() => select(trade.trade_id)}
             >
-              <div className='trade__id'>#{trade.uid}</div>
+              <div className='trade__id'>#{trade.trade_id}</div>
               <TeamName tid={trade.propose_tid} abbrv />
               <TeamName tid={trade.accept_tid} abbrv />
               <TradeVetoCountdown trade={trade} league={league} prefix='' />
@@ -79,16 +79,16 @@ export default class TradeMenu extends React.Component {
     const menuItems = []
     for (const [index, trade] of own_trades.entries()) {
       const classNames = ['trade__menu-item']
-      if (selectedTradeId === trade.uid) classNames.push('selected')
+      if (selectedTradeId === trade.trade_id) classNames.push('selected')
       const otherTeamId =
         teamId === trade.propose_tid ? trade.accept_tid : trade.propose_tid
       menuItems.push(
         <div
           key={index}
           className={classNames.join(' ')}
-          onClick={() => select(trade.uid)}
+          onClick={() => select(trade.trade_id)}
         >
-          <div className='trade__id'>#{trade.uid}</div>
+          <div className='trade__id'>#{trade.trade_id}</div>
           <TeamName tid={otherTeamId} abbrv />
         </div>
       )

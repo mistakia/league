@@ -31,7 +31,7 @@ const check_orphan_slice = async ({
   slice_failures
 }) => {
   const max_week_row = await db('rosters_players')
-    .where({ lid: league.uid, season_year: current_season.year })
+    .where({ lid: league.league_id, season_year: current_season.year })
     .max({ max_week: 'week' })
     .first()
   const max_week = max_week_row?.max_week
@@ -41,7 +41,7 @@ const check_orphan_slice = async ({
     max_week > highest_valid_week
   ) {
     slice_failures.push(
-      `orphan roster slice for (lid=${league.uid}, year=${current_season.year}): populated week ${max_week} exists beyond week ${highest_valid_week}`
+      `orphan roster slice for (lid=${league.league_id}, year=${current_season.year}): populated week ${max_week} exists beyond week ${highest_valid_week}`
     )
   }
 }
@@ -110,7 +110,7 @@ const run = async () => {
 
     // get latest rosters for league
     const rosters = await db('rosters').where({
-      lid: league.uid,
+      lid: league.league_id,
       season_year: previousYear,
       week: previousWeek
     })
@@ -221,7 +221,7 @@ const run = async () => {
     if (source_team_count > 0) {
       const written_row = await db('rosters_players')
         .where({
-          lid: league.uid,
+          lid: league.league_id,
           season_year: current_season.year,
           week: nextWeek
         })
@@ -230,7 +230,7 @@ const run = async () => {
       const written_count = Number(written_row?.written || 0)
       if (written_count < source_team_count) {
         slice_failures.push(
-          `row-count shortfall: written=${written_count} expected=${source_team_count} for (lid=${league.uid}, year=${current_season.year}, week=${nextWeek})`
+          `row-count shortfall: written=${written_count} expected=${source_team_count} for (lid=${league.league_id}, year=${current_season.year}, week=${nextWeek})`
         )
       }
     }
@@ -248,7 +248,7 @@ const run = async () => {
     const source_keys = new Set(
       (
         await db('rosters_players').select('tid', 'pid').where({
-          lid: league.uid,
+          lid: league.league_id,
           season_year: previousYear,
           week: previousWeek
         })
@@ -257,7 +257,7 @@ const run = async () => {
     const generated_keys = new Set(
       (
         await db('rosters_players').select('tid', 'pid').where({
-          lid: league.uid,
+          lid: league.league_id,
           season_year: current_season.year,
           week: nextWeek
         })
@@ -268,7 +268,7 @@ const run = async () => {
     const extra = [...generated_keys].filter((k) => !source_keys.has(k))
     if (missing.length || extra.length) {
       slice_failures.push(
-        `slice divergence for (lid=${league.uid}, year=${current_season.year}, week=${nextWeek}): ${missing.length} missing, ${extra.length} extra vs source (year=${previousYear}, week=${previousWeek})`
+        `slice divergence for (lid=${league.league_id}, year=${current_season.year}, week=${nextWeek}): ${missing.length} missing, ${extra.length} extra vs source (year=${previousYear}, week=${previousWeek})`
       )
     }
 

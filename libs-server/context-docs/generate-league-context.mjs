@@ -34,7 +34,7 @@ const DEFAULT_BASE_URL = 'https://xo.football'
  */
 export async function load_configured_league({ db, lid, year }) {
   const league = await getLeague({ lid, year })
-  if (!league || !league.uid) {
+  if (!league || !league.league_id) {
     throw new ContextDocError(`league ${lid} not found`, {
       status: 404,
       code: 'league_not_found'
@@ -90,7 +90,7 @@ export default async function generate_league_context({
   const recent_transactions = await db('transactions')
     .where({ lid, season_year: year })
     .orderBy('occurred_at', 'desc')
-    .orderBy('uid', 'desc')
+    .orderBy('transaction_id', 'desc')
     .limit(10)
   const transaction_players = await get_players({
     db,
@@ -128,7 +128,7 @@ export default async function generate_league_context({
 
   const identity = [
     heading(1, `${league.name} — League Context`),
-    `League ${league.uid} · ${year} season · ${teams.length} teams`,
+    `League ${league.league_id} · ${year} season · ${teams.length} teams`,
     `Format: ${league.number_teams || teams.length}-team, $${league.salary_cap} cap auction. See [rules](${doc_url(
       base_url,
       { lid, view: 'rules' }

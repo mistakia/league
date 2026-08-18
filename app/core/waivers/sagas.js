@@ -49,7 +49,7 @@ export function* reorder({ payload }) {
           newWaiver.findIndex((i) => i.uid === b.uid)
     )
   }
-  const waivers = newWaiver.map((w, index) => w.uid).toJS()
+  const waivers = newWaiver.map((w, index) => w.waiver_id).toJS()
   const reset = items.map(({ uid, priority_order }) => ({
     uid,
     priority_order

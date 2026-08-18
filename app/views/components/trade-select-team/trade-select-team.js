@@ -50,7 +50,7 @@ export default class TradeSelectTeam extends React.Component {
         <List component='nav'>
           <ListItemButton
             button
-            disabled={Boolean(trade.uid)}
+            disabled={Boolean(trade.trade_id)}
             onClick={this.handleOpen}
           >
             <TeamName tid={trade.accept_tid} /> Sends

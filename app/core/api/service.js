@@ -296,8 +296,8 @@ export const api = {
     const url = `${API_URL}/leagues/${leagueId}/trade-review`
     return { url }
   },
-  get_trade_review_trade({ leagueId, trade_uid }) {
-    const url = `${API_URL}/leagues/${leagueId}/trade-review/${trade_uid}`
+  get_trade_review_trade({ leagueId, trade_id }) {
+    const url = `${API_URL}/leagues/${leagueId}/trade-review/${trade_id}`
     return { url }
   },
   get_restricted_free_agency_auctions(params) {

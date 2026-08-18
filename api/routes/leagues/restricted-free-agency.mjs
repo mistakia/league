@@ -115,7 +115,7 @@ router.get('/?', async (req, res) => {
 
     const bids = await db('restricted_free_agency_bids')
       .select(
-        'restricted_free_agency_bids.uid',
+        'restricted_free_agency_bids.bid_id',
         'restricted_free_agency_bids.nomination_id',
         'restricted_free_agency_bids.pid',
         'restricted_free_agency_bids.tid',
@@ -154,9 +154,9 @@ router.get('/?', async (req, res) => {
 
     const visible_release_bid_ids = bids
       .filter(
-        (bid) => winning_bid_ids.has(bid.uid) || user_team_ids.has(bid.tid)
+        (bid) => winning_bid_ids.has(bid.bid_id) || user_team_ids.has(bid.tid)
       )
-      .map((bid) => bid.uid)
+      .map((bid) => bid.bid_id)
 
     const releases = await db('restricted_free_agency_releases').whereIn(
       'restricted_free_agency_bid_id',
@@ -176,7 +176,7 @@ router.get('/?', async (req, res) => {
       const existing = bids_by_nomination_id.get(bid.nomination_id) || []
       existing.push({
         ...bid,
-        releases: releases_by_bid_id.get(bid.uid) || []
+        releases: releases_by_bid_id.get(bid.bid_id) || []
       })
       bids_by_nomination_id.set(bid.nomination_id, existing)
     }

@@ -195,7 +195,7 @@ router.get('/?', async (req, res) => {
       .select('transactions.*', 'draft.pick', 'draft.pick_string')
       .where({ 'transactions.lid': leagueId })
       .orderBy('transactions.occurred_at', 'desc')
-      .orderBy('transactions.uid', 'desc')
+      .orderBy('transactions.transaction_id', 'desc')
       .limit(limit)
       .offset(offset)
 
@@ -321,7 +321,7 @@ router.get('/release', async (req, res) => {
       .whereIn('type', types)
       .where('occurred_at', '>', cutoff)
       .orderBy('occurred_at', 'desc')
-      .orderBy('uid', 'desc')
+      .orderBy('transaction_id', 'desc')
 
     res.send(transactions)
   } catch (error) {

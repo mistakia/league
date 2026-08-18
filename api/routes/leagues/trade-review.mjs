@@ -102,7 +102,7 @@ const without_chains = (trade) => ({
  *     TradeReviewRecord:
  *       type: object
  *       properties:
- *         trade_uid:
+ *         trade_id:
  *           type: integer
  *         tid:
  *           type: integer
@@ -300,7 +300,7 @@ router.get('/:tradeId', async (req, res) => {
 
     const results = await grade_trades({
       lid: Number(req.params.leagueId),
-      trade_uid
+      trade_id
     })
     if (!results.length) {
       return res.status(404).send({ error: 'trade not found' })

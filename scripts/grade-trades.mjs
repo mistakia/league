@@ -23,7 +23,7 @@ const initialize_cli = () =>
       type: 'number',
       describe: 'grade from this team perspective; omit for every team'
     })
-    .option('trade_uid', { type: 'number', describe: 'grade a single trade' })
+    .option('trade_id', { type: 'number', describe: 'grade a single trade' })
     .option('year', {
       type: 'number',
       describe: 'limit to trades in this year'
@@ -71,7 +71,7 @@ const report = ({ results, boom_threshold }) => {
     const proceeds =
       trade.net_value_proceeds == null ? 'withheld' : trade.net_value_proceeds
     log(
-      `trade ${trade.trade_uid} ${date} tid=${trade.tid} net_value_at_trade=${at_trade} net_value_still_held=${trade.net_value_still_held} net_value_proceeds=${proceeds}`
+      `trade ${trade.trade_id} ${date} tid=${trade.tid} net_value_at_trade=${at_trade} net_value_still_held=${trade.net_value_still_held} net_value_proceeds=${proceeds}`
     )
     for (const asset of trade.acquired_assets) {
       log(`   in  ${describe_asset(asset)}`)
@@ -141,7 +141,7 @@ const main = async () => {
     const results = await grade_trades({
       lid: argv.lid,
       tid: argv.tid ?? null,
-      trade_uid: argv.trade_uid ?? null,
+      trade_id: argv.trade_id ?? null,
       year: argv.year ?? null,
       offseason: argv.offseason,
       min_age_days: argv.min_age_days

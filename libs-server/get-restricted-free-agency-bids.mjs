@@ -30,13 +30,13 @@ export default async function ({ userId, leagueId }) {
         'restricted_free_agency_releases'
       ).whereIn(
         'restricted_free_agency_bid_id',
-        bids.map((b) => b.uid)
+        bids.map((b) => b.bid_id)
       )
 
       // Map releases to bids
       for (const bid of bids) {
         const releases = restricted_free_agency_releases.filter(
-          (r) => r.restricted_free_agency_bid_id === bid.uid
+          (r) => r.restricted_free_agency_bid_id === bid.bid_id
         )
         if (releases.length) {
           bid.restricted_free_agency_conditional_releases = releases.map(

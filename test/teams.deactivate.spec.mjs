@@ -451,7 +451,7 @@ describe('API /teams - deactivate', function () {
         slot: roster_slot_types.BENCH,
         transaction: transaction_types.ROSTER_ADD,
         value: 1,
-        waiver_id: result[0].uid
+        waiver_id: result[0].waiver_id
       })
 
       await knex('waivers').insert({

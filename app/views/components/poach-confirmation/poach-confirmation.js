@@ -73,8 +73,8 @@ export default class PoachConfirmation extends React.Component {
         pid: player_map.get('pid'),
         type: waiver_types.POACH
       })
-    } else if (poach.uid) {
-      this.props.updatePoach({ poachId: poach.uid, release })
+    } else if (poach.poach_id) {
+      this.props.updatePoach({ poachId: poach.poach_id, release })
     } else {
       this.props.submitPoach({ release, pid: player_map.get('pid') })
     }

@@ -51,11 +51,11 @@ SELECT md5(concat_ws('|',
   (SELECT md5(string_agg(concat_ws(':', uid, propose_tid, accept_tid, season_year, offered, accepted, cancelled, rejected, vetoed), ',' ORDER BY uid))
      FROM trades WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', tt.trade_id, tt.transaction_id), ',' ORDER BY tt.trade_id, tt.transaction_id))
-     FROM trades_transactions tt JOIN trades t ON t.uid = tt.trade_id WHERE t.lid = ?),
+     FROM trades_transactions tt JOIN trades t ON t.trade_id = tt.trade_id WHERE t.lid = ?),
   (SELECT md5(string_agg(concat_ws(':', tp.trade_id, tp.tid, tp.pid), ',' ORDER BY tp.trade_id, tp.tid, tp.pid))
-     FROM trades_players tp JOIN trades t ON t.uid = tp.trade_id WHERE t.lid = ?),
+     FROM trades_players tp JOIN trades t ON t.trade_id = tp.trade_id WHERE t.lid = ?),
   (SELECT md5(string_agg(concat_ws(':', tk.trade_id, tk.tid, tk.draft_pick_id), ',' ORDER BY tk.trade_id, tk.tid, tk.draft_pick_id))
-     FROM trades_picks tk JOIN trades t ON t.uid = tk.trade_id WHERE t.lid = ?),
+     FROM trades_picks tk JOIN trades t ON t.trade_id = tk.trade_id WHERE t.lid = ?),
   (SELECT md5(string_agg(concat_ws(':', uid, pid, round, is_compensatory, pick, tid, original_team_id, season_year, selection_timestamp), ',' ORDER BY uid))
      FROM draft WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', uid, pid, bid_amount, tid, season_year, is_successful, processed, cancelled, nomination_id, outcome), ',' ORDER BY uid))
@@ -95,7 +95,7 @@ const refresh_roster_asset_lineage = async ({ lid = null, force = false }) => {
 
   for (const league of leagues) {
     summary.leagues_checked += 1
-    const league_id = league.uid
+    const league_id = league.league_id
 
     try {
       // Captured BEFORE the rebuild on purpose. A write landing mid-rebuild is

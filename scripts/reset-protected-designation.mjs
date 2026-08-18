@@ -193,7 +193,7 @@ const reset_protected_designations_for_due_leagues = async ({
   // A league with no configured extension_deadline_at is inside the extension window
   // indefinitely, matching is-before-extension-deadline.mjs, so it is never due.
   const eligible = await db('seasons')
-    .join('leagues', 'leagues.uid', 'seasons.lid')
+    .join('leagues', 'leagues.league_id', 'seasons.lid')
     .where({
       'seasons.season_year': current_season.year,
       'leagues.is_hosted': true

@@ -77,7 +77,7 @@ export default async function generate_team_context({
   const recent_transactions = await db('transactions')
     .where({ lid, tid, season_year: year })
     .orderBy('occurred_at', 'desc')
-    .orderBy('uid', 'desc')
+    .orderBy('transaction_id', 'desc')
     .limit(10)
   const players = await get_players({
     db,
@@ -110,7 +110,7 @@ export default async function generate_team_context({
     type: 'team_context',
     fields: {
       canonical_url: doc_url(base_url, { lid, tid }),
-      league_id: league.uid,
+      league_id: league.league_id,
       team_id: team.team_id,
       team_name: team.name,
       year,

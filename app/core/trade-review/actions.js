@@ -17,11 +17,11 @@ export const trade_review_actions = {
   // response omits chains -- they are an order of magnitude more data than the
   // rest of a row and nothing collapsed renders them.
   LOAD_TRADE_REVIEW_TRADE: 'LOAD_TRADE_REVIEW_TRADE',
-  load_trade_review_trade: ({ leagueId, trade_uid }) => ({
+  load_trade_review_trade: ({ leagueId, trade_id }) => ({
     type: trade_review_actions.LOAD_TRADE_REVIEW_TRADE,
     payload: {
       leagueId: Number(leagueId),
-      trade_uid: Number(trade_uid)
+      trade_id: Number(trade_id)
     }
   })
 }

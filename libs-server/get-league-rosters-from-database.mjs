@@ -55,7 +55,7 @@ export default async function ({
     .join('rosters', 'rosters_players.roster_id', '=', 'rosters.roster_id')
     .leftJoin('transactions', function () {
       this.on(
-        'transactions.uid',
+        'transactions.transaction_id',
         '=',
         db.raw(
           '(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.pid = rosters_players.pid)'
@@ -132,7 +132,7 @@ export default async function ({
           'restricted_free_agency_releases'
         ).whereIn(
           'restricted_free_agency_bid_id',
-          bids.map((b) => b.uid)
+          bids.map((b) => b.bid_id)
         )
 
         // Pin to the week the client actually renders. `rosters` holds every
@@ -157,7 +157,7 @@ export default async function ({
 
             // Add conditional releases for this bid
             const releases = restricted_free_agency_releases.filter(
-              (r) => r.restricted_free_agency_bid_id === bid.uid
+              (r) => r.restricted_free_agency_bid_id === bid.bid_id
             )
             if (releases.length) {
               player.restricted_free_agency_conditional_releases = releases.map(

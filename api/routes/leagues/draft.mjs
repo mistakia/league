@@ -243,7 +243,7 @@ router.get('/?', async (req, res) => {
     const trade_counts = await db('trades_picks')
       .select('draft_pick_id')
       .count('trade_id as trade_count')
-      .innerJoin('trades', 'trades.uid', 'trades_picks.trade_id')
+      .innerJoin('trades', 'trades.trade_id', 'trades_picks.trade_id')
       .whereNotNull('trades.accepted')
       .whereIn(
         'draft_pick_id',
@@ -323,13 +323,13 @@ router.get('/picks/:pickId', async (req, res) => {
     // Get trade history for this pick
     const trade_history = await db('trades')
       .select([
-        'trades.uid',
+        'trades.trade_id',
         'trades.propose_tid',
         'trades.accept_tid',
         'trades.accepted',
         'trades_picks.draft_pick_id'
       ])
-      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.trade_id')
+      .innerJoin('trades_picks', 'trades.trade_id', 'trades_picks.trade_id')
       .where('trades_picks.draft_pick_id', pickId)
       .whereNotNull('trades.accepted')
       .orderBy('trades.accepted', 'asc')
@@ -695,7 +695,7 @@ router.post('/?', async (req, res) => {
     }
 
     const trades = await db('trades')
-      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.trade_id')
+      .innerJoin('trades_picks', 'trades.trade_id', 'trades_picks.trade_id')
       .where('trades_picks.draft_pick_id', pickId)
       .whereNull('trades.accepted')
       .whereNull('trades.cancelled')
@@ -705,13 +705,13 @@ router.post('/?', async (req, res) => {
     if (trades.length) {
       // TODO - broadcast on WS
       // TODO - broadcast notifications
-      const tradeids = trades.map((t) => t.uid)
+      const tradeids = trades.map((t) => t.trade_id)
       await db('trades')
-        .whereIn('uid', tradeids)
+        .whereIn('trade_id', tradeids)
         .update({ cancelled: new Date() })
     }
 
-    const data = { uid: pickId, pid, lid, tid: teamId }
+    const data = { draft_pick_id: pickId, pid, lid, tid: teamId }
     broadcast(lid, {
       type: 'DRAFTED_PLAYER',
       payload: { data }

@@ -68,8 +68,8 @@ export async function cancel_existing_waivers({ pid, teamId, leagueId, type }) {
     await knex('waivers')
       .update('cancelled', new Date())
       .whereIn(
-        'uid',
-        existing_waivers.map((w) => w.uid)
+        'waiver_id',
+        existing_waivers.map((w) => w.waiver_id)
       )
   }
 }

@@ -38,10 +38,10 @@ export default async function ({ lid, commissioner_user_id, ...params } = {}) {
     is_hosted: league_params.is_hosted
   }
 
-  if (lid) league.uid = lid
+  if (lid) league.league_id = lid
 
-  const leagues = await db('leagues').insert(league).returning('uid')
-  const leagueId = leagues[0].uid
+  const leagues = await db('leagues').insert(league).returning('league_id')
+  const leagueId = leagues[0].league_id
 
   const scoring_format_id = await find_or_create_scoring_format(
     db,

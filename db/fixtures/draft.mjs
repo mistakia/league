@@ -76,7 +76,7 @@ export default async function (knex) {
       player_position: player.secondary_position,
       roster_id: roster.roster_id,
       tid: roster.tid,
-      lid: league.uid,
+      lid: league.league_id,
       season_year: current_season.year,
       week: current_season.week
     })
@@ -88,7 +88,7 @@ export default async function (knex) {
       transaction_rows.push({
         user_id: roster.tid,
         tid: roster.tid,
-        lid: league.uid,
+        lid: league.league_id,
         pid: player.pid,
         type,
         player_salary,

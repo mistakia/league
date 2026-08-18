@@ -89,7 +89,7 @@ export function app_reducer(state = initialState(), { payload, type }) {
         const leagueNotSet = !currentLeagueId
 
         const leagueId = payload.data.leagues.length
-          ? payload.data.leagues[0].uid
+          ? payload.data.leagues[0].league_id
           : undefined
         if (leagueNotSet && leagueId) {
           state.set('leagueId', leagueId)
@@ -106,7 +106,7 @@ export function app_reducer(state = initialState(), { payload, type }) {
           userId: payload.data.user.id,
           user: create_user_record(payload.data.user),
           teamIds: new List(payload.data.teams.map((t) => t.team_id)),
-          leagueIds: new List(payload.data.leagues.map((l) => l.uid)),
+          leagueIds: new List(payload.data.leagues.map((l) => l.league_id)),
           isPending: false
         })
       })

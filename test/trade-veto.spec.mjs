@@ -75,7 +75,7 @@ const propose_and_accept_one_for_one = async () => {
     })
   propose_res.should.have.status(200)
 
-  const trade_id = propose_res.body.uid
+  const trade_id = propose_res.body.trade_id
 
   const accept_res = await chai_request
     .execute(server)
@@ -135,7 +135,7 @@ const propose_and_accept_with_pick = async () => {
     })
   propose_res.should.have.status(200)
 
-  const trade_id = propose_res.body.uid
+  const trade_id = propose_res.body.trade_id
 
   const accept_res = await chai_request
     .execute(server)
@@ -238,7 +238,7 @@ describe('API /trades - veto', function () {
 
     const accept_res = await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${propose_res.body.uid}/accept`)
+      .post(`/api/leagues/1/trades/${propose_res.body.trade_id}/accept`)
       .set('Authorization', `Bearer ${user2}`)
     accept_res.should.have.status(200)
 
@@ -249,7 +249,7 @@ describe('API /trades - veto', function () {
 
     const veto_res = await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${propose_res.body.uid}/veto`)
+      .post(`/api/leagues/1/trades/${propose_res.body.trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
     veto_res.should.have.status(200)
 
@@ -270,7 +270,7 @@ describe('API /trades - veto', function () {
     should.exist(veto_res.body.accepted)
     should.exist(veto_res.body.vetoed)
 
-    const rows = await knex('trades').where({ uid: trade_id })
+    const rows = await knex('trades').where({ trade_id: trade_id })
     rows.length.should.equal(1)
     should.exist(rows[0].accepted)
     should.exist(rows[0].vetoed)
@@ -401,7 +401,7 @@ describe('API /trades - veto', function () {
 
     const veto_res = await chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${propose_res.body.uid}/veto`)
+      .post(`/api/leagues/1/trades/${propose_res.body.trade_id}/veto`)
       .set('Authorization', `Bearer ${user1}`)
     veto_res.should.have.status(200)
 
@@ -422,7 +422,7 @@ describe('API /trades - veto', function () {
     res.should.have.status(200)
 
     res.body.length.should.equal(1)
-    res.body[0].uid.should.equal(trade_id)
+    res.body[0].trade_id.should.equal(trade_id)
     // the commissioner is not party to every trade they rule on, so the list
     // has to carry the assets rather than just the trade row
     res.body[0].proposingTeamPlayers.length.should.equal(1)
@@ -560,7 +560,7 @@ describe('API /trades - veto', function () {
         value: async (...args) => {
           restore()
           await knex('trades')
-            .where({ uid: trade_id })
+            .where({ trade_id: trade_id })
             .update({ approved: new Date() })
           return original_transaction(...args)
         }
@@ -580,7 +580,7 @@ describe('API /trades - veto', function () {
     )
 
     // the status code alone cannot tell a rollback from a committed reversal
-    const trade_row = await knex('trades').where({ uid: trade_id }).first()
+    const trade_row = await knex('trades').where({ trade_id: trade_id }).first()
     should.not.exist(trade_row.vetoed)
     should.exist(trade_row.approved)
 
@@ -603,7 +603,7 @@ describe('API /trades - veto', function () {
       .join(
         'transactions',
         'trades_transactions.transaction_id',
-        'transactions.uid'
+        'transactions.transaction_id'
       )
       .select('transactions.type')
     linked_transactions.length.should.equal(2)
@@ -651,7 +651,7 @@ describe('API /trades - veto', function () {
 
     const request = chai_request
       .execute(server)
-      .post(`/api/leagues/1/trades/${propose_res.body.uid}/approve`)
+      .post(`/api/leagues/1/trades/${propose_res.body.trade_id}/approve`)
       .set('Authorization', `Bearer ${user1}`)
 
     await error(request, 'trade has not been accepted and can not be approved')

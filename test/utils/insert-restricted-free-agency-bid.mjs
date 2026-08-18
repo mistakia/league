@@ -112,7 +112,7 @@ export const insert_restricted_free_agency_bid = async ({
     })
     .returning('uid')
 
-  const bid_id = rows[0].uid
+  const bid_id = rows[0].bid_id
 
   // Seed the audit trail too, so no fixture can produce a bid that the writers
   // could not have produced. Every live write path records a change; a bid with

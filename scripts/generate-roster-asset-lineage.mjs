@@ -67,7 +67,7 @@ const generate_roster_asset_lineage = async ({
 
   const league = await db('leagues')
     .select('uid', 'salary_attribution_rule')
-    .where('uid', lid)
+    .where('league_id', lid)
     .first()
   if (!league) {
     log(`league ${lid} not found`)
@@ -213,7 +213,7 @@ const generate_roster_asset_lineage = async ({
       transformation_id: t.transformation_id,
       lid: t.lid,
       transaction_id: t.transaction_id,
-      trade_uid: t.trade_uid ?? null,
+      trade_id: t.trade_id ?? null,
       transformation_type: t.transformation_type,
       occurred_at: t.occurred_at,
       source_holding_id: t.source_draft_id
@@ -292,7 +292,7 @@ const main = async () => {
         .whereNull('archived_at')
       for (const league of leagues) {
         await generate_roster_asset_lineage({
-          lid: league.uid,
+          lid: league.league_id,
           year: argv.year || null
         })
       }

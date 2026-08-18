@@ -496,7 +496,7 @@ router.post('/?', async (req, res) => {
         // the predicate matches on `cancelled` being irrelevant and the update
         // would otherwise give no way to name which bids it touched.
         const removed_bid_rows = await db('restricted_free_agency_bids')
-          .select('uid')
+          .select('bid_id')
           .where({
             pid: remove,
             tid,
@@ -504,10 +504,10 @@ router.post('/?', async (req, res) => {
           })
 
         if (removed_bid_rows.length) {
-          const removed_bid_ids = removed_bid_rows.map((row) => row.uid)
+          const removed_bid_ids = removed_bid_rows.map((row) => row.bid_id)
           await db.transaction(async (trx) => {
             await trx('restricted_free_agency_bids')
-              .whereIn('uid', removed_bid_ids)
+              .whereIn('bid_id', removed_bid_ids)
               .update({
                 cancelled: new Date()
               })
@@ -596,8 +596,8 @@ router.post('/?', async (req, res) => {
     await db.transaction(async (trx) => {
       const query = await trx('restricted_free_agency_bids')
         .insert(data)
-        .returning('uid')
-      restricted_free_agency_bid_id = query[0].uid
+        .returning('bid_id')
+      restricted_free_agency_bid_id = query[0].bid_id
 
       if (release.length) {
         const releaseInserts = release.map((pid) => ({
@@ -615,7 +615,7 @@ router.post('/?', async (req, res) => {
         changed_by_user_id: req.auth.userId
       })
     })
-    data.uid = restricted_free_agency_bid_id
+    data.bid_id = restricted_free_agency_bid_id
 
     data.release = release
     data.remove = remove
@@ -772,7 +772,7 @@ router.delete('/?', async (req, res) => {
       })
       .whereNull('restricted_free_agency_bids.cancelled')
       .orderByRaw(
-        '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.uid DESC'
+        '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.bid_id DESC'
       )
 
     if (!query1.length) {
@@ -798,11 +798,11 @@ router.delete('/?', async (req, res) => {
     await db.transaction(async (trx) => {
       await trx('restricted_free_agency_bids')
         .update('cancelled', cancelled)
-        .where('uid', restrictedFreeAgencyBid.uid)
+        .where('bid_id', restrictedFreeAgencyBid.bid_id)
 
       await record_restricted_free_agency_bid_change({
         db: trx,
-        bid_id: restrictedFreeAgencyBid.uid,
+        bid_id: restrictedFreeAgencyBid.bid_id,
         change_type: bid_change_types.CANCELLED,
         change_source: bid_change_sources.API_BID_CANCEL,
         changed_by_user_id: req.auth.userId
@@ -981,7 +981,7 @@ router.put('/?', async (req, res) => {
       })
       .whereNull('restricted_free_agency_bids.cancelled')
       .orderByRaw(
-        '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.uid DESC'
+        '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.bid_id DESC'
       )
 
     if (!query1.length) {
@@ -1108,11 +1108,11 @@ router.put('/?', async (req, res) => {
           user_id: req.auth.userId,
           bid_amount: bid
         })
-        .where('uid', restrictedFreeAgencyBid.uid)
+        .where('bid_id', restrictedFreeAgencyBid.bid_id)
 
       if (release.length) {
         const releaseInserts = release.map((pid) => ({
-          restricted_free_agency_bid_id: restrictedFreeAgencyBid.uid,
+          restricted_free_agency_bid_id: restrictedFreeAgencyBid.bid_id,
           pid
         }))
         await trx('restricted_free_agency_releases')
@@ -1123,12 +1123,12 @@ router.put('/?', async (req, res) => {
 
       await trx('restricted_free_agency_releases')
         .del()
-        .where('restricted_free_agency_bid_id', restrictedFreeAgencyBid.uid)
+        .where('restricted_free_agency_bid_id', restrictedFreeAgencyBid.bid_id)
         .whereNotIn('pid', release)
 
       await record_restricted_free_agency_bid_change({
         db: trx,
-        bid_id: restrictedFreeAgencyBid.uid,
+        bid_id: restrictedFreeAgencyBid.bid_id,
         change_type: bid_change_types.UPDATED,
         change_source: bid_change_sources.API_BID_UPDATE,
         changed_by_user_id: req.auth.userId
@@ -1249,7 +1249,7 @@ router.post('/nominate/?', async (req, res) => {
         })
         .whereNull('restricted_free_agency_bids.cancelled')
         .orderByRaw(
-          '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.uid DESC'
+          '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.bid_id DESC'
         )
         .first()
 
@@ -1398,7 +1398,7 @@ router.delete('/nominate/?', async (req, res) => {
         })
         .whereNull('restricted_free_agency_bids.cancelled')
         .orderByRaw(
-          '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.uid DESC'
+          '(restricted_free_agency_bids.processed IS NULL) DESC, restricted_free_agency_bids.bid_id DESC'
         )
         .first()
 

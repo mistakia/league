@@ -12,7 +12,7 @@ export default function LeagueSettingsExternal({
   isDefault,
   onchange
 }) {
-  const disabled = !league.uid
+  const disabled = !league.league_id
   const props = { league, isCommish, isDefault, onchange, disabled }
   const title = 'External League'
   const description =
@@ -27,7 +27,7 @@ export default function LeagueSettingsExternal({
           </Alert>
         </Grid>
       )}
-      {Boolean(league.uid) && (
+      {Boolean(league.league_id) && (
         <Grid xs={12} item>
           <Alert severity='info'>
             External league importing is currently disabled. Will be re-enabled

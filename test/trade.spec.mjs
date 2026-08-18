@@ -153,11 +153,11 @@ describe('API /trades', function () {
       proposeRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
       proposeRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
-      const trade_id = proposeRes.body.uid
+      const trade_id = proposeRes.body.trade_id
 
       // Verify slot assignments stored in database
       const stored_slots = await knex('trades_slots').where({
-        trade_uid: trade_id
+        trade_id: trade_id
       })
       stored_slots.length.should.equal(
         proposingTeamPlayers.length + acceptingTeamPlayers.length
@@ -242,15 +242,15 @@ describe('API /trades', function () {
         })
 
       proposalRes.should.have.status(200)
-      should.exist(proposalRes.body.uid)
+      should.exist(proposalRes.body.trade_id)
       proposalRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
       proposalRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
-      const trade_id = proposalRes.body.uid
+      const trade_id = proposalRes.body.trade_id
 
       // Verify slot assignments stored in database
       const stored_slots = await knex('trades_slots').where({
-        trade_uid: trade_id
+        trade_id: trade_id
       })
       stored_slots.length.should.equal(
         proposingTeamPlayers.length + acceptingTeamPlayers.length
@@ -392,11 +392,11 @@ describe('API /trades', function () {
       proposeRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
       proposeRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
-      const trade_id = proposeRes.body.uid
+      const trade_id = proposeRes.body.trade_id
 
       // Verify slot assignments stored in database
       const stored_slots = await knex('trades_slots').where({
-        trade_uid: trade_id
+        trade_id: trade_id
       })
       stored_slots.length.should.equal(
         proposingTeamPlayers.length + acceptingTeamPlayers.length
@@ -551,11 +551,11 @@ describe('API /trades', function () {
       proposeRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
       proposeRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
-      const trade_id = proposeRes.body.uid
+      const trade_id = proposeRes.body.trade_id
 
       // Verify slot assignments in database
       const stored_slots = await knex('trades_slots').where({
-        trade_uid: trade_id
+        trade_id: trade_id
       })
       stored_slots.length.should.equal(2)
 
@@ -644,7 +644,7 @@ describe('API /trades', function () {
         })
 
       proposeRes.should.have.status(200)
-      const trade_id = proposeRes.body.uid
+      const trade_id = proposeRes.body.trade_id
 
       // Accepting team overrides their slot assignment to BENCH
       const accepting_team_slot_override = {}

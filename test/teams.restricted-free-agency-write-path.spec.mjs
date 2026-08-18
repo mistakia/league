@@ -139,7 +139,7 @@ describe('API /teams - restricted free agency write path', function () {
 
       expect(live, 'live bid not seeded').to.exist
 
-      return { player, processed_bid_id, live_bid_id: live.uid }
+      return { player, processed_bid_id, live_bid_id: live.bid_id }
     }
 
     it('PUT edits the live bid rather than rejecting on the settled one', async () => {
@@ -158,10 +158,10 @@ describe('API /teams - restricted free agency write path', function () {
       res.should.have.status(200)
 
       const live = await knex('restricted_free_agency_bids')
-        .where('uid', live_bid_id)
+        .where('bid_id', live_bid_id)
         .first()
       const processed = await knex('restricted_free_agency_bids')
-        .where('uid', processed_bid_id)
+        .where('bid_id', processed_bid_id)
         .first()
 
       expect(live.bid_amount, 'edit did not land on the live bid').to.equal(19)
@@ -181,10 +181,10 @@ describe('API /teams - restricted free agency write path', function () {
       res.should.have.status(200)
 
       const live = await knex('restricted_free_agency_bids')
-        .where('uid', live_bid_id)
+        .where('bid_id', live_bid_id)
         .first()
       const processed = await knex('restricted_free_agency_bids')
-        .where('uid', processed_bid_id)
+        .where('bid_id', processed_bid_id)
         .first()
 
       expect(live.cancelled, 'the live bid was not the one cancelled').to.exist

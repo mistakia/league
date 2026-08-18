@@ -67,7 +67,7 @@ describe('LINEAGE - pick chain gap', function () {
     recorded_tid
   }) => {
     await knex('trades').insert({
-      uid: trade_id,
+      trade_id: trade_id,
       lid: LID,
       propose_tid,
       accept_tid,
@@ -99,10 +99,10 @@ describe('LINEAGE - pick chain gap', function () {
     )
     const legs = transformation_drafts
       .filter((edge) => holding_by_draft_id.has(edge.target_draft_id))
-      .filter((edge) => edge.trade_uid)
+      .filter((edge) => edge.trade_id)
       .sort((a, b) => a.occurred_at - b.occurred_at)
       .map((edge) => ({
-        trade_uid: edge.trade_uid,
+        trade_id: edge.trade_id,
         from_tid: holding_by_draft_id.get(edge.source_draft_id)?.tid ?? null,
         to_tid: holding_by_draft_id.get(edge.target_draft_id).tid
       }))
@@ -139,7 +139,7 @@ describe('LINEAGE - pick chain gap', function () {
     // The standings fact is untouched -- only the holder of the synthesized
     // pre-trade window moves.
     expect(holdings[0].pick_original_owner_tid).to.equal(3)
-    expect(legs).to.deep.equal([{ trade_uid: 1, from_tid: 1, to_tid: 2 }])
+    expect(legs).to.deep.equal([{ trade_id: 1, from_tid: 1, to_tid: 2 }])
     expect(coverage_warnings.pick_chain_gap_before_first_trade).to.equal(1)
     expect(coverage_warnings.trade_leg_source_not_participant).to.equal(
       undefined
@@ -169,7 +169,7 @@ describe('LINEAGE - pick chain gap', function () {
 
     expect(holdings.length).to.equal(2)
     expect(holdings[0].tid).to.equal(4)
-    expect(legs).to.deep.equal([{ trade_uid: 2, from_tid: 4, to_tid: 5 }])
+    expect(legs).to.deep.equal([{ trade_id: 2, from_tid: 4, to_tid: 5 }])
     expect(coverage_warnings.pick_chain_gap_before_first_trade).to.equal(
       undefined
     )
@@ -204,7 +204,7 @@ describe('LINEAGE - pick chain gap', function () {
 
     const { legs, coverage_warnings } = await walk_pick({ draft_pick_id: 5 })
 
-    expect(legs).to.deep.equal([{ trade_uid: 6, from_tid: 3, to_tid: 4 }])
+    expect(legs).to.deep.equal([{ trade_id: 6, from_tid: 3, to_tid: 4 }])
     expect(coverage_warnings.pick_chain_end_state_mismatch).to.equal(1)
     expect(coverage_warnings.pick_chain_gap_before_first_trade).to.equal(
       undefined
@@ -244,8 +244,8 @@ describe('LINEAGE - pick chain gap', function () {
 
     const { legs, coverage_warnings } = await walk_pick({ draft_pick_id: 3 })
 
-    expect(legs[0]).to.deep.equal({ trade_uid: 3, from_tid: 6, to_tid: 7 })
-    expect(legs[1].trade_uid).to.equal(4)
+    expect(legs[0]).to.deep.equal({ trade_id: 3, from_tid: 6, to_tid: 7 })
+    expect(legs[1].trade_id).to.equal(4)
     expect(legs[1].to_tid).to.equal(9)
     expect(coverage_warnings.pick_chain_gap_mid_chain).to.equal(1)
     expect(coverage_warnings.trade_leg_source_not_participant).to.equal(1)
@@ -273,7 +273,7 @@ describe('LINEAGE - pick chain gap', function () {
 
     const { legs, coverage_warnings } = await walk_pick({ draft_pick_id: 4 })
 
-    expect(legs).to.deep.equal([{ trade_uid: 5, from_tid: 1, to_tid: 11 }])
+    expect(legs).to.deep.equal([{ trade_id: 5, from_tid: 1, to_tid: 11 }])
     expect(coverage_warnings.pick_chain_gap_unresolved).to.equal(1)
     expect(coverage_warnings.trade_leg_source_not_participant).to.equal(
       undefined

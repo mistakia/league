@@ -107,16 +107,16 @@ describe('API /waivers - poach', function () {
     const submitted = Math.round(Date.now() / 1000)
     new Date(res.body.submitted).getTime().should.equal(submitted * 1000)
     res.body.type.should.equal(waiver_types.POACH)
-    res.body.uid.should.be.a('number')
-    res.body.uid.should.be.above(0)
+    res.body.waiver_id.should.be.a('number')
+    res.body.waiver_id.should.be.above(0)
 
     const waivers = await knex('waivers').select('*')
 
     expect(waivers.length).to.equal(1)
 
     const waiver = waivers[0]
-    expect(waiver.uid).to.be.a('number')
-    expect(waiver.uid).to.be.above(0)
+    expect(waiver.waiver_id).to.be.a('number')
+    expect(waiver.waiver_id).to.be.above(0)
     expect(waiver.user_id).to.equal(2)
     expect(waiver.pid).to.equal(drafted_player_id)
     expect(waiver.tid).to.equal(teamId)
@@ -130,7 +130,7 @@ describe('API /waivers - poach', function () {
     expect(waiver.processed).to.equal(null)
     expect(waiver.cancelled).to.equal(null)
 
-    res.body.uid.should.equal(waiver.uid)
+    res.body.waiver_id.should.equal(waiver.waiver_id)
   })
 
   // - poaching waiver for deactivated player

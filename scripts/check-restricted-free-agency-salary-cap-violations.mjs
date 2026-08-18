@@ -27,7 +27,7 @@ const RESTRICTED_FREE_AGENCY_TAG_TYPE =
 const get_leagues_with_restricted_free_agency_transactions = async () => {
   return await db('seasons')
     .select('seasons.*', 'leagues.name as league_name')
-    .join('leagues', 'leagues.uid', '=', 'seasons.lid')
+    .join('leagues', 'leagues.league_id', '=', 'seasons.lid')
     .where('seasons.season_year', CURRENT_YEAR)
     .whereExists(function () {
       this.select('*')

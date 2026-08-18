@@ -5,7 +5,7 @@
  * engine. Asserts invariants a spot check cannot distinguish:
  *  1. Every still-held figure is non-negative.
  *  2. Both perspectives of every trade are sign-inverted on every figure.
- *  3. A trade_uid-filtered call agrees with a full-league call on every shared
+ *  3. A trade_id-filtered call agrees with a full-league call on every shared
  *     record — the filtered-invocation truncation the first design shipped.
  *  4. A year-filtered call agrees with a full-league call on proceeds.
  *  5. No retired field survives on the wire.
@@ -51,8 +51,8 @@ const validate = async () => {
   // 2. Both perspectives of every trade agree on all figures.
   const by_trade = new Map()
   for (const record of full) {
-    if (!by_trade.has(record.trade_uid)) by_trade.set(record.trade_uid, [])
-    by_trade.get(record.trade_uid).push(record)
+    if (!by_trade.has(record.trade_id)) by_trade.set(record.trade_id, [])
+    by_trade.get(record.trade_id).push(record)
   }
   let asymmetric = 0
   const mirrors = (a, b) => (a == null || b == null ? a === b : a === -b)
@@ -78,10 +78,10 @@ const validate = async () => {
   const sample = [...by_trade.keys()].slice(0, 40)
   let filtered_disagreements = 0
   for (const uid of sample) {
-    const one = await grade_trades({ lid: LID, trade_uid: uid })
+    const one = await grade_trades({ lid: LID, trade_id: uid })
     for (const record of one) {
       const reference = full.find(
-        (row) => row.trade_uid === record.trade_uid && row.tid === record.tid
+        (row) => row.trade_id === record.trade_id && row.tid === record.tid
       )
       if (!reference) {
         filtered_disagreements += 1
@@ -102,7 +102,7 @@ const validate = async () => {
     }
   }
   check(
-    'a trade_uid call agrees with a full-league call on every figure',
+    'a trade_id call agrees with a full-league call on every figure',
     filtered_disagreements === 0,
     `${sample.length} trades sampled`
   )
@@ -114,7 +114,7 @@ const validate = async () => {
     const slice = await grade_trades({ lid: LID, year })
     for (const record of slice) {
       const reference = full.find(
-        (row) => row.trade_uid === record.trade_uid && row.tid === record.tid
+        (row) => row.trade_id === record.trade_id && row.tid === record.tid
       )
       if (
         !reference ||

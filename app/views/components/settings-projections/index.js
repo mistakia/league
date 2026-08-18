@@ -6,7 +6,7 @@ import { get_sources_state } from '@core/sources'
 import SettingsProjections from './settings-projections'
 
 const map_state_to_props = createSelector(get_sources_state, (sources) => ({
-  sourceIds: sources.toList().map((s) => s.uid)
+  sourceIds: sources.toList().map((s) => s.source_id)
 }))
 
 export default connect(map_state_to_props)(SettingsProjections)

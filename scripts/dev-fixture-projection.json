@@ -182,7 +182,7 @@
       "division_wins": "keep"
     },
     "leagues": {
-      "uid": "keep",
+      "league_id": "keep",
       "commissioner_user_id": "keep",
       "name": "keep",
       "discord_webhook_url": "NULL",
@@ -245,7 +245,7 @@
       "pid": "keep"
     },
     "poaches": {
-      "uid": "keep",
+      "poach_id": "keep",
       "pid": "keep",
       "user_id": "keep",
       "tid": "keep",
@@ -257,7 +257,7 @@
       "is_successful": "keep"
     },
     "restricted_free_agency_bids": {
-      "uid": "keep",
+      "bid_id": "keep",
       "pid": "keep",
       "user_id": "keep",
       "bid_amount": "keep",
@@ -373,7 +373,7 @@
       "origin_slot": "keep"
     },
     "trades": {
-      "uid": "keep",
+      "trade_id": "keep",
       "propose_tid": "keep",
       "accept_tid": "keep",
       "lid": "keep",
@@ -401,7 +401,7 @@
       "transaction_id": "keep"
     },
     "transactions": {
-      "uid": "keep",
+      "transaction_id": "keep",
       "user_id": "keep",
       "tid": "keep",
       "lid": "keep",
@@ -452,7 +452,7 @@
       "pid": "keep"
     },
     "waivers": {
-      "uid": "keep",
+      "waiver_id": "keep",
       "user_id": "keep",
       "pid": "keep",
       "tid": "keep",

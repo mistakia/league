@@ -106,7 +106,7 @@ export default async function ({
   const transactions = await db('transactions')
     .where({ pid, lid: leagueId })
     .orderBy('occurred_at', 'desc')
-    .orderBy('uid', 'desc')
+    .orderBy('transaction_id', 'desc')
     .limit(1)
   const tran = transactions[0]
   const playerPoachValue = tran.player_salary + 2
@@ -123,7 +123,7 @@ export default async function ({
   if (release.length) {
     const pendingPoachReleases = await db('poach_releases')
       .select('poach_releases.pid')
-      .join('poaches', 'poach_releases.poach_id', 'poaches.uid')
+      .join('poaches', 'poach_releases.poach_id', 'poaches.poach_id')
       .whereNull('processed')
       .where('tid', teamId)
     const pendingPoachReleasePlayers = pendingPoachReleases.map((p) => p.pid)
@@ -143,8 +143,8 @@ export default async function ({
     pid,
     submitted
   }
-  const insert_query = await db('poaches').insert(data).returning('uid')
-  const poach_id = insert_query[0].uid
+  const insert_query = await db('poaches').insert(data).returning('poach_id')
+  const poach_id = insert_query[0].poach_id
   const releaseInserts = release.map((pid) => ({ poach_id, pid }))
   if (releaseInserts.length) {
     await db('poach_releases').insert(releaseInserts)

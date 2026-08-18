@@ -296,7 +296,7 @@ const main = async () => {
     // Process all leagues
     const leagues = await db('leagues').select('uid').where('is_hosted', true)
     for (const league of leagues) {
-      await calculate_league_careerlogs({ lid: league.uid })
+      await calculate_league_careerlogs({ lid: league.league_id })
     }
   } catch (err) {
     error = err

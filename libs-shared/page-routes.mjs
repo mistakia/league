@@ -226,7 +226,7 @@ export const page_routes = [
     description: 'Completed trades with valuation at the time of the trade.'
   },
   {
-    pattern: '/leagues/:lid/trades/:trade_uid',
+    pattern: '/leagues/:lid/trades/:trade_id',
     title: 'Trades',
     description: 'Completed trades with valuation at the time of the trade.'
   },

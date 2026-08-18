@@ -194,7 +194,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         announced_at: processed
       })
       const bid_row = await knex('restricted_free_agency_bids')
-        .where('uid', bid_uid)
+        .where('bid_id', bid_uid)
         .first()
 
       await processRestrictedFreeAgencyBid({
@@ -206,7 +206,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       })
 
       const bid_after = await knex('restricted_free_agency_bids')
-        .where('uid', bid_row.uid)
+        .where('bid_id', bid_row.bid_id)
         .first()
       expect(bid_after.is_successful).to.equal(true)
       expect(bid_after.processed.getTime()).to.equal(processed * 1000)

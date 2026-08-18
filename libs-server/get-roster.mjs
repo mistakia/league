@@ -47,7 +47,7 @@ export const build_roster_players_query = ({
     // `player_salary` under that same name.
     .select('*', 'player_position as pos', 'roster_id as rid')
     .orderBy('transactions.occurred_at', 'desc')
-    .orderBy('transactions.uid', 'desc')
+    .orderBy('transactions.transaction_id', 'desc')
 
 export default async function ({
   tid,
@@ -110,7 +110,7 @@ export default async function ({
         'restricted_free_agency_releases'
       ).whereIn(
         'restricted_free_agency_bid_id',
-        bids.map((b) => b.uid)
+        bids.map((b) => b.bid_id)
       )
 
       for (const roster_player of roster_row.players) {
@@ -125,7 +125,7 @@ export default async function ({
 
           // Add conditional releases for this bid
           const releases = restricted_free_agency_releases.filter(
-            (r) => r.restricted_free_agency_bid_id === bid.uid
+            (r) => r.restricted_free_agency_bid_id === bid.bid_id
           )
           if (releases.length) {
             roster_player.restricted_free_agency_conditional_releases =

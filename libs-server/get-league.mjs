@@ -34,7 +34,7 @@ export default async function ({ lid, year = current_season.year } = {}) {
 
   const league = await db('leagues')
     .leftJoin('seasons', function () {
-      this.on('leagues.uid', '=', 'seasons.lid')
+      this.on('leagues.league_id', '=', 'seasons.lid')
       this.on(
         db.raw(`seasons.season_year = ${year} or seasons.season_year is null`)
       )
@@ -45,7 +45,7 @@ export default async function ({ lid, year = current_season.year } = {}) {
       'seasons.scoring_format_id',
       'league_scoring_formats.id'
     )
-    .where('leagues.uid', lid)
+    .where('leagues.league_id', lid)
     .first()
 
   if (league) {

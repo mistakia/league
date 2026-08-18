@@ -17,7 +17,7 @@ export function leagues_reducer(state = initialState, { payload, type }) {
     case app_actions.AUTH_FULFILLED:
       return state.withMutations((state) => {
         payload.data.leagues.forEach((l) =>
-          state.set(l.uid, createLeague({ isLoaded: true, ...l }))
+          state.set(l.league_id, createLeague({ isLoaded: true, ...l }))
         )
       })
 
@@ -37,12 +37,12 @@ export function leagues_reducer(state = initialState, { payload, type }) {
 
     case league_actions.GET_LEAGUE_FULFILLED:
       return state.set(
-        payload.data.uid,
+        payload.data.league_id,
         createLeague({ isLoaded: true, ...payload.data })
       )
 
     case team_actions.GET_TEAMS_FULFILLED: {
-      const teamIds = payload.data.teams.map((t) => t.uid)
+      const teamIds = payload.data.teams.map((t) => t.team_id)
       if (state.hasIn([payload.opts.leagueId, 'uid'])) {
         return state.setIn([payload.opts.leagueId, 'teams'], new List(teamIds))
       } else {

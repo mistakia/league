@@ -9,7 +9,7 @@ export default async function ({ lid, pid, tid }) {
       pid
     })
     .orderBy('occurred_at', 'desc')
-    .orderBy('uid', 'desc')
+    .orderBy('transaction_id', 'desc')
 
   const types = [
     transaction_types.ROSTER_ADD,

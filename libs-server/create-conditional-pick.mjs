@@ -17,7 +17,7 @@ const create_conditional_pick = async function ({ tid, league }) {
   let pick
   if (is_before_draft) {
     const last_pick = await db('draft')
-      .where({ season_year: current_season.year, lid: league.uid })
+      .where({ season_year: current_season.year, lid: league.league_id })
       .max('pick as max_pick')
     pick = last_pick[0].max_pick ? last_pick[0].max_pick + 1 : null
   } else {
@@ -26,7 +26,7 @@ const create_conditional_pick = async function ({ tid, league }) {
 
   await db('draft').insert({
     tid,
-    lid: league.uid,
+    lid: league.league_id,
     original_team_id: tid,
     is_compensatory: 1,
     round: 4,
@@ -36,7 +36,7 @@ const create_conditional_pick = async function ({ tid, league }) {
 
   // Call set-draft-pick-number when year is current year and before draft
   if (year === current_season.year && is_before_draft) {
-    await set_draft_pick_number({ lid: league.uid })
+    await set_draft_pick_number({ lid: league.league_id })
   }
 }
 

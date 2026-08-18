@@ -52,7 +52,7 @@ const observed_at = (date) => `${date}T12:00:00Z`
 
 const insert_transaction = async ({ uid, tid, pid, type, date }) =>
   knex('transactions').insert({
-    uid,
+    transaction_id,
     user_id: 1,
     tid,
     lid,

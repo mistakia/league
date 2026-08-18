@@ -203,7 +203,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(error).to.equal(undefined)
 
       // check waivers
-      const waivers = await knex('waivers').orderBy('uid')
+      const waivers = await knex('waivers').orderBy('waiver_id')
       expect(waivers.length).to.equal(7)
       expect(waivers[0].pid).to.equal(player1.pid)
       expect(waivers[0].is_successful).to.equal(true)
@@ -279,7 +279,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       // verify transactions
       const transactions = await knex('transactions')
         .where('lid', leagueId)
-        .orderBy('uid')
+        .orderBy('transaction_id')
       expect(transactions.length).to.equal(4)
       expect(transactions[0].pid).to.equal(player1.pid)
       expect(transactions[0].tid).to.equal(1)
@@ -340,7 +340,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
 
       expect(error).to.equal(undefined)
 
-      const waivers = await knex('waivers').orderBy('uid')
+      const waivers = await knex('waivers').orderBy('waiver_id')
       expect(waivers.length).to.equal(1)
       expect(waivers[0].pid).to.equal(player.pid)
       expect(waivers[0].is_successful).to.equal(null)

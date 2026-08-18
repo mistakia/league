@@ -27,7 +27,7 @@ export default async function ({ userId, leagueId, teamId, requireLeague }) {
         'users_teams.season_year'
       )
     })
-    .join('leagues', 'teams.lid', 'leagues.uid')
+    .join('leagues', 'teams.lid', 'leagues.league_id')
     .where('teams.team_id', tid)
     .where('teams.season_year', current_season.year)
   const team = userTeams.find(

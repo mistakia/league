@@ -27,7 +27,7 @@ const observed_at = (date) => `${date}T12:00:00Z`
 
 const insert_transaction = async ({ uid, tid, pid, type, date }) =>
   knex('transactions').insert({
-    uid,
+    transaction_id,
     user_id: 1,
     tid,
     lid,
@@ -125,7 +125,7 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
         date: day_two
       })
       await knex('trades').insert({
-        uid: 1,
+        trade_id: 1,
         propose_tid: 1,
         accept_tid: 2,
         lid,

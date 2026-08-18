@@ -237,9 +237,9 @@ export default function LeagueHomePage({
 
   const body = (
     <div className='league-container league__home'>
-      {league.uid && (
+      {league.league_id && (
         <div className='copy-markdown-button-row'>
-          <CopyMarkdownButton path={`/leagues/${league.uid}.md`} />
+          <CopyMarkdownButton path={`/leagues/${league.league_id}.md`} />
         </div>
       )}
       <Grid container spacing={2}>

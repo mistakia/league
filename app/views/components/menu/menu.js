@@ -96,7 +96,7 @@ export default function AppMenu({
         <div className='main__menu'>
           <div className='menu__sections'>
             <div className='menu__section'>
-              {league.uid ? (
+              {league.league_id ? (
                 <div className='league__title'>{league.name}</div>
               ) : (
                 // Only a signed-in user can connect a league, so the warning is
@@ -117,7 +117,7 @@ export default function AppMenu({
                   </div>
                 )
               )}
-              {Boolean(league.uid) && <LeagueSchedule />}
+              {Boolean(league.league_id) && <LeagueSchedule />}
               <div
                 className='menu__links'
                 onClick={() => isMobile && set_menu_open(false)}

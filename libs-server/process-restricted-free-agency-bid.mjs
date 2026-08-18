@@ -171,7 +171,7 @@ export default async function ({
         outcome_detail: null,
         processed
       })
-      .where('uid', uid)
+      .where('bid_id', uid)
     await trx('restricted_free_agency_nominations')
       .update({
         winning_bid_id: uid,

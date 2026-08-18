@@ -89,8 +89,8 @@ describe('API /teams - restricted free agency', function () {
       res.body.bid_amount.should.equal(bid)
       res.body.season_year.should.equal(current_season.year)
       res.body.original_team_id.should.equal(teamId)
-      res.body.uid.should.be.a('number')
-      res.body.uid.should.be.above(0)
+      res.body.bid_id.should.be.a('number')
+      res.body.bid_id.should.be.above(0)
       res.body.release.should.be.an('array')
       res.body.release.length.should.equal(1)
       res.body.release[0].should.equal(releasePlayer.pid)
@@ -98,8 +98,8 @@ describe('API /teams - restricted free agency', function () {
       const query1 = await knex('restricted_free_agency_bids').select()
 
       query1.length.should.equal(1)
-      query1[0].uid.should.be.a('number')
-      query1[0].uid.should.be.above(0)
+      query1[0].bid_id.should.be.a('number')
+      query1[0].bid_id.should.be.above(0)
       query1[0].pid.should.equal(player.pid)
       query1[0].user_id.should.equal(userId)
       query1[0].bid_amount.should.equal(bid)
@@ -120,8 +120,8 @@ describe('API /teams - restricted free agency', function () {
       query2[0].restricted_free_agency_bid_id.should.be.above(0)
       query2[0].pid.should.equal(releasePlayer.pid)
 
-      res.body.uid.should.equal(query1[0].uid)
-      query1[0].uid.should.equal(query2[0].restricted_free_agency_bid_id)
+      res.body.bid_id.should.equal(query1[0].bid_id)
+      query1[0].bid_id.should.equal(query2[0].restricted_free_agency_bid_id)
 
       const roster = await getRoster({ tid: teamId })
 
@@ -479,7 +479,7 @@ describe('API /teams - restricted free agency', function () {
       res2.body.release.should.deep.equal([releasePlayer2.pid])
 
       const query = await knex('restricted_free_agency_releases').where({
-        restricted_free_agency_bid_id: res2.body.uid
+        restricted_free_agency_bid_id: res2.body.bid_id
       })
       query.should.have.lengthOf(1)
       query[0].pid.should.equal(releasePlayer2.pid)

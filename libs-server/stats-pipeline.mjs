@@ -32,7 +32,7 @@ export const get_hosted_league_ids = async () => {
   return db('leagues')
     .where({ is_hosted: 1 })
     .whereNull('archived_at')
-    .pluck('uid')
+    .pluck('league_id')
 }
 
 /**

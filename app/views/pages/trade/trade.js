@@ -188,7 +188,7 @@ export default function TradePage() {
   const is_commish = useSelector(get_is_commish)
 
   const is_proposer = trade.propose_tid === app.teamId
-  const is_proposed = Boolean(trade.uid)
+  const is_proposed = Boolean(trade.trade_id)
   const is_open =
     !trade.cancelled && !trade.rejected && !trade.accepted && !trade.vetoed
 

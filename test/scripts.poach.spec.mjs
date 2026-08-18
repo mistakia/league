@@ -361,10 +361,10 @@ describe('SCRIPTS /waivers - poach', function () {
           processed: new Date(),
           type: waiver_types.POACH
         })
-        .returning('uid')
+        .returning('waiver_id')
 
       await knex('waiver_releases').insert({
-        waiver_id: query1[0].uid,
+        waiver_id: query1[0].waiver_id,
         pid: releasePlayer.pid
       })
 
@@ -377,10 +377,10 @@ describe('SCRIPTS /waivers - poach', function () {
           player_tid: 1,
           submitted: new Date()
         })
-        .returning('uid')
+        .returning('poach_id')
 
       await knex('poach_releases').insert({
-        poach_id: query2[0].uid,
+        poach_id: query2[0].poach_id,
         pid: releasePlayer.pid
       })
 
