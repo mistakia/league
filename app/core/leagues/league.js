@@ -21,6 +21,7 @@ const pick_scoring_columns = (source) =>
   )
 
 export const League = new Record({
+  league_id: null,
   commissioner_user_id: null,
   name: null,
   number_teams: null,
@@ -146,6 +147,7 @@ export const League = new Record({
 // scoring columns can be picked from it by the registry below.
 export function createLeague(league_data = {}) {
   const {
+    league_id,
     commissioner_user_id,
     name,
     number_teams,
@@ -253,6 +255,7 @@ export function createLeague(league_data = {}) {
   } = league_data
 
   return new League({
+    league_id,
     commissioner_user_id,
     name,
     number_teams,
