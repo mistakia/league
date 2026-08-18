@@ -116,7 +116,7 @@ const calculateStatsFromPlays = (plays) => {
           // TODO deprecate - temp fix for missing trg
           // receiver
           addStat(play.target_pid, 'receptions', 1)
-          addStat(play.target_pid, 'receiving_yards', play.recv_yards)
+          addStat(play.target_pid, 'receiving_yards', play.receiving_yards)
           addStat(play.target_pid, 'ryac', play.yards_after_catch)
           addStat(play.target_pid, 'rcay', play.depth_of_target)
           if (play.missed_or_broken_tackle)

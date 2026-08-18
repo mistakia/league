@@ -846,32 +846,33 @@ export default {
     'Expected Catch Rate Generated/Allowed By Position',
   nfl_team_seasonlogs_catch_rate_over_expected:
     'Catch Rate Over Expected Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_yards_per_reception:
+  nfl_team_seasonlogs_receiving_yards_per_reception:
     'Receiving Yards per Reception Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_yards_per_route:
+  nfl_team_seasonlogs_receiving_yards_per_route:
     'Receiving Yards per Route Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_epa: 'Receiving EPA Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_epa_per_target:
+  nfl_team_seasonlogs_receiving_epa:
+    'Receiving EPA Generated/Allowed By Position',
+  nfl_team_seasonlogs_receiving_epa_per_target:
     'Receiving EPA per Target Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_epa_per_route:
+  nfl_team_seasonlogs_receiving_epa_per_route:
     'Receiving EPA per Route Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_drops:
+  nfl_team_seasonlogs_receiving_drops:
     'Receiving Drops Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_drop_rate:
+  nfl_team_seasonlogs_receiving_drop_rate:
     'Receiving Drop Rate Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_yards_after_catch:
+  nfl_team_seasonlogs_receiving_yards_after_catch:
     'Receiving Yards After Catch Generated/Allowed By Position',
-  nfl_team_seasonlogs_expected_recv_yards_after_catch:
+  nfl_team_seasonlogs_expected_receiving_yards_after_catch:
     'Expected Receiving YAC Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_yards_after_catch_over_expected:
+  nfl_team_seasonlogs_receiving_yards_after_catch_over_expected:
     'Receiving YAC Over Expected Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_yards_after_catch_per_reception:
+  nfl_team_seasonlogs_receiving_yards_after_catch_per_reception:
     'Receiving YAC per Reception Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_avg_target_separation:
+  nfl_team_seasonlogs_receiving_average_target_separation:
     'Average Target Separation Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_air_yards:
+  nfl_team_seasonlogs_receiving_air_yards:
     'Receiving Air Yards Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_air_yards_per_target:
+  nfl_team_seasonlogs_receiving_air_yards_per_target:
     'Receiving Air Yards per Target Generated/Allowed By Position',
   nfl_team_seasonlogs_target_rate: 'Target Rate Generated/Allowed By Position',
   nfl_team_seasonlogs_avg_route_depth:
@@ -884,13 +885,13 @@ export default {
     'Team Target Share Generated/Allowed By Position',
   nfl_team_seasonlogs_team_air_yard_share:
     'Team Air Yard Share Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_deep_target_percentage:
+  nfl_team_seasonlogs_receiving_deep_target_percentage:
     'Deep Target Percentage Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_tight_window_percentage:
+  nfl_team_seasonlogs_receiving_tight_window_percentage:
     'Tight Window Percentage Generated/Allowed By Position',
   nfl_team_seasonlogs_longest_reception:
     'Longest Reception Generated/Allowed By Position',
-  nfl_team_seasonlogs_recv_yards_15_plus_rate:
+  nfl_team_seasonlogs_receiving_yards_15_plus_rate:
     'Reception Rate 15+ Yards Generated/Allowed By Position',
 
   // Player Basic Info

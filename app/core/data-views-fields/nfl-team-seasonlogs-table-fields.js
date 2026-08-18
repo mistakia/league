@@ -622,80 +622,84 @@ export default {
     header_label: 'CROE',
     player_value_path: 'nfl_team_seasonlogs_catch_rate_over_expected'
   }),
-  nfl_team_seasonlogs_recv_yards_per_reception: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_yards_per_reception: create_seasonlog_field({
     column_title: 'Receiving Yards per Reception Generated/Allowed By Position',
     header_label: 'Y/R',
-    player_value_path: 'nfl_team_seasonlogs_recv_yards_per_reception'
+    player_value_path: 'nfl_team_seasonlogs_receiving_yards_per_reception'
   }),
-  nfl_team_seasonlogs_recv_yards_per_route: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_yards_per_route: create_seasonlog_field({
     column_title: 'Receiving Yards per Route Generated/Allowed By Position',
     header_label: 'Y/Rt',
-    player_value_path: 'nfl_team_seasonlogs_recv_yards_per_route'
+    player_value_path: 'nfl_team_seasonlogs_receiving_yards_per_route'
   }),
-  nfl_team_seasonlogs_recv_epa: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_epa: create_seasonlog_field({
     column_title: 'Receiving EPA Generated/Allowed By Position',
     header_label: 'RecEPA',
-    player_value_path: 'nfl_team_seasonlogs_recv_epa'
+    player_value_path: 'nfl_team_seasonlogs_receiving_epa'
   }),
-  nfl_team_seasonlogs_recv_epa_per_target: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_epa_per_target: create_seasonlog_field({
     column_title: 'Receiving EPA per Target Generated/Allowed By Position',
     header_label: 'EPA/Tgt',
-    player_value_path: 'nfl_team_seasonlogs_recv_epa_per_target'
+    player_value_path: 'nfl_team_seasonlogs_receiving_epa_per_target'
   }),
-  nfl_team_seasonlogs_recv_epa_per_route: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_epa_per_route: create_seasonlog_field({
     column_title: 'Receiving EPA per Route Generated/Allowed By Position',
     header_label: 'EPA/Rt',
-    player_value_path: 'nfl_team_seasonlogs_recv_epa_per_route'
+    player_value_path: 'nfl_team_seasonlogs_receiving_epa_per_route'
   }),
-  nfl_team_seasonlogs_recv_drops: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_drops: create_seasonlog_field({
     column_title: 'Receiving Drops Generated/Allowed By Position',
     header_label: 'Drops',
-    player_value_path: 'nfl_team_seasonlogs_recv_drops'
+    player_value_path: 'nfl_team_seasonlogs_receiving_drops'
   }),
-  nfl_team_seasonlogs_recv_drop_rate: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_drop_rate: create_seasonlog_field({
     column_title: 'Receiving Drop Rate Generated/Allowed By Position',
     header_label: 'Drop%',
-    player_value_path: 'nfl_team_seasonlogs_recv_drop_rate'
+    player_value_path: 'nfl_team_seasonlogs_receiving_drop_rate'
   }),
-  nfl_team_seasonlogs_recv_yards_after_catch: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_yards_after_catch: create_seasonlog_field({
     column_title: 'Receiving Yards After Catch Generated/Allowed By Position',
     header_label: 'YAC',
-    player_value_path: 'nfl_team_seasonlogs_recv_yards_after_catch'
+    player_value_path: 'nfl_team_seasonlogs_receiving_yards_after_catch'
   }),
-  nfl_team_seasonlogs_expected_recv_yards_after_catch: create_seasonlog_field({
-    column_title: 'Expected Receiving YAC Generated/Allowed By Position',
-    header_label: 'xYAC',
-    player_value_path: 'nfl_team_seasonlogs_expected_recv_yards_after_catch'
-  }),
-  nfl_team_seasonlogs_recv_yards_after_catch_over_expected:
+  nfl_team_seasonlogs_expected_receiving_yards_after_catch:
+    create_seasonlog_field({
+      column_title: 'Expected Receiving YAC Generated/Allowed By Position',
+      header_label: 'xYAC',
+      player_value_path:
+        'nfl_team_seasonlogs_expected_receiving_yards_after_catch'
+    }),
+  nfl_team_seasonlogs_receiving_yards_after_catch_over_expected:
     create_seasonlog_field({
       column_title: 'Receiving YAC Over Expected Generated/Allowed By Position',
       header_label: 'YACOE',
       player_value_path:
-        'nfl_team_seasonlogs_recv_yards_after_catch_over_expected'
+        'nfl_team_seasonlogs_receiving_yards_after_catch_over_expected'
     }),
-  nfl_team_seasonlogs_recv_yards_after_catch_per_reception:
+  nfl_team_seasonlogs_receiving_yards_after_catch_per_reception:
     create_seasonlog_field({
       column_title: 'Receiving YAC per Reception Generated/Allowed By Position',
       header_label: 'YAC/Rec',
       player_value_path:
-        'nfl_team_seasonlogs_recv_yards_after_catch_per_reception'
+        'nfl_team_seasonlogs_receiving_yards_after_catch_per_reception'
     }),
-  nfl_team_seasonlogs_recv_avg_target_separation: create_seasonlog_field({
-    column_title: 'Average Target Separation Generated/Allowed By Position',
-    header_label: 'Sep',
-    player_value_path: 'nfl_team_seasonlogs_recv_average_target_separation'
-  }),
-  nfl_team_seasonlogs_recv_air_yards: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_average_target_separation:
+    create_seasonlog_field({
+      column_title: 'Average Target Separation Generated/Allowed By Position',
+      header_label: 'Sep',
+      player_value_path:
+        'nfl_team_seasonlogs_receiving_average_target_separation'
+    }),
+  nfl_team_seasonlogs_receiving_air_yards: create_seasonlog_field({
     column_title: 'Receiving Air Yards Generated/Allowed By Position',
     header_label: 'AirYds',
-    player_value_path: 'nfl_team_seasonlogs_recv_air_yards'
+    player_value_path: 'nfl_team_seasonlogs_receiving_air_yards'
   }),
-  nfl_team_seasonlogs_recv_air_yards_per_target: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_air_yards_per_target: create_seasonlog_field({
     column_title:
       'Receiving Air Yards per Target Generated/Allowed By Position',
     header_label: 'AirYds/Tgt',
-    player_value_path: 'nfl_team_seasonlogs_recv_air_yards_per_target'
+    player_value_path: 'nfl_team_seasonlogs_receiving_air_yards_per_target'
   }),
   nfl_team_seasonlogs_target_rate: create_seasonlog_field({
     column_title: 'Target Rate Generated/Allowed By Position',
@@ -727,24 +731,26 @@ export default {
     header_label: 'AirShare',
     player_value_path: 'nfl_team_seasonlogs_team_air_yard_share'
   }),
-  nfl_team_seasonlogs_recv_deep_target_percentage: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_deep_target_percentage: create_seasonlog_field({
     column_title: 'Deep Target Percentage Generated/Allowed By Position',
     header_label: 'Deep%',
-    player_value_path: 'nfl_team_seasonlogs_recv_deep_target_percentage'
+    player_value_path: 'nfl_team_seasonlogs_receiving_deep_target_percentage'
   }),
-  nfl_team_seasonlogs_recv_tight_window_percentage: create_seasonlog_field({
-    column_title: 'Tight Window Percentage Generated/Allowed By Position',
-    header_label: 'Tight%',
-    player_value_path: 'nfl_team_seasonlogs_recv_tight_window_percentage'
-  }),
+  nfl_team_seasonlogs_receiving_tight_window_percentage: create_seasonlog_field(
+    {
+      column_title: 'Tight Window Percentage Generated/Allowed By Position',
+      header_label: 'Tight%',
+      player_value_path: 'nfl_team_seasonlogs_receiving_tight_window_percentage'
+    }
+  ),
   nfl_team_seasonlogs_longest_reception: create_seasonlog_field({
     column_title: 'Longest Reception Generated/Allowed By Position',
     header_label: 'Long',
     player_value_path: 'nfl_team_seasonlogs_longest_reception'
   }),
-  nfl_team_seasonlogs_recv_yards_15_plus_rate: create_seasonlog_field({
+  nfl_team_seasonlogs_receiving_yards_15_plus_rate: create_seasonlog_field({
     column_title: 'Reception Rate 15+ Yards Generated/Allowed By Position',
     header_label: '15+%',
-    player_value_path: 'nfl_team_seasonlogs_recv_yards_15_plus_rate'
+    player_value_path: 'nfl_team_seasonlogs_receiving_yards_15_plus_rate'
   })
 }

@@ -194,7 +194,7 @@ export const market_type_mappings = {
   [player_first_quarter_prop_types.GAME_FIRST_QUARTER_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     player_column: 'target_pid', // target
-    metric_columns: ['recv_yards'],
+    metric_columns: ['receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 1
@@ -256,7 +256,7 @@ export const market_type_mappings = {
   [player_second_quarter_prop_types.GAME_SECOND_QUARTER_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     player_column: 'target_pid',
-    metric_columns: ['recv_yards'],
+    metric_columns: ['receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 2
@@ -275,7 +275,7 @@ export const market_type_mappings = {
     {
       handler: HANDLER_TYPES.NFL_PLAYS,
       player_column: 'ball_carrier_pid',
-      metric_columns: ['rush_yards', 'recv_yards'],
+      metric_columns: ['rush_yards', 'receiving_yards'],
       has_metric_value: true,
       selection_types: ['OVER', 'UNDER'],
       quarter_filter: 2,
@@ -302,7 +302,7 @@ export const market_type_mappings = {
   [player_third_quarter_prop_types.GAME_THIRD_QUARTER_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     player_column: 'target_pid',
-    metric_columns: ['recv_yards'],
+    metric_columns: ['receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 3
@@ -320,7 +320,7 @@ export const market_type_mappings = {
     {
       handler: HANDLER_TYPES.NFL_PLAYS,
       player_column: 'ball_carrier_pid',
-      metric_columns: ['rush_yards', 'recv_yards'],
+      metric_columns: ['rush_yards', 'receiving_yards'],
       has_metric_value: true,
       selection_types: ['OVER', 'UNDER'],
       quarter_filter: 3,
@@ -347,7 +347,7 @@ export const market_type_mappings = {
   [player_fourth_quarter_prop_types.GAME_FOURTH_QUARTER_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     player_column: 'target_pid',
-    metric_columns: ['recv_yards'],
+    metric_columns: ['receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 4
@@ -366,7 +366,7 @@ export const market_type_mappings = {
     {
       handler: HANDLER_TYPES.NFL_PLAYS,
       player_column: 'ball_carrier_pid',
-      metric_columns: ['rush_yards', 'recv_yards'],
+      metric_columns: ['rush_yards', 'receiving_yards'],
       has_metric_value: true,
       selection_types: ['OVER', 'UNDER'],
       quarter_filter: 4,
@@ -393,7 +393,7 @@ export const market_type_mappings = {
   [player_first_half_alt_prop_types.GAME_FIRST_HALF_ALT_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     player_column: 'target_pid', // target
-    metric_columns: ['recv_yards'],
+    metric_columns: ['receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     half_filter: 1 // First half (quarters 1 and 2)
@@ -403,7 +403,7 @@ export const market_type_mappings = {
   [player_game_prop_types.GAME_LONGEST_RECEPTION]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
     player_column: 'target_pid',
-    metric_columns: ['recv_yards'],
+    metric_columns: ['receiving_yards'],
     aggregation_type: 'MAX',
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER']
@@ -428,14 +428,14 @@ export const market_type_mappings = {
   // Team yardage markets - full game (use NFL plays data)
   [team_game_market_types.GAME_TEAM_TOTAL_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
-    metric_columns: ['rush_yards', 'recv_yards'],
+    metric_columns: ['rush_yards', 'receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     team_aggregate: true
   },
   [team_game_market_types.GAME_TEAM_ALT_TOTAL_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
-    metric_columns: ['rush_yards', 'recv_yards'],
+    metric_columns: ['rush_yards', 'receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     team_aggregate: true,
@@ -451,7 +451,7 @@ export const market_type_mappings = {
   },
   [team_game_market_types.GAME_TEAM_ALT_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
-    metric_columns: ['recv_yards'],
+    metric_columns: ['receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     team_aggregate: true,
@@ -461,7 +461,7 @@ export const market_type_mappings = {
   // Team yardage markets - first half (use NFL plays data)
   [team_game_market_types.GAME_TEAM_FIRST_HALF_TOTAL_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
-    metric_columns: ['rush_yards', 'recv_yards'],
+    metric_columns: ['rush_yards', 'receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     team_aggregate: true,
@@ -469,7 +469,7 @@ export const market_type_mappings = {
   },
   [team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_TOTAL_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
-    metric_columns: ['rush_yards', 'recv_yards'],
+    metric_columns: ['rush_yards', 'receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     team_aggregate: true,
@@ -495,7 +495,7 @@ export const market_type_mappings = {
   },
   [team_game_market_types.GAME_TEAM_FIRST_HALF_ALT_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
-    metric_columns: ['recv_yards'],
+    metric_columns: ['receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     team_aggregate: true,
@@ -506,7 +506,7 @@ export const market_type_mappings = {
   // Team yardage markets - first quarter (use NFL plays data)
   [team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_TOTAL_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
-    metric_columns: ['rush_yards', 'recv_yards'],
+    metric_columns: ['rush_yards', 'receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     team_aggregate: true,
@@ -532,7 +532,7 @@ export const market_type_mappings = {
   },
   [team_game_market_types.GAME_TEAM_FIRST_QUARTER_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
-    metric_columns: ['recv_yards'],
+    metric_columns: ['receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     team_aggregate: true,
@@ -540,7 +540,7 @@ export const market_type_mappings = {
   },
   [team_game_market_types.GAME_TEAM_FIRST_QUARTER_ALT_RECEIVING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
-    metric_columns: ['recv_yards'],
+    metric_columns: ['receiving_yards'],
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     team_aggregate: true,

@@ -145,21 +145,21 @@ const NFL_TEAM_SEASONLOGS_AVG_COLUMNS = [
   'catch_rate',
   'expected_catch_rate',
   'catch_rate_over_expected',
-  'recv_yards_per_reception',
-  'recv_yards_per_route',
-  'recv_epa_per_target',
-  'recv_epa_per_route',
-  'recv_drop_rate',
-  'recv_yards_after_catch_per_reception',
-  'recv_average_target_separation',
-  'recv_air_yards_per_target',
+  'receiving_yards_per_reception',
+  'receiving_yards_per_route',
+  'receiving_epa_per_target',
+  'receiving_epa_per_route',
+  'receiving_drop_rate',
+  'receiving_yards_after_catch_per_reception',
+  'receiving_average_target_separation',
+  'receiving_air_yards_per_target',
   'target_rate',
   'average_route_depth',
   'team_target_share',
   'team_air_yard_share',
-  'recv_deep_target_percentage',
-  'recv_tight_window_percentage',
-  'recv_yards_15_plus_rate'
+  'receiving_deep_target_percentage',
+  'receiving_tight_window_percentage',
+  'receiving_yards_15_plus_rate'
 ]
 
 const NFL_TEAM_SEASONLOGS_RANGE_OFFSET_AGGREGATE = {
@@ -392,38 +392,42 @@ export default {
     create_field_from_nfl_team_seasonlogs('expected_catch_rate'),
   nfl_team_seasonlogs_catch_rate_over_expected:
     create_field_from_nfl_team_seasonlogs('catch_rate_over_expected'),
-  nfl_team_seasonlogs_recv_yards_per_reception:
-    create_field_from_nfl_team_seasonlogs('recv_yards_per_reception'),
-  nfl_team_seasonlogs_recv_yards_per_route:
-    create_field_from_nfl_team_seasonlogs('recv_yards_per_route'),
-  nfl_team_seasonlogs_recv_epa:
-    create_field_from_nfl_team_seasonlogs('recv_epa'),
-  nfl_team_seasonlogs_recv_epa_per_target:
-    create_field_from_nfl_team_seasonlogs('recv_epa_per_target'),
-  nfl_team_seasonlogs_recv_epa_per_route:
-    create_field_from_nfl_team_seasonlogs('recv_epa_per_route'),
-  nfl_team_seasonlogs_recv_drops:
-    create_field_from_nfl_team_seasonlogs('recv_drops'),
-  nfl_team_seasonlogs_recv_drop_rate:
-    create_field_from_nfl_team_seasonlogs('recv_drop_rate'),
-  nfl_team_seasonlogs_recv_yards_after_catch:
-    create_field_from_nfl_team_seasonlogs('recv_yards_after_catch'),
-  nfl_team_seasonlogs_expected_recv_yards_after_catch:
-    create_field_from_nfl_team_seasonlogs('expected_recv_yards_after_catch'),
-  nfl_team_seasonlogs_recv_yards_after_catch_over_expected:
+  nfl_team_seasonlogs_receiving_yards_per_reception:
+    create_field_from_nfl_team_seasonlogs('receiving_yards_per_reception'),
+  nfl_team_seasonlogs_receiving_yards_per_route:
+    create_field_from_nfl_team_seasonlogs('receiving_yards_per_route'),
+  nfl_team_seasonlogs_receiving_epa:
+    create_field_from_nfl_team_seasonlogs('receiving_epa'),
+  nfl_team_seasonlogs_receiving_epa_per_target:
+    create_field_from_nfl_team_seasonlogs('receiving_epa_per_target'),
+  nfl_team_seasonlogs_receiving_epa_per_route:
+    create_field_from_nfl_team_seasonlogs('receiving_epa_per_route'),
+  nfl_team_seasonlogs_receiving_drops:
+    create_field_from_nfl_team_seasonlogs('receiving_drops'),
+  nfl_team_seasonlogs_receiving_drop_rate:
+    create_field_from_nfl_team_seasonlogs('receiving_drop_rate'),
+  nfl_team_seasonlogs_receiving_yards_after_catch:
+    create_field_from_nfl_team_seasonlogs('receiving_yards_after_catch'),
+  nfl_team_seasonlogs_expected_receiving_yards_after_catch:
     create_field_from_nfl_team_seasonlogs(
-      'recv_yards_after_catch_over_expected'
+      'expected_receiving_yards_after_catch'
     ),
-  nfl_team_seasonlogs_recv_yards_after_catch_per_reception:
+  nfl_team_seasonlogs_receiving_yards_after_catch_over_expected:
     create_field_from_nfl_team_seasonlogs(
-      'recv_yards_after_catch_per_reception'
+      'receiving_yards_after_catch_over_expected'
     ),
-  nfl_team_seasonlogs_recv_avg_target_separation:
-    create_field_from_nfl_team_seasonlogs('recv_average_target_separation'),
-  nfl_team_seasonlogs_recv_air_yards:
-    create_field_from_nfl_team_seasonlogs('recv_air_yards'),
-  nfl_team_seasonlogs_recv_air_yards_per_target:
-    create_field_from_nfl_team_seasonlogs('recv_air_yards_per_target'),
+  nfl_team_seasonlogs_receiving_yards_after_catch_per_reception:
+    create_field_from_nfl_team_seasonlogs(
+      'receiving_yards_after_catch_per_reception'
+    ),
+  nfl_team_seasonlogs_receiving_average_target_separation:
+    create_field_from_nfl_team_seasonlogs(
+      'receiving_average_target_separation'
+    ),
+  nfl_team_seasonlogs_receiving_air_yards:
+    create_field_from_nfl_team_seasonlogs('receiving_air_yards'),
+  nfl_team_seasonlogs_receiving_air_yards_per_target:
+    create_field_from_nfl_team_seasonlogs('receiving_air_yards_per_target'),
   nfl_team_seasonlogs_target_rate:
     create_field_from_nfl_team_seasonlogs('target_rate'),
   nfl_team_seasonlogs_avg_route_depth: create_field_from_nfl_team_seasonlogs(
@@ -437,12 +441,12 @@ export default {
     create_field_from_nfl_team_seasonlogs('team_target_share'),
   nfl_team_seasonlogs_team_air_yard_share:
     create_field_from_nfl_team_seasonlogs('team_air_yard_share'),
-  nfl_team_seasonlogs_recv_deep_target_percentage:
-    create_field_from_nfl_team_seasonlogs('recv_deep_target_percentage'),
-  nfl_team_seasonlogs_recv_tight_window_percentage:
-    create_field_from_nfl_team_seasonlogs('recv_tight_window_percentage'),
+  nfl_team_seasonlogs_receiving_deep_target_percentage:
+    create_field_from_nfl_team_seasonlogs('receiving_deep_target_percentage'),
+  nfl_team_seasonlogs_receiving_tight_window_percentage:
+    create_field_from_nfl_team_seasonlogs('receiving_tight_window_percentage'),
   nfl_team_seasonlogs_longest_reception:
     create_field_from_nfl_team_seasonlogs('longest_reception'),
-  nfl_team_seasonlogs_recv_yards_15_plus_rate:
-    create_field_from_nfl_team_seasonlogs('recv_yards_15_plus_rate')
+  nfl_team_seasonlogs_receiving_yards_15_plus_rate:
+    create_field_from_nfl_team_seasonlogs('receiving_yards_15_plus_rate')
 }

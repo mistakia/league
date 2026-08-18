@@ -105,10 +105,10 @@ export const get_data_views_fields = createSelector(
 // - opponent_rush_ra
 // - opponent_rush_ry
 // - opponent_rush_tdr
-// - opponent_recv_trg
-// - opponent_recv_rec
-// - opponent_recv_recy
-// - opponent_recv_tdrec
+// - opponent_receiving_trg
+// - opponent_receiving_rec
+// - opponent_receiving_recy
+// - opponent_receiving_tdrec
 
 export function PlayerTableFields({
   week,

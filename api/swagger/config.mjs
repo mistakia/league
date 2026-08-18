@@ -1591,7 +1591,7 @@ const options = {
                   description: 'Rushing yards on the play',
                   example: 7
                 },
-                recv_yards: {
+                receiving_yards: {
                   type: 'integer',
                   nullable: true,
                   description: 'Receiving yards on the play',

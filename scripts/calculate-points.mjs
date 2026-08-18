@@ -46,7 +46,7 @@ const BIG_PLAY_ROLES = {
   },
   receiving_yards: {
     pid_column: 'target_pid',
-    yards_column: 'recv_yards',
+    yards_column: 'receiving_yards',
     stats_key: 'recv_play_yards'
   }
 }

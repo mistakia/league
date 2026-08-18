@@ -197,7 +197,7 @@ const fantasy_points_from_plays_with = async ({
     'nfl_plays.is_rushing_touchdown',
     'nfl_plays.pass_yards',
     'nfl_plays.is_passing_touchdown',
-    'nfl_plays.recv_yards',
+    'nfl_plays.receiving_yards',
     'nfl_plays.is_completion',
     'nfl_plays.is_interception',
     'nfl_plays.is_first_down',

@@ -148,7 +148,7 @@ const nfl_play_fields = [
   'touchdown_nfl_team',
 
   'pass_yards',
-  'recv_yards',
+  'receiving_yards',
   'rush_yards',
 
   'depth_of_target',

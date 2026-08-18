@@ -117,7 +117,7 @@ const format_prop_row = ({
             play.ball_carrier_pid === prop_row.selection_pid
           ) {
             acc[play.esbid].first_quarter_stats.receiving_yards +=
-              play.recv_yards || 0
+              play.receiving_yards || 0
           }
         }
 
@@ -370,7 +370,7 @@ const calculate_weekly_market_selections_analysis = async ({
       'season_type',
       'quarter',
       'pass_yards',
-      'recv_yards',
+      'receiving_yards',
       'rush_yards',
       'passer_pid',
       'target_pid',
