@@ -1,0 +1,343 @@
+[
+  {
+    "operation": "DELETE /api/leagues/{leagueId}/rosters",
+    "status": 403,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/*/rosters no schema defined for status code '403' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "DELETE /api/leagues/{leagueId}/teams",
+    "status": 403,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/*/teams no schema defined for status code '403' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "DELETE /api/teams/{teamId}/tag/restricted-free-agency",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-18",
+    "messages": ["/response/cancelled must be integer"]
+  },
+  {
+    "operation": "GET /api/data-views",
+    "status": 401,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/data-views no schema defined for status code '401' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "GET /api/data-views/{data_view_id}",
+    "status": 200,
+    "class": "missing_required",
+    "added": "2026-08-18",
+    "messages": ["/response/view_id must have required property 'view_id'"]
+  },
+  {
+    "operation": "GET /api/data-views/{data_view_id}",
+    "status": 401,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/data-views/organization no schema defined for status code '401' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "GET /api/leagues/{leagueId}/draft",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-18",
+    "messages": ["/response/picks/*/pick_string must be string"]
+  },
+  {
+    "operation": "GET /api/leagues/{leagueId}/players",
+    "status": 200,
+    "class": "pattern_drift",
+    "added": "2026-08-18",
+    "messages": [
+      "/response/*/pid must match pattern \"^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$\"",
+      "/response/*/roster_status must be equal to one of the allowed values: ACTIVE, INACTIVE, INJURED_RESERVE, PRACTICE_SQUAD, SUSPENDED",
+      "/response/*/roster_status must be string"
+    ]
+  },
+  {
+    "operation": "GET /api/leagues/{leagueId}/restricted-free-agency",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-18",
+    "messages": ["/response/*/bids/*/is_successful must be boolean"]
+  },
+  {
+    "operation": "GET /api/leagues/{leagueId}/teams",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-18",
+    "messages": ["/response/teams/*/picks/*/pick must be integer"]
+  },
+  {
+    "operation": "GET /api/leagues/{leagueId}/trade-review",
+    "status": 403,
+    "class": "undeclared_body",
+    "added": "2026-08-18",
+    "messages": ["/response response should NOT have a body"]
+  },
+  {
+    "operation": "GET /api/leagues/{leagueId}/trade-review/{tradeId}",
+    "status": 200,
+    "class": "undeclared_body",
+    "added": "2026-08-18",
+    "messages": ["/response response should NOT have a body"]
+  },
+  {
+    "operation": "GET /api/leagues/{leagueId}/trade-review/{tradeId}",
+    "status": 404,
+    "class": "undeclared_body",
+    "added": "2026-08-18",
+    "messages": ["/response response should NOT have a body"]
+  },
+  {
+    "operation": "GET /api/leagues/{leagueId}/trades",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-18",
+    "messages": ["/response must be object"]
+  },
+  {
+    "operation": "GET /api/leagues/{leagueId}/trades",
+    "status": 401,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/*/trades no schema defined for status code '401' in the openapi spec",
+      "/api/leagues/*/trades?vetoable=true no schema defined for status code '401' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "GET /api/leagues/{leagueId}/waivers/super-priority/{pid}",
+    "status": 200,
+    "class": "missing_required",
+    "added": "2026-08-18",
+    "messages": ["/response/player_id must have required property 'player_id'"]
+  },
+  {
+    "operation": "GET /api/plays",
+    "status": 200,
+    "class": "missing_required",
+    "added": "2026-08-18",
+    "messages": [
+      "/response/*/season_type must have required property 'season_type'"
+    ]
+  },
+  {
+    "operation": "GET /api/plays/charted",
+    "status": 200,
+    "class": "missing_required",
+    "added": "2026-08-18",
+    "messages": ["/response/*/esbid must have required property 'esbid'"]
+  },
+  {
+    "operation": "GET /api/plays/stats",
+    "status": 200,
+    "class": "missing_required",
+    "added": "2026-08-18",
+    "messages": ["/response/*/pid must have required property 'pid'"]
+  },
+  {
+    "operation": "GET /api/scoreboard",
+    "status": 200,
+    "class": "missing_required",
+    "added": "2026-08-18",
+    "messages": [
+      "/response/*/season_type must have required property 'season_type'"
+    ]
+  },
+  {
+    "operation": "GET /api/selection-combinations",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-18",
+    "messages": ["/response/*/esbid must be string"]
+  },
+  {
+    "operation": "GET /api/teams/{teamId}/players",
+    "status": 200,
+    "class": "pattern_drift",
+    "added": "2026-08-18",
+    "messages": [
+      "/response/*/pid must match pattern \"^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$\"",
+      "/response/*/roster_status must be string"
+    ]
+  },
+  {
+    "operation": "GET /api/wagers/{user_id}",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-18",
+    "messages": ["/response/*/selections must be array"]
+  },
+  {
+    "operation": "POST /api/data-views/search",
+    "status": 400,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/data-views/search no schema defined for status code '400' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "POST /api/leagues/{leagueId}/draft",
+    "status": 423,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/*/draft no schema defined for status code '423' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "POST /api/leagues/{leagueId}/rosters",
+    "status": 200,
+    "class": "missing_required",
+    "added": "2026-08-18",
+    "messages": [
+      "/response/transaction/transaction_id must have required property 'transaction_id'"
+    ]
+  },
+  {
+    "operation": "POST /api/leagues/{leagueId}/rosters",
+    "status": 403,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/*/rosters no schema defined for status code '403' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "POST /api/leagues/{leagueId}/teams",
+    "status": 403,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/*/teams no schema defined for status code '403' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "POST /api/leagues/{leagueId}/trades",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-18",
+    "messages": ["/response/proposingTeamPicks/*/pick must be integer"]
+  },
+  {
+    "operation": "POST /api/leagues/{leagueId}/trades",
+    "status": 423,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/*/trades no schema defined for status code '423' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "POST /api/leagues/{leagueId}/waivers",
+    "status": 200,
+    "class": "missing_required",
+    "added": "2026-08-18",
+    "messages": [
+      "/response/is_successful must have required property 'is_successful'"
+    ]
+  },
+  {
+    "operation": "POST /api/leagues/{leagueId}/waivers",
+    "status": 423,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/*/waivers no schema defined for status code '423' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "POST /api/players",
+    "status": 200,
+    "class": "pattern_drift",
+    "added": "2026-08-18",
+    "messages": [
+      "/response/*/pid must match pattern \"^([A-Z]{4}-[A-Z]{4}-[0-9]{6}|[A-Z]{2,3})$\"",
+      "/response/*/roster_status must be string"
+    ]
+  },
+  {
+    "operation": "POST /api/teams/{teamId}/activate",
+    "status": 200,
+    "class": "missing_required",
+    "added": "2026-08-18",
+    "messages": [
+      "/response/transaction/transaction_id must have required property 'transaction_id'",
+      "/response/transaction/waiver_id must have required property 'waiver_id'"
+    ]
+  },
+  {
+    "operation": "POST /api/teams/{teamId}/add",
+    "status": 423,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/teams/*/add no schema defined for status code '423' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "POST /api/teams/{teamId}/release",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-18",
+    "messages": ["/response/slot must be integer"]
+  },
+  {
+    "operation": "PUT /api/leagues/{leagueId}",
+    "status": 403,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/* no schema defined for status code '403' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "PUT /api/leagues/{leagueId}",
+    "status": 423,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/* no schema defined for status code '423' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "PUT /api/leagues/{leagueId}/rosters",
+    "status": 403,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/leagues/*/rosters no schema defined for status code '403' in the openapi spec"
+    ]
+  },
+  {
+    "operation": "PUT /api/leagues/{leagueId}/waivers/{waiverId}",
+    "status": 200,
+    "class": "type_drift",
+    "added": "2026-08-18",
+    "messages": ["/response/waiver_id must be integer"]
+  },
+  {
+    "operation": "PUT /api/teams/{teamId}",
+    "status": 423,
+    "class": "undeclared_status",
+    "added": "2026-08-18",
+    "messages": [
+      "/api/teams/* no schema defined for status code '423' in the openapi spec"
+    ]
+  }
+]

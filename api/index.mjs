@@ -22,6 +22,10 @@ import sockets from './sockets/index.mjs'
 import { create_logger } from '#libs-shared/log.mjs'
 import { create_error_handler } from '#libs-server/middleware/error-handler.mjs'
 import { create_render_html_middleware } from '#libs-server/middleware/render-html.mjs'
+import {
+  create_response_validation_middleware,
+  is_response_validation_enabled
+} from '#api/swagger/response-validation.mjs'
 
 const logger = debug('api')
 const morgan_logger = debug('api')
@@ -128,6 +132,15 @@ api.use('/api/*', expressjwt(config.jwt), (err, req, res, next) => {
   }
   return next(err)
 })
+// Response validation, test environment only. Mounted HERE -- after the JWT
+// middleware so an authenticated response is what gets validated, and before
+// the first route mount so it wraps `res.json` on every handler below. Moving
+// it below the mounts silently disables it; `assert_holdout_is_current()` fails
+// the run on zero observed pairs for that reason.
+if (is_response_validation_enabled()) {
+  api.use(create_response_validation_middleware())
+}
+
 api.use('/api/docs', routes.docs)
 api.use('/api/status', routes.status)
 api.use('/api/errors', routes.errors)
