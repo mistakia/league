@@ -161,7 +161,7 @@ const announce_restricted_free_agent = async ({
   let nominating_team
 
   if (tid) {
-    nominating_team = teams.find((team) => team.uid === tid)
+    nominating_team = teams.find((team) => team.team_id === tid)
 
     if (!nominating_team) {
       throw new Error(`Team with tid ${tid} not found in league ${lid}`)
@@ -196,7 +196,7 @@ const announce_restricted_free_agent = async ({
     .where({
       league_id: lid,
       season_year: current_season.year,
-      original_team_id: nominating_team.uid
+      original_team_id: nominating_team.team_id
     })
     .whereNotNull('nominated_at')
     .whereNull('announced_at')
@@ -213,13 +213,13 @@ const announce_restricted_free_agent = async ({
 
     if (!player_row) {
       throw new Error(
-        `Player with pid ${nomination.player_id} for team ${nominating_team.uid} not found`
+        `Player with pid ${nomination.player_id} for team ${nominating_team.team_id} not found`
       )
     }
 
     message = `${nominating_team.name} (${nominating_team.abbreviation}) has announced ${player_row.first_name} ${player_row.last_name} (${player_row.primary_position}) as a restricted free agent`
     metadata = {
-      tid: nominating_team.uid,
+      tid: nominating_team.team_id,
       pid: nomination.player_id,
       nomination_id: nomination.nomination_id,
       window_index: target_window_index
@@ -227,9 +227,9 @@ const announce_restricted_free_agent = async ({
   } else {
     // No nomination for this window: record a marker so the oracle can confirm
     // the window was visited rather than silently skipped.
-    message = `No RFA nomination pending for team ${nominating_team.uid} in window ${target_window_index}`
+    message = `No RFA nomination pending for team ${nominating_team.team_id} in window ${target_window_index}`
     metadata = {
-      tid: nominating_team.uid,
+      tid: nominating_team.team_id,
       no_nomination: true,
       window_index: target_window_index
     }
@@ -274,7 +274,7 @@ const announce_restricted_free_agent = async ({
     log(`Notification sent: ${message}`)
   } else {
     log(
-      `No unprocessed nominated player found for team ${nominating_team.uid} in window ${target_window_index}`
+      `No unprocessed nominated player found for team ${nominating_team.team_id} in window ${target_window_index}`
     )
   }
 }

@@ -24,7 +24,7 @@ export default class TeamName extends React.Component {
       />
     )
 
-    const imageEl = <TeamImage tid={team.uid} year={year} />
+    const imageEl = <TeamImage tid={team.team_id} year={year} />
 
     return (
       <>

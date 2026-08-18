@@ -464,7 +464,7 @@ router.post('/?', async (req, res) => {
 
     // add player to roster
     const rosterInsert = {
-      roster_id: roster.uid,
+      roster_id: roster.roster_id,
       pid,
       player_position: player_row.primary_position,
       slot: roster_slot_types.BENCH,
@@ -866,7 +866,7 @@ router.delete('/?', async (req, res) => {
 
     const rosterRes = await db('rosters_players')
       .where({
-        roster_id: roster.uid,
+        roster_id: roster.roster_id,
         pid
       })
       .del()

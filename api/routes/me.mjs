@@ -187,12 +187,12 @@ router.get('/?', async (req, res) => {
         'users_teams.season_year': current_season.year
       })
       .join('users_teams', function () {
-        this.on('users_teams.tid', '=', 'teams.uid')
+        this.on('users_teams.tid', '=', 'teams.team_id')
         this.andOn('users_teams.season_year', '=', 'teams.season_year')
       })
 
     const leagueIds = teams.map((t) => t.lid)
-    const teamIds = teams.map((t) => t.uid)
+    const teamIds = teams.map((t) => t.team_id)
     const leagues = await db('leagues')
       .leftJoin('seasons', function () {
         this.on('leagues.uid', '=', 'seasons.lid')

@@ -57,7 +57,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
 
   // Check if player was originally a PS (signed) player, not PSD (drafted)
   const original_roster = await db('rosters_players')
-    .join('rosters', 'rosters_players.roster_id', 'rosters.uid')
+    .join('rosters', 'rosters_players.roster_id', 'rosters.roster_id')
     .where({
       'rosters_players.pid': pid,
       'rosters_players.tid': super_priority_status.original_tid,
@@ -254,7 +254,7 @@ export default async function ({
     await db('rosters_players')
       .update({ slot: roster_slot_types.BENCH })
       .where({
-        roster_id: rosterRow.uid,
+        roster_id: rosterRow.roster_id,
         pid: activate_pid
       })
 
@@ -297,7 +297,7 @@ export default async function ({
       pid: activate_pid,
       tid,
       slot: roster_slot_types.BENCH,
-      roster_id: roster.uid,
+      roster_id: roster.roster_id,
       player_position: activate_player_row.primary_position,
       transaction
     })
@@ -325,7 +325,7 @@ export default async function ({
     .where('week', '>=', current_season.week)
     .where('season_year', current_season.year)
     .where('tid', tid)
-  const rosterIds = teamRosters.map((r) => r.uid)
+  const rosterIds = teamRosters.map((r) => r.roster_id)
   await db('rosters_players')
     .whereIn('roster_id', rosterIds)
     .where('pid', release_pid)
@@ -341,7 +341,7 @@ export default async function ({
     pid: release_pid,
     slot: null,
     tid,
-    roster_id: roster.uid,
+    roster_id: roster.roster_id,
     player_position: release_player_row.primary_position,
     transaction
   })
@@ -355,7 +355,7 @@ export default async function ({
 
   if (create_notification) {
     const teams = await db('teams').where({
-      uid: tid,
+      team_id: tid,
       lid,
       season_year: current_season.year
     })

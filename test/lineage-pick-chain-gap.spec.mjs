@@ -49,7 +49,7 @@ describe('LINEAGE - pick chain gap', function () {
     round
   }) => {
     await knex('draft').insert({
-      uid: draft_pick_id,
+      draft_pick_id,
       lid: LID,
       season_year: PICK_YEAR,
       round,

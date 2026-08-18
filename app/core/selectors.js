@@ -907,8 +907,9 @@ export function get_selected_matchup(state) {
   if (is_league_post_season_week({ year, week })) {
     const items = matchups.get('playoffs')
     return (
-      items.find((m) => m.uid === matchupId && m.season_year === year) ||
-      create_matchup()
+      items.find(
+        (m) => m.playoff_week_number === matchupId && m.season_year === year
+      ) || create_matchup()
     )
   } else {
     return matchups.getIn(['matchups_by_id', matchupId], create_matchup())
@@ -924,7 +925,7 @@ export function get_selected_matchup_teams(state) {
     const prevWeek = current_season.finalWeek - 1
     return teams.map((teamRecord) => {
       const previousWeekScore = getPointsByTeamId(state, {
-        tid: teamRecord.uid,
+        tid: teamRecord.team_id,
         week: prevWeek
       })
       return { previousWeekScore, ...teamRecord.toJS() }
@@ -1943,7 +1944,7 @@ export const getRosterPositionalValueByTeamId = createSelector(
   (rosterRecords, league, teams, team, player_maps, draft_pick_values) => {
     const divTeamIds = teams
       .filter((t) => t.division === team.division)
-      .map((t) => t.uid)
+      .map((t) => t.team_id)
 
     const values = {
       league_min: {},
@@ -1991,7 +1992,7 @@ export const getRosterPositionalValueByTeamId = createSelector(
         values.rosters[roster.tid][position] = pts_added_total
         if (divTeamIds.includes(roster.tid))
           div_position_values.push(pts_added_total)
-        if (roster.tid === team.uid) values.team[position] = pts_added_total
+        if (roster.tid === team.team_id) values.team[position] = pts_added_total
         values.total[roster.tid] =
           (values.total[roster.tid] ?? 0) + pts_added_total
       }
@@ -2034,7 +2035,7 @@ export const getRosterPositionalValueByTeamId = createSelector(
       )
       league_draft_value.push(draft_value)
       if (divTeamIds.includes(tid)) div_draft_value.push(draft_value)
-      if (tid === team.uid) {
+      if (tid === team.team_id) {
         values.team.DRAFT = draft_value
       }
       if (values.rosters[tid]) {
@@ -2081,7 +2082,7 @@ export const getRosterPositionalValueByTeamId = createSelector(
       value
     }))
     values.sorted_tids = team_values.sort((a, b) => b.value - a.value)
-    values.team_total = values.total[team.uid]
+    values.team_total = values.total[team.team_id]
 
     return values
   }
@@ -2901,9 +2902,9 @@ export function get_league_teams_value_deltas(state) {
 
   let result = new Map()
   for (const team of teams.values()) {
-    const uid = team.get('uid')
-    const deltas = get_team_value_deltas_by_team_id(state, { tid: uid })
-    result = result.set(uid, deltas)
+    const team_id = team.get('team_id')
+    const deltas = get_team_value_deltas_by_team_id(state, { tid: team_id })
+    result = result.set(team_id, deltas)
   }
 
   return result
@@ -2965,7 +2966,7 @@ export function get_draft_pick_by_id(state, { pickId }) {
   const teams = get_teams_for_current_league_and_year(state)
   for (const team of teams.valueSeq()) {
     const picks = team.get('picks')
-    const pick = picks.find((p) => p.uid === pickId)
+    const pick = picks.find((p) => p.draft_pick_id === pickId)
     if (pick) {
       return pick
     }
@@ -2982,7 +2983,7 @@ export const get_draft_pick_trade_counts = createSelector(
     // Get trade counts from draft picks data (now included in API response)
     draft.picks.forEach((pick) => {
       const count = pick.trade_count || 0
-      trade_counts.set(pick.uid, count)
+      trade_counts.set(pick.draft_pick_id, count)
     })
 
     return trade_counts
@@ -3002,7 +3003,7 @@ export function get_overall_standings(state) {
   const flat_teams = teams
     .toList()
     .toJS()
-    .map((team) => ({ tid: team.uid, div: team.division, ...team.stats }))
+    .map((team) => ({ tid: team.team_id, div: team.division, ...team.stats }))
 
   // get_playoff_seeding THROWS on a missing playoff format, which is right on
   // the server but wrong here: this runs inside mapStateToProps, so a throw
@@ -3514,9 +3515,9 @@ export const get_current_trade_players = createSelector(
 )
 
 function calculateTradedPicks({ picks, add, remove }) {
-  const pickids = remove.map((p) => p.uid)
+  const pickids = remove.map((p) => p.draft_pick_id)
 
-  let filtered = picks.filter((pick) => !pickids.includes(pick.uid))
+  let filtered = picks.filter((pick) => !pickids.includes(pick.draft_pick_id))
   for (const pick of add) {
     filtered = filtered.push(pick)
   }
@@ -3731,9 +3732,11 @@ export const get_current_trade_analysis = createSelector(
       const pickids = remove_array
         .filter((p) => p != null) // Filter out undefined/null values
         .map((p) =>
-          typeof p === 'string' || typeof p === 'number' ? p : p.uid
+          typeof p === 'string' || typeof p === 'number' ? p : p.draft_pick_id
         )
-      let filtered = teamPicks.filter((pick) => !pickids.includes(pick.uid))
+      let filtered = teamPicks.filter(
+        (pick) => !pickids.includes(pick.draft_pick_id)
+      )
       // Add new picks, filtering out undefined values
       for (const pick of add_array) {
         if (pick != null) {

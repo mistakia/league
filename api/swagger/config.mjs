@@ -513,7 +513,7 @@ const options = {
         Team: {
           type: 'object',
           properties: {
-            uid: {
+            team_id: {
               type: 'integer',
               description: 'Fantasy team ID',
               example: 13
@@ -2625,7 +2625,7 @@ const options = {
           type: 'object',
           description: 'Fantasy draft pick information',
           properties: {
-            uid: {
+            draft_pick_id: {
               type: 'integer',
               description: 'Draft pick ID',
               example: 1542
@@ -2708,7 +2708,7 @@ const options = {
               type: 'object',
               description: 'Initial roster created for the team',
               properties: {
-                uid: {
+                roster_id: {
                   type: 'integer',
                   description: 'Roster ID',
                   example: 1234

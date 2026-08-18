@@ -31,7 +31,7 @@ export default async function (leagueId) {
       'nfl_games.date',
       'nfl_games.time_eastern'
     )
-    .join('teams', 'waivers.tid', 'teams.uid')
+    .join('teams', 'waivers.tid', 'teams.team_id')
     .join('player', 'waivers.pid', 'player.pid')
     .where('teams.season_year', current_season.year)
     .where('waivers.lid', leagueId)

@@ -303,7 +303,7 @@ export default async function ({
     await db('rosters_players')
       .update({ slot: roster_slot_types.BENCH })
       .where({
-        roster_id: rosterRow.uid,
+        roster_id: rosterRow.roster_id,
         pid: activate_pid
       })
 
@@ -330,7 +330,7 @@ export default async function ({
       pid: activate_pid,
       tid,
       slot: roster_slot_types.BENCH,
-      rid: roster.uid,
+      rid: roster.roster_id,
       pos: activate_player_row.primary_position,
       transaction
     })
@@ -353,7 +353,7 @@ export default async function ({
         ? transaction_types.RESERVE_LONG_TERM
         : transaction_types.RESERVE_COV
   await db('rosters_players').update({ slot }).where({
-    roster_id: rosterRow.uid,
+    roster_id: rosterRow.roster_id,
     pid: reserve_pid
   })
 
@@ -425,7 +425,7 @@ export default async function ({
     .del()
 
   const teams = await db('teams').where({
-    uid: tid,
+    team_id: tid,
     season_year: current_season.year
   })
   const team = teams[0]
@@ -448,7 +448,7 @@ export default async function ({
     transaction,
     slot,
     pid: reserve_pid,
-    rid: roster.uid,
+    rid: roster.roster_id,
     tid,
     pos: player_row.primary_position
   })

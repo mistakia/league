@@ -548,7 +548,7 @@ export default class Auction {
     const { user_id, tid, pid, value } = message
 
     // Check team capacity
-    const team = this._teams.find((t) => t.uid === tid)
+    const team = this._teams.find((t) => t.team_id === tid)
     if (team.cap - value < 0) {
       this.reply(user_id, 'exceeds salary limit')
       this._start_bid_timer()
@@ -682,7 +682,7 @@ export default class Auction {
     }
 
     // Validate team exists
-    const team = this._teams.find((t) => t.uid === tid)
+    const team = this._teams.find((t) => t.team_id === tid)
     if (!team) {
       this.logger(`pass nomination rejected - team not found: ${tid}`)
       return false
@@ -807,7 +807,7 @@ export default class Auction {
   async _add_player_to_roster(roster_obj, player_info, tid, value) {
     try {
       await db('rosters_players').insert({
-        roster_id: roster_obj.uid,
+        roster_id: roster_obj.roster_id,
         slot: roster_slot_types.BENCH,
         player_position: player_info.primary_position,
         pid: player_info.pid,
@@ -828,13 +828,13 @@ export default class Auction {
   }
 
   async _update_team_capacity(tid, value) {
-    const team = this._teams.find((t) => t.uid === tid)
+    const team = this._teams.find((t) => t.team_id === tid)
     team.availableSpace = team.availableSpace - 1
     const new_cap = (team.cap = team.cap - value)
 
     try {
       await db('teams')
-        .where({ uid: tid, season_year: current_season.year })
+        .where({ team_id: tid, season_year: current_season.year })
         .update('salary_cap', new_cap)
     } catch (err) {
       this.logger(err)
@@ -886,11 +886,11 @@ export default class Auction {
 
     for (const team of this._teams) {
       // Skip the excluded team
-      if (exclude_team_id && team.uid === exclude_team_id) {
+      if (exclude_team_id && team.team_id === exclude_team_id) {
         continue
       }
 
-      const team_roster = await getRoster({ tid: team.uid })
+      const team_roster = await getRoster({ tid: team.team_id })
       const team_roster_obj = new Roster({
         roster: team_roster,
         league: this._league
@@ -900,7 +900,7 @@ export default class Auction {
         team_roster_obj.availableCap > bid_value &&
         team_roster_obj.has_bench_space_for_position(player_pos)
       ) {
-        eligible_team_ids.push(team.uid)
+        eligible_team_ids.push(team.team_id)
       }
     }
 
@@ -1112,7 +1112,7 @@ export default class Auction {
       season_year: current_season.year
     })
     this._teams = teams.sort((a, b) => a.draft_order - b.draft_order)
-    this._tids = this._teams.map((t) => t.uid)
+    this._tids = this._teams.map((t) => t.team_id)
   }
 
   async _load_transactions() {
@@ -1169,7 +1169,7 @@ export default class Auction {
 
   async _calculate_team_capacities() {
     for (const team of this._teams) {
-      const roster = await getRoster({ tid: team.uid })
+      const roster = await getRoster({ tid: team.team_id })
       const r = new Roster({ roster, league: this._league })
       team.availableSpace = r.availableSpace
       team.cap = r.availableCap
@@ -1252,9 +1252,9 @@ export default class Auction {
         .concat(this._tids.slice(0, idx + 1))
 
       for (const tid of list) {
-        const team = this._teams.find((t) => t.uid === tid)
+        const team = this._teams.find((t) => t.team_id === tid)
         if (team.availableSpace) {
-          return team.uid
+          return team.team_id
         }
       }
     }

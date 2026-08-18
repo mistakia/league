@@ -16,7 +16,7 @@ const map_state_to_props = createSelector(
   get_current_trade,
   (teams, app, trade) => ({
     teams: teams
-      .filter((t) => t.uid !== app.teamId)
+      .filter((t) => t.team_id !== app.teamId)
       .toList()
       .toJS(),
     trade

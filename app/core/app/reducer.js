@@ -60,7 +60,7 @@ export function app_reducer(state = initialState(), { payload, type }) {
     case team_actions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
         const teamId = state.get('teamId')
-        const team = payload.data.teams.find((t) => t.uid === teamId)
+        const team = payload.data.teams.find((t) => t.team_id === teamId)
         if (!team) state.set('teamId', null)
       })
 
@@ -96,7 +96,7 @@ export function app_reducer(state = initialState(), { payload, type }) {
         }
 
         const teamId = payload.data.teams.length
-          ? payload.data.teams[0].uid
+          ? payload.data.teams[0].team_id
           : undefined
         if ((leagueNotSet || currentLeagueId === leagueId) && teamId) {
           state.set('teamId', teamId)
@@ -105,7 +105,7 @@ export function app_reducer(state = initialState(), { payload, type }) {
         state.merge({
           userId: payload.data.user.id,
           user: create_user_record(payload.data.user),
-          teamIds: new List(payload.data.teams.map((t) => t.uid)),
+          teamIds: new List(payload.data.teams.map((t) => t.team_id)),
           leagueIds: new List(payload.data.leagues.map((l) => l.uid)),
           isPending: false
         })

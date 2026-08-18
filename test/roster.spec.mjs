@@ -33,7 +33,7 @@ describe('LIBS-SHARED Roster', function () {
     }
 
     const roster = {
-      uid: 0,
+      roster_id: 0,
       players: []
     }
 
@@ -47,7 +47,7 @@ describe('LIBS-SHARED Roster', function () {
 
     const r = new Roster({ roster, league })
 
-    r.uid.should.equal(0)
+    r.roster_id.should.equal(0)
     r.players.length.should.equal(7)
   })
 
@@ -76,7 +76,7 @@ describe('LIBS-SHARED Roster', function () {
     }
 
     const roster = {
-      uid: 0,
+      roster_id: 0,
       players: []
     }
 
@@ -90,7 +90,7 @@ describe('LIBS-SHARED Roster', function () {
 
     const r = new Roster({ roster, league })
 
-    r.uid.should.equal(0)
+    r.roster_id.should.equal(0)
     r.players.length.should.equal(18)
     r.isFull.should.equal(true)
 
@@ -123,7 +123,7 @@ describe('LIBS-SHARED Roster', function () {
     }
 
     const roster = {
-      uid: 0,
+      roster_id: 0,
       players: []
     }
 
@@ -145,7 +145,7 @@ describe('LIBS-SHARED Roster', function () {
 
     const r = new Roster({ roster, league })
 
-    r.uid.should.equal(0)
+    r.roster_id.should.equal(0)
     r.players.length.should.equal(4)
     r.isFull.should.equal(false)
 
@@ -178,7 +178,7 @@ describe('LIBS-SHARED Roster', function () {
     }
 
     const roster = {
-      uid: 0,
+      roster_id: 0,
       players: []
     }
 
@@ -200,7 +200,7 @@ describe('LIBS-SHARED Roster', function () {
 
     const r = new Roster({ roster, league })
 
-    r.uid.should.equal(0)
+    r.roster_id.should.equal(0)
     r.players.length.should.equal(4)
     r.isFull.should.equal(false)
 
@@ -245,7 +245,7 @@ describe('LIBS-SHARED Roster', function () {
     }
 
     const roster = {
-      uid: 0,
+      roster_id: 0,
       tid: 1,
       week: 1,
       year: 2024,
@@ -300,7 +300,7 @@ describe('LIBS-SHARED Roster', function () {
     }
 
     const roster = {
-      uid: 0,
+      roster_id: 0,
       tid: 1,
       week: 1,
       year: 2024,
@@ -355,7 +355,7 @@ describe('LIBS-SHARED Roster', function () {
     }
 
     const roster = {
-      uid: 0,
+      roster_id: 0,
       players: []
     }
 
@@ -381,7 +381,7 @@ describe('LIBS-SHARED Roster', function () {
 
     const r = new Roster({ roster, league })
 
-    r.uid.should.equal(0)
+    r.roster_id.should.equal(0)
     r.players.length.should.equal(3)
     r.isFull.should.equal(false)
 
@@ -415,7 +415,7 @@ describe('LIBS-SHARED Roster', function () {
     }
 
     const roster = {
-      uid: 0,
+      roster_id: 0,
       players: []
     }
 
@@ -448,7 +448,7 @@ describe('LIBS-SHARED Roster', function () {
 
     const r = new Roster({ roster, league })
 
-    r.uid.should.equal(0)
+    r.roster_id.should.equal(0)
     r.players.length.should.equal(4)
     r.isFull.should.equal(false)
 
@@ -483,7 +483,7 @@ describe('LIBS-SHARED Roster', function () {
     }
 
     const roster = {
-      uid: 0,
+      roster_id: 0,
       players: []
     }
 
@@ -503,7 +503,7 @@ describe('LIBS-SHARED Roster', function () {
 
     const r = new Roster({ roster, league })
 
-    r.uid.should.equal(0)
+    r.roster_id.should.equal(0)
     r.players.length.should.equal(2)
     r.isFull.should.equal(false)
     r.hasOpenPracticeSquadSlot().should.equal(true) // PS has space
@@ -539,7 +539,7 @@ describe('LIBS-SHARED Roster', function () {
     }
 
     const roster = {
-      uid: 0,
+      roster_id: 0,
       players: []
     }
 
@@ -558,7 +558,7 @@ describe('LIBS-SHARED Roster', function () {
 
     const r = new Roster({ roster, league })
 
-    r.uid.should.equal(0)
+    r.roster_id.should.equal(0)
     r.players.length.should.equal(2)
 
     // Practice squad is full
@@ -617,7 +617,7 @@ describe('LIBS-SHARED Roster', function () {
       }
 
       const roster = {
-        uid: 0,
+        roster_id: 0,
         players: [
           {
             slot: roster_slot_types.BENCH,
@@ -655,7 +655,7 @@ describe('LIBS-SHARED Roster', function () {
       }
 
       const roster = {
-        uid: 0,
+        roster_id: 0,
         players: [
           {
             slot: roster_slot_types.PS,

@@ -94,8 +94,16 @@ async function analyze_all_players({ year, lid, validate }) {
   // Get overview from super_priority table
   const query = db('super_priority')
     .join('player', 'super_priority.pid', 'player.pid')
-    .join('teams as original', 'super_priority.original_tid', 'original.uid')
-    .join('teams as poaching', 'super_priority.poaching_tid', 'poaching.uid')
+    .join(
+      'teams as original',
+      'super_priority.original_tid',
+      'original.team_id'
+    )
+    .join(
+      'teams as poaching',
+      'super_priority.poaching_tid',
+      'poaching.team_id'
+    )
     .where('original.season_year', year)
     .where('poaching.season_year', year)
     .select(

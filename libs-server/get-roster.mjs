@@ -63,7 +63,7 @@ export default async function ({
 
   const players = await build_roster_players_query({
     db,
-    roster_id: roster_row.uid,
+    roster_id: roster_row.roster_id,
     tid,
     year: roster_row.season_year,
     week: roster_row.week

@@ -25,8 +25,8 @@ const seed_slice = async ({ lid = 1, tid = 1, week }) => {
   const year = current_season.year
   const rows = await knex('rosters')
     .insert({ tid, lid, week, season_year: year })
-    .returning('uid')
-  const rid = rows[0].uid
+    .returning('roster_id')
+  const rid = rows[0].roster_id
 
   await knex('rosters_players').insert([
     {

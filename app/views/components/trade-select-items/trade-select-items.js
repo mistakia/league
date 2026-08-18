@@ -44,12 +44,12 @@ function build_options({ players, picks, teams }) {
 
   if (picks && picks.forEach) {
     picks.forEach((pick) => {
-      const id = `pick-${pick.uid}`
+      const id = `pick-${pick.draft_pick_id}`
       if (!seen_ids.has(id)) {
         seen_ids.add(id)
         option_list.push({
           id,
-          pickId: pick.uid,
+          pickId: pick.draft_pick_id,
           label: get_pick_label({ pick, teams }),
           type: 'pick'
         })
@@ -76,8 +76,8 @@ function build_selected_value({ selected_players, selected_picks, teams }) {
   if (selected_picks && selected_picks.forEach) {
     selected_picks.forEach((pick) => {
       value_list.push({
-        id: `pick-${pick.uid}`,
-        pickId: pick.uid,
+        id: `pick-${pick.draft_pick_id}`,
+        pickId: pick.draft_pick_id,
         label: get_pick_label({ pick, teams }),
         type: 'pick'
       })

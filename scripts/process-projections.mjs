@@ -387,7 +387,7 @@ const process_league = async ({ year, lid }) => {
   // check to see if it is past the fantasy season
   if (week <= current_season.finalWeek) {
     for (const team of teams) {
-      const rosterRow = await getRoster({ tid: team.uid, week })
+      const rosterRow = await getRoster({ tid: team.team_id, week })
       rosterRows.push(rosterRow)
       rosterRow.players.forEach((p) => rostered_pids.push(p.pid))
       const roster = new Roster({ roster: rosterRow, league })
@@ -810,7 +810,7 @@ const check_lineup_starter_identity_oracle = async () => {
     with rostered_teams as (
       select r.lid, r.tid
       from rosters r
-      join rosters_players rp on rp.roster_id = r.uid
+      join rosters_players rp on rp.roster_id = r.roster_id
       join player p on p.pid = rp.pid
       where r.season_year = ? and p.primary_position <> 'DST'
       group by r.lid, r.tid

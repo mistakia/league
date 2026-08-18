@@ -47,7 +47,7 @@ export default async function setupSuperPriority({
       tid: original_team_id
     })
     .limit(1)
-  const originalRosterId = originalRosters[0].uid
+  const originalRosterId = originalRosters[0].roster_id
 
   // Insert transaction with custom timestamp
   await db('transactions').insert({
@@ -105,7 +105,7 @@ export default async function setupSuperPriority({
       tid: poaching_team_id
     })
     .limit(1)
-  const poachingRosterId = poachingRosters[0].uid
+  const poachingRosterId = poachingRosters[0].roster_id
 
   // Insert roster entry for poaching team
   await db('rosters_players').insert({

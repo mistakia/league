@@ -44,7 +44,7 @@ export default function LeagueTeamsValueOverTime({
   let highest_value_team = null
   let lowest_value_team = null
   teams.forEach((team) => {
-    const team_values = league_team_daily_values.get(team.uid)
+    const team_values = league_team_daily_values.get(team.team_id)
     if (!team_values) return
     const most_recent_value = team_values.last()
     if (most_recent_value && most_recent_value.ktc_value > max_value) {
@@ -61,7 +61,7 @@ export default function LeagueTeamsValueOverTime({
   const current_timestamp = Date.now()
 
   teams.forEach((team) => {
-    const team_values = league_team_daily_values.get(team.uid)
+    const team_values = league_team_daily_values.get(team.team_id)
     if (!team_values) return
     const data = []
     team_values.forEach((item) => {
@@ -75,14 +75,14 @@ export default function LeagueTeamsValueOverTime({
       data.push([item.timestamp, item.ktc_value])
     })
     const item = {
-      tid: team.uid,
+      tid: team.team_id,
       name: team.name,
       data
     }
 
     if (
-      team.uid !== highest_value_team.uid &&
-      team.uid !== lowest_value_team.uid
+      team.team_id !== highest_value_team.team_id &&
+      team.team_id !== lowest_value_team.team_id
     ) {
       item.label = {
         enabled: false

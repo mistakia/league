@@ -21,7 +21,7 @@ const map_state_to_props = createSelector(
 
     const data = teams.map((team) => ({
       team,
-      starters: starters.teams[team.uid] || [],
+      starters: starters.teams[team.team_id] || [],
       projection: [],
       projectedPoints: team.previousWeekScore || 0,
       points: team.previousWeekScore || 0,
@@ -42,7 +42,7 @@ const map_state_to_props = createSelector(
       const playerMaps = starters.games[date]
       const teamPoints = {}
       teams.forEach((t) => {
-        teamPoints[t.uid] = 0
+        teamPoints[t.team_id] = 0
       })
 
       for (const player_map of playerMaps) {
@@ -52,7 +52,7 @@ const map_state_to_props = createSelector(
         )
 
         if (team) {
-          teamPoints[team.team.uid] += player_map.getIn(
+          teamPoints[team.team.team_id] += player_map.getIn(
             ['points', `${week}`, 'total'],
             0
           )
@@ -65,7 +65,7 @@ const map_state_to_props = createSelector(
 
       for (const [tid, points] of Object.entries(teamPoints)) {
         if (points || isLast) {
-          const team = data.find((t) => t.team.uid === Number(tid))
+          const team = data.find((t) => t.team.team_id === Number(tid))
           if (!team) continue
           const last = team.projection[team.projection.length - 1]
           if (!last || last[0] < start.valueOf()) {
@@ -96,19 +96,19 @@ const map_state_to_props = createSelector(
     for (const play of plays.reverse()) {
       const teamPoints = {}
       teams.forEach((t) => {
-        teamPoints[t.uid] = 0
+        teamPoints[t.team_id] = 0
       })
 
       for (const [pid, points] of Object.entries(play.points)) {
         const team = data.find((t) =>
           t.starters.find((pMap) => pMap.get('pid') === pid)
         )
-        if (team) teamPoints[team.team.uid] += points.total
+        if (team) teamPoints[team.team.team_id] += points.total
       }
 
       for (const [tid, points] of Object.entries(teamPoints)) {
         if (points) {
-          const team = data.find((t) => t.team.uid === Number(tid))
+          const team = data.find((t) => t.team.team_id === Number(tid))
           if (!team) continue
 
           team.points += points

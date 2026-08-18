@@ -41,10 +41,10 @@ export default async function (knex, league_params = {}) {
   // -- see that module's header for the collision window it protects.
   await reset_league_tables(knex)
 
-  // Reset sequences for test isolation (teams_uid_seq reset after team creation)
+  // Reset sequences for test isolation (teams_team_id_seq reset after team creation)
   await knex.raw('ALTER SEQUENCE waivers_uid_seq RESTART WITH 1')
   await knex.raw('ALTER SEQUENCE transactions_uid_seq RESTART WITH 1')
-  await knex.raw('ALTER SEQUENCE rosters_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE rosters_roster_id_seq RESTART WITH 1')
   await knex.raw('ALTER SEQUENCE trades_uid_seq RESTART WITH 1')
   await knex.raw('ALTER SEQUENCE poaches_uid_seq RESTART WITH 1')
   await knex.raw('ALTER SEQUENCE leagues_uid_seq RESTART WITH 1')
@@ -93,7 +93,7 @@ export default async function (knex, league_params = {}) {
   // one round trip per team-week -- roughly 230 of them -- which put the fixture
   // near mocha's default 2000ms timeout. That is why specs doing nothing unusual
   // failed on timeouts under CI load, and why which spec failed moved between
-  // runs. Row order within each insert is preserved so `rosters.uid` is handed
+  // runs. Row order within each insert is preserved so `rosters.roster_id` is handed
   // out in the same sequence as before.
   const team_rows = []
   const roster_rows = []
@@ -102,7 +102,7 @@ export default async function (knex, league_params = {}) {
 
   for (let i = 1; i <= 12; i++) {
     team_rows.push({
-      uid: i,
+      team_id: i,
       season_year: current_season.year,
       lid: 1,
       waiver_order: i,
@@ -136,6 +136,8 @@ export default async function (knex, league_params = {}) {
   await knex('rosters').insert(roster_rows)
   await knex('users_teams').insert(users_teams_rows)
 
-  // Sync teams sequence with the max uid after manual inserts
-  await knex.raw("SELECT setval('teams_uid_seq', (SELECT MAX(uid) FROM teams))")
+  // Sync teams sequence with the max team_id after manual inserts
+  await knex.raw(
+    "SELECT setval('teams_team_id_seq', (SELECT MAX(team_id) FROM teams))"
+  )
 }

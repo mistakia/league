@@ -37,7 +37,7 @@ export default function AuctionTeam({
   return (
     <div className={classNames.join(' ')}>
       <div className='auction__team-name'>
-        <TeamName abbrv color tid={team.uid} />
+        <TeamName abbrv color tid={team.team_id} />
       </div>
       <div className='auction__team-cap'>${roster.availableCap}</div>
       <div className='auction__team-roster-space'>{roster.availableSpace}</div>

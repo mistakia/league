@@ -14,8 +14,8 @@ export default class TeamFilter extends React.Component {
     for (const team of this.props.teams.values()) {
       state.values.push({
         label: team.name,
-        value: team.uid,
-        selected: this.props.teamIds.includes(team.uid)
+        value: team.team_id,
+        selected: this.props.teamIds.includes(team.team_id)
       })
     }
 

@@ -257,7 +257,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       // Plant a FRANCHISE and a ROOKIE tag on year=Y0 final-week as carry-forward fodder.
       await knex('rosters_players').insert([
         {
-          roster_id: final_week_roster.uid,
+          roster_id: final_week_roster.roster_id,
           slot: franchise_player.slot,
           pid: franchise_player.pid,
           player_position: franchise_player.player_position,
@@ -269,7 +269,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
           week: final_week
         },
         {
-          roster_id: final_week_roster.uid,
+          roster_id: final_week_roster.roster_id,
           slot: rookie_player.slot,
           pid: rookie_player.pid,
           player_position: rookie_player.player_position,

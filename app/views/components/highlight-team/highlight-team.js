@@ -17,8 +17,8 @@ export default class HighlightTeam extends React.Component {
       state.values.push({
         className: `draft-order-${team.draft_order}`,
         label: team.name,
-        value: team.uid,
-        selected: this.props.highlight_teamIds.includes(team.uid)
+        value: team.team_id,
+        selected: this.props.highlight_teamIds.includes(team.team_id)
       })
     }
 

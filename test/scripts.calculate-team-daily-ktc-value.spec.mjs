@@ -71,13 +71,13 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
       await knex(table).del()
     }
 
-    for (const uid of [1, 2, 3]) {
+    for (const team_id of [1, 2, 3]) {
       await knex('teams').insert({
-        uid,
+        team_id,
         season_year: year,
         lid,
-        name: `team ${uid}`,
-        abbreviation: `T${uid}`,
+        name: `team ${team_id}`,
+        abbreviation: `T${team_id}`,
         salary_cap: 200,
         free_agent_acquisition_budget_balance: 200
       })

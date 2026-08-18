@@ -223,7 +223,7 @@ const validate_league = async (lid) => {
 
 const validate_team = async ({ tid, lid }) => {
   const teams = await db('teams')
-    .where({ uid: tid, lid, season_year: current_season.year })
+    .where({ team_id: tid, lid, season_year: current_season.year })
     .limit(1)
   if (!teams.length) {
     throw new Error(`Team not found with ID: ${tid} in league ${lid}`)

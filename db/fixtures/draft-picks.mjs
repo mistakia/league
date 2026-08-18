@@ -2,7 +2,7 @@ import { current_season } from '#constants'
 import { getLeague } from '#libs-server'
 
 export default async function (knex) {
-  await knex.raw('ALTER SEQUENCE draft_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE draft_draft_pick_id_seq RESTART WITH 1')
   const lid = 1
   const teams = await knex('teams').where({
     lid,
@@ -14,8 +14,8 @@ export default async function (knex) {
     const idx = i % league.number_teams
     const team = teams[idx]
     await knex('draft').insert({
-      tid: team.uid,
-      original_team_id: team.uid,
+      tid: team.team_id,
+      original_team_id: team.team_id,
       lid: league.uid,
       pick: i + 1,
       round: Math.ceil((i + 1) / league.number_teams),
@@ -26,8 +26,8 @@ export default async function (knex) {
   for (const team of teams) {
     for (let i = 1; i < 4; i++) {
       await knex('draft').insert({
-        tid: team.uid,
-        original_team_id: team.uid,
+        tid: team.team_id,
+        original_team_id: team.team_id,
         lid: league.uid,
         round: i,
         season_year: current_season.year + 1

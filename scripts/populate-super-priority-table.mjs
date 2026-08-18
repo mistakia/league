@@ -66,8 +66,8 @@ const run = async ({
         const [player_details, original_team, poaching_team] =
           await Promise.all([
             db('player').where('pid', poach_tx.pid).first(),
-            db('teams').where('uid', status.original_tid).first(),
-            db('teams').where('uid', status.poaching_tid).first()
+            db('teams').where('team_id', status.original_tid).first(),
+            db('teams').where('team_id', status.poaching_tid).first()
           ])
 
         if (player_details && original_team && poaching_team) {

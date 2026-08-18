@@ -98,7 +98,7 @@ const place_player_at_week_one = async ({
     })
     .limit(1)
   await knex('rosters_players').insert({
-    roster_id: rosters[0].uid,
+    roster_id: rosters[0].roster_id,
     pid: player.pid,
     slot,
     player_position: player.secondary_position,
@@ -335,7 +335,7 @@ describe('SUPER PRIORITY - Extension joint-condition (Amendment XXXIV §4)', fun
     ])
 
     await knex('rosters_players').insert({
-      roster_id: prior_rosters[0].uid,
+      roster_id: prior_rosters[0].roster_id,
       pid: player.pid,
       slot: roster_slot_types.BENCH,
       player_position: player.secondary_position,

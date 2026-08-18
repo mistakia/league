@@ -50,7 +50,7 @@ const project_lineups = async (lid) => {
   }
 
   for (const team of teams) {
-    const tid = team.uid
+    const tid = team.team_id
     const rosterRows = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRows, league })
     const player_pids = roster.players.map((p) => p.pid)

@@ -120,7 +120,7 @@ describe('API /leagues/teams - add', function () {
       for (let i = 1; i <= 12; i++) {
         await knex('teams').insert({
           season_year: current_season.year,
-          uid: i,
+          team_id: i,
           lid: 1,
           waiver_order: i,
           draft_order: i,

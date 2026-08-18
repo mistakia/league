@@ -21,8 +21,8 @@ router.get('/?', async (req, res) => {
       // Latest team row for each team
       db('teams')
         .where({ lid: leagueId })
-        .distinctOn('uid')
-        .orderBy(['uid', { column: 'season_year', order: 'desc' }])
+        .distinctOn('team_id')
+        .orderBy(['team_id', { column: 'season_year', order: 'desc' }])
     ])
 
     // Separate user_careerlogs and usernames

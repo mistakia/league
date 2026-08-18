@@ -89,12 +89,12 @@ const main = async () => {
 
     // Get team names for display
     const teams = await db('teams')
-      .whereIn('uid', team_ids)
-      .select('uid', 'name')
+      .whereIn('team_id', team_ids)
+      .select('team_id', 'name')
 
     const team_name_map = new Map()
     for (const team of teams) {
-      team_name_map.set(team.uid, team.name)
+      team_name_map.set(team.team_id, team.name)
     }
 
     // Run simulation

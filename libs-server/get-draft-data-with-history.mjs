@@ -8,7 +8,7 @@ export default async function get_draft_data_with_history({ lid, year }) {
   const trade_history_by_pick = {}
 
   // Get all trades that involved any of these picks
-  const pick_ids = picks.map((pick) => pick.uid)
+  const pick_ids = picks.map((pick) => pick.draft_pick_id)
 
   if (pick_ids.length > 0) {
     // Get trades involving these picks (accepted trades only)

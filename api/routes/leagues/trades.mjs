@@ -245,7 +245,7 @@ router.get('/?', async (req, res) => {
     const trade_picks_rows = await db('trades_picks')
       .select(
         'trades_picks.*',
-        'draft.uid',
+        'draft.draft_pick_id',
         'draft.pick',
         'draft.pick_string',
         'draft.round',
@@ -254,7 +254,7 @@ router.get('/?', async (req, res) => {
         'draft.original_team_id'
       )
       .whereIn('trade_id', tradeids)
-      .join('draft', 'trades_picks.draft_pick_id', 'draft.uid')
+      .join('draft', 'trades_picks.draft_pick_id', 'draft.draft_pick_id')
 
     for (const trade of trades) {
       trade.proposingTeamReleasePlayers = []
@@ -650,12 +650,12 @@ router.post(
 
       const pickids = proposingTeamPicks.concat(acceptingTeamPicks)
       const draft_pick_rows = await db('draft')
-        .whereIn('uid', pickids)
+        .whereIn('draft_pick_id', pickids)
         .modify(where_outstanding_draft_pick)
 
       // validate sending picks
       for (const pick of proposingTeamPicks) {
-        const p = draft_pick_rows.find((p) => p.uid === pick)
+        const p = draft_pick_rows.find((p) => p.draft_pick_id === pick)
         if (!p) {
           return res.status(400).send({ error: 'pick is not valid' })
         }
@@ -683,7 +683,7 @@ router.post(
 
       // validate receiving picks
       for (const pick of acceptingTeamPicks) {
-        const p = draft_pick_rows.find((p) => p.uid === pick)
+        const p = draft_pick_rows.find((p) => p.draft_pick_id === pick)
         if (!p) {
           return res.status(400).send({ error: 'pick is not valid' })
         }

@@ -73,7 +73,7 @@ const min_max_normalize = (values) => {
  */
 export const compute_power_indexes = ({ teams, seasonlogs }) => {
   const per_team = teams.map((team) => {
-    const logs = seasonlogs.filter((log_row) => log_row.tid === team.uid)
+    const logs = seasonlogs.filter((log_row) => log_row.tid === team.team_id)
 
     let wins = 0
     let losses = 0
@@ -94,7 +94,7 @@ export const compute_power_indexes = ({ teams, seasonlogs }) => {
     const points_for_per_game = games ? points_for / games : 0
 
     return {
-      tid: team.uid,
+      tid: team.team_id,
       name: team.name,
       seasons: logs.length,
       games,
@@ -222,7 +222,7 @@ const run = async ({ lid, pots: print_pots_only, pot_order, dry_run }) => {
     .whereBetween('season_year', [first_year, last_year])
     .whereIn(
       'tid',
-      teams.map((team) => team.uid)
+      teams.map((team) => team.team_id)
     )
 
   const power_indexes = compute_power_indexes({ teams, seasonlogs })
@@ -287,7 +287,7 @@ const run = async ({ lid, pots: print_pots_only, pot_order, dry_run }) => {
       .map(([tid]) => tid)
     console.log(
       `Division ${division}: ${members
-        .map((tid) => teams.find((team) => team.uid === tid).name)
+        .map((tid) => teams.find((team) => team.team_id === tid).name)
         .join(', ')}`
     )
   }
@@ -300,7 +300,7 @@ const run = async ({ lid, pots: print_pots_only, pot_order, dry_run }) => {
   for (const [tid, division] of assignments.entries()) {
     await db('teams')
       .update({ division })
-      .where({ uid: tid, lid, season_year: current_season.year })
+      .where({ team_id: tid, lid, season_year: current_season.year })
   }
 
   return { num_divisions, assignments }

@@ -592,8 +592,12 @@ describe('SCRIPTS - restricted free agency bids', function () {
       })
 
       // Set waiver order for teams
-      await knex('teams').where({ uid: team_id2 }).update({ waiver_order: 1 })
-      await knex('teams').where({ uid: team_id3 }).update({ waiver_order: 2 })
+      await knex('teams')
+        .where({ team_id: team_id2 })
+        .update({ waiver_order: 1 })
+      await knex('teams')
+        .where({ team_id: team_id3 })
+        .update({ waiver_order: 2 })
 
       // Get the current mocked timestamp
       const current_time = Math.round(Date.now() / 1000)
@@ -689,7 +693,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
 
       // Verify waiver order was reset for the winning team (team_id2)
       const final_waiver_orders = await knex('teams')
-        .select('uid', 'waiver_order')
+        .select('team_id', 'waiver_order')
         .where({ lid: leagueId, season_year: current_season.year })
         .orderBy('waiver_order', 'asc')
 
@@ -701,7 +705,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       )
 
       // Check that the winning team now has the worst waiver position
-      expect(max_waiver_order_team.uid).to.equal(team_id2)
+      expect(max_waiver_order_team.team_id).to.equal(team_id2)
 
       // Check that all teams have a unique waiver order
       const waiver_orders = final_waiver_orders.map((t) => t.waiver_order)

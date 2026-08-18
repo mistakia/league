@@ -50,11 +50,11 @@ function build_standings({ teams, seasonlogs, managers, league }) {
   const seasonlog_by_tid = new Map(seasonlogs.map((row) => [row.tid, row]))
 
   const rows = teams.map((team) => {
-    const log = seasonlog_by_tid.get(team.uid) || {}
+    const log = seasonlog_by_tid.get(team.team_id) || {}
     return {
-      tid: team.uid,
+      tid: team.team_id,
       name: team.name,
-      manager: (managers[team.uid] || []).join(', ') || '—',
+      manager: (managers[team.team_id] || []).join(', ') || '—',
       wins: log.regular_season_wins || 0,
       losses: log.regular_season_losses || 0,
       ties: log.regular_season_ties || 0,
@@ -80,7 +80,7 @@ export default async function generate_league_context({
 
   const teams = await db('teams')
     .where({ lid, season_year: year })
-    .orderBy('uid')
+    .orderBy('team_id')
   const seasonlogs = await db('league_team_seasonlogs').where({
     lid,
     season_year: year
@@ -96,7 +96,9 @@ export default async function generate_league_context({
     db,
     pids: recent_transactions.map((t) => t.pid)
   })
-  const team_name_by_tid = new Map(teams.map((team) => [team.uid, team.name]))
+  const team_name_by_tid = new Map(
+    teams.map((team) => [team.team_id, team.name])
+  )
 
   const standings = build_standings({ teams, seasonlogs, managers, league })
 
@@ -111,7 +113,9 @@ export default async function generate_league_context({
       number_teams: teams.length
     },
     related: {
-      children: teams.map((team) => doc_url(base_url, { lid, tid: team.uid })),
+      children: teams.map((team) =>
+        doc_url(base_url, { lid, tid: team.team_id })
+      ),
       related: [
         doc_url(base_url, { lid, view: 'rules' }),
         doc_url(base_url, { lid, view: 'schedule' }),
@@ -245,7 +249,7 @@ export default async function generate_league_context({
     { label: 'Documentation index', url: docs_index_url(base_url) },
     ...teams.map((team) => ({
       label: `Team: ${team.name}`,
-      url: doc_url(base_url, { lid, tid: team.uid })
+      url: doc_url(base_url, { lid, tid: team.team_id })
     }))
   ])
 

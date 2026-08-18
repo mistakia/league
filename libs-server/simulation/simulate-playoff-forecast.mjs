@@ -82,11 +82,11 @@ export async function simulate_wildcard_forecast({
   // Initialize results
   const result = {}
   for (const team of all_teams) {
-    result[team.uid] = {
-      tid: team.uid,
-      playoff_odds: team_stats.some((t) => t.tid === team.uid) ? 1.0 : 0.0,
-      division_odds: bye_tids.includes(team.uid) ? 1.0 : 0.0,
-      bye_odds: bye_tids.includes(team.uid) ? 1.0 : 0.0,
+    result[team.team_id] = {
+      tid: team.team_id,
+      playoff_odds: team_stats.some((t) => t.tid === team.team_id) ? 1.0 : 0.0,
+      division_odds: bye_tids.includes(team.team_id) ? 1.0 : 0.0,
+      bye_odds: bye_tids.includes(team.team_id) ? 1.0 : 0.0,
       championship_wins: 0
     }
   }
@@ -347,7 +347,7 @@ export async function simulate_championship_forecast({
   // Initialize results
   const result = {}
   for (const team of all_teams) {
-    const team_stats = team_stats_by_tid[team.uid]
+    const team_stats = team_stats_by_tid[team.team_id]
     // Top two seeds receive the bye; divisions confer no berth.
     // Number.isInteger first: the optional chain guards undefined, not null,
     // and a null regular_season_finish coerces to 0 <= bye_count, awarding a
@@ -356,9 +356,9 @@ export async function simulate_championship_forecast({
       Number.isInteger(team_stats?.regular_season_finish) &&
       team_stats.regular_season_finish <= bye_count
 
-    result[team.uid] = {
-      tid: team.uid,
-      playoff_odds: all_playoff_tids.includes(team.uid) ? 1.0 : 0.0,
+    result[team.team_id] = {
+      tid: team.team_id,
+      playoff_odds: all_playoff_tids.includes(team.team_id) ? 1.0 : 0.0,
       division_odds: has_bye ? 1.0 : 0.0,
       bye_odds: has_bye ? 1.0 : 0.0,
       championship_wins: 0

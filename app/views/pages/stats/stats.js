@@ -370,7 +370,7 @@ export default function StatsPage({
   for (const team of sorted.valueSeq()) {
     summary_rows.push(
       <SummaryRow
-        key={`summary_${team.uid}`}
+        key={`summary_${team.team_id}`}
         team={team}
         percentiles={percentiles}
         year={year}
@@ -382,7 +382,7 @@ export default function StatsPage({
   for (const team of sorted.valueSeq()) {
     slot_rows.push(
       <SlotRow
-        key={`slot_${team.uid}`}
+        key={`slot_${team.team_id}`}
         team={team}
         slots={slots}
         percentiles={percentiles}
@@ -394,7 +394,7 @@ export default function StatsPage({
   for (const team of sorted.valueSeq()) {
     position_rows.push(
       <PositionRow
-        key={`position_${team.uid}`}
+        key={`position_${team.team_id}`}
         team={team}
         percentiles={percentiles}
         year={year}

@@ -189,7 +189,7 @@ router.post('/?', async (req, res) => {
         ? roster_slot_types.PSP
         : roster_slot_types.PSDP
     await db('rosters_players').update({ slot }).where({
-      roster_id: rosterRow.uid,
+      roster_id: rosterRow.roster_id,
       pid
     })
 
@@ -210,7 +210,7 @@ router.post('/?', async (req, res) => {
       pid,
       tid,
       slot,
-      roster_id: roster.uid,
+      roster_id: roster.roster_id,
       player_position: player_row.primary_position,
       transaction
     }
@@ -221,7 +221,7 @@ router.post('/?', async (req, res) => {
     })
 
     const teams = await db('teams').where({
-      uid: tid,
+      team_id: tid,
       season_year: current_season.year
     })
     const team = teams[0]

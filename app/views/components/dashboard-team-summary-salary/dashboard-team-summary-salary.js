@@ -10,13 +10,13 @@ import Rank from '@components/rank'
 import { Team } from '@core/teams'
 
 export default function DashboardTeamSummarySalary({ teams, tid }) {
-  const team = teams.find((t) => t.uid === tid) || new Team()
-  const rank = teams.findIndex((t) => t.uid === tid) + 1
+  const team = teams.find((t) => t.team_id === tid) || new Team()
+  const rank = teams.findIndex((t) => t.team_id === tid) + 1
 
   const items = []
   for (const team of teams) {
     items.push(
-      <tr key={team.uid}>
+      <tr key={team.team_id}>
         <td>{team.name}</td>
         <td>${team.cap}</td>
       </tr>
