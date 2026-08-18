@@ -128,13 +128,16 @@ jobs:
       - name: API response shape gate (gate 1)
         run: node db/gates/check-api-response-shapes.mjs --gate 1
 
-      # Fails when a literal bound to a CHECK-constrained column is outside that
-      # column's permitted set. No other gate here shares its class: the others
-      # resolve column NAMES, and this one resolves the bound VALUE, which is how
-      # a retired season_type or position spelling survives every one of them.
-      # Nine negative controls run on every invocation, four asserting SILENCE.
-      - name: Stranded vocabulary literal gate
-        run: node db/gates/check-stranded-vocabulary-literals.mjs
+      # check-stranded-vocabulary-literals is deliberately NOT wired here, and
+      # the reason is structural rather than a finding. Its SQL corpus lives in
+      # user-base: find_user_base_root() walks up from the checkout looking for
+      # text/nfl/query, and in CI there is no such ancestor, so it exits 2 with
+      # `TOOLING ERROR: root does not exist: /home/runner/work/text/nfl/query`
+      # before examining anything. It cannot be verified by running it on a
+      # clean checkout either -- on any developer machine the checkout sits
+      # under user-base and the walk succeeds, so the dependency is on the
+      # ENVIRONMENT and is invisible locally. Same class as
+      # check-league-schema-consumers. Run it per cluster via yarn check:cluster.
 
       # Fails when a deliberately dropped table still has a consumer. Reads the
       # 11-entry dropped-table roster against the code tree; a listed table that
