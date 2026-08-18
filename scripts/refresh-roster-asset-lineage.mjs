@@ -56,7 +56,7 @@ SELECT md5(concat_ws('|',
      FROM trades_players tp JOIN trades t ON t.uid = tp.trade_id WHERE t.lid = ?),
   (SELECT md5(string_agg(concat_ws(':', tk.trade_id, tk.tid, tk.draft_pick_id), ',' ORDER BY tk.trade_id, tk.tid, tk.draft_pick_id))
      FROM trades_picks tk JOIN trades t ON t.uid = tk.trade_id WHERE t.lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', uid, pid, round, is_compensatory, pick, tid, original_team_id, season_year, selection_timestamp), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', draft_pick_id, pid, round, is_compensatory, pick, tid, original_team_id, season_year, selection_timestamp), ',' ORDER BY draft_pick_id))
      FROM draft WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', uid, pid, bid_amount, tid, season_year, is_successful, processed, cancelled, nomination_id, outcome), ',' ORDER BY uid))
      FROM restricted_free_agency_bids WHERE lid = ?),
