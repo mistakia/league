@@ -43,7 +43,7 @@ export function leagues_reducer(state = initialState, { payload, type }) {
 
     case team_actions.GET_TEAMS_FULFILLED: {
       const teamIds = payload.data.teams.map((t) => t.team_id)
-      if (state.hasIn([payload.opts.leagueId, 'uid'])) {
+      if (state.has(payload.opts.leagueId)) {
         return state.setIn([payload.opts.leagueId, 'teams'], new List(teamIds))
       } else {
         return state.set(

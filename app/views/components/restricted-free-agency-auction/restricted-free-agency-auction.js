@@ -48,11 +48,11 @@ export default function RestrictedFreeAgencyAuction({ auction }) {
   // decommissioned since would otherwise render under its current identity.
   const season_year = auction.get('season_year')
 
-  const winning_bid = bids.find((bid) => bid.get('uid') === winning_bid_id)
+  const winning_bid = bids.find((bid) => bid.get('bid_id') === winning_bid_id)
 
   const bid_rows = bids.map((bid, index) => {
     const releases = bid.get('releases')
-    const is_winner = bid.get('uid') === winning_bid_id
+    const is_winner = bid.get('bid_id') === winning_bid_id
 
     return (
       <div

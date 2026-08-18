@@ -25,7 +25,7 @@ export default function PoachNotice({
     showConfirmation({
       title: 'Process Poach',
       description: `${player_map.get('first_name')} ${player_map.get('last_name')} (${player_map.get('primary_position')}) will be poached. Are you sure you want to proceed? This will remove the player from your roster and add them to the roster of the team that submitted the poach.`,
-      on_confirm_func: () => process_poach(poach.get('uid'))
+      on_confirm_func: () => process_poach(poach.get('poach_id'))
     })
   }
 
