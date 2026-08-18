@@ -20,7 +20,7 @@
  * their exit codes and their output.
  *
  * WHAT IT ADDS BEYOND CONVENIENCE. A gate that cannot report is worse than no
- * gate, so three of these run an always-on negative control and fail themselves
+ * gate, so most of these run an always-on negative control and fail themselves
  * when it does not go red. This runner makes that convention structural: a gate
  * DECLARING a control must print one, and a control that reports STAYED GREEN
  * fails the whole run even though the gate itself exited 0. The gates that
@@ -154,7 +154,7 @@ const GATES = [
     id: 'schema-conformance-ratchet',
     command: ['db/gates/check-schema-conformance-ratchet.mjs'],
     requires: 'none',
-    negative_control: false,
+    negative_control: true,
     oracle:
       'schema file vs checked-in violation baseline — new debt fails, cleared debt passes silently'
   },
@@ -170,7 +170,7 @@ const GATES = [
     id: 'renamed-column-consumers-gate-1',
     command: ['db/gates/check-renamed-column-consumers.mjs', '--gate', '1'],
     requires: 'none',
-    negative_control: false,
+    negative_control: true,
     oracle:
       "every 'table.column' literal in server code resolves against the schema file"
   },
@@ -194,7 +194,7 @@ const GATES = [
     id: 'dropped-table-consumers',
     command: ['db/gates/check-dropped-table-consumers.mjs'],
     requires: 'none',
-    negative_control: false,
+    negative_control: true,
     oracle: 'each deliberately dropped table name has no surviving consumer'
   },
   {
