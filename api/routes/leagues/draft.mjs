@@ -242,7 +242,7 @@ router.get('/?', async (req, res) => {
     // Get trade counts for each pick
     const trade_counts = await db('trades_picks')
       .select('draft_pick_id')
-      .count('trade_id as trade_count')
+      .count('trades_picks.trade_id as trade_count')
       .innerJoin('trades', 'trades.trade_id', 'trades_picks.trade_id')
       .whereNotNull('trades.accepted')
       .whereIn(

@@ -203,8 +203,8 @@ router.put('/:poachId', async (req, res) => {
     const otherPendingPoachReleases = await db('poaches')
       .select('poach_releases.pid')
       .join('poach_releases', 'poaches.poach_id', 'poach_releases.poach_id')
-      .whereNot('poach_id', poachId)
-      .whereNull('processed')
+      .whereNot('poaches.poach_id', poachId)
+      .whereNull('poaches.processed')
 
     const otherPoachReleasePlayers = otherPendingPoachReleases.map((p) => p.pid)
     for (const releasePlayerId of release) {
