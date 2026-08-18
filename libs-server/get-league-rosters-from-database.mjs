@@ -64,8 +64,8 @@ export default async function ({
     })
     .whereIn(
       // QUALIFIED deliberately: this statement joins `rosters`, and both tables
-      // now carry `roster_id` where they used to carry `rosters.uid` against
-      // `rosters_players.roster_id`. The rename is what removed the accidental
+      // now carry `roster_id` where the parent used to carry the retired
+      // surrogate name. The rename is what removed the accidental
       // disambiguation, so a bare reference here is a 42702.
       'rosters_players.roster_id',
       rosters.map((r) => r.roster_id)
