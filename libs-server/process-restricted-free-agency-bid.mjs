@@ -192,7 +192,7 @@ export default async function ({
     // impossible.
     await record_restricted_free_agency_bid_change({
       db: trx,
-      bid_id: bid_id,
+      bid_id,
       change_type: bid_change_types.SETTLED,
       change_source: bid_change_sources.SETTLEMENT_SCRIPT,
       // No actor: settlement is automatic and no human chose this outcome.

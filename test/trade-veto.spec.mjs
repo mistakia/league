@@ -270,7 +270,7 @@ describe('API /trades - veto', function () {
     should.exist(veto_res.body.accepted)
     should.exist(veto_res.body.vetoed)
 
-    const rows = await knex('trades').where({ trade_id: trade_id })
+    const rows = await knex('trades').where({ trade_id })
     rows.length.should.equal(1)
     should.exist(rows[0].accepted)
     should.exist(rows[0].vetoed)
@@ -560,7 +560,7 @@ describe('API /trades - veto', function () {
         value: async (...args) => {
           restore()
           await knex('trades')
-            .where({ trade_id: trade_id })
+            .where({ trade_id })
             .update({ approved: new Date() })
           return original_transaction(...args)
         }
@@ -580,7 +580,7 @@ describe('API /trades - veto', function () {
     )
 
     // the status code alone cannot tell a rollback from a committed reversal
-    const trade_row = await knex('trades').where({ trade_id: trade_id }).first()
+    const trade_row = await knex('trades').where({ trade_id }).first()
     should.not.exist(trade_row.vetoed)
     should.exist(trade_row.approved)
 

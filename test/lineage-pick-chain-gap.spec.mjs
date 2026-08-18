@@ -67,7 +67,7 @@ describe('LINEAGE - pick chain gap', function () {
     recorded_tid
   }) => {
     await knex('trades').insert({
-      trade_id: trade_id,
+      trade_id,
       lid: LID,
       propose_tid,
       accept_tid,

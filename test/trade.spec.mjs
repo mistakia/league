@@ -157,7 +157,7 @@ describe('API /trades', function () {
 
       // Verify slot assignments stored in database
       const stored_slots = await knex('trades_slots').where({
-        trade_id: trade_id
+        trade_id
       })
       stored_slots.length.should.equal(
         proposingTeamPlayers.length + acceptingTeamPlayers.length
@@ -250,7 +250,7 @@ describe('API /trades', function () {
 
       // Verify slot assignments stored in database
       const stored_slots = await knex('trades_slots').where({
-        trade_id: trade_id
+        trade_id
       })
       stored_slots.length.should.equal(
         proposingTeamPlayers.length + acceptingTeamPlayers.length
@@ -396,7 +396,7 @@ describe('API /trades', function () {
 
       // Verify slot assignments stored in database
       const stored_slots = await knex('trades_slots').where({
-        trade_id: trade_id
+        trade_id
       })
       stored_slots.length.should.equal(
         proposingTeamPlayers.length + acceptingTeamPlayers.length
@@ -555,7 +555,7 @@ describe('API /trades', function () {
 
       // Verify slot assignments in database
       const stored_slots = await knex('trades_slots').where({
-        trade_id: trade_id
+        trade_id
       })
       stored_slots.length.should.equal(2)
 

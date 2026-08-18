@@ -828,28 +828,28 @@ router.post(
         const insertPicks = []
         for (const pid of proposingTeamPlayers) {
           insertPlayers.push({
-            trade_id: trade_id,
+            trade_id,
             tid: propose_tid,
             pid
           })
         }
         for (const pid of acceptingTeamPlayers) {
           insertPlayers.push({
-            trade_id: trade_id,
+            trade_id,
             tid: accept_tid,
             pid
           })
         }
         for (const draft_pick_id of proposingTeamPicks) {
           insertPicks.push({
-            trade_id: trade_id,
+            trade_id,
             draft_pick_id,
             tid: propose_tid
           })
         }
         for (const draft_pick_id of acceptingTeamPicks) {
           insertPicks.push({
-            trade_id: trade_id,
+            trade_id,
             draft_pick_id,
             tid: accept_tid
           })
@@ -858,7 +858,7 @@ router.post(
         const insertReleases = []
         for (const pid of releasePlayers) {
           insertReleases.push({
-            trade_id: trade_id,
+            trade_id,
             pid,
             tid: propose_tid
           })
