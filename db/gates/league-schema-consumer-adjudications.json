@@ -552,19 +552,51 @@
     },
     {
       "gate": 1,
-      "path": "home-dynasty-league/league-operations/discord-channels.md",
-      "table": "config",
-      "column": "discord",
-      "kind": "not_a_column",
-      "reason": "config.discord.channels / config.discord.server_id are dotted paths into the USER-BASE config JSON consumed by extension/discord/lib/fetch-messages.mjs, not league columns. The league config table is a key/value store (key, config_value, updated_at)."
-    },
-    {
-      "gate": 1,
       "path": "nfl/league/database-schema-standards.md",
       "table": "leagues",
       "column": "groupme_id",
       "kind": "history",
       "reason": "Cited as one of five RECORDED INSTANCES of an audit rule missing a column -- history, not live instruction. The column has since been dropped from leagues (no %group% column remains), which does not falsify the example: the point being made is about the vocabulary gap in the audit rule, not about the column existing."
+    },
+    {
+      "gate": 1,
+      "path": "CLAUDE.md",
+      "table": "player",
+      "column": "formatted_alias",
+      "kind": "not_a_column",
+      "reason": "The worked EXAMPLE of the knex gate's own inline-subquery false positive, quoted in the check-knex-column-resolution section to explain why a nested builder's columns land in the enclosing statement's table environment. formatted_alias is a real player_aliases column; the reported player.formatted_alias pair is the mis-binding the paragraph exists to illustrate, so gate 1 reporting it is the illustration rather than a defect. Same shape as the player_gamelogs.count worked example."
+    },
+    {
+      "gate": 1,
+      "path": "CLAUDE.md",
+      "table": "nfl_plays",
+      "column": "recv_yards",
+      "kind": "history",
+      "reason": "Accurate past-tense record of what the 2026-08-18 recv -> receiving conform DID. The sentence says the sweep correctly rewrote every nfl_plays.recv_yards and the only residue was the metric alias, so the pre-rename spelling is cited deliberately as the column that moved. The column is now receiving_yards."
+    },
+    {
+      "gate": 1,
+      "path": "home-dynasty-league/league-operations/rookie-draft-operations.md",
+      "table": "config",
+      "column": "jwt",
+      "kind": "not_a_column",
+      "reason": "A key path into the league server's own config object (./config/index.mjs under NODE_ENV=production), read as config.jwt.secret to mint a JWT on the host. Not the league config table, which is a key/value store (key, config_value, updated_at). Same config.* collision as the config.discord entries."
+    },
+    {
+      "gate": 1,
+      "path": "nfl-betting/fantasypoints-data-master-index.md",
+      "table": "player",
+      "column": "position",
+      "kind": "not_a_column",
+      "reason": "A key path into the FantasyPoints Data API request body: context.filterMatch[\"player.position\"] is a Mongo-style filter key (alongside player.playerId grouping and the jq del(.[\"player.position\"]) shape), not a league column. The doc is an API reference for a vendor payload, so the dotted pair is a data key."
+    },
+    {
+      "gate": 1,
+      "path": "nfl/league/database-schema-standards.md",
+      "table": "playoffs",
+      "column": "uid",
+      "kind": "history",
+      "reason": "Accurate past-tense record of the 2026-08-17 uid retirement. The sentence says playoffs.uid was a playoff-week ordinal and BECAME playoff_week_number, naming the pre-rename spelling as the point. Only live instruction counts as a defect."
     }
   ]
 }
