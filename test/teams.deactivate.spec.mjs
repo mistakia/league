@@ -441,7 +441,7 @@ describe('API /teams - deactivate', function () {
           bid_amount: 1,
           type: waiver_types.FREE_AGENCY
         })
-        .returning('uid')
+        .returning('waiver_id')
 
       await addPlayer({
         teamId: 1,

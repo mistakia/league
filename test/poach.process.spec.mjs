@@ -50,7 +50,7 @@ describe('API /poaches - process', function () {
 
       // Create a poaching claim
       const poach = {
-        uid: 1,
+        poach_id: 1,
         pid: player1.pid,
         user_id: 2,
         tid: 2,

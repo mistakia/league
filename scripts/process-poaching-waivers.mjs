@@ -131,7 +131,7 @@ const run = async ({ daily = false } = {}) => {
   // unprocessed. A non-empty result means the loop silently skipped eligible
   // waivers — surface that as a shortfall.
   const stuck_waivers = await db('waivers')
-    .select('uid', 'lid', 'pid')
+    .select('waiver_id', 'lid', 'pid')
     .whereNull('processed')
     .whereNull('cancelled')
     .where('type', waiver_types.POACH)

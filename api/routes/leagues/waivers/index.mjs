@@ -910,7 +910,7 @@ router.put('/:waiverId', async (req, res) => {
       .where('waiver_id', waiverId)
       .whereNotIn('pid', release)
 
-    res.send({ bid, release, uid: waiverId })
+    res.send({ bid, release, waiver_id: waiverId })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -1025,7 +1025,7 @@ router.post('/:waiverId/cancel', async (req, res) => {
       .where('waiver_id', waiverId)
 
     res.send({
-      uid: waiverId,
+      waiver_id: waiverId,
       tid,
       lid: leagueId,
       cancelled

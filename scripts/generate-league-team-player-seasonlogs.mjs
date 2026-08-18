@@ -251,7 +251,7 @@ const main = async () => {
       })
     } else if (argv.all) {
       const leagues = await db('leagues')
-        .select('uid')
+        .select('league_id')
         .where({ is_hosted: 1 })
         .whereNull('archived_at')
       for (const league of leagues) {

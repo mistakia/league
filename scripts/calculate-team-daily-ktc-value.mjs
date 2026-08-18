@@ -247,7 +247,14 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   const teams_index = {}
   const trades = await get_trades({ lid })
   const transactions = await db('transactions')
-    .select('uid', 'tid', 'pid', 'type', 'occurred_at', 'season_year')
+    .select(
+      'transaction_id',
+      'tid',
+      'pid',
+      'type',
+      'occurred_at',
+      'season_year'
+    )
     .where('lid', lid)
     .orderBy('occurred_at', 'asc')
 
@@ -706,7 +713,7 @@ const main = async () => {
     } else {
       // get all hosted leagues that are not archived
       const leagues = await db('leagues')
-        .select('uid')
+        .select('league_id')
         .where({ is_hosted: 1 })
         .whereNull('archived_at')
 

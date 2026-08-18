@@ -28,7 +28,7 @@ export default async function ({
   lid,
   user_id,
   original_team_id,
-  uid,
+  bid_id,
   processed
 }) {
   // check player is on original team roster
@@ -57,7 +57,7 @@ export default async function ({
 
   const releases = await db('restricted_free_agency_releases').where(
     'restricted_free_agency_bid_id',
-    uid
+    bid_id
   )
   const cutlist_rows = await db('league_cutlist')
     .where('tid', tid)
@@ -171,10 +171,10 @@ export default async function ({
         outcome_detail: null,
         processed
       })
-      .where('bid_id', uid)
+      .where('bid_id', bid_id)
     await trx('restricted_free_agency_nominations')
       .update({
-        winning_bid_id: uid,
+        winning_bid_id: bid_id,
         // `processed` is an INSTANT: it is bound unchanged to the timestamptz
         // `restricted_free_agency_bids.processed` in the statement above, so
         // wrapping it in `to_timestamp()` here would convert it twice.
@@ -192,7 +192,7 @@ export default async function ({
     // impossible.
     await record_restricted_free_agency_bid_change({
       db: trx,
-      bid_id: uid,
+      bid_id: bid_id,
       change_type: bid_change_types.SETTLED,
       change_source: bid_change_sources.SETTLEMENT_SCRIPT,
       // No actor: settlement is automatic and no human chose this outcome.

@@ -39,7 +39,14 @@ const PLAYER_VALUE = 1000
 
 const observed_at = (date) => `${date}T12:00:00Z`
 
-const insert_transaction = async ({ uid, tid, pid, date, time, season_year }) =>
+const insert_transaction = async ({
+  transaction_id,
+  tid,
+  pid,
+  date,
+  time,
+  season_year
+}) =>
   knex('transactions').insert({
     transaction_id,
     user_id: 1,
@@ -99,7 +106,7 @@ describe('SCRIPTS - calculate team daily ktc value - share invariant', function 
     // denominator, a row computed against the larger one is detectable in the
     // day's share sum rather than merely being a duplicate.
     await insert_transaction({
-      uid: 401,
+      transaction_id: 401,
       tid: SURVIVING_TEAM_ID,
       pid: PLAYER_KEPT,
       date: first_date,
@@ -107,7 +114,7 @@ describe('SCRIPTS - calculate team daily ktc value - share invariant', function 
       season_year
     })
     await insert_transaction({
-      uid: 402,
+      transaction_id: 402,
       tid: DECOMMISSIONED_TEAM_ID,
       pid: PLAYER_LOST,
       date: first_date,
@@ -118,7 +125,7 @@ describe('SCRIPTS - calculate team daily ktc value - share invariant', function 
     // Late enough in the day that the interpolation cursor's noon step for this
     // date falls before it, which is what makes the day emitted twice.
     await insert_transaction({
-      uid: 403,
+      transaction_id: 403,
       tid: SURVIVING_TEAM_ID,
       pid: 'PLAY-THRE-000003',
       date: boundary_date,
@@ -126,7 +133,7 @@ describe('SCRIPTS - calculate team daily ktc value - share invariant', function 
       season_year: season_year + 1
     })
     await insert_transaction({
-      uid: 404,
+      transaction_id: 404,
       tid: SURVIVING_TEAM_ID,
       pid: 'PLAY-FOUR-000004',
       date: last_date,

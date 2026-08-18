@@ -66,7 +66,7 @@ const generate_roster_asset_lineage = async ({
   log(`generating roster asset lineage for league ${lid}`)
 
   const league = await db('leagues')
-    .select('uid', 'salary_attribution_rule')
+    .select('league_id', 'salary_attribution_rule')
     .where('league_id', lid)
     .first()
   if (!league) {
@@ -287,7 +287,7 @@ const main = async () => {
     const argv = initialize_cli()
     if (argv.all) {
       const leagues = await db('leagues')
-        .select('uid')
+        .select('league_id')
         .where({ is_hosted: true })
         .whereNull('archived_at')
       for (const league of leagues) {

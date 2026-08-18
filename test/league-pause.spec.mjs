@@ -471,7 +471,7 @@ describe('LEAGUE PAUSE', function () {
         .set('Authorization', `Bearer ${user1}`)
 
       res.should.have.status(200)
-      const league = res.body.leagues.find((l) => l.uid === league_id)
+      const league = res.body.leagues.find((l) => l.league_id === league_id)
       expect(league, 'league 1 absent from the me payload').to.not.equal(
         undefined
       )
@@ -488,7 +488,7 @@ describe('LEAGUE PAUSE', function () {
         .execute(server)
         .get('/api/me')
         .set('Authorization', `Bearer ${user1}`)
-      const league = me_res.body.leagues.find((l) => l.uid === league_id)
+      const league = me_res.body.leagues.find((l) => l.league_id === league_id)
       expect(league.paused_at).to.equal(null)
       expect(league.resumed_at).to.equal(null)
     })

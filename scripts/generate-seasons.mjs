@@ -17,7 +17,7 @@ const generate_seasons = async () => {
   log(`Found ${leagues.length} active hosted leagues`)
 
   for (const league of leagues) {
-    const { uid: lid } = league
+    const { league_id: lid } = league
 
     // get the latest season for this league
     const season = await db('seasons')

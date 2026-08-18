@@ -58,7 +58,7 @@ export default async function ({
         'transactions.transaction_id',
         '=',
         db.raw(
-          '(select max(uid) from transactions where transactions.tid = rosters.tid and transactions.pid = rosters_players.pid)'
+          '(select max(transaction_id) from transactions where transactions.tid = rosters.tid and transactions.pid = rosters_players.pid)'
         )
       )
     })

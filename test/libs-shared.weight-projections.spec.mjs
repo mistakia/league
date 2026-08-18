@@ -112,8 +112,8 @@ describe('LIBS-SHARED weightProjections', function () {
         build_projection(6, { receiving_yards: 500 })
       ],
       weights: [
-        { uid: 3, weight: 3 },
-        { uid: 6, weight: 1 }
+        { source_id: 3, weight: 3 },
+        { source_id: 6, weight: 1 }
       ],
       week: 0
     })

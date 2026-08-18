@@ -661,7 +661,7 @@ const run = async ({ year = current_season.year } = {}) => {
   // synthetic logged-out default league. The remainder is every currently
   // active, hosted league derived from the leagues table.
   const hosted_league_rows = await db('leagues')
-    .select('uid')
+    .select('league_id')
     .where({ is_hosted: true })
     .whereNull('archived_at')
   const lids = [0, ...hosted_league_rows.map((row) => row.league_id)]
@@ -775,7 +775,7 @@ const check_oracle = async ({ seas_type }) => {
   // swallowed, which left this oracle unable to report its own failure.
   const two_hours_ago = new Date(Date.now() - 7200 * 1000)
   const stale_leagues = await db('leagues')
-    .select('uid', 'processed_at')
+    .select('league_id', 'processed_at')
     .where({ is_hosted: true })
     .whereNull('archived_at')
     .where(function () {

@@ -71,7 +71,7 @@ const compute_input_hash = async ({ lid }) => {
 
 const refresh_roster_asset_lineage = async ({ lid = null, force = false }) => {
   const league_query = db('leagues')
-    .select('uid')
+    .select('league_id')
     .where({ is_hosted: true })
     .whereNull('archived_at')
   if (lid) league_query.where('uid', lid)

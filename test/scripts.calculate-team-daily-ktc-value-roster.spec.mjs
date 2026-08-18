@@ -30,7 +30,7 @@ const GAINING_TEAM_ID = 2
 const POACHED_PLAYER = 'PLAY-POAC-000001'
 const PLAYER_VALUE = 1000
 
-const insert_transaction = async ({ uid, tid, pid, type, date }) =>
+const insert_transaction = async ({ transaction_id, tid, pid, type, date }) =>
   knex('transactions').insert({
     transaction_id,
     user_id: 1,
@@ -76,7 +76,7 @@ describe('SCRIPTS - calculate team daily ktc value - roster reconstruction', fun
 
   it('moves a poached player off the team he was poached from', async function () {
     await insert_transaction({
-      uid: 501,
+      transaction_id: 501,
       tid: LOSING_TEAM_ID,
       pid: POACHED_PLAYER,
       type: transaction_types.DRAFT,
@@ -84,7 +84,7 @@ describe('SCRIPTS - calculate team daily ktc value - roster reconstruction', fun
     })
     // The poach names only the gaining team, which is the whole difficulty.
     await insert_transaction({
-      uid: 502,
+      transaction_id: 502,
       tid: GAINING_TEAM_ID,
       pid: POACHED_PLAYER,
       type: transaction_types.POACHED,
@@ -92,7 +92,7 @@ describe('SCRIPTS - calculate team daily ktc value - roster reconstruction', fun
     })
     // A day is emitted when the following day's first transaction arrives.
     await insert_transaction({
-      uid: 503,
+      transaction_id: 503,
       tid: GAINING_TEAM_ID,
       pid: 'PLAY-OTHR-000002',
       type: transaction_types.DRAFT,
@@ -126,28 +126,28 @@ describe('SCRIPTS - calculate team daily ktc value - roster reconstruction', fun
     // went unapplied -- the player never left, so nothing had to bring him back
     // -- and became live the moment that was fixed.
     await insert_transaction({
-      uid: 521,
+      transaction_id: 521,
       tid: LOSING_TEAM_ID,
       pid: POACHED_PLAYER,
       type: transaction_types.DRAFT,
       date: day_one
     })
     await insert_transaction({
-      uid: 522,
+      transaction_id: 522,
       tid: GAINING_TEAM_ID,
       pid: POACHED_PLAYER,
       type: transaction_types.POACHED,
       date: day_two
     })
     await insert_transaction({
-      uid: 523,
+      transaction_id: 523,
       tid: LOSING_TEAM_ID,
       pid: POACHED_PLAYER,
       type: transaction_types.SUPER_PRIORITY,
       date: day_three
     })
     await insert_transaction({
-      uid: 524,
+      transaction_id: 524,
       tid: GAINING_TEAM_ID,
       pid: 'PLAY-OTHR-000002',
       type: transaction_types.DRAFT,
@@ -166,21 +166,21 @@ describe('SCRIPTS - calculate team daily ktc value - roster reconstruction', fun
     // whatever the log does or does not say about the departure, a player
     // contributes to exactly one team on any day.
     await insert_transaction({
-      uid: 511,
+      transaction_id: 511,
       tid: LOSING_TEAM_ID,
       pid: POACHED_PLAYER,
       type: transaction_types.DRAFT,
       date: day_one
     })
     await insert_transaction({
-      uid: 512,
+      transaction_id: 512,
       tid: GAINING_TEAM_ID,
       pid: POACHED_PLAYER,
       type: transaction_types.ROSTER_ADD,
       date: day_two
     })
     await insert_transaction({
-      uid: 513,
+      transaction_id: 513,
       tid: GAINING_TEAM_ID,
       pid: 'PLAY-OTHR-000002',
       type: transaction_types.DRAFT,

@@ -172,7 +172,7 @@ export default async function ({
   })
 
   return {
-    uid: poach_id,
+    poach_id,
     release,
     ...data
   }

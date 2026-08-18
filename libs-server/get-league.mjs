@@ -29,7 +29,7 @@ export default async function ({ lid, year = current_season.year } = {}) {
 
   if (!lid) {
     const league = create_default_league()
-    return { uid: 0, ...league }
+    return { league_id: 0, ...league }
   }
 
   const league = await db('leagues')

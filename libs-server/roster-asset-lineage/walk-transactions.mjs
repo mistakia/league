@@ -871,7 +871,7 @@ const build_event_stream = async ({ lid }) => {
   const trades = await db('trades')
     .where({ lid })
     .whereNotNull('accepted')
-    .select('uid', 'propose_tid', 'accept_tid', 'season_year', 'accepted')
+    .select('trade_id', 'propose_tid', 'accept_tid', 'season_year', 'accepted')
     .orderBy('accepted', 'asc')
   const trade_ids = trades.map((t) => t.trade_id)
   const trade_players = trade_ids.length
