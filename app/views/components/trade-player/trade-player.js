@@ -29,7 +29,13 @@ export default class TradePlayer extends React.Component {
         <div className='trade__player-metric metric'>
           <label>Adj Val</label>
           {player_map
-            .getIn(['salary_adj_pts_added', pts_added_type], 0)
+            .getIn(
+              [
+                'projected_points_added_positive_including_cap_savings',
+                pts_added_type
+              ],
+              0
+            )
             .toFixed(1)}
         </div>
         <div className='trade__player-metric metric'>

@@ -142,7 +142,7 @@ const generate_league_format_player_seasonlogs = async ({
     delete insert.pos
     delete insert.pts_added
     delete insert.market_salary
-    delete insert.salary_adj_pts_added
+    delete insert.projected_points_added_positive_including_cap_savings
   }
 
   // Output oracles. Both numbers are already computed above; asserting on them

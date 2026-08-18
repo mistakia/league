@@ -36,7 +36,7 @@ const map_state_to_props = createSelector(
     const player_pts_added = player_map.getIn(['pts_added', '0'], 0)
     // The LIVE auction price: what the player costs given the cap space and
     // value still on the board right now. Distinct from the persisted
-    // market_salary_adj, which is the same question answered at cron time.
+    // projected_positive_salary_at_available_cap, which is the same question answered at cron time.
     const auction_adjusted_salary = Math.max(
       Math.round(player_pts_added * rate) || 0,
       0

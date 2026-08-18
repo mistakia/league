@@ -640,3 +640,128 @@ describe('data view practice field parity', function () {
     ).to.deep.equal([])
   })
 })
+
+// A `select_as` alias is not an internal label -- select-string.mjs emits it as
+// a real SQL identifier, `${select_as}_${column_index}`, and Postgres TRUNCATES
+// an identifier past 63 bytes with a NOTICE rather than an error. So an
+// over-long alias makes the result carry a key the client never asks for and
+// the cell renders blank, in production, while every spec above stays green:
+// the value-path assertions compare the client path to `select_as()` with BOTH
+// sides untruncated, so they agree on a name the database will never return.
+//
+// Verified on league-test-pg, not reasoned:
+//   select 1 as "rest_of_season_projected_points_added_positive_including_cap_savings_0"
+//   NOTICE: identifier ... will be truncated to "..._including_cap_sa"
+//
+// That 70-byte alias is what a literal reading of the 2026-08-18 adj retirement
+// would have shipped. The three aliases in that family drop their `projected_`
+// token to fit, which is the headroom this budget exists to protect.
+//
+// The budget is 60, not 63: `_${column_index}` costs two bytes at index 0 and
+// three once a view carries ten or more columns, so an alias that fits only at
+// a single-digit index is a defect waiting for a wide view.
+describe('data-view select_as alias length', function () {
+  const POSTGRES_IDENTIFIER_LIMIT = 63
+  const MAX_COLUMN_INDEX_SUFFIX = '_99'.length
+  const budget = POSTGRES_IDENTIFIER_LIMIT - MAX_COLUMN_INDEX_SUFFIX
+
+  // A zero-argument `select_as` has exactly one alias, so CALLING it is an exact
+  // oracle. One taking params aliases per request and has no single value to
+  // measure; those are counted and reported rather than silently skipped.
+  const measure_all = () => {
+    const over_budget = []
+    let measured = 0
+    let parameterized = 0
+
+    for (const [column_id, definition] of Object.entries(
+      all_column_definitions
+    )) {
+      const select_as = definition && definition.select_as
+      if (typeof select_as !== 'function') continue
+      if (select_as.length > 0) {
+        parameterized += 1
+        continue
+      }
+
+      let alias
+      try {
+        alias = select_as()
+      } catch (err) {
+        parameterized += 1
+        continue
+      }
+      if (typeof alias !== 'string') continue
+      measured += 1
+
+      const bytes = Buffer.byteLength(alias, 'utf8')
+      if (bytes > budget) {
+        over_budget.push({ column_id, alias, bytes })
+      }
+    }
+
+    return { over_budget, measured, parameterized }
+  }
+
+  // Two aliases were already over budget when this check was written, both from
+  // the 2026-08-18 receiving conform, and both OUTSIDE the adj retirement's
+  // scope. They are held out here rather than fixed by a session that does not
+  // own them -- and rather than quietly lowering the budget, which is how a gate
+  // stops being one.
+  //
+  // Neither is broken today: at 61 bytes each survives `_0` through `_9` at
+  // exactly the 63-byte limit, and truncates only once it lands at column index
+  // 10 or beyond, which needs a view carrying eleven or more columns. That is a
+  // real latent blank cell, not a false positive.
+  //
+  // The remedy is to shorten both aliases and their `player_value_path` reads in
+  // lockstep. An entry that is no longer over budget FAILS below, so a repair
+  // forces its removal instead of leaving a standing exemption for the name.
+  const KNOWN_OVER_BUDGET = new Set([
+    'nfl_team_seasonlogs_receiving_yards_after_catch_over_expected',
+    'nfl_team_seasonlogs_receiving_yards_after_catch_per_reception'
+  ])
+
+  it('holds out no alias that is already inside the budget', function () {
+    const { over_budget } = measure_all()
+    const still_over = new Set(over_budget.map((entry) => entry.column_id))
+    const stale = [...KNOWN_OVER_BUDGET].filter((id) => !still_over.has(id))
+    expect(
+      stale,
+      `held-out aliases that now fit; delete these entries: ${stale.join('; ')}`
+    ).to.deep.equal([])
+  })
+
+  it('keeps every zero-argument alias inside the identifier budget', function () {
+    const { over_budget, measured, parameterized } = measure_all()
+
+    // A matcher that stopped matching would report perfect compliance over a
+    // corpus it never read, so assert the denominator too. `parameterized` is
+    // reported rather than asserted -- it is the honest uncovered bucket.
+    expect(
+      measured,
+      `measured no zero-argument select_as at all (${parameterized} parameterized); the scan is blind`
+    ).to.be.greaterThan(20)
+
+    const unheld = over_budget
+      .filter((entry) => !KNOWN_OVER_BUDGET.has(entry.column_id))
+      .map(
+        (entry) =>
+          `${entry.column_id}: '${entry.alias}' is ${entry.bytes} bytes`
+      )
+
+    expect(
+      unheld,
+      `aliases Postgres will truncate, rendering a blank cell: ${unheld.join('; ')}`
+    ).to.deep.equal([])
+  })
+
+  it('would report an alias that exceeds the budget', function () {
+    // The positive control. Without it a green above cannot be told apart from
+    // a comparison that can never fire.
+    const alias = 'a'.repeat(budget + 1)
+    expect(Buffer.byteLength(alias, 'utf8')).to.be.greaterThan(budget)
+    // At the widest column index the budget covers, this alias is exactly what
+    // Postgres refuses to keep whole.
+    expect(`${alias}_99`.length).to.be.greaterThan(POSTGRES_IDENTIFIER_LIMIT)
+  })
+})

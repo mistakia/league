@@ -59,7 +59,7 @@ const extra_column_params_by_base_name = {
 const computed_base_names = new Set([
   'points_added',
   'market_salary',
-  'salary_adjusted_points_added'
+  'points_added_positive_including_cap_savings'
 ])
 
 // The param KEY stays `sourceid` even though its COLUMN is now `source_id`.

@@ -32,13 +32,13 @@ export default {
     "The player's extended salary minus their projected market salary. Positive means the contract is priced above what one season of the player is worth. Populated only for a regular roster tag. Null for franchise and rookie tags, because market salary prices a single season and those are multi-year commitments; null for restricted free agency, because the auction settles that contract and the offer is blind. Also null where no market projection exists for the player",
   player_week_projected_market_salary:
     'The projected market salary for the player in a specific week',
-  player_season_projected_inflation_adjusted_market_salary:
+  player_season_projected_positive_salary_at_available_cap:
     'The projected market salary for the player for the entire season, adjusted for inflation',
-  player_week_projected_salary_adjusted_points_added:
+  player_week_projected_points_added_positive_including_cap_savings:
     'The projected points added by the player in a specific week, adjusted for their salary',
-  player_season_projected_salary_adjusted_points_added:
+  player_season_projected_points_added_positive_including_cap_savings:
     'The projected points added by the player for the entire season, adjusted for their salary',
-  player_rest_of_season_projected_salary_adjusted_points_added:
+  player_rest_of_season_projected_points_added_positive_including_cap_savings:
     'The projected points added by the player for the remainder of the season, adjusted for their salary',
 
   player_fantasy_points_from_plays: "The player's fantasy points from plays",

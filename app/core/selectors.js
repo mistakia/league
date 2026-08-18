@@ -3642,7 +3642,16 @@ function getTeamTradeSummary(
     value_adj: playerMaps.reduce(
       (sum, pMap) =>
         sum +
-        Math.max(pMap.getIn(['salary_adj_pts_added', pts_added_type], 0), 0),
+        Math.max(
+          pMap.getIn(
+            [
+              'projected_points_added_positive_including_cap_savings',
+              pts_added_type
+            ],
+            0
+          ),
+          0
+        ),
       0
     ),
     salary: playerMaps.reduce(

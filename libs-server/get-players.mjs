@@ -338,7 +338,7 @@ export default async function ({
     player_row.player_salary = null
     player_row.points = {}
     player_row.pts_added = {}
-    player_row.salary_adj_pts_added = {}
+    player_row.projected_points_added_positive_including_cap_savings = {}
     player_row.market_salary = {}
     player_row.projection = {}
     players_by_pid[player_row.pid] = player_row
@@ -413,8 +413,14 @@ export default async function ({
       })
       .whereIn('pid', returnedPlayerIds)
 
-    for (const { pid, week, salary_adj_pts_added } of leagueValuesProj) {
-      players_by_pid[pid].salary_adj_pts_added[week] = salary_adj_pts_added
+    for (const {
+      pid,
+      week,
+      projected_points_added_positive_including_cap_savings
+    } of leagueValuesProj) {
+      players_by_pid[pid].projected_points_added_positive_including_cap_savings[
+        week
+      ] = projected_points_added_positive_including_cap_savings
     }
 
     const league_season_values = await db(
@@ -428,11 +434,14 @@ export default async function ({
 
     for (const {
       pid,
-      salary_adj_pts_added,
-      market_salary_adj
+      projected_points_added_positive_including_cap_savings,
+      projected_positive_salary_at_available_cap
     } of league_season_values) {
-      players_by_pid[pid].salary_adj_pts_added['0'] = salary_adj_pts_added
-      players_by_pid[pid].market_salary_adj = market_salary_adj
+      players_by_pid[pid].projected_points_added_positive_including_cap_savings[
+        '0'
+      ] = projected_points_added_positive_including_cap_savings
+      players_by_pid[pid].projected_positive_salary_at_available_cap =
+        projected_positive_salary_at_available_cap
     }
 
     const league_rest_of_season_values = await db(
@@ -444,8 +453,14 @@ export default async function ({
       })
       .whereIn('pid', returnedPlayerIds)
 
-    for (const { pid, salary_adj_pts_added } of league_rest_of_season_values) {
-      players_by_pid[pid].salary_adj_pts_added.ros = salary_adj_pts_added
+    for (const {
+      pid,
+      projected_points_added_positive_including_cap_savings
+    } of league_rest_of_season_values) {
+      players_by_pid[
+        pid
+      ].projected_points_added_positive_including_cap_savings.ros =
+        projected_points_added_positive_including_cap_savings
     }
   }
 

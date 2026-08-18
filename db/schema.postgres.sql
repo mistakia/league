@@ -4417,8 +4417,7 @@ CREATE TABLE public.league_player_projection_values (
     week character varying(3) NOT NULL,
     season_year smallint,
     lid integer NOT NULL,
-    salary_adj_pts_added numeric(5,2),
-    market_salary_adj numeric(6,2)
+    projected_points_added_positive_including_cap_savings numeric(5,2)
 );
 
 
@@ -4430,8 +4429,7 @@ CREATE TABLE public.league_player_rest_of_season_projection_values (
     pid character varying(25),
     lid integer NOT NULL,
     season_year smallint,
-    salary_adj_pts_added numeric(5,2),
-    salary_adj_points_added_net numeric(5,2)
+    projected_points_added_positive_including_cap_savings numeric(5,2)
 );
 
 
@@ -4443,9 +4441,8 @@ CREATE TABLE public.league_player_season_projection_values (
     pid character varying(25),
     lid integer NOT NULL,
     season_year smallint,
-    salary_adj_pts_added numeric(5,2),
-    market_salary_adj numeric(6,2),
-    salary_adj_points_added_net numeric(5,2)
+    projected_points_added_positive_including_cap_savings numeric(5,2),
+    projected_positive_salary_at_available_cap numeric(6,2)
 );
 
 
