@@ -176,6 +176,192 @@ function load_schema_tables() {
   return tables
 }
 
+// ---------------------------------------------------------------------------
+// negative controls
+// ---------------------------------------------------------------------------
+
+// Five controls, run on EVERY invocation, and a control that does not hold
+// fails the gate.
+//
+// This gate reports a green over eleven names on almost every run, which is the
+// shape a broken matcher is invisible in: `no dropped table has a surviving
+// consumer` is byte-identical whether the patterns work or match nothing at
+// all. The matcher was rewritten off ripgrep onto the Node tree-walk above on
+// 2026-08-18 (`6660fec37`) to take an environment dependency out of CI, so the
+// thing producing that green is new code that had never been shown to go red.
+//
+// THREE RED, one per pattern shape, because the three shapes fail
+// independently: the two builder patterns are case-SENSITIVE by design and the
+// raw-SQL one is not, so a single control would leave two shapes unproven.
+//
+// TWO SILENT, because suppressing noise is half of what these patterns are for.
+// A bare-word matcher on `schedule` hit 76 files and not one was a defect;
+// the patterns exist to reject those, and a matcher that went back to matching
+// bare words would fail in the direction that looks like MORE coverage.
+//
+// Every control mutates REAL corpus material -- it must FIND an occurrence of
+// its shape before it can rewrite one -- so an emptied or unreachable corpus
+// reports NO MATERIAL and fails, rather than passing over nothing.
+const CONTROL_TABLE = 'schedule'
+
+// Rewrite one occurrence IN PLACE by offset, never by pattern. An ordinary
+// table name recurs across a file, and a pattern rewrite would plant matches at
+// sites the control is not aiming at -- which turns a silent control green for
+// a reason that has nothing to do with the shape under test.
+const rewrite_at = ({ text, offset, length, replacement }) =>
+  text.slice(0, offset) + replacement + text.slice(offset + length)
+
+// The first corpus entry carrying an occurrence of the shape `find` names, in
+// a file that does not ALREADY match the control table -- a file that matched
+// beforehand would make a silent control pass on the gate's own prior finding.
+const pick_material = ({ corpus, find }) => {
+  const control_patterns = table_reference_patterns(CONTROL_TABLE)
+  for (const entry of corpus) {
+    if (control_patterns.some((pattern) => pattern.test(entry.text))) continue
+    const hit = find(entry.text)
+    if (hit) return { entry, hit }
+  }
+  return null
+}
+
+// A quoted table-name argument to a call: `db('players')`, `.leftJoin("x as y")`.
+// Returns the offset and length of the NAME inside the quotes.
+const find_quoted_argument = (text, callee_pattern) => {
+  const re = new RegExp(
+    `${callee_pattern}\\s*\\(\\s*['"\`]([a-z_][a-z_0-9]*)['"\`]`,
+    'g'
+  )
+  const match = re.exec(text)
+  if (!match) return null
+  const name = match[1]
+  return {
+    offset: match.index + match[0].lastIndexOf(name),
+    length: name.length
+  }
+}
+
+const CONTROLS = [
+  {
+    name: 'a knex builder argument naming a dropped table is reported',
+    direction: 'must-report',
+    find: (text) => find_quoted_argument(text, '\\b(?:db|trx|knex)')
+  },
+  {
+    name: 'a join-family argument naming a dropped table is reported',
+    direction: 'must-report',
+    find: (text) =>
+      find_quoted_argument(
+        text,
+        '\\.(?:from|into|table|join|leftJoin|rightJoin|innerJoin)'
+      )
+  },
+  {
+    // Deliberately anchored on an UPPERCASE keyword. The raw-SQL pattern is the
+    // only case-insensitive one of the three, and matching it against a
+    // lowercase keyword would leave the `i` flag -- the thing that makes it
+    // differ from the other two -- untested.
+    name: 'a raw SQL keyword naming a dropped table is reported, case-insensitively',
+    direction: 'must-report',
+    find: (text) => {
+      const re = /\b(?:FROM|JOIN|INTO|UPDATE|TABLE)\s+([a-z_][a-z_0-9]*)\b/g
+      const match = re.exec(text)
+      if (!match) return null
+      const name = match[1]
+      return {
+        offset: match.index + match[0].lastIndexOf(name),
+        length: name.length
+      }
+    }
+  },
+  {
+    // The 76-file case, from the header. `schedule` as an ordinary local is not
+    // a table reference and must not be reported.
+    name: 'a bare-word occurrence that is NOT a table reference stays silent',
+    direction: 'must-stay-silent',
+    find: (text) => {
+      const re = /\bconst\s+([a-z_][a-z_0-9]*)\s*=/g
+      const match = re.exec(text)
+      if (!match) return null
+      const name = match[1]
+      return {
+        offset: match.index + match[0].lastIndexOf(name),
+        length: name.length
+      }
+    }
+  },
+  {
+    // A quoted occurrence that is not a CALL argument. Quoting alone is not
+    // what makes a name a table reference, and a matcher that dropped the
+    // callee requirement would report every string that spells one.
+    name: 'a quoted occurrence outside a builder call stays silent',
+    direction: 'must-stay-silent',
+    find: (text) => {
+      const re = /(?:===|:)\s*['"`]([a-z_][a-z_0-9]*)['"`]/g
+      const match = re.exec(text)
+      if (!match) return null
+      const name = match[1]
+      return {
+        offset: match.index + match[0].lastIndexOf(name),
+        length: name.length
+      }
+    }
+  }
+]
+
+function run_negative_controls(corpus) {
+  return CONTROLS.map((control) => {
+    const material = pick_material({ corpus, find: control.find })
+    if (!material) {
+      return {
+        name: control.name,
+        result: 'NO MATERIAL',
+        detail:
+          'no corpus occurrence of this shape -- the scan may not be reaching the tree',
+        passed: false
+      }
+    }
+
+    const { entry, hit } = material
+    const mutated_text = rewrite_at({
+      text: entry.text,
+      offset: hit.offset,
+      length: hit.length,
+      replacement: CONTROL_TABLE
+    })
+    if (mutated_text === entry.text) {
+      return {
+        name: control.name,
+        result: 'MUTATION DID NOT APPLY',
+        detail: `${entry.relative_path} unchanged -- the control proved nothing`,
+        passed: false
+      }
+    }
+
+    const mutated_corpus = corpus.map((candidate) =>
+      candidate === entry
+        ? { relative_path: entry.relative_path, text: mutated_text }
+        : candidate
+    )
+    const reported = find_consumer_files(
+      CONTROL_TABLE,
+      mutated_corpus
+    ).includes(entry.relative_path)
+    const passed = control.direction === 'must-report' ? reported : !reported
+    return {
+      name: control.name,
+      result: passed
+        ? control.direction === 'must-report'
+          ? 'WENT RED'
+          : 'STAYED SILENT'
+        : control.direction === 'must-report'
+          ? 'STAYED GREEN'
+          : 'FALSE POSITIVE',
+      detail: entry.relative_path,
+      passed
+    }
+  })
+}
+
 function main() {
   const schema_tables = load_schema_tables()
   const dropped = [...DROPPED_TABLES].sort()
@@ -209,9 +395,27 @@ function main() {
     }
   }
 
-  if (errors.length) {
-    console.log('\nERRORS:')
-    for (const e of errors) console.log(`  x ${e}`)
+  const controls = run_negative_controls(corpus)
+  const failed_controls = controls.filter((control) => !control.passed)
+  console.log('\nNEGATIVE CONTROLS')
+  for (const control of controls) {
+    console.log(
+      `  [${control.passed ? 'ok' : 'FAIL'}] ${control.result}  ${control.name}`
+    )
+    if (!control.passed) console.log(`      ${control.detail}`)
+  }
+
+  if (errors.length || failed_controls.length) {
+    if (errors.length) {
+      console.log('\nERRORS:')
+      for (const e of errors) console.log(`  x ${e}`)
+    }
+    if (failed_controls.length) {
+      console.log(
+        `\n${failed_controls.length} negative control(s) did not hold. Until they do, this ` +
+          'gate cannot tell a clean tree from a matcher that has stopped matching.'
+      )
+    }
     process.exitCode = 1
     return
   }
