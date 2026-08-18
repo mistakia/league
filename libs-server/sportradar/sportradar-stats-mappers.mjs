@@ -103,7 +103,7 @@ export const map_receiving_stats = async ({
   }
 
   // Receiving metrics
-  mapped.recv_yards = receive_stats.yards || null
+  mapped.receiving_yards = receive_stats.yards || null
   mapped.yards_after_catch = receive_stats.yards_after_catch || null
   mapped.yards_after_any_contact = receive_stats.yards_after_contact || null
   mapped.broken_tackles_receiving = receive_stats.broken_tackles || 0

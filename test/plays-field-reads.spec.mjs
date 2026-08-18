@@ -612,7 +612,7 @@ describe('calculate-stats-from-plays interception attribution', function () {
       pass_play({
         is_completion: true,
         target_pid: 'TARG-ET-000003',
-        recv_yards: 12,
+        receiving_yards: 12,
         pass_yards: 12
       })
     ])

@@ -201,7 +201,7 @@ const calculate_historical_hit_rates = async ({
     .select(
       'esbid',
       'pass_yards',
-      'recv_yards',
+      'receiving_yards',
       'rush_yards',
       'passer_pid',
       'target_pid',
@@ -242,7 +242,8 @@ const calculate_historical_hit_rates = async ({
           play.rush_yards || 0
       }
       if (play.target_pid) {
-        acc[play.esbid][play.target_pid].receiving_yards += play.recv_yards || 0
+        acc[play.esbid][play.target_pid].receiving_yards +=
+          play.receiving_yards || 0
       }
 
       return acc
@@ -255,7 +256,7 @@ const calculate_historical_hit_rates = async ({
     .select(
       'esbid',
       'pass_yards',
-      'recv_yards',
+      'receiving_yards',
       'rush_yards',
       'passer_pid',
       'target_pid',
@@ -295,7 +296,8 @@ const calculate_historical_hit_rates = async ({
         play.rush_yards || 0
     }
     if (play.target_pid) {
-      acc[play.esbid][play.target_pid].receiving_yards += play.recv_yards || 0
+      acc[play.esbid][play.target_pid].receiving_yards +=
+        play.receiving_yards || 0
     }
 
     return acc

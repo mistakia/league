@@ -179,12 +179,12 @@ const PLAYS_SOURCED_ROLES = [
     name: 'receiving',
     pid_column: 'target_pid',
     fallback:
-      'COALESCE(is_completion::int, 0) * 1 + COALESCE(recv_yards, 0) * 0.1 + COALESCE(is_passing_touchdown::int, 0) * 6',
+      'COALESCE(is_completion::int, 0) * 1 + COALESCE(receiving_yards, 0) * 0.1 + COALESCE(is_passing_touchdown::int, 0) * 6',
     terms: [
       {
         column: 'receiving_yards',
         kind: 'rate',
-        expr: 'COALESCE(recv_yards, 0)',
+        expr: 'COALESCE(receiving_yards, 0)',
         always: true
       },
       {
@@ -239,7 +239,7 @@ const PLAYS_SOURCED_ROLES = [
     ],
     bonus_stat: {
       stat: 'receiving_yards',
-      yards_expr: 'COALESCE(recv_yards, 0)'
+      yards_expr: 'COALESCE(receiving_yards, 0)'
     }
   }
 ]

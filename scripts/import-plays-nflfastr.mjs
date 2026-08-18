@@ -418,7 +418,7 @@ const format_scoring_yards = (play) => ({
   is_passing_touchdown: format_boolean(play.pass_touchdown),
   is_rushing_touchdown: format_boolean(play.rush_touchdown),
   pass_yards: format_number(play.passing_yards),
-  recv_yards: format_number(play.receiving_yards),
+  receiving_yards: format_number(play.receiving_yards),
   rush_yards: format_number(play.rushing_yards)
 })
 

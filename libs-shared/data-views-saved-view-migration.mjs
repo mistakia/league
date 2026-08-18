@@ -292,7 +292,13 @@ export const COUNTING_STAT_PARAM_RENAMES = {
   pass_yds: 'pass_yards',
   pen_team: 'penalty_team',
   pen_yds: 'penalty_yards',
-  recv_yds: 'recv_yards',
+  // recv_yds is a frozen legacy key of THIS batch and only its VALUE moves. The
+  // 2026-08-18 recv -> receiving conform renamed the physical column again, and
+  // migrate_params resolves in a single pass, so a chain only works when the
+  // second rule sits in a map merged LATER -- which the recv_yards rule does
+  // (RECEIVING_PREFIX_PARAM_RENAMES). Pointing this one straight at the live
+  // name is the same answer in one hop and does not depend on merge order.
+  recv_yds: 'receiving_yards',
   return_yds: 'return_yards',
   rush_yds: 'rush_yards',
   td_prob: 'touchdown_prob',
@@ -359,6 +365,24 @@ export const LONG_TAIL_PARAM_RENAMES = {
   pos_score_post: 'possession_score_post',
   pos_timeouts_remaining: 'possession_timeouts_remaining',
   yard_line_num: 'yard_line_number'
+}
+
+// The 2026-08-18 recv -> receiving conform
+// (db/adhoc/2026-08-18-conform-recv-to-receiving.sql). Exactly ONE of the 41
+// renamed columns is also a registry key -- nfl_plays.recv_yards -- and the
+// registry key IS the persisted key, so a saved view carrying it would silently
+// lose its filter, the same failure mode as every map above.
+//
+// Production carried zero occurrences of it across 186 saved views and 875 short
+// URLs when this shipped, so the rule is precautionary against anything saved
+// between then and the deploy rather than a repair of live state.
+//
+// Merged LAST, which is what lets the counting-stat batch's frozen recv_yds key
+// chain through this rule if it is ever repointed back to the intermediate
+// spelling. It points at the live name directly today, so the chain is not
+// load-bearing.
+export const RECEIVING_PREFIX_PARAM_RENAMES = {
+  recv_yards: 'receiving_yards'
 }
 
 // scoring_format_hash -> scoring_format_id, stranded by the format-id migration
@@ -616,10 +640,57 @@ const COLUMN_ID_RENAMES = {
     'nfl_team_seasonlogs_rush_attempts_stacked_box_percentage',
   nfl_team_seasonlogs_rush_attempts_under_center_pct:
     'nfl_team_seasonlogs_rush_attempts_under_center_percentage',
+  // These two are frozen legacy keys from the pct batch, and their VALUES move
+  // with the 2026-08-18 recv -> receiving conform. migrate_column_entry does a
+  // SINGLE lookup with no chaining, so a value left pointing at the
+  // intermediate spelling would resolve to an id the fields index no longer
+  // carries -- the blank-cell shape, one step further along.
   nfl_team_seasonlogs_recv_deep_target_pct:
-    'nfl_team_seasonlogs_recv_deep_target_percentage',
+    'nfl_team_seasonlogs_receiving_deep_target_percentage',
   nfl_team_seasonlogs_recv_tight_window_pct:
-    'nfl_team_seasonlogs_recv_tight_window_percentage'
+    'nfl_team_seasonlogs_receiving_tight_window_percentage',
+  // The 2026-08-18 recv -> receiving conform. Seventeen ids move because their
+  // spelling derives from a renamed column, so the server stops emitting the old
+  // key and the client's player_value_path renders blank without these.
+  //
+  // Production carried ZERO saved views and ZERO share URLs naming any of them
+  // at authoring time; these are precautionary against anything saved between
+  // then and the deploy, per the reasoning in the pct note above.
+  //
+  // nfl_team_seasonlogs_recv_avg_target_separation additionally repairs a
+  // divergence the counting batch left: its player_value_path already read
+  // nfl_team_seasonlogs_recv_average_target_separation, which did not match its
+  // own id.
+  nfl_team_seasonlogs_expected_recv_yards_after_catch:
+    'nfl_team_seasonlogs_expected_receiving_yards_after_catch',
+  nfl_team_seasonlogs_recv_air_yards: 'nfl_team_seasonlogs_receiving_air_yards',
+  nfl_team_seasonlogs_recv_air_yards_per_target:
+    'nfl_team_seasonlogs_receiving_air_yards_per_target',
+  nfl_team_seasonlogs_recv_avg_target_separation:
+    'nfl_team_seasonlogs_receiving_average_target_separation',
+  nfl_team_seasonlogs_recv_deep_target_percentage:
+    'nfl_team_seasonlogs_receiving_deep_target_percentage',
+  nfl_team_seasonlogs_recv_drop_rate: 'nfl_team_seasonlogs_receiving_drop_rate',
+  nfl_team_seasonlogs_recv_drops: 'nfl_team_seasonlogs_receiving_drops',
+  nfl_team_seasonlogs_recv_epa: 'nfl_team_seasonlogs_receiving_epa',
+  nfl_team_seasonlogs_recv_epa_per_route:
+    'nfl_team_seasonlogs_receiving_epa_per_route',
+  nfl_team_seasonlogs_recv_epa_per_target:
+    'nfl_team_seasonlogs_receiving_epa_per_target',
+  nfl_team_seasonlogs_recv_tight_window_percentage:
+    'nfl_team_seasonlogs_receiving_tight_window_percentage',
+  nfl_team_seasonlogs_recv_yards_15_plus_rate:
+    'nfl_team_seasonlogs_receiving_yards_15_plus_rate',
+  nfl_team_seasonlogs_recv_yards_after_catch:
+    'nfl_team_seasonlogs_receiving_yards_after_catch',
+  nfl_team_seasonlogs_recv_yards_after_catch_over_expected:
+    'nfl_team_seasonlogs_receiving_yards_after_catch_over_expected',
+  nfl_team_seasonlogs_recv_yards_after_catch_per_reception:
+    'nfl_team_seasonlogs_receiving_yards_after_catch_per_reception',
+  nfl_team_seasonlogs_recv_yards_per_reception:
+    'nfl_team_seasonlogs_receiving_yards_per_reception',
+  nfl_team_seasonlogs_recv_yards_per_route:
+    'nfl_team_seasonlogs_receiving_yards_per_route'
 }
 
 // Column-id renames for the SHARE-URL path, which receives none of the read-time
@@ -652,7 +723,8 @@ const PARAM_KEY_RENAMES = {
   ...POSITION_CODE_PARAM_RENAMES,
   ...COUNTING_STAT_PARAM_RENAMES,
   ...MARKETS_PARAM_RENAMES,
-  ...LONG_TAIL_PARAM_RENAMES
+  ...LONG_TAIL_PARAM_RENAMES,
+  ...RECEIVING_PREFIX_PARAM_RENAMES
 }
 
 // Every legacy param key this module rewrites at read time, exported so

@@ -127,7 +127,7 @@
     "CASE WHEN SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN is_qb_pressure = true AND passer_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as qb_press_pct_from_plays"
   ],
   "player_receiver_air_conversion_ratio_from_plays": [
-    "CASE WHEN SUM(depth_of_target) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN recv_yards ELSE 0 END)::decimal / NULLIF(SUM(depth_of_target), 0), 4) AS decimal) ELSE 0 END as rec_air_conv_ratio_from_plays"
+    "CASE WHEN SUM(depth_of_target) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)::decimal / NULLIF(SUM(depth_of_target), 0), 4) AS decimal) ELSE 0 END as rec_air_conv_ratio_from_plays"
   ],
   "player_receiving_first_down_from_plays": [
     "SUM(CASE WHEN is_first_down = true THEN 1 ELSE 0 END) as recv_first_down_from_plays"
@@ -149,13 +149,13 @@
     "CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN yards_after_catch ELSE 0 END)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rec_yds_after_catch_per_rec_from_plays"
   ],
   "player_receiving_yards_from_plays": [
-    "SUM(CASE WHEN is_completion = true THEN recv_yards ELSE 0 END) as rec_yds_from_plays"
+    "SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END) as rec_yds_from_plays"
   ],
   "player_receiving_yards_per_reception_from_plays": [
-    "CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN recv_yards ELSE 0 END)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rec_yds_per_rec_from_plays"
+    "CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rec_yds_per_rec_from_plays"
   ],
   "player_receiving_yards_per_target_from_plays": [
-    "CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN recv_yards ELSE 0 END)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rec_yds_per_trg_from_plays"
+    "CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rec_yds_per_trg_from_plays"
   ],
   "player_receptions_from_plays": [
     "SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) as recs_from_plays"

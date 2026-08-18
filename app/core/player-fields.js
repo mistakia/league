@@ -1006,28 +1006,28 @@ function PlayerFields({ week, opponent_time_period, state }) {
       ...opponent_field('rushing_touchdowns')
     },
 
-    opponent_recv_trg: {
+    opponent_receiving_trg: {
       category: 'receiving matchup',
       column_header: 'TRG',
       csv_header: 'Opponent targets over average',
       percentile_field: 'targets',
       ...opponent_field('targets')
     },
-    opponent_recv_rec: {
+    opponent_receiving_rec: {
       category: 'receiving matchup',
       column_header: 'REC',
       csv_header: 'Opponent recs over average',
       percentile_field: 'receptions',
       ...opponent_field('receptions')
     },
-    opponent_recv_recy: {
+    opponent_receiving_recy: {
       category: 'receiving matchup',
       column_header: 'YDS',
       csv_header: 'Opponent recv yds over average',
       percentile_field: 'receiving_yards',
       ...opponent_field('receiving_yards')
     },
-    opponent_recv_tdrec: {
+    opponent_receiving_tdrec: {
       category: 'receiving matchup',
       column_header: 'TD',
       csv_header: 'Opponent recv tds over average',
@@ -1157,40 +1157,40 @@ function PlayerFields({ week, opponent_time_period, state }) {
       percentile_field: 'catch_rate_over_expected',
       ...opponent_field('catch_rate_over_expected')
     },
-    opponent_recv_yards_per_reception: {
+    opponent_receiving_yards_per_reception: {
       category: 'receiving efficiency matchup',
       column_header: 'Y/R',
       csv_header: 'Opponent receiving yards per reception over average',
-      percentile_field: 'recv_yards_per_reception',
-      ...opponent_field('recv_yards_per_reception')
+      percentile_field: 'receiving_yards_per_reception',
+      ...opponent_field('receiving_yards_per_reception')
     },
-    opponent_recv_yards_per_route: {
+    opponent_receiving_yards_per_route: {
       category: 'receiving efficiency matchup',
       column_header: 'Y/RTE',
       csv_header: 'Opponent receiving yards per route over average',
-      percentile_field: 'recv_yards_per_route',
-      ...opponent_field('recv_yards_per_route')
+      percentile_field: 'receiving_yards_per_route',
+      ...opponent_field('receiving_yards_per_route')
     },
     opponent_receiving_epa_per_target: {
       category: 'receiving efficiency matchup',
       column_header: 'EPA/TGT',
       csv_header: 'Opponent receiving EPA per target over average',
-      percentile_field: 'recv_epa_per_target',
-      ...opponent_field('recv_epa_per_target')
+      percentile_field: 'receiving_epa_per_target',
+      ...opponent_field('receiving_epa_per_target')
     },
     opponent_receiving_epa_per_route: {
       category: 'receiving efficiency matchup',
       column_header: 'EPA/RTE',
       csv_header: 'Opponent receiving EPA per route over average',
-      percentile_field: 'recv_epa_per_route',
-      ...opponent_field('recv_epa_per_route')
+      percentile_field: 'receiving_epa_per_route',
+      ...opponent_field('receiving_epa_per_route')
     },
     opponent_receiving_yards_after_catch_over_expected: {
       category: 'receiving efficiency matchup',
       column_header: 'YAC/E',
       csv_header: 'Opponent receiving yards after catch over expected',
-      percentile_field: 'recv_yards_after_catch_over_expected',
-      ...opponent_field('recv_yards_after_catch_over_expected')
+      percentile_field: 'receiving_yards_after_catch_over_expected',
+      ...opponent_field('receiving_yards_after_catch_over_expected')
     },
     opponent_rushing_yards_over_expectation: {
       category: 'rushing efficiency matchup',

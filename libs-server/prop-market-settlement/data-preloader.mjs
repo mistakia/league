@@ -123,7 +123,7 @@ const load_nfl_plays = async (esbids) => {
       // Yardage columns used in market calculations
       'pass_yards',
       'rush_yards',
-      'recv_yards',
+      'receiving_yards',
       // Play outcome flags used by count and first-scorer market logic
       'is_completion',
       'is_touchdown',

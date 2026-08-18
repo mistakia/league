@@ -30,12 +30,12 @@ export default {
     main_where: () => 'nfl_plays.target_pid'
   },
   play_recv_yds: {
-    column_name: 'recv_yards',
+    column_name: 'receiving_yards',
     table_name: 'nfl_plays',
-    main_select: () => ['nfl_plays.recv_yards as play_recv_yds'],
-    main_where: () => 'nfl_plays.recv_yards',
+    main_select: () => ['nfl_plays.receiving_yards as play_recv_yds'],
+    main_where: () => 'nfl_plays.receiving_yards',
     aggregate_select: () =>
-      db.raw('SUM(nfl_plays.recv_yards) as play_recv_yds'),
+      db.raw('SUM(nfl_plays.receiving_yards) as play_recv_yds'),
     use_having: true
   },
   play_yards_after_catch: {

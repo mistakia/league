@@ -194,7 +194,7 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.ball_carrier_pid',
       'nfl_plays.pass_yards',
       'nfl_plays.rush_yards',
-      'nfl_plays.recv_yards',
+      'nfl_plays.receiving_yards',
       'nfl_plays.yards_gained',
       'nfl_plays.is_first_down',
       'nfl_plays.is_successful_play',

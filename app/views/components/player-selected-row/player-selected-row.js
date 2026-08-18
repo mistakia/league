@@ -118,7 +118,7 @@ const RECEIVING_PRODUCTION = [
   'receptions',
   'receiving_yards',
   'receiving_touchdowns',
-  'recv_epa'
+  'receiving_epa'
 ]
 
 const RECEIVING_EFFICIENCY = [
@@ -126,16 +126,16 @@ const RECEIVING_EFFICIENCY = [
   'catch_rate',
   'expected_catch_rate',
   'catch_rate_over_expected',
-  'recv_yards_per_reception',
-  'recv_yards_per_route',
-  'recv_epa_per_target',
-  'recv_epa_per_route',
-  'recv_yards_after_catch_over_expected'
+  'receiving_yards_per_reception',
+  'receiving_yards_per_route',
+  'receiving_epa_per_target',
+  'receiving_epa_per_route',
+  'receiving_yards_after_catch_over_expected'
 ]
 
 const RECEIVING_EXPLOSIVENESS = [
   'longest_reception',
-  'recv_yards_15_plus_count'
+  'receiving_yards_15_plus_count'
 ]
 
 const RECEIVING_OPPORTUNITIES = [
@@ -147,11 +147,11 @@ const RECEIVING_OPPORTUNITIES = [
 ]
 
 const RECEIVING_USAGE = [
-  'recv_air_yards',
-  'recv_air_yards_per_target',
+  'receiving_air_yards',
+  'receiving_air_yards_per_target',
   'average_route_depth',
-  'recv_deep_target_percentage',
-  'recv_tight_window_percentage'
+  'receiving_deep_target_percentage',
+  'receiving_tight_window_percentage'
 ]
 
 const RECEIVING_REDZONE = ['redzone_targets', 'endzone_targets']
@@ -182,8 +182,8 @@ const PERCENTAGE_FIELDS = [
   'deep_pass_attempt_percentage',
   'tight_window_percentage',
   'play_action_percentage',
-  'recv_deep_target_percentage',
-  'recv_tight_window_percentage'
+  'receiving_deep_target_percentage',
+  'receiving_tight_window_percentage'
 ]
 
 const FIELD_FIXED_VALUES = {
@@ -208,19 +208,19 @@ const FIELD_FIXED_VALUES = {
   rush_yards_after_contact_per_attempt: 2,
   rush_success_rate: 3,
   rush_yards_per_attempt: 1,
-  recv_epa: 1,
+  receiving_epa: 1,
   wopr: 2,
   catch_rate: 2,
   expected_catch_rate: 2,
   catch_rate_over_expected: 2,
-  recv_yards_per_reception: 2,
-  recv_yards_per_route: 2,
-  recv_epa_per_target: 2,
-  recv_epa_per_route: 2,
-  recv_yards_after_catch_over_expected: 2,
+  receiving_yards_per_reception: 2,
+  receiving_yards_per_route: 2,
+  receiving_epa_per_target: 2,
+  receiving_epa_per_route: 2,
+  receiving_yards_after_catch_over_expected: 2,
   weighted_opportunity_rating: 2,
-  recv_deep_target_percentage: 2,
-  recv_tight_window_percentage: 2
+  receiving_deep_target_percentage: 2,
+  receiving_tight_window_percentage: 2
 }
 
 // Position-based stat field configuration

@@ -2975,7 +2975,7 @@ CREATE TABLE public.espn_receiving_metrics_history (
     season_type character varying(3) NOT NULL,
     espn_rtm_routes integer,
     espn_rtm_targets integer,
-    espn_rtm_recv_yards integer,
+    espn_rtm_receiving_yards integer,
     espn_overall_score integer,
     espn_open_score integer,
     espn_catch_score integer,
@@ -5398,7 +5398,7 @@ CREATE TABLE public.nfl_plays (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -6404,7 +6404,7 @@ CREATE TABLE public.nfl_plays_current_week (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -6950,7 +6950,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -7383,7 +7383,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -7816,7 +7816,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -8249,7 +8249,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -8682,7 +8682,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -9115,7 +9115,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -9548,7 +9548,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -9981,7 +9981,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -10414,7 +10414,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -10847,7 +10847,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -11280,7 +11280,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -11713,7 +11713,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -12146,7 +12146,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -12579,7 +12579,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -13012,7 +13012,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -13445,7 +13445,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -13878,7 +13878,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -14311,7 +14311,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -14744,7 +14744,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -15177,7 +15177,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -15610,7 +15610,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -16043,7 +16043,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -16476,7 +16476,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -16909,7 +16909,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -17342,7 +17342,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -17775,7 +17775,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -18208,7 +18208,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     is_passing_touchdown boolean,
     is_rushing_touchdown boolean,
     pass_yards smallint,
-    recv_yards smallint,
+    receiving_yards smallint,
     rush_yards integer,
     is_qb_dropback boolean,
     is_qb_kneel boolean,
@@ -19018,30 +19018,30 @@ CREATE TABLE public.nfl_team_seasonlogs (
     catch_rate numeric(5,4) DEFAULT NULL::numeric,
     expected_catch_rate numeric(5,4) DEFAULT NULL::numeric,
     catch_rate_over_expected numeric(5,4) DEFAULT NULL::numeric,
-    recv_yards_per_reception numeric(5,2) DEFAULT NULL::numeric,
-    recv_yards_per_route numeric(5,2) DEFAULT NULL::numeric,
-    recv_epa numeric(5,2) DEFAULT NULL::numeric,
-    recv_epa_per_target numeric(5,2) DEFAULT NULL::numeric,
-    recv_epa_per_route numeric(5,2) DEFAULT NULL::numeric,
-    recv_drops numeric(5,2) DEFAULT NULL::numeric,
-    recv_drop_rate numeric(5,2) DEFAULT NULL::numeric,
-    recv_yards_after_catch numeric(6,2) DEFAULT NULL::numeric,
-    expected_recv_yards_after_catch numeric(6,2) DEFAULT NULL::numeric,
-    recv_yards_after_catch_over_expected numeric(5,2) DEFAULT NULL::numeric,
-    recv_yards_after_catch_per_reception numeric(5,2) DEFAULT NULL::numeric,
-    recv_average_target_separation numeric(5,2) DEFAULT NULL::numeric,
-    recv_air_yards numeric(6,2) DEFAULT NULL::numeric,
-    recv_air_yards_per_target numeric(5,2) DEFAULT NULL::numeric,
+    receiving_yards_per_reception numeric(5,2) DEFAULT NULL::numeric,
+    receiving_yards_per_route numeric(5,2) DEFAULT NULL::numeric,
+    receiving_epa numeric(5,2) DEFAULT NULL::numeric,
+    receiving_epa_per_target numeric(5,2) DEFAULT NULL::numeric,
+    receiving_epa_per_route numeric(5,2) DEFAULT NULL::numeric,
+    receiving_drops numeric(5,2) DEFAULT NULL::numeric,
+    receiving_drop_rate numeric(5,2) DEFAULT NULL::numeric,
+    receiving_yards_after_catch numeric(6,2) DEFAULT NULL::numeric,
+    expected_receiving_yards_after_catch numeric(6,2) DEFAULT NULL::numeric,
+    receiving_yards_after_catch_over_expected numeric(5,2) DEFAULT NULL::numeric,
+    receiving_yards_after_catch_per_reception numeric(5,2) DEFAULT NULL::numeric,
+    receiving_average_target_separation numeric(5,2) DEFAULT NULL::numeric,
+    receiving_air_yards numeric(6,2) DEFAULT NULL::numeric,
+    receiving_air_yards_per_target numeric(5,2) DEFAULT NULL::numeric,
     target_rate numeric(5,2) DEFAULT NULL::numeric,
     average_route_depth numeric(5,2) DEFAULT NULL::numeric,
     endzone_targets numeric(5,2) DEFAULT NULL::numeric,
     endzone_receptions numeric(5,2) DEFAULT NULL::numeric,
     team_target_share numeric(5,4) DEFAULT NULL::numeric,
     team_air_yard_share numeric(5,4) DEFAULT NULL::numeric,
-    recv_deep_target_percentage numeric(5,4) DEFAULT NULL::numeric,
-    recv_tight_window_percentage numeric(5,4) DEFAULT NULL::numeric,
+    receiving_deep_target_percentage numeric(5,4) DEFAULT NULL::numeric,
+    receiving_tight_window_percentage numeric(5,4) DEFAULT NULL::numeric,
     longest_reception numeric(5,2) DEFAULT NULL::numeric,
-    recv_yards_15_plus_rate numeric(5,4) DEFAULT NULL::numeric,
+    receiving_yards_15_plus_rate numeric(5,4) DEFAULT NULL::numeric,
     receiving_first_downs numeric(5,2) DEFAULT 0.00,
     rushing_first_downs numeric(5,2) DEFAULT 0.00,
     rushing_yards_excluding_kneels numeric(6,2) DEFAULT 0.00,
@@ -20831,8 +20831,8 @@ CREATE TABLE public.player_defender_gamelogs (
     coverage_snaps_nearest_defender smallint,
     targets_nearest_defender smallint,
     receptions_nearest_defender smallint,
-    recv_yards_nearest_defender smallint,
-    recv_touchdowns_nearest_defender smallint,
+    receiving_yards_nearest_defender smallint,
+    receiving_touchdowns_nearest_defender smallint,
     passer_rating_nearest_defender numeric(5,2),
     target_epa_nearest_defender numeric(5,2),
     yards_per_reception_nearest_defender numeric(5,2),
@@ -24752,32 +24752,32 @@ CREATE TABLE public.player_receiving_gamelogs (
     catch_rate numeric(5,2),
     expected_catch_rate numeric(5,2),
     catch_rate_over_expected numeric(5,2),
-    recv_yards_per_reception numeric(5,2),
-    recv_yards_per_route numeric(5,2),
-    recv_epa numeric(5,2),
-    recv_epa_per_target numeric(5,2),
-    recv_epa_per_route numeric(5,2),
-    recv_drops smallint,
-    recv_drop_rate numeric(5,2),
-    recv_yards_after_catch numeric(6,2),
-    expected_recv_yards_after_catch numeric(5,2),
-    recv_yards_after_catch_over_expected numeric(5,2),
-    recv_yards_after_catch_per_reception numeric(5,2),
-    recv_average_target_separation numeric(5,2),
-    recv_air_yards numeric(6,2),
-    recv_air_yards_per_target numeric(5,2),
+    receiving_yards_per_reception numeric(5,2),
+    receiving_yards_per_route numeric(5,2),
+    receiving_epa numeric(5,2),
+    receiving_epa_per_target numeric(5,2),
+    receiving_epa_per_route numeric(5,2),
+    receiving_drops smallint,
+    receiving_drop_rate numeric(5,2),
+    receiving_yards_after_catch numeric(6,2),
+    expected_receiving_yards_after_catch numeric(5,2),
+    receiving_yards_after_catch_over_expected numeric(5,2),
+    receiving_yards_after_catch_per_reception numeric(5,2),
+    receiving_average_target_separation numeric(5,2),
+    receiving_air_yards numeric(6,2),
+    receiving_air_yards_per_target numeric(5,2),
     target_rate numeric(5,2),
     average_route_depth numeric(5,2),
     endzone_targets smallint,
     endzone_receptions smallint,
-    recv_deep_target_percentage numeric(5,2),
-    recv_tight_window_percentage numeric(5,2),
+    receiving_deep_target_percentage numeric(5,2),
+    receiving_tight_window_percentage numeric(5,2),
     longest_reception smallint,
-    recv_yards_15_plus_rate numeric(5,4),
+    receiving_yards_15_plus_rate numeric(5,4),
     weighted_opportunity_rating numeric(5,2),
     redzone_targets smallint,
     route_share numeric(5,2),
-    recv_yards_15_plus_count smallint,
+    receiving_yards_15_plus_count smallint,
     team_target_share numeric(5,4),
     team_air_yard_share numeric(5,4)
 );
@@ -24886,7 +24886,7 @@ CREATE TABLE public.player_seasonlogs (
     espn_yac_score integer DEFAULT 0,
     espn_rtm_routes integer DEFAULT 0,
     espn_rtm_targets integer DEFAULT 0,
-    espn_rtm_recv_yards integer DEFAULT 0,
+    espn_rtm_receiving_yards integer DEFAULT 0,
     career_year smallint DEFAULT '0'::smallint,
     pfr_season_value smallint,
     rushing_first_downs smallint DEFAULT 0 NOT NULL,
@@ -31469,7 +31469,7 @@ CREATE INDEX idx_nfl_plays_esbid ON ONLY public.nfl_plays USING btree (esbid);
 -- Name: idx_nfl_plays_fantasy; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_fantasy ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX idx_nfl_plays_fantasy ON ONLY public.nfl_plays USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -32953,7 +32953,7 @@ CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -33338,7 +33338,7 @@ CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -33723,7 +33723,7 @@ CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -34108,7 +34108,7 @@ CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -34493,7 +34493,7 @@ CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -34878,7 +34878,7 @@ CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -35263,7 +35263,7 @@ CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -35648,7 +35648,7 @@ CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -36033,7 +36033,7 @@ CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -36418,7 +36418,7 @@ CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -36803,7 +36803,7 @@ CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -37188,7 +37188,7 @@ CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -37573,7 +37573,7 @@ CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -37958,7 +37958,7 @@ CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -38343,7 +38343,7 @@ CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -38728,7 +38728,7 @@ CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -39113,7 +39113,7 @@ CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -39498,7 +39498,7 @@ CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -39883,7 +39883,7 @@ CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -40268,7 +40268,7 @@ CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -40653,7 +40653,7 @@ CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -41038,7 +41038,7 @@ CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -41423,7 +41423,7 @@ CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -41808,7 +41808,7 @@ CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -42193,7 +42193,7 @@ CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -42578,7 +42578,7 @@ CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2025_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2025 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --
@@ -42963,7 +42963,7 @@ CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_idx ON public.n
 -- Name: nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, recv_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
+CREATE INDEX nfl_plays_year_2026_year_seas_type_play_type_bc_pid_psr_pid_idx ON public.nfl_plays_year_2026 USING btree (season_year, season_type, play_type) INCLUDE (ball_carrier_pid, passer_pid, target_pid, fumble_lost_pid, rush_yards, is_rushing_touchdown, pass_yards, is_passing_touchdown, is_interception, receiving_yards, is_completion, is_first_down, week, is_touchdown, is_sack, offense_nfl_team);
 
 
 --

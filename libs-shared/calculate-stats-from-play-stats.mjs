@@ -22,7 +22,7 @@ const calculateStatsFromPlayStats = (playStats) => {
   stats.targeted_air_yards = 0
   stats.longest_reception = 0
   stats.redzone_targets = 0
-  stats.recv_yards_15_plus_count = 0
+  stats.receiving_yards_15_plus_count = 0
   stats.longest_rush = 0
   stats.rush_attempts_redzone = 0
   stats.rush_attempts_goal_line = 0
@@ -201,7 +201,7 @@ const calculateStatsFromPlayStats = (playStats) => {
           playStat.stat_yards
         )
         if (playStat.stat_yards >= 15) {
-          stats.recv_yards_15_plus_count += 1
+          stats.receiving_yards_15_plus_count += 1
         }
         // Track receiving first downs using play-level first_down flag
         if (playStat.is_first_down) {
@@ -222,7 +222,7 @@ const calculateStatsFromPlayStats = (playStats) => {
           playStat.stat_yards
         )
         if (playStat.stat_yards >= 15) {
-          stats.recv_yards_15_plus_count += 1
+          stats.receiving_yards_15_plus_count += 1
         }
         // Track receiving first downs using play-level first_down flag
         if (playStat.is_first_down) {

@@ -131,7 +131,13 @@ const get_team_yardage_markets = async ({ year, current_week_only }) => {
 
 const aggregate_team_game_yards = async ({ teams }) => {
   const plays = await db('nfl_plays')
-    .select('esbid', 'offense_nfl_team', 'quarter', 'rush_yards', 'recv_yards')
+    .select(
+      'esbid',
+      'offense_nfl_team',
+      'quarter',
+      'rush_yards',
+      'receiving_yards'
+    )
     .whereIn('offense_nfl_team', teams)
     .whereNot('play_type', 'NOPL')
 
@@ -150,7 +156,7 @@ const aggregate_team_game_yards = async ({ teams }) => {
     }
 
     const rushing = play.rush_yards || 0
-    const receiving = play.recv_yards || 0
+    const receiving = play.receiving_yards || 0
 
     aggregated[key].full_game.rushing += rushing
     aggregated[key].full_game.receiving += receiving

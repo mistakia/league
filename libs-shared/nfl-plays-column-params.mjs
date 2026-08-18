@@ -999,7 +999,7 @@ export default {
       }
     ]
   },
-  recv_yards: {
+  receiving_yards: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,

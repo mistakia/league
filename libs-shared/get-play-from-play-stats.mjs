@@ -134,7 +134,7 @@ export default function getPlayFromPlayStats(play) {
       case 21:
         playRow.is_completion = true
         playRow.target_gsis_player_id = playStat.gsis_player_id
-        playRow.recv_yards = playStat.stat_yards
+        playRow.receiving_yards = playStat.stat_yards
         break
 
       // Receiving Touchdown - receiving TD with yards
@@ -144,7 +144,7 @@ export default function getPlayFromPlayStats(play) {
         playRow.is_touchdown = true
         playRow.is_passing_touchdown = true
         playRow.target_gsis_player_id = playStat.gsis_player_id
-        playRow.recv_yards = playStat.stat_yards
+        playRow.receiving_yards = playStat.stat_yards
         playRow.touchdown_nfl_team = playStat.nfl_team
         break
 

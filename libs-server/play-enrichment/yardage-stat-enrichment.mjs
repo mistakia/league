@@ -11,7 +11,7 @@ const log = debug('play-enrichment:yardage-stats')
  * Extracts yardage data from NFL API playStats based on statId:
  * - statId 10/11: Rushing yards → rush_yards
  * - statId 15/16: Passing yards → pass_yards
- * - statId 21/22: Receiving yards → recv_yards
+ * - statId 21/22: Receiving yards → receiving_yards
  * - Aggregates yards_gained from all yardage plays
  *
  * Also enriches completion status (comp), touchdowns (td, rush_td, pass_td),
@@ -61,8 +61,8 @@ export const enrich_yardage_stats = (plays, play_stats) => {
       enrichment_data.rush_yards = stats_data.rush_yards
     if (stats_data.pass_yards != null)
       enrichment_data.pass_yards = stats_data.pass_yards
-    if (stats_data.recv_yards != null)
-      enrichment_data.recv_yards = stats_data.recv_yards
+    if (stats_data.receiving_yards != null)
+      enrichment_data.receiving_yards = stats_data.receiving_yards
     if (stats_data.yards_gained != null)
       enrichment_data.yards_gained = stats_data.yards_gained
     if (stats_data.return_yards != null)
@@ -106,7 +106,7 @@ export const enrich_yardage_stats = (plays, play_stats) => {
     if (
       enrichment_data.rush_yards !== undefined ||
       enrichment_data.pass_yards !== undefined ||
-      enrichment_data.recv_yards !== undefined ||
+      enrichment_data.receiving_yards !== undefined ||
       enrichment_data.yards_gained !== undefined
     ) {
       enriched_count++
