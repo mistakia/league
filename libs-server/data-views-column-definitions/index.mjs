@@ -161,15 +161,15 @@ const player_league_roster_join = async ({
 
 // `teams` is reached by correlated subquery rather than by a second join in
 // `player_league_roster_join`, so adding this column leaves the SQL of every
-// existing roster-status view untouched. `teams_pkey` is UNIQUE on (uid, year),
-// so the subquery is a single index lookup and cannot fan out a row.
+// existing roster-status view untouched. `teams_pkey` is UNIQUE on (team_id,
+// year), so the subquery is a single index lookup and cannot fan out a row.
 const player_league_fantasy_team_sql = ({ params = {} }) => {
   const year_param = Array.isArray(params.year) ? params.year[0] : params.year
   const year =
     year_param === undefined || year_param === null
       ? current_season.year
       : sql_integer_param({ value: year_param, param_name: 'year' })
-  return `(SELECT name FROM teams WHERE uid = rosters_players.tid AND season_year = ${year})`
+  return `(SELECT name FROM teams WHERE team_id = rosters_players.tid AND season_year = ${year})`
 }
 
 export default {
