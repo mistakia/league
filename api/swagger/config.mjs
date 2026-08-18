@@ -360,7 +360,7 @@ const options = {
         League: {
           type: 'object',
           properties: {
-            uid: {
+            league_id: {
               type: 'integer',
               description: 'Fantasy league ID',
               example: 2
@@ -789,7 +789,7 @@ const options = {
         ProjectionSource: {
           type: 'object',
           properties: {
-            uid: {
+            source_id: {
               type: 'integer',
               description: 'Source ID',
               example: 16
@@ -931,7 +931,7 @@ const options = {
         ProcessedWaiverClaim: {
           type: 'object',
           properties: {
-            uid: {
+            waiver_id: {
               type: 'integer',
               description: 'Waiver claim ID',
               example: 12345
@@ -963,7 +963,7 @@ const options = {
                 'Array of players released as part of this waiver claim'
             }
           },
-          required: ['uid', 'processed', 'release']
+          required: ['waiver_id', 'processed', 'release']
         },
         WaiverClaimRequest: {
           type: 'object',
@@ -1012,7 +1012,7 @@ const options = {
         WaiverClaim: {
           type: 'object',
           properties: {
-            uid: {
+            waiver_id: {
               type: 'integer',
               description: 'Waiver claim ID',
               example: 12345
@@ -1093,7 +1093,7 @@ const options = {
             }
           },
           required: [
-            'uid',
+            'waiver_id',
             'tid',
             'user_id',
             'lid',
@@ -1190,7 +1190,7 @@ const options = {
         WaiverUpdateResponse: {
           type: 'object',
           properties: {
-            uid: {
+            waiver_id: {
               type: 'integer',
               description: 'Waiver claim ID',
               example: 12345
@@ -1210,7 +1210,7 @@ const options = {
               example: ['JORD-LOVE-001990']
             }
           },
-          required: ['uid', 'bid', 'release']
+          required: ['waiver_id', 'bid', 'release']
         },
         WaiverCancelRequest: {
           type: 'object',
@@ -1231,7 +1231,7 @@ const options = {
         WaiverCancelResponse: {
           type: 'object',
           properties: {
-            uid: {
+            waiver_id: {
               type: 'integer',
               description: 'Cancelled waiver claim ID',
               example: 12345
@@ -1253,7 +1253,7 @@ const options = {
               example: '2026-08-08T17:00:00.000Z'
             }
           },
-          required: ['uid', 'tid', 'lid', 'cancelled']
+          required: ['waiver_id', 'tid', 'lid', 'cancelled']
         },
         PlacedWager: {
           type: 'object',
@@ -1969,7 +1969,7 @@ const options = {
             {
               type: 'object',
               properties: {
-                uid: {
+                transaction_id: {
                   $ref: '#/components/schemas/EntityId'
                 },
                 user_id: {
@@ -2013,7 +2013,7 @@ const options = {
                 }
               },
               required: [
-                'uid',
+                'transaction_id',
                 'user_id',
                 'pid',
                 'type',
@@ -2426,7 +2426,7 @@ const options = {
         TradeDetails: {
           type: 'object',
           properties: {
-            uid: {
+            trade_id: {
               $ref: '#/components/schemas/EntityId'
             },
             proposingTeamId: {
@@ -2530,7 +2530,7 @@ const options = {
             }
           },
           required: [
-            'uid',
+            'trade_id',
             'proposingTeamId',
             'acceptingTeamId',
             'lid',
@@ -3467,7 +3467,7 @@ const options = {
           description: 'List of trade proposals',
           example: [
             {
-              uid: 1234,
+              trade_id: 1234,
               lid: 2,
               propose_tid: 13,
               accept_tid: 14,
@@ -3489,7 +3489,7 @@ const options = {
         Trade: {
           type: 'object',
           properties: {
-            uid: {
+            trade_id: {
               type: 'integer',
               description: 'Trade ID',
               example: 1234
