@@ -690,7 +690,25 @@ export const COLUMN_ID_RENAMES = {
   nfl_team_seasonlogs_recv_yards_per_reception:
     'nfl_team_seasonlogs_receiving_yards_per_reception',
   nfl_team_seasonlogs_recv_yards_per_route:
-    'nfl_team_seasonlogs_receiving_yards_per_route'
+    'nfl_team_seasonlogs_receiving_yards_per_route',
+
+  // The `adj` retirement, 2026-08-18. One token spelled two different concepts
+  // and neither name said what the number was adjusted AGAINST, so both take
+  // names that state the POOL they price against.
+  //
+  // Each VALUE is the id the registry carries today, deliberately: this map is
+  // consulted by a SINGLE lookup with no chaining, so a value pointing at an
+  // intermediate spelling resolves to a dead id and renders a BLANK CELL rather
+  // than raising. The `rename-map target liveness` spec resolves all four
+  // against data-view-fields-index.mjs.
+  player_season_projected_inflation_adjusted_market_salary:
+    'player_season_projected_positive_salary_at_available_cap',
+  player_week_projected_salary_adjusted_points_added:
+    'player_week_projected_points_added_positive_including_cap_savings',
+  player_season_projected_salary_adjusted_points_added:
+    'player_season_projected_points_added_positive_including_cap_savings',
+  player_rest_of_season_projected_salary_adjusted_points_added:
+    'player_rest_of_season_projected_points_added_positive_including_cap_savings'
 }
 
 // Column-id renames for the SHARE-URL path, which receives none of the read-time

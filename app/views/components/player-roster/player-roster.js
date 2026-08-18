@@ -76,7 +76,6 @@ class PlayerRoster extends Player {
     const projectionType = isRegularSeason ? 'ros' : '0'
     const hasProjections = player_map.hasIn(['market_salary', projectionType])
     const market_salary = player_map.getIn(['market_salary', projectionType], 0)
-    // const market_salary_adj = player_map.get('market_salary_adj', 0)
     const get_savings = () => {
       if (!hasProjections) return null
       if (isRestrictedFreeAgency || isRestrictedFreeAgent)
@@ -91,8 +90,8 @@ class PlayerRoster extends Player {
     // season-grain net, so this reads `ros_net` in every phase rather than
     // following `projectionType`.
     const pts_added_net = player_map.getIn(['pts_added', 'ros_net'], null)
-    const salary_adj_pts_added = player_map.getIn(
-      ['salary_adj_pts_added', projectionType],
+    const points_added_including_cap_savings = player_map.getIn(
+      ['projected_points_added_positive_including_cap_savings', projectionType],
       0
     )
     const week = Math.max(current_season.week, 1)
@@ -232,13 +231,6 @@ class PlayerRoster extends Player {
                   prefix='$'
                 />
               )}
-              {/* {!isPoach && isOffseason && (
-              <PercentileMetric
-                scaled
-                value={market_salary_adj}
-                percentile={percentiles.market_salary_adj}
-              />
-            )} */}
               {!isPoach && isOffseason && (
                 <PercentileMetric
                   scaled
@@ -335,8 +327,10 @@ class PlayerRoster extends Player {
             {isOffseason && (
               <PercentileMetric
                 scaled
-                value={salary_adj_pts_added}
-                percentile={percentiles.salary_adj_pts_added}
+                value={points_added_including_cap_savings}
+                percentile={
+                  percentiles.projected_points_added_positive_including_cap_savings
+                }
               />
             )}
             <PercentileMetric

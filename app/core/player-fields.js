@@ -176,11 +176,11 @@ function PlayerFields({ week, opponent_time_period, state }) {
       csv_header: 'Projected Salary',
       player_value_path: 'player_salary'
     },
-    'salary_adj_pts_added.week': {
+    'projected_points_added_positive_including_cap_savings.week': {
       category: 'management',
       column_header: 'Value',
       csv_header: 'Projected Value',
-      player_value_path: `salary_adj_pts_added.${week}`
+      player_value_path: `projected_points_added_positive_including_cap_savings.${week}`
     },
     'market_salary.week': {
       category: 'management',
@@ -188,11 +188,11 @@ function PlayerFields({ week, opponent_time_period, state }) {
       csv_header: 'Projected Market Salary',
       player_value_path: `market_salary.${week}`
     },
-    market_salary_adj: {
+    projected_positive_salary_at_available_cap: {
       category: 'management',
-      column_header: 'Inflation Adj',
-      csv_header: 'Projected Inflation Adjusted Market Salary',
-      player_value_path: 'market_salary_adj'
+      column_header: 'Available Cap',
+      csv_header: 'Projected Positive Salary at Available Cap',
+      player_value_path: 'projected_positive_salary_at_available_cap'
     },
 
     'pts_added.ros': {

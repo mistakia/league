@@ -10,7 +10,7 @@ export function createPlayer({
   points,
   market_salary,
   pts_added,
-  salary_adj_pts_added,
+  projected_points_added_positive_including_cap_savings,
   projections,
   practice,
   transactions,
@@ -113,8 +113,10 @@ export function createPlayer({
     params.pts_added = new Map(pts_added)
   }
 
-  if (salary_adj_pts_added) {
-    params.salary_adj_pts_added = new Map(salary_adj_pts_added)
+  if (projected_points_added_positive_including_cap_savings) {
+    params.projected_points_added_positive_including_cap_savings = new Map(
+      projected_points_added_positive_including_cap_savings
+    )
   }
 
   if (projections) {

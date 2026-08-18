@@ -1,0 +1,22 @@
+{
+  "name": "should create a query for the four projected valuation columns across all periods",
+  "description": "Covers the columns the 2026-08-18 adj retirement renamed. All four are requested TOGETHER and across all three periods, because each is provably correct when requested alone: these three tables store several periods in one column and pin their own period sentinel, so a defect in the alias key collapses them into one join group and one period's value renders under another period's header. There was zero golden coverage of any of these ids before this fixture.",
+  "request": {
+    "sort": [
+      {
+        "column_id": "player_season_projected_points_added_positive_including_cap_savings",
+        "desc": true
+      }
+    ],
+    "prefix_columns": ["player_name"],
+    "columns": [
+      "player_week_projected_points_added_positive_including_cap_savings",
+      "player_season_projected_points_added_positive_including_cap_savings",
+      "player_rest_of_season_projected_points_added_positive_including_cap_savings",
+      "player_season_projected_positive_salary_at_available_cap"
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.first_name, player.last_name, \"t07a1b196d4539a0a05cb2c9a8e69bd98\".\"projected_points_added_positive_including_cap_savings\" AS \"week_points_added_positive_including_cap_savings_0\", \"t2a80abc1dd4bff3743e40c1c492fe254\".\"projected_points_added_positive_including_cap_savings\" AS \"season_points_added_positive_including_cap_savings_0\", \"t2a80abc1dd4bff3743e40c1c492fe254\".\"projected_positive_salary_at_available_cap\" AS \"player_season_projected_positive_salary_at_available_cap_0\", \"t9b3900ac1a694887caa835ed3d7d9d37\".\"projected_points_added_positive_including_cap_savings\" AS \"rest_of_season_points_added_positive_including_cap_savings_0\", \"player\".\"primary_position\" from \"player\" left join \"league_player_projection_values\" as \"t07a1b196d4539a0a05cb2c9a8e69bd98\" on \"t07a1b196d4539a0a05cb2c9a8e69bd98\".\"pid\" = \"player\".\"pid\" and \"t07a1b196d4539a0a05cb2c9a8e69bd98\".\"season_year\" = 2026 and \"t07a1b196d4539a0a05cb2c9a8e69bd98\".\"week\" = '0' and \"t07a1b196d4539a0a05cb2c9a8e69bd98\".\"lid\" = 1 left join \"league_player_season_projection_values\" as \"t2a80abc1dd4bff3743e40c1c492fe254\" on \"t2a80abc1dd4bff3743e40c1c492fe254\".\"pid\" = \"player\".\"pid\" and \"t2a80abc1dd4bff3743e40c1c492fe254\".\"season_year\" = 2026 and \"t2a80abc1dd4bff3743e40c1c492fe254\".\"lid\" = 1 left join \"league_player_rest_of_season_projection_values\" as \"t9b3900ac1a694887caa835ed3d7d9d37\" on \"t9b3900ac1a694887caa835ed3d7d9d37\".\"pid\" = \"player\".\"pid\" and \"t9b3900ac1a694887caa835ed3d7d9d37\".\"season_year\" = 2026 and \"t9b3900ac1a694887caa835ed3d7d9d37\".\"lid\" = 1 group by player.first_name, player.last_name, \"t07a1b196d4539a0a05cb2c9a8e69bd98\".\"projected_points_added_positive_including_cap_savings\", \"t2a80abc1dd4bff3743e40c1c492fe254\".\"projected_points_added_positive_including_cap_savings\", \"t2a80abc1dd4bff3743e40c1c492fe254\".\"projected_positive_salary_at_available_cap\", \"t9b3900ac1a694887caa835ed3d7d9d37\".\"projected_points_added_positive_including_cap_savings\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["projections", "valuation"],
+  "timeout_ms": 40000
+}

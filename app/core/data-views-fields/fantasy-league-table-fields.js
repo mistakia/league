@@ -99,64 +99,65 @@ export default function ({ week, is_logged_in, fantasy_teams = [] }) {
       }
     },
 
-    player_season_projected_inflation_adjusted_market_salary: {
-      column_title: 'Inflation Adj. Projected Market Salary',
+    player_season_projected_positive_salary_at_available_cap: {
+      column_title: 'Projected Positive Salary at Available Cap',
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.SEASON_PROJECTION,
         COLUMN_GROUPS.FANTASY_LEAGUE
       ],
-      header_label: 'Inflation Adj',
+      header_label: 'Available Cap',
       // This entry's select_as is the only one in its file carrying a `player_`
-      // prefix, so the server emits
-      // `player_season_projected_inflation_adjusted_market_salary` while this
-      // read omitted it and rendered a blank cell. Matching the client keeps the
-      // payload key stable for cached results.
+      // prefix, so the server emits the id verbatim while this read once omitted
+      // it and rendered a blank cell. Matching the client keeps the payload key
+      // stable for cached results.
       player_value_path:
-        'player_season_projected_inflation_adjusted_market_salary',
+        'player_season_projected_positive_salary_at_available_cap',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     },
 
-    player_week_projected_salary_adjusted_points_added: {
-      column_title: 'Salary Adj. Points Added (Week)',
+    player_week_projected_points_added_positive_including_cap_savings: {
+      column_title: 'Projected Points Added incl. Cap Savings (Week)',
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.WEEK_PROJECTION,
         COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Value',
-      player_value_path: 'week_projected_salary_adjusted_points_added',
+      player_value_path: 'week_points_added_positive_including_cap_savings',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     },
 
-    player_season_projected_salary_adjusted_points_added: {
-      column_title: 'Salary Adj. Points Added (Season)',
+    player_season_projected_points_added_positive_including_cap_savings: {
+      column_title: 'Projected Points Added incl. Cap Savings (Season)',
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.SEASON_PROJECTION,
         COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Value',
-      player_value_path: 'season_projected_salary_adjusted_points_added',
+      player_value_path: 'season_points_added_positive_including_cap_savings',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     },
 
-    player_rest_of_season_projected_salary_adjusted_points_added: {
-      column_title: 'Salary Adj. Points Added (Rest-Of-Season)',
-      column_groups: [
-        COLUMN_GROUPS.PROJECTION,
-        COLUMN_GROUPS.REST_OF_SEASON_PROJECTION,
-        COLUMN_GROUPS.FANTASY_LEAGUE
-      ],
-      header_label: 'Value',
-      player_value_path:
-        'rest_of_season_projected_salary_adjusted_points_added',
-      size: 70,
-      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
-    }
+    player_rest_of_season_projected_points_added_positive_including_cap_savings:
+      {
+        column_title:
+          'Projected Points Added incl. Cap Savings (Rest-Of-Season)',
+        column_groups: [
+          COLUMN_GROUPS.PROJECTION,
+          COLUMN_GROUPS.REST_OF_SEASON_PROJECTION,
+          COLUMN_GROUPS.FANTASY_LEAGUE
+        ],
+        header_label: 'Value',
+        player_value_path:
+          'rest_of_season_points_added_positive_including_cap_savings',
+        size: 70,
+        data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+      }
   }
 
   if (!is_logged_in) {

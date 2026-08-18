@@ -124,13 +124,19 @@ const map_state_to_props = createSelector(
         market_salary,
         rookie_tag_savings,
         franchise_tag_savings,
-        market_salary_adj: p.get('market_salary_adj', 0),
+        projected_positive_salary_at_available_cap: p.get(
+          'projected_positive_salary_at_available_cap',
+          0
+        ),
         projected_salary: p.getIn(['market_salary', projectionType], 0),
         pts_added: p.getIn(['pts_added', projectionType], 0),
         pts_added_net: p.getIn(['pts_added', 'ros_net'], 0),
         projected_starts: p.getIn(['lineups', 'starts'], 0),
-        salary_adj_pts_added: p.getIn(
-          ['salary_adj_pts_added', projectionType],
+        projected_points_added_positive_including_cap_savings: p.getIn(
+          [
+            'projected_points_added_positive_including_cap_savings',
+            projectionType
+          ],
           0
         ),
         extendedSalary,
@@ -154,12 +160,12 @@ const map_state_to_props = createSelector(
         'market_salary',
         'rookie_tag_savings',
         'franchise_tag_savings',
-        'market_salary_adj',
+        'projected_positive_salary_at_available_cap',
         'projected_salary',
         'pts_added',
         'pts_added_net',
         'projected_starts',
-        'salary_adj_pts_added',
+        'projected_points_added_positive_including_cap_savings',
         'extended_salary',
         'points_added_earned',
         'points_added_earned_rank',

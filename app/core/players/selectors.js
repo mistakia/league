@@ -206,7 +206,7 @@ export function getFilteredPlayers(state) {
       //
       // The comparison used to be against 0.85 of the adjusted market salary.
       // c9d1f8425 (2022-07-25) introduced that multiplier in the same change
-      // that switched the comparison from market_salary to market_salary_adj,
+      // that switched the comparison from market_salary to projected_positive_salary_at_available_cap,
       // with no comment and nothing in the commit message, and nothing has
       // explained it since. It widened the set by 15% for no stated reason.
       // There is no measurement to preserve here, so it is gone rather than
@@ -216,7 +216,10 @@ export function getFilteredPlayers(state) {
         player_map.get('tid')
       ) {
         const salary = player_map.get('player_salary')
-        const market_salary_adj = player_map.get('market_salary_adj', 0)
+        const projected_positive_salary_at_available_cap = player_map.get(
+          'projected_positive_salary_at_available_cap',
+          0
+        )
         const tag = player_map.get('tag')
         const slot = player_map.get('slot')
         const isRestrictedOrFranchised =
@@ -225,7 +228,7 @@ export function getFilteredPlayers(state) {
         if (
           !practice_squad_slots.includes(slot) &&
           !isRestrictedOrFranchised &&
-          salary - market_salary_adj > 0
+          salary - projected_positive_salary_at_available_cap > 0
         ) {
           return true
         }

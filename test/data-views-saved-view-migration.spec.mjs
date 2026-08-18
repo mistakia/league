@@ -869,7 +869,87 @@ describe('rename-map target liveness', () => {
   // DELETED from it. This count is what catches that. If a future rename adds
   // rules here, raise this number deliberately rather than deleting the
   // assertion.
-  it('carries a rule for each of the 41 column ids that moved', () => {
-    expect(Object.keys(COLUMN_ID_RENAMES)).to.have.lengthOf(41)
+  describe('adj retirement column-id renames (2026-08-18)', () => {
+    // Both halves of the retirement change their persisted id, so a saved view
+    // carrying either old spelling needs a rule. The market_salary_adj half is
+    // the one an earlier plan revision claimed needed none, on the grounds that
+    // its id already spelled the target -- it does not, and did not.
+    const cases = [
+      [
+        'player_season_projected_inflation_adjusted_market_salary',
+        'player_season_projected_positive_salary_at_available_cap'
+      ],
+      [
+        'player_week_projected_salary_adjusted_points_added',
+        'player_week_projected_points_added_positive_including_cap_savings'
+      ],
+      [
+        'player_season_projected_salary_adjusted_points_added',
+        'player_season_projected_points_added_positive_including_cap_savings'
+      ],
+      [
+        'player_rest_of_season_projected_salary_adjusted_points_added',
+        'player_rest_of_season_projected_points_added_positive_including_cap_savings'
+      ]
+    ]
+
+    for (const [legacy_column_id, current_column_id] of cases) {
+      it(`migrates ${legacy_column_id}`, () => {
+        const result = migrate_column_entry({ column_id: legacy_column_id })
+        expect(result.changed).to.equal(true)
+        expect(result.column_id).to.equal(current_column_id)
+      })
+
+      it(`rewrites ${legacy_column_id} on a short-URL column id`, () => {
+        expect(apply_column_id_rename(legacy_column_id)).to.equal(
+          current_column_id
+        )
+      })
+    }
+
+    it("leaves a column entry's params untouched while renaming its id", () => {
+      // The id moves; nothing about these columns changes a param, so a rule
+      // that also rewrote params would be silently destroying a saved filter.
+      const result = migrate_column_entry({
+        column_id: 'player_season_projected_salary_adjusted_points_added',
+        params: { year: [2025], league_format_id: ['genesis'] }
+      })
+      expect(result.changed).to.equal(true)
+      expect(result.params).to.deep.equal({
+        year: [2025],
+        league_format_id: ['genesis']
+      })
+    })
+
+    it('leaves an unrelated column id alone', () => {
+      // The negative control. Without it a green above cannot be told apart
+      // from a migrator that rewrites every id it is handed.
+      const result = migrate_column_entry({
+        column_id: 'player_season_projected_points_added'
+      })
+      expect(result.column_id).to.equal('player_season_projected_points_added')
+      expect(
+        apply_column_id_rename('player_season_projected_points_added')
+      ).to.equal('player_season_projected_points_added')
+    })
+
+    it('does not rewrite an already-migrated id a second time', () => {
+      // migrate_column_entry is a SINGLE lookup with no chaining, so a NEW id
+      // appearing as a KEY here would resolve a live column to a dead one and
+      // render a blank cell. Assert the new ids are absent from the key set.
+      for (const [, current_column_id] of cases) {
+        expect(
+          Object.prototype.hasOwnProperty.call(
+            COLUMN_ID_RENAMES,
+            current_column_id
+          ),
+          `${current_column_id} is live and must not be a rename KEY`
+        ).to.equal(false)
+      }
+    })
+  })
+
+  it('carries a rule for each of the 45 column ids that moved', () => {
+    expect(Object.keys(COLUMN_ID_RENAMES)).to.have.lengthOf(45)
   })
 })

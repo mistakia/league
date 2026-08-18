@@ -471,11 +471,12 @@ const process_league = async ({ year, lid }) => {
       ? league_available_salary_space / league_available_pts_added
       : (league_available_salary_space + player_row.player_salary) /
         (league_available_pts_added + Math.max(player_row.pts_added[0], 0))
-    const market_salary_adj = Math.max(
+    const projected_positive_salary_at_available_cap = Math.max(
       Math.round(league_adjusted_rate * player_row.pts_added[0]) || 0,
       0
     )
-    player_row.market_salary_adj = market_salary_adj
+    player_row.projected_positive_salary_at_available_cap =
+      projected_positive_salary_at_available_cap
 
     // The period sentinels are no longer written into the week column. The loop
     // below was period-blind by construction -- calculatePlayerValuesRestOfSeason
@@ -483,50 +484,58 @@ const process_league = async ({ year, lid }) => {
     // numeric weeks live in -- which is exactly what let the sentinels
     // accumulate. Each period now routes to its own table.
     //
-    // Both VARIANTS of a period land as named columns on one row rather than as
-    // two rows. Pushing the net variant as its own row would collide with the
-    // positive one on (pid, lid, season_year) inside the same batch, and
-    // `onConflict(...).merge()` raises "ON CONFLICT DO UPDATE command cannot
-    // affect row a second time" for a duplicate within a single INSERT -- it
-    // does not merge them. So the period keys are read directly here and the
-    // loop is left to the numeric weeks alone.
-    const salary_adj_by_key = player_row.salary_adj_pts_added
+    // Only the POSITIVE variant lands as a named column. The net siblings were
+    // dropped 2026-08-18: calculate-prices.mjs floors this quantity at zero for
+    // every aggregate key, net included, so a column named for the net variant
+    // asserted a signed value it could never carry. Nothing read them.
+    //
+    // Narrowing each guard onto the surviving key drops a row that had a net
+    // value and no positive one. That shape does not occur -- measured against
+    // production before the drop: 1135 rows on each period table, 0 with net
+    // non-null and positive null.
+    //
+    // The period keys are still read directly here rather than through the loop
+    // below, which is left to the numeric weeks alone.
+    const by_aggregate_key =
+      player_row.projected_points_added_positive_including_cap_savings
 
-    const season_positive = salary_adj_by_key['0']
-    const season_net = salary_adj_by_key[season_net_projection_key]
-    if (season_positive !== undefined || season_net !== undefined) {
+    const season_positive = by_aggregate_key['0']
+    if (season_positive !== undefined) {
       season_value_inserts.push({
         pid: player_row.pid,
         season_year: current_season.year,
         lid,
-        salary_adj_pts_added: season_positive ?? null,
-        salary_adj_points_added_net: season_net ?? null,
-        market_salary_adj
+        projected_points_added_positive_including_cap_savings: season_positive,
+        projected_positive_salary_at_available_cap
       })
     }
 
-    const ros_positive = salary_adj_by_key.ros
-    const ros_net = salary_adj_by_key.ros_net
-    if (ros_positive !== undefined || ros_net !== undefined) {
+    const ros_positive = by_aggregate_key.ros
+    if (ros_positive !== undefined) {
       rest_of_season_value_inserts.push({
         pid: player_row.pid,
         season_year: current_season.year,
         lid,
-        salary_adj_pts_added: ros_positive ?? null,
-        salary_adj_points_added_net: ros_net ?? null
+        projected_points_added_positive_including_cap_savings: ros_positive
       })
     }
 
-    for (const [week, salary_adj_pts_added] of Object.entries(
-      salary_adj_by_key
-    )) {
+    for (const [
+      week,
+      projected_points_added_positive_including_cap_savings
+    ] of Object.entries(by_aggregate_key)) {
       // Every period key is excluded here, not just the two that already had a
       // home. league_player_projection_values.week is varchar(3) and the table
       // is written delete-by-lid THEN batch_insert, so letting 'ros_net' through
       // means the delete commits, the insert throws, and the table is left EMPTY
-      // rather than stale -- blanking market_salary_adj on league-home, the
-      // auction nomination panel and the selected-player panel for a full cron
-      // cycle.
+      // rather than stale -- blanking the available-cap salary on league-home,
+      // the auction nomination panel and the selected-player panel for a full
+      // cron cycle.
+      //
+      // The exclusion still names both net keys even though their columns are
+      // gone. calculatePrices and calculatePlayerValuesRestOfSeason still WRITE
+      // those keys into this map, so dropping the guard would let 'ros_net'
+      // reach the varchar(3) week column and empty the table.
       if (
         week === '0' ||
         week === 'ros' ||
@@ -541,7 +550,7 @@ const process_league = async ({ year, lid }) => {
         season_year: current_season.year,
         lid,
         week,
-        salary_adj_pts_added
+        projected_points_added_positive_including_cap_savings
       })
     }
   }

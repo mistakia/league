@@ -47,13 +47,20 @@ const map_state_to_props = createSelector(
       items.push({
         market_salary: p.getIn(['market_salary', '0'], 0),
         pts_added: p.getIn(['pts_added', '0'], 0),
-        salary_adj_pts_added: p.getIn(['salary_adj_pts_added', '0'], 0)
+        projected_points_added_positive_including_cap_savings: p.getIn(
+          ['projected_points_added_positive_including_cap_savings', '0'],
+          0
+        )
       })
     })
 
     const percentiles = calculatePercentiles({
       items,
-      stats: ['market_salary', 'pts_added', 'salary_adj_pts_added']
+      stats: [
+        'market_salary',
+        'pts_added',
+        'projected_points_added_positive_including_cap_savings'
+      ]
     })
 
     // Find the user's teamId for this league

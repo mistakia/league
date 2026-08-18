@@ -88,14 +88,14 @@ const calculate_points_added = async ({
 
     item.points = {}
     item.pts_added = {}
-    item.salary_adj_pts_added = {}
+    item.projected_points_added_positive_including_cap_savings = {}
     item.market_salary = {}
 
     // set default values
     for (const week of weeks) {
       item.points[week] = { total: 0 }
       item.pts_added[week] = -999
-      item.salary_adj_pts_added[week] = 0
+      item.projected_points_added_positive_including_cap_savings[week] = 0
       item.market_salary[week] = 0
     }
 

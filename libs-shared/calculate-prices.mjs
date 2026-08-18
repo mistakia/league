@@ -42,7 +42,8 @@ import get_discretionary_cap from './get-discretionary-cap.mjs'
 // If a market-agreement objective is wanted, it belongs downstream of the board
 // as a separate lens, never inside it -- and the situational question ("what
 // will he actually cost given what is left in this league right now") is already
-// answered separately by market_salary_adj in scripts/process-projections.mjs.
+// answered separately by projected_positive_salary_at_available_cap in
+// scripts/process-projections.mjs.
 
 // The denominator is the sum of the POSITIVE PARTS of the aggregate being
 // priced, never its raw sum.
@@ -108,10 +109,15 @@ const calculatePrices = ({ league_format, players, aggregate_key }) => {
     // never priced, so the raw product is negative for a large share of the
     // board -- and salary_diff below consumed that negative before anything
     // floored it. That happens to be harmless today (a negative market_salary
-    // implies a negative pts_added, which drives salary_adj_pts_added negative
-    // under either ordering, and it is floored at zero too), but only by an
-    // algebraic coincidence of the current formula. Flooring at the definition
-    // makes the value mean the same thing everywhere it is read.
+    // implies a negative pts_added, which drives the including-cap-savings
+    // quantity negative under either ordering, and it is floored at zero too),
+    // but only by an algebraic coincidence of the current formula. Flooring at
+    // the definition makes the value mean the same thing everywhere it is read.
+    //
+    // This floor is what the `positive` token in the column name asserts, and
+    // it applies to EVERY aggregate key, net included -- which is why the net
+    // sibling column was dropped rather than renamed. Its name claimed a signed
+    // variant that this line makes impossible.
     const market_salary = Math.max(
       Math.round(pts_added_salary_rate * player.pts_added[aggregate_key]) || 0,
       0
@@ -123,16 +129,15 @@ const calculatePrices = ({ league_format, players, aggregate_key }) => {
         : market_salary - player.player_salary
 
     const pts_added_from_salary_savings = salary_diff / pts_added_salary_rate
-    const pts_added_salary_adjusted =
+    const pts_added_including_cap_savings =
       player.pts_added[aggregate_key] + pts_added_from_salary_savings || 0
 
-    if (!player.salary_adj_pts_added) {
-      player.salary_adj_pts_added = {}
+    if (!player.projected_points_added_positive_including_cap_savings) {
+      player.projected_points_added_positive_including_cap_savings = {}
     }
-    player.salary_adj_pts_added[aggregate_key] = Math.max(
-      pts_added_salary_adjusted,
-      0
-    )
+    player.projected_points_added_positive_including_cap_savings[
+      aggregate_key
+    ] = Math.max(pts_added_including_cap_savings, 0)
 
     if (!player.market_salary) {
       player.market_salary = {}

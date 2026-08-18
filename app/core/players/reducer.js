@@ -170,7 +170,9 @@ export function players_reducer(state = initialState, { payload, type }) {
             points: new Map(p.points),
             market_salary: new Map(p.market_salary),
             pts_added: new Map(p.pts_added),
-            salary_adj_pts_added: new Map(p.salary_adj_pts_added)
+            projected_points_added_positive_including_cap_savings: new Map(
+              p.projected_points_added_positive_including_cap_savings
+            )
           })
         })
       })

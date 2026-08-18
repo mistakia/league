@@ -88,7 +88,13 @@ export default class PlayerRosterTotal extends React.Component {
         pts_added_net_total + player_map.getIn(['pts_added', 'ros_net'], 0)
       valueAdjTotal =
         valueAdjTotal +
-        player_map.getIn(['salary_adj_pts_added', projectionType], 0)
+        player_map.getIn(
+          [
+            'projected_points_added_positive_including_cap_savings',
+            projectionType
+          ],
+          0
+        )
       weekPointsTotal =
         weekPointsTotal + player_map.getIn(['points', `${week}`, 'total'], 0)
       // Use seasonlog_points to avoid collision with projection points object

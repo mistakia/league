@@ -684,25 +684,26 @@ const player_projected_market_salary = {
 // resolved to whatever params.week was (default 0), so the season and
 // rest-of-season columns silently returned a per-week value instead of their own
 // period. Now each period reads its own table.
-const player_projected_salary_adjusted_points_added_periods = {
-  player_week_projected_salary_adjusted_points_added: {
-    column_name: 'salary_adj_pts_added',
+const player_projected_points_added_including_cap_savings_periods = {
+  player_week_projected_points_added_positive_including_cap_savings: {
+    column_name: 'projected_points_added_positive_including_cap_savings',
     table_alias: league_player_projection_values_table_alias,
-    select_as: () => 'week_projected_salary_adjusted_points_added',
+    select_as: () => 'week_points_added_positive_including_cap_savings',
     source: make_league_player_projection_source(),
     get_cache_info: get_cache_info_for_player_projected_stats
   },
-  player_season_projected_salary_adjusted_points_added: {
-    column_name: 'salary_adj_pts_added',
+  player_season_projected_points_added_positive_including_cap_savings: {
+    column_name: 'projected_points_added_positive_including_cap_savings',
     table_alias: league_player_season_projection_values_table_alias,
-    select_as: () => 'season_projected_salary_adjusted_points_added',
+    select_as: () => 'season_points_added_positive_including_cap_savings',
     source: make_league_player_season_projection_source(),
     get_cache_info: get_cache_info_for_player_projected_stats
   },
-  player_rest_of_season_projected_salary_adjusted_points_added: {
-    column_name: 'salary_adj_pts_added',
+  player_rest_of_season_projected_points_added_positive_including_cap_savings: {
+    column_name: 'projected_points_added_positive_including_cap_savings',
     table_alias: league_player_rest_of_season_projection_values_table_alias,
-    select_as: () => 'rest_of_season_projected_salary_adjusted_points_added',
+    select_as: () =>
+      'rest_of_season_points_added_positive_including_cap_savings',
     source: make_league_player_rest_of_season_projection_source(),
     get_cache_info: get_cache_info_for_player_projected_stats
   }
@@ -790,7 +791,7 @@ const create_projected_stat = (base, stat_name) => {
     // Only the rest-of-season prefix reads a period sentinel. `week` and
     // `season` both follow the request's week param, which is pre-existing
     // behaviour on this table and NOT changed here -- see the note on
-    // player_projected_salary_adjusted_points_added_periods.
+    // player_projected_points_added_including_cap_savings_periods.
     const period_week = is_rest_of_season ? 'ros' : null
     const select_as = () => `${prefix}_projected_${stat_name}`
     const definition = {
@@ -841,7 +842,7 @@ const player_rest_of_season_projected_points_added_net = {
 
 const projected_stat_column_defintions = {
   ...create_projected_stat(player_projected_market_salary, 'market_salary'),
-  ...player_projected_salary_adjusted_points_added_periods,
+  ...player_projected_points_added_including_cap_savings_periods,
   ...create_projected_stat(player_projected_points_added, 'points_added'),
   player_rest_of_season_projected_points_added_net,
   ...create_projected_stat(player_projected_points, 'points'),
@@ -888,14 +889,16 @@ const projected_stat_column_defintions = {
 }
 
 export default {
-  // market_salary_adj moved to the season table: it was non-null on the week='0'
-  // row only and NULL on every other week, so it was a sentinel-only column on a
-  // per-week table. This column was already reading the season period by way of
-  // the week=0 default; it now says so, and survives the week narrowing.
-  player_season_projected_inflation_adjusted_market_salary: {
-    column_name: 'market_salary_adj',
+  // This was market_salary_adj until 2026-08-18. It moved to the season table
+  // first -- it was non-null on the week='0' row only and NULL on every other
+  // week, so it was a sentinel-only column on a per-week table -- and then took
+  // a name that says which POOL it prices against: money teams can still bid,
+  // each team's availableCap minus min_bid per open space. Its minimal pair is
+  // market_salary -> projected_positive_salary_at_full_cap.
+  player_season_projected_positive_salary_at_available_cap: {
+    column_name: 'projected_positive_salary_at_available_cap',
     table_alias: league_player_season_projection_values_table_alias,
-    select_as: () => 'player_season_projected_inflation_adjusted_market_salary',
+    select_as: () => 'player_season_projected_positive_salary_at_available_cap',
     source: make_league_player_season_projection_source(),
     get_cache_info: get_cache_info_for_player_projected_stats
   },
