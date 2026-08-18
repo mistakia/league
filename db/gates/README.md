@@ -48,6 +48,18 @@ object is frozen, so a control that patches `fs.readFileSync` silently does
 nothing and then reports a green it never earned. That is a control failing OPEN,
 the one direction a control must never fail.
 
+**A SILENT control whose mutation plants one token while its assertion watches
+for another passes over anything.** It is the same failing-open shape, reached
+without any monkeypatching: the mutation lands, the gate is asked whether it
+reported `<sentinel>`, and the answer is no for the trivial reason that
+`<sentinel>` was never planted — so the control reads STAYED SILENT against a
+gate that reports every occurrence of the shape. Caught 2026-08-18 on the
+file-extension control in `check-renamed-column-consumers` gate 1, whose
+mutation plants `'<table>.csv'` while the shared assertion looked for
+`zzz_control_absent`. The check is mechanical: every silent control must be made
+to FAIL by removing the exclusion it covers, one exclusion at a time. A silent
+control that cannot be made to fail is not a control.
+
 **Call `main()` bare; do not guard on `is_main`.** These are run by hand from a
 relative path, and `is_main` compares `process.argv[1]` VERBATIM against the
 resolved module path — so a guarded call silently does nothing and exits 0.
