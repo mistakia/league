@@ -107,6 +107,41 @@ jobs:
       - name: League fixture reset coverage
         run: node db/gates/check-league-fixture-reset-coverage.mjs
 
+      # The three gates below were out of CI by OMISSION rather than by
+      # structure: each is `requires: none` in the check:cluster manifest, needs
+      # no database and no base ref, and answers in about a second. Each was run
+      # green on a clean checkout before being wired here, because a red master
+      # defers every session's push to mistakia/league fleet-wide.
+
+      # Fails when a swagger response schema disagrees with itself — a `required`
+      # name absent from the resolved properties, or a $ref that does not
+      # resolve. GATE 1 ONLY: the gate's own header names it the CI-eligible
+      # half, since it reads the spec against ITSELF and so cannot go red on a
+      # schema change at all.
+      #
+      # Gate 2 (wholesale single-table handlers vs db/schema.postgres.sql) is
+      # deliberately NOT wired. It is green today, so this is a wiring decision
+      # rather than a repair — but it reads the checked-out schema file, and
+      # CLAUDE.md's standing verdict is that it stays out and runs per cluster
+      # from a clean worktree:
+      #   node db/gates/check-api-response-shapes.mjs
+      - name: API response shape gate (gate 1)
+        run: node db/gates/check-api-response-shapes.mjs --gate 1
+
+      # Fails when a literal bound to a CHECK-constrained column is outside that
+      # column's permitted set. No other gate here shares its class: the others
+      # resolve column NAMES, and this one resolves the bound VALUE, which is how
+      # a retired season_type or position spelling survives every one of them.
+      # Nine negative controls run on every invocation, four asserting SILENCE.
+      - name: Stranded vocabulary literal gate
+        run: node db/gates/check-stranded-vocabulary-literals.mjs
+
+      # Fails when a deliberately dropped table still has a consumer. Reads the
+      # 11-entry dropped-table roster against the code tree; a listed table that
+      # reappears is itself a finding, so the roster cannot go stale silently.
+      - name: Dropped table consumer gate
+        run: node db/gates/check-dropped-table-consumers.mjs
+
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update
