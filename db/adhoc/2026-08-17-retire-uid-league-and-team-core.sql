@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-18 against league_production
 --
 -- Retire `uid` from the league and team core, the second window of
 -- [[user:task/league/retire-uid-surrogate-key-column.md]].
