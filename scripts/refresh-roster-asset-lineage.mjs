@@ -46,9 +46,9 @@ const initialize_cli = () =>
 // for the watermark it replaces -- completeness costs 20ms per poll.
 const fingerprint_sql = `
 SELECT md5(concat_ws('|',
-  (SELECT md5(string_agg(concat_ws(':', uid, tid, pid, type, player_salary, season_year, occurred_at), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', transaction_id, tid, pid, type, player_salary, season_year, occurred_at), ',' ORDER BY transaction_id))
      FROM transactions WHERE lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', uid, propose_tid, accept_tid, season_year, offered, accepted, cancelled, rejected, vetoed), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', trade_id, propose_tid, accept_tid, season_year, offered, accepted, cancelled, rejected, vetoed), ',' ORDER BY trade_id))
      FROM trades WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', tt.trade_id, tt.transaction_id), ',' ORDER BY tt.trade_id, tt.transaction_id))
      FROM trades_transactions tt JOIN trades t ON t.trade_id = tt.trade_id WHERE t.lid = ?),
@@ -58,7 +58,7 @@ SELECT md5(concat_ws('|',
      FROM trades_picks tk JOIN trades t ON t.trade_id = tk.trade_id WHERE t.lid = ?),
   (SELECT md5(string_agg(concat_ws(':', draft_pick_id, pid, round, is_compensatory, pick, tid, original_team_id, season_year, selection_timestamp), ',' ORDER BY draft_pick_id))
      FROM draft WHERE lid = ?),
-  (SELECT md5(string_agg(concat_ws(':', uid, pid, bid_amount, tid, season_year, is_successful, processed, cancelled, nomination_id, outcome), ',' ORDER BY uid))
+  (SELECT md5(string_agg(concat_ws(':', bid_id, pid, bid_amount, tid, season_year, is_successful, processed, cancelled, nomination_id, outcome), ',' ORDER BY bid_id))
      FROM restricted_free_agency_bids WHERE lid = ?),
   (SELECT md5(string_agg(concat_ws(':', season_year, draft_start, rookie_draft_completed_at, extension_deadline_at), ',' ORDER BY season_year))
      FROM seasons WHERE lid = ?)
