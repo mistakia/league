@@ -65,9 +65,7 @@ const format_slot = (window_open_at) =>
   window_open_at.format('h:mm A').padStart(8, ' ')
 
 // Discord does not reject a longer message, it SILENTLY truncates it, so a post
-// that runs long loses its tail rather than failing. The rule line at the
-// bottom is the part a manager who has not read the constitution needs, and it
-// is the part a silent truncation takes.
+// that runs long loses its tail rather than failing.
 export const DISCORD_MESSAGE_LIMIT = 2000
 
 // How many stalled picks to name before the line becomes a count. Unbounded
@@ -159,11 +157,6 @@ const compose_slate_message = ({
         : `On the clock: ${on_clock.name} with ${on_clock.pick_string}.`
     )
   }
-
-  lines.push(
-    '',
-    'A window is when a pick may be taken OUT OF ORDER — once a window opens, that team may select ahead of any earlier pick still unmade. A team whose preceding pick is already made is on the clock regardless of its window.'
-  )
 
   return lines.join('\n')
 }

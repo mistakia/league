@@ -175,18 +175,6 @@ describe('scripts - announce draft slate', function () {
       expect(message).to.include(
         '11:00 AM   1.10  A team with a fairly long name'
       )
-      expect(message).to.include('OUT OF ORDER')
-    })
-
-    it('states the out-of-order rule the windows exist to govern', () => {
-      const message = build_slate_message({
-        season_year: 2026,
-        slate_date: slots[0].window_open_at,
-        slots
-      })
-
-      expect(message).to.include('OUT OF ORDER')
-      expect(message).to.include('on the clock regardless of its window')
     })
   })
 })
