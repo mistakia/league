@@ -9,7 +9,7 @@ import { createPortal } from 'react-dom'
 import PropTypes from 'prop-types'
 import { ClickAwayListener } from '@mui/base/ClickAwayListener'
 
-import { nfl_week_identifier } from '@libs-shared'
+import { nfl_week_identifier } from '#libs-shared'
 
 import {
   apply_per_week_toggle,

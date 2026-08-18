@@ -5,7 +5,7 @@ import {
   get_rosters_for_current_league,
   get_current_league
 } from '@core/selectors'
-import { Roster } from '@libs-shared'
+import { Roster } from '#libs-shared'
 
 import AuctionLeagueStats from './auction-league-stats'
 

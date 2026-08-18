@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import TransactionsFilter from '@components/transactions-filter'
-import { transaction_types, transaction_type_display_names } from '@constants'
+import { transaction_types, transaction_type_display_names } from '#constants'
 
 export default class TransactionTypeFilter extends React.Component {
   render = () => {

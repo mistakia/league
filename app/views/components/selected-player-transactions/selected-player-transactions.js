@@ -15,7 +15,7 @@ import Timestamp from '@components/timestamp'
 import TransactionRow from '@components/transaction-row'
 
 import './selected-player-transactions.styl'
-import { transaction_type_display_names } from '@constants'
+import { transaction_type_display_names } from '#constants'
 
 export default function SelectedPlayerTransactions({
   player_map,

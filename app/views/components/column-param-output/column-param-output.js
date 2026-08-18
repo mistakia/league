@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField'
 import FilterBase from 'react-table/src/filter-base'
 import ColumnParamOverrideSection from 'react-table/src/column-param-override-section'
 import { render_column_param_item } from 'react-table/src/column-controls-column-param-item'
-import { output_column_param } from '@libs-shared'
+import { output_column_param } from '#libs-shared'
 
 import './column-param-output.styl'
 

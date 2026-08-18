@@ -11,7 +11,7 @@ import format_lineage_event, {
   terminated_by_labels,
   team_asset_state_labels,
   team_asset_state_descriptions
-} from '@libs-shared/format-lineage-event.mjs'
+} from '#libs-shared/format-lineage-event.mjs'
 
 import './trade-review-trade.styl'
 

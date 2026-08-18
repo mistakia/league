@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { calculatePoints } from '@libs-shared'
+import { calculatePoints } from '#libs-shared'
 import {
   get_current_league,
   getSelectedPlayer,

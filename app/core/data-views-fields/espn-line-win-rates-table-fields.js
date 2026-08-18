@@ -3,8 +3,8 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import {
   common_column_params,
   nfl_plays_team_column_params
-} from '@libs-shared'
-import { current_season } from '@constants'
+} from '#libs-shared'
+import { current_season } from '#constants'
 
 const { single_year, career_year } = common_column_params
 const { matchup_opponent_type } = nfl_plays_team_column_params

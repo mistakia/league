@@ -18,10 +18,10 @@ import Chip from '@mui/material/Chip'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
-import { Roster } from '@libs-shared'
+import { Roster } from '#libs-shared'
 
 import './waiver-confirmation.styl'
-import { current_season, roster_slot_types, waiver_types } from '@constants'
+import { current_season, roster_slot_types, waiver_types } from '#constants'
 
 export default function WaiverConfirmation({
   waiver,

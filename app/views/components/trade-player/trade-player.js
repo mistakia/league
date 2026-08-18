@@ -4,7 +4,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PlayerNameExpanded from '@components/player-name-expanded'
 
 import './trade-player.styl'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 export default class TradePlayer extends React.Component {
   render = () => {

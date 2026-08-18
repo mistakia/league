@@ -1,8 +1,8 @@
 import { List, Map } from 'immutable'
 import { createSelector } from 'reselect'
 
-import { data_view_fields_index } from '@libs-shared'
-import { current_season } from '@constants'
+import { data_view_fields_index } from '#libs-shared'
+import { current_season } from '#constants'
 import ColumnParamNflWeekSelector from '@components/column-param-nfl-week-selector/column-param-nfl-week-selector.js'
 import ColumnParamOutput from '@components/column-param-output/column-param-output.js'
 import ColumnParamMonthDay from '@components/column-param-month-day/column-param-month-day.js'

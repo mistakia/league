@@ -6,7 +6,7 @@ import { team_actions } from './actions'
 import { auction_actions } from '@core/auction'
 import { draft_actions } from '@core/draft'
 import { trade_actions } from '@core/trade'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 const initialState = new Map()
 

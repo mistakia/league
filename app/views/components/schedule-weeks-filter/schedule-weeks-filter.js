@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import ScheduleFilter from '@components/schedule-filter'
-import { regular_fantasy_weeks } from '@constants'
+import { regular_fantasy_weeks } from '#constants'
 
 export default class ScheduleWeeksFilter extends React.Component {
   render = () => {

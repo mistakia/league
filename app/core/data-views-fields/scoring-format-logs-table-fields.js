@@ -6,7 +6,7 @@ import {
   common_column_params,
   named_scoring_formats,
   DEFAULT_SCORING_FORMAT_ID
-} from '@libs-shared'
+} from '#libs-shared'
 
 const { single_year, single_year_offset } = common_column_params
 

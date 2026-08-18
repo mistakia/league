@@ -9,7 +9,7 @@ import PageLayout from '@layouts/page'
 import { get_app } from '@core/selectors'
 import { API_URL } from '@core/constants'
 
-import { questions } from '@libs-shared/manager-waitlist-questions.mjs'
+import { questions } from '#libs-shared/manager-waitlist-questions.mjs'
 
 import './waitlist-submissions.styl'
 

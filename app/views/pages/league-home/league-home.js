@@ -17,13 +17,13 @@ import PoachNotice from '@components/poach-notice'
 import PageLayout from '@layouts/page'
 import Notices from '@components/notices'
 import CopyMarkdownButton from '@components/copy-markdown-button'
-import { current_season, fantasy_positions, league_defaults } from '@constants'
+import { current_season, fantasy_positions, league_defaults } from '#constants'
 import {
   isReserveEligible,
   isReserveCovEligible,
   get_free_agent_period,
   get_restricted_free_agency_nomination_window
-} from '@libs-shared'
+} from '#libs-shared'
 import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
 import { teams_to_array } from '@core/utils'
 import RestrictedFreeAgencySchedule from '@components/restricted-free-agency-schedule'

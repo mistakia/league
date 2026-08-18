@@ -5,7 +5,7 @@ import Icon from '@components/icon'
 import Source from '@components/source'
 import SelectedPlayerProjectionRow from '@components/selected-player-projection-row'
 import SelectedPlayerProjectionRowHeader from '@components/selected-player-projection-row-header'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 export default function SelectedPlayerProjection({
   pid,

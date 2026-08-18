@@ -6,7 +6,7 @@ import ScoreboardScoreTeam from '@components/scoreboard-score-team'
 import { Scoreboard } from '@core/scoreboard'
 
 import './scoreboard-teams.styl'
-import { current_season, matchup_types } from '@constants'
+import { current_season, matchup_types } from '#constants'
 
 function ScoreboardHeader() {
   return (

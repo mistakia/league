@@ -9,7 +9,7 @@ import {
   useSensor,
   useSensors
 } from '@dnd-kit/core'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 import {
   SortableContext,
   sortableKeyboardCoordinates,

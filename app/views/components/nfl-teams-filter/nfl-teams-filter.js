@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerFilter from '@components/player-filter'
-import { nfl_team_abbreviations } from '@constants'
+import { nfl_team_abbreviations } from '#constants'
 
 export default class NFLTeamsFilter extends React.Component {
   render() {

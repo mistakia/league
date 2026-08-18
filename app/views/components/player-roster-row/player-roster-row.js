@@ -1,13 +1,13 @@
 import React from 'react'
 import dayjs from 'dayjs'
 
-import { getExtensionAmount } from '@libs-shared'
+import { getExtensionAmount } from '#libs-shared'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
 import PlayerName from '@components/player-name'
 
 import './player-roster-row.styl'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 class PlayerRosterRow extends Player {
   render = () => {

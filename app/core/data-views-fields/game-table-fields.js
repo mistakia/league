@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import COLUMN_GROUPS from './column-groups'
-import { common_column_params } from '@libs-shared'
+import { common_column_params } from '#libs-shared'
 import GameOpponent from '@components/game-opponent'
 
 const { nfl_week_id } = common_column_params

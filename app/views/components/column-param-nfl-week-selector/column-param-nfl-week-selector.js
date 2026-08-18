@@ -6,7 +6,7 @@ import PropTypes from 'prop-types'
 
 import FilterBase from 'react-table/src/filter-base'
 import { format_column_params } from 'react-table/src/utils/format-column-params.js'
-import { nfl_week_identifier } from '@libs-shared'
+import { nfl_week_identifier } from '#libs-shared'
 
 import NflWeekSelectorDynamicValuesSection from './nfl-week-selector-dynamic-values-section.js'
 import NflWeekSelectorYearRow from './nfl-week-selector-year-row.js'

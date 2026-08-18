@@ -1,6 +1,6 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 
-import { plays_view_fields_index, nfl_plays_column_params } from '@libs-shared'
+import { plays_view_fields_index, nfl_plays_column_params } from '#libs-shared'
 
 const PLAYS_COLUMN_GROUPS = {
   CORE: { column_group_id: 'CORE', priority: 1 },

@@ -3,7 +3,7 @@ import React from 'react'
 import PlayerRowStatusColumn from '@components/player-row-status-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { common_column_params } from '@libs-shared'
+import { common_column_params } from '#libs-shared'
 
 const { single_nfl_week_id } = common_column_params
 

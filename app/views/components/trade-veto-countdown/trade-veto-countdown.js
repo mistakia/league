@@ -5,7 +5,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import {
   get_trade_veto_deadline,
   is_trade_within_veto_window
-} from '@libs-shared'
+} from '#libs-shared'
 import { useClockSeconds } from '@core/utils'
 
 const format_remaining = (seconds) => {

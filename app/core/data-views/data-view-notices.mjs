@@ -3,8 +3,8 @@ import {
   current_nfl_week_identifier,
   nfl_week_offset_params,
   format_nfl_week_identifier
-} from '@libs-shared/nfl-week-identifier.mjs'
-import { current_season } from '@constants'
+} from '#libs-shared/nfl-week-identifier.mjs'
+import { current_season } from '#constants'
 
 const summarize_year_seas_set = (values) => {
   const years = new Set()

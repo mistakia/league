@@ -6,13 +6,13 @@ import {
   getOptimizerPositionConstraints,
   optimizeLineup,
   calculatePlayerValuesRestOfSeason
-} from '@libs-shared'
+} from '#libs-shared'
 import solver from 'javascript-lp-solver'
 import {
   current_season,
   fantasy_positions,
   extended_player_stats
-} from '@constants'
+} from '#constants'
 
 export function workerOptimizeLineup(params) {
   return optimizeLineup(params)

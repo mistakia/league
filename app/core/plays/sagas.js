@@ -2,7 +2,7 @@ import { fork, takeLatest, call, select } from 'redux-saga/effects'
 
 import { player_actions } from '@core/players'
 import { api_get_plays, api_get_play_stats } from '@core/api'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 import { get_request_history, get_scoreboard, get_app } from '@core/selectors'
 import { scoreboard_actions } from '@core/scoreboard'
 import { matchups_actions } from '@core/matchups'

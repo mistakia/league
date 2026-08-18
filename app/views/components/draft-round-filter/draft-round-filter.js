@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerFilter from '@components/player-filter'
-import { nfl_draft_rounds } from '@constants'
+import { nfl_draft_rounds } from '#constants'
 
 export default class PositionFilter extends React.Component {
   render() {

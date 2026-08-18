@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import dayjs from 'dayjs'
 
-import { get_restricted_free_agency_nomination_info } from '@libs-shared'
+import { get_restricted_free_agency_nomination_info } from '#libs-shared'
 import TeamName from '@components/team-name'
 import { teams_to_array, useClockSeconds, format_countdown } from '@core/utils'
 

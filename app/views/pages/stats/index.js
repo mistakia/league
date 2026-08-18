@@ -3,7 +3,7 @@ import { createSelector } from 'reselect'
 import { Map } from 'immutable'
 
 import { team_actions } from '@core/teams'
-import { create_empty_fantasy_team_stats, fantasy_team_stats } from '@constants'
+import { create_empty_fantasy_team_stats, fantasy_team_stats } from '#constants'
 import {
   get_app,
   get_current_league,
@@ -11,7 +11,7 @@ import {
   get_league_user_historical_ranks
 } from '@core/selectors'
 import { league_careerlogs_actions } from '@core/league-careerlogs'
-import { calculatePercentiles } from '@libs-shared'
+import { calculatePercentiles } from '#libs-shared'
 
 import StatsPage from './stats'
 

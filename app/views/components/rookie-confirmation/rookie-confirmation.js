@@ -12,7 +12,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { player_tag_types } from '@constants'
+import { player_tag_types } from '#constants'
 
 export default class RookieConfirmation extends React.Component {
   constructor(props) {

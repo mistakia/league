@@ -10,7 +10,7 @@ import parse_table_state_from_url from '@core/data-views/parse-table-state-from-
 
 import DataViewsPage from '@pages/data-views'
 import PlaysPage from '@pages/plays'
-import resolve_short_url_chain from '@libs-shared/resolve-short-url-chain.mjs'
+import resolve_short_url_chain from '#libs-shared/resolve-short-url-chain.mjs'
 
 const STATUS_LOADING = 'loading'
 const STATUS_READY = 'ready'

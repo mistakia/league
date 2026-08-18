@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 import PlayerFilter from '@components/player-filter'
 
 export default class WeekFilter extends React.Component {

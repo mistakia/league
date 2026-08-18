@@ -1,7 +1,7 @@
 import { Map, List, fromJS } from 'immutable'
 
 import { restricted_free_agency_actions } from './actions'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 const initial_state = new Map({
   auctions: new List(),

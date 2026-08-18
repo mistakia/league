@@ -2,12 +2,12 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import Filter from '@components/filter'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 import {
   get_nfl_week_identifiers_for_year,
   parse_nfl_week_identifier,
   get_postseason_week_label
-} from '@libs-shared/nfl-week-identifier.mjs'
+} from '#libs-shared/nfl-week-identifier.mjs'
 
 const default_year = current_season.week
   ? current_season.year

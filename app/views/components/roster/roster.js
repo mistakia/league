@@ -5,11 +5,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 
 import PlayerRosterRow from '@components/player-roster-row'
-import { Roster as RosterBuilder } from '@libs-shared'
+import { Roster as RosterBuilder } from '#libs-shared'
 import TeamName from '@components/team-name'
 
 import './roster.styl'
-import { roster_slot_types } from '@constants'
+import { roster_slot_types } from '#constants'
 
 export default class Roster extends React.Component {
   render = () => {

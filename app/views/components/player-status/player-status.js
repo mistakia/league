@@ -6,7 +6,7 @@ import {
   player_nfl_status,
   nfl_player_status_abbreviations,
   nfl_player_status_descriptions
-} from '@constants'
+} from '#constants'
 
 export default function PlayerStatus({ player_map }) {
   const status =

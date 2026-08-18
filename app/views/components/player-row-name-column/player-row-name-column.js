@@ -3,7 +3,7 @@ import { Map } from 'immutable'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { get_string_from_object } from '@libs-shared'
+import { get_string_from_object } from '#libs-shared'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
@@ -12,7 +12,7 @@ import NFLTeam from '@components/nfl-team'
 import IconButton from '@components/icon-button'
 
 import './player-row-name-column.styl'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 export default function PlayerRowNameColumn({
   row,

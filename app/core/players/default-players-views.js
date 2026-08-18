@@ -1,4 +1,4 @@
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 const is_regular_season_finished =
   current_season.week > current_season.finalWeek

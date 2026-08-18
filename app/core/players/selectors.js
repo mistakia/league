@@ -12,7 +12,7 @@ import {
   ncaa_college_names,
   ncaa_conference_names,
   player_availability_statuses
-} from '@constants'
+} from '#constants'
 import {
   get_stats_state,
   get_active_roster_player_ids_for_current_league,

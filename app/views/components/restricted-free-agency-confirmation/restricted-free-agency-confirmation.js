@@ -15,14 +15,14 @@ import TextField from '@mui/material/TextField'
 import Autocomplete from '@mui/material/Autocomplete'
 import Chip from '@mui/material/Chip'
 
-import { isSlotActive } from '@libs-shared'
+import { isSlotActive } from '#libs-shared'
 
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
 
 import './restricted-free-agency-confirmation.styl'
-import { player_tag_types } from '@constants'
+import { player_tag_types } from '#constants'
 
 export default class RestrictedFreeAgencyConfirmation extends React.Component {
   constructor(props) {

@@ -1,7 +1,7 @@
-import { common_column_params } from '@libs-shared'
+import { common_column_params } from '#libs-shared'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 const { single_year, career_year } = common_column_params
 

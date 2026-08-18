@@ -13,8 +13,8 @@ import Chip from '@mui/material/Chip'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
-import { Roster, getExtensionAmount } from '@libs-shared'
-import { waiver_types } from '@constants'
+import { Roster, getExtensionAmount } from '#libs-shared'
+import { waiver_types } from '#constants'
 
 export default class PoachConfirmation extends React.Component {
   constructor(props) {

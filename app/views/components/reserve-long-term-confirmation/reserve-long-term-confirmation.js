@@ -8,7 +8,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { practice_squad_unprotected_slots, roster_slot_types } from '@constants'
+import { practice_squad_unprotected_slots, roster_slot_types } from '#constants'
 
 export default function ReserveLongTermConfirmation({
   player_map,

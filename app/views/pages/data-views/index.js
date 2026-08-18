@@ -23,7 +23,7 @@ import {
   get_data_view_organization_props_for_table_view_controller
 } from '@core/data-views/selectors'
 import { get_data_views_fields } from '@core/data-views-fields'
-import { calculatePercentiles } from '@libs-shared'
+import { calculatePercentiles } from '#libs-shared'
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import DataViewsPage from './data-views'

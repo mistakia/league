@@ -11,7 +11,7 @@ import SelectedPlayerScheduleWeekFilter from '@components/selected-player-schedu
 import SelectedPlayerScheduleTimePeriodFilter from '@components/selected-player-schedule-time-period-filter'
 
 import './selected-player-schedule.styl'
-import { current_season, nfl_weeks } from '@constants'
+import { current_season, nfl_weeks } from '#constants'
 
 export default function SelectedPlayerSchedule({
   player_map,

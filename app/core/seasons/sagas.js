@@ -4,7 +4,7 @@ import { get_request_history, get_app } from '@core/selectors'
 import { seasons_actions } from './actions'
 import { api_get_season } from '@core/api'
 import { app_actions } from '@core/app'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 export function* load_season() {
   const { leagueId, year } = yield select(get_app)

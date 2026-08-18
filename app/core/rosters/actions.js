@@ -1,5 +1,5 @@
 import { actions_utils } from '@core/utils'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 const { create_api_actions, create_api_action_types, create_toggle_action } =
   actions_utils
 

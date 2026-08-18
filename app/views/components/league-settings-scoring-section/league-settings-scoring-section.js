@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import EditableLeagueField from '@components/editable-league-field'
 import SettingsSection from '@components/settings-section'
-import { scoring_columns } from '@libs-shared/scoring-columns.mjs'
+import { scoring_columns } from '#libs-shared/scoring-columns.mjs'
 
 // Renders every editable scoring column in one registry `section`.
 //

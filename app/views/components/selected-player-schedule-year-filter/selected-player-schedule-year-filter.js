@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import Filter from '@components/filter'
-import { available_years } from '@constants'
+import { available_years } from '#constants'
 
 export default function SelectedPlayerScheduleYearFilter({
   selected_years_for_schedule = [],

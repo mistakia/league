@@ -12,7 +12,7 @@ import DefaultPlayersViews, {
   default_players_view_order_by
 } from './default-players-views'
 
-import { league_has_starting_position } from '@libs-shared'
+import { league_has_starting_position } from '#libs-shared'
 import {
   current_season,
   fantasy_positions,
@@ -27,7 +27,7 @@ import {
   nfl_draft_rounds,
   player_availability_statuses,
   create_empty_extended_stats
-} from '@constants'
+} from '#constants'
 
 export const default_player_filter_options = {
   search: null,

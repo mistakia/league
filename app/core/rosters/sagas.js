@@ -55,7 +55,7 @@ import {
   current_season,
   roster_slot_display_names,
   transaction_type_display_names
-} from '@constants'
+} from '#constants'
 import { player_actions } from '@core/players'
 import { poach_actions } from '@core/poaches'
 import { waiver_actions } from '@core/waivers'

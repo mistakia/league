@@ -5,7 +5,7 @@ import {
   nfl_plays_column_params,
   output_column_param,
   nfl_plays_team_column_params
-} from '@libs-shared'
+} from '#libs-shared'
 
 const from_play_field = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,

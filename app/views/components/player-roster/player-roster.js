@@ -1,5 +1,5 @@
 import React from 'react'
-import { getExtensionAmount } from '@libs-shared'
+import { getExtensionAmount } from '#libs-shared'
 import PlayerName from '@components/player-name'
 import IconButton from '@components/icon-button'
 import { Player, connect } from '@components/player'
@@ -8,7 +8,7 @@ import TeamName from '@components/team-name'
 import PercentileMetric from '@components/percentile-metric'
 import StackedMetric from '@components/stacked-metric'
 import NFLTeamBye from '@components/nfl-team-bye'
-import { current_season, player_tag_types } from '@constants'
+import { current_season, player_tag_types } from '#constants'
 
 // league.franchise_tag_salary_<pos> no longer shares a shape with the
 // position code, so the per-position lookup needs an explicit map.

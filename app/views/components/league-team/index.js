@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { current_season, player_tag_types } from '@constants'
+import { current_season, player_tag_types } from '#constants'
 import {
   get_team_by_id_for_current_year,
   get_current_league,
@@ -15,7 +15,7 @@ import {
   get_teams_for_current_league,
   get_restricted_free_agency_players
 } from '@core/selectors'
-import { calculatePercentiles, getExtensionAmount } from '@libs-shared'
+import { calculatePercentiles, getExtensionAmount } from '#libs-shared'
 import { player_actions } from '@core/players'
 
 import LeagueTeam from './league-team'

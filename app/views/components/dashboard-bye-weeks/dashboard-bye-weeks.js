@@ -5,7 +5,7 @@ import Popover from '@mui/material/Popover'
 import Position from '@components/position'
 
 import './dashboard-bye-weeks.styl'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 const weeksRemaining = current_season.finalWeek - current_season.week
 

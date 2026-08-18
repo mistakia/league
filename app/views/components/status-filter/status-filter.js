@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerFilter from '@components/player-filter'
-import { player_nfl_status } from '@constants'
+import { player_nfl_status } from '#constants'
 
 export default class StatusFilter extends React.Component {
   render = () => {

@@ -18,7 +18,7 @@ import ScoreboardSlots from '@components/scoreboard-slots'
 import ScoreboardTeams from '@components/scoreboard-teams'
 
 import './matchup.styl'
-import { matchup_types } from '@constants'
+import { matchup_types } from '#constants'
 
 export default function MatchupPage({
   is_loading,

@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import AuctionFilter from '@components/auction-filter'
-import { fantasy_positions } from '@constants'
+import { fantasy_positions } from '#constants'
 
 export default class AuctionPositionFilter extends React.Component {
   render = () => {

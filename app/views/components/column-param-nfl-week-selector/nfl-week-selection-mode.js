@@ -1,4 +1,4 @@
-import { nfl_week_identifier } from '@libs-shared'
+import { nfl_week_identifier } from '#libs-shared'
 
 const {
   parse_nfl_week_identifier,

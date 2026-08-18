@@ -5,10 +5,10 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import Toolbar from '@mui/material/Toolbar'
 
 import SelectYear from '@components/select-year'
-import { toPercent } from '@libs-shared'
+import { toPercent } from '#libs-shared'
 import PageLayout from '@layouts/page'
 import ProbabilityLeverageChart from '@components/probability-leverage-chart/probability-leverage-chart'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 function Divider({ title }) {
   return <div className='table__row table__divider sticky__column'>{title}</div>

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { useLocation } from 'react-router-dom'
 
 import { BASE_URL } from '@core/constants'
-import { resolve_page_meta } from '@libs-shared/page-meta.mjs'
+import { resolve_page_meta } from '#libs-shared/page-meta.mjs'
 
 // The API fills the `<head>` for the initial page load, which is what a crawler
 // reads. This keeps it correct afterwards: client-side navigation never touches

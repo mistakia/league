@@ -1,6 +1,6 @@
 import { Record, List } from 'immutable'
 
-import { matchup_types } from '@constants'
+import { matchup_types } from '#constants'
 
 // This Record serves BOTH kinds of scoreboard entry, and their identities are
 // genuinely different things -- which is why it carries two id fields rather

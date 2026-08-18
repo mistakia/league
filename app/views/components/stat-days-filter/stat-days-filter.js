@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import StatFilter from '@components/stat-filter'
-import { game_days } from '@constants'
+import { game_days } from '#constants'
 
 export default class StatDaysFilter extends React.Component {
   render = () => {

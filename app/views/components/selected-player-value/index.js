@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 import { getSelectedPlayer, getBaselines } from '@core/selectors'
 
 import SelectedPlayerValue from './selected-player-value'
-import { current_season, fantasy_weeks } from '@constants'
+import { current_season, fantasy_weeks } from '#constants'
 
 const map_state_to_props = createSelector(
   getSelectedPlayer,

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PlayerLabel from '@components/player-label'
 
-import { player_tag_types } from '@constants'
+import { player_tag_types } from '#constants'
 
 export default class PlayerTag extends React.Component {
   render() {

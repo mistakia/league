@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import StatFilter from '@components/stat-filter'
-import { nfl_downs } from '@constants'
+import { nfl_downs } from '#constants'
 
 export default class StatDownsFilter extends React.Component {
   render = () => {
