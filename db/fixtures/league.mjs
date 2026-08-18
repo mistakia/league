@@ -48,7 +48,9 @@ export default async function (knex, league_params = {}) {
   await knex.raw('ALTER SEQUENCE trades_uid_seq RESTART WITH 1')
   await knex.raw('ALTER SEQUENCE poaches_uid_seq RESTART WITH 1')
   await knex.raw('ALTER SEQUENCE leagues_uid_seq RESTART WITH 1')
-  await knex.raw('ALTER SEQUENCE super_priority_uid_seq RESTART WITH 1')
+  await knex.raw(
+    'ALTER SEQUENCE super_priority_super_priority_id_seq RESTART WITH 1'
+  )
 
   const userId = 1
   const league_defaults = {

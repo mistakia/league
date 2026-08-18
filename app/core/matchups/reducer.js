@@ -56,16 +56,26 @@ export function matchups_reducer(state = initialState, { payload, type }) {
           isPending: false
         })
 
-        const playoffs = groupBy(payload.data.playoffs, 'uid')
-        for (const gid in playoffs) {
-          const tids = playoffs[gid].map((p) => p.tid)
-          const points = playoffs[gid].map((p) => p.points)
-          const points_manual = playoffs[gid].map((p) => p.points_manual)
-          const projections = playoffs[gid].map((p) => p.projection)
+        const playoffs = groupBy(payload.data.playoffs, 'playoff_week_number')
+        for (const playoff_week_number in playoffs) {
+          const rows = playoffs[playoff_week_number]
+          const tids = rows.map((p) => p.tid)
+          const points = rows.map((p) => p.points)
+          const points_manual = rows.map((p) => p.points_manual)
+          const projections = rows.map((p) => p.projection)
           state.updateIn(['playoffs'], (arr) =>
             arr.push(
               create_matchup({
-                ...playoffs[gid][0],
+                ...rows[0],
+                // A tournament entry has no matchup id -- its identity IS its
+                // playoff week ordinal, which the API now sends as
+                // playoff_week_number. Map it onto the Record's uid here, at the
+                // one boundary where playoff rows become Matchups, because uid
+                // is the key the scoreboard selects on for BOTH matchup types
+                // (app/core/matchups/sagas.js, app/core/selectors.js). Without
+                // this the Record drops the undeclared key silently and every
+                // playoff scoreboard renders blank.
+                uid: Number(playoff_week_number),
                 tids,
                 type: matchup_types.TOURNAMENT,
                 points,

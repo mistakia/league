@@ -43,7 +43,7 @@ const process_playoffs = async ({ lid, year }) => {
     const playoff_inserts = []
     for (const tid of wildcard_teams) {
       playoff_inserts.push({
-        uid: 1, // wildcard round uid
+        playoff_week_number: 1, // wildcard round
         tid,
         lid,
         season_year: year,
@@ -53,7 +53,7 @@ const process_playoffs = async ({ lid, year }) => {
 
     await db('playoffs')
       .insert(playoff_inserts)
-      .onConflict(['tid', 'uid', 'season_year'])
+      .onConflict(['tid', 'playoff_week_number', 'season_year'])
       .merge()
     log(
       `inserted ${playoff_inserts.length} wildcard round matchups for lid ${lid}`
@@ -107,14 +107,14 @@ const process_playoffs = async ({ lid, year }) => {
 
   await db('playoffs')
     .insert(playoffs)
-    .onConflict(['tid', 'uid', 'season_year'])
+    .onConflict(['tid', 'playoff_week_number', 'season_year'])
     .merge()
   log(`updated ${playoffs.length} playoff results`)
 
   if (current_season.year !== year || current_season.week > 17) {
     // calculate post season finish
     const playoff_teams = playoffs
-      .filter((p) => p.uid === 1)
+      .filter((p) => p.playoff_week_number === 1)
       .sort((a, b) => b.points - a.points)
       .map((p) => p.tid)
 
@@ -139,7 +139,9 @@ const process_playoffs = async ({ lid, year }) => {
     })
 
     // combine championship round week 16 and 17 points
-    const championship_round_matchups = playoffs.filter((p) => p.uid > 1)
+    const championship_round_matchups = playoffs.filter(
+      (p) => p.playoff_week_number > 1
+    )
     const championship_round_points = {}
     for (const matchup of championship_round_matchups) {
       if (!championship_round_points[matchup.tid]) {
@@ -202,7 +204,7 @@ const process_playoffs = async ({ lid, year }) => {
   const is_championship_round =
     current_season.year === year && current_season.week >= 16
   const missing_championship_matchups = !playoffs.some(
-    (p) => p.uid === 2 && p.week === 16
+    (p) => p.playoff_week_number === 2 && p.week === 16
   )
   if (missing_championship_matchups && is_championship_round) {
     log(`creating championship round matchups for lid ${lid} year ${year}`)
@@ -218,7 +220,7 @@ const process_playoffs = async ({ lid, year }) => {
       .map((t) => t.tid)
 
     const wildcard_teams = playoffs
-      .filter((p) => p.uid === 1 && p.week === 15)
+      .filter((p) => p.playoff_week_number === 1 && p.week === 15)
       .sort((a, b) => b.points - a.points)
       .slice(0, 2)
       .map((p) => p.tid)
@@ -227,7 +229,7 @@ const process_playoffs = async ({ lid, year }) => {
     const championship_inserts = []
     for (const tid of championship_teams) {
       championship_inserts.push({
-        uid: 2, // championship round uid
+        playoff_week_number: 2, // championship round
         tid,
         lid,
         season_year: year,
@@ -235,7 +237,7 @@ const process_playoffs = async ({ lid, year }) => {
       })
 
       championship_inserts.push({
-        uid: 3, // championship round uid
+        playoff_week_number: 3, // championship round
         tid,
         lid,
         season_year: year,
@@ -245,7 +247,7 @@ const process_playoffs = async ({ lid, year }) => {
 
     await db('playoffs')
       .insert(championship_inserts)
-      .onConflict(['tid', 'uid', 'season_year'])
+      .onConflict(['tid', 'playoff_week_number', 'season_year'])
       .merge()
     log(
       `inserted ${championship_inserts.length} championship round matchups for lid ${lid}`

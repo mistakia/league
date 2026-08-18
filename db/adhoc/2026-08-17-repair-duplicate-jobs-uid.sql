@@ -1,4 +1,4 @@
--- STATUS: PENDING
+-- STATUS: APPLIED 2026-08-18 against league_production
 --
 -- Reassign the duplicate `jobs.uid` values so a primary key can be established
 -- on the column.

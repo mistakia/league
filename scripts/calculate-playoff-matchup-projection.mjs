@@ -35,7 +35,7 @@ const calculate_playoff_matchup_projection = async ({
     )
 
     if (!team_lineup) {
-      log(`Missing lineup for playoff: ${playoff.uid}`)
+      log(`Missing lineup for playoff: ${playoff.playoff_week_number}`)
       continue
     }
 
@@ -56,7 +56,7 @@ const calculate_playoff_matchup_projection = async ({
     log(`Updating ${playoff_updates.length} playoffs in lid ${lid} for ${year}`)
     await db('playoffs')
       .insert(playoff_updates)
-      .onConflict(['uid', 'tid', 'season_year', 'week'])
+      .onConflict(['playoff_week_number', 'tid', 'season_year', 'week'])
       .merge()
   }
 }

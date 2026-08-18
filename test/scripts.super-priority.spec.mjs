@@ -583,7 +583,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           eligible: 1,
           claimed: 0
         })
-        .returning('uid')
+        .returning('super_priority_id')
 
       super_priority_record = record
     })
@@ -595,7 +595,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           pid: player.pid,
           original_tid: 1,
           lid: 1,
-          super_priority_uid: super_priority_record.uid,
+          super_priority_id: super_priority_record.super_priority_id,
           user_id: 1
         })
       } catch (err) {
@@ -643,7 +643,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
 
       // Verify super priority record marked as claimed
       const updated_record = await knex('super_priority')
-        .where({ uid: super_priority_record.uid })
+        .where({ super_priority_id: super_priority_record.super_priority_id })
         .first()
 
       expect(updated_record.claimed).to.equal(1)
@@ -657,7 +657,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
           pid: player.pid,
           original_tid: 1,
           lid: 1,
-          super_priority_uid: super_priority_record.uid
+          super_priority_id: super_priority_record.super_priority_id
         })
       } catch (err) {
         error = err

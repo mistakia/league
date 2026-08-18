@@ -188,7 +188,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
   if (
     super_priority_status.eligible &&
     super_priority_status.original_tid === waiver.tid &&
-    super_priority_status.super_priority_uid
+    super_priority_status.super_priority_id
   ) {
     // Get waiver releases
     const release = await db('waiver_releases')
@@ -201,7 +201,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
         pid: waiver.pid,
         original_tid: waiver.tid,
         lid,
-        super_priority_uid: super_priority_status.super_priority_uid,
+        super_priority_id: super_priority_status.super_priority_id,
         user_id: waiver.user_id,
         release: release.map((r) => r.pid)
       })

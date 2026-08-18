@@ -109,7 +109,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
   } else if (!existing_record.eligible) {
     // Update existing record to mark as eligible and set waiver requirement
     await db('super_priority')
-      .where({ uid: existing_record.uid })
+      .where({ super_priority_id: existing_record.super_priority_id })
       .update({ eligible: 1, requires_waiver })
   }
 

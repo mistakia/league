@@ -522,17 +522,17 @@ describe('LIB - get_super_priority_status', function () {
       ])
     })
 
-    it('should return null super_priority_uid when no record exists', async () => {
+    it('should return null super_priority_id when no record exists', async () => {
       const status = await get_super_priority_status({
         pid: player.pid,
         lid: 1
       })
 
       expect(status.eligible).to.equal(true)
-      expect(status.super_priority_uid).to.equal(null)
+      expect(status.super_priority_id).to.equal(null)
     })
 
-    it('should include super_priority_uid when record exists', async () => {
+    it('should include super_priority_id when record exists', async () => {
       // Create super_priority record
       const [super_priority_record] = await knex('super_priority')
         .insert({
@@ -544,7 +544,7 @@ describe('LIB - get_super_priority_status', function () {
           eligible: 1,
           claimed: 0
         })
-        .returning('uid')
+        .returning('super_priority_id')
 
       const status = await get_super_priority_status({
         pid: player.pid,
@@ -552,7 +552,9 @@ describe('LIB - get_super_priority_status', function () {
       })
 
       expect(status.eligible).to.equal(true)
-      expect(status.super_priority_uid).to.equal(super_priority_record.uid)
+      expect(status.super_priority_id).to.equal(
+        super_priority_record.super_priority_id
+      )
     })
 
     it('should return not eligible when record is claimed', async () => {

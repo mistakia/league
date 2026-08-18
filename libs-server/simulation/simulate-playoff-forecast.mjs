@@ -302,7 +302,7 @@ export async function simulate_championship_forecast({
   // Get championship teams from playoffs table
   const playoffs = await db('playoffs')
     .where({ lid: league_id, season_year: year })
-    .whereIn('uid', [2, 3]) // Championship round entries
+    .whereIn('playoff_week_number', [2, 3]) // Championship round entries
 
   const championship_tids = [...new Set(playoffs.map((p) => p.tid))]
 

@@ -603,6 +603,7 @@ ALTER TABLE IF EXISTS ONLY public.keeptradecut_valuations DROP CONSTRAINT IF EXI
 ALTER TABLE IF EXISTS ONLY public.keeptradecut_pick DROP CONSTRAINT IF EXISTS keeptradecut_pick_pkey;
 ALTER TABLE IF EXISTS ONLY public.keeptradecut_pick DROP CONSTRAINT IF EXISTS keeptradecut_pick_ktc_player_id_key;
 ALTER TABLE IF EXISTS ONLY public.keeptradecut_liquidity DROP CONSTRAINT IF EXISTS keeptradecut_liquidity_pkey;
+ALTER TABLE IF EXISTS ONLY public.jobs DROP CONSTRAINT IF EXISTS jobs_pkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_pkey;
 ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS "idx_25127_PRIMARY";
@@ -676,7 +677,7 @@ ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.trades ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.teams ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS public.super_priority ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.super_priority ALTER COLUMN super_priority_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.sources ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.selection_combination_odds_history ALTER COLUMN history_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.selection_combination_definitions ALTER COLUMN combination_id DROP DEFAULT;
@@ -690,10 +691,10 @@ ALTER TABLE IF EXISTS public.poaches ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.placed_wagers ALTER COLUMN wager_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.matchups ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.leagues ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS public.league_notifications ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.league_notifications ALTER COLUMN notification_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.league_migrations_lock ALTER COLUMN index DROP DEFAULT;
 ALTER TABLE IF EXISTS public.league_migrations ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.jobs ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.jobs ALTER COLUMN job_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.draft ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_daily ALTER COLUMN composite_market_value_row_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_blend_weights ALTER COLUMN version_id DROP DEFAULT;
@@ -723,7 +724,7 @@ DROP TABLE IF EXISTS public.trades;
 DROP TABLE IF EXISTS public.trade_releases;
 DROP SEQUENCE IF EXISTS public.teams_uid_seq;
 DROP TABLE IF EXISTS public.teams;
-DROP SEQUENCE IF EXISTS public.super_priority_uid_seq;
+DROP SEQUENCE IF EXISTS public.super_priority_super_priority_id_seq;
 DROP TABLE IF EXISTS public.super_priority;
 DROP SEQUENCE IF EXISTS public.sources_uid_seq;
 DROP TABLE IF EXISTS public.sources;
@@ -845,9 +846,9 @@ DROP SEQUENCE IF EXISTS public.placed_wagers_wager_id_seq;
 DROP TABLE IF EXISTS public.placed_wagers;
 DROP TABLE IF EXISTS public.pff_unresolved_players;
 DROP TABLE IF EXISTS public.pff_team_seasonlogs;
-DROP SEQUENCE IF EXISTS public.pff_team_seasonlogs_uid_seq;
+DROP SEQUENCE IF EXISTS public.pff_team_seasonlogs_pff_team_seasonlog_id_seq;
 DROP TABLE IF EXISTS public.pff_team_gamelogs;
-DROP SEQUENCE IF EXISTS public.pff_team_gamelogs_uid_seq;
+DROP SEQUENCE IF EXISTS public.pff_team_gamelogs_pff_team_gamelog_id_seq;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs_changelog;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs;
 DROP TABLE IF EXISTS public.pff_player_gamelogs;
@@ -953,7 +954,7 @@ DROP TABLE IF EXISTS public.league_player_season_projection_values;
 DROP TABLE IF EXISTS public.league_player_rest_of_season_projection_values;
 DROP TABLE IF EXISTS public.league_player_projection_values;
 DROP TABLE IF EXISTS public.league_pauses;
-DROP SEQUENCE IF EXISTS public.league_notifications_uid_seq;
+DROP SEQUENCE IF EXISTS public.league_notifications_notification_id_seq;
 DROP TABLE IF EXISTS public.league_notifications;
 DROP TABLE IF EXISTS public.league_nfl_team_seasonlogs;
 DROP SEQUENCE IF EXISTS public.league_migrations_lock_index_seq;
@@ -973,7 +974,7 @@ DROP TABLE IF EXISTS public.league_baselines;
 DROP TABLE IF EXISTS public.keeptradecut_valuations;
 DROP TABLE IF EXISTS public.keeptradecut_pick;
 DROP TABLE IF EXISTS public.keeptradecut_liquidity;
-DROP SEQUENCE IF EXISTS public.jobs_uid_seq;
+DROP SEQUENCE IF EXISTS public.jobs_job_id_seq;
 DROP TABLE IF EXISTS public.jobs;
 DROP TABLE IF EXISTS public.invite_codes;
 DROP TABLE IF EXISTS public.historical_injury_index_2025;
@@ -4000,7 +4001,7 @@ CREATE TABLE public.invite_codes (
 --
 
 CREATE TABLE public.jobs (
-    uid integer NOT NULL,
+    job_id integer NOT NULL,
     type smallint NOT NULL,
     is_successful boolean NOT NULL,
     reason text,
@@ -4009,10 +4010,10 @@ CREATE TABLE public.jobs (
 
 
 --
--- Name: jobs_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: jobs_job_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.jobs_uid_seq
+CREATE SEQUENCE public.jobs_job_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -4022,10 +4023,10 @@ CREATE SEQUENCE public.jobs_uid_seq
 
 
 --
--- Name: jobs_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: jobs_job_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.jobs_uid_seq OWNED BY public.jobs.uid;
+ALTER SEQUENCE public.jobs_job_id_seq OWNED BY public.jobs.job_id;
 
 
 --
@@ -4348,7 +4349,7 @@ CREATE TABLE public.league_nfl_team_seasonlogs (
 --
 
 CREATE TABLE public.league_notifications (
-    uid integer NOT NULL,
+    notification_id integer NOT NULL,
     lid integer NOT NULL,
     season_year smallint NOT NULL,
     notification_type character varying(100) NOT NULL,
@@ -4361,10 +4362,10 @@ CREATE TABLE public.league_notifications (
 
 
 --
--- Name: league_notifications_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: league_notifications_notification_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.league_notifications_uid_seq
+CREATE SEQUENCE public.league_notifications_notification_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -4374,10 +4375,10 @@ CREATE SEQUENCE public.league_notifications_uid_seq
 
 
 --
--- Name: league_notifications_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: league_notifications_notification_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.league_notifications_uid_seq OWNED BY public.league_notifications.uid;
+ALTER SEQUENCE public.league_notifications_notification_id_seq OWNED BY public.league_notifications.notification_id;
 
 
 --
@@ -19486,10 +19487,10 @@ ALTER TABLE public.pff_player_seasonlogs_changelog ALTER COLUMN id ADD GENERATED
 
 
 --
--- Name: pff_team_gamelogs_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: pff_team_gamelogs_pff_team_gamelog_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.pff_team_gamelogs_uid_seq
+CREATE SEQUENCE public.pff_team_gamelogs_pff_team_gamelog_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -19502,7 +19503,7 @@ CREATE SEQUENCE public.pff_team_gamelogs_uid_seq
 --
 
 CREATE TABLE public.pff_team_gamelogs (
-    uid integer DEFAULT nextval('public.pff_team_gamelogs_uid_seq'::regclass) NOT NULL,
+    pff_team_gamelog_id integer DEFAULT nextval('public.pff_team_gamelogs_pff_team_gamelog_id_seq'::regclass) NOT NULL,
     nfl_team character varying(3) NOT NULL,
     season_year smallint NOT NULL,
     week smallint NOT NULL,
@@ -19528,10 +19529,10 @@ CREATE TABLE public.pff_team_gamelogs (
 
 
 --
--- Name: pff_team_seasonlogs_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: pff_team_seasonlogs_pff_team_seasonlog_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.pff_team_seasonlogs_uid_seq
+CREATE SEQUENCE public.pff_team_seasonlogs_pff_team_seasonlog_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -19544,7 +19545,7 @@ CREATE SEQUENCE public.pff_team_seasonlogs_uid_seq
 --
 
 CREATE TABLE public.pff_team_seasonlogs (
-    uid integer DEFAULT nextval('public.pff_team_seasonlogs_uid_seq'::regclass) NOT NULL,
+    pff_team_seasonlog_id integer DEFAULT nextval('public.pff_team_seasonlogs_pff_team_seasonlog_id_seq'::regclass) NOT NULL,
     nfl_team character varying(3) NOT NULL,
     season_year smallint NOT NULL,
     pff_team_id smallint,
@@ -24997,7 +24998,7 @@ CREATE TABLE public.players_status (
 --
 
 CREATE TABLE public.playoffs (
-    uid integer NOT NULL,
+    playoff_week_number integer NOT NULL,
     tid integer NOT NULL,
     lid integer NOT NULL,
     season_year smallint NOT NULL,
@@ -27096,7 +27097,7 @@ ALTER SEQUENCE public.sources_uid_seq OWNED BY public.sources.uid;
 --
 
 CREATE TABLE public.super_priority (
-    uid integer NOT NULL,
+    super_priority_id integer NOT NULL,
     pid character varying(25) NOT NULL,
     original_tid integer NOT NULL,
     poaching_tid integer NOT NULL,
@@ -27110,10 +27111,10 @@ CREATE TABLE public.super_priority (
 
 
 --
--- Name: super_priority_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: super_priority_super_priority_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.super_priority_uid_seq
+CREATE SEQUENCE public.super_priority_super_priority_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -27123,10 +27124,10 @@ CREATE SEQUENCE public.super_priority_uid_seq
 
 
 --
--- Name: super_priority_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: super_priority_super_priority_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.super_priority_uid_seq OWNED BY public.super_priority.uid;
+ALTER SEQUENCE public.super_priority_super_priority_id_seq OWNED BY public.super_priority.super_priority_id;
 
 
 --
@@ -28443,10 +28444,10 @@ ALTER TABLE ONLY public.draft ALTER COLUMN uid SET DEFAULT nextval('public.draft
 
 
 --
--- Name: jobs uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: jobs job_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.jobs ALTER COLUMN uid SET DEFAULT nextval('public.jobs_uid_seq'::regclass);
+ALTER TABLE ONLY public.jobs ALTER COLUMN job_id SET DEFAULT nextval('public.jobs_job_id_seq'::regclass);
 
 
 --
@@ -28464,10 +28465,10 @@ ALTER TABLE ONLY public.league_migrations_lock ALTER COLUMN index SET DEFAULT ne
 
 
 --
--- Name: league_notifications uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: league_notifications notification_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.league_notifications ALTER COLUMN uid SET DEFAULT nextval('public.league_notifications_uid_seq'::regclass);
+ALTER TABLE ONLY public.league_notifications ALTER COLUMN notification_id SET DEFAULT nextval('public.league_notifications_notification_id_seq'::regclass);
 
 
 --
@@ -28562,10 +28563,10 @@ ALTER TABLE ONLY public.sources ALTER COLUMN uid SET DEFAULT nextval('public.sou
 
 
 --
--- Name: super_priority uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: super_priority super_priority_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.super_priority ALTER COLUMN uid SET DEFAULT nextval('public.super_priority_uid_seq'::regclass);
+ALTER TABLE ONLY public.super_priority ALTER COLUMN super_priority_id SET DEFAULT nextval('public.super_priority_super_priority_id_seq'::regclass);
 
 
 --
@@ -29148,6 +29149,14 @@ ALTER TABLE ONLY public.invite_codes
 
 
 --
+-- Name: jobs jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.jobs
+    ADD CONSTRAINT jobs_pkey PRIMARY KEY (job_id);
+
+
+--
 -- Name: keeptradecut_liquidity keeptradecut_liquidity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -29208,7 +29217,7 @@ ALTER TABLE ONLY public.league_formats
 --
 
 ALTER TABLE ONLY public.league_notifications
-    ADD CONSTRAINT league_notifications_pkey PRIMARY KEY (uid);
+    ADD CONSTRAINT league_notifications_pkey PRIMARY KEY (notification_id);
 
 
 --
@@ -29448,7 +29457,7 @@ ALTER TABLE ONLY public.pff_team_gamelogs
 --
 
 ALTER TABLE ONLY public.pff_team_gamelogs
-    ADD CONSTRAINT pff_team_gamelogs_pkey PRIMARY KEY (uid);
+    ADD CONSTRAINT pff_team_gamelogs_pkey PRIMARY KEY (pff_team_gamelog_id);
 
 
 --
@@ -29464,7 +29473,7 @@ ALTER TABLE ONLY public.pff_team_seasonlogs
 --
 
 ALTER TABLE ONLY public.pff_team_seasonlogs
-    ADD CONSTRAINT pff_team_seasonlogs_pkey PRIMARY KEY (uid);
+    ADD CONSTRAINT pff_team_seasonlogs_pkey PRIMARY KEY (pff_team_seasonlog_id);
 
 
 --
@@ -30000,7 +30009,7 @@ ALTER TABLE ONLY public.player_variance
 --
 
 ALTER TABLE ONLY public.playoffs
-    ADD CONSTRAINT playoffs_pkey PRIMARY KEY (uid, tid, season_year, week);
+    ADD CONSTRAINT playoffs_pkey PRIMARY KEY (playoff_week_number, tid, season_year, week);
 
 
 --
@@ -30112,7 +30121,7 @@ ALTER TABLE ONLY public.selection_combination_odds_index
 --
 
 ALTER TABLE ONLY public.super_priority
-    ADD CONSTRAINT super_priority_pkey PRIMARY KEY (uid);
+    ADD CONSTRAINT super_priority_pkey PRIMARY KEY (super_priority_id);
 
 
 --
@@ -30774,7 +30783,7 @@ CREATE UNIQUE INDEX idx_24855_pid ON public.player_seasonlogs USING btree (pid, 
 -- Name: idx_24910_tid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24910_tid ON public.playoffs USING btree (tid, uid, season_year);
+CREATE UNIQUE INDEX idx_24910_tid ON public.playoffs USING btree (tid, playoff_week_number, season_year);
 
 
 --
@@ -58483,10 +58492,10 @@ GRANT SELECT ON TABLE public.jobs TO league_reader;
 
 
 --
--- Name: SEQUENCE jobs_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE jobs_job_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.jobs_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.jobs_job_id_seq TO league_reader;
 
 
 --
@@ -58623,10 +58632,10 @@ GRANT SELECT ON TABLE public.league_notifications TO league_reader;
 
 
 --
--- Name: SEQUENCE league_notifications_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE league_notifications_notification_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.league_notifications_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.league_notifications_notification_id_seq TO league_reader;
 
 
 --
@@ -59386,11 +59395,11 @@ GRANT SELECT ON SEQUENCE public.pff_player_seasonlogs_changelog_id_seq TO league
 
 
 --
--- Name: SEQUENCE pff_team_gamelogs_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE pff_team_gamelogs_pff_team_gamelog_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT ALL ON SEQUENCE public.pff_team_gamelogs_uid_seq TO postgres;
-GRANT SELECT ON SEQUENCE public.pff_team_gamelogs_uid_seq TO league_reader;
+GRANT ALL ON SEQUENCE public.pff_team_gamelogs_pff_team_gamelog_id_seq TO postgres;
+GRANT SELECT ON SEQUENCE public.pff_team_gamelogs_pff_team_gamelog_id_seq TO league_reader;
 
 
 --
@@ -59402,11 +59411,11 @@ GRANT SELECT ON TABLE public.pff_team_gamelogs TO league_reader;
 
 
 --
--- Name: SEQUENCE pff_team_seasonlogs_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE pff_team_seasonlogs_pff_team_seasonlog_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT ALL ON SEQUENCE public.pff_team_seasonlogs_uid_seq TO postgres;
-GRANT SELECT ON SEQUENCE public.pff_team_seasonlogs_uid_seq TO league_reader;
+GRANT ALL ON SEQUENCE public.pff_team_seasonlogs_pff_team_seasonlog_id_seq TO postgres;
+GRANT SELECT ON SEQUENCE public.pff_team_seasonlogs_pff_team_seasonlog_id_seq TO league_reader;
 
 
 --
@@ -60279,10 +60288,10 @@ GRANT SELECT ON TABLE public.super_priority TO league_reader;
 
 
 --
--- Name: SEQUENCE super_priority_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE super_priority_super_priority_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.super_priority_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.super_priority_super_priority_id_seq TO league_reader;
 
 
 --

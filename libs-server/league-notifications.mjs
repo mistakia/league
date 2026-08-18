@@ -81,7 +81,7 @@ export async function claim_league_notification({
     })
     .onConflict(['lid', 'season_year', 'notification_type', 'event_timestamp'])
     .ignore()
-    .returning('uid')
+    .returning('notification_id')
 
   const claimed = inserted.length > 0
   log(

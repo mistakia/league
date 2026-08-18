@@ -231,7 +231,7 @@
       "selections": "keep"
     },
     "playoffs": {
-      "uid": "keep",
+      "playoff_week_number": "keep",
       "tid": "keep",
       "lid": "keep",
       "season_year": "keep",

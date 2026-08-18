@@ -16,7 +16,7 @@ export default async function process_super_priority({
   pid,
   original_tid,
   lid,
-  super_priority_uid,
+  super_priority_id,
   user_id = null,
   release = []
 }) {
@@ -44,7 +44,7 @@ export default async function process_super_priority({
 
   // Determine target slot based on super_priority record requirements
   const super_priority_record = await db('super_priority')
-    .where({ uid: super_priority_uid })
+    .where({ super_priority_id })
     .first()
 
   let target_slot
@@ -164,11 +164,11 @@ export default async function process_super_priority({
   await db('transactions').insert(transaction)
 
   // Mark super priority as claimed
-  if (super_priority_uid === undefined) {
-    throw new Error('super_priority_uid is undefined')
+  if (super_priority_id === undefined) {
+    throw new Error('super_priority_id is undefined')
   }
 
-  await db('super_priority').where({ uid: super_priority_uid }).update({
+  await db('super_priority').where({ super_priority_id }).update({
     claimed: 1,
     claimed_at: occurred_at
   })
@@ -218,11 +218,11 @@ const main = async () => {
   const pid = process.argv[2]
   const original_tid = Number(process.argv[3])
   const lid = Number(process.argv[4]) || 1
-  const super_priority_uid = Number(process.argv[5])
+  const super_priority_id = Number(process.argv[5])
 
-  if (!pid || !original_tid || !super_priority_uid) {
+  if (!pid || !original_tid || !super_priority_id) {
     console.log(
-      'Usage: node process-super-priority.mjs <pid> <original_tid> [lid] <super_priority_uid>'
+      'Usage: node process-super-priority.mjs <pid> <original_tid> [lid] <super_priority_id>'
     )
     process.exit(1)
   }
@@ -232,7 +232,7 @@ const main = async () => {
       pid,
       original_tid,
       lid,
-      super_priority_uid
+      super_priority_id
     })
     console.log('Super priority processed:', result)
   } catch (error) {

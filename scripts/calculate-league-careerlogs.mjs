@@ -187,10 +187,12 @@ const calculate_league_careerlogs = async ({ lid }) => {
           lid: league_team_seasonlog.lid,
           season_year: league_team_seasonlog.season_year
         })
-        .orderBy('uid')
+        .orderBy('playoff_week_number')
 
       // Process wildcard round
-      const wildcard_game = playoff_data.find((game) => game.uid === 1)
+      const wildcard_game = playoff_data.find(
+        (game) => game.playoff_week_number === 1
+      )
       if (wildcard_game) {
         careerlog.wildcard_total_points += wildcard_game.points || 0
         careerlog.wildcard_highest_score = Math.max(
@@ -203,14 +205,15 @@ const calculate_league_careerlogs = async ({ lid }) => {
         )
 
         // Check if team won the wildcard round
-        if (playoff_data.some((game) => game.uid === 2)) {
+        if (playoff_data.some((game) => game.playoff_week_number === 2)) {
           careerlog.wildcard_wins += 1
         }
       }
 
       // Process championship round
       const championship_games = playoff_data.filter(
-        (game) => game.uid === 2 || game.uid === 3
+        (game) =>
+          game.playoff_week_number === 2 || game.playoff_week_number === 3
       )
       for (const game of championship_games) {
         careerlog.championship_total_points += game.points || 0

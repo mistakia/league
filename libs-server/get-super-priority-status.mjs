@@ -57,7 +57,7 @@ export default async function get_super_priority_status({
 
   return {
     ...eligibility,
-    super_priority_uid: super_priority_record?.uid || null
+    super_priority_id: super_priority_record?.super_priority_id || null
   }
 }
 

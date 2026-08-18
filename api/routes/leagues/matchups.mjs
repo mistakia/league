@@ -52,10 +52,10 @@ const router = express.Router({ mergeParams: true })
  *       type: object
  *       description: Fantasy league playoff matchup
  *       properties:
- *         uid:
+ *         playoff_week_number:
  *           type: integer
- *           description: Playoff matchup ID
- *           example: 5678
+ *           description: Playoff week ordinal -- 1 is the wildcard round, 2 and 3 are both the championship round
+ *           example: 1
  *         lid:
  *           type: integer
  *           description: League ID
@@ -345,7 +345,7 @@ router.post('/?', async (req, res) => {
  *                       away_team_id: 16
  *                       week_type: "REG"
  *                   playoffs:
- *                     - uid: 5678
+ *                     - playoff_week_number: 1
  *                       lid: 2
  *                       season_year: 2024
  *                       week: 15
@@ -353,7 +353,7 @@ router.post('/?', async (req, res) => {
  *                       seed1: 13
  *                       seed2: 16
  *                       winner: null
- *                     - uid: 5679
+ *                     - playoff_week_number: 1
  *                       lid: 2
  *                       season_year: 2024
  *                       week: 15
