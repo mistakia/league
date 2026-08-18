@@ -50,9 +50,9 @@ let league_format_id
 const local_noon = (date) => dayjs(`${date} 12:00:00`).unix()
 const observed_at = (date) => `${date}T12:00:00Z`
 
-const insert_transaction = async ({ uid, tid, pid, type, date }) =>
+const insert_transaction = async ({ transaction_id, tid, pid, type, date }) =>
   knex('transactions').insert({
-    uid,
+    transaction_id,
     user_id: 1,
     tid,
     lid,
@@ -158,21 +158,21 @@ describe('SCRIPTS - calculate team daily ktc value - draft picks', function () {
     // NEXT day's first transaction arrives, so each day under test needs a
     // transaction of its own and one more has to follow it.
     await insert_transaction({
-      uid: 301,
+      transaction_id: 301,
       tid: 1,
       pid: 'PLAY-ONE-000001',
       type: transaction_types.DRAFT,
       date: day_one
     })
     await insert_transaction({
-      uid: 302,
+      transaction_id: 302,
       tid: 4,
       pid: 'PLAY-TWO-000002',
       type: transaction_types.DRAFT,
       date: day_two
     })
     await insert_transaction({
-      uid: 303,
+      transaction_id: 303,
       tid: 4,
       pid: 'PLAY-THRE-000003',
       type: transaction_types.DRAFT,

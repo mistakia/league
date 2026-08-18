@@ -12,7 +12,7 @@ export default async function ({ lid, year = null }) {
 
   const trades = await trade_query
 
-  const trade_ids = trades.map((t) => t.uid)
+  const trade_ids = trades.map((t) => t.trade_id)
 
   const trade_picks = await db('trades_picks').whereIn('trade_id', trade_ids)
 
@@ -27,10 +27,10 @@ export default async function ({ lid, year = null }) {
   )
 
   for (const trade of trades) {
-    trade.picks = trade_picks.filter((p) => p.trade_id === trade.uid)
-    trade.players = trade_players.filter((p) => p.trade_id === trade.uid)
+    trade.picks = trade_picks.filter((p) => p.trade_id === trade.trade_id)
+    trade.players = trade_players.filter((p) => p.trade_id === trade.trade_id)
     trade.transactions = trade_transactions.filter(
-      (t) => t.trade_id === trade.uid
+      (t) => t.trade_id === trade.trade_id
     )
   }
 

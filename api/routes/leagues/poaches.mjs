@@ -66,7 +66,7 @@ router.post('/?', async (req, res) => {
         lid: leagueId
       })
       .orderBy('occurred_at', 'desc')
-      .orderBy('uid', 'desc')
+      .orderBy('transaction_id', 'desc')
       .limit(1)
     const tran = transactions[0]
 
@@ -180,7 +180,7 @@ router.put('/:poachId', async (req, res) => {
     // verify poachId belongs to teamId
     const poaches = await db('poaches')
       .where({
-        uid: poachId,
+        poach_id: poachId,
         tid,
         lid: leagueId
       })
@@ -202,8 +202,8 @@ router.put('/:poachId', async (req, res) => {
     // verify release player not use in different poach
     const otherPendingPoachReleases = await db('poaches')
       .select('poach_releases.pid')
-      .join('poach_releases', 'poaches.uid', 'poach_releases.poach_id')
-      .whereNot('uid', poachId)
+      .join('poach_releases', 'poaches.poach_id', 'poach_releases.poach_id')
+      .whereNot('poach_id', poachId)
       .whereNull('processed')
 
     const otherPoachReleasePlayers = otherPendingPoachReleases.map((p) => p.pid)
@@ -241,7 +241,7 @@ router.put('/:poachId', async (req, res) => {
     const transactions = await db('transactions')
       .where({ pid: poach_player_row.pid, lid: leagueId })
       .orderBy('occurred_at', 'desc')
-      .orderBy('uid', 'desc')
+      .orderBy('transaction_id', 'desc')
       .limit(1)
     const tran = transactions[0]
     const playerPoachValue = tran.player_salary + 2
@@ -282,7 +282,7 @@ router.post('/:poachId/process', async (req, res) => {
 
     const poaching_claim = await db('poaches')
       .where({
-        uid: poachId
+        poach_id: poachId
       })
       .whereNull('processed')
       .first()
@@ -309,7 +309,7 @@ router.post('/:poachId/process', async (req, res) => {
     try {
       const release = await db('poach_releases')
         .select('pid')
-        .where('poach_id', poaching_claim.uid)
+        .where('poach_id', poaching_claim.poach_id)
 
       await processPoach({
         release: release.map((r) => r.pid),
@@ -338,7 +338,7 @@ router.post('/:poachId/process', async (req, res) => {
 
     const processed_claim = await db('poaches')
       .where({
-        uid: poachId
+        poach_id: poachId
       })
       .first()
 

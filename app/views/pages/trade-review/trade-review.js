@@ -29,12 +29,12 @@ export default function TradeReviewPage({
   is_failed,
   is_logged_in
 }) {
-  const { lid, trade_uid: trade_uid_param } = useParams()
+  const { lid, trade_id: trade_id_param } = useParams()
   const navigate = useNavigate()
-  const trade_uid = trade_uid_param != null ? Number(trade_uid_param) : null
-  const is_single_trade = trade_uid_param != null
+  const trade_id = trade_id_param != null ? Number(trade_id_param) : null
+  const is_single_trade = trade_id_param != null
 
-  const trade = trade_uid != null ? trades.get(trade_uid) : null
+  const trade = trade_id != null ? trades.get(trade_id) : null
   const trade_has_chains = Boolean(trade && trade.get('has_chains'))
   const trade_is_pending = Boolean(trade && trade.get('is_pending'))
   const trade_is_failed = Boolean(trade && trade.get('is_failed'))
@@ -47,34 +47,34 @@ export default function TradeReviewPage({
     if (isNaN(lid)) {
       return navigate('/', { replace: true })
     }
-    if (is_single_trade && isNaN(trade_uid)) {
+    if (is_single_trade && isNaN(trade_id)) {
       return navigate(`/leagues/${lid}/trades`, { replace: true })
     }
-  }, [lid, is_single_trade, trade_uid, navigate])
+  }, [lid, is_single_trade, trade_id, navigate])
 
   // The list page fetches the whole review, once per league. A single-trade
   // page fetches only its own trade and never the list, so a deep link does not
   // recompute the whole review just to show one trade.
   useEffect(() => {
     if (isNaN(lid)) return
-    if (trade_uid_param != null) return
+    if (trade_id_param != null) return
     if (list_lid === Number(lid)) return
 
     load_trade_review({ leagueId: lid })
-  }, [lid, trade_uid_param, list_lid, load_trade_review])
+  }, [lid, trade_id_param, list_lid, load_trade_review])
 
   // The single trade comes with its lineage chains, so a full page load on a
   // trade URL needs just this. Navigating from the list re-fetches it to upgrade
   // the chainless list entry; has_chains and the pending/failed flags are what
   // stop that from repeating.
   useEffect(() => {
-    if (isNaN(lid) || trade_uid == null) return
+    if (isNaN(lid) || trade_id == null) return
     if (trade_has_chains || trade_is_pending || trade_is_failed) return
 
-    load_trade_review_trade({ leagueId: lid, trade_uid })
+    load_trade_review_trade({ leagueId: lid, trade_id })
   }, [
     lid,
-    trade_uid,
+    trade_id,
     trade_has_chains,
     trade_is_pending,
     trade_is_failed,
@@ -87,7 +87,7 @@ export default function TradeReviewPage({
     if (!is_single_trade) return
     const container = get_scroll_container()
     if (container) container.scrollTop = 0
-  }, [is_single_trade, trade_uid])
+  }, [is_single_trade, trade_id])
 
   // ...and coming back puts the reader where they left off. Keyed on the list
   // having rendered its trades, since a scroll offset cannot be applied to a
@@ -100,11 +100,11 @@ export default function TradeReviewPage({
     if (container) container.scrollTop = list_scroll_position.top
   }, [is_single_trade, lid, trades.size])
 
-  const go_to_trade = (uid) => {
+  const go_to_trade = (trade_id) => {
     const container = get_scroll_container()
     list_scroll_position.lid = Number(lid)
     list_scroll_position.top = container ? container.scrollTop : 0
-    navigate(`/leagues/${lid}/trades/${uid}`)
+    navigate(`/leagues/${lid}/trades/${trade_id}`)
   }
   const go_to_list = () => navigate(`/leagues/${lid}/trades`)
 
@@ -125,7 +125,7 @@ export default function TradeReviewPage({
         // navigated away from itself on a stray click would be a trap.
         <TradeReviewTrade
           trade={trade}
-          trade_uid={trade_uid}
+          trade_id={trade_id}
           league_id={lid}
           is_expanded
           is_failed={trade_is_failed}
@@ -160,10 +160,10 @@ export default function TradeReviewPage({
       .filter((trade_entry) => Boolean(trade_entry.get('perspectives').size))
       .reverse()
       .toArray()
-      .map(([uid, trade_entry]) => (
+      .map(([trade_id, trade_entry]) => (
         <TradeReviewTrade
-          key={uid}
-          trade_uid={uid}
+          key={trade_id}
+          trade_id={trade_id}
           trade={trade_entry}
           league_id={lid}
           on_open={go_to_trade}

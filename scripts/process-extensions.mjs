@@ -64,13 +64,13 @@ const createTransaction = async ({ roster_player, tid, league }) => {
   }
 
   const extensions = await getPlayerExtensions({
-    lid: league.uid,
+    lid: league.league_id,
     pid
   })
   const { player_salary: value } = await getLastTransaction({
     pid,
     tid,
-    lid: league.uid
+    lid: league.league_id
   })
   const extensionValue = getExtensionAmount({
     extensions: extensions.length,
@@ -86,7 +86,7 @@ const createTransaction = async ({ roster_player, tid, league }) => {
   return {
     user_id: 0,
     tid,
-    lid: league.uid,
+    lid: league.league_id,
     pid,
     type: getTransactionType(tag),
     player_salary: extensionValue,
@@ -163,7 +163,7 @@ const process_extensions_for_due_leagues = async () => {
     extension_deadline_at + AUTO_PROCESS_WINDOW_DAYS * 86400
 
   const eligible = await db('seasons')
-    .join('leagues', 'leagues.uid', 'seasons.lid')
+    .join('leagues', 'leagues.league_id', 'seasons.lid')
     .where({
       'seasons.season_year': current_season.year,
       'leagues.is_hosted': true

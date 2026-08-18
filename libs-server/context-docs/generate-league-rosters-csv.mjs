@@ -42,7 +42,7 @@ export default async function generate_league_rosters_csv({
 
   const rows = team_rosters.flatMap(({ rows }) =>
     rows.map((row) => ({
-      league_id: league.uid,
+      league_id: league.league_id,
       year,
       team_id: row.tid,
       team_name: row.team_name,

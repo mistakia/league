@@ -67,7 +67,7 @@ export const get_latest_league_resume = async ({
   if (!league_id) return null
 
   const pause_state = await get_pause_state_by_league_id({
-    leagues: [{ uid: league_id }],
+    leagues: [{ league_id }],
     db
   })
 
@@ -87,7 +87,7 @@ export const get_latest_league_resume = async ({
  * cannot come to mean different things on the two routes.
  *
  * @param {Object} args
- * @param {Array<{uid: number}>} args.leagues
+ * @param {Array<{league_id: number}>} args.leagues
  * @param {Object} [args.db]
  * @returns {Promise<Object>} Keyed by league id, each `{ paused_at, resumed_at }`.
  */
@@ -95,7 +95,7 @@ export const get_pause_state_by_league_id = async ({
   leagues,
   db = default_db
 }) => {
-  const league_ids = leagues.map((league) => Number(league.uid))
+  const league_ids = leagues.map((league) => Number(league.league_id))
   if (!league_ids.length) return {}
 
   const pause_rows = await db('league_pauses')
@@ -105,7 +105,7 @@ export const get_pause_state_by_league_id = async ({
 
   const pause_state = {}
   for (const league of leagues) {
-    const league_id = Number(league.uid)
+    const league_id = Number(league.league_id)
     const league_rows = pause_rows.filter(
       (pause_row) => Number(pause_row.league_id) === league_id
     )

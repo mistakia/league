@@ -65,7 +65,7 @@ export default async function generate_league_rules({
     type: 'league_rules',
     fields: {
       canonical_url: doc_url(base_url, { lid, view: 'rules' }),
-      league_id: league.uid,
+      league_id: league.league_id,
       league_name: league.name,
       year
     },

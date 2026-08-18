@@ -121,7 +121,7 @@ const run = async ({ daily = false } = {}) => {
           reason: error ? error.message : null, // TODO - add error codes
           processed: timestamp
         })
-        .where('uid', waiver.wid)
+        .where('waiver_id', waiver.wid)
 
       waiver = await getTopPoachingWaiver(lid)
     }
@@ -131,7 +131,7 @@ const run = async ({ daily = false } = {}) => {
   // unprocessed. A non-empty result means the loop silently skipped eligible
   // waivers — surface that as a shortfall.
   const stuck_waivers = await db('waivers')
-    .select('uid', 'lid', 'pid')
+    .select('waiver_id', 'lid', 'pid')
     .whereNull('processed')
     .whereNull('cancelled')
     .where('type', waiver_types.POACH)
@@ -139,7 +139,7 @@ const run = async ({ daily = false } = {}) => {
 
   if (stuck_waivers.length > 0) {
     return {
-      shortfall: `${stuck_waivers.length} poaching waiver(s) remain unprocessed after run: uids=${stuck_waivers.map((w) => w.uid).join(',')}`
+      shortfall: `${stuck_waivers.length} poaching waiver(s) remain unprocessed after run: waiver_ids=${stuck_waivers.map((w) => w.waiver_id).join(',')}`
     }
   }
 

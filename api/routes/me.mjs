@@ -195,7 +195,7 @@ router.get('/?', async (req, res) => {
     const teamIds = teams.map((t) => t.team_id)
     const leagues = await db('leagues')
       .leftJoin('seasons', function () {
-        this.on('leagues.uid', '=', 'seasons.lid')
+        this.on('leagues.league_id', '=', 'seasons.lid')
         this.on(
           db.raw(
             `seasons.season_year = ${current_season.year} or seasons.season_year is null`
@@ -212,7 +212,7 @@ router.get('/?', async (req, res) => {
         'seasons.scoring_format_id',
         'league_scoring_formats.id'
       )
-      .whereIn('leagues.uid', leagueIds)
+      .whereIn('leagues.league_id', leagueIds)
 
     // The SPA's league store is populated from this payload on auth, so a
     // league missing its pause state here renders no banner, freezes no clock,
@@ -222,7 +222,7 @@ router.get('/?', async (req, res) => {
     // does on GET /leagues/:leagueId.
     const pause_state = await get_pause_state_by_league_id({ leagues, db })
     for (const league of leagues) {
-      Object.assign(league, pause_state[Number(league.uid)])
+      Object.assign(league, pause_state[Number(league.league_id)])
     }
 
     const seasons = await db('seasons').whereIn('lid', leagueIds)
@@ -236,7 +236,7 @@ router.get('/?', async (req, res) => {
     const divisionsByLeagueId = groupBy(divisions, 'lid')
 
     for (const lid in seasonsByLeagueId) {
-      const league = leagues.find((l) => l.uid === Number(lid))
+      const league = leagues.find((l) => l.league_id === Number(lid))
       league.years = seasonsByLeagueId[lid].map((s) => s.season_year)
 
       // Add divisions to the league
@@ -252,21 +252,23 @@ router.get('/?', async (req, res) => {
       req.auth.userId
     )
     for (const source of sources) {
-      const userSource = userSources.find((s) => s.source_id === source.uid)
+      const userSource = userSources.find(
+        (s) => s.source_id === source.source_id
+      )
       source.weight = userSource ? userSource.weight : 1
     }
 
     const poaches = await db('poaches')
       .whereIn('lid', leagueIds)
       .whereNull('processed')
-    const poachIds = poaches.map((p) => p.uid)
+    const poachIds = poaches.map((p) => p.poach_id)
     const poachReleases = await db('poach_releases').whereIn(
       'poach_id',
       poachIds
     )
     for (const poach of poaches) {
       poach.release = poachReleases
-        .filter((p) => p.poach_id === poach.uid)
+        .filter((p) => p.poach_id === poach.poach_id)
         .map((p) => p.pid)
     }
 
@@ -274,14 +276,14 @@ router.get('/?', async (req, res) => {
       .whereIn('tid', teamIds)
       .whereNull('processed')
       .whereNull('cancelled')
-    const waiverIds = waivers.map((p) => p.uid)
+    const waiverIds = waivers.map((p) => p.waiver_id)
     const waiverReleases = await db('waiver_releases').whereIn(
       'waiver_id',
       waiverIds
     )
     for (const waiver of waivers) {
       waiver.release = waiverReleases
-        .filter((p) => p.waiver_id === waiver.uid)
+        .filter((p) => p.waiver_id === waiver.waiver_id)
         .map((p) => p.pid)
     }
 

@@ -108,7 +108,7 @@ export default async function ({
   // if signed through waivers, make sure player had no competing bids
   if (firstTransaction.waiver_id) {
     const waivers = await db('waivers').where({
-      uid: firstTransaction.waiver_id
+      waiver_id: firstTransaction.waiver_id
     })
     const transactionWaiver = waivers[0]
 

@@ -75,9 +75,9 @@ DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_source_idx;
 DROP INDEX IF EXISTS public.user_data_view_tags_user_id_idx;
 DROP INDEX IF EXISTS public.user_data_view_favorites_user_id_idx;
-DROP INDEX IF EXISTS public.trades_slots_trade_uid_idx;
+DROP INDEX IF EXISTS public.trades_slots_trade_id_idx;
 DROP INDEX IF EXISTS public.scoring_format_player_projection_points_pid_id_week_season_year;
-DROP INDEX IF EXISTS public.roster_asset_transformation_trade_uid_idx;
+DROP INDEX IF EXISTS public.roster_asset_transformation_trade_id_idx;
 DROP INDEX IF EXISTS public.roster_asset_transformation_target_idx;
 DROP INDEX IF EXISTS public.roster_asset_transformation_source_idx;
 DROP INDEX IF EXISTS public.roster_asset_transformation_lid_occurred_idx;
@@ -403,11 +403,9 @@ DROP INDEX IF EXISTS public.idx_25141_userid_tid_season_year;
 DROP INDEX IF EXISTS public.idx_25138_sourceid;
 DROP INDEX IF EXISTS public.idx_25127_email;
 DROP INDEX IF EXISTS public.idx_25114_pid;
-DROP INDEX IF EXISTS public.idx_25103_uid;
 DROP INDEX IF EXISTS public.idx_25099_transaction;
 DROP INDEX IF EXISTS public.idx_25096_pid;
 DROP INDEX IF EXISTS public.idx_25093_pick;
-DROP INDEX IF EXISTS public.idx_25089_uid;
 DROP INDEX IF EXISTS public.idx_25085_pid;
 DROP INDEX IF EXISTS public.idx_25075_team_season_year;
 DROP INDEX IF EXISTS public.idx_25029_team;
@@ -480,6 +478,7 @@ ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_k
 ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS unique_super_priority;
 ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transactions_pkey;
 ALTER TABLE IF EXISTS ONLY public.trades_slots DROP CONSTRAINT IF EXISTS trades_slots_pkey;
+ALTER TABLE IF EXISTS ONLY public.trades DROP CONSTRAINT IF EXISTS trades_pkey;
 ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS super_priority_pkey;
 ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_index DROP CONSTRAINT IF EXISTS selection_combination_odds_index_pkey;
@@ -672,25 +671,25 @@ ALTER TABLE IF EXISTS ONLY public.admission_vote_candidate_sponsors DROP CONSTRA
 ALTER TABLE IF EXISTS ONLY public.admission_vote_ballots DROP CONSTRAINT IF EXISTS admission_vote_ballots_pkey;
 ALTER TABLE IF EXISTS ONLY public.admission_vote_ballot_preferences DROP CONSTRAINT IF EXISTS admission_vote_ballot_preferences_rank_unique_per_ballot;
 ALTER TABLE IF EXISTS ONLY public.admission_vote_ballot_preferences DROP CONSTRAINT IF EXISTS admission_vote_ballot_preferences_pkey;
-ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.waivers ALTER COLUMN waiver_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS public.trades ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.transactions ALTER COLUMN transaction_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.trades ALTER COLUMN trade_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.teams ALTER COLUMN team_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.super_priority ALTER COLUMN super_priority_id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.sources ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.sources ALTER COLUMN source_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.selection_combination_odds_history ALTER COLUMN history_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.selection_combination_definitions ALTER COLUMN combination_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.rosters ALTER COLUMN roster_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.roster_asset_transformation ALTER COLUMN transformation_row_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.roster_asset_holding ALTER COLUMN holding_id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.restricted_free_agency_bids ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.restricted_free_agency_bids ALTER COLUMN bid_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.props_index ALTER COLUMN prop_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.position_vocabulary_backfill_audit ALTER COLUMN audit_id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.poaches ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.poaches ALTER COLUMN poach_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.placed_wagers ALTER COLUMN wager_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.matchups ALTER COLUMN matchup_id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.leagues ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.leagues ALTER COLUMN league_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.league_notifications ALTER COLUMN notification_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.league_migrations_lock ALTER COLUMN index DROP DEFAULT;
 ALTER TABLE IF EXISTS public.league_migrations ALTER COLUMN id DROP DEFAULT;
@@ -699,7 +698,7 @@ ALTER TABLE IF EXISTS public.draft ALTER COLUMN draft_pick_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_daily ALTER COLUMN composite_market_value_row_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_blend_weights ALTER COLUMN version_id DROP DEFAULT;
 DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
-DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
+DROP SEQUENCE IF EXISTS public.waivers_waiver_id_seq;
 DROP TABLE IF EXISTS public.waivers;
 DROP TABLE IF EXISTS public.waiver_releases;
 DROP VIEW IF EXISTS public.view_trade_asset_flow;
@@ -713,10 +712,10 @@ DROP TABLE IF EXISTS public.user_data_views;
 DROP TABLE IF EXISTS public.user_data_view_tags;
 DROP TABLE IF EXISTS public.user_data_view_favorites;
 DROP TABLE IF EXISTS public.urls;
-DROP SEQUENCE IF EXISTS public.transactions_uid_seq;
+DROP SEQUENCE IF EXISTS public.transactions_transaction_id_seq;
 DROP TABLE IF EXISTS public.transactions;
-DROP SEQUENCE IF EXISTS public.trades_uid_seq;
 DROP TABLE IF EXISTS public.trades_transactions;
+DROP SEQUENCE IF EXISTS public.trades_trade_id_seq;
 DROP TABLE IF EXISTS public.trades_slots;
 DROP TABLE IF EXISTS public.trades_players;
 DROP TABLE IF EXISTS public.trades_picks;
@@ -726,7 +725,7 @@ DROP SEQUENCE IF EXISTS public.teams_team_id_seq;
 DROP TABLE IF EXISTS public.teams;
 DROP SEQUENCE IF EXISTS public.super_priority_super_priority_id_seq;
 DROP TABLE IF EXISTS public.super_priority;
-DROP SEQUENCE IF EXISTS public.sources_uid_seq;
+DROP SEQUENCE IF EXISTS public.sources_source_id_seq;
 DROP TABLE IF EXISTS public.sources;
 DROP TABLE IF EXISTS public.selection_combination_odds_index;
 DROP SEQUENCE IF EXISTS public.selection_combination_odds_history_history_id_seq;
@@ -749,7 +748,7 @@ DROP TABLE IF EXISTS public.roster_asset_holding;
 DROP TABLE IF EXISTS public.ros_projections;
 DROP TABLE IF EXISTS public.restricted_free_agency_releases;
 DROP TABLE IF EXISTS public.restricted_free_agency_nominations;
-DROP SEQUENCE IF EXISTS public.restricted_free_agency_bids_uid_seq;
+DROP SEQUENCE IF EXISTS public.restricted_free_agency_bids_bid_id_seq;
 DROP TABLE IF EXISTS public.restricted_free_agency_bids;
 DROP SEQUENCE IF EXISTS public.props_index_prop_id_seq;
 DROP TABLE IF EXISTS public.props_index;
@@ -782,7 +781,7 @@ DROP TABLE IF EXISTS public.practice;
 DROP SEQUENCE IF EXISTS public.position_vocabulary_backfill_audit_audit_id_seq;
 DROP TABLE IF EXISTS public.position_vocabulary_backfill_audit;
 DROP TABLE IF EXISTS public.position_game_outcome_defaults;
-DROP SEQUENCE IF EXISTS public.poaches_uid_seq;
+DROP SEQUENCE IF EXISTS public.poaches_poach_id_seq;
 DROP TABLE IF EXISTS public.poaches;
 DROP TABLE IF EXISTS public.poach_releases;
 DROP TABLE IF EXISTS public.playoffs;
@@ -936,7 +935,7 @@ DROP TABLE IF EXISTS public.nfl_coaches;
 DROP SEQUENCE IF EXISTS public.matchups_matchup_id_seq;
 DROP TABLE IF EXISTS public.matchups;
 DROP TABLE IF EXISTS public.manager_waitlist_submissions;
-DROP SEQUENCE IF EXISTS public.leagues_uid_seq;
+DROP SEQUENCE IF EXISTS public.leagues_league_id_seq;
 DROP TABLE IF EXISTS public.leagues;
 DROP TABLE IF EXISTS public.league_user_careerlogs;
 DROP TABLE IF EXISTS public.league_team_seasonlogs;
@@ -4854,7 +4853,7 @@ CREATE TABLE public.league_user_careerlogs (
 --
 
 CREATE TABLE public.leagues (
-    uid bigint NOT NULL,
+    league_id bigint NOT NULL,
     commissioner_user_id integer NOT NULL,
     name character varying(50) NOT NULL,
     discord_webhook_url character varying(255),
@@ -4878,10 +4877,10 @@ COMMENT ON COLUMN public.leagues.salary_attribution_rule IS 'Enum SALARY_ATTRIBU
 
 
 --
--- Name: leagues_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: leagues_league_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.leagues_uid_seq
+CREATE SEQUENCE public.leagues_league_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -4890,10 +4889,10 @@ CREATE SEQUENCE public.leagues_uid_seq
 
 
 --
--- Name: leagues_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: leagues_league_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.leagues_uid_seq OWNED BY public.leagues.uid;
+ALTER SEQUENCE public.leagues_league_id_seq OWNED BY public.leagues.league_id;
 
 
 --
@@ -25024,7 +25023,7 @@ CREATE TABLE public.poach_releases (
 --
 
 CREATE TABLE public.poaches (
-    uid bigint NOT NULL,
+    poach_id bigint NOT NULL,
     pid character varying(25),
     user_id integer NOT NULL,
     tid integer NOT NULL,
@@ -25038,10 +25037,10 @@ CREATE TABLE public.poaches (
 
 
 --
--- Name: poaches_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: poaches_poach_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.poaches_uid_seq
+CREATE SEQUENCE public.poaches_poach_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -25050,10 +25049,10 @@ CREATE SEQUENCE public.poaches_uid_seq
 
 
 --
--- Name: poaches_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: poaches_poach_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.poaches_uid_seq OWNED BY public.poaches.uid;
+ALTER SEQUENCE public.poaches_poach_id_seq OWNED BY public.poaches.poach_id;
 
 
 --
@@ -26357,7 +26356,7 @@ ALTER SEQUENCE public.props_index_prop_id_seq OWNED BY public.props_index.prop_i
 --
 
 CREATE TABLE public.restricted_free_agency_bids (
-    uid integer NOT NULL,
+    bid_id integer NOT NULL,
     pid character varying(25),
     user_id integer NOT NULL,
     bid_amount integer,
@@ -26375,10 +26374,10 @@ CREATE TABLE public.restricted_free_agency_bids (
 
 
 --
--- Name: restricted_free_agency_bids_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: restricted_free_agency_bids_bid_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.restricted_free_agency_bids_uid_seq
+CREATE SEQUENCE public.restricted_free_agency_bids_bid_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -26388,10 +26387,10 @@ CREATE SEQUENCE public.restricted_free_agency_bids_uid_seq
 
 
 --
--- Name: restricted_free_agency_bids_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: restricted_free_agency_bids_bid_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.restricted_free_agency_bids_uid_seq OWNED BY public.restricted_free_agency_bids.uid;
+ALTER SEQUENCE public.restricted_free_agency_bids_bid_id_seq OWNED BY public.restricted_free_agency_bids.bid_id;
 
 
 --
@@ -26653,7 +26652,7 @@ CREATE TABLE public.roster_asset_transformation (
     target_share numeric(4,3),
     is_audit_corrected boolean DEFAULT false NOT NULL,
     correction_note text,
-    trade_uid integer
+    trade_id integer
 );
 
 
@@ -26686,10 +26685,10 @@ COMMENT ON COLUMN public.roster_asset_transformation.target_share IS 'This targe
 
 
 --
--- Name: COLUMN roster_asset_transformation.trade_uid; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN roster_asset_transformation.trade_id; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.roster_asset_transformation.trade_uid IS 'trades.uid for TRADE-type (transformation_type=1) edges; NULL for every other transformation type. Populated by the walker rather than joined on occurred_at, which is ambiguous when two trades are accepted in the same second.';
+COMMENT ON COLUMN public.roster_asset_transformation.trade_id IS 'trades.uid for TRADE-type (transformation_type=1) edges; NULL for every other transformation type. Populated by the walker rather than joined on occurred_at, which is ambiguous when two trades are accepted in the same second.';
 
 
 --
@@ -27066,17 +27065,17 @@ CREATE TABLE public.selection_combination_odds_index (
 --
 
 CREATE TABLE public.sources (
-    uid integer NOT NULL,
+    source_id integer NOT NULL,
     name character varying(50) DEFAULT ''::character varying NOT NULL,
     url character varying(60) DEFAULT ''::character varying NOT NULL
 );
 
 
 --
--- Name: sources_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: sources_source_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.sources_uid_seq
+CREATE SEQUENCE public.sources_source_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -27086,10 +27085,10 @@ CREATE SEQUENCE public.sources_uid_seq
 
 
 --
--- Name: sources_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: sources_source_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.sources_uid_seq OWNED BY public.sources.uid;
+ALTER SEQUENCE public.sources_source_id_seq OWNED BY public.sources.source_id;
 
 
 --
@@ -27188,7 +27187,7 @@ CREATE TABLE public.trade_releases (
 --
 
 CREATE TABLE public.trades (
-    uid bigint NOT NULL,
+    trade_id bigint NOT NULL,
     propose_tid integer NOT NULL,
     accept_tid integer NOT NULL,
     lid integer NOT NULL,
@@ -27230,12 +27229,31 @@ CREATE TABLE public.trades_players (
 --
 
 CREATE TABLE public.trades_slots (
-    trade_uid integer NOT NULL,
+    trade_id integer NOT NULL,
     pid character varying(25) NOT NULL,
     tid integer NOT NULL,
     slot integer NOT NULL,
     origin_slot integer
 );
+
+
+--
+-- Name: trades_trade_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.trades_trade_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: trades_trade_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.trades_trade_id_seq OWNED BY public.trades.trade_id;
 
 
 --
@@ -27249,30 +27267,11 @@ CREATE TABLE public.trades_transactions (
 
 
 --
--- Name: trades_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.trades_uid_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: trades_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.trades_uid_seq OWNED BY public.trades.uid;
-
-
---
 -- Name: transactions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.transactions (
-    uid bigint NOT NULL,
+    transaction_id bigint NOT NULL,
     user_id integer NOT NULL,
     tid integer NOT NULL,
     lid integer NOT NULL,
@@ -27287,10 +27286,10 @@ CREATE TABLE public.transactions (
 
 
 --
--- Name: transactions_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: transactions_transaction_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.transactions_uid_seq
+CREATE SEQUENCE public.transactions_transaction_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -27299,10 +27298,10 @@ CREATE SEQUENCE public.transactions_uid_seq
 
 
 --
--- Name: transactions_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: transactions_transaction_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.transactions_uid_seq OWNED BY public.transactions.uid;
+ALTER SEQUENCE public.transactions_transaction_id_seq OWNED BY public.transactions.transaction_id;
 
 
 --
@@ -27481,7 +27480,7 @@ COMMENT ON VIEW public.view_roster_asset_lineage_walk IS 'Transitive closure of 
 
 CREATE VIEW public.view_trade_asset_flow AS
  SELECT t.lid,
-    t.trade_uid,
+    t.trade_id,
     t.transformation_id,
     t.occurred_at,
     t.source_holding_id,
@@ -27526,7 +27525,7 @@ CREATE TABLE public.waiver_releases (
 --
 
 CREATE TABLE public.waivers (
-    uid integer NOT NULL,
+    waiver_id integer NOT NULL,
     user_id integer NOT NULL,
     pid character varying(25),
     tid integer NOT NULL,
@@ -27544,10 +27543,10 @@ CREATE TABLE public.waivers (
 
 
 --
--- Name: waivers_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: waivers_waiver_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.waivers_uid_seq
+CREATE SEQUENCE public.waivers_waiver_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -27557,10 +27556,10 @@ CREATE SEQUENCE public.waivers_uid_seq
 
 
 --
--- Name: waivers_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: waivers_waiver_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.waivers_uid_seq OWNED BY public.waivers.uid;
+ALTER SEQUENCE public.waivers_waiver_id_seq OWNED BY public.waivers.waiver_id;
 
 
 --
@@ -28472,10 +28471,10 @@ ALTER TABLE ONLY public.league_notifications ALTER COLUMN notification_id SET DE
 
 
 --
--- Name: leagues uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: leagues league_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.leagues ALTER COLUMN uid SET DEFAULT nextval('public.leagues_uid_seq'::regclass);
+ALTER TABLE ONLY public.leagues ALTER COLUMN league_id SET DEFAULT nextval('public.leagues_league_id_seq'::regclass);
 
 
 --
@@ -28493,10 +28492,10 @@ ALTER TABLE ONLY public.placed_wagers ALTER COLUMN wager_id SET DEFAULT nextval(
 
 
 --
--- Name: poaches uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: poaches poach_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.poaches ALTER COLUMN uid SET DEFAULT nextval('public.poaches_uid_seq'::regclass);
+ALTER TABLE ONLY public.poaches ALTER COLUMN poach_id SET DEFAULT nextval('public.poaches_poach_id_seq'::regclass);
 
 
 --
@@ -28514,10 +28513,10 @@ ALTER TABLE ONLY public.props_index ALTER COLUMN prop_id SET DEFAULT nextval('pu
 
 
 --
--- Name: restricted_free_agency_bids uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: restricted_free_agency_bids bid_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.restricted_free_agency_bids ALTER COLUMN uid SET DEFAULT nextval('public.restricted_free_agency_bids_uid_seq'::regclass);
+ALTER TABLE ONLY public.restricted_free_agency_bids ALTER COLUMN bid_id SET DEFAULT nextval('public.restricted_free_agency_bids_bid_id_seq'::regclass);
 
 
 --
@@ -28556,10 +28555,10 @@ ALTER TABLE ONLY public.selection_combination_odds_history ALTER COLUMN history_
 
 
 --
--- Name: sources uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: sources source_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.sources ALTER COLUMN uid SET DEFAULT nextval('public.sources_uid_seq'::regclass);
+ALTER TABLE ONLY public.sources ALTER COLUMN source_id SET DEFAULT nextval('public.sources_source_id_seq'::regclass);
 
 
 --
@@ -28577,17 +28576,17 @@ ALTER TABLE ONLY public.teams ALTER COLUMN team_id SET DEFAULT nextval('public.t
 
 
 --
--- Name: trades uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: trades trade_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.trades ALTER COLUMN uid SET DEFAULT nextval('public.trades_uid_seq'::regclass);
+ALTER TABLE ONLY public.trades ALTER COLUMN trade_id SET DEFAULT nextval('public.trades_trade_id_seq'::regclass);
 
 
 --
--- Name: transactions uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: transactions transaction_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.transactions ALTER COLUMN uid SET DEFAULT nextval('public.transactions_uid_seq'::regclass);
+ALTER TABLE ONLY public.transactions ALTER COLUMN transaction_id SET DEFAULT nextval('public.transactions_transaction_id_seq'::regclass);
 
 
 --
@@ -28598,10 +28597,10 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 
 --
--- Name: waivers uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: waivers waiver_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.waivers ALTER COLUMN uid SET DEFAULT nextval('public.waivers_uid_seq'::regclass);
+ALTER TABLE ONLY public.waivers ALTER COLUMN waiver_id SET DEFAULT nextval('public.waivers_waiver_id_seq'::regclass);
 
 
 --
@@ -29073,7 +29072,7 @@ ALTER TABLE ONLY public.placed_wagers
 --
 
 ALTER TABLE ONLY public.poaches
-    ADD CONSTRAINT "idx_24917_PRIMARY" PRIMARY KEY (uid);
+    ADD CONSTRAINT "idx_24917_PRIMARY" PRIMARY KEY (poach_id);
 
 
 --
@@ -29105,7 +29104,7 @@ ALTER TABLE ONLY public.rosters
 --
 
 ALTER TABLE ONLY public.sources
-    ADD CONSTRAINT "idx_25023_PRIMARY" PRIMARY KEY (uid);
+    ADD CONSTRAINT "idx_25023_PRIMARY" PRIMARY KEY (source_id);
 
 
 --
@@ -29113,7 +29112,7 @@ ALTER TABLE ONLY public.sources
 --
 
 ALTER TABLE ONLY public.restricted_free_agency_bids
-    ADD CONSTRAINT "idx_25108_PRIMARY" PRIMARY KEY (uid);
+    ADD CONSTRAINT "idx_25108_PRIMARY" PRIMARY KEY (bid_id);
 
 
 --
@@ -29137,7 +29136,7 @@ ALTER TABLE ONLY public.users
 --
 
 ALTER TABLE ONLY public.waivers
-    ADD CONSTRAINT "idx_25151_PRIMARY" PRIMARY KEY (uid);
+    ADD CONSTRAINT "idx_25151_PRIMARY" PRIMARY KEY (waiver_id);
 
 
 --
@@ -29297,7 +29296,7 @@ ALTER TABLE ONLY public.league_user_careerlogs
 --
 
 ALTER TABLE ONLY public.leagues
-    ADD CONSTRAINT leagues_pkey PRIMARY KEY (uid);
+    ADD CONSTRAINT leagues_pkey PRIMARY KEY (league_id);
 
 
 --
@@ -30141,11 +30140,19 @@ ALTER TABLE ONLY public.teams
 
 
 --
+-- Name: trades trades_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.trades
+    ADD CONSTRAINT trades_pkey PRIMARY KEY (trade_id);
+
+
+--
 -- Name: trades_slots trades_slots_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.trades_slots
-    ADD CONSTRAINT trades_slots_pkey PRIMARY KEY (trade_uid, pid, tid);
+    ADD CONSTRAINT trades_slots_pkey PRIMARY KEY (trade_id, pid, tid);
 
 
 --
@@ -30153,7 +30160,7 @@ ALTER TABLE ONLY public.trades_slots
 --
 
 ALTER TABLE ONLY public.transactions
-    ADD CONSTRAINT transactions_pkey PRIMARY KEY (uid);
+    ADD CONSTRAINT transactions_pkey PRIMARY KEY (transaction_id);
 
 
 --
@@ -30893,13 +30900,6 @@ CREATE UNIQUE INDEX idx_25085_pid ON public.trade_releases USING btree (trade_id
 
 
 --
--- Name: idx_25089_uid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_25089_uid ON public.trades USING btree (uid);
-
-
---
 -- Name: idx_25093_pick; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30918,13 +30918,6 @@ CREATE UNIQUE INDEX idx_25096_pid ON public.trades_players USING btree (trade_id
 --
 
 CREATE UNIQUE INDEX idx_25099_transaction ON public.trades_transactions USING btree (trade_id, transaction_id);
-
-
---
--- Name: idx_25103_uid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_25103_uid ON public.transactions USING btree (uid);
 
 
 --
@@ -45124,10 +45117,10 @@ CREATE INDEX roster_asset_transformation_target_idx ON public.roster_asset_trans
 
 
 --
--- Name: roster_asset_transformation_trade_uid_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: roster_asset_transformation_trade_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX roster_asset_transformation_trade_uid_idx ON public.roster_asset_transformation USING btree (trade_uid) WHERE (trade_uid IS NOT NULL);
+CREATE INDEX roster_asset_transformation_trade_id_idx ON public.roster_asset_transformation USING btree (trade_id) WHERE (trade_id IS NOT NULL);
 
 
 --
@@ -45138,10 +45131,10 @@ CREATE UNIQUE INDEX scoring_format_player_projection_points_pid_id_week_season_y
 
 
 --
--- Name: trades_slots_trade_uid_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: trades_slots_trade_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX trades_slots_trade_uid_idx ON public.trades_slots USING btree (trade_uid);
+CREATE INDEX trades_slots_trade_id_idx ON public.trades_slots USING btree (trade_id);
 
 
 --
@@ -57758,7 +57751,7 @@ ALTER TABLE ONLY public.external_league_connections
 --
 
 ALTER TABLE ONLY public.external_league_connections
-    ADD CONSTRAINT external_league_connections_lid_fkey FOREIGN KEY (lid) REFERENCES public.leagues(uid) ON DELETE CASCADE;
+    ADD CONSTRAINT external_league_connections_lid_fkey FOREIGN KEY (lid) REFERENCES public.leagues(league_id) ON DELETE CASCADE;
 
 
 --
@@ -57782,7 +57775,7 @@ ALTER TABLE ONLY public.external_league_import_jobs
 --
 
 ALTER TABLE ONLY public.external_league_import_jobs
-    ADD CONSTRAINT external_league_import_jobs_lid_fkey FOREIGN KEY (lid) REFERENCES public.leagues(uid) ON DELETE CASCADE;
+    ADD CONSTRAINT external_league_import_jobs_lid_fkey FOREIGN KEY (lid) REFERENCES public.leagues(league_id) ON DELETE CASCADE;
 
 
 --
@@ -58766,10 +58759,10 @@ GRANT SELECT ON TABLE public.leagues TO league_reader;
 
 
 --
--- Name: SEQUENCE leagues_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE leagues_league_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.leagues_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.leagues_league_id_seq TO league_reader;
 
 
 --
@@ -59876,10 +59869,10 @@ GRANT SELECT ON TABLE public.poaches TO league_reader;
 
 
 --
--- Name: SEQUENCE poaches_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE poaches_poach_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.poaches_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.poaches_poach_id_seq TO league_reader;
 
 
 --
@@ -60107,10 +60100,10 @@ GRANT SELECT ON TABLE public.restricted_free_agency_bids TO league_reader;
 
 
 --
--- Name: SEQUENCE restricted_free_agency_bids_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE restricted_free_agency_bids_bid_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.restricted_free_agency_bids_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.restricted_free_agency_bids_bid_id_seq TO league_reader;
 
 
 --
@@ -60275,10 +60268,10 @@ GRANT SELECT ON TABLE public.sources TO league_reader;
 
 
 --
--- Name: SEQUENCE sources_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE sources_source_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.sources_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.sources_source_id_seq TO league_reader;
 
 
 --
@@ -60345,17 +60338,17 @@ GRANT SELECT ON TABLE public.trades_slots TO league_reader;
 
 
 --
+-- Name: SEQUENCE trades_trade_id_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT SELECT ON SEQUENCE public.trades_trade_id_seq TO league_reader;
+
+
+--
 -- Name: TABLE trades_transactions; Type: ACL; Schema: public; Owner: -
 --
 
 GRANT SELECT ON TABLE public.trades_transactions TO league_reader;
-
-
---
--- Name: SEQUENCE trades_uid_seq; Type: ACL; Schema: public; Owner: -
---
-
-GRANT SELECT ON SEQUENCE public.trades_uid_seq TO league_reader;
 
 
 --
@@ -60366,10 +60359,10 @@ GRANT SELECT ON TABLE public.transactions TO league_reader;
 
 
 --
--- Name: SEQUENCE transactions_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE transactions_transaction_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.transactions_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.transactions_transaction_id_seq TO league_reader;
 
 
 --
@@ -60464,10 +60457,10 @@ GRANT SELECT ON TABLE public.waivers TO league_reader;
 
 
 --
--- Name: SEQUENCE waivers_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE waivers_waiver_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.waivers_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.waivers_waiver_id_seq TO league_reader;
 
 
 --

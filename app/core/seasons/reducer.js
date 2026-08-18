@@ -12,20 +12,23 @@ export function seasons_reducer(state = initial_state, { payload, type }) {
     case app_actions.AUTH_FULFILLED:
       return state.withMutations((state) => {
         payload.data.leagues.forEach((league) => {
-          state.setIn([league.uid, league.season_year], create_season(league))
+          state.setIn(
+            [league.league_id, league.season_year],
+            create_season(league)
+          )
         })
       })
 
     case league_actions.GET_LEAGUE_FULFILLED: {
       return state.setIn(
-        [payload.data.uid, payload.data.season_year],
+        [payload.data.league_id, payload.data.season_year],
         create_season(payload.data)
       )
     }
 
     case seasons_actions.GET_SEASON_FULFILLED: {
       return state.setIn(
-        [payload.data.uid, payload.data.season_year],
+        [payload.data.league_id, payload.data.season_year],
         create_season(payload.data)
       )
     }

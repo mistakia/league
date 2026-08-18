@@ -51,7 +51,7 @@ export default async function (lid) {
   const query = db('waivers')
     .select(
       'teams.*',
-      'waivers.uid as wid',
+      'waivers.waiver_id as wid',
       'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
@@ -74,7 +74,7 @@ export default async function (lid) {
         order: 'asc'
       },
       {
-        column: 'waivers.uid',
+        column: 'waivers.waiver_id',
         order: 'asc'
       }
     ])
@@ -99,7 +99,7 @@ export default async function (lid) {
   const super_priority_query = db('waivers')
     .select(
       'teams.*',
-      'waivers.uid as wid',
+      'waivers.waiver_id as wid',
       'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
@@ -120,7 +120,7 @@ export default async function (lid) {
         order: 'asc'
       },
       {
-        column: 'waivers.uid',
+        column: 'waivers.waiver_id',
         order: 'asc'
       }
     ])

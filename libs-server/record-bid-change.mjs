@@ -34,6 +34,15 @@ const bid_table_by_type = {
   [bid_types.WAIVER]: 'waivers'
 }
 
+// The surrogate key's name differs per table: restricted_free_agency_bids
+// spells it bid_id and waivers spells it waiver_id. A dynamic table needs its
+// id column named alongside it, not hardcoded, or the rename leaves the
+// predicate on the old spelling.
+const bid_id_column_by_type = {
+  [bid_types.RESTRICTED_FREE_AGENCY]: 'bid_id',
+  [bid_types.WAIVER]: 'waiver_id'
+}
+
 export default async function record_bid_change({
   db = default_db,
   bid_type,
@@ -56,12 +65,15 @@ export default async function record_bid_change({
   }
 
   const bid_table = bid_table_by_type[bid_type]
-  const bid = await db(bid_table).where('uid', bid_id).first()
+  const bid_id_column = bid_id_column_by_type[bid_type]
+  const bid = await db(bid_table).where(bid_id_column, bid_id).first()
 
   // A change recorded against a bid that does not exist is a caller bug, and a
   // silent skip would leave a gap indistinguishable from an unwired write path.
   if (!bid) {
-    throw new Error(`no ${bid_table} row with uid ${bid_id} to record`)
+    throw new Error(
+      `no ${bid_table} row with ${bid_id_column} ${bid_id} to record`
+    )
   }
 
   // Conditional releases are part of the OFFER, not a detail beside it: changing

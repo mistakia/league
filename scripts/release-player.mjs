@@ -284,7 +284,7 @@ const display_success_results = ({
   }
 
   console.log(`Discord notification sent: ${!!league.discord_webhook_url}`)
-  console.log(`Transaction ID: ${result[0].transaction.uid}`)
+  console.log(`Transaction ID: ${result[0].transaction.transaction_id}`)
 }
 
 const handle_error = (error) => {

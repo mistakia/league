@@ -201,12 +201,13 @@ export function* init({ payload }) {
     yield fork(load_league_players)
   } else {
     const team_id = (payload.data.teams[0] || {}).team_id
-    const league_id = (payload.data.leagues[0] || {}).uid
+    const league_id = (payload.data.leagues[0] || {}).league_id
     yield fork(load_team_players, {
       payload: { teamId: team_id, leagueId: league_id }
     })
   }
-  if (league.uid) yield fork(api_get_baselines, { leagueId: league.uid })
+  if (league.league_id)
+    yield fork(api_get_baselines, { leagueId: league.league_id })
   if (app.teamId) yield fork(fetch_cutlist)
 
   const { watchlist } = payload.data.user

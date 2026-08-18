@@ -77,7 +77,7 @@ describe('bid changelog', function () {
 
     res.should.have.status(200)
 
-    const rows = await changelog_for_bid(res.body.uid)
+    const rows = await changelog_for_bid(res.body.bid_id)
     rows.length.should.equal(1)
 
     const [created] = rows
@@ -122,7 +122,7 @@ describe('bid changelog', function () {
       })
 
     post_res.should.have.status(200)
-    const bid_id = post_res.body.uid
+    const bid_id = post_res.body.bid_id
 
     const put_res = await chai_request
       .execute(server)
@@ -146,7 +146,7 @@ describe('bid changelog', function () {
     rows[1].changed_by_user_id.should.equal(1)
 
     const bid_row = await knex('restricted_free_agency_bids')
-      .where('uid', bid_id)
+      .where('bid_id', bid_id)
       .first()
     bid_row.bid_amount.should.equal(22)
   })
@@ -182,7 +182,7 @@ describe('bid changelog', function () {
       })
 
     post_res.should.have.status(200)
-    const bid_id = post_res.body.uid
+    const bid_id = post_res.body.bid_id
 
     const put_res = await chai_request
       .execute(server)
@@ -256,7 +256,7 @@ describe('bid changelog', function () {
 
     delete_res.should.have.status(200)
 
-    const withdrawn_rows = await changelog_for_bid(withdrawn_res.body.uid)
+    const withdrawn_rows = await changelog_for_bid(withdrawn_res.body.bid_id)
     withdrawn_rows.length.should.equal(2)
     withdrawn_rows[1].change_type.should.equal(bid_change_types.CANCELLED)
     withdrawn_rows[1].change_source.should.equal(
@@ -297,7 +297,7 @@ describe('bid changelog', function () {
 
     replacement_res.should.have.status(200)
 
-    const replaced_rows = await changelog_for_bid(replaced_res.body.uid)
+    const replaced_rows = await changelog_for_bid(replaced_res.body.bid_id)
     replaced_rows.length.should.equal(2)
     replaced_rows[1].change_type.should.equal(bid_change_types.CANCELLED)
     replaced_rows[1].change_source.should.equal(
@@ -394,7 +394,7 @@ describe('bid changelog', function () {
 
     await run_restricted_free_agency_settlement({ dry_run: false })
 
-    const original_rows = await changelog_for_bid(original_res.body.uid)
+    const original_rows = await changelog_for_bid(original_res.body.bid_id)
     const settled_original = original_rows[original_rows.length - 1]
     settled_original.change_type.should.equal(bid_change_types.SETTLED)
     settled_original.change_source.should.equal(
@@ -410,7 +410,7 @@ describe('bid changelog', function () {
     )
     expect(settled_original.processed_at).to.not.equal(null)
 
-    const competing_rows = await changelog_for_bid(competing_res.body.uid)
+    const competing_rows = await changelog_for_bid(competing_res.body.bid_id)
     const settled_competing = competing_rows[competing_rows.length - 1]
     settled_competing.change_type.should.equal(bid_change_types.SETTLED)
     settled_competing.is_successful.should.equal(false)

@@ -60,7 +60,7 @@ const get_active_leagues = async () => {
 
   const active_leagues = await db('seasons')
     .select('seasons.*', 'leagues.name as name')
-    .join('leagues', 'leagues.uid', '=', 'seasons.lid')
+    .join('leagues', 'leagues.league_id', '=', 'seasons.lid')
     .where({ 'seasons.season_year': current_season.year })
     .whereNotNull('restricted_free_agency_period_start')
     .whereNotNull('restricted_free_agency_first_window_at')

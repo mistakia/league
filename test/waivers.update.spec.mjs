@@ -59,7 +59,7 @@ describe('API /waivers - update', function () {
           leagueId
         })
 
-      const waiverId = submitRes.body.uid
+      const waiverId = submitRes.body.waiver_id
 
       // reorder waiver claim
       const res = await chai_request
@@ -103,7 +103,7 @@ describe('API /waivers - update', function () {
           leagueId
         })
 
-      const waiverId1 = submitRes1.body.uid
+      const waiverId1 = submitRes1.body.waiver_id
 
       // submit waiver claim #2
       const submitRes2 = await chai_request
@@ -117,7 +117,7 @@ describe('API /waivers - update', function () {
           leagueId
         })
 
-      const waiverId2 = submitRes2.body.uid
+      const waiverId2 = submitRes2.body.waiver_id
 
       // reorder waiver claim
       const res = await chai_request
@@ -163,7 +163,7 @@ describe('API /waivers - update', function () {
           leagueId
         })
 
-      const waiverId1 = submitRes1.body.uid
+      const waiverId1 = submitRes1.body.waiver_id
 
       // submit waiver claim #1
       const submitRes2 = await chai_request
@@ -177,7 +177,7 @@ describe('API /waivers - update', function () {
           leagueId
         })
 
-      const waiverId2 = submitRes2.body.uid
+      const waiverId2 = submitRes2.body.waiver_id
 
       // submit waiver claim #1
       const submitRes3 = await chai_request
@@ -191,7 +191,7 @@ describe('API /waivers - update', function () {
           leagueId
         })
 
-      const waiverId3 = submitRes3.body.uid
+      const waiverId3 = submitRes3.body.waiver_id
 
       // reorder waiver claim
       const res = await chai_request
@@ -236,7 +236,7 @@ describe('API /waivers - update', function () {
           leagueId
         })
 
-      const waiverId = submitRes.body.uid
+      const waiverId = submitRes.body.waiver_id
 
       // update bid
       const bid = 10
@@ -256,7 +256,7 @@ describe('API /waivers - update', function () {
       res.body.bid.should.equal(bid)
 
       const waivers = await knex('waivers')
-        .where({ uid: res.body.uid })
+        .where({ waiver_id: res.body.waiver_id })
         .limit(1)
       expect(waivers.length).to.equal(1)
       expect(waivers[0].bid_amount).to.equal(bid)
@@ -286,7 +286,7 @@ describe('API /waivers - update', function () {
           leagueId
         })
 
-      const waiverId = submitRes.body.uid
+      const waiverId = submitRes.body.waiver_id
 
       // insert release player into roster
       await addPlayer({ leagueId, player: releasePlayer, teamId, userId: 1 })
@@ -308,7 +308,7 @@ describe('API /waivers - update', function () {
       res.body.release.should.deep.equal([releasePlayer.pid])
 
       const waivers = await knex('waiver_releases')
-        .where({ waiver_id: res.body.uid })
+        .where({ waiver_id: res.body.waiver_id })
         .limit(1)
       expect(waivers.length).to.equal(1)
       expect(waivers[0].pid).to.equal(releasePlayer.pid)
@@ -343,7 +343,7 @@ describe('API /waivers - update', function () {
           leagueId
         })
 
-      waiverId = submitRes.body.uid
+      waiverId = submitRes.body.waiver_id
     })
 
     it('not logged in', async () => {
@@ -541,7 +541,7 @@ describe('API /waivers - update', function () {
           leagueId
         })
 
-      waiverId = submitRes.body.uid
+      waiverId = submitRes.body.waiver_id
 
       const request = chai_request
         .execute(server)

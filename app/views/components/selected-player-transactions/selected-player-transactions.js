@@ -55,7 +55,7 @@ export default function SelectedPlayerTransactions({
     items.push(
       <TransactionRow
         transaction={transaction}
-        key={transaction.uid}
+        key={transaction.transaction_id}
         layout='narrow'
       />
     )
@@ -65,7 +65,7 @@ export default function SelectedPlayerTransactions({
   for (const transaction of Object.values(teams)) {
     team_rows.push(
       <TableRow
-        key={transaction.uid}
+        key={transaction.transaction_id}
         sx={{ '&:hover': { backgroundColor: '#fafafa' } }}
       >
         <TableCell

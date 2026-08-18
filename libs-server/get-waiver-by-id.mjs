@@ -10,7 +10,7 @@ export default async function (waiver_id) {
     .select(
       'waivers.*',
       'teams.*',
-      'waivers.uid as wid',
+      'waivers.waiver_id as wid',
       'waivers.bid_amount',
       'waivers.pid',
       'waivers.tid',
@@ -19,7 +19,7 @@ export default async function (waiver_id) {
       'waivers.super_priority'
     )
     .join('teams', 'waivers.tid', 'teams.team_id')
-    .where('waivers.uid', waiver_id)
+    .where('waivers.waiver_id', waiver_id)
     .where('teams.season_year', current_season.year)
     .first()
 

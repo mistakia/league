@@ -19,14 +19,14 @@ export function waivers_reducer(state = initialState, { payload, type }) {
     case waiver_actions.POST_WAIVER_FULFILLED:
       return state.withMutations((state) => {
         state.setIn(
-          ['teams', payload.data.tid, payload.data.uid],
+          ['teams', payload.data.tid, payload.data.waiver_id],
           createWaiver(payload.data)
         )
       })
 
     case waiver_actions.PUT_WAIVER_FULFILLED: {
-      const uid = Number(payload.data.uid)
-      return state.mergeIn(['teams', payload.opts.teamId, uid], {
+      const waiver_id = Number(payload.data.waiver_id)
+      return state.mergeIn(['teams', payload.opts.teamId, waiver_id], {
         bid_amount: payload.data.bid_amount,
         release: new List(payload.data.release)
       })
@@ -35,7 +35,10 @@ export function waivers_reducer(state = initialState, { payload, type }) {
     case app_actions.AUTH_FULFILLED:
       return state.withMutations((state) => {
         payload.data.waivers.forEach((waiver) => {
-          state.setIn(['teams', waiver.tid, waiver.uid], createWaiver(waiver))
+          state.setIn(
+            ['teams', waiver.tid, waiver.waiver_id],
+            createWaiver(waiver)
+          )
         })
       })
 
@@ -53,14 +56,14 @@ export function waivers_reducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         for (const w of payload.opts.reset) {
           state.setIn(
-            ['teams', payload.opts.teamId, w.uid, 'priority_order'],
+            ['teams', payload.opts.teamId, w.waiver_id, 'priority_order'],
             w.priority_order
           )
         }
       })
 
     case waiver_actions.POST_CANCEL_WAIVER_FULFILLED:
-      return state.deleteIn(['teams', payload.data.tid, payload.data.uid])
+      return state.deleteIn(['teams', payload.data.tid, payload.data.waiver_id])
 
     case waiver_actions.GET_WAIVERS_FULFILLED:
       return state.merge({

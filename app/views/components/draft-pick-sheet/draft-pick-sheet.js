@@ -99,7 +99,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
         type: 'trade',
         tid: recipient_tid,
         date,
-        trade_uid: trade.get('uid')
+        trade_id: trade.get('trade_id')
       })
 
       // Update current owner
@@ -136,7 +136,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
             )
           } else if (item.type === 'trade') {
             return (
-              <div key={item.trade_uid} className={item_class}>
+              <div key={item.trade_id} className={item_class}>
                 <div className='timeline-connector' />
                 <div className='timeline-marker'>
                   <RepeatIcon className='timeline-marker-icon' />

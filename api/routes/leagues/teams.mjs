@@ -541,7 +541,7 @@ router.post('/?', async (req, res) => {
 
     const roster = {
       tid: team.team_id,
-      lid: league.uid,
+      lid: league.league_id,
       week: current_season.week,
       season_year: current_season.year
     }

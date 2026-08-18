@@ -19,7 +19,7 @@ const map_state_to_props = createSelector(
   get_is_commish,
   get_veto_candidate_trades,
   (trade, app, league, is_commish, veto_candidate_trades) => ({
-    trades: trade.items.sort((a, b) => b.uid - a.uid),
+    trades: trade.items.sort((a, b) => b.trade_id - a.trade_id),
     selectedTradeId: trade.selectedTradeId,
     teamId: app.teamId,
     league,

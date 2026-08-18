@@ -80,7 +80,7 @@ async function calculate_super_priority_from_source({
 
   const most_recent_transaction = await most_recent_transaction_query
     .orderBy('occurred_at', 'desc')
-    .orderBy('uid', 'desc') // Secondary sort by uid for same-timestamp transactions
+    .orderBy('transaction_id', 'desc') // Secondary sort by uid for same-timestamp transactions
     .limit(1)
 
   if (!most_recent_transaction.length) {
@@ -185,7 +185,7 @@ async function calculate_super_priority_from_source({
       transaction_types.POACHED
     ])
     .orderBy('occurred_at', 'desc')
-    .orderBy('uid', 'desc')
+    .orderBy('transaction_id', 'desc')
     .limit(1)
 
   if (!pre_poach_transactions.length) {

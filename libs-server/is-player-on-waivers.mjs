@@ -15,7 +15,7 @@ export default async function ({ pid, leagueId }) {
     .whereNot('type', transaction_types.ROSTER_ACTIVATE)
     .where('occurred_at', '>', cutoff)
     .orderBy('occurred_at', 'desc')
-    .orderBy('uid', 'desc')
+    .orderBy('transaction_id', 'desc')
     .limit(2)
 
   return isOnReleaseWaivers({ transactions })

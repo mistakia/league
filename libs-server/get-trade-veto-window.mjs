@@ -53,7 +53,7 @@ export const get_trade_protected_assets = async ({
   const accepted_after = new Date((now - hours * 3600) * 1000)
 
   const open_trades = await db('trades')
-    .where('lid', league.uid)
+    .where('lid', league.league_id)
     .whereNotNull('accepted')
     .whereNull('vetoed')
     .whereNull('approved')
@@ -61,14 +61,14 @@ export const get_trade_protected_assets = async ({
 
   if (!open_trades.length) return empty
 
-  const trade_by_uid = new Map(open_trades.map((t) => [t.uid, t]))
-  const tradeids = [...trade_by_uid.keys()]
+  const trade_by_id = new Map(open_trades.map((t) => [t.trade_id, t]))
+  const tradeids = [...trade_by_id.keys()]
   // Delegates rather than restating the arithmetic: `accepted` is timestamptz,
   // so the open-coded `Number(...) + hours * 3600` here was reading milliseconds
   // as seconds, and a second copy of the deadline formula could drift from the
   // one the client renders its countdown against.
   const protected_until = (trade_id) =>
-    get_trade_veto_deadline({ trade: trade_by_uid.get(trade_id), league })
+    get_trade_veto_deadline({ trade: trade_by_id.get(trade_id), league })
 
   const result = { pids: new Map(), pickids: new Map() }
 

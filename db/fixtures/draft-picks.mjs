@@ -16,7 +16,7 @@ export default async function (knex) {
     await knex('draft').insert({
       tid: team.team_id,
       original_team_id: team.team_id,
-      lid: league.uid,
+      lid: league.league_id,
       pick: i + 1,
       round: Math.ceil((i + 1) / league.number_teams),
       season_year: current_season.year
@@ -28,7 +28,7 @@ export default async function (knex) {
       await knex('draft').insert({
         tid: team.team_id,
         original_team_id: team.team_id,
-        lid: league.uid,
+        lid: league.league_id,
         round: i,
         season_year: current_season.year + 1
       })

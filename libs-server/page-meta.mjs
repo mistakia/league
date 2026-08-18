@@ -20,10 +20,7 @@ const get_league_name = async (lid) => {
 
   let name = null
   try {
-    const row = await db('leagues')
-      .select('name')
-      .where({ uid: league_id })
-      .first()
+    const row = await db('leagues').select('name').where({ league_id }).first()
     name = (row && row.name) || null
   } catch (error) {
     // Metadata is never worth a failed page load.

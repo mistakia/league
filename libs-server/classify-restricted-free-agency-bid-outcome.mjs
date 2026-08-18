@@ -28,7 +28,11 @@ export default function classify_restricted_free_agency_bid_outcome({
     return restricted_free_agency_bid_outcomes.PLAYER_INELIGIBLE
   }
 
-  if (losing_bid.uid && winning_bid.uid && losing_bid.uid === winning_bid.uid) {
+  if (
+    losing_bid.bid_id &&
+    winning_bid.bid_id &&
+    losing_bid.bid_id === winning_bid.bid_id
+  ) {
     return restricted_free_agency_bid_outcomes.WON
   }
 

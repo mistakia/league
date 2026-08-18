@@ -54,7 +54,7 @@ const router = express.Router()
  * a ballot". That second question is the eligibility snapshot's alone.
  */
 const resolve_league_membership = async ({ db, league_id, user_id }) => {
-  const league = await db('leagues').where({ uid: league_id }).first()
+  const league = await db('leagues').where({ league_id }).first()
 
   if (!league) {
     return null

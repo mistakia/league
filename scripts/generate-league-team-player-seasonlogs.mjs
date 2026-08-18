@@ -251,12 +251,12 @@ const main = async () => {
       })
     } else if (argv.all) {
       const leagues = await db('leagues')
-        .select('uid')
+        .select('league_id')
         .where({ is_hosted: 1 })
         .whereNull('archived_at')
       for (const league of leagues) {
         await generate_league_team_player_seasonlogs({
-          lid: league.uid,
+          lid: league.league_id,
           year: argv.year,
           with_optimal
         })

@@ -34,7 +34,7 @@ const run = async () => {
   // lives on the seasons row, so a single left join carries it.
   const league_seasons = await db('leagues')
     .leftJoin('seasons', function () {
-      this.on('leagues.uid', '=', 'seasons.lid')
+      this.on('leagues.league_id', '=', 'seasons.lid')
       this.on(
         db.raw(
           `seasons.season_year = ${current_season.year} or seasons.season_year is null`
@@ -69,7 +69,7 @@ const run = async () => {
       .join('teams', 'draft.tid', 'teams.team_id')
       .where('draft.season_year', current_season.year)
       .where('teams.season_year', current_season.year)
-      .where('draft.lid', league.uid)
+      .where('draft.lid', league.league_id)
       .modify(where_outstanding_draft_pick, 'draft')
       .orderBy('draft.pick')
       .select('draft.pick', 'draft.tid', 'teams.name', 'teams.abbreviation')
@@ -81,7 +81,7 @@ const run = async () => {
     // indexes each pick by its position in the outstanding set as of the last
     // boundary, so a partial board mis-indexes every window on it.
     const draft_picks = await db('draft')
-      .where({ lid: league.uid, season_year: current_season.year })
+      .where({ lid: league.league_id, season_year: current_season.year })
       .orderBy('pick', 'asc')
 
     // A pick goes on the clock at the START OF ITS OWN PUBLISHED WINDOW,

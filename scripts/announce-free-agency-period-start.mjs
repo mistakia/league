@@ -64,8 +64,8 @@ const get_eligible_leagues_for_free_agency_period_notifications = async ({
 
   // Get leagues with free agency period configured
   const leagues_with_free_agency = await db('seasons')
-    .select('seasons.*', 'leagues.name as name', 'leagues.uid as lid')
-    .join('leagues', 'leagues.uid', '=', 'seasons.lid')
+    .select('seasons.*', 'leagues.name as name', 'leagues.league_id as lid')
+    .join('leagues', 'leagues.league_id', '=', 'seasons.lid')
     .where({
       'seasons.season_year': current_season.year
     })

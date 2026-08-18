@@ -362,11 +362,11 @@ function ChainStep({
   shows_asset,
   columns,
   league_id,
-  trade_uid
+  trade_id
 }) {
   const period_end = chain_row.get('period_end')
   const terminated_by = chain_row.get('terminated_by')
-  const hop_trade_uid = chain_row.get('transformation_trade_uid')
+  const hop_trade_id = chain_row.get('transformation_trade_id')
   const is_open = period_end == null
 
   const event_label = is_origin
@@ -391,8 +391,8 @@ function ChainStep({
             />
           </span>
           <span className='trade-review-trade__step-event'>
-            {hop_trade_uid && hop_trade_uid !== trade_uid ? (
-              <Link to={`/leagues/${league_id}/trades/${hop_trade_uid}`}>
+            {hop_trade_id && hop_trade_id !== trade_id ? (
+              <Link to={`/leagues/${league_id}/trades/${hop_trade_id}`}>
                 {event_label}
               </Link>
             ) : (
@@ -425,10 +425,10 @@ ChainStep.propTypes = {
   shows_asset: PropTypes.bool,
   columns: PropTypes.array.isRequired,
   league_id: PropTypes.string,
-  trade_uid: PropTypes.number
+  trade_id: PropTypes.number
 }
 
-function Chain({ chain, league_id, trade_uid }) {
+function Chain({ chain, league_id, trade_id }) {
   // A holding is continued when some later holding in the chain was built out
   // of it. That is a property of the graph rather than of the ordering, so it
   // stays correct when a chain branches -- a pick that became a player who was
@@ -477,7 +477,7 @@ function Chain({ chain, league_id, trade_uid }) {
             shows_asset={shows_asset}
             columns={columns}
             league_id={league_id}
-            trade_uid={trade_uid}
+            trade_id={trade_id}
           />
         )
       })}
@@ -488,10 +488,10 @@ function Chain({ chain, league_id, trade_uid }) {
 Chain.propTypes = {
   chain: ImmutablePropTypes.list.isRequired,
   league_id: PropTypes.string,
-  trade_uid: PropTypes.number
+  trade_id: PropTypes.number
 }
 
-function Asset({ asset, has_chains, league_id, trade_uid }) {
+function Asset({ asset, has_chains, league_id, trade_id }) {
   const team_asset_state = asset_state(asset)
   const chain = asset.get('chain')
   const keeptradecut_value_at_trade = asset.get('keeptradecut_value_at_trade')
@@ -550,7 +550,7 @@ function Asset({ asset, has_chains, league_id, trade_uid }) {
       </div>
       {has_chains &&
         (chain && chain.size ? (
-          <Chain chain={chain} league_id={league_id} trade_uid={trade_uid} />
+          <Chain chain={chain} league_id={league_id} trade_id={trade_id} />
         ) : (
           // Every leg has a chain of at least its own row, so reaching here
           // means the response did not match the contract. Naming that beats an
@@ -567,7 +567,7 @@ Asset.propTypes = {
   asset: ImmutablePropTypes.map.isRequired,
   has_chains: PropTypes.bool,
   league_id: PropTypes.string,
-  trade_uid: PropTypes.number
+  trade_id: PropTypes.number
 }
 
 // Production and cost for a whole side, in the same chips the timeline uses so
@@ -619,7 +619,7 @@ function Perspective({ perspective, season_year, has_chains, league_id }) {
           asset={asset}
           has_chains={has_chains}
           league_id={league_id}
-          trade_uid={perspective.get('trade_uid')}
+          trade_id={perspective.get('trade_id')}
         />
       ))}
     </div>
@@ -798,7 +798,7 @@ export default function TradeReviewTrade({
   is_expanded,
   is_failed,
   on_open,
-  trade_uid,
+  trade_id,
   league_id
 }) {
   const perspectives = trade.get('perspectives')
@@ -831,14 +831,14 @@ export default function TradeReviewTrade({
   const is_interactive = Boolean(on_open)
   const interactive_props = is_interactive
     ? {
-        onClick: () => on_open(trade_uid),
+        onClick: () => on_open(trade_id),
         role: 'button',
         tabIndex: 0,
         'aria-label': `Trade of ${format_date(occurred_at)} — open lineage`,
         onKeyDown: (event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
-            on_open(trade_uid)
+            on_open(trade_id)
           }
         }
       }
@@ -919,7 +919,7 @@ export default function TradeReviewTrade({
 
 TradeReviewTrade.propTypes = {
   trade: ImmutablePropTypes.map.isRequired,
-  trade_uid: PropTypes.number.isRequired,
+  trade_id: PropTypes.number.isRequired,
   league_id: PropTypes.string,
   is_expanded: PropTypes.bool,
   is_failed: PropTypes.bool,

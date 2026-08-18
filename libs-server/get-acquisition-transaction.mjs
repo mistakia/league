@@ -9,7 +9,7 @@ export default async function ({ lid, pid, tid, year, week }) {
       pid
     })
     .orderBy('occurred_at', 'desc')
-    .orderBy('uid', 'desc')
+    .orderBy('transaction_id', 'desc')
 
   if (year) {
     query.where(function () {

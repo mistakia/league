@@ -197,11 +197,14 @@ const load_trade_participants = async ({ lid, trade_uids }) => {
   const by_trade = new Map()
   if (!trade_uids.length) return by_trade
   const rows = await db('trades')
-    .select('uid', 'propose_tid', 'accept_tid')
+    .select('trade_id', 'propose_tid', 'accept_tid')
     .where('lid', lid)
-    .whereIn('uid', trade_uids)
+    .whereIn('trade_id', trade_uids)
   for (const trade_row of rows) {
-    by_trade.set(trade_row.uid, [trade_row.propose_tid, trade_row.accept_tid])
+    by_trade.set(trade_row.trade_id, [
+      trade_row.propose_tid,
+      trade_row.accept_tid
+    ])
   }
   return by_trade
 }
@@ -252,7 +255,7 @@ const load_lineage_chains = async ({ origin_holding_ids }) => {
       'h.salary_basis',
       't.transformation_type',
       't.occurred_at as transformation_occurred_at',
-      't.trade_uid as transformation_trade_uid',
+      't.trade_id as transformation_trade_id',
       't.source_holding_id'
     )
     .orderBy('w.originating_holding_id')
@@ -339,14 +342,14 @@ const production_while_held = ({ assets, tid }) => {
 const grade_trades = async ({
   lid,
   tid = null,
-  trade_uid = null,
+  trade_id = null,
   year = null,
   offseason = false,
   min_age_days = 0
 }) => {
   const now_unix = Math.floor(Date.now() / 1000)
 
-  // The league's WHOLE leg set, deliberately unnarrowed by trade_uid. The
+  // The league's WHOLE leg set, deliberately unnarrowed by trade_id. The
   // consideration traversal walks from a trade into later trades, so a leg set
   // narrowed before the walk truncates it silently: the figure collapses to
   // still-held on the detail route and loses records that cross a year boundary
@@ -362,7 +365,7 @@ const grade_trades = async ({
   }
 
   const legs = all_legs.filter((leg) => {
-    if (trade_uid != null && leg.trade_uid !== trade_uid) return false
+    if (trade_id != null && leg.trade_id !== trade_id) return false
     if (tid != null && leg.from_tid !== tid && leg.to_tid !== tid) return false
     const occurred = leg.occurred_at
     if (year != null && occurred.getUTCFullYear() !== year) return false
@@ -382,16 +385,16 @@ const grade_trades = async ({
   // all_legs_by_trade drives the traversal and is not.
   const legs_by_trade = new Map()
   for (const leg of legs) {
-    if (!legs_by_trade.has(leg.trade_uid)) legs_by_trade.set(leg.trade_uid, [])
-    legs_by_trade.get(leg.trade_uid).push(leg)
+    if (!legs_by_trade.has(leg.trade_id)) legs_by_trade.set(leg.trade_id, [])
+    legs_by_trade.get(leg.trade_id).push(leg)
   }
   const all_legs_by_trade = new Map()
   const leg_by_source_holding = new Map()
   for (const leg of all_legs) {
-    if (!all_legs_by_trade.has(leg.trade_uid)) {
-      all_legs_by_trade.set(leg.trade_uid, [])
+    if (!all_legs_by_trade.has(leg.trade_id)) {
+      all_legs_by_trade.set(leg.trade_id, [])
     }
-    all_legs_by_trade.get(leg.trade_uid).push(leg)
+    all_legs_by_trade.get(leg.trade_id).push(leg)
     leg_by_source_holding.set(leg.source_holding_id, leg)
   }
 
@@ -537,7 +540,7 @@ const grade_trades = async ({
         continue
       }
 
-      const onward_uid = child.transformation_trade_uid
+      const onward_uid = child.transformation_trade_id
       const onward_legs = onward_uid ? all_legs_by_trade.get(onward_uid) : null
       const sent = onward_legs
         ? onward_legs.filter((leg) => leg.to_tid !== owner_tid)
@@ -703,7 +706,7 @@ const grade_trades = async ({
       })
 
       results.push({
-        trade_uid: uid,
+        trade_id: uid,
         realized_points_added_while_held: production.realized_points_added,
         salary_paid_while_held: production.salary_paid,
         tid: perspective_tid,

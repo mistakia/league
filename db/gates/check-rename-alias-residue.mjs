@@ -29,7 +29,7 @@
 //
 // THE DISCRIMINATOR is that the alias TARGET name is a column the table actually
 // LOST in the schema diff. That single condition separates a rename alias-back
-// from ordinary join disambiguation (`waivers.uid as wid`, `leagues.name as
+// from ordinary join disambiguation (`waivers.waiver_id as wid`, `leagues.name as
 // league_name`), which no other filter can do. It takes the scan from 196 alias
 // sites to a handful.
 //

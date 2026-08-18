@@ -80,7 +80,7 @@ const process_single_practice_waiver = async (waiver_id, timestamp) => {
           reason: error.message,
           processed: timestamp
         })
-        .where('uid', waiver.wid)
+        .where('waiver_id', waiver.wid)
     }
   }
 }
@@ -131,7 +131,7 @@ const process_bulk_practice_waivers = async (daily, timestamp) => {
  */
 const get_practice_waiver_shortfall = async () => {
   const stuck_waivers = await db('waivers')
-    .select('waivers.uid', 'waivers.lid')
+    .select('waivers.waiver_id', 'waivers.lid')
     .leftJoin('league_pauses', function () {
       this.on('league_pauses.league_id', '=', 'waivers.lid').andOnNull(
         'league_pauses.resumed_at'
@@ -145,7 +145,7 @@ const get_practice_waiver_shortfall = async () => {
   if (!stuck_waivers.length) return null
 
   return `${stuck_waivers.length} practice squad waiver(s) remain unprocessed after run: uids=${stuck_waivers
-    .map((waiver) => waiver.uid)
+    .map((waiver) => waiver.waiver_id)
     .join(',')}`
 }
 
@@ -156,7 +156,7 @@ const validate_game_timing = async (waiver_id, lid) => {
     .join('player', 'waivers.pid', 'player.pid')
   apply_nfl_games_current_week_join({ db, query: waiver_game_query })
   const waiver_with_game_info = await waiver_game_query
-    .where('waivers.uid', waiver_id)
+    .where('waivers.waiver_id', waiver_id)
     .first()
 
   if (waiver_with_game_info && waiver_with_game_info.date) {
@@ -212,7 +212,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
           is_successful: 1,
           processed: timestamp
         })
-        .where('uid', waiver.wid)
+        .where('waiver_id', waiver.wid)
 
       log(
         `super priority claim processed for pid: ${waiver.pid}, tid: ${waiver.tid}`
@@ -234,7 +234,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
           reason: err.message,
           processed: timestamp
         })
-        .where('uid', waiver.wid)
+        .where('waiver_id', waiver.wid)
 
       log(
         `super priority claim failed for pid: ${waiver.pid}, tid: ${waiver.tid} - ${err.message}`
@@ -248,7 +248,7 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
         reason: 'super priority not available',
         processed: timestamp
       })
-      .where('uid', waiver.wid)
+      .where('waiver_id', waiver.wid)
 
     log(
       `super priority claim failed for pid: ${waiver.pid}, tid: ${waiver.tid}`
@@ -305,7 +305,7 @@ const handle_regular_practice_claim = async (waiver, lid, timestamp) => {
       reason: null,
       processed: timestamp
     })
-    .where('uid', waiver.wid)
+    .where('waiver_id', waiver.wid)
 }
 
 const cancel_other_pending_waivers = async (
@@ -324,7 +324,7 @@ const cancel_other_pending_waivers = async (
     .where('lid', lid)
     .where('pid', pid)
     .where('type', waiver_types.FREE_AGENCY_PRACTICE)
-    .where('uid', '!=', waiver_id)
+    .where('waiver_id', '!=', waiver_id)
     .whereNull('processed')
     .whereNull('cancelled')
 }
@@ -367,7 +367,7 @@ const process_league_practice_waivers = async (lid, timestamp) => {
           reason: error ? error.message : null,
           processed: timestamp
         })
-        .where('uid', waiver.wid)
+        .where('waiver_id', waiver.wid)
     }
 
     waiver = await getTopPracticeSquadWaiver(lid)

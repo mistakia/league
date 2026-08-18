@@ -153,7 +153,7 @@ export default function WaiverConfirmation({
     if (!waiver_error) {
       if (waiver) {
         update({
-          waiverId: waiver.uid,
+          waiverId: waiver.waiver_id,
           release: waiver_release,
           bid: waiver_bid
         })

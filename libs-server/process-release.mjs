@@ -276,8 +276,8 @@ export default async function ({
     }
     const [inserted_transaction] = await db('transactions')
       .insert(transaction)
-      .returning('uid')
-    transaction.uid = inserted_transaction.uid
+      .returning('transaction_id')
+    transaction.transaction_id = inserted_transaction.transaction_id
 
     // clear any pending poaching claims for player
     await db('poaches')
@@ -317,8 +317,8 @@ export default async function ({
   }
   const [inserted_transaction] = await db('transactions')
     .insert(transaction)
-    .returning('uid')
-  transaction.uid = inserted_transaction.uid
+    .returning('transaction_id')
+  transaction.transaction_id = inserted_transaction.transaction_id
 
   // remove release player from rosters
   const teamRosters = await db('rosters')

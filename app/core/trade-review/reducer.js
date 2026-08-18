@@ -7,7 +7,7 @@ import { trade_review_actions } from './actions'
 // shape is set by the API -- declaring it twice would only create a place for
 // the two to disagree.
 const initial_state = new Map({
-  // trade_uid -> Map({ perspectives, has_chains, is_pending, is_failed }), in
+  // trade_id -> Map({ perspectives, has_chains, is_pending, is_failed }), in
   // the order the API returned, which is oldest trade first.
   trades: new OrderedMap(),
   is_pending: false,
@@ -27,10 +27,10 @@ const initial_state = new Map({
 const group_by_trade = (records) => {
   let trades = new OrderedMap()
   for (const record of records) {
-    const trade_uid = record.trade_uid
-    const perspectives = trades.getIn([trade_uid, 'perspectives'], new List())
+    const trade_id = record.trade_id
+    const perspectives = trades.getIn([trade_id, 'perspectives'], new List())
     trades = trades.set(
-      trade_uid,
+      trade_id,
       new Map({
         perspectives: perspectives.push(fromJS(record)),
         has_chains: false,
@@ -61,8 +61,8 @@ export function trade_review_reducer(state = initial_state, { payload, type }) {
     // the list has arrived, and setIn would otherwise conjure a trade entry
     // carrying a pending flag and no perspectives.
     case trade_review_actions.GET_TRADE_REVIEW_TRADE_PENDING:
-      return state.hasIn(['trades', payload.opts.trade_uid])
-        ? state.setIn(['trades', payload.opts.trade_uid, 'is_pending'], true)
+      return state.hasIn(['trades', payload.opts.trade_id])
+        ? state.setIn(['trades', payload.opts.trade_id, 'is_pending'], true)
         : state
 
     // A failure on an in-map trade just clears its pending flag and marks the
@@ -71,17 +71,15 @@ export function trade_review_reducer(state = initial_state, { payload, type }) {
     // perspectives so a single-trade page can say so instead of spinning
     // forever; the list filters such entries out when it renders.
     case trade_review_actions.GET_TRADE_REVIEW_TRADE_FAILED:
-      return state.updateIn(
-        ['trades', payload.opts.trade_uid],
-        (trade_entry) =>
-          trade_entry
-            ? trade_entry.merge({ is_pending: false, is_failed: true })
-            : new Map({
-                perspectives: new List(),
-                has_chains: false,
-                is_pending: false,
-                is_failed: true
-              })
+      return state.updateIn(['trades', payload.opts.trade_id], (trade_entry) =>
+        trade_entry
+          ? trade_entry.merge({ is_pending: false, is_failed: true })
+          : new Map({
+              perspectives: new List(),
+              has_chains: false,
+              is_pending: false,
+              is_failed: true
+            })
       )
 
     // The detail response is the same two records with a `chain` on every
@@ -89,7 +87,7 @@ export function trade_review_reducer(state = initial_state, { payload, type }) {
     // it. has_chains is what stops the page re-fetching on every expand.
     case trade_review_actions.GET_TRADE_REVIEW_TRADE_FULFILLED:
       return state.setIn(
-        ['trades', payload.opts.trade_uid],
+        ['trades', payload.opts.trade_id],
         new Map({
           perspectives: fromJS(payload.data),
           has_chains: true,

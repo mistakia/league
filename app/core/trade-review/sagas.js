@@ -14,8 +14,8 @@ export function* load_trade_review({ payload }) {
 }
 
 export function* load_trade_review_trade({ payload }) {
-  const { leagueId, trade_uid } = payload
-  yield call(api_get_trade_review_trade, { leagueId, trade_uid })
+  const { leagueId, trade_id } = payload
+  yield call(api_get_trade_review_trade, { leagueId, trade_id })
 }
 
 const collect_asset_pids = (assets, add_pid) => {

@@ -14,7 +14,7 @@ import { league_defaults } from '@constants'
 
 export default function EditableLeague({ update, league, userId }) {
   const onchange = (value) => {
-    const leagueId = league.uid || league_defaults.LEAGUE_ID
+    const leagueId = league.league_id || league_defaults.LEAGUE_ID
     update({ leagueId, ...value })
   }
 

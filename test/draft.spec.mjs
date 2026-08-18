@@ -64,7 +64,7 @@ describe('API /draft', function () {
 
     res.should.be.json
 
-    res.body.uid.should.equal(1)
+    res.body.draft_pick_id.should.equal(1)
     res.body.pid.should.equal(player.pid)
     res.body.lid.should.equal(leagueId)
     res.body.tid.should.equal(teamId)

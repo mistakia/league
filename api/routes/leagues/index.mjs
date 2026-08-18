@@ -302,7 +302,7 @@ router.put('/:leagueId', async (req, res) => {
     if (league_fields.includes(field)) {
       await db('leagues')
         .update({ [field]: value })
-        .where({ uid: lid })
+        .where({ league_id: lid })
     } else if (season_fields.includes(field)) {
       await db('seasons')
         .update({ [field]: value })
@@ -584,14 +584,14 @@ router.post('/:leagueId/pause', async (req, res) => {
     // anyway -- surfacing that as an error would make a double-click look like
     // a failure.
     const existing_pause = await get_open_league_pause({
-      league_id: league.uid,
+      league_id: league.league_id,
       db
     })
     if (existing_pause) return res.send(existing_pause)
 
     const [pause] = await db('league_pauses')
       .insert({
-        league_id: league.uid,
+        league_id: league.league_id,
         paused_at: new Date(),
         pause_reason: String(pause_reason).trim(),
         paused_by_user_id: req.auth.userId
@@ -651,7 +651,7 @@ router.delete('/:leagueId/pause', async (req, res) => {
       return
 
     const open_pause = await get_open_league_pause({
-      league_id: league.uid,
+      league_id: league.league_id,
       db
     })
     if (!open_pause) {

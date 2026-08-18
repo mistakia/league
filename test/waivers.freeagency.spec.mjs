@@ -77,7 +77,7 @@ describe('API /waivers - free agency', function () {
       res.body.bid_amount.should.equal(0)
       res.body.type.should.equal(waiver_types.FREE_AGENCY)
 
-      res.body.uid.should.exist
+      res.body.waiver_id.should.exist
     })
 
     it('submit waiver for released rookie - offseason', async () => {
@@ -135,7 +135,7 @@ describe('API /waivers - free agency', function () {
       res.body.bid_amount.should.equal(0)
       res.body.type.should.equal(waiver_types.FREE_AGENCY_PRACTICE)
 
-      res.body.uid.should.exist
+      res.body.waiver_id.should.exist
     })
 
     it('free agent rookie waiver w/ full active roster', async () => {})

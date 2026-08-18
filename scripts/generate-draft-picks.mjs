@@ -23,12 +23,12 @@ const run = async ({ future_year = current_season.year + 1 }) => {
 
   for (const league of leagues) {
     const picks = await db('draft')
-      .where({ lid: league.uid, season_year: future_year })
+      .where({ lid: league.league_id, season_year: future_year })
       .limit(1)
     if (picks.length) continue
 
     const teams = await db('teams').where({
-      lid: league.uid,
+      lid: league.league_id,
       season_year: current_season.year
     })
     for (const team of teams) {
@@ -36,7 +36,7 @@ const run = async ({ future_year = current_season.year + 1 }) => {
         const rows = await db('draft').where({
           original_team_id: team.team_id,
           round: i,
-          lid: league.uid,
+          lid: league.league_id,
           season_year: future_year
         })
 
@@ -50,7 +50,7 @@ const run = async ({ future_year = current_season.year + 1 }) => {
         await db('draft').insert({
           tid: team.team_id,
           original_team_id: team.team_id,
-          lid: league.uid,
+          lid: league.league_id,
           round: i,
           season_year: future_year
         })

@@ -1058,7 +1058,7 @@ describe('API /teams - reserve', function () {
           transaction_types.ROSTER_ACTIVATE,
           transaction_types.RESERVE_IR
         ])
-        .orderBy('uid', 'asc')
+        .orderBy('transaction_id', 'asc')
       expect(transactions.map((t) => t.type)).to.deep.equal([
         transaction_types.ROSTER_ACTIVATE,
         transaction_types.RESERVE_IR
@@ -1205,7 +1205,7 @@ describe('API /teams - reserve', function () {
           transaction_types.ROSTER_ACTIVATE,
           reserve_transaction_type
         ])
-        .orderBy('uid', 'asc')
+        .orderBy('transaction_id', 'asc')
       expect(transactions.map((t) => t.type)).to.deep.equal([
         transaction_types.ROSTER_ACTIVATE,
         reserve_transaction_type

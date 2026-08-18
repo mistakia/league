@@ -25,9 +25,9 @@ const day_three = '2024-03-03'
 const local_noon = (date) => dayjs(`${date} 12:00:00`).unix()
 const observed_at = (date) => `${date}T12:00:00Z`
 
-const insert_transaction = async ({ uid, tid, pid, type, date }) =>
+const insert_transaction = async ({ transaction_id, tid, pid, type, date }) =>
   knex('transactions').insert({
-    uid,
+    transaction_id,
     user_id: 1,
     tid,
     lid,
@@ -88,28 +88,28 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
     beforeEach(async function () {
       // day one: each team drafts. PLAY-FOUR is never ranked by keeptradecut.
       await insert_transaction({
-        uid: 101,
+        transaction_id: 101,
         tid: 1,
         pid: 'PLAY-ONE-000001',
         type: transaction_types.DRAFT,
         date: day_one
       })
       await insert_transaction({
-        uid: 102,
+        transaction_id: 102,
         tid: 2,
         pid: 'PLAY-TWO-000002',
         type: transaction_types.DRAFT,
         date: day_one
       })
       await insert_transaction({
-        uid: 103,
+        transaction_id: 103,
         tid: 3,
         pid: 'PLAY-THRE-000003',
         type: transaction_types.DRAFT,
         date: day_one
       })
       await insert_transaction({
-        uid: 104,
+        transaction_id: 104,
         tid: 3,
         pid: 'PLAY-FOUR-000004',
         type: transaction_types.DRAFT,
@@ -118,14 +118,14 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
 
       // day two: team 1 trades PLAY-ONE to team 2
       await insert_transaction({
-        uid: 105,
+        transaction_id: 105,
         tid: 1,
         pid: 'PLAY-ONE-000001',
         type: transaction_types.TRADE,
         date: day_two
       })
       await knex('trades').insert({
-        uid: 1,
+        trade_id: 1,
         propose_tid: 1,
         accept_tid: 2,
         lid,
@@ -146,7 +146,7 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
 
       // day three: an unrelated add, which is what makes day two emit
       await insert_transaction({
-        uid: 106,
+        transaction_id: 106,
         tid: 1,
         pid: 'PLAY-FIVE-000005',
         type: transaction_types.DRAFT,
@@ -265,7 +265,7 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
   describe('absent teams', function () {
     it('throws naming the team and transaction on an add for an unknown team', async function () {
       await insert_transaction({
-        uid: 201,
+        transaction_id: 201,
         tid: 99,
         pid: 'PLAY-ONE-000001',
         type: transaction_types.DRAFT,
@@ -287,14 +287,14 @@ describe('SCRIPTS - calculate team daily ktc value', function () {
 
     it('tolerates a release for a decommissioned team', async function () {
       await insert_transaction({
-        uid: 202,
+        transaction_id: 202,
         tid: 1,
         pid: 'PLAY-ONE-000001',
         type: transaction_types.DRAFT,
         date: day_one
       })
       await insert_transaction({
-        uid: 203,
+        transaction_id: 203,
         tid: 99,
         pid: 'PLAY-ONE-000001',
         type: transaction_types.ROSTER_RELEASE,

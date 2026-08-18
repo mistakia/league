@@ -347,7 +347,7 @@ export const announce_draft_slate = async ({ lid, dry_run = false }) => {
 const process_all_leagues = async ({ dry_run = false } = {}) => {
   const leagues = await db('leagues')
     .join('seasons', function () {
-      this.on('leagues.uid', '=', 'seasons.lid').andOn(
+      this.on('leagues.league_id', '=', 'seasons.lid').andOn(
         'seasons.season_year',
         '=',
         db.raw('?', [current_season.year])
@@ -356,27 +356,27 @@ const process_all_leagues = async ({ dry_run = false } = {}) => {
     .whereNotNull('seasons.draft_start')
     .where('seasons.draft_start', '<', new Date())
     .whereNull('seasons.rookie_draft_completed_at')
-    .select('leagues.uid')
+    .select('leagues.league_id')
 
   const announced = []
   const shortfalls = []
 
   for (const league of leagues) {
     const { announced_boundary, is_missing_webhook } =
-      await announce_draft_slate({ lid: league.uid, dry_run })
+      await announce_draft_slate({ lid: league.league_id, dry_run })
 
     // A league that posts nothing to Discord is not misconfigured, it just does
     // not use the channel — so this is raised by the announcer only once a post
     // was actually owed, never merely because a draft is open.
     if (is_missing_webhook) {
       shortfalls.push(
-        `league ${league.uid}: a draft slate was due but discord_announcements_webhook_url is unset -- the announcement did not reach anyone`
+        `league ${league.league_id}: a draft slate was due but discord_announcements_webhook_url is unset -- the announcement did not reach anyone`
       )
     }
 
     if (announced_boundary) {
       announced.push({
-        lid: league.uid,
+        lid: league.league_id,
         boundary_timestamp: announced_boundary
       })
     }

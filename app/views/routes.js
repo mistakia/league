@@ -144,7 +144,7 @@ const Routes = ({ app }) => {
         />
         <Route path='/leagues/:lid/trades' element={<TradeReviewPage />} />
         <Route
-          path='/leagues/:lid/trades/:trade_uid'
+          path='/leagues/:lid/trades/:trade_id'
           element={<TradeReviewPage />}
         />
         {/* Candidate PII. The API refuses anyone who does not manage a team

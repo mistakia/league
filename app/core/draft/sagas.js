@@ -36,7 +36,7 @@ export function* draft_player() {
 export function* init() {
   const league = yield select(get_current_league)
   if (league.draft_start && current_season.fantasy_season_week === 0) {
-    yield call(api_get_draft, { leagueId: league.uid })
+    yield call(api_get_draft, { leagueId: league.league_id })
   }
 }
 

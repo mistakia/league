@@ -29,7 +29,7 @@ export default class EditableSource extends React.Component {
     }
 
     if (!this.state.invalid) {
-      const data = { sourceId: this.props.source.uid, weight: value }
+      const data = { sourceId: this.props.source.source_id, weight: value }
       this.props.update(data)
     } else {
       this.setState({ value: this.defaultValue })

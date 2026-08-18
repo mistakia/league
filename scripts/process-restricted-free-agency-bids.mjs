@@ -98,7 +98,7 @@ async function settle_losing_bids({
     })
     .whereNull('cancelled')
     .whereNull('processed')
-    .whereNot('uid', winning_bid.uid)
+    .whereNot('bid_id', winning_bid.bid_id)
 
   for (const losing_bid of losing_bids) {
     const outcome = classify_restricted_free_agency_bid_outcome({
@@ -110,11 +110,11 @@ async function settle_losing_bids({
     await db.transaction(async (trx) => {
       await trx('restricted_free_agency_bids')
         .update({ is_successful: 0, outcome, processed: processed_at })
-        .where('uid', losing_bid.uid)
+        .where('bid_id', losing_bid.bid_id)
 
       await record_restricted_free_agency_bid_change({
         db: trx,
-        bid_id: losing_bid.uid,
+        bid_id: losing_bid.bid_id,
         change_type: bid_change_types.SETTLED,
         change_source: bid_change_sources.SETTLEMENT_SCRIPT,
         changed_by_user_id: null
@@ -220,7 +220,7 @@ const run = async ({ dry_run = false } = {}) => {
   // Get leagues currently in RFA period with unprocessed bids
   const active_leagues = await db('seasons')
     .select('seasons.*', 'leagues.name as name')
-    .join('leagues', 'leagues.uid', '=', 'seasons.lid')
+    .join('leagues', 'leagues.league_id', '=', 'seasons.lid')
     .join('restricted_free_agency_bids', function () {
       this.on('restricted_free_agency_bids.lid', 'seasons.lid').on(
         'restricted_free_agency_bids.season_year',
@@ -516,13 +516,13 @@ const run = async ({ dry_run = false } = {}) => {
               outcome_detail: error.message,
               processed: processing_instant
             })
-            .where('uid', winning_bid.uid)
+            .where('bid_id', winning_bid.bid_id)
             .whereNull('processed')
 
           if (updated_count) {
             await record_restricted_free_agency_bid_change({
               db: trx,
-              bid_id: winning_bid.uid,
+              bid_id: winning_bid.bid_id,
               change_type: bid_change_types.SETTLED,
               change_source: bid_change_sources.SETTLEMENT_SCRIPT,
               changed_by_user_id: null
@@ -618,11 +618,11 @@ const run = async ({ dry_run = false } = {}) => {
           ]
         )
       })
-      .select('rfab.uid', 'rfab.lid', 'rfab.pid')
+      .select('rfab.bid_id', 'rfab.lid', 'rfab.pid')
 
     if (stuck_bids.length > 0) {
       return {
-        shortfall: `${stuck_bids.length} eligible RFA bid(s) remain unprocessed after run: uids=${stuck_bids.map((b) => b.uid).join(',')}`
+        shortfall: `${stuck_bids.length} eligible RFA bid(s) remain unprocessed after run: bid_ids=${stuck_bids.map((b) => b.bid_id).join(',')}`
       }
     }
   }

@@ -95,7 +95,7 @@ describe('API /waivers - cancel', function () {
       type: waiver_types.POACH,
       token: user2
     })
-    waiverId = waiver.uid
+    waiverId = waiver.waiver_id
 
     const cancel_result = await cancel_waiver({
       waiverId,
@@ -104,7 +104,7 @@ describe('API /waivers - cancel', function () {
       token: user2
     })
 
-    cancel_result.uid.should.equal(waiverId)
+    cancel_result.waiver_id.should.equal(waiverId)
     cancel_result.tid.should.equal(teamId)
     cancel_result.lid.should.equal(leagueId)
     new Date(cancel_result.cancelled).getTime().should.equal(Date.now())
@@ -124,13 +124,13 @@ describe('API /waivers - cancel', function () {
     })
 
     const cancel_result = await cancel_waiver({
-      waiverId: waiver.uid,
+      waiverId: waiver.waiver_id,
       teamId,
       leagueId,
       token: user2
     })
 
-    cancel_result.uid.should.equal(waiver.uid)
+    cancel_result.waiver_id.should.equal(waiver.waiver_id)
     cancel_result.tid.should.equal(teamId)
     cancel_result.lid.should.equal(leagueId)
     new Date(cancel_result.cancelled).getTime().should.equal(Date.now())
@@ -171,7 +171,7 @@ describe('API /waivers - cancel', function () {
         token: user2
       })
 
-      error_test_waiver_id = waiver.uid
+      error_test_waiver_id = waiver.waiver_id
     })
 
     it('not logged in', async () => {

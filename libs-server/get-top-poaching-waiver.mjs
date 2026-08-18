@@ -21,7 +21,7 @@ export default async function (league_id) {
   const waivers_query = db('waivers')
     .select(
       'teams.*',
-      'waivers.uid as wid',
+      'waivers.waiver_id as wid',
       'waivers.pid',
       'waivers.tid',
       'waivers.user_id',
@@ -32,7 +32,11 @@ export default async function (league_id) {
     .whereNull('processed')
     .whereNull('cancelled')
     .where('type', waiver_types.POACH)
-    .orderBy(['teams.waiver_order', 'waivers.priority_order', 'waivers.uid'])
+    .orderBy([
+      'teams.waiver_order',
+      'waivers.priority_order',
+      'waivers.waiver_id'
+    ])
 
   if (exclude_pids.length) {
     waivers_query.whereNotIn('waivers.pid', exclude_pids)

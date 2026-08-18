@@ -39,7 +39,7 @@ const SortableHandle = () => (
 const SortablePlayerRoster = ({ waiver, percentiles, ...props }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
-      id: waiver.uid || waiver.pid
+      id: waiver.waiver_id || waiver.pid
     })
 
   const style = {
@@ -51,7 +51,7 @@ const SortablePlayerRoster = ({ waiver, percentiles, ...props }) => {
     <div ref={setNodeRef} style={style} {...attributes}>
       <PlayerRoster
         pid={waiver.pid}
-        waiverId={waiver.uid}
+        waiverId={waiver.waiver_id}
         claim={waiver}
         player_map={waiver.player_map}
         dragHandle={
@@ -107,7 +107,7 @@ export default function DashboardPlayersTable({
         <PlayerRoster
           key={index}
           claim={poach}
-          poachId={poach.uid}
+          poachId={poach.poach_id}
           pid={poach.pid}
           player_map={poach.player_map}
           {...{ percentiles }}
@@ -126,19 +126,21 @@ export default function DashboardPlayersTable({
           modifiers={[restrictToVerticalAxis, restrictToParentElement]}
           onDragEnd={({ active, over }) => {
             if (active.id !== over?.id) {
-              const oldIndex = claims.findIndex((c) => c.uid === active.id)
-              const newIndex = claims.findIndex((c) => c.uid === over.id)
+              const oldIndex = claims.findIndex(
+                (c) => c.waiver_id === active.id
+              )
+              const newIndex = claims.findIndex((c) => c.waiver_id === over.id)
               reorderWaivers({ oldIndex, newIndex, type: waiverType })
             }
           }}
         >
           <SortableContext
-            items={claims.map((c) => c.uid)}
+            items={claims.map((c) => c.waiver_id)}
             strategy={verticalListSortingStrategy}
           >
             {claims.map((waiver) => (
               <SortablePlayerRoster
-                key={waiver.uid}
+                key={waiver.waiver_id}
                 waiver={waiver}
                 percentiles={percentiles}
               />
