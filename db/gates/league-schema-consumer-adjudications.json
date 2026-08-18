@@ -32,6 +32,76 @@
   ],
   "adjudications": [
     {
+      "gate": 4,
+      "path": "nfl-betting/query/prop-edge-finder.sql",
+      "statement_contains": "hits_soft,\n    historical_edge_soft,\n    historical_edge_hard",
+      "kind": "pending_ruling",
+      "reason": "Real 42883 (character varying <> integer), surfaced only after the o_am -> over_american_odds repair removed the 42703 that was masking it. props_index.prop_type was a numeric enum when this query was written and became a string vocabulary in league 0221a941b; the live 2023 values are names (GAME_RECEIVING_YARDS, GAME_RUSHING_YARDS, ...) with no numeric codes at all. So quoting it as '18' would turn a loud type error into a predicate that matches NOTHING and silently widens the result set -- the bound-value-type class this repo already records for .where('public', true) against a smallint. Repairing it needs the one fact not recoverable from the schema or the pre-rename constants: which prop type the legacy code 18 named. Awaiting that; then replace the literal and remove this entry. The sibling file prop-recent-hits.sql carried no such predicate and is fully repaired."
+    },
+    {
+      "gate": 4,
+      "path": "nfl-betting/2023/week-10.sql",
+      "statement_contains": "with team_gamelogs as (",
+      "kind": "history",
+      "reason": "Operator ruling 2026-08-18, relayed via the league management session: the 2023 week archives under text/nfl-betting are HISTORY and stay as is. They are the record of what was actually run at the time, so rewriting them to satisfy a later conform would destroy the thing they exist to preserve. Every failure in this file is the same 42702 -- an unqualified season_year predicate that was unambiguous when written and became ambiguous once a joined table was conformed to the same name, which is the rename-makes-a-predicate-ambiguous class. The entry is keyed on the file's one statement shape rather than per statement because the file is frozen: nothing new will be written here, so a broader anchor cannot mask a future finding. Remove this entry if the archive is ever deleted or rewritten."
+    },
+    {
+      "gate": 4,
+      "path": "nfl-betting/2023/week-11.sql",
+      "statement_contains": "with team_gamelogs as (",
+      "kind": "history",
+      "reason": "Operator ruling 2026-08-18, relayed via the league management session: the 2023 week archives under text/nfl-betting are HISTORY and stay as is. They are the record of what was actually run at the time, so rewriting them to satisfy a later conform would destroy the thing they exist to preserve. Every failure in this file is the same 42702 -- an unqualified season_year predicate that was unambiguous when written and became ambiguous once a joined table was conformed to the same name, which is the rename-makes-a-predicate-ambiguous class. The entry is keyed on the file's one statement shape rather than per statement because the file is frozen: nothing new will be written here, so a broader anchor cannot mask a future finding. Remove this entry if the archive is ever deleted or rewritten."
+    },
+    {
+      "gate": 4,
+      "path": "nfl-betting/2023/week-12.sql",
+      "statement_contains": "with team_gamelogs as (",
+      "kind": "history",
+      "reason": "Operator ruling 2026-08-18, relayed via the league management session: the 2023 week archives under text/nfl-betting are HISTORY and stay as is. They are the record of what was actually run at the time, so rewriting them to satisfy a later conform would destroy the thing they exist to preserve. Every failure in this file is the same 42702 -- an unqualified season_year predicate that was unambiguous when written and became ambiguous once a joined table was conformed to the same name, which is the rename-makes-a-predicate-ambiguous class. The entry is keyed on the file's one statement shape rather than per statement because the file is frozen: nothing new will be written here, so a broader anchor cannot mask a future finding. Remove this entry if the archive is ever deleted or rewritten."
+    },
+    {
+      "gate": 4,
+      "path": "nfl-betting/2023/week-13.sql",
+      "statement_contains": "with team_gamelogs as (",
+      "kind": "history",
+      "reason": "Operator ruling 2026-08-18, relayed via the league management session: the 2023 week archives under text/nfl-betting are HISTORY and stay as is. They are the record of what was actually run at the time, so rewriting them to satisfy a later conform would destroy the thing they exist to preserve. Every failure in this file is the same 42702 -- an unqualified season_year predicate that was unambiguous when written and became ambiguous once a joined table was conformed to the same name, which is the rename-makes-a-predicate-ambiguous class. The entry is keyed on the file's one statement shape rather than per statement because the file is frozen: nothing new will be written here, so a broader anchor cannot mask a future finding. Remove this entry if the archive is ever deleted or rewritten."
+    },
+    {
+      "gate": 4,
+      "path": "nfl-betting/2023/week-14.sql",
+      "statement_contains": "with team_gamelogs as (",
+      "kind": "history",
+      "reason": "Operator ruling 2026-08-18, relayed via the league management session: the 2023 week archives under text/nfl-betting are HISTORY and stay as is. They are the record of what was actually run at the time, so rewriting them to satisfy a later conform would destroy the thing they exist to preserve. Every failure in this file is the same 42702 -- an unqualified season_year predicate that was unambiguous when written and became ambiguous once a joined table was conformed to the same name, which is the rename-makes-a-predicate-ambiguous class. The entry is keyed on the file's one statement shape rather than per statement because the file is frozen: nothing new will be written here, so a broader anchor cannot mask a future finding. Remove this entry if the archive is ever deleted or rewritten."
+    },
+    {
+      "gate": 4,
+      "path": "nfl-betting/2023/week-15.sql",
+      "statement_contains": "with team_gamelogs as (",
+      "kind": "history",
+      "reason": "Operator ruling 2026-08-18, relayed via the league management session: the 2023 week archives under text/nfl-betting are HISTORY and stay as is. They are the record of what was actually run at the time, so rewriting them to satisfy a later conform would destroy the thing they exist to preserve. Every failure in this file is the same 42702 -- an unqualified season_year predicate that was unambiguous when written and became ambiguous once a joined table was conformed to the same name, which is the rename-makes-a-predicate-ambiguous class. The entry is keyed on the file's one statement shape rather than per statement because the file is frozen: nothing new will be written here, so a broader anchor cannot mask a future finding. Remove this entry if the archive is ever deleted or rewritten."
+    },
+    {
+      "gate": 4,
+      "path": "nfl-betting/2023/week-16.sql",
+      "statement_contains": "with team_gamelogs as (",
+      "kind": "history",
+      "reason": "Operator ruling 2026-08-18, relayed via the league management session: the 2023 week archives under text/nfl-betting are HISTORY and stay as is. They are the record of what was actually run at the time, so rewriting them to satisfy a later conform would destroy the thing they exist to preserve. Every failure in this file is the same 42702 -- an unqualified season_year predicate that was unambiguous when written and became ambiguous once a joined table was conformed to the same name, which is the rename-makes-a-predicate-ambiguous class. The entry is keyed on the file's one statement shape rather than per statement because the file is frozen: nothing new will be written here, so a broader anchor cannot mask a future finding. Remove this entry if the archive is ever deleted or rewritten."
+    },
+    {
+      "gate": 4,
+      "path": "nfl-betting/2023/buccaneers-godwin-evans-occurrences.sql",
+      "statement_contains": "with team_gamelogs as (",
+      "kind": "history",
+      "reason": "Operator ruling 2026-08-18, relayed via the league management session: the 2023 week archives under text/nfl-betting are HISTORY and stay as is. They are the record of what was actually run at the time, so rewriting them to satisfy a later conform would destroy the thing they exist to preserve. Every failure in this file is the same 42702 -- an unqualified season_year predicate that was unambiguous when written and became ambiguous once a joined table was conformed to the same name, which is the rename-makes-a-predicate-ambiguous class. The entry is keyed on the file's one statement shape rather than per statement because the file is frozen: nothing new will be written here, so a broader anchor cannot mask a future finding. Remove this entry if the archive is ever deleted or rewritten."
+    },
+    {
+      "gate": 4,
+      "path": "nfl-betting/2023/buccaneers-godwin-evans-occurrences.sql",
+      "statement_contains": "select player.short_name, opponent_nfl_team",
+      "kind": "history",
+      "reason": "Operator ruling 2026-08-18, relayed via the league management session: the 2023 week archives under text/nfl-betting are HISTORY and stay as is. They are the record of what was actually run at the time, so rewriting them to satisfy a later conform would destroy the thing they exist to preserve. Every failure in this file is the same 42702 -- an unqualified season_year predicate that was unambiguous when written and became ambiguous once a joined table was conformed to the same name, which is the rename-makes-a-predicate-ambiguous class. The entry is keyed on the file's one statement shape rather than per statement because the file is frozen: nothing new will be written here, so a broader anchor cannot mask a future finding. Remove this entry if the archive is ever deleted or rewritten."
+    },
+    {
       "gate": 1,
       "path": "CLAUDE.md",
       "table": "player_gamelogs",
@@ -77,7 +147,7 @@
       "table": "prop_market_selections_index",
       "column": "esbid",
       "kind": "history",
-      "reason": "Cites a defect this gate's own EXPLAIN half found — a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
+      "reason": "Cites a defect this gate's own EXPLAIN half found \u2014 a join on an esbid that table has never had. The rename recipe names it as evidence that gate 2 is not redundant, so the absent column is the point of the sentence. Reported by the gate against its own documentation on first run, which is the mechanism working."
     },
     {
       "gate": 1,
