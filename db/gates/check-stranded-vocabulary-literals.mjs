@@ -42,7 +42,26 @@
 // resolved alias environment -- a bare map key binds to nothing and is silent
 // by construction.
 //
+// TWO GATES, because the two corpora have different prerequisites.
+//
+//   GATE 1 -- the knex half, over this repo's own server roots, resolved against
+//             db/schema.postgres.sql. Needs no database, no base ref and nothing
+//             outside the checkout, so it cannot go red on a sibling's in-flight
+//             migration and is CI-eligible on the same terms as
+//             check-renamed-column-consumers gate 1 and
+//             check-api-response-shapes gate 1.
+//   GATE 2 -- the SQL half, over a corpus that lives in user-base. It is reached
+//             by walking up from the checkout for `text/nfl/query`, and a CI
+//             runner has no such ancestor, so gate 2 runs per cluster via
+//             `yarn check:cluster`.
+//
+// The split exists because the halves were fused: a run bound for CI computed
+// every knex finding and then exited 2 on the absent SQL root before printing
+// any of them, so the whole gate was taken out of CI on 2026-08-18 over a
+// dependency only half of it has. Each gate runs only its own negative controls.
+//
 // Usage:
+//   node db/gates/check-stranded-vocabulary-literals.mjs --gate 1
 //   node db/gates/check-stranded-vocabulary-literals.mjs --sql-root <dir>
 //   node db/gates/check-stranded-vocabulary-literals.mjs --json
 //   node db/gates/check-stranded-vocabulary-literals.mjs --occupancy <file.json>
@@ -833,9 +852,18 @@ const CONTROLS = [
   }
 ]
 
-const run_negative_controls = ({ tables, vocabulary }) => {
+// Each gate runs only its own controls. Running a `sql` control under --gate 1
+// would exercise a scanner half that gate never invokes, so its green would
+// assert nothing about the run -- and running it is not the same as the SQL half
+// having a corpus to read.
+const run_negative_controls = ({ tables, vocabulary, gate }) => {
   const results = []
-  for (const control of CONTROLS) {
+  const applicable = CONTROLS.filter((control) => {
+    if (gate === 1) return control.kind === 'knex'
+    if (gate === 2) return control.kind === 'sql'
+    return true
+  })
+  for (const control of applicable) {
     const result =
       control.kind === 'knex'
         ? scan_knex_source({
@@ -860,11 +888,23 @@ const run_negative_controls = ({ tables, vocabulary }) => {
 
 const parse_argv = () => {
   const argv = process.argv.slice(2)
-  const options = { roots: [], json: false, occupancy: null }
+  // gate null means both halves, which is what `yarn check:cluster` wants.
+  const options = { roots: [], json: false, occupancy: null, gate: null }
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === '--sql-root') options.roots.push(argv[++i])
     else if (argv[i] === '--json') options.json = true
     else if (argv[i] === '--occupancy') options.occupancy = argv[++i]
+    else if (argv[i] === '--gate') options.gate = Number(argv[++i])
+  }
+  if (options.gate !== null && options.gate !== 1 && options.gate !== 2) {
+    console.error(`TOOLING ERROR: --gate must be 1 or 2, got ${options.gate}`)
+    process.exit(2)
+  }
+  if (options.gate === 1 && options.roots.length) {
+    console.error(
+      'TOOLING ERROR: --sql-root is gate 2 material; --gate 1 reads no SQL corpus'
+    )
+    process.exit(2)
   }
   return options
 }
@@ -878,6 +918,9 @@ const main = () => {
   const occupancy = options.occupancy
     ? JSON.parse(fs.readFileSync(options.occupancy, 'utf8'))
     : null
+
+  const run_knex_half = options.gate !== 2
+  const run_sql_half = options.gate !== 1
 
   const roots = options.roots.length
     ? options.roots
@@ -896,37 +939,47 @@ const main = () => {
     fs.readFileSync(path.join(repo_root, 'db', 'schema.postgres.sql'), 'utf8')
   )
   const server_roots = ['api', 'libs-server', 'scripts', 'jobs', 'app']
-  for (const file of walk_files(server_roots, ['.mjs', '.js'], repo_root)) {
-    const source = fs.readFileSync(file, 'utf8')
-    js_files_read += 1
-    statements_read += collect_statements(source).length
-    const result = scan_knex_source({
-      source,
-      relative_path: path.relative(repo_root, file),
-      tables,
-      vocabulary,
-      occupancy
-    })
-    findings.push(...result.findings)
-    zero_rows.push(...result.zero_rows)
-  }
-
-  for (const root of roots) {
-    if (!fs.existsSync(root)) {
-      console.error(`TOOLING ERROR: root does not exist: ${root}`)
-      process.exit(2)
-    }
-    for (const file of walk_sql_files(root)) {
-      files_read += 1
-      const sql = fs.readFileSync(file, 'utf8')
-      const result = scan_sql_text({
-        sql,
-        relative_path: path.relative(user_base_root, file),
+  if (run_knex_half) {
+    for (const file of walk_files(server_roots, ['.mjs', '.js'], repo_root)) {
+      const source = fs.readFileSync(file, 'utf8')
+      js_files_read += 1
+      statements_read += collect_statements(source).length
+      const result = scan_knex_source({
+        source,
+        relative_path: path.relative(repo_root, file),
+        tables,
         vocabulary,
         occupancy
       })
       findings.push(...result.findings)
       zero_rows.push(...result.zero_rows)
+    }
+  }
+
+  if (run_sql_half) {
+    for (const root of roots) {
+      if (!fs.existsSync(root)) {
+        console.error(`TOOLING ERROR: root does not exist: ${root}`)
+        console.error(
+          'This is gate 2 material. A checkout with no user-base ancestor -- a CI'
+        )
+        console.error(
+          'runner, a /tmp worktree -- can run gate 1 alone with --gate 1.'
+        )
+        process.exit(2)
+      }
+      for (const file of walk_sql_files(root)) {
+        files_read += 1
+        const sql = fs.readFileSync(file, 'utf8')
+        const result = scan_sql_text({
+          sql,
+          relative_path: path.relative(user_base_root, file),
+          vocabulary,
+          occupancy
+        })
+        findings.push(...result.findings)
+        zero_rows.push(...result.zero_rows)
+      }
     }
   }
 
@@ -936,14 +989,23 @@ const main = () => {
   }
 
   console.log('SURFACE')
+  console.log(
+    `  gates run:                          ${options.gate ? options.gate : '1 and 2'}`
+  )
   console.log(`  value-vocabulary CHECK constraints: ${total_constraints}`)
   console.log(
     `  on partition children:              ${partition_child_constraints}`
   )
   console.log(`  LOGICAL constrained columns:        ${columns.length}`)
-  console.log(`  .sql files read:                    ${files_read}`)
-  console.log(`  JS files read:                      ${js_files_read}`)
-  console.log(`  knex statements parsed:             ${statements_read}`)
+  console.log(
+    `  .sql files read:                    ${run_sql_half ? files_read : 'gate 2 not run'}`
+  )
+  console.log(
+    `  JS files read:                      ${run_knex_half ? js_files_read : 'gate 1 not run'}`
+  )
+  console.log(
+    `  knex statements parsed:             ${run_knex_half ? statements_read : 'gate 1 not run'}`
+  )
   console.log('')
 
   console.log(`CAN NEVER MATCH -- ${findings.length}`)
@@ -958,7 +1020,18 @@ const main = () => {
   if (!findings.length) console.log('  none')
   console.log('')
 
-  const controls = run_negative_controls({ tables, vocabulary })
+  const controls = run_negative_controls({
+    tables,
+    vocabulary,
+    gate: options.gate
+  })
+  // A gate whose control set is empty reads green over nothing at all.
+  if (!controls.length) {
+    console.error(
+      `TOOLING ERROR: no negative control applies to gate ${options.gate}`
+    )
+    return 2
+  }
   const failed_controls = controls.filter((control) => !control.passed)
   console.log('NEGATIVE CONTROLS')
   for (const control of controls) {

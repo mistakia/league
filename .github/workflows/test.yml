@@ -128,24 +128,18 @@ jobs:
       - name: API response shape gate (gate 1)
         run: node db/gates/check-api-response-shapes.mjs --gate 1
 
-      # check-stranded-vocabulary-literals is deliberately NOT wired here, and
-      # the reason is structural rather than a finding. Its SQL corpus lives in
-      # user-base: find_user_base_root() walks up from the checkout looking for
-      # text/nfl/query, and in CI there is no such ancestor, so it exits 2 with
-      # `TOOLING ERROR: root does not exist: /home/runner/work/text/nfl/query`
-      # before examining anything. It cannot be verified by running it on a
-      # clean checkout either -- on any developer machine the checkout sits
-      # under user-base and the walk succeeds, so the dependency is on the
-      # ENVIRONMENT and is invisible locally. Same class as
-      # check-league-schema-consumers. Run it per cluster via yarn check:cluster.
+      # GATE 1 ONLY, for the same reason as the gate above: gate 1 is the knex
+      # half, over this repo's own server roots against db/schema.postgres.sql,
+      # so it needs nothing outside the checkout. Gate 2 reads a SQL corpus that
+      # lives in user-base, which a runner has no ancestor for, and runs per
+      # cluster via yarn check:cluster.
+      - name: Stranded vocabulary literal gate (gate 1)
+        run: node db/gates/check-stranded-vocabulary-literals.mjs --gate 1
 
-      # check-dropped-table-consumers is NOT wired here either, for a second
-      # environment reason rather than a finding: it shells out to ripgrep
-      # (`execFileSync('rg', ...)`, db/gates/check-dropped-table-consumers.mjs),
-      # which is not on an ubuntu-latest runner, so the spawn fails ENOENT and
-      # the gate exits 1 having examined nothing. Wiring it would need an
-      # explicit ripgrep install step ahead of it. Invisible on a developer
-      # machine, where rg is on PATH. Run it per cluster via yarn check:cluster.
+      # Reads only the checked-out tree and walks it in Node, so it needs no
+      # database, no base ref and no binary that is not node itself.
+      - name: Dropped table consumer gate
+        run: node db/gates/check-dropped-table-consumers.mjs
 
       - name: Install PostgreSQL client
         run: |

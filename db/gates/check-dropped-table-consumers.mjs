@@ -36,7 +36,6 @@
 
 import fs from 'fs'
 import path from 'path'
-import { execFileSync } from 'child_process'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -82,40 +81,87 @@ function table_reference_patterns(table) {
     'fullOuterJoin|leftOuterJoin|rightOuterJoin|crossJoin|joinRaw'
   return [
     // db('schedule'), trx("schedule as s")
-    `\\b(?:db|trx|knex)\\s*\\(\\s*${quoted}`,
+    new RegExp(`\\b(?:db|trx|knex)\\s*\\(\\s*${quoted}`),
     // .from('schedule'), .leftJoin('schedule as s', ...)
-    `\\.(?:${joins})\\s*\\(\\s*${quoted}`,
+    new RegExp(`\\.(?:${joins})\\s*\\(\\s*${quoted}`),
     // raw SQL: FROM schedule, JOIN public.schedule, INSERT INTO schedule, ...
-    `(?i)\\b(?:from|join|into|update|table)\\s+(?:public\\.)?${t}\\b`
+    // SQL keywords are case-insensitive; the two builder patterns above are not,
+    // because their `joins` alternation is camelCase and folding case there would
+    // match spellings knex does not have.
+    new RegExp(
+      `\\b(?:from|join|into|update|table)\\s+(?:public\\.)?${t}\\b`,
+      'i'
+    )
   ]
 }
 
-function grep_consumer_files(table) {
-  const dirs = [
-    'libs-server',
-    'libs-shared',
-    'app',
-    'server',
-    'api',
-    'jobs',
-    'scripts'
-  ].filter((d) => fs.existsSync(path.join(repo_root, d)))
-  const patterns = table_reference_patterns(table).flatMap((p) => ['-e', p])
+// Walk every file under the scanned directories, with no extension filter.
+//
+// The filter is deliberately absent rather than forgotten. This gate previously
+// shelled out to ripgrep, which searches every file type, so restricting to
+// .mjs/.js here would silently narrow the gate's reach -- a raw table reference
+// in a .sql, .cron or .json file would stop being seen while the run still
+// printed `ok`. `dist` and `node_modules` are skipped for the same reason
+// ripgrep skipped them: they are build output, not consumers.
+function walk_all_files(dir) {
+  const files = []
+  let entries
   try {
-    const out = execFileSync(
-      'rg',
-      ['-l', '--no-messages', ...patterns, ...dirs],
-      {
-        cwd: repo_root,
-        encoding: 'utf8',
-        maxBuffer: 64 * 1024 * 1024
-      }
-    )
-    return out.split('\n').filter(Boolean)
-  } catch (err) {
-    if (err.status === 1) return []
-    throw err
+    entries = fs.readdirSync(dir, { withFileTypes: true })
+  } catch {
+    return files
   }
+  for (const entry of entries) {
+    if (entry.name === 'node_modules' || entry.name === 'dist') continue
+    if (entry.name === '.git') continue
+    const full_path = path.join(dir, entry.name)
+    if (entry.isDirectory()) files.push(...walk_all_files(full_path))
+    else if (entry.isFile()) files.push(full_path)
+  }
+  return files
+}
+
+const SCAN_DIRS = [
+  'libs-server',
+  'libs-shared',
+  'app',
+  'server',
+  'api',
+  'jobs',
+  'scripts'
+]
+
+// Read the scanned tree once. Every dropped table is matched against the same
+// corpus, so reading per table would re-read several thousand files per run.
+//
+// A file holding a NUL byte is skipped, matching ripgrep's binary handling: it
+// is not source, and a NUL makes the content untrustworthy to match against.
+function load_corpus() {
+  const dirs = SCAN_DIRS.filter((d) => fs.existsSync(path.join(repo_root, d)))
+  const corpus = []
+  for (const dir of dirs) {
+    for (const file of walk_all_files(path.join(repo_root, dir))) {
+      let text
+      try {
+        text = fs.readFileSync(file, 'utf8')
+      } catch {
+        continue
+      }
+      if (text.includes('\x00')) continue
+      corpus.push({ relative_path: path.relative(repo_root, file), text })
+    }
+  }
+  return corpus
+}
+
+function find_consumer_files(table, corpus) {
+  const patterns = table_reference_patterns(table)
+  const files = []
+  for (const entry of corpus) {
+    if (patterns.some((pattern) => pattern.test(entry.text)))
+      files.push(entry.relative_path)
+  }
+  return files.sort()
 }
 
 // Tables the exported schema still defines, used to assert DROPPED_TABLES has
@@ -148,8 +194,11 @@ function main() {
     }
   }
 
+  const corpus = load_corpus()
+  console.log(`  scanned ${corpus.length} files under ${SCAN_DIRS.join(', ')}`)
+
   for (const table of dropped) {
-    const files = grep_consumer_files(table)
+    const files = find_consumer_files(table, corpus)
     if (files.length) {
       errors.push(
         `dropped table ${table} still has ${files.length} consumer file(s):\n` +
