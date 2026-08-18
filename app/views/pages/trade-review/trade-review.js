@@ -100,11 +100,11 @@ export default function TradeReviewPage({
     if (container) container.scrollTop = list_scroll_position.top
   }, [is_single_trade, lid, trades.size])
 
-  const go_to_trade = (uid) => {
+  const go_to_trade = (trade_id) => {
     const container = get_scroll_container()
     list_scroll_position.lid = Number(lid)
     list_scroll_position.top = container ? container.scrollTop : 0
-    navigate(`/leagues/${lid}/trades/${uid}`)
+    navigate(`/leagues/${lid}/trades/${trade_id}`)
   }
   const go_to_list = () => navigate(`/leagues/${lid}/trades`)
 
@@ -160,10 +160,10 @@ export default function TradeReviewPage({
       .filter((trade_entry) => Boolean(trade_entry.get('perspectives').size))
       .reverse()
       .toArray()
-      .map(([uid, trade_entry]) => (
+      .map(([trade_id, trade_entry]) => (
         <TradeReviewTrade
-          key={uid}
-          trade_id={uid}
+          key={trade_id}
+          trade_id={trade_id}
           trade={trade_entry}
           league_id={lid}
           on_open={go_to_trade}
