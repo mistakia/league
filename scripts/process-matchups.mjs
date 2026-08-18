@@ -35,14 +35,14 @@ const run = async ({ lid = 1, year = current_season.year }) => {
     starters[week] = {}
     active[week] = {}
     for (const team of teams) {
-      const rosterRow = await getRoster({ tid: team.uid, week, year })
+      const rosterRow = await getRoster({ tid: team.team_id, week, year })
       const roster = new Roster({ roster: rosterRow, league })
-      starters[week][team.uid] = roster.starters.map((p) => ({
+      starters[week][team.team_id] = roster.starters.map((p) => ({
         pid: p.pid,
         pos: p.pos,
         slot: p.slot
       }))
-      active[week][team.uid] = roster.active.map((p) => ({
+      active[week][team.team_id] = roster.active.map((p) => ({
         pid: p.pid,
         pos: p.pos
       }))
@@ -110,7 +110,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
         tid: team.tid,
         is_compensatory: false
       })
-      .first('uid')
+      .first('draft_pick_id')
     if (!owns_own_first_round_pick) continue
     let penalty = 0
     for (const week of team.incomplete_optimal_lineup_weeks) {
@@ -142,7 +142,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
 
   const league_team_seasonlogs = []
   for (const [tid, team] of Object.entries(result)) {
-    const tm = teams.find((t) => t.uid === team.tid)
+    const tm = teams.find((t) => t.team_id === team.tid)
     // Remove post_season_finish and overall_finish from the stats object as they are not calculated and should not overwrite existing values
     const { post_season_finish, overall_finish, ...remainingStats } = team.stats
     league_team_seasonlogs.push({
@@ -163,7 +163,7 @@ const run = async ({ lid = 1, year = current_season.year }) => {
   }
 
   if (matchups.length) {
-    await db('matchups').insert(matchups).onConflict('uid').merge()
+    await db('matchups').insert(matchups).onConflict('matchup_id').merge()
     log(`saved ${matchups.length} matchups`)
   }
 }

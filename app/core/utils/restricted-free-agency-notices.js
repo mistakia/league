@@ -39,7 +39,7 @@ export function get_restricted_free_agency_notices({
     .filter(
       (nomination) =>
         nomination.is_deadline_approaching &&
-        nomination.nominating_team.uid === team_id
+        nomination.nominating_team.team_id === team_id
     )
     .filter((nomination) => {
       // Only show if this team hasn't nominated a player
@@ -47,7 +47,7 @@ export function get_restricted_free_agency_notices({
         restricted_free_agency_players &&
         restricted_free_agency_players.some(
           (player_map) =>
-            player_map.get('tid') === nomination.nominating_team.uid &&
+            player_map.get('tid') === nomination.nominating_team.team_id &&
             player_map.get('restricted_free_agency_tag_nominated')
         )
       )

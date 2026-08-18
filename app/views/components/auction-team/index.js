@@ -22,10 +22,10 @@ const map_state_to_props = createSelector(
   (auction, team, isConnected, roster, bid, app) => ({
     team,
     isConnected,
-    isOwner: team.uid === app.teamId,
-    isNominating: auction.nominating_team_id === team.uid,
+    isOwner: team.team_id === app.teamId,
+    isNominating: auction.nominating_team_id === team.team_id,
     isWinningBid: auction.transactions.first()
-      ? auction.transactions.first().tid === team.uid
+      ? auction.transactions.first().tid === team.team_id
       : false,
     bid,
     roster

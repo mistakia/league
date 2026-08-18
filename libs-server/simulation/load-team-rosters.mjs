@@ -167,7 +167,7 @@ export async function load_all_teams_starters({
   // Get all team IDs for the league
   const teams = await db('teams')
     .where({ lid: league_id, season_year: year })
-    .select('uid as team_id')
+    .select('team_id')
 
   const team_ids = teams.map((t) => t.team_id)
 

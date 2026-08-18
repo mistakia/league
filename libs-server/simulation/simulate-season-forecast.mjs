@@ -67,8 +67,8 @@ export async function simulate_season_forecast({
       .whereNotNull('away_points')
 
     for (const team of teams) {
-      team_stats_by_tid[team.uid] = {
-        tid: team.uid,
+      team_stats_by_tid[team.team_id] = {
+        tid: team.team_id,
         wins: 0,
         losses: 0,
         ties: 0,
@@ -103,7 +103,7 @@ export async function simulate_season_forecast({
       .where({ lid: league_id, season_year: year })
       .whereIn(
         'tid',
-        teams.map((t) => t.uid)
+        teams.map((t) => t.team_id)
       )
 
     for (const stats of team_stats) {
@@ -173,7 +173,7 @@ export async function simulate_season_forecast({
       // Use 50/50 as fallback
       const probs = new Map()
       for (const matchup of matchups_by_week[sim_week]) {
-        probs.set(matchup.uid, {
+        probs.set(matchup.matchup_id, {
           home_team_id: matchup.home_team_id,
           away_team_id: matchup.away_team_id,
           home_win_prob: 0.5,
@@ -187,8 +187,8 @@ export async function simulate_season_forecast({
   // Initialize result trackers
   const result = {}
   for (const team of teams) {
-    result[team.uid] = {
-      tid: team.uid,
+    result[team.team_id] = {
+      tid: team.team_id,
       div: team.division,
       playoff_appearances: 0,
       division_wins: 0,
@@ -204,7 +204,7 @@ export async function simulate_season_forecast({
     // Initialize standings with current stats
     const standings = {}
     for (const team of teams) {
-      const stats = team_stats_by_tid[team.uid] || {
+      const stats = team_stats_by_tid[team.team_id] || {
         wins: 0,
         losses: 0,
         ties: 0,
@@ -213,8 +213,8 @@ export async function simulate_season_forecast({
         all_play_losses: 0,
         all_play_ties: 0
       }
-      standings[team.uid] = {
-        tid: team.uid,
+      standings[team.team_id] = {
+        tid: team.team_id,
         div: team.division,
         wins: stats.wins || 0,
         losses: stats.losses || 0,
@@ -233,7 +233,7 @@ export async function simulate_season_forecast({
       const probs = week_probabilities.get(sim_week)
 
       for (const matchup of week_matchups) {
-        const prob_data = probs.get(matchup.uid)
+        const prob_data = probs.get(matchup.matchup_id)
         if (!prob_data) continue
 
         let home_wins = false
@@ -364,8 +364,8 @@ async function build_post_season_forecast({
 
   const result = {}
   for (const team of teams) {
-    const stats = team_stats_by_tid[team.uid]
-    const is_playoff_team = playoffs.some((p) => p.tid === team.uid)
+    const stats = team_stats_by_tid[team.team_id]
+    const is_playoff_team = playoffs.some((p) => p.tid === team.team_id)
     // Number.isInteger first: the optional chain guards undefined, not null,
     // and a null finish coerces to 0 <= bye_count, awarding a bye to every team
     // with no recorded finish.
@@ -373,8 +373,8 @@ async function build_post_season_forecast({
       Number.isInteger(stats?.regular_season_finish) &&
       stats.regular_season_finish <= playoff_format.bye_count
 
-    result[team.uid] = {
-      tid: team.uid,
+    result[team.team_id] = {
+      tid: team.team_id,
       playoff_odds: is_playoff_team ? 1.0 : 0.0,
       division_odds: has_bye ? 1.0 : 0.0,
       bye_odds: has_bye ? 1.0 : 0.0,

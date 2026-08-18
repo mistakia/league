@@ -101,7 +101,7 @@ export function trade_reducer(state = initialState(), { payload, type }) {
     case trade_actions.GET_TRADES_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((t) =>
-          state.setIn(['items', t.uid], create_trade(t))
+          state.setIn(['items', t.team_id], create_trade(t))
         )
       })
 

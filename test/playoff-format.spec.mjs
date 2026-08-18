@@ -18,16 +18,18 @@ const expect = chai.expect
 // holding everybody, a structure the constitution does not describe.
 const make_teams = (number_teams, num_divisions) =>
   Array.from({ length: number_teams }, (unused, i) => ({
-    uid: i + 1,
+    team_id: i + 1,
     division: num_divisions ? (i % num_divisions) + 1 : null
   }))
 
-const opponent_counts = (schedule, uid) => {
+const opponent_counts = (schedule, team_id) => {
   const counts = {}
   for (const week of schedule) {
     for (const { home, away } of week) {
-      if (home.uid === uid) counts[away.uid] = (counts[away.uid] || 0) + 1
-      if (away.uid === uid) counts[home.uid] = (counts[home.uid] || 0) + 1
+      if (home.team_id === team_id)
+        counts[away.team_id] = (counts[away.team_id] || 0) + 1
+      if (away.team_id === team_id)
+        counts[home.team_id] = (counts[home.team_id] || 0) + 1
     }
   }
   return counts
@@ -700,8 +702,8 @@ describe('playoff format and division schedule', function () {
       const teams = make_teams(10, 0)
       const schedule = generate_fantasy_league_schedule(teams)
 
-      for (const { uid } of teams) {
-        const counts = opponent_counts(schedule, uid)
+      for (const { team_id } of teams) {
+        const counts = opponent_counts(schedule, team_id)
         expect(Object.keys(counts).length).to.equal(9)
         expect(Object.values(counts).reduce((a, b) => a + b, 0)).to.equal(
           num_weeks
@@ -727,12 +729,12 @@ describe('playoff format and division schedule', function () {
       const schedule = generate_fantasy_league_schedule(teams)
 
       for (const team of teams) {
-        const counts = opponent_counts(schedule, team.uid)
+        const counts = opponent_counts(schedule, team.team_id)
         const division_opponents = teams.filter(
-          (t) => t.division === team.division && t.uid !== team.uid
+          (t) => t.division === team.division && t.team_id !== team.team_id
         )
         for (const opponent of division_opponents) {
-          expect(counts[opponent.uid]).to.equal(2)
+          expect(counts[opponent.team_id]).to.equal(2)
         }
       }
     })

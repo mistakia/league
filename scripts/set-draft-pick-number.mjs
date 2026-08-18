@@ -20,7 +20,7 @@ const set_draft_pick_number = async ({ lid }) => {
   })
   const draftOrder = teams
     .sort((a, b) => a.draft_order - b.draft_order)
-    .map((t) => t.uid)
+    .map((t) => t.team_id)
 
   const picks = await db('draft').where({
     lid,
@@ -28,7 +28,7 @@ const set_draft_pick_number = async ({ lid }) => {
     is_compensatory: 0
   })
 
-  const team_ids = teams.map((t) => t.uid)
+  const team_ids = teams.map((t) => t.team_id)
   const filtered_picks = picks.filter((p) => team_ids.includes(p.tid))
 
   for (const pick of filtered_picks) {
@@ -43,7 +43,7 @@ const set_draft_pick_number = async ({ lid }) => {
         pick: num,
         pick_string: `${pick.round}.${pick_number_in_round}`
       })
-      .where('uid', pick.uid)
+      .where('draft_pick_id', pick.draft_pick_id)
   }
 
   // reset pick numbers as there could be gaps due to decommissioned teams
@@ -59,7 +59,9 @@ const set_draft_pick_number = async ({ lid }) => {
     const pick = sorted_draft_picks[i]
     const num = i + 1
     if (pick.pick !== num) {
-      await db('draft').update({ pick: num }).where('uid', pick.uid)
+      await db('draft')
+        .update({ pick: num })
+        .where('draft_pick_id', pick.draft_pick_id)
     }
   }
 
@@ -88,7 +90,7 @@ const set_draft_pick_number = async ({ lid }) => {
           round: Math.ceil(num / league.number_teams),
           pick_string: `${Math.ceil(num / league.number_teams)}.${num % league.number_teams || league.number_teams}`
         })
-        .where('uid', pick.uid)
+        .where('draft_pick_id', pick.draft_pick_id)
     }
 
     count++

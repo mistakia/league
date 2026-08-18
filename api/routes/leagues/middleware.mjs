@@ -69,7 +69,7 @@ export function require_commissioner(league, userId, res, action) {
  *
  * Ownership lives in users_teams, joined to teams on (tid, year) -- the same
  * shape libs-server/verify-user-team.mjs uses. The teams table has no user
- * column at all; teams.uid is the team's own id, so the previous predicate
+ * column at all; teams.team_id is the team's own id, so the previous predicate
  * (`teams.where({ lid, uid: userId })`) compared a user id against a team id
  * and authorized on a coincidental collision between the two id spaces.
  *
@@ -92,7 +92,7 @@ export async function require_league_access(league, userId, leagueId, db, res) {
 
   const user_team = await db('teams')
     .join('users_teams', function () {
-      this.on('teams.uid', '=', 'users_teams.tid').andOn(
+      this.on('teams.team_id', '=', 'users_teams.tid').andOn(
         'teams.season_year',
         '=',
         'users_teams.season_year'
@@ -100,7 +100,7 @@ export async function require_league_access(league, userId, leagueId, db, res) {
     })
     .where('teams.lid', leagueId)
     .where('users_teams.user_id', userId)
-    .first('teams.uid')
+    .first('teams.team_id')
 
   if (!user_team) {
     res.status(403).send({ error: 'Access denied' })
@@ -152,7 +152,7 @@ export async function require_league_not_paused(req, res, next) {
 
     if (!league_id && teamId) {
       const team = await db('teams')
-        .where({ uid: Number(teamId) })
+        .where({ team_id: Number(teamId) })
         .first('lid')
 
       if (!team) return next()

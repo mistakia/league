@@ -88,11 +88,13 @@ const format_delta = (value) => {
  * Load team names and create a mapping from team ID to name
  */
 const load_team_names = async ({ team_ids }) => {
-  const teams = await db('teams').whereIn('uid', team_ids).select('uid', 'name')
+  const teams = await db('teams')
+    .whereIn('team_id', team_ids)
+    .select('team_id', 'name')
 
   const team_name_map = new Map()
   for (const team of teams) {
-    team_name_map.set(team.uid, team.name)
+    team_name_map.set(team.team_id, team.name)
   }
   return team_name_map
 }

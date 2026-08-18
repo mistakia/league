@@ -30,7 +30,7 @@ export function matchups_reducer(state = initialState, { payload, type }) {
 
     case team_actions.GET_TEAMS_FULFILLED:
       return state.merge({
-        teams: new List(payload.data.teams.map((t) => t.uid))
+        teams: new List(payload.data.teams.map((t) => t.team_id))
       })
 
     case scoreboard_actions.SCOREBOARD_SELECT_WEEK:
@@ -49,7 +49,7 @@ export function matchups_reducer(state = initialState, { payload, type }) {
             points: [m.home_points, m.away_points],
             projections: [m.home_projection, m.away_projection]
           })
-          state.setIn(['matchups_by_id', m.uid], matchup)
+          state.setIn(['matchups_by_id', m.matchup_id], matchup)
         })
 
         state.merge({
@@ -67,15 +67,11 @@ export function matchups_reducer(state = initialState, { payload, type }) {
             arr.push(
               create_matchup({
                 ...rows[0],
-                // A tournament entry has no matchup id -- its identity IS its
-                // playoff week ordinal, which the API now sends as
-                // playoff_week_number. Map it onto the Record's uid here, at the
-                // one boundary where playoff rows become Matchups, because uid
-                // is the key the scoreboard selects on for BOTH matchup types
-                // (app/core/matchups/sagas.js, app/core/selectors.js). Without
-                // this the Record drops the undeclared key silently and every
-                // playoff scoreboard renders blank.
-                uid: Number(playoff_week_number),
+                // `playoff_week_number` rides in on the spread and the Record
+                // declares it, so a tournament entry keeps its own identity
+                // rather than borrowing the matchup id field. It carries no
+                // matchup id at all, which is the point.
+                playoff_week_number: Number(playoff_week_number),
                 tids,
                 type: matchup_types.TOURNAMENT,
                 points,

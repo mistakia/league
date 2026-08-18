@@ -30,32 +30,32 @@ export default async function ({ lid, team_order }) {
 
   if (!Array.isArray(team_order) || !team_order.length) {
     throw new Error(
-      'team_order is required -- pass the drawn order of team uids'
+      'team_order is required -- pass the drawn order of team ids'
     )
   }
 
-  const teams_by_uid = new Map(teams.map((team) => [team.uid, team]))
+  const teams_by_team_id = new Map(teams.map((team) => [team.team_id, team]))
   const seen = new Set()
   const ordered_teams = []
 
-  for (const uid of team_order) {
-    const team = teams_by_uid.get(uid)
+  for (const team_id of team_order) {
+    const team = teams_by_team_id.get(team_id)
     if (!team) {
       throw new Error(
-        `team_order names uid ${uid}, which is not in league ${lid}`
+        `team_order names team ${team_id}, which is not in league ${lid}`
       )
     }
-    if (seen.has(uid)) {
-      throw new Error(`team_order names uid ${uid} more than once`)
+    if (seen.has(team_id)) {
+      throw new Error(`team_order names team ${team_id} more than once`)
     }
-    seen.add(uid)
+    seen.add(team_id)
     ordered_teams.push(team)
   }
 
-  const missing = teams.filter((team) => !seen.has(team.uid))
+  const missing = teams.filter((team) => !seen.has(team.team_id))
   if (missing.length) {
     throw new Error(
-      `team_order omits ${missing.length} team(s): ${missing.map((t) => t.uid).join(', ')}`
+      `team_order omits ${missing.length} team(s): ${missing.map((t) => t.team_id).join(', ')}`
     )
   }
 
@@ -65,8 +65,8 @@ export default async function ({ lid, team_order }) {
   for (const [index, week] of schedule.entries()) {
     for (const matchup of week) {
       inserts.push({
-        home_team_id: matchup.home.uid,
-        away_team_id: matchup.away.uid,
+        home_team_id: matchup.home.team_id,
+        away_team_id: matchup.away.team_id,
         lid,
         week: index + 1,
         season_year: current_season.year

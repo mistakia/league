@@ -2,7 +2,7 @@ import { Record, List, Map } from 'immutable'
 import { create_empty_fantasy_team_stats } from '@constants'
 
 export const Team = new Record({
-  uid: null,
+  team_id: null,
   division: null,
   name: null,
   image: null,
@@ -32,7 +32,7 @@ export const Team = new Record({
 })
 
 export function createTeam({
-  uid,
+  team_id,
   division,
   name,
   image,
@@ -64,7 +64,7 @@ export function createTeam({
   ...params
 }) {
   return new Team({
-    uid,
+    team_id,
     division,
     name,
     image,

@@ -47,7 +47,9 @@ export default function TeamPage({
   useEffect(() => {
     if (!tid && teams.size) {
       const team = teams.first()
-      return navigate(`/leagues/${lid}/teams/${team.uid}`, { replace: true })
+      return navigate(`/leagues/${lid}/teams/${team.team_id}`, {
+        replace: true
+      })
     }
   }, [lid, tid, league_loaded_and_no_tid, teams, navigate])
 

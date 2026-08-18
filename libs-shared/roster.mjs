@@ -24,7 +24,7 @@ const nonStarterSlots = [
 
 export default class Roster {
   constructor({ roster, league }) {
-    this.uid = roster.uid
+    this.roster_id = roster.roster_id
     this.tid = roster.tid
     this.week = roster.week
     this.season_year = roster.season_year
@@ -74,7 +74,7 @@ export default class Roster {
         slot,
         pid,
         pos,
-        rid: roster.uid,
+        rid: roster.roster_id,
         player_salary: salary,
         extensions,
         tag,
@@ -299,7 +299,7 @@ export default class Roster {
       slot,
       pid,
       pos,
-      rid: this.uid,
+      rid: this.roster_id,
       player_salary,
       tag,
       extensions,

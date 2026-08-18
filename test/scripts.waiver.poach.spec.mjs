@@ -217,10 +217,10 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         season_year: current_season.year
       })
-      const team1 = teams.find((t) => t.uid === 1)
-      const team2 = teams.find((t) => t.uid === 2)
-      const team3 = teams.find((t) => t.uid === 3)
-      const team4 = teams.find((t) => t.uid === 4)
+      const team1 = teams.find((t) => t.team_id === 1)
+      const team2 = teams.find((t) => t.team_id === 2)
+      const team3 = teams.find((t) => t.team_id === 3)
+      const team4 = teams.find((t) => t.team_id === 4)
       expect(team1.waiver_order).to.equal(1)
       expect(team2.waiver_order).to.equal(12)
       expect(team3.waiver_order).to.equal(2)
@@ -296,10 +296,10 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         season_year: current_season.year
       })
-      const team1 = teams.find((t) => t.uid === 1)
-      const team2 = teams.find((t) => t.uid === 2)
-      const team3 = teams.find((t) => t.uid === 3)
-      const team4 = teams.find((t) => t.uid === 4)
+      const team1 = teams.find((t) => t.team_id === 1)
+      const team2 = teams.find((t) => t.team_id === 2)
+      const team3 = teams.find((t) => t.team_id === 3)
+      const team4 = teams.find((t) => t.team_id === 4)
       expect(team1.waiver_order).to.equal(1)
       expect(team2.waiver_order).to.equal(12)
       expect(team3.waiver_order).to.equal(2)
@@ -396,10 +396,10 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         season_year: current_season.year
       })
-      const team1 = teams.find((t) => t.uid === 1)
-      const team2 = teams.find((t) => t.uid === 2)
-      const team3 = teams.find((t) => t.uid === 3)
-      const team4 = teams.find((t) => t.uid === 4)
+      const team1 = teams.find((t) => t.team_id === 1)
+      const team2 = teams.find((t) => t.team_id === 2)
+      const team3 = teams.find((t) => t.team_id === 3)
+      const team4 = teams.find((t) => t.team_id === 4)
       expect(team1.waiver_order).to.equal(1)
       expect(team2.waiver_order).to.equal(12)
       expect(team3.waiver_order).to.equal(2)
@@ -510,10 +510,10 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         season_year: current_season.year
       })
-      const team1 = teams.find((t) => t.uid === 1)
-      const team2 = teams.find((t) => t.uid === 2)
-      const team3 = teams.find((t) => t.uid === 3)
-      const team4 = teams.find((t) => t.uid === 4)
+      const team1 = teams.find((t) => t.team_id === 1)
+      const team2 = teams.find((t) => t.team_id === 2)
+      const team3 = teams.find((t) => t.team_id === 3)
+      const team4 = teams.find((t) => t.team_id === 4)
       expect(team1.waiver_order).to.equal(1)
       expect(team2.waiver_order).to.equal(11)
       expect(team3.waiver_order).to.equal(2)
@@ -655,11 +655,11 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         season_year: current_season.year
       })
-      const team1 = teams.find((t) => t.uid === 1)
-      const team2 = teams.find((t) => t.uid === 2)
-      const team3 = teams.find((t) => t.uid === 3)
-      const team4 = teams.find((t) => t.uid === 4)
-      const team6 = teams.find((t) => t.uid === 6)
+      const team1 = teams.find((t) => t.team_id === 1)
+      const team2 = teams.find((t) => t.team_id === 2)
+      const team3 = teams.find((t) => t.team_id === 3)
+      const team4 = teams.find((t) => t.team_id === 4)
+      const team6 = teams.find((t) => t.team_id === 6)
       expect(team1.waiver_order).to.equal(1)
       expect(team2.waiver_order).to.equal(11)
       expect(team3.waiver_order).to.equal(2)
@@ -774,10 +774,10 @@ describe('SCRIPTS /waivers - poach', function () {
         lid: 1,
         season_year: current_season.year
       })
-      const team1 = teams.find((t) => t.uid === 1)
-      const team2 = teams.find((t) => t.uid === 2)
-      const team3 = teams.find((t) => t.uid === 3)
-      const team4 = teams.find((t) => t.uid === 4)
+      const team1 = teams.find((t) => t.team_id === 1)
+      const team2 = teams.find((t) => t.team_id === 2)
+      const team3 = teams.find((t) => t.team_id === 3)
+      const team4 = teams.find((t) => t.team_id === 4)
       expect(team1.waiver_order).to.equal(1)
       expect(team2.waiver_order).to.equal(2)
       expect(team3.waiver_order).to.equal(3)

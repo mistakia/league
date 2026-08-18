@@ -225,7 +225,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
 
     case team_actions.POST_TEAMS_FULFILLED:
       return state.setIn(
-        [payload.data.team.uid, current_season.year, current_season.week],
+        [payload.data.team.team_id, current_season.year, current_season.week],
         createRoster(payload.data.roster)
       )
 

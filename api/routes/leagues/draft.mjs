@@ -247,7 +247,7 @@ router.get('/?', async (req, res) => {
       .whereNotNull('trades.accepted')
       .whereIn(
         'draft_pick_id',
-        picks.map((p) => p.uid)
+        picks.map((p) => p.draft_pick_id)
       )
       .groupBy('draft_pick_id')
 
@@ -260,7 +260,7 @@ router.get('/?', async (req, res) => {
     // Add trade_count to each pick
     const picks_with_trade_counts = picks.map((pick) => ({
       ...pick,
-      trade_count: trade_count_map[pick.uid] || 0
+      trade_count: trade_count_map[pick.draft_pick_id] || 0
     }))
 
     res.send({ picks: picks_with_trade_counts })
@@ -313,7 +313,9 @@ router.get('/picks/:pickId', async (req, res) => {
     const { leagueId, pickId } = req.params
 
     // Get the pick to find its position
-    const pick = await db('draft').where({ uid: pickId, lid: leagueId }).first()
+    const pick = await db('draft')
+      .where({ draft_pick_id: pickId, lid: leagueId })
+      .first()
     if (!pick) {
       return res.status(404).send({ error: 'Pick not found' })
     }
@@ -335,7 +337,7 @@ router.get('/picks/:pickId', async (req, res) => {
     // Get historical picks at this position from previous years
     const historical_picks = await db('draft')
       .select([
-        'draft.uid',
+        'draft.draft_pick_id',
         'draft.season_year',
         'draft.pick',
         'draft.pid',
@@ -558,7 +560,7 @@ router.post('/?', async (req, res) => {
 
     // check if previous pick has been made
     const picks = await db('draft')
-      .where({ uid: pickId })
+      .where({ draft_pick_id: pickId })
       .modify(where_outstanding_draft_pick)
     const pick = picks[0]
     if (!pick) {
@@ -636,7 +638,7 @@ router.post('/?', async (req, res) => {
         : 1
 
     await db('rosters_players').insert({
-      roster_id: roster.uid,
+      roster_id: roster.roster_id,
       pid,
       player_position: player_row.primary_position,
       slot: roster_slot_types.PSD,
@@ -663,7 +665,7 @@ router.post('/?', async (req, res) => {
     // seasons.rookie_draft_completed_at that close_rookie_draft writes below.
     const selection_timestamp = new Date()
 
-    await db('draft').where({ uid: pickId }).update({
+    await db('draft').where({ draft_pick_id: pickId }).update({
       pid,
       selection_timestamp
     })
@@ -717,7 +719,7 @@ router.post('/?', async (req, res) => {
     res.send(data)
 
     const teams = await db('teams').where({
-      uid: teamId,
+      team_id: teamId,
       season_year: current_season.year
     })
     const team = teams[0]

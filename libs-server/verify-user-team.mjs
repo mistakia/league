@@ -21,14 +21,14 @@ export default async function ({ userId, leagueId, teamId, requireLeague }) {
   const userTeams = await db('teams')
     .select('teams.*', 'users_teams.*', 'leagues.commissioner_user_id')
     .leftJoin('users_teams', function () {
-      this.on('teams.uid', '=', 'users_teams.tid').andOn(
+      this.on('teams.team_id', '=', 'users_teams.tid').andOn(
         'teams.season_year',
         '=',
         'users_teams.season_year'
       )
     })
     .join('leagues', 'teams.lid', 'leagues.uid')
-    .where('teams.uid', tid)
+    .where('teams.team_id', tid)
     .where('teams.season_year', current_season.year)
   const team = userTeams.find(
     (p) => p.user_id === userId || p.commissioner_user_id === userId

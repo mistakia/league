@@ -242,7 +242,7 @@ const GATES = [
     requires: 'test-container',
     negative_control: true,
     oracle:
-      'every statement bound to the league database — documented pairs, fenced SQL, and executable SQL from shell and /api/db/league/query — vs the schema'
+      'every statement bound to the league database — documented pairs, fenced SQL, executable SQL from shell and /api/db/league/query, and standalone .sql files bound by their root — vs the schema'
   },
   {
     id: 'conflated-player-rows',

@@ -59,7 +59,7 @@ export default async function ({
   await verify_assets_not_trade_protected({ league, pids })
 
   const teams = await db('teams')
-    .where({ uid: teamId, lid: leagueId, season_year: current_season.year })
+    .where({ team_id: teamId, lid: leagueId, season_year: current_season.year })
     .limit(1)
   const team = teams[0]
 
@@ -198,7 +198,7 @@ export default async function ({
 
   // add player to roster
   await db('rosters_players').insert({
-    roster_id: roster.uid,
+    roster_id: roster.roster_id,
     pid,
     player_position: player_row.primary_position,
     slot,
@@ -227,7 +227,7 @@ export default async function ({
   result.push({
     pid,
     slot,
-    rid: roster.uid,
+    rid: roster.roster_id,
     pos: player_row.primary_position,
     transaction: addTransaction
   })

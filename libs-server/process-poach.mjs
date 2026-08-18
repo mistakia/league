@@ -108,7 +108,7 @@ export default async function ({ pid, release = [], lid, tid, user_id }) {
     .where('week', '>=', current_season.week)
     .where('tid', rosterSlot.tid)
     .where('season_year', current_season.year)
-  const poachedTeamRosterIds = poachedTeamRosters.map((r) => r.uid)
+  const poachedTeamRosterIds = poachedTeamRosters.map((r) => r.roster_id)
   await db('rosters_players')
     .whereIn('roster_id', poachedTeamRosterIds)
     .where('pid', pid)
@@ -129,7 +129,7 @@ export default async function ({ pid, release = [], lid, tid, user_id }) {
 
   // add player to poaching team roster
   await db('rosters_players').insert({
-    roster_id: rosterRow.uid,
+    roster_id: rosterRow.roster_id,
     slot: roster_slot_types.BENCH,
     pid,
     player_position: poach_player_row.primary_position,

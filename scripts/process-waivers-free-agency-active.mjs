@@ -229,7 +229,7 @@ const update_team_budget = async (team_id, bid) => {
   await db('teams')
     .decrement('free_agent_acquisition_budget_balance', bid)
     .where({
-      uid: team_id,
+      team_id,
       season_year: current_season.year
     })
 }

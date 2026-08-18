@@ -64,7 +64,7 @@ router.get('/', async (req, res) => {
     // anyone who ever held a team. Same season scoping as GET /api/me.
     const teams = await db('teams')
       .join('users_teams', function () {
-        this.on('users_teams.tid', '=', 'teams.uid')
+        this.on('users_teams.tid', '=', 'teams.team_id')
         this.andOn('users_teams.season_year', '=', 'teams.season_year')
       })
       .where({

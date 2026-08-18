@@ -62,7 +62,7 @@ const resolve_league_membership = async ({ db, league_id, user_id }) => {
 
   const teams = await db('teams')
     .join('users_teams', function () {
-      this.on('users_teams.tid', '=', 'teams.uid')
+      this.on('users_teams.tid', '=', 'teams.team_id')
       this.andOn('users_teams.season_year', '=', 'teams.season_year')
     })
     .where({
@@ -71,7 +71,7 @@ const resolve_league_membership = async ({ db, league_id, user_id }) => {
       'users_teams.user_id': user_id,
       'users_teams.season_year': current_season.year
     })
-    .select('teams.uid as team_id')
+    .select('teams.team_id as team_id')
 
   return {
     is_commissioner: league.commissioner_user_id === user_id,
@@ -204,8 +204,8 @@ router.get('/', async (req, res) => {
     // names every Sponsor in terms, and nothing here says how a Team voted.
     const league_teams = await db('teams')
       .where({ lid: league_id, season_year: current_season.year })
-      .orderBy('uid', 'asc')
-      .select('uid as team_id', 'name as team_name')
+      .orderBy('team_id', 'asc')
+      .select('team_id', 'name as team_name')
 
     const vote = await get_latest_vote({ db, league_id })
 
@@ -227,7 +227,11 @@ router.get('/', async (req, res) => {
 
     const sponsors = await db('admission_vote_candidate_sponsors')
       .leftJoin('teams', function () {
-        this.on('teams.uid', '=', 'admission_vote_candidate_sponsors.team_id')
+        this.on(
+          'teams.team_id',
+          '=',
+          'admission_vote_candidate_sponsors.team_id'
+        )
         this.andOn('teams.season_year', '=', db.raw('?', [vote.season_year]))
       })
       .whereIn(
@@ -679,8 +683,8 @@ router.post('/', async (req, res) => {
       (
         await db('teams')
           .where({ lid: league_id, season_year: current_season.year })
-          .select('uid')
-      ).map((team) => team.uid)
+          .select('team_id')
+      ).map((team) => team.team_id)
     )
 
     const eligible_teams = Array.isArray(req.body.eligible_teams)

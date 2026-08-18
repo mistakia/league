@@ -69,8 +69,12 @@ export function* select_matchup() {
     console.log(`matchup: ${matchup}`)
     console.log(`first: ${first}`)
     if (matchup || first) {
-      const uid = matchup ? matchup.uid : first.uid
-      yield put(matchups_actions.select_matchup({ matchupId: uid }))
+      const entry = matchup || first
+      yield put(
+        matchups_actions.select_matchup({
+          matchupId: entry.playoff_week_number
+        })
+      )
     }
   } else {
     const matchups = state.get('matchups_by_id').toList()
@@ -82,7 +86,9 @@ export function* select_matchup() {
       : matchups.first()
     console.log(`matchup: ${matchup}`)
     if (matchup) {
-      yield put(matchups_actions.select_matchup({ matchupId: matchup.uid }))
+      yield put(
+        matchups_actions.select_matchup({ matchupId: matchup.matchup_id })
+      )
     }
   }
 }

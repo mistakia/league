@@ -41,7 +41,7 @@ const calculateStandings = ({
         )
       : current_season.regularSeasonFinalWeek
   const teamStats = {}
-  for (const { uid: tid, division } of teams) {
+  for (const { team_id: tid, division } of teams) {
     teamStats[tid] = {
       division,
       tid,
@@ -74,7 +74,7 @@ const calculateStandings = ({
     let highest_score = -Infinity
     let highest_scoring_teams = []
 
-    for (const { uid: tid } of teams) {
+    for (const { team_id: tid } of teams) {
       const startingPlayers = starters[week][tid]
       const starter_pids = startingPlayers.map((p) => p.pid)
       let total = 0
@@ -180,7 +180,7 @@ const calculateStandings = ({
 
     // calculate all play record
 
-    for (const { uid: tid } of teams) {
+    for (const { team_id: tid } of teams) {
       const scores = Object.values(teamStats)
         .filter((p) => p.tid !== tid)
         .map((p) => p.points.weeks[week])
@@ -210,7 +210,7 @@ const calculateStandings = ({
   const max_potential_points = Math.max(...potential_points_per_team)
   const min_all_play_losses = Math.min(...all_play_losses_per_team)
   const max_all_play_losses = Math.max(...all_play_losses_per_team)
-  for (const { uid: tid } of teams) {
+  for (const { team_id: tid } of teams) {
     const potential_points =
       teamStats[tid].stats.potential_points +
       teamStats[tid].stats.potential_points_penalty
@@ -241,8 +241,8 @@ const calculateStandings = ({
 
   // calculate division finish
   const divisions = {}
-  for (const { uid: tid } of teams) {
-    const { division } = teams.find((t) => t.uid === tid)
+  for (const { team_id: tid } of teams) {
+    const { division } = teams.find((t) => t.team_id === tid)
     if (!divisions[division]) divisions[division] = []
     divisions[division].push(tid)
   }

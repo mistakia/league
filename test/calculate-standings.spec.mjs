@@ -47,10 +47,10 @@ const make_league = () => ({
 // count, so any division layout works here. Assertions target the detector
 // behavior on team 1 only.
 const teams = [
-  { uid: 1, division: 1 },
-  { uid: 2, division: 1 },
-  { uid: 3, division: 2 },
-  { uid: 4, division: 2 }
+  { team_id: 1, division: 1 },
+  { team_id: 2, division: 1 },
+  { team_id: 3, division: 2 },
+  { team_id: 4, division: 2 }
 ]
 
 // optimizeStandingsLineup post-filters its result keys with player_id_regex,

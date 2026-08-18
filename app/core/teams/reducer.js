@@ -17,15 +17,15 @@ export function teams_reducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         const year = payload.opts.year || current_season.year
         payload.data.teams.forEach((t) => {
-          if (state.hasIn([year, t.uid])) {
+          if (state.hasIn([year, t.team_id])) {
             if (t.stats) {
               state.setIn(
-                [year, t.uid],
-                state.getIn([year, t.uid]).mergeDeep(createTeam(t))
+                [year, t.team_id],
+                state.getIn([year, t.team_id]).mergeDeep(createTeam(t))
               )
             } else {
-              let new_team = state.getIn([year, t.uid]).merge(createTeam(t))
-              const existing_stats = state.getIn([year, t.uid]).get('stats')
+              let new_team = state.getIn([year, t.team_id]).merge(createTeam(t))
+              const existing_stats = state.getIn([year, t.team_id]).get('stats')
               const new_stats = new_team.get('stats')
 
               // Merge existing stats with new stats, using truthy values
@@ -35,10 +35,10 @@ export function teams_reducer(state = initialState, { payload, type }) {
               )
 
               new_team = new_team.set('stats', merged_stats)
-              state.setIn([year, t.uid], new_team)
+              state.setIn([year, t.team_id], new_team)
             }
           } else {
-            state.setIn([year, t.uid], createTeam(t))
+            state.setIn([year, t.team_id], createTeam(t))
           }
         })
       })
@@ -62,7 +62,9 @@ export function teams_reducer(state = initialState, { payload, type }) {
     case draft_actions.POST_DRAFT_FULFILLED: {
       const { data } = payload
       const teamPicks = state.getIn([current_season.year, data.tid, 'picks'])
-      const key = teamPicks.findKey((p) => p.uid === data.uid)
+      const key = teamPicks.findKey(
+        (p) => p.draft_pick_id === data.draft_pick_id
+      )
       return state.setIn(
         [current_season.year, data.tid, 'picks', key, 'pid'],
         data.pid
@@ -87,9 +89,11 @@ export function teams_reducer(state = initialState, { payload, type }) {
           let proposingTeamPicks = proposingTeam.get('picks')
           // remove traded picks
           if (payload.data.proposingTeamPicks.length) {
-            const pickids = payload.data.proposingTeamPicks.map((p) => p.uid)
+            const pickids = payload.data.proposingTeamPicks.map(
+              (p) => p.draft_pick_id
+            )
             proposingTeamPicks = proposingTeamPicks.filter(
-              (p) => !pickids.includes(p.uid)
+              (p) => !pickids.includes(p.draft_pick_id)
             )
           }
 
@@ -114,9 +118,11 @@ export function teams_reducer(state = initialState, { payload, type }) {
           let acceptingTeamPicks = acceptingTeam.get('picks')
           // remove traded picks
           if (payload.data.acceptingTeamPicks.length) {
-            const pickids = payload.data.acceptingTeamPicks.map((p) => p.uid)
+            const pickids = payload.data.acceptingTeamPicks.map(
+              (p) => p.draft_pick_id
+            )
             acceptingTeamPicks = acceptingTeamPicks.filter(
-              (p) => !pickids.includes(p.uid)
+              (p) => !pickids.includes(p.draft_pick_id)
             )
           }
 
@@ -136,7 +142,7 @@ export function teams_reducer(state = initialState, { payload, type }) {
 
     case team_actions.POST_TEAMS_FULFILLED:
       return state.setIn(
-        [current_season.year, payload.data.team.uid],
+        [current_season.year, payload.data.team.team_id],
         createTeam(payload.data.team)
       )
 
@@ -146,7 +152,7 @@ export function teams_reducer(state = initialState, { payload, type }) {
     case team_actions.GET_LEAGUE_TEAM_STATS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((stats) => {
-          if (state.hasIn([payload.opts.year, stats.tid, 'uid'])) {
+          if (state.hasIn([payload.opts.year, stats.tid, 'team_id'])) {
             const team = state.getIn([payload.opts.year, stats.tid])
             state.setIn(
               [payload.opts.year, stats.tid],
@@ -155,7 +161,7 @@ export function teams_reducer(state = initialState, { payload, type }) {
           } else {
             state.setIn(
               [payload.opts.year, stats.tid],
-              createTeam({ ...stats, uid: stats.tid, stats })
+              createTeam({ ...stats, team_id: stats.tid, stats })
             )
           }
         })

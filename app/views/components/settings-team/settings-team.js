@@ -26,7 +26,7 @@ export default class SettingsTeam extends React.Component {
   }
 
   handleSubmit = (type) => {
-    const teamId = this.props.team.uid
+    const teamId = this.props.team.team_id
     const value = this.state[type].toString().substring(1)
     this.props.update({ teamId, field: type, value })
   }
@@ -77,7 +77,7 @@ export default class SettingsTeam extends React.Component {
   }
 
   onchange = (value) => {
-    const teamId = this.props.team.uid
+    const teamId = this.props.team.team_id
     this.props.update({ teamId, ...value })
   }
 
@@ -114,7 +114,7 @@ export default class SettingsTeam extends React.Component {
               className='team__brand-ac'
               style={{ backgroundColor: this.state.accent_color }}
             />
-            <TeamImage tid={team.uid} />
+            <TeamImage tid={team.team_id} />
             <div className='team__brand-colors'>
               <div ref={this.primaryRef} />
               <div ref={this.altRef} />

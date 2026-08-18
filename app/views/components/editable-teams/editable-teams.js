@@ -29,11 +29,11 @@ export default class EditableTeams extends React.Component {
       return null
     }
 
-    const sorted = teams.sort((a, b) => a.uid - b.uid)
+    const sorted = teams.sort((a, b) => a.team_id - b.team_id)
 
     const teamItems = []
     for (const [index, team] of sorted.entries()) {
-      teamItems.push(<SettingsTeamsTeam key={index} tid={team.uid} />)
+      teamItems.push(<SettingsTeamsTeam key={index} tid={team.team_id} />)
     }
 
     let addTeam

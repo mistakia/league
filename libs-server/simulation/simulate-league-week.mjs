@@ -352,7 +352,7 @@ export async function save_matchup_probabilities(matchup_results) {
 
   let updated = 0
   for (const result of matchup_results) {
-    await db('matchups').where('uid', result.matchup_id).update({
+    await db('matchups').where('matchup_id', result.matchup_id).update({
       home_win_probability: result.home_win_probability,
       away_win_probability: result.away_win_probability,
       simulation_timestamp: new Date()

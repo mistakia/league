@@ -145,8 +145,8 @@ const build_fixture = ({
 }
 
 const two_teams = [
-  { uid: 1, name: 'Alpha', draft_order: 2 },
-  { uid: 2, name: 'Beta', draft_order: 1 }
+  { team_id: 1, name: 'Alpha', draft_order: 2 },
+  { team_id: 2, name: 'Beta', draft_order: 1 }
 ]
 
 const team_board = (board, tid) =>
@@ -1481,9 +1481,9 @@ describe('tag board', function () {
       const schedule = build_rfa_schedule({
         season,
         teams: [
-          { uid: 5, name: 'Fifth', draft_order: 1 },
-          { uid: 9, name: 'Ninth', draft_order: 3 },
-          { uid: 2, name: 'Second', draft_order: 2 }
+          { team_id: 5, name: 'Fifth', draft_order: 1 },
+          { team_id: 9, name: 'Ninth', draft_order: 3 },
+          { team_id: 2, name: 'Second', draft_order: 2 }
         ]
       })
 

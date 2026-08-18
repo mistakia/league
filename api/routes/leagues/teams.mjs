@@ -369,8 +369,8 @@ router.get('/?', async (req, res) => {
       })
 
     for (const team of teams) {
-      const forecast = forecasts.find((f) => f.tid === team.uid) || {}
-      team.picks = picks.filter((p) => p.tid === team.uid)
+      const forecast = forecasts.find((f) => f.tid === team.team_id) || {}
+      team.picks = picks.filter((p) => p.tid === team.team_id)
       team.playoff_odds = forecast.playoff_odds
       team.division_odds = forecast.division_odds
       team.bye_odds = forecast.bye_odds
@@ -536,18 +536,18 @@ router.post('/?', async (req, res) => {
       lid: leagueId
     }
 
-    const rows = await db('teams').insert(team).returning('uid')
-    team.uid = rows[0].uid
+    const rows = await db('teams').insert(team).returning('team_id')
+    team.team_id = rows[0].team_id
 
     const roster = {
-      tid: team.uid,
+      tid: team.team_id,
       lid: league.uid,
       week: current_season.week,
       season_year: current_season.year
     }
 
-    const rosterRows = await db('rosters').insert(roster).returning('uid')
-    roster.uid = rosterRows[0].uid
+    const rosterRows = await db('rosters').insert(roster).returning('roster_id')
+    roster.roster_id = rosterRows[0].roster_id
 
     res.send({ roster, team })
   } catch (error) {
@@ -685,7 +685,7 @@ router.delete('/?', async (req, res) => {
     const teamRows = await db('teams')
       .select('teams.*')
       .join('users_teams', function () {
-        this.on('teams.uid', '=', 'users_teams.tid')
+        this.on('teams.team_id', '=', 'users_teams.tid')
         this.andOn('teams.season_year', '=', 'users_teams.season_year')
       })
       .where({
@@ -708,7 +708,7 @@ router.delete('/?', async (req, res) => {
     const teams = await db('teams')
       .where({
         season_year: current_season.year,
-        uid: teamId,
+        team_id: teamId,
         lid: leagueId
       })
       .del()

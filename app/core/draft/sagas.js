@@ -28,8 +28,8 @@ export function* load_draft() {
 export function* draft_player() {
   const { selected } = yield select(get_draft_state)
   const { teamId, leagueId } = yield select(get_app)
-  const { uid } = yield select(get_rookie_draft_next_pick)
-  const params = { leagueId, pid: selected, teamId, pickId: uid }
+  const { draft_pick_id } = yield select(get_rookie_draft_next_pick)
+  const params = { leagueId, pid: selected, teamId, pickId: draft_pick_id }
   yield call(api_post_draft, params)
 }
 

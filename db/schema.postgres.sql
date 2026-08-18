@@ -448,7 +448,6 @@ DROP INDEX IF EXISTS public.idx_24719_play_stat;
 DROP INDEX IF EXISTS public.idx_24707_game;
 DROP INDEX IF EXISTS public.idx_24707_esbid;
 DROP INDEX IF EXISTS public.idx_24699_aid;
-DROP INDEX IF EXISTS public.idx_24693_uid;
 DROP INDEX IF EXISTS public.idx_24689_lineup;
 DROP INDEX IF EXISTS public.idx_24686_starter;
 DROP INDEX IF EXISTS public.idx_24683_contribution;
@@ -586,6 +585,7 @@ ALTER TABLE IF EXISTS ONLY public.nfl_game_coaches DROP CONSTRAINT IF EXISTS nfl
 ALTER TABLE IF EXISTS ONLY public.nfl_coaches DROP CONSTRAINT IF EXISTS nfl_coaches_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_coaches DROP CONSTRAINT IF EXISTS nfl_coaches_pfr_coach_id_unique;
 ALTER TABLE IF EXISTS ONLY public.manager_waitlist_submissions DROP CONSTRAINT IF EXISTS manager_waitlist_submissions_pkey;
+ALTER TABLE IF EXISTS ONLY public.leagues DROP CONSTRAINT IF EXISTS leagues_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_player_seasonlogs DROP CONSTRAINT IF EXISTS league_team_player_seasonlogs_pkey;
@@ -676,12 +676,12 @@ ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.trades ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS public.teams ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.teams ALTER COLUMN team_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.super_priority ALTER COLUMN super_priority_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.sources ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.selection_combination_odds_history ALTER COLUMN history_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.selection_combination_definitions ALTER COLUMN combination_id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.rosters ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.rosters ALTER COLUMN roster_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.roster_asset_transformation ALTER COLUMN transformation_row_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.roster_asset_holding ALTER COLUMN holding_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.restricted_free_agency_bids ALTER COLUMN uid DROP DEFAULT;
@@ -689,13 +689,13 @@ ALTER TABLE IF EXISTS public.props_index ALTER COLUMN prop_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.position_vocabulary_backfill_audit ALTER COLUMN audit_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.poaches ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.placed_wagers ALTER COLUMN wager_id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.matchups ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.matchups ALTER COLUMN matchup_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.leagues ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.league_notifications ALTER COLUMN notification_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.league_migrations_lock ALTER COLUMN index DROP DEFAULT;
 ALTER TABLE IF EXISTS public.league_migrations ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.jobs ALTER COLUMN job_id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.draft ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.draft ALTER COLUMN draft_pick_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_daily ALTER COLUMN composite_market_value_row_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.composite_market_value_blend_weights ALTER COLUMN version_id DROP DEFAULT;
 DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
@@ -722,7 +722,7 @@ DROP TABLE IF EXISTS public.trades_players;
 DROP TABLE IF EXISTS public.trades_picks;
 DROP TABLE IF EXISTS public.trades;
 DROP TABLE IF EXISTS public.trade_releases;
-DROP SEQUENCE IF EXISTS public.teams_uid_seq;
+DROP SEQUENCE IF EXISTS public.teams_team_id_seq;
 DROP TABLE IF EXISTS public.teams;
 DROP SEQUENCE IF EXISTS public.super_priority_super_priority_id_seq;
 DROP TABLE IF EXISTS public.super_priority;
@@ -738,7 +738,7 @@ DROP TABLE IF EXISTS public.scoring_format_player_seasonlogs;
 DROP TABLE IF EXISTS public.scoring_format_player_projection_points;
 DROP TABLE IF EXISTS public.scoring_format_player_gamelogs;
 DROP TABLE IF EXISTS public.scoring_format_player_careerlogs;
-DROP SEQUENCE IF EXISTS public.rosters_uid_seq;
+DROP SEQUENCE IF EXISTS public.rosters_roster_id_seq;
 DROP TABLE IF EXISTS public.rosters_players;
 DROP TABLE IF EXISTS public.rosters;
 DROP SEQUENCE IF EXISTS public.roster_asset_transformation_transformation_row_id_seq;
@@ -933,7 +933,7 @@ DROP TABLE IF EXISTS public.nfl_game_coaches;
 DROP TABLE IF EXISTS public.nfl_draft_rankings_index;
 DROP TABLE IF EXISTS public.nfl_draft_rankings_history;
 DROP TABLE IF EXISTS public.nfl_coaches;
-DROP SEQUENCE IF EXISTS public.matchups_uid_seq;
+DROP SEQUENCE IF EXISTS public.matchups_matchup_id_seq;
 DROP TABLE IF EXISTS public.matchups;
 DROP TABLE IF EXISTS public.manager_waitlist_submissions;
 DROP SEQUENCE IF EXISTS public.leagues_uid_seq;
@@ -1015,7 +1015,7 @@ DROP TABLE IF EXISTS public.dvoa_team_seasonlogs_history;
 DROP TABLE IF EXISTS public.dvoa_team_gamelogs;
 DROP TABLE IF EXISTS public.dvoa_team_drive_seasonlogs;
 DROP TABLE IF EXISTS public.draftkings_category_activity;
-DROP SEQUENCE IF EXISTS public.draft_uid_seq;
+DROP SEQUENCE IF EXISTS public.draft_draft_pick_id_seq;
 DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.dfs_contests;
 DROP TABLE IF EXISTS public.config;
@@ -2280,7 +2280,7 @@ CREATE TABLE public.dfs_contests (
 --
 
 CREATE TABLE public.draft (
-    uid bigint NOT NULL,
+    draft_pick_id bigint NOT NULL,
     pid character varying(25),
     round smallint NOT NULL,
     is_compensatory boolean DEFAULT false NOT NULL,
@@ -2304,10 +2304,10 @@ COMMENT ON COLUMN public.draft.expired_at IS 'When this pick''s draft window clo
 
 
 --
--- Name: draft_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: draft_draft_pick_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.draft_uid_seq
+CREATE SEQUENCE public.draft_draft_pick_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -2316,10 +2316,10 @@ CREATE SEQUENCE public.draft_uid_seq
 
 
 --
--- Name: draft_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: draft_draft_pick_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.draft_uid_seq OWNED BY public.draft.uid;
+ALTER SEQUENCE public.draft_draft_pick_id_seq OWNED BY public.draft.draft_pick_id;
 
 
 --
@@ -4955,7 +4955,7 @@ ALTER TABLE public.manager_waitlist_submissions ALTER COLUMN submission_id ADD G
 --
 
 CREATE TABLE public.matchups (
-    uid bigint NOT NULL,
+    matchup_id bigint NOT NULL,
     away_team_id integer NOT NULL,
     home_team_id integer NOT NULL,
     lid integer NOT NULL,
@@ -4974,10 +4974,10 @@ CREATE TABLE public.matchups (
 
 
 --
--- Name: matchups_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: matchups_matchup_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.matchups_uid_seq
+CREATE SEQUENCE public.matchups_matchup_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -4986,10 +4986,10 @@ CREATE SEQUENCE public.matchups_uid_seq
 
 
 --
--- Name: matchups_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: matchups_matchup_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.matchups_uid_seq OWNED BY public.matchups.uid;
+ALTER SEQUENCE public.matchups_matchup_id_seq OWNED BY public.matchups.matchup_id;
 
 
 --
@@ -26716,7 +26716,7 @@ ALTER SEQUENCE public.roster_asset_transformation_transformation_row_id_seq OWNE
 --
 
 CREATE TABLE public.rosters (
-    uid bigint NOT NULL,
+    roster_id bigint NOT NULL,
     tid integer NOT NULL,
     lid integer NOT NULL,
     week smallint NOT NULL,
@@ -26745,10 +26745,10 @@ CREATE TABLE public.rosters_players (
 
 
 --
--- Name: rosters_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: rosters_roster_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.rosters_uid_seq
+CREATE SEQUENCE public.rosters_roster_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -26757,10 +26757,10 @@ CREATE SEQUENCE public.rosters_uid_seq
 
 
 --
--- Name: rosters_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: rosters_roster_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.rosters_uid_seq OWNED BY public.rosters.uid;
+ALTER SEQUENCE public.rosters_roster_id_seq OWNED BY public.rosters.roster_id;
 
 
 --
@@ -27135,7 +27135,7 @@ ALTER SEQUENCE public.super_priority_super_priority_id_seq OWNED BY public.super
 --
 
 CREATE TABLE public.teams (
-    uid integer NOT NULL,
+    team_id integer NOT NULL,
     season_year smallint NOT NULL,
     lid integer NOT NULL,
     division smallint,
@@ -27152,10 +27152,10 @@ CREATE TABLE public.teams (
 
 
 --
--- Name: teams_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: teams_team_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE public.teams_uid_seq
+CREATE SEQUENCE public.teams_team_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -27165,10 +27165,10 @@ CREATE SEQUENCE public.teams_uid_seq
 
 
 --
--- Name: teams_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: teams_team_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.teams_uid_seq OWNED BY public.teams.uid;
+ALTER SEQUENCE public.teams_team_id_seq OWNED BY public.teams.team_id;
 
 
 --
@@ -28437,10 +28437,10 @@ ALTER TABLE ONLY public.composite_market_value_daily ALTER COLUMN composite_mark
 
 
 --
--- Name: draft uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: draft draft_pick_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.draft ALTER COLUMN uid SET DEFAULT nextval('public.draft_uid_seq'::regclass);
+ALTER TABLE ONLY public.draft ALTER COLUMN draft_pick_id SET DEFAULT nextval('public.draft_draft_pick_id_seq'::regclass);
 
 
 --
@@ -28479,10 +28479,10 @@ ALTER TABLE ONLY public.leagues ALTER COLUMN uid SET DEFAULT nextval('public.lea
 
 
 --
--- Name: matchups uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: matchups matchup_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.matchups ALTER COLUMN uid SET DEFAULT nextval('public.matchups_uid_seq'::regclass);
+ALTER TABLE ONLY public.matchups ALTER COLUMN matchup_id SET DEFAULT nextval('public.matchups_matchup_id_seq'::regclass);
 
 
 --
@@ -28535,10 +28535,10 @@ ALTER TABLE ONLY public.roster_asset_transformation ALTER COLUMN transformation_
 
 
 --
--- Name: rosters uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: rosters roster_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.rosters ALTER COLUMN uid SET DEFAULT nextval('public.rosters_uid_seq'::regclass);
+ALTER TABLE ONLY public.rosters ALTER COLUMN roster_id SET DEFAULT nextval('public.rosters_roster_id_seq'::regclass);
 
 
 --
@@ -28570,10 +28570,10 @@ ALTER TABLE ONLY public.super_priority ALTER COLUMN super_priority_id SET DEFAUL
 
 
 --
--- Name: teams uid; Type: DEFAULT; Schema: public; Owner: -
+-- Name: teams team_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.teams ALTER COLUMN uid SET DEFAULT nextval('public.teams_uid_seq'::regclass);
+ALTER TABLE ONLY public.teams ALTER COLUMN team_id SET DEFAULT nextval('public.teams_team_id_seq'::regclass);
 
 
 --
@@ -29033,7 +29033,7 @@ ALTER TABLE ONLY public.historical_injury_index_2025
 --
 
 ALTER TABLE ONLY public.draft
-    ADD CONSTRAINT "idx_24608_PRIMARY" PRIMARY KEY (uid);
+    ADD CONSTRAINT "idx_24608_PRIMARY" PRIMARY KEY (draft_pick_id);
 
 
 --
@@ -29057,7 +29057,7 @@ ALTER TABLE ONLY public.league_migrations_lock
 --
 
 ALTER TABLE ONLY public.matchups
-    ADD CONSTRAINT "idx_24699_PRIMARY" PRIMARY KEY (uid);
+    ADD CONSTRAINT "idx_24699_PRIMARY" PRIMARY KEY (matchup_id);
 
 
 --
@@ -29097,7 +29097,7 @@ ALTER TABLE ONLY public.props_index
 --
 
 ALTER TABLE ONLY public.rosters
-    ADD CONSTRAINT "idx_24995_PRIMARY" PRIMARY KEY (uid);
+    ADD CONSTRAINT "idx_24995_PRIMARY" PRIMARY KEY (roster_id);
 
 
 --
@@ -29290,6 +29290,14 @@ ALTER TABLE ONLY public.league_team_seasonlogs
 
 ALTER TABLE ONLY public.league_user_careerlogs
     ADD CONSTRAINT league_user_careerlogs_lid_userid_unique UNIQUE (lid, user_id);
+
+
+--
+-- Name: leagues leagues_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.leagues
+    ADD CONSTRAINT leagues_pkey PRIMARY KEY (uid);
 
 
 --
@@ -30129,7 +30137,7 @@ ALTER TABLE ONLY public.super_priority
 --
 
 ALTER TABLE ONLY public.teams
-    ADD CONSTRAINT teams_pkey PRIMARY KEY (uid, season_year);
+    ADD CONSTRAINT teams_pkey PRIMARY KEY (team_id, season_year);
 
 
 --
@@ -30605,13 +30613,6 @@ CREATE UNIQUE INDEX idx_24689_lineup ON public.league_team_lineups USING btree (
 
 
 --
--- Name: idx_24693_uid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24693_uid ON public.leagues USING btree (uid);
-
-
---
 -- Name: idx_24699_aid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30881,7 +30882,7 @@ CREATE UNIQUE INDEX idx_25029_team ON public.league_team_seasonlogs USING btree 
 -- Name: idx_25075_team_season_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25075_team_season_year ON public.teams USING btree (uid, season_year);
+CREATE UNIQUE INDEX idx_25075_team_season_year ON public.teams USING btree (team_id, season_year);
 
 
 --
@@ -58205,10 +58206,10 @@ GRANT SELECT ON TABLE public.draft TO league_reader;
 
 
 --
--- Name: SEQUENCE draft_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE draft_draft_pick_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.draft_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.draft_draft_pick_id_seq TO league_reader;
 
 
 --
@@ -58786,10 +58787,10 @@ GRANT SELECT ON TABLE public.matchups TO league_reader;
 
 
 --
--- Name: SEQUENCE matchups_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE matchups_matchup_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.matchups_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.matchups_matchup_id_seq TO league_reader;
 
 
 --
@@ -60190,10 +60191,10 @@ GRANT SELECT ON TABLE public.rosters_players TO league_reader;
 
 
 --
--- Name: SEQUENCE rosters_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE rosters_roster_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.rosters_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.rosters_roster_id_seq TO league_reader;
 
 
 --
@@ -60302,10 +60303,10 @@ GRANT SELECT ON TABLE public.teams TO league_reader;
 
 
 --
--- Name: SEQUENCE teams_uid_seq; Type: ACL; Schema: public; Owner: -
+-- Name: SEQUENCE teams_team_id_seq; Type: ACL; Schema: public; Owner: -
 --
 
-GRANT SELECT ON SEQUENCE public.teams_uid_seq TO league_reader;
+GRANT SELECT ON SEQUENCE public.teams_team_id_seq TO league_reader;
 
 
 --

@@ -58,7 +58,7 @@ export function transactions_reducer(
 
     case team_actions.GET_TEAMS_FULFILLED:
       return state.merge({
-        teams: new List(payload.data.teams.map((t) => t.uid))
+        teams: new List(payload.data.teams.map((t) => t.team_id))
       })
 
     case team_actions.DELETE_TEAMS_FULFILLED:

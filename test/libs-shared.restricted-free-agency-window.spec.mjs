@@ -255,8 +255,8 @@ describe('LIBS-SHARED restricted free agency windows', function () {
 
   describe('team nomination window', function () {
     const teams = [
-      { uid: 1, draft_order: 1 },
-      { uid: 2, draft_order: 2 }
+      { team_id: 1, draft_order: 1 },
+      { team_id: 2, draft_order: 2 }
     ]
 
     // Two teams, one 12-hour window each on the day; the highest draft order
@@ -283,11 +283,11 @@ describe('LIBS-SHARED restricted free agency windows', function () {
       const team1 = window_for(1, current)
       const team2 = window_for(2, current)
 
-      expect(team1.nominating_team.uid).to.equal(1)
+      expect(team1.nominating_team.team_id).to.equal(1)
       expect(format_et(team1.announce_at)).to.equal('2026-08-02 05:00')
 
       // Team 2’s own window 0 has already opened, so its next turn is next round
-      expect(team2.nominating_team.uid).to.equal(2)
+      expect(team2.nominating_team.team_id).to.equal(2)
       expect(format_et(team2.announce_at)).to.equal('2026-08-02 17:00')
     })
 

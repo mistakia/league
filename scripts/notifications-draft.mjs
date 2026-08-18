@@ -66,7 +66,7 @@ const run = async () => {
     // from the clock (announces nothing in a fast draft, announces a future
     // pick in a stalled one), so we track the frontier directly.
     const frontier = await db('draft')
-      .join('teams', 'draft.tid', 'teams.uid')
+      .join('teams', 'draft.tid', 'teams.team_id')
       .where('draft.season_year', current_season.year)
       .where('teams.season_year', current_season.year)
       .where('draft.lid', league.uid)

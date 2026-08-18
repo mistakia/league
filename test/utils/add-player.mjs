@@ -40,7 +40,7 @@ export default async function ({
       })
       .limit(1)
   }
-  const rosterId = rosters[0].uid
+  const rosterId = rosters[0].roster_id
 
   await db('transactions').insert({
     user_id: userId,

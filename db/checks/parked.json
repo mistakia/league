@@ -88,7 +88,7 @@
     },
     "disposition": "adjudicated",
     "reason": "Colton Taylor and Dylan Taylor are two different Texas A&M players in the same class. NO veto can reach this pair, because both rows carry the 0000-00-00 sentinel, so there is no birth date to disagree on and no identifier held on both sides.",
-    "evidence": "Texas A&M, 2021 entry, different positions (QB and WR), and neither row carries a draft_overall_pick. It is the reason this class is a detector rather than a mint-time attach rule — an attach would have merged them silently. Note it is not the only both-sentinel pair the check returns (Daijun/Sevarian Edwards is the other, and is an open finding rather than an adjudicated one); it is the pair known to be two people.",
+    "evidence": "Texas A&M, 2021 entry, different positions (QB and WR), and neither row carries a draft_overall_pick. It is the reason this class is a detector rather than a mint-time attach rule — an attach would have merged them silently. A prior aside here claimed Daijun/Sevarian Edwards (Georgia 2024) was also a known two-person pair; that was WRONG — Sevarian Daijun Edwards is one person and the two rows were merged on 2026-08-17 in db/adhoc/2026-08-17-merge-nickname-legal-name-player-rows.sql. The aside is corrected here so it does not mislead a future adjudicator.",
     "validated_at": "2026-08-15"
   },
   {

@@ -20,7 +20,7 @@ import {
  *
  * @param {Object} params
  * @param {Object} params.league - League with restricted_free_agency_period_start and window settings
- * @param {Array} params.teams - Teams with uid and draft_order
+ * @param {Array} params.teams - Teams with team_id and draft_order
  * @param {Number} [params.current_timestamp] - Current timestamp in seconds
  * @param {Number} [params.nomination_warning_hours=48] - Hours before a deadline to flag it as approaching
  * @returns {Object|null} Schedule, current window, and upcoming nominations

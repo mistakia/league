@@ -119,16 +119,16 @@ describe('draft pick expiry', function () {
       const expired = await knex('draft')
         .where({ lid: 1 })
         .whereNotNull('expired_at')
-        .select('uid')
-      const expired_uids = new Set(expired.map((p) => Number(p.uid)))
+        .select('draft_pick_id')
+      const expired_uids = new Set(expired.map((p) => Number(p.draft_pick_id)))
 
       expect(expired_uids.size).to.be.above(0)
 
       for (const team of res.body.teams) {
         for (const pick of team.picks || []) {
-          expect(expired_uids.has(Number(pick.uid))).to.equal(
+          expect(expired_uids.has(Number(pick.draft_pick_id))).to.equal(
             false,
-            `expired pick ${pick.uid} returned as an asset of team ${team.uid}`
+            `expired pick ${pick.draft_pick_id} returned as an asset of team ${team.team_id}`
           )
         }
       }
@@ -151,7 +151,7 @@ describe('draft pick expiry', function () {
         .send({
           propose_tid: 1,
           accept_tid: 2,
-          proposingTeamPicks: [expired_pick.uid],
+          proposingTeamPicks: [expired_pick.draft_pick_id],
           acceptingTeamPlayers: [],
           proposingTeamPlayers: [],
           acceptingTeamPicks: [],

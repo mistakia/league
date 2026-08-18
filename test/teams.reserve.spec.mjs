@@ -627,10 +627,10 @@ describe('API /teams - reserve', function () {
           week: prior_week,
           season_year: current_season.year
         })
-        .returning('uid')
+        .returning('roster_id')
 
       const prior_roster_uid =
-        prior_roster_result[0].uid || prior_roster_result[0]
+        prior_roster_result[0].roster_id || prior_roster_result[0]
 
       // Add player to prior week roster
       await knex('rosters_players').insert({

@@ -37,9 +37,9 @@ export default class TradeSelectTeam extends React.Component {
 
     const menuItems = teams.map((team, index) => (
       <MenuItem
-        key={team.uid}
-        selected={team.uid === trade.accept_tid}
-        onClick={() => this.handleSelect(team.uid)}
+        key={team.team_id}
+        selected={team.team_id === trade.accept_tid}
+        onClick={() => this.handleSelect(team.team_id)}
       >
         {team.name}
       </MenuItem>

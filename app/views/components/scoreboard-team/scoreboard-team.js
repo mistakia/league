@@ -19,8 +19,8 @@ export default function ScoreboardTeam({
 }) {
   const { matchup } = scoreboard
   const is_home = useMemo(
-    () => team.uid === matchup.home_team_id,
-    [team.uid, matchup.home_team_id]
+    () => team.team_id === matchup.home_team_id,
+    [team.team_id, matchup.home_team_id]
   )
   const final_projection = useMemo(
     () => (is_home ? matchup.home_projection : matchup.away_projection),
@@ -105,8 +105,8 @@ export default function ScoreboardTeam({
             backgroundColor: `#${team.accent_color || 'd0d0d0'}`
           }}
         />
-        <TeamImage tid={team.uid} year={matchup.season_year} />
-        <TeamName tid={team.uid} year={matchup.season_year} />
+        <TeamImage tid={team.team_id} year={matchup.season_year} />
+        <TeamName tid={team.team_id} year={matchup.season_year} />
       </div>
       <div className='scoreboard__team-meta'>
         <div className='scoreboard__team-score'>

@@ -9,8 +9,8 @@ import get_restricted_free_agency_nomination_info from './get-restricted-free-ag
  *
  * @param {Object} params
  * @param {Object} params.league - League with restricted_free_agency_period_start and window settings
- * @param {Array} params.teams - Teams with uid and draft_order
- * @param {Number} params.team_id - Team uid whose next window to find
+ * @param {Array} params.teams - Teams with team_id and draft_order
+ * @param {Number} params.team_id - Team id whose next window to find
  * @param {Number} [params.current_timestamp] - Current timestamp in seconds
  * @returns {Object|null} The team's next upcoming window entry, or null
  */
@@ -30,7 +30,7 @@ const get_restricted_free_agency_nomination_window = ({
   return (
     info.schedule.find(
       (entry) =>
-        entry.nominating_team?.uid === team_id &&
+        entry.nominating_team?.team_id === team_id &&
         entry.announce_at > current_timestamp
     ) || null
   )

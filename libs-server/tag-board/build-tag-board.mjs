@@ -321,8 +321,10 @@ export default function build_tag_board({
     rookie: season.rookie_tag_limit,
     restricted_free_agency: season.restricted_free_agency_tag_limit
   }
-  const team_ids = teams.map((team) => team.uid)
-  const team_name_by_tid = new Map(teams.map((team) => [team.uid, team.name]))
+  const team_ids = teams.map((team) => team.team_id)
+  const team_name_by_tid = new Map(
+    teams.map((team) => [team.team_id, team.name])
+  )
 
   // ---- player rows -------------------------------------------------------
 
@@ -1107,7 +1109,7 @@ export default function build_tag_board({
     coverage_precise_min: COVERAGE_PRECISE_MIN,
     calendar_freshness: build_calendar_freshness({ season, now_unix }),
     teams: teams.map((team) => ({
-      tid: team.uid,
+      tid: team.team_id,
       name: team.name,
       draft_order: team.draft_order
     })),
@@ -1182,7 +1184,7 @@ export const build_rfa_schedule = ({ season, teams }) => {
       })
     }
     return {
-      tid: team.uid,
+      tid: team.team_id,
       name: team.name,
       draft_order: team.draft_order,
       nomination_position: index + 1,

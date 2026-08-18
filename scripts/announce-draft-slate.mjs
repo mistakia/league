@@ -210,7 +210,7 @@ export const announce_draft_slate = async ({ lid, dry_run = false }) => {
 
   const outstanding = await db('draft')
     .join('teams', function () {
-      this.on('draft.tid', '=', 'teams.uid').andOn(
+      this.on('draft.tid', '=', 'teams.team_id').andOn(
         'teams.season_year',
         '=',
         db.raw('?', [current_season.year])

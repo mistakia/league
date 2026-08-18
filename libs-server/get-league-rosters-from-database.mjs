@@ -52,7 +52,7 @@ export default async function ({
       'transactions.occurred_at',
       'transactions.season_year'
     )
-    .join('rosters', 'rosters_players.roster_id', '=', 'rosters.uid')
+    .join('rosters', 'rosters_players.roster_id', '=', 'rosters.roster_id')
     .leftJoin('transactions', function () {
       this.on(
         'transactions.uid',
@@ -63,12 +63,16 @@ export default async function ({
       )
     })
     .whereIn(
-      'roster_id',
-      rosters.map((r) => r.uid)
+      // QUALIFIED deliberately: this statement joins `rosters`, and both tables
+      // now carry `roster_id` where the parent used to carry the retired
+      // surrogate name. The rename is what removed the accidental
+      // disambiguation, so a bare reference here is a 42702.
+      'rosters_players.roster_id',
+      rosters.map((r) => r.roster_id)
     )
 
   rosters.forEach((r) => {
-    r.players = players.filter((p) => p.roster_id === r.uid)
+    r.players = players.filter((p) => p.roster_id === r.roster_id)
     r.lineups = {}
     const teamLineups = lineups.filter((l) => l.tid === r.tid)
     const teamStarters = lineupStarters.filter((l) => l.tid === r.tid)
@@ -94,7 +98,7 @@ export default async function ({
     const query1 = await db('teams')
       .select('teams.*')
       .join('users_teams', function () {
-        this.on('teams.uid', '=', 'users_teams.tid').andOn(
+        this.on('teams.team_id', '=', 'users_teams.tid').andOn(
           'teams.season_year',
           '=',
           'users_teams.season_year'
@@ -105,7 +109,7 @@ export default async function ({
       .where('teams.season_year', current_season.year)
 
     if (query1.length) {
-      const tid = query1[0].uid
+      const tid = query1[0].team_id
       const bids = await build_active_restricted_free_agency_bids_query({
         db,
         tid

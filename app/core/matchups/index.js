@@ -5,4 +5,4 @@ export {
   get_matchups_actions,
   post_matchups_actions
 } from './actions'
-export { Matchup, create_matchup } from './matchup'
+export { Matchup, create_matchup, matchup_identity } from './matchup'

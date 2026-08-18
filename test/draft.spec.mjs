@@ -80,7 +80,7 @@ describe('API /draft', function () {
       userId: 1
     })
 
-    const picks = await knex('draft').where({ uid: 1 })
+    const picks = await knex('draft').where({ draft_pick_id: 1 })
     const pick = picks[0]
 
     expect(pick.pid).to.equal(player.pid)
@@ -304,7 +304,7 @@ describe('API /draft', function () {
     })
 
     it('player rostered', async () => {
-      const picks = await knex('draft').where({ uid: 1 }).limit(1)
+      const picks = await knex('draft').where({ draft_pick_id: 1 }).limit(1)
       const { pid } = picks[0]
       MockDate.set(
         regular_season_start
@@ -388,7 +388,9 @@ describe('API /draft', function () {
       paused_res.should.have.status(423)
       paused_res.body.error.should.equal('league is paused')
 
-      const [pick_while_paused] = await knex('draft').where({ uid: 2 })
+      const [pick_while_paused] = await knex('draft').where({
+        draft_pick_id: 2
+      })
       expect(pick_while_paused.pid).to.equal(null)
 
       await knex('league_pauses').del()

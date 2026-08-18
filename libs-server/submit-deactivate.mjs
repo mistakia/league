@@ -146,7 +146,7 @@ export default async function ({
   const slot = isDraftedRookie ? roster_slot_types.PSD : roster_slot_types.PS
 
   await db('rosters_players').update({ slot }).where({
-    roster_id: roster.uid,
+    roster_id: roster.roster_id,
     pid: deactivate_pid
   })
 
@@ -169,13 +169,13 @@ export default async function ({
     pid: deactivate_pid,
     tid,
     slot,
-    rid: roster.uid,
+    rid: roster.roster_id,
     pos: player_row.primary_position,
     transaction
   }
 
   const teams = await db('teams').where({
-    uid: tid,
+    team_id: tid,
     season_year: current_season.year
   })
   const team = teams[0]

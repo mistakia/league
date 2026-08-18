@@ -27,7 +27,7 @@
  *
  * @example
  * const frontier = await db('draft')
- *   .join('teams', 'draft.tid', 'teams.uid')
+ *   .join('teams', 'draft.tid', 'teams.team_id')
  *   .modify(where_outstanding_draft_pick, 'draft')
  */
 export default function where_outstanding_draft_pick(query, table) {

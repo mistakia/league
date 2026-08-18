@@ -8,7 +8,7 @@ export default async function ({ leagueId, teamId }) {
     season_year: current_season.year
   })
   const sorted = teams.sort((a, b) => a.waiver_order - b.waiver_order)
-  const index = sorted.findIndex((t) => t.uid === teamId)
+  const index = sorted.findIndex((t) => t.team_id === teamId)
   sorted.push(sorted.splice(index, 1)[0])
 
   for (const [index, team] of sorted.entries()) {
@@ -16,7 +16,7 @@ export default async function ({ leagueId, teamId }) {
     if (newWaiverOrder !== team.waiver_order) {
       await db('teams')
         .update('waiver_order', newWaiverOrder)
-        .where({ uid: team.uid, season_year: current_season.year })
+        .where({ team_id: team.team_id, season_year: current_season.year })
     }
   }
 }

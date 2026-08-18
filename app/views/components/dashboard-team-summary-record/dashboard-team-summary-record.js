@@ -15,14 +15,14 @@ export default function DashboardTeamSummaryRecord({
   standings,
   tid
 }) {
-  const team = standings.teams.find((t) => t.uid === tid) || new Team()
-  const rank = overall.findIndex((t) => t.uid === tid) + 1
+  const team = standings.teams.find((t) => t.team_id === tid) || new Team()
+  const rank = overall.findIndex((t) => t.team_id === tid) + 1
 
   const leagueStandings = []
   const divStandings = []
   for (const [index, t] of overall.entries()) {
     const item = (
-      <tr key={t.uid}>
+      <tr key={t.team_id}>
         <td>{t.name}</td>
         <td style={{ minWidth: '58px' }}>
           {t.getIn(['stats', 'regular_season_wins'], 0)}-
