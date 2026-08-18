@@ -18,7 +18,7 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
 import Loading from '@components/loading'
-import { job_title_by_id } from '@libs-shared/job-constants'
+import { job_title_by_id } from '#libs-shared/job-constants.mjs'
 import PageLayout from '@layouts/page'
 
 import './status.styl'

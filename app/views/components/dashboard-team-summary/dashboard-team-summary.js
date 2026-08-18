@@ -10,7 +10,7 @@ import DashboardTeamSummaryByeOdds from '@components/dashboard-team-summary-bye-
 import DashboardTeamSummaryDivisionOdds from '@components/dashboard-team-summary-division-odds'
 import DashboardTeamSummaryChampionshipOdds from '@components/dashboard-team-summary-championship-odds'
 import DashboardTeamSummaryFranchiseTags from '@components/dashboard-team-summary-franchise-tags'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 export default function DashboardTeamSummary({ tid }) {
   const is_regular_season =

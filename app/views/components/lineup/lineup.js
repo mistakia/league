@@ -4,11 +4,11 @@ import PropTypes from 'prop-types'
 import Grid from '@mui/material/Grid'
 import { Map } from 'immutable'
 
-import { Roster } from '@libs-shared'
+import { Roster } from '#libs-shared'
 import PlayerSlot from '@components/player-slot'
 
 import './lineup.styl'
-import { roster_slot_types } from '@constants'
+import { roster_slot_types } from '#constants'
 
 export default class Lineup extends React.Component {
   constructor(props) {

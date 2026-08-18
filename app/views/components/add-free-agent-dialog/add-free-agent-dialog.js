@@ -12,8 +12,8 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { Roster } from '@libs-shared'
-import { roster_slot_types } from '@constants'
+import { Roster } from '#libs-shared'
+import { roster_slot_types } from '#constants'
 
 export default class AddFreeAgentDialog extends React.Component {
   constructor(props) {

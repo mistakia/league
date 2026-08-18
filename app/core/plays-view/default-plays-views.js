@@ -1,4 +1,4 @@
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 export const default_plays_view_view_id = 'DEFAULT_PLAYS_VIEW'
 

@@ -195,8 +195,6 @@ export default {
       ),
       highcharts: path.resolve(__dirname, '../node_modules/highcharts'),
       'timeago.js': path.resolve(__dirname, '../node_modules/timeago.js'),
-      '@libs-shared': path.resolve(__dirname, '../libs-shared'),
-      '@constants': path.resolve(__dirname, '../libs-shared/constants'),
       '@views': path.resolve(__dirname, '../app/views'),
       '@pages': path.resolve(__dirname, '../app/views/pages'),
       '@core': path.resolve(__dirname, '../app/core'),

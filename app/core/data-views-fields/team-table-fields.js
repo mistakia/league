@@ -3,7 +3,7 @@ import React from 'react'
 import TeamCodeColumn from '@components/team-code-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { build_nfl_team_values, nfl_team_value_groups } from '@constants'
+import { build_nfl_team_values, nfl_team_value_groups } from '#constants'
 
 const team_code_column_values = build_nfl_team_values()
 

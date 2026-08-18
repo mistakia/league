@@ -1,7 +1,7 @@
 import { Record, List } from 'immutable'
 
-import { current_season } from '@constants'
-import { scoring_column_names } from '@libs-shared/scoring-columns.mjs'
+import { current_season } from '#constants'
+import { scoring_column_names } from '#libs-shared/scoring-columns.mjs'
 
 // An Immutable Record silently DROPS any key its declaration does not carry,
 // and createLeague independently drops any key it does not name -- so a scoring

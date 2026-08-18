@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
 
-import { nth } from '@libs-shared'
+import { nth } from '#libs-shared'
 
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'

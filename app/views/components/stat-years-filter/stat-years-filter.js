@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import StatFilter from '@components/stat-filter'
-import { available_years } from '@constants'
+import { available_years } from '#constants'
 
 export default class StatYearsFilter extends React.Component {
   render = () => {

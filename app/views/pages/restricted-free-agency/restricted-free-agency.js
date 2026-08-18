@@ -10,7 +10,7 @@ import Select from '@mui/material/Select'
 import Loading from '@components/loading'
 import RestrictedFreeAgencyAuction from '@components/restricted-free-agency-auction'
 import PageLayout from '@layouts/page'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 import './restricted-free-agency.styl'
 

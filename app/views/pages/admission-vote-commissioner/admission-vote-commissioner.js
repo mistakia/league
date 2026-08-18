@@ -11,7 +11,7 @@ import { API_URL } from '@core/constants'
 import {
   admission_vote_statuses,
   admission_vote_outcomes
-} from '@libs-shared/constants/admission-vote-constants.mjs'
+} from '#libs-shared/constants/admission-vote-constants.mjs'
 
 import './admission-vote-commissioner.styl'
 

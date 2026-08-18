@@ -9,7 +9,7 @@ import {
 import { player_actions } from '@core/players'
 import { stat_actions } from './actions'
 import { api_get_charted_plays } from '@core/api'
-import { parse_nfl_week_identifier } from '@libs-shared/nfl-week-identifier.mjs'
+import { parse_nfl_week_identifier } from '#libs-shared/nfl-week-identifier.mjs'
 
 const derive_seas_types_from_weeks = (weeks) => {
   const set = new globalThis.Set()

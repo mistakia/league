@@ -6,7 +6,7 @@ import {
   roster_slot_types,
   roster_slot_display_names,
   starter_slot_league_columns
-} from '@constants'
+} from '#constants'
 
 export default class ScoreboardSlots extends React.Component {
   render = () => {

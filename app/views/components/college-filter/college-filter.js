@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerFilter from '@components/player-filter'
-import { ncaa_college_names } from '@constants'
+import { ncaa_college_names } from '#constants'
 
 export default class CollegeFilter extends React.Component {
   render() {

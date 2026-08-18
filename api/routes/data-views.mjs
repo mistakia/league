@@ -1252,7 +1252,7 @@ router.post('/debug/?', async (req, res) => {
  *             schema:
  *               type: string
  *               format: binary
- *             description: 'HTML page with styled table containing the data'
+ *               description: 'HTML page with styled table containing the data'
  *       '400':
  *         description: Invalid request parameters
  *         content:

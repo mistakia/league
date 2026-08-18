@@ -17,7 +17,7 @@ import { draft_pick_value_actions } from '@core/draft-pick-value'
 import { transactions_actions } from '@core/transactions'
 import { team_actions } from '@core/teams'
 import { roster_actions } from '@core/rosters'
-import { calculatePercentiles } from '@libs-shared'
+import { calculatePercentiles } from '#libs-shared'
 
 import LeagueHomePage from './league-home'
 

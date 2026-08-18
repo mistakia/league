@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { nth } from '@libs-shared'
+import { nth } from '#libs-shared'
 
 import './metric-card.styl'
 

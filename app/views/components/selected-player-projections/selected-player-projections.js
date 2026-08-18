@@ -4,9 +4,9 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import { List } from 'immutable'
 import LinearProgress from '@mui/material/LinearProgress'
 
-import { groupBy } from '@libs-shared'
+import { groupBy } from '#libs-shared'
 import SelectedPlayerProjection from '@components/selected-player-projection'
-import { current_season, external_data_sources } from '@constants'
+import { current_season, external_data_sources } from '#constants'
 
 export default class SelectedPlayerSeasonProjections extends React.Component {
   componentDidMount() {

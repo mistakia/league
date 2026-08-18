@@ -11,7 +11,7 @@ import {
   current_season,
   roster_slot_types,
   starting_lineup_slots
-} from '@constants'
+} from '#constants'
 
 const slot_display_config = {
   [roster_slot_types.BENCH]: {

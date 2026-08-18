@@ -2,12 +2,12 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { toStringArray } from '@libs-shared'
+import { toStringArray } from '#libs-shared'
 import {
   current_season,
   roster_slot_types,
   roster_slot_display_names
-} from '@constants'
+} from '#constants'
 import Button from '@components/button'
 import PlayerNameExpanded from '@components/player-name-expanded'
 

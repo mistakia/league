@@ -14,12 +14,12 @@ import {
   get_string_from_object,
   get_team_color,
   get_position_color
-} from '@libs-shared'
-import get_row_axis_label_suffix from '@libs-shared/get-row-axis-label-suffix.mjs'
-import { render_participation_null } from '@libs-shared/data-views/participation-cell.mjs'
+} from '#libs-shared'
+import get_row_axis_label_suffix from '#libs-shared/get-row-axis-label-suffix.mjs'
+import { render_participation_null } from '#libs-shared/data-views/participation-cell.mjs'
 import parse_table_state_from_url from '@core/data-views/parse-table-state-from-url.mjs'
 import { derive_auto_tags } from '@core/data-views/derive-auto-tags'
-import { nfl_team_abbreviations } from '@constants'
+import { nfl_team_abbreviations } from '#constants'
 import { shorten_url } from '@core/utils'
 import { API_URL } from '@core/constants'
 import DataViewFilterChips from '@components/data-view-filter-chips'

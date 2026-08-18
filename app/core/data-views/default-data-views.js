@@ -1,5 +1,5 @@
-import { current_season } from '@constants'
-import { ROW_GRAIN_DEFAULTS } from '@libs-shared/row-grain-defaults.mjs'
+import { current_season } from '#constants'
+import { ROW_GRAIN_DEFAULTS } from '#libs-shared/row-grain-defaults.mjs'
 
 const player_prefix_columns = ROW_GRAIN_DEFAULTS.player.prefix_columns
 

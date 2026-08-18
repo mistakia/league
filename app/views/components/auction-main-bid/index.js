@@ -11,7 +11,7 @@ import {
   is_nominated_player_eligible
 } from '@core/selectors'
 import { notification_actions } from '@core/notifications'
-import { get_free_agent_period } from '@libs-shared'
+import { get_free_agent_period } from '#libs-shared'
 
 import AuctionMainBid from './auction-main-bid'
 

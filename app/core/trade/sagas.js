@@ -19,8 +19,8 @@ import {
   api_post_approve_trade,
   api_get_trades
 } from '@core/api'
-import { get_default_trade_slot, Roster } from '@libs-shared'
-import { current_season, roster_slot_types } from '@constants'
+import { get_default_trade_slot, Roster } from '#libs-shared'
+import { current_season, roster_slot_types } from '#constants'
 
 /**
  * Ensure all players have slot assignments by calculating defaults for any missing slots

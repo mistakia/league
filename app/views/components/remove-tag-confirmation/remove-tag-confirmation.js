@@ -8,7 +8,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { player_tag_display_names } from '@constants'
+import { player_tag_display_names } from '#constants'
 
 export default class RemoveTagConfirmation extends React.Component {
   handleSubmit = () => {

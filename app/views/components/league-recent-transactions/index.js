@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 import { get_transactions } from '@core/selectors'
 
 import LeagueRecentTransactions from './league-recent-transactions'
-import { transaction_types } from '@constants'
+import { transaction_types } from '#constants'
 
 const signing_types = [
   transaction_types.ROSTER_ADD,

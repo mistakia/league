@@ -6,7 +6,7 @@ import dayjs from 'dayjs'
 import { Player, connect } from '@components/player'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
-import { nth } from '@libs-shared'
+import { nth } from '#libs-shared'
 import IconButton from '@components/icon-button'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
@@ -19,7 +19,7 @@ import {
   player_nfl_status,
   nfl_player_status_abbreviations,
   nfl_player_status_descriptions
-} from '@constants'
+} from '#constants'
 
 function getClock({ desc, game_clock_start, quarter }) {
   switch (desc) {

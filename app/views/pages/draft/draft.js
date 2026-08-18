@@ -20,9 +20,9 @@ import {
   current_season,
   default_points_added,
   fantasy_positions
-} from '@constants'
-import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
-import { get_next_publication_boundary } from '@libs-shared'
+} from '#constants'
+import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
+import { get_next_publication_boundary } from '#libs-shared'
 
 dayjs.extend(relativeTime)
 

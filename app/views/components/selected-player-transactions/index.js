@@ -2,13 +2,13 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
-import { current_season, transaction_types } from '@constants'
+import { current_season, transaction_types } from '#constants'
 import {
   getSelectedPlayer,
   get_current_league,
   is_before_extension_deadline
 } from '@core/selectors'
-import { getExtensionAmount } from '@libs-shared'
+import { getExtensionAmount } from '#libs-shared'
 import { player_actions } from '@core/players'
 
 import SelectedPlayerTransactions from './selected-player-transactions'

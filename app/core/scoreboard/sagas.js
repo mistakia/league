@@ -4,7 +4,7 @@ import { get_scoreboard, getScoreboardUpdated } from '@core/selectors'
 import { scoreboard_actions } from './actions'
 import { play_actions } from '@core/plays'
 import { send, wsActions } from '@core/ws'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 export function* register() {
   if (!current_season.isRegularSeason) return

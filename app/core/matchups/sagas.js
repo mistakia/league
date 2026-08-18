@@ -8,8 +8,8 @@ import {
   get_matchups_state,
   get_scoreboard
 } from '@core/selectors'
-import { is_league_post_season_week } from '@libs-shared'
-import { current_season } from '@constants'
+import { is_league_post_season_week } from '#libs-shared'
+import { current_season } from '#constants'
 import { matchups_actions } from './actions'
 import { scoreboard_actions } from '@core/scoreboard'
 

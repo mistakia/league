@@ -1,6 +1,6 @@
 /* global Blob */
 
-import { convert_to_csv } from '@libs-shared'
+import { convert_to_csv } from '#libs-shared'
 
 export function csv({ headers, data, fileName = 'xo-football-export.csv' }) {
   if (headers) {

@@ -1,6 +1,6 @@
 import { Record, List } from 'immutable'
 
-import { transaction_types, fantasy_positions } from '@constants'
+import { transaction_types, fantasy_positions } from '#constants'
 import { auction_actions } from './actions'
 import { app_actions } from '@core/app'
 

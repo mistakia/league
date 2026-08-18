@@ -1,5 +1,5 @@
 import { Record, List, Map } from 'immutable'
-import { create_empty_fantasy_team_stats } from '@constants'
+import { create_empty_fantasy_team_stats } from '#constants'
 
 export const Team = new Record({
   team_id: null,

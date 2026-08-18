@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 
 import { play_actions } from '@core/plays'
 import { scoreboard_actions } from './actions'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 import { matchups_actions } from '@core/matchups'
 
 const current_week = Math.min(current_season.week, current_season.finalWeek)

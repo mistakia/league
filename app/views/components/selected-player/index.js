@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { player_actions } from '@core/players'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 import {
   getSelectedPlayer,
   get_app,
@@ -11,7 +11,7 @@ import {
   get_current_league,
   get_player_seasonlogs_for_selected_player
 } from '@core/selectors'
-import { get_free_agent_period } from '@libs-shared'
+import { get_free_agent_period } from '#libs-shared'
 
 import SelectedPlayer from './selected-player'
 

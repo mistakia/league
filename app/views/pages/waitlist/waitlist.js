@@ -5,7 +5,7 @@ import { NavLink, useSearchParams } from 'react-router-dom'
 
 import PageLayout from '@layouts/page'
 import { API_URL } from '@core/constants'
-import { league_name, site_name } from '@libs-shared/social-sharing.mjs'
+import { league_name, site_name } from '#libs-shared/social-sharing.mjs'
 import {
   commitment_affirmation_label,
   commitment_terms,
@@ -13,7 +13,7 @@ import {
   honeypot_field_name,
   questions,
   what_we_look_for
-} from '@libs-shared/manager-waitlist-questions.mjs'
+} from '#libs-shared/manager-waitlist-questions.mjs'
 
 import './waitlist.styl'
 

@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import { timeago } from './timeago'
 import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
-import { get_restricted_free_agency_nomination_info } from '@libs-shared'
+import { get_restricted_free_agency_nomination_info } from '#libs-shared'
 import { teams_to_array } from './teams-to-array'
 
 // Pure function: returns array of Alert elements

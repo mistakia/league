@@ -14,7 +14,7 @@ import {
   league_name,
   league_season_phrase,
   site_name
-} from '@libs-shared/social-sharing.mjs'
+} from '#libs-shared/social-sharing.mjs'
 
 import './landing.styl'
 

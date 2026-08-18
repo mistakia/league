@@ -3,7 +3,7 @@
 // The league facts (team count, format, founding year, season number) come
 // from the shared copy module, which is the single source.
 
-import { league_team_count } from '@libs-shared/social-sharing.mjs'
+import { league_team_count } from '#libs-shared/social-sharing.mjs'
 
 // The vetting questionnaire, and the page's primary call to action. It is an
 // in-site route rather than an external form: the argument this page makes is

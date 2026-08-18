@@ -7,8 +7,8 @@ import {
   projection_source_param,
   DEFAULT_SCORING_FORMAT_ID,
   DEFAULT_LEAGUE_FORMAT_ID
-} from '@libs-shared'
-import { current_season } from '@constants'
+} from '#libs-shared'
+import { current_season } from '#constants'
 
 const { single_year, nfl_week_id } = common_column_params
 

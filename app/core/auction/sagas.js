@@ -12,7 +12,7 @@ import {
 } from '@core/selectors'
 import { auction_actions } from './actions'
 import { send } from '@core/ws'
-import { get_eligible_slots } from '@libs-shared'
+import { get_eligible_slots } from '#libs-shared'
 import {
   fantasy_positions,
   player_id_regex,
@@ -20,7 +20,7 @@ import {
   starting_lineup_slot_league_keys,
   roster_slot_types,
   starter_slot_league_columns
-} from '@constants'
+} from '#constants'
 import { beep } from '@core/audio'
 
 export function* optimize() {

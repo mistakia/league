@@ -5,7 +5,7 @@ import {
   common_column_params,
   named_league_formats,
   DEFAULT_LEAGUE_FORMAT_ID
-} from '@libs-shared'
+} from '#libs-shared'
 
 const { single_year, single_year_offset } = common_column_params
 

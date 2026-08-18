@@ -1,6 +1,6 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 import Root from '@views/root'
 
 document.addEventListener('DOMContentLoaded', () => {

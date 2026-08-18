@@ -228,6 +228,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
+ * /teams/{teamId}/tag:
  *   delete:
  *     tags:
  *       - Fantasy Teams

@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerFilter from '@components/player-filter'
-import { player_availability_statuses } from '@constants'
+import { player_availability_statuses } from '#constants'
 
 export default class AvailabilityFilter extends React.Component {
   render() {

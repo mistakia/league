@@ -3,7 +3,7 @@ import { Map, List } from 'immutable'
 import { waiver_actions } from './actions'
 import { app_actions } from '@core/app'
 import { createWaiver } from './waiver'
-import { waiver_types } from '@constants'
+import { waiver_types } from '#constants'
 
 const initialState = new Map({
   report: new List(),

@@ -1,4 +1,4 @@
-import { league_defaults } from '@constants'
+import { league_defaults } from '#constants'
 import { actions_utils } from '@core/utils'
 const { create_api_actions, create_api_action_types } = actions_utils
 

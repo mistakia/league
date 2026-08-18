@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import PlayerLabel from '@components/player-label'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 export default class PlayerNameText extends React.Component {
   render = () => {

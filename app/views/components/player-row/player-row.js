@@ -13,7 +13,7 @@ import PlayerTag from '@components/player-tag'
 import { Team } from '@core/teams'
 
 import './player-row.styl'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 class PlayerRow extends Player {
   render = () => {

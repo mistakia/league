@@ -10,7 +10,7 @@ import LeagueSettingsMiscScoring from '@components/league-settings-misc-scoring'
 import LeagueSettingsScoringSection from '@components/league-settings-scoring-section'
 import LeagueSettingsGeneral from '@components/league-settings-general'
 import LeagueSettingsExternal from '@components/league-settings-external'
-import { league_defaults } from '@constants'
+import { league_defaults } from '#constants'
 
 export default function EditableLeague({ update, league, userId }) {
   const onchange = (value) => {

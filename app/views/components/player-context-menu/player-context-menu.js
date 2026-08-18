@@ -6,7 +6,7 @@ import MenuList from '@mui/material/MenuList'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
-import { current_season, roster_slot_types } from '@constants'
+import { current_season, roster_slot_types } from '#constants'
 
 export default function PlayerContextMenu({
   player_map,

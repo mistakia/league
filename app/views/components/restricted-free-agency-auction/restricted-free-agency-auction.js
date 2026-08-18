@@ -8,7 +8,7 @@ import TeamName from '@components/team-name'
 import {
   restricted_free_agency_bid_outcome_display_names,
   restricted_free_agency_bid_outcome_descriptions
-} from '@constants'
+} from '#constants'
 
 import './restricted-free-agency-auction.styl'
 

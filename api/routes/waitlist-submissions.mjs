@@ -45,10 +45,22 @@ const router = express.Router()
  *                 $ref: '#/components/schemas/WaitlistSubmission'
  *       400:
  *         description: Missing or malformed league_id
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       401:
  *         description: Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       403:
  *         description: The caller does not manage a team in this league
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/', async (req, res) => {
   const { db, logger } = req.app.locals

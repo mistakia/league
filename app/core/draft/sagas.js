@@ -16,7 +16,7 @@ import {
   api_get_players,
   api_get_draft_pick_details
 } from '@core/api'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 dayjs.extend(isBetween)
 

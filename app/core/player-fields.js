@@ -2,7 +2,7 @@ import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
 import { percentile_actions } from '@core/percentiles'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 import { store } from '@core/store.js'
 import { get_game_by_team, get_seasonlogs } from '@core/selectors'
 import PlayerRowOpponent from '@components/player-row-opponent'

@@ -1,9 +1,8 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 
-import { bookmaker_constants } from '#libs-shared'
+import { bookmaker_constants, common_column_params } from '#libs-shared'
 import COLUMN_GROUPS from './column-groups'
-import { common_column_params } from '@libs-shared'
-import { current_year } from '@constants'
+import { current_year } from '#constants'
 
 const { career_year, career_game, single_year, single_nfl_week_id } =
   common_column_params

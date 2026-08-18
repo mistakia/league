@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import TeamName from '@components/team-name'
 
 import './scoreboard-score-team.styl'
-import { matchup_types } from '@constants'
+import { matchup_types } from '#constants'
 
 export default function ScoreboardScoreTeam({
   tid,

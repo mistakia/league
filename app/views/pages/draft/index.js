@@ -1,13 +1,13 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 import {
   get_draft_pass_window,
   getDraftDates,
   get_draft_clock_now
-} from '@libs-shared'
-import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
+} from '#libs-shared'
+import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import { draft_actions } from '@core/draft'
 import {
   get_app,

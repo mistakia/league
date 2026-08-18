@@ -10,7 +10,7 @@ import {
   nfl_team_value_groups,
   player_nfl_status,
   nfl_player_status_display_names
-} from '@constants'
+} from '#constants'
 
 const contract_field = (props) => ({
   ...props,

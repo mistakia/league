@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 
 import TeamName from '@components/team-name'
-import { getPoachProcessingTime } from '@libs-shared'
+import { getPoachProcessingTime } from '#libs-shared'
 
 import './poach-notice.styl'
 

@@ -5,7 +5,7 @@ import Alert from '@mui/material/Alert'
 
 import Button from '@components/button'
 import TradeVetoCountdown from '@components/trade-veto-countdown'
-import { is_trade_within_veto_window } from '@libs-shared'
+import { is_trade_within_veto_window } from '#libs-shared'
 
 export default class TradeAction extends React.Component {
   handleProposeClick = () => this.props.propose()

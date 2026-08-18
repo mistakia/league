@@ -16,7 +16,7 @@ function assert_vocabulary_in_dev(tags) {
   if (process.env.NODE_ENV !== 'development' || vocabulary_validated) return
   // Lazy-load the vocabulary set from the shared module. This runs once at
   // module-load time via the first call to derive_auto_tags in a dev session.
-  import('@libs-shared/view-organization/auto-tag-vocabulary.mjs')
+  import('#libs-shared/view-organization/auto-tag-vocabulary.mjs')
     .then(({ AUTO_TAG_VOCABULARY_SET: vocab }) => {
       AUTO_TAG_VOCABULARY_SET = vocab
       vocabulary_validated = true

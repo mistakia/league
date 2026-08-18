@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
-import { nfl_week_identifier } from '@libs-shared'
+import { nfl_week_identifier } from '#libs-shared'
 
 import NflWeekSelectorYearPopper from './nfl-week-selector-year-popper.js'
 import {

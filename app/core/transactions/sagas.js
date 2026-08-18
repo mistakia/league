@@ -1,6 +1,6 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { transaction_types } from '@constants'
+import { transaction_types } from '#constants'
 import { app_actions } from '@core/app'
 import { get_app, get_transactions, get_player_maps } from '@core/selectors'
 import { transactions_actions } from './actions'

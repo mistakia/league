@@ -6,7 +6,7 @@ import {
   output_column_param,
   named_scoring_formats,
   DEFAULT_SCORING_FORMAT_ID
-} from '@libs-shared'
+} from '#libs-shared'
 
 const scoring_format_id_param = {
   label: 'Scoring Format',

@@ -7,7 +7,7 @@ import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 
 import './trade-slot-selector.styl'
-import { roster_slot_types, starting_lineup_slots } from '@constants'
+import { roster_slot_types, starting_lineup_slots } from '#constants'
 
 const slot_options = [
   {

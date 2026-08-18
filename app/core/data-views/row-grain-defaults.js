@@ -5,4 +5,4 @@ export {
   ROW_GRAIN_DEFAULTS,
   ROW_GRAIN_OPTIONS,
   ROW_GRAIN_TOOLTIP
-} from '@libs-shared/row-grain-defaults.mjs'
+} from '#libs-shared/row-grain-defaults.mjs'

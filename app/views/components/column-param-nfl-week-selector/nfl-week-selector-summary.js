@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import Checkbox from '@mui/material/Checkbox'
 
-import { nfl_week_identifier } from '@libs-shared'
+import { nfl_week_identifier } from '#libs-shared'
 
 import {
   purge_static_group,

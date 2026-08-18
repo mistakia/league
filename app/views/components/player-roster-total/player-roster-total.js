@@ -2,8 +2,8 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
-import { getExtensionAmount } from '@libs-shared'
-import { current_season, player_tag_types } from '@constants'
+import { getExtensionAmount } from '#libs-shared'
+import { current_season, player_tag_types } from '#constants'
 
 export default class PlayerRosterTotal extends React.Component {
   render() {

@@ -2,12 +2,12 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { get_string_from_object } from '@libs-shared'
+import { get_string_from_object } from '#libs-shared'
 import TeamName from '@components/team-name'
 import TeamImage from '@components/team-image'
 
 import './matchup.styl'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 export default function Matchup({ matchup, teams, scoreboard }) {
   const navigate = useNavigate()

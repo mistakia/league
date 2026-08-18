@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
-import { fantasy_positions } from '@constants'
+import { fantasy_positions } from '#constants'
 import {
   get_app,
   get_auction_state,

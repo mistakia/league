@@ -6,7 +6,7 @@ import Chip from '@mui/material/Chip'
 import LeagueTeamsValueOverTime from '@components/league-teams-value-over-time'
 
 import './league-header.styl'
-import { roster_slot_types, starter_slot_league_columns } from '@constants'
+import { roster_slot_types, starter_slot_league_columns } from '#constants'
 
 export default function LeagueHeader({ league, is_in_league }) {
   const is_ppr_equal =

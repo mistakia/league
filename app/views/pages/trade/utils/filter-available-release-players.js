@@ -1,5 +1,5 @@
-import { isSlotActive } from '@libs-shared'
-import { roster_slot_types } from '@constants'
+import { isSlotActive } from '#libs-shared'
+import { roster_slot_types } from '#constants'
 
 /**
  * Filter available players to show only those that can resolve roster limit issues

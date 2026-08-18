@@ -1,5 +1,5 @@
 import * as table_constants from 'react-table/src/constants.mjs'
-import { common_column_params } from '@libs-shared'
+import { common_column_params } from '#libs-shared'
 
 const { nfl_week_id, year_offset, career_year } = common_column_params
 

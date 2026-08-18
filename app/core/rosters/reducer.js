@@ -8,7 +8,7 @@ import {
   roster_slot_types,
   transaction_types,
   player_tag_types
-} from '@constants'
+} from '#constants'
 import { auction_actions } from '@core/auction'
 import { team_actions } from '@core/teams'
 

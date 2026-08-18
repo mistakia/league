@@ -4,8 +4,8 @@ import { app_actions } from '@core/app'
 import { createLeague, League } from './league'
 import { team_actions } from '@core/teams'
 import { league_actions } from './actions'
-import { create_default_league } from '@libs-shared'
-import { league_defaults } from '@constants'
+import { create_default_league } from '#libs-shared'
+import { league_defaults } from '#constants'
 
 const initialState = new Map().set(
   league_defaults.LEAGUE_ID,

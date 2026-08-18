@@ -4,8 +4,8 @@ import { matchups_actions } from './actions'
 import { team_actions } from '@core/teams'
 import { app_actions } from '@core/app'
 import { scoreboard_actions } from '@core/scoreboard'
-import { groupBy } from '@libs-shared'
-import { regular_fantasy_weeks, matchup_types } from '@constants'
+import { groupBy } from '#libs-shared'
+import { regular_fantasy_weeks, matchup_types } from '#constants'
 import { create_matchup } from './matchup'
 
 const initialState = new Map({

@@ -4,7 +4,7 @@ import { api_get_players_gamelogs } from '@core/api'
 import { get_app, get_request_history } from '@core/selectors'
 import { matchups_actions } from '@core/matchups'
 import { gamelogs_actions } from './actions'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 export function* load({ payload }) {
   const { leagueId } = yield select(get_app)

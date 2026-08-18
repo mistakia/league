@@ -4,12 +4,12 @@ import Highcharts from '@core/highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import 'highcharts/highcharts-more'
 
-import { nth } from '@libs-shared'
+import { nth } from '#libs-shared'
 import {
   fantasy_positions,
   roster_slot_types,
   starter_slot_league_columns
-} from '@constants'
+} from '#constants'
 
 export default function DashboardTeamValue({
   summary,

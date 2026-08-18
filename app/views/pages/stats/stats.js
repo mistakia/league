@@ -8,7 +8,7 @@ import Tooltip from '@mui/material/Tooltip'
 
 import PageLayout from '@layouts/page'
 import PercentileMetric from '@components/percentile-metric'
-import { get_eligible_slots, toPercent } from '@libs-shared'
+import { get_eligible_slots, toPercent } from '#libs-shared'
 import SelectYear from '@components/select-year'
 
 import './stats.styl'
@@ -18,7 +18,7 @@ import {
   roster_slot_display_names,
   fantasy_positions,
   create_empty_fantasy_team_stats
-} from '@constants'
+} from '#constants'
 
 const careerlog_single_fields = {
   number_seasons: 'Seasons',

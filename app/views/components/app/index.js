@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 
 import { app_actions } from '@core/app'
 import { get_app, get_current_league, get_auction_state } from '@core/selectors'
-import { get_free_agent_period } from '@libs-shared'
+import { get_free_agent_period } from '#libs-shared'
 
 import App from './app'
 

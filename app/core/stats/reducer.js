@@ -8,11 +8,11 @@ import {
   nfl_quarters,
   nfl_downs,
   stat_qualification_thresholds
-} from '@constants'
+} from '#constants'
 import {
   get_nfl_week_identifiers_for_year,
   get_max_weeks_for_season_type
-} from '@libs-shared/nfl-week-identifier.mjs'
+} from '#libs-shared/nfl-week-identifier.mjs'
 
 const default_reg_year = current_season.week
   ? current_season.year

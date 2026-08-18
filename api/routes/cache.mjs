@@ -40,6 +40,7 @@ const cache_path = path.join(os.homedir(), './cache')
  *                   description: The cache key that was requested
  *                   example: "player_stats/2024/week_4"
  *                 value:
+ *                   nullable: true
  *                   oneOf:
  *                     - type: object
  *                       description: The cached data (can be any JSON object)
@@ -51,8 +52,6 @@ const cache_path = path.join(os.homedir(), './cache')
  *                       description: The cached data (can be any JSON value)
  *                     - type: boolean
  *                       description: The cached data (can be any JSON value)
- *                     - type: "null"
- *                       description: Returned when cache entry doesn't exist
  *                   example: {
  *                     "players": [
  *                       {

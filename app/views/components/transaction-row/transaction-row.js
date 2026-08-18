@@ -6,7 +6,7 @@ import TeamName from '@components/team-name'
 import Timestamp from '@components/timestamp'
 
 import './transaction-row.styl'
-import { transaction_types, transaction_type_display_names } from '@constants'
+import { transaction_types, transaction_type_display_names } from '#constants'
 
 export default function TransactionRow({
   transaction,

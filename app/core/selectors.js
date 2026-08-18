@@ -30,8 +30,8 @@ import {
   optimizeStandingsLineup,
   get_playoff_seeding,
   compare_playoff_seed
-} from '@libs-shared'
-import get_draft_window_config from '@libs-shared/get-draft-window-config.mjs'
+} from '#libs-shared'
+import get_draft_window_config from '#libs-shared/get-draft-window-config.mjs'
 import {
   current_season,
   roster_slot_types,
@@ -46,7 +46,7 @@ import {
   player_nfl_status,
   default_points_added,
   starter_slot_league_columns
-} from '@constants'
+} from '#constants'
 import { League } from '@core/leagues'
 import { fuzzy_search } from '@core/utils'
 import { create_matchup } from '@core/matchups'

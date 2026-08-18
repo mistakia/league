@@ -13,7 +13,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { current_season, transaction_types } from '@constants'
+import { current_season, transaction_types } from '#constants'
 
 export default function DeactivateConfirmation({
   onClose,

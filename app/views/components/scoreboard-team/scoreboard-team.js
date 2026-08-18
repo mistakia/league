@@ -7,7 +7,7 @@ import TeamName from '@components/team-name'
 import TeamImage from '@components/team-image'
 
 import './scoreboard-team.styl'
-import { current_season, roster_slot_types } from '@constants'
+import { current_season, roster_slot_types } from '#constants'
 
 export default function ScoreboardTeam({
   team,

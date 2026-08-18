@@ -7,7 +7,7 @@ import {
   roster_slot_types,
   practice_squad_drafted_slots,
   practice_squad_signed_slots
-} from '@constants'
+} from '#constants'
 import {
   get_teams_for_current_league,
   get_rosters_for_current_league,

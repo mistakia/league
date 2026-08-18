@@ -11,7 +11,7 @@ import 'highcharts/modules/series-label'
 import { Team } from '@core/teams'
 
 import './league-teams-value-over-time.styl'
-import { ui_color_palette } from '@constants'
+import { ui_color_palette } from '#constants'
 
 export default function LeagueTeamsValueOverTime({
   load_league_team_daily_values,

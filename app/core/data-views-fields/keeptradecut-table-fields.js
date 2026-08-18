@@ -1,8 +1,8 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import COLUMN_GROUPS from './column-groups'
-import { common_column_params } from '@libs-shared'
-import { current_season } from '@constants'
+import { common_column_params } from '#libs-shared'
+import { current_season } from '#constants'
 import { format_month_day } from './month-day.mjs'
 
 const { single_year, single_year_offset } = common_column_params

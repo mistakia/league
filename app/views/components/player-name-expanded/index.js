@@ -5,7 +5,7 @@ import { player_actions } from '@core/players'
 import { getPlayerById, getGameStatusByPlayerId } from '@core/selectors'
 
 import PlayerNameExpanded from './player-name-expanded'
-import { current_season } from '@constants'
+import { current_season } from '#constants'
 
 const map_state_to_props = createSelector(
   getPlayerById,

@@ -12,7 +12,7 @@ import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
 
 import PercentileMetric from '@components/percentile-metric'
-import { calculatePercentiles } from '@libs-shared'
+import { calculatePercentiles } from '#libs-shared'
 
 import './selected-player-markets.styl'
 

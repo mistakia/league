@@ -21,7 +21,7 @@ import {
   current_season,
   roster_slot_types,
   starting_lineup_slots
-} from '@constants'
+} from '#constants'
 import {
   get_app,
   get_current_trade,

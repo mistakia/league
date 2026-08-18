@@ -371,8 +371,16 @@ const is_named_on_an_admission_vote = async ({ db, submission_id }) => {
  *                   description: Whether the mail provider accepted the edit link. False means the answers are stored but no link went out, and the page says so rather than promising mail. It is never a claim about delivery, which is decided after the response.
  *       400:
  *         description: A required answer is missing, an answer is too long, or the commitment was not affirmed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       429:
  *         description: Too many submissions from this address
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/', submit_rate_limiter, async (req, res) => {
   const { db, config, logger } = req.app.locals
@@ -477,8 +485,16 @@ router.post('/', submit_rate_limiter, async (req, res) => {
  *                   type: boolean
  *       400:
  *         description: No contact_email was given
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       429:
  *         description: Too many link requests from this address
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.post('/edit-link', edit_link_rate_limiter, async (req, res) => {
   const { db, config, logger } = req.app.locals
@@ -553,8 +569,16 @@ router.post('/edit-link', edit_link_rate_limiter, async (req, res) => {
  *               $ref: '#/components/schemas/WaitlistSubmissionForCandidate'
  *       401:
  *         description: The token is missing, malformed, or not an edit token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: The token is valid and names no application
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/submission', async (req, res) => {
   const { db, config, logger } = req.app.locals
@@ -655,14 +679,34 @@ router.get('/submission', async (req, res) => {
  *                   type: boolean
  *       400:
  *         description: A required answer is missing, an answer is too long, or the commitment was not affirmed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       401:
  *         description: The token is missing, malformed, or not an edit token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       404:
  *         description: The token is valid and names no application
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       409:
  *         description: The application is named on an admission vote and can no longer be edited
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       429:
  *         description: Too many edits from this address
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.put('/', edit_rate_limiter, async (req, res) => {
   const { db, config, logger } = req.app.locals

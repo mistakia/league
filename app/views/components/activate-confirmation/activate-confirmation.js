@@ -12,8 +12,8 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { isReserveEligible } from '@libs-shared'
-import { current_season, roster_slot_types } from '@constants'
+import { isReserveEligible } from '#libs-shared'
+import { current_season, roster_slot_types } from '#constants'
 
 export default class ActivateConfirmation extends React.Component {
   constructor(props) {

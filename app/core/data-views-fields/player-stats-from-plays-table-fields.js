@@ -1,7 +1,7 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import COLUMN_GROUPS from './column-groups'
-import { nfl_plays_column_params, output_column_param } from '@libs-shared'
+import { nfl_plays_column_params, output_column_param } from '#libs-shared'
 
 const offensive_player_from_play_field = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,

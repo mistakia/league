@@ -4,7 +4,7 @@ import { transactions_actions } from './actions'
 import { team_actions } from '@core/teams'
 import { roster_actions } from '@core/rosters'
 import { TRANSACTIONS_PER_LOAD } from '@core/constants'
-import { transaction_types } from '@constants'
+import { transaction_types } from '#constants'
 
 const initialState = new Record({
   isPending: false,
