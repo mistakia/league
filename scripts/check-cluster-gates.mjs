@@ -183,6 +183,14 @@ const GATES = [
       'alias-qualified and unqualified knex column references, resolved through the statement that binds them, vs the schema file'
   },
   {
+    id: 'stranded-vocabulary-literals',
+    command: ['db/gates/check-stranded-vocabulary-literals.mjs'],
+    requires: 'none',
+    negative_control: true,
+    oracle:
+      "a literal bound to a CHECK-constrained column vs that column's permitted set — the bound VALUE, not the column name, so no other gate here shares its class"
+  },
+  {
     id: 'dropped-table-consumers',
     command: ['db/gates/check-dropped-table-consumers.mjs'],
     requires: 'none',
