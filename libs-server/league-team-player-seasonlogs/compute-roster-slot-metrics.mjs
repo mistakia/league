@@ -1,5 +1,6 @@
 /**
- * Compute weeks-count and pts_added_{earned,net} per (tid, pid) for a given
+ * Compute weeks-count and realized_points_added_{positive,net} per (tid, pid)
+ * for a given
  * (lid, year, league_format_id) slice, parameterized by which roster slot
  * family to count.
  *
@@ -16,9 +17,32 @@ export default async function compute_roster_slot_metrics({
   slots,
   suffix
 }) {
-  const weeks_key = `weeks_${suffix}`
-  const earned_key = `pts_added_earned_${suffix}`
-  const net_key = `pts_added_net_${suffix}`
+  // An explicit map rather than a template, because a key BUILT from the
+  // suffix is a rename no grep, no column check and no consumer gate can see:
+  // the pts conform renamed these two and swept the sibling lens and the
+  // insert payload, leaving this file emitting pts_added_* against a consumer
+  // reading realized_points_added_*. Nothing threw -- the payload still named
+  // real columns, so the write succeeded with four columns silently NULL.
+  const metric_keys = {
+    rostered: {
+      weeks: 'weeks_rostered',
+      earned: 'realized_points_added_positive_rostered',
+      net: 'realized_points_added_net_rostered'
+    },
+    started: {
+      weeks: 'weeks_started',
+      earned: 'realized_points_added_positive_started',
+      net: 'realized_points_added_net_started'
+    }
+  }[suffix]
+
+  if (!metric_keys) {
+    throw new Error(`compute_roster_slot_metrics: unknown suffix '${suffix}'`)
+  }
+
+  const weeks_key = metric_keys.weeks
+  const earned_key = metric_keys.earned
+  const net_key = metric_keys.net
 
   const weeks_rows = await db('rosters_players')
     .where({ lid, season_year: year })
