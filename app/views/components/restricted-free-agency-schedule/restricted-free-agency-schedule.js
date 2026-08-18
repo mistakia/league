@@ -71,8 +71,8 @@ export default function RestrictedFreeAgencySchedule({
             <div className='rfa-schedule__current-heading'>
               <div className='rfa-schedule__current-label'>Current window</div>
               <div className='rfa-schedule__current-team'>
-                <TeamName tid={current.nominating_team.uid} />
-                {current.nominating_team.uid === team_id && (
+                <TeamName tid={current.nominating_team.team_id} />
+                {current.nominating_team.team_id === team_id && (
                   <span className='rfa-schedule__current-tag'>your team</span>
                 )}
               </div>
@@ -136,14 +136,14 @@ export default function RestrictedFreeAgencySchedule({
                   ? ' rfa-schedule__future-row--warning'
                   : ''
               }${
-                entry.nominating_team.uid === team_id
+                entry.nominating_team.team_id === team_id
                   ? ' rfa-schedule__future-row--mine'
                   : ''
               }`}
             >
               <div className='rfa-schedule__future-team'>
-                <TeamName tid={entry.nominating_team.uid} />
-                {entry.nominating_team.uid === team_id && (
+                <TeamName tid={entry.nominating_team.team_id} />
+                {entry.nominating_team.team_id === team_id && (
                   <span className='rfa-schedule__future-tag'>your team</span>
                 )}
               </div>

@@ -469,7 +469,7 @@ router.post('/?', async (req, res) => {
       await db('rosters_players')
         .update({ tag: player_tag_types.RESTRICTED_FREE_AGENCY })
         .where({
-          roster_id: rosterRow.uid,
+          roster_id: rosterRow.roster_id,
           pid
         })
 
@@ -482,7 +482,7 @@ router.post('/?', async (req, res) => {
 
       if (remove) {
         await db('rosters_players').update({ tag: 1 }).where({
-          roster_id: rosterRow.uid,
+          roster_id: rosterRow.roster_id,
           pid: remove
         })
 
@@ -815,7 +815,7 @@ router.delete('/?', async (req, res) => {
     await db('rosters_players')
       .update({ tag: player_tag_types.REGULAR })
       .where({
-        roster_id: rosterRow.uid,
+        roster_id: rosterRow.roster_id,
         pid
       })
 
@@ -1088,7 +1088,7 @@ router.put('/?', async (req, res) => {
       await db('rosters_players')
         .update({ tag: player_tag_types.RESTRICTED_FREE_AGENCY })
         .where({
-          roster_id: rosterRow.uid,
+          roster_id: rosterRow.roster_id,
           pid
         })
     }

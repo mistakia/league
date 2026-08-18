@@ -117,7 +117,7 @@ export default async function process_super_priority({
   }
 
   await db('rosters_players').insert({
-    roster_id: current_week_roster.uid,
+    roster_id: current_week_roster.roster_id,
     slot: target_slot,
     pid,
     player_position: player_row.primary_position,
@@ -175,7 +175,7 @@ export default async function process_super_priority({
 
   // Get team info for notifications
   const team_rows = await db('teams')
-    .where({ uid: original_tid, lid, season_year: current_season.year })
+    .where({ team_id: original_tid, lid, season_year: current_season.year })
     .limit(1)
 
   if (team_rows.length) {

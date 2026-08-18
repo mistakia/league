@@ -70,7 +70,7 @@ const get_fantasy_team_column_values = (teams) =>
   teams
     .valueSeq()
     .map((team) => ({
-      value: team.get('uid'),
+      value: team.get('team_id'),
       label: team.get('name') || team.get('abbreviation')
     }))
     .sortBy((column_value) => column_value.label)

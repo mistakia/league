@@ -12,12 +12,12 @@ import { nth } from '@libs-shared'
 import { Team } from '@core/teams'
 
 export default function DashboardTeamSummaryWaiverOrder({ teams, tid }) {
-  const team = teams.find((t) => t.uid === tid) || new Team()
+  const team = teams.find((t) => t.team_id === tid) || new Team()
 
   const items = []
   for (const team of teams.valueSeq()) {
     items.push(
-      <tr key={team.uid}>
+      <tr key={team.team_id}>
         <td>{team.name}</td>
         <td>
           {team.waiver_order}

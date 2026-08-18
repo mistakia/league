@@ -63,7 +63,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
   }
 
   await db('rosters_players').update({ slot: roster_slot_types.BENCH }).where({
-    roster_id: rosterRow.uid,
+    roster_id: rosterRow.roster_id,
     pid: activate_pid
   })
 
@@ -97,13 +97,13 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     pid: activate_pid,
     tid,
     slot: roster_slot_types.BENCH,
-    rid: roster.uid,
+    rid: roster.roster_id,
     pos: player_row.primary_position,
     transaction
   }
 
   const teams = await db('teams').where({
-    uid: tid,
+    team_id: tid,
     season_year: current_season.year
   })
   const team = teams[0]

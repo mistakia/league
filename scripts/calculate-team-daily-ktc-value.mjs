@@ -173,7 +173,7 @@ const build_day_inserts = ({
 
     // A team absent from the map holds no picks that day, which is an ordinary
     // state for a team that has traded them all away.
-    const team_picks = pick_values_by_team_id.get(team.uid)
+    const team_picks = pick_values_by_team_id.get(team.team_id)
     const team_pick_value = team_picks ? team_picks.pick_value : 0
     if (team_picks) {
       held_pick_count += team_picks.held_pick_count
@@ -185,7 +185,7 @@ const build_day_inserts = ({
     day_total_value += team_total_value
     day_inserts.push({
       lid,
-      tid: team.uid,
+      tid: team.team_id,
       date,
       observed_at,
       ktc_value: team_ktc_value,
@@ -337,14 +337,14 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
       log(`updating teams index for year ${current_year}`)
 
       const teams = await db('teams')
-        .select('uid')
+        .select('team_id')
         .where({ lid, season_year: current_year })
 
       // add any new teams to team index
       for (const team of teams) {
-        if (teams_index[team.uid]) continue
+        if (teams_index[team.team_id]) continue
 
-        teams_index[team.uid] = {
+        teams_index[team.team_id] = {
           ...team,
           players: {}
         }
@@ -353,7 +353,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
       // remove any decommissioned teams from team index
       for (const team_id of Object.keys(teams_index)) {
         const tid = Number(team_id)
-        if (teams.find((t) => t.uid === tid)) continue
+        if (teams.find((t) => t.team_id === tid)) continue
 
         delete teams_index[team_id]
       }

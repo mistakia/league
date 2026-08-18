@@ -16,8 +16,8 @@ export default async function (knex) {
 
   // After the deletes, never before -- see reset-league-tables.mjs for the
   // primary-key collision window a restart-first ordering opens.
-  await knex.raw('ALTER SEQUENCE teams_uid_seq RESTART WITH 1')
-  await knex.raw('ALTER SEQUENCE rosters_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE teams_team_id_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE rosters_roster_id_seq RESTART WITH 1')
 
   const userId = 1
   const draft_start_timestamp = Math.round(Date.now() / 1000)

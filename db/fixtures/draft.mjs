@@ -74,7 +74,7 @@ export default async function (knex) {
       slot: roster_slot_types.BENCH,
       pid: player.pid,
       player_position: player.secondary_position,
-      roster_id: roster.uid,
+      roster_id: roster.roster_id,
       tid: roster.tid,
       lid: league.uid,
       season_year: current_season.year,

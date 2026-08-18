@@ -12,7 +12,7 @@ function SeasonDraftPicks({ picks, year }) {
   const pickItems = []
   for (const pick of sortedPicks) {
     pickItems.push(
-      <div key={pick.uid} className='player__item table__row'>
+      <div key={pick.draft_pick_id} className='player__item table__row'>
         {/* <div className='metric table__cell'>{pick.pick || '-'}</div> */}
         <div className='metric table__cell'>
           {pick.pick_string

@@ -16,12 +16,12 @@ chai.should()
 // matchups over 14 weeks and would pass any count-only check.
 
 const opponents_by_team = (schedule, teams) => {
-  const opponents = new Map(teams.map((team) => [team.uid, []]))
+  const opponents = new Map(teams.map((team) => [team.team_id, []]))
 
   for (const week of schedule) {
     for (const matchup of week) {
-      opponents.get(matchup.home.uid).push(matchup.away.uid)
-      opponents.get(matchup.away.uid).push(matchup.home.uid)
+      opponents.get(matchup.home.team_id).push(matchup.away.team_id)
+      opponents.get(matchup.away.team_id).push(matchup.home.team_id)
     }
   }
 
@@ -29,11 +29,14 @@ const opponents_by_team = (schedule, teams) => {
 }
 
 const count_by_opponent = (list) =>
-  list.reduce((acc, uid) => acc.set(uid, (acc.get(uid) || 0) + 1), new Map())
+  list.reduce(
+    (acc, team_id) => acc.set(team_id, (acc.get(team_id) || 0) + 1),
+    new Map()
+  )
 
 describe('UTILS generate_fantasy_league_schedule', function () {
   const ten_teams = Array.from({ length: 10 }, (unused, i) => ({
-    uid: i + 1,
+    team_id: i + 1,
     division: null
   }))
 
@@ -49,14 +52,14 @@ describe('UTILS generate_fantasy_league_schedule', function () {
     const doubled = new Map()
 
     for (const team of ten_teams) {
-      const counts = count_by_opponent(opponents.get(team.uid))
+      const counts = count_by_opponent(opponents.get(team.team_id))
 
       // every other team, exactly once or twice, never three times
-      counts.size.should.equal(9, `team ${team.uid} opponent count`)
+      counts.size.should.equal(9, `team ${team.team_id} opponent count`)
       for (const [opponent, played] of counts.entries()) {
         expect(played).to.be.oneOf(
           [1, 2],
-          `team ${team.uid} played ${opponent} ${played} times`
+          `team ${team.team_id} played ${opponent} ${played} times`
         )
       }
 
@@ -64,8 +67,11 @@ describe('UTILS generate_fantasy_league_schedule', function () {
         .filter(([, played]) => played === 2)
         .map(([opponent]) => opponent)
 
-      twice.should.have.lengthOf(5, `team ${team.uid} double-played opponents`)
-      doubled.set(team.uid, new Set(twice))
+      twice.should.have.lengthOf(
+        5,
+        `team ${team.team_id} double-played opponents`
+      )
+      doubled.set(team.team_id, new Set(twice))
     }
 
     // symmetry: if A plays B twice then B plays A twice
@@ -98,11 +104,14 @@ describe('UTILS generate_fantasy_league_schedule', function () {
 
   it('splits home and away evenly at ten teams', () => {
     const schedule = generate_fantasy_league_schedule(ten_teams)
-    const home_games = new Map(ten_teams.map((team) => [team.uid, 0]))
+    const home_games = new Map(ten_teams.map((team) => [team.team_id, 0]))
 
     for (const week of schedule) {
       for (const matchup of week) {
-        home_games.set(matchup.home.uid, home_games.get(matchup.home.uid) + 1)
+        home_games.set(
+          matchup.home.team_id,
+          home_games.get(matchup.home.team_id) + 1
+        )
       }
     }
 
@@ -114,7 +123,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
 
   it('generates a valid schedule for 12 teams and 4 divisions', () => {
     const teams = Array.from({ length: 12 }, (unused, i) => ({
-      uid: i + 1,
+      team_id: i + 1,
       division: (i % 4) + 1
     }))
 
@@ -124,9 +133,9 @@ describe('UTILS generate_fantasy_league_schedule', function () {
     const opponents = opponents_by_team(schedule, teams)
 
     for (const team of teams) {
-      const counts = count_by_opponent(opponents.get(team.uid))
+      const counts = count_by_opponent(opponents.get(team.team_id))
       for (const [opponent, played] of counts.entries()) {
-        const other = teams.find((t) => t.uid === opponent)
+        const other = teams.find((t) => t.team_id === opponent)
         if (team.division === other.division) {
           played.should.equal(2)
         } else {
@@ -138,7 +147,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
 
   it('refuses a division structure the constitution does not describe', () => {
     const two_divisions = Array.from({ length: 10 }, (unused, i) => ({
-      uid: i + 1,
+      team_id: i + 1,
       division: (i % 2) + 1
     }))
 

@@ -125,7 +125,7 @@ const run = async ({ lid }) => {
     .del()
 
   for (const team of teams) {
-    const tid = team.uid
+    const tid = team.team_id
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
     const transactions = []

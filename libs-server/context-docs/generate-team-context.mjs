@@ -57,7 +57,7 @@ export default async function generate_team_context({
   const league = await load_configured_league({ db, lid, year })
 
   const team = await db('teams')
-    .where({ uid: tid, lid, season_year: year })
+    .where({ team_id: tid, lid, season_year: year })
     .first()
   if (!team) {
     throw new ContextDocError(`team ${tid} not found in league ${lid}`, {
@@ -98,10 +98,10 @@ export default async function generate_team_context({
     .orderBy('week')
   const other_teams = await db('teams')
     .where({ lid, season_year: year })
-    .whereNot('uid', tid)
+    .whereNot('team_id', tid)
   const team_name_by_tid = new Map([
-    [team.uid, team.name],
-    ...other_teams.map((t) => [t.uid, t.name])
+    [team.team_id, team.name],
+    ...other_teams.map((t) => [t.team_id, t.name])
   ])
 
   const salary_basis = resolve_salary_basis({ league, year })
@@ -111,7 +111,7 @@ export default async function generate_team_context({
     fields: {
       canonical_url: doc_url(base_url, { lid, tid }),
       league_id: league.uid,
-      team_id: team.uid,
+      team_id: team.team_id,
       team_name: team.name,
       year,
       salary_basis: salary_basis.frontmatter_value,
@@ -130,7 +130,7 @@ export default async function generate_team_context({
     }
   })
 
-  const manager = (managers[team.uid] || []).join(', ') || '—'
+  const manager = (managers[team.team_id] || []).join(', ') || '—'
   const division =
     league[`division_${team.division}_name`] ||
     (team.division ? `Division ${team.division}` : '—')
@@ -244,7 +244,7 @@ export default async function generate_team_context({
     { label: 'Documentation index', url: docs_index_url(base_url) },
     ...other_teams.map((t) => ({
       label: `Team: ${t.name}`,
-      url: doc_url(base_url, { lid, tid: t.uid })
+      url: doc_url(base_url, { lid, tid: t.team_id })
     }))
   ])
 

@@ -121,7 +121,7 @@ const propose_and_accept_with_pick = async () => {
     .send({
       proposingTeamPlayers,
       acceptingTeamPlayers,
-      proposingTeamPicks: [pick.uid],
+      proposingTeamPicks: [pick.draft_pick_id],
       acceptingTeamPicks: [],
       proposing_team_slots: {
         [acceptingTeamPlayers[0]]: roster_slot_types.BENCH
@@ -228,7 +228,7 @@ describe('API /trades - veto', function () {
       .send({
         proposingTeamPlayers: [],
         acceptingTeamPlayers: [],
-        proposingTeamPicks: [pick.uid],
+        proposingTeamPicks: [pick.draft_pick_id],
         acceptingTeamPicks: [],
         propose_tid: 1,
         accept_tid: 2,
@@ -242,7 +242,9 @@ describe('API /trades - veto', function () {
       .set('Authorization', `Bearer ${user2}`)
     accept_res.should.have.status(200)
 
-    const after_accept = await knex('draft').where({ uid: pick.uid }).first()
+    const after_accept = await knex('draft')
+      .where({ draft_pick_id: pick.draft_pick_id })
+      .first()
     after_accept.tid.should.equal(2)
 
     const veto_res = await chai_request
@@ -251,7 +253,9 @@ describe('API /trades - veto', function () {
       .set('Authorization', `Bearer ${user1}`)
     veto_res.should.have.status(200)
 
-    const after_veto = await knex('draft').where({ uid: pick.uid }).first()
+    const after_veto = await knex('draft')
+      .where({ draft_pick_id: pick.draft_pick_id })
+      .first()
     after_veto.tid.should.equal(1)
   })
 
@@ -607,7 +611,9 @@ describe('API /trades - veto', function () {
       .every(({ type }) => type === transaction_types.TRADE)
       .should.equal(true)
 
-    const pick_row = await knex('draft').where({ uid: pick.uid }).first()
+    const pick_row = await knex('draft')
+      .where({ draft_pick_id: pick.draft_pick_id })
+      .first()
     pick_row.tid.should.equal(2)
   })
 

@@ -197,7 +197,7 @@ router.post('/?', async (req, res) => {
 
     if (remove) {
       await db('rosters_players').update({ tag: 1 }).where({
-        roster_id: rosterRow.uid,
+        roster_id: rosterRow.roster_id,
         pid: remove
       })
     }
@@ -215,7 +215,7 @@ router.post('/?', async (req, res) => {
       .whereNull('processed')
 
     await db('rosters_players').update({ tag }).where({
-      roster_id: rosterRow.uid,
+      roster_id: rosterRow.roster_id,
       pid
     })
 
@@ -342,7 +342,7 @@ router.delete('/?', async (req, res) => {
     }
 
     await db('rosters_players').update({ tag: 1 }).where({
-      roster_id: rosterRow.uid,
+      roster_id: rosterRow.roster_id,
       pid
     })
 

@@ -39,7 +39,7 @@ const calculate_matchup_projection = async ({
     )
 
     if (!home_lineup || !away_lineup) {
-      log(`Missing lineup for matchup: ${matchup.uid}`)
+      log(`Missing lineup for matchup: ${matchup.matchup_id}`)
       continue
     }
 
@@ -60,7 +60,10 @@ const calculate_matchup_projection = async ({
 
   if (matchup_updates.length) {
     log(`Updating ${matchup_updates.length} matchups in lid ${lid} for ${year}`)
-    await db('matchups').insert(matchup_updates).onConflict('uid').merge()
+    await db('matchups')
+      .insert(matchup_updates)
+      .onConflict('matchup_id')
+      .merge()
   }
 }
 

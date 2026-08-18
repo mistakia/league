@@ -131,11 +131,11 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           lid: 1
         })
-        .returning('uid')
+        .returning('roster_id')
 
       // Add roster entry showing player was in PS drafted slot
       await knex('rosters_players').insert({
-        roster_id: roster.uid,
+        roster_id: roster.roster_id,
         pid: player.pid,
         tid: 1, // Original team
         lid: 1,
@@ -239,9 +239,9 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           lid: 1
         })
-        .returning('uid')
+        .returning('roster_id')
       await knex('rosters_players').insert({
-        roster_id: roster.uid,
+        roster_id: roster.roster_id,
         pid: player.pid,
         tid: 2,
         lid: 1,
@@ -335,8 +335,8 @@ describe('LIB - get_super_priority_status', function () {
             season_year: current_season.year,
             lid: 1
           })
-          .returning('uid')
-        rosterIds.push(roster.uid)
+          .returning('roster_id')
+        rosterIds.push(roster.roster_id)
       }
 
       // Add roster entries for 4 weeks on poaching team
@@ -374,11 +374,11 @@ describe('LIB - get_super_priority_status', function () {
           season_year: current_season.year,
           lid: 1
         })
-        .returning('uid')
+        .returning('roster_id')
 
       // Add roster entry in regular_season_starting slot
       await knex('rosters_players').insert({
-        roster_id: roster.uid,
+        roster_id: roster.roster_id,
         pid: player.pid,
         tid: 2, // Poaching team
         lid: 1,

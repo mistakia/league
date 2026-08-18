@@ -68,7 +68,7 @@ export function build_roster_rows({ team, roster, players }) {
       const is_tagged =
         roster_entry.tag && roster_entry.tag !== player_tag_types.REGULAR
       return {
-        tid: team.uid,
+        tid: team.team_id,
         team_name: team.name,
         group: group_title_for_slot(roster_entry.slot),
         slot: roster_slot_display_names[roster_entry.slot] || roster_entry.slot,
@@ -97,12 +97,12 @@ export function build_roster_rows({ team, roster, players }) {
 export default async function load_league_rosters({ db, lid, year, league }) {
   const teams = await db('teams')
     .where({ lid, season_year: year })
-    .orderBy('uid')
+    .orderBy('team_id')
 
   const rosters = await Promise.all(
     teams.map(async (team) => ({
       team,
-      roster: await load_team_roster({ tid: team.uid, year, lid, league })
+      roster: await load_team_roster({ tid: team.team_id, year, lid, league })
     }))
   )
 

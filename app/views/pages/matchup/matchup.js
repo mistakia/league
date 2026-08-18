@@ -10,6 +10,7 @@ import PageLayout from '@layouts/page'
 import SelectYear from '@components/select-year'
 import ScoreboardSelectWeek from '@components/scoreboard-select-week'
 import ScoreboardScores from '@components/scoreboard-scores'
+import { matchup_identity } from '@core/matchups'
 import ScoreboardTeam from '@components/scoreboard-team'
 import ScoreboardOverTime from '@components/scoreboard-over-time'
 import ScoreboardPlayByPlay from '@components/scoreboard-play-by-play'
@@ -95,9 +96,9 @@ export default function MatchupPage({
     set_selected_tid(
       is_head_to_head ? matchup.home_team_id : matchup.getIn(['tids', '0'])
     )
-    if (matchup.uid) {
+    if (matchup_identity(matchup)) {
       navigate(
-        `/leagues/${matchup.lid}/matchups/${matchup.season_year}/${matchup.week}/${matchup.uid}`
+        `/leagues/${matchup.lid}/matchups/${matchup.season_year}/${matchup.week}/${matchup_identity(matchup)}`
       )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,7 +107,7 @@ export default function MatchupPage({
   let matchup_body
   if (is_loading) {
     matchup_body = <Loading loading={is_loading} />
-  } else if (!matchup.uid) {
+  } else if (!matchup_identity(matchup)) {
     matchup_body = <div className='scoreboard__empty empty' />
   } else {
     matchup_body = (
@@ -149,12 +150,12 @@ export default function MatchupPage({
             </div>
           </Grid>
           <Grid item xs={12} md={3}>
-            <ScoreboardPlayByPlay mid={matchup.uid} />
+            <ScoreboardPlayByPlay mid={matchup_identity(matchup)} />
           </Grid>
         </Grid>
         <Grid container item xs={12} spacing={0}>
           <Grid item xs={12}>
-            <ScoreboardOverTime mid={matchup.uid} />
+            <ScoreboardOverTime mid={matchup_identity(matchup)} />
           </Grid>
         </Grid>
       </>

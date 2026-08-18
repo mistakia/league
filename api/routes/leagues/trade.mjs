@@ -194,7 +194,7 @@ export const get_trade = async (req, res) => {
     const picks = await db('trades_picks')
       .select(
         'trades_picks.*',
-        'draft.uid',
+        'draft.draft_pick_id',
         'draft.pick',
         'draft.pick_string',
         'draft.round',
@@ -203,7 +203,7 @@ export const get_trade = async (req, res) => {
         'draft.original_team_id'
       )
       .where({ trade_id: tradeId })
-      .join('draft', 'trades_picks.draft_pick_id', 'draft.uid')
+      .join('draft', 'trades_picks.draft_pick_id', 'draft.draft_pick_id')
 
     trade.proposingTeamReleasePlayers = []
     trade.acceptingTeamReleasePlayers = []
@@ -1016,7 +1016,7 @@ router.post(
         if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
           await trx('rosters_players')
             .del()
-            .where({ roster_id: acceptingTeamRoster.uid })
+            .where({ roster_id: acceptingTeamRoster.roster_id })
           await trx('rosters_players').insert(
             acceptingTeamRoster.rosters_players
           )
@@ -1026,7 +1026,7 @@ router.post(
         if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
           await trx('rosters_players')
             .del()
-            .where({ roster_id: proposingTeamRoster.uid })
+            .where({ roster_id: proposingTeamRoster.roster_id })
           await trx('rosters_players').insert(
             proposingTeamRoster.rosters_players
           )
@@ -1041,7 +1041,7 @@ router.post(
                   ? trade.accept_tid
                   : trade.propose_tid
             }) // swap team ids
-            .where({ uid: pick.draft_pick_id })
+            .where({ draft_pick_id: pick.draft_pick_id })
         }
 
         // cancel other trades that include any picks in this trade
@@ -1104,8 +1104,8 @@ router.post(
         lid: leagueId,
         season_year: current_season.year
       })
-      const proposingTeam = teams.find((t) => t.uid === trade.propose_tid)
-      const acceptingTeam = teams.find((t) => t.uid === trade.accept_tid)
+      const proposingTeam = teams.find((t) => t.team_id === trade.propose_tid)
+      const acceptingTeam = teams.find((t) => t.team_id === trade.accept_tid)
       const proposingTeamItems = []
       const acceptingTeamItems = []
       for (const pid of proposingTeamPlayers) {
@@ -1122,11 +1122,11 @@ router.post(
       }
 
       const picks = await db('draft').whereIn(
-        'uid',
+        'draft_pick_id',
         pickRows.map((p) => p.draft_pick_id)
       )
       for (const pick of picks) {
-        const pick_team = teams.find((t) => t.uid === pick.original_team_id)
+        const pick_team = teams.find((t) => t.team_id === pick.original_team_id)
         let pick_string = pick.pick_string
           ? `${pick.pick_string}`
           : `${pick.season_year} ${pick.round}${nth(pick.round)}`
@@ -1136,7 +1136,9 @@ router.post(
         }
 
         // pick.tid is the team the pick belongs to
-        const pickTradeInfo = pickRows.find((p) => p.draft_pick_id === pick.uid)
+        const pickTradeInfo = pickRows.find(
+          (p) => p.draft_pick_id === pick.draft_pick_id
+        )
         if (pickTradeInfo.tid === trade.propose_tid) {
           proposingTeamItems.push(pick_string)
         } else {
@@ -1260,7 +1262,7 @@ router.post(
       const { tradeId, leagueId } = req.params
 
       const trades = await db('trades')
-        .join('teams', 'trades.accept_tid', 'teams.uid')
+        .join('teams', 'trades.accept_tid', 'teams.team_id')
         .join('users_teams', function () {
           this.on('trades.accept_tid', '=', 'users_teams.tid')
           this.andOn(
@@ -1390,7 +1392,7 @@ router.post(
             db.raw('users_teams.season_year = ?', [current_season.year])
           )
         })
-        .join('teams', 'trades.propose_tid', 'teams.uid')
+        .join('teams', 'trades.propose_tid', 'teams.team_id')
         .where('trades.uid', tradeId)
         .where('teams.season_year', current_season.year)
         .where('users_teams.user_id', req.auth.userId)
@@ -1753,19 +1755,19 @@ router.post(
 
           await trx('rosters_players')
             .del()
-            .where({ roster_id: proposing_roster.uid })
+            .where({ roster_id: proposing_roster.roster_id })
           await trx('rosters_players').insert(proposing_roster.rosters_players)
 
           await trx('rosters_players')
             .del()
-            .where({ roster_id: accepting_roster.uid })
+            .where({ roster_id: accepting_roster.roster_id })
           await trx('rosters_players').insert(accepting_roster.rosters_players)
 
           // Return traded picks to the team that gave them up.
           for (const pick of pick_rows) {
             await trx('draft')
               .update({ tid: pick.tid })
-              .where({ uid: pick.draft_pick_id })
+              .where({ draft_pick_id: pick.draft_pick_id })
           }
         })
       } catch (error) {

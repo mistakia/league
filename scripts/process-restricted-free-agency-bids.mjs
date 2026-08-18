@@ -52,14 +52,14 @@ const initialize_cli = () => {
 async function sort_bids_by_waiver_order(bids) {
   if (!bids || !bids.length) return []
 
-  const teams = await db('teams').select('uid', 'waiver_order').where({
+  const teams = await db('teams').select('team_id', 'waiver_order').where({
     lid: bids[0].lid,
     season_year: current_season.year
   })
 
   const team_waiver_order = {}
   for (const team of teams) {
-    team_waiver_order[team.uid] = team.waiver_order
+    team_waiver_order[team.team_id] = team.waiver_order
   }
 
   return bids.sort(
@@ -393,7 +393,7 @@ const run = async ({ dry_run = false } = {}) => {
             restricted_free_agency_bids
           )
           const winning_team = await db('teams')
-            .where('uid', sorted[0].tid)
+            .where('team_id', sorted[0].tid)
             .first()
           if (winning_team) {
             log(

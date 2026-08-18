@@ -105,11 +105,11 @@ export default async function ({
     // remove player from original team roster
     await db('rosters_players')
       .del()
-      .where({ roster_id: originalTeamRoster.uid, pid })
+      .where({ roster_id: originalTeamRoster.roster_id, pid })
 
     // add player to competing team roster
     await db('rosters_players').insert({
-      roster_id: roster.uid,
+      roster_id: roster.roster_id,
       pid,
       player_position: pos,
       slot: roster_slot_types.BENCH,

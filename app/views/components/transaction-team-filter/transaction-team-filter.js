@@ -13,9 +13,9 @@ export default class TransactionTeamFilter extends React.Component {
 
     for (const team of this.props.leagueTeams) {
       state.values.push({
-        value: team.uid,
+        value: team.team_id,
         label: team.name,
-        selected: this.props.teams.includes(team.uid)
+        selected: this.props.teams.includes(team.team_id)
       })
     }
 

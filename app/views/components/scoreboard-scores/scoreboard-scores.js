@@ -14,12 +14,12 @@ export default function ScoreboardScores({
   const items = []
   for (const [index, matchup] of matchups.entries()) {
     const classNames = ['scoreboard__matchup cursor']
-    if (matchup.uid === selected) classNames.push('selected')
+    if (matchup.matchup_id === selected) classNames.push('selected')
     items.push(
       <div
         key={index}
         className={classNames.join(' ')}
-        onClick={() => select_matchup({ matchupId: matchup.uid })}
+        onClick={() => select_matchup({ matchupId: matchup.matchup_id })}
       >
         <ScoreboardScoreTeam
           tid={matchup.away_team_id}

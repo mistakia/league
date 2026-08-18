@@ -21,8 +21,8 @@ export default async function compute_optimal_metrics({
 }) {
   const team_rows = await db('teams')
     .where({ lid, season_year: year })
-    .select('uid')
-  const team_ids = team_rows.map((t) => t.uid)
+    .select('team_id')
+  const team_ids = team_rows.map((t) => t.team_id)
   if (team_ids.length === 0) return new Map()
 
   const gamelog_rows = await db('league_format_player_gamelogs as g')

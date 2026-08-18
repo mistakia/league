@@ -152,7 +152,7 @@ export default async function ({
 
   const player_team = await db('teams')
     .where({
-      uid: playerTid,
+      team_id: playerTid,
       season_year: current_season.year,
       lid: leagueId
     })

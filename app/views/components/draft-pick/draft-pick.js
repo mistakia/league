@@ -86,7 +86,7 @@ export default function DraftPick({
                 </div>
               )}
             <div className='draft__pick-team'>
-              <TeamName tid={team.uid} abbrv />
+              <TeamName tid={team.team_id} abbrv />
             </div>
           </div>
           {trade_count > 0 && (

@@ -29,7 +29,7 @@ export default class AddPlayerDialog extends React.Component {
 
   getAvailableCap = () => {
     const { rosters, league, team } = this.props
-    const rosterData = rosters.find((r) => r.tid === team.uid)
+    const rosterData = rosters.find((r) => r.tid === team.team_id)
     const roster = new Roster({ roster: rosterData.toJS(), league })
     return roster.availableCap
   }
@@ -60,7 +60,7 @@ export default class AddPlayerDialog extends React.Component {
       this.props.add({
         pid,
         value,
-        teamId: team.uid
+        teamId: team.team_id
       })
     }
     this.props.onClose()

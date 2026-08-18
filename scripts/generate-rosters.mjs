@@ -123,9 +123,9 @@ const run = async () => {
 
     for (const roster of rosters) {
       // get current roster players
-      const { tid, lid, uid } = roster
+      const { tid, lid, roster_id } = roster
       const roster_player_rows = await db('rosters_players').where({
-        roster_id: uid
+        roster_id
       })
       if (roster_player_rows.length) {
         source_teams_with_players += 1
@@ -140,12 +140,12 @@ const run = async () => {
         season_year: current_season.year
       }
       const rosterRows = await db('rosters').where(rosterData)
-      let rid = rosterRows.length ? rosterRows[0].uid : null
+      let rid = rosterRows.length ? rosterRows[0].roster_id : null
       if (!rid) {
         const insert_query = await db('rosters')
           .insert(rosterData)
-          .returning('uid')
-        rid = insert_query[0].uid
+          .returning('roster_id')
+        rid = insert_query[0].roster_id
       }
 
       // insert any missing players & remove excess players

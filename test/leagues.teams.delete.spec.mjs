@@ -43,11 +43,11 @@ describe('API /leagues/teams - delete', function () {
         abbreviation: 'TM1',
         lid: leagueId
       }
-      const insert_query = await knex('teams').insert(team).returning('uid')
-      team.uid = insert_query[0].uid
+      const insert_query = await knex('teams').insert(team).returning('team_id')
+      team.team_id = insert_query[0].team_id
 
       const roster = {
-        tid: team.uid,
+        tid: team.team_id,
         lid: leagueId,
         week: current_season.week,
         season_year: current_season.year
@@ -60,7 +60,7 @@ describe('API /leagues/teams - delete', function () {
         .delete('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          teamId: team.uid,
+          teamId: team.team_id,
           leagueId
         })
 
@@ -152,9 +152,9 @@ describe('API /leagues/teams - delete', function () {
           salary_cap: 200,
           free_agent_acquisition_budget_balance: 200
         })
-        .returning('uid')
+        .returning('team_id')
 
-      const tid = rows[0].uid
+      const tid = rows[0].team_id
 
       await knex('users_teams').insert({
         user_id: 1,

@@ -177,7 +177,7 @@ const map_state_to_props = createSelector(
       players,
       percentiles,
       cutlist,
-      is_team_manager: app.teamId === team.uid,
+      is_team_manager: app.teamId === team.team_id,
       poaches,
       teams,
       restricted_free_agency_players

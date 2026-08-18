@@ -91,8 +91,8 @@ function build_trade_items({
   })
 
   picks.forEach((pick) => {
-    if (pick && pick.uid) {
-      items.push(<TradePick key={pick.uid} pick={pick} />)
+    if (pick && pick.draft_pick_id) {
+      items.push(<TradePick key={pick.draft_pick_id} pick={pick} />)
     }
   })
 
@@ -316,7 +316,7 @@ export default function TradePage() {
   )
 
   const accepting_team_release_section = build_release_section({
-    team_name_tid: trade.accept_tid || accepting_team.uid,
+    team_name_tid: trade.accept_tid || accepting_team.team_id,
     team_name_label: 'Releases',
     is_proposed,
     is_open,

@@ -241,7 +241,7 @@ export default function DraftPage({
 
     pickItems.push(
       <DraftPick
-        key={pick.uid}
+        key={pick.draft_pick_id}
         pick={pick}
         pid={pick.pid}
         tid={pick.tid}

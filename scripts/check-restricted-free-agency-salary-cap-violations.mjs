@@ -57,7 +57,7 @@ const get_teams_with_restricted_free_agency_transactions = async ({ lid }) => {
 const get_team_display_name = async ({ tid }) => {
   const team = await db('teams')
     .select('name', 'abbreviation')
-    .where('uid', tid)
+    .where('team_id', tid)
     .where('season_year', CURRENT_YEAR)
     .first()
 

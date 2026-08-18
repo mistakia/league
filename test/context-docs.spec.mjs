@@ -125,7 +125,7 @@ const seed_full_league = async () => {
   ])
   await knex('rosters_players').insert([
     {
-      roster_id: roster0.uid,
+      roster_id: roster0.roster_id,
       slot: roster_slot_types.QB,
       pid: rfa_player.pid,
       player_position: rfa_player.primary_position,
@@ -137,7 +137,7 @@ const seed_full_league = async () => {
       season_year: year
     },
     {
-      roster_id: roster0.uid,
+      roster_id: roster0.roster_id,
       slot: roster_slot_types.PS,
       pid: ps_player.pid,
       player_position: ps_player.primary_position,
@@ -477,7 +477,7 @@ describe('context documents', function () {
         user_id: 1
       })
       await knex('rosters_players').insert({
-        roster_id: roster0.uid,
+        roster_id: roster0.roster_id,
         slot: roster_slot_types.BENCH,
         pid: player.pid,
         player_position: player.primary_position,

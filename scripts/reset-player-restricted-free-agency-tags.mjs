@@ -51,9 +51,9 @@ const run = async () => {
       season_year: current_season.year,
       lid
     })
-    .orderBy('uid')
+    .orderBy('team_id')
 
-  const team_uids = teams.map((t) => t.uid)
+  const team_uids = teams.map((t) => t.team_id)
   log(`Found ${teams.length} teams in the league`)
 
   // Pre-flight: count eligible-to-reset rows (tag=RFA, no active bid

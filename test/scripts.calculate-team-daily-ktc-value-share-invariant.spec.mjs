@@ -85,7 +85,7 @@ describe('SCRIPTS - calculate team daily ktc value - share invariant', function 
     await knex('seasons').insert({ ...season, season_year: season_year + 1 })
     const teams = await knex('teams')
       .where({ lid, season_year })
-      .whereNot('uid', '>', NUM_TEAMS_AFTER)
+      .whereNot('team_id', '>', NUM_TEAMS_AFTER)
     await knex('teams').insert(
       teams.map((team) => ({ ...team, season_year: season_year + 1 }))
     )

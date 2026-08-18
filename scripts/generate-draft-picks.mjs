@@ -34,7 +34,7 @@ const run = async ({ future_year = current_season.year + 1 }) => {
     for (const team of teams) {
       for (let i = 1; i < 4; i++) {
         const rows = await db('draft').where({
-          original_team_id: team.uid,
+          original_team_id: team.team_id,
           round: i,
           lid: league.uid,
           season_year: future_year
@@ -42,14 +42,14 @@ const run = async ({ future_year = current_season.year + 1 }) => {
 
         if (rows.length) {
           log(
-            `picks exist for team ${team.uid} in round ${i}, year ${future_year}`
+            `picks exist for team ${team.team_id} in round ${i}, year ${future_year}`
           )
           continue
         }
 
         await db('draft').insert({
-          tid: team.uid,
-          original_team_id: team.uid,
+          tid: team.team_id,
+          original_team_id: team.team_id,
           lid: league.uid,
           round: i,
           season_year: future_year

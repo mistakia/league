@@ -55,16 +55,16 @@ import {
 // unique indexes exist to prevent. Both cases are counted as coverage warnings,
 // and `trade_leg_source_not_participant` is the oracle -- it must stay at zero.
 //
-// Pick identity contract: `draft.uid` is a pick's stable identity and
+// Pick identity contract: `draft.draft_pick_id` is a pick's stable identity and
 // `trades_picks.draft_pick_id` is the only reference to it, so `draft.(tid, otid)` may
-// only ever be written keyed on `draft.uid`. Rewriting them keyed on
+// only ever be written keyed on `draft.draft_pick_id`. Rewriting them keyed on
 // `(round, pick)` -- the way a draft-order correction is tempting to write --
 // re-points a draft_pick_id at another team's pick and silently mis-keys every trade
 // row naming it. `pick_chain_end_state_mismatch` is the oracle for that: the
 // team the chain lands on after the last accepted trade must equal `draft.tid`.
 // The identity-preserving way to restate draft order is to fix
 // `teams.draft_order` and re-run scripts/set-draft-pick-number.mjs, which
-// derives `pick`/`pick_string` from `draft.original_team_id` keyed on `draft.uid`.
+// derives `pick`/`pick_string` from `draft.original_team_id` keyed on `draft.draft_pick_id`.
 //   Unhandled flows (super-priority chains, decommission_reassignment,
 //   failed_poach_sanctuary, auto_cap_release, season_rollover for picks):
 //   accumulated as coverage_warnings; surfaced by the generator's row-count
@@ -884,9 +884,9 @@ const build_event_stream = async ({ lid }) => {
   const pickids = Array.from(new Set(trade_picks.map((p) => p.draft_pick_id)))
   const picks_meta = pickids.length
     ? await db('draft')
-        .whereIn('uid', pickids)
+        .whereIn('draft_pick_id', pickids)
         .select(
-          'uid',
+          'draft_pick_id',
           'round',
           'season_year',
           'original_team_id',
@@ -894,7 +894,7 @@ const build_event_stream = async ({ lid }) => {
           'tid'
         )
     : []
-  const pick_meta_by_id = new Map(picks_meta.map((p) => [p.uid, p]))
+  const pick_meta_by_id = new Map(picks_meta.map((p) => [p.draft_pick_id, p]))
   // Compute per-pick chronological from/to per trade by walking forward from
   // the standings-allocated owner (`draft.original_team_id`, which trade.mjs preserves --
   // only `draft.tid` is mutated by trades). For each successive trade
@@ -985,7 +985,7 @@ const build_event_stream = async ({ lid }) => {
     // `draft.tid` says holds the pick. A mismatch means the pick's identity and
     // its trade history disagree about who owns it -- the shape produced by
     // rewriting `draft.(tid, otid)` keyed on `(round, pick)` instead of on
-    // `draft.uid`, which re-points a draft_pick_id at a different team's pick and
+    // `draft.draft_pick_id`, which re-points a draft_pick_id at a different team's pick and
     // leaves every trades_picks row naming it mis-keyed.
     if (current !== meta.tid) {
       const last_trade = trade_by_id.get(tradeids[tradeids.length - 1])
@@ -1054,7 +1054,7 @@ const build_event_stream = async ({ lid }) => {
   const all_picks = await db('draft')
     .where({ lid })
     .select(
-      'uid',
+      'draft_pick_id',
       'pid',
       'tid',
       'original_team_id',
@@ -1084,7 +1084,7 @@ const build_event_stream = async ({ lid }) => {
   }
   for (const pick of all_picks) {
     let endow_date = endowment_by_year.get(pick.season_year)
-    const earliest_trade = earliest_trade_by_pickid.get(pick.uid)
+    const earliest_trade = earliest_trade_by_pickid.get(pick.draft_pick_id)
     // `earliest_trade` is `trades.accepted`, which is timestamptz -- so it is a
     // Date and `earliest_trade * 1000` is NaN-adjacent nonsense (milliseconds
     // times a thousand). The comparison then never fires, the pre-trade
@@ -1107,8 +1107,9 @@ const build_event_stream = async ({ lid }) => {
       // unchanged. Only the holder of the synthesized pre-trade window moves,
       // and only for a pick whose first trade does not include `otid`.
       tid:
-        endowment_holder_tid_by_pickid.get(pick.uid) ?? pick.original_team_id,
-      draft_pick_id: pick.uid,
+        endowment_holder_tid_by_pickid.get(pick.draft_pick_id) ??
+        pick.original_team_id,
+      draft_pick_id: pick.draft_pick_id,
       pick_year: pick.season_year,
       pick_round: pick.round,
       pick_original_owner_tid: pick.original_team_id,
@@ -1121,7 +1122,7 @@ const build_event_stream = async ({ lid }) => {
         sort_priority: 4, // after DRAFT-transaction acquisition (priority 2) so the player draft exists
         kind: 'pick_conversion',
         tid: pick.tid,
-        draft_pick_id: pick.uid,
+        draft_pick_id: pick.draft_pick_id,
         player_id: pick.pid,
         occurred_at: pick.selection_timestamp
       })

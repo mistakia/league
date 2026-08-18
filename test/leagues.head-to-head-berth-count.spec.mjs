@@ -137,7 +137,7 @@ const build_standings_inputs = (league) => {
     starters,
     active,
     gamelogs,
-    teams: tids.map((uid) => ({ uid, division: null }))
+    teams: tids.map((team_id) => ({ team_id, division: null }))
   }
 }
 

@@ -66,8 +66,8 @@ export default function ScoreboardTeams({
 
   // Calculate other teams (teams not in scoreboards)
   const other_teams_tids = teams
-    .filter((team) => !scoreboard_tids.has(team.get('uid')))
-    .map((team) => team.get('uid'))
+    .filter((team) => !scoreboard_tids.has(team.get('team_id')))
+    .map((team) => team.get('team_id'))
 
   const items = []
   for (const [index, scoreboard] of sorted.entries()) {

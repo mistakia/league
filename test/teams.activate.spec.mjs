@@ -481,7 +481,7 @@ describe('API /teams - activate', function () {
           tid: teamId
         })
         .limit(1)
-      const rosterId = rosters[0].uid
+      const rosterId = rosters[0].roster_id
 
       // Insert transaction from 49 hours ago
       await knex('transactions').insert({

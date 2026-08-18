@@ -18,7 +18,7 @@ export default async function (waiver_id) {
       'waivers.type as waiver_type',
       'waivers.super_priority'
     )
-    .join('teams', 'waivers.tid', 'teams.uid')
+    .join('teams', 'waivers.tid', 'teams.team_id')
     .where('waivers.uid', waiver_id)
     .where('teams.season_year', current_season.year)
     .first()

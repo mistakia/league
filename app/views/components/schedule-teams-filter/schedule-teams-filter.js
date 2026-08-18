@@ -13,9 +13,9 @@ export default class ScheduleTeamsFilter extends React.Component {
 
     for (const team of this.props.league_teams) {
       state.values.push({
-        value: team.uid,
+        value: team.team_id,
         label: team.name,
-        selected: this.props.matchup_teams.includes(team.uid)
+        selected: this.props.matchup_teams.includes(team.team_id)
       })
     }
 

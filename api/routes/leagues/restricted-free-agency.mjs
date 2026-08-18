@@ -137,7 +137,7 @@ router.get('/?', async (req, res) => {
       const user_teams = await db('users_teams')
         .select('users_teams.tid')
         .join('teams', function () {
-          this.on('users_teams.tid', '=', 'teams.uid')
+          this.on('users_teams.tid', '=', 'teams.team_id')
           this.andOn('users_teams.season_year', '=', 'teams.season_year')
         })
         .where('users_teams.user_id', req.auth.userId)

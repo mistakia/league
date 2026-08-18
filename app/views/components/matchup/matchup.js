@@ -11,11 +11,11 @@ import { current_season } from '@constants'
 
 export default function Matchup({ matchup, teams, scoreboard }) {
   const navigate = useNavigate()
-  const home = teams.find((t) => t.uid === matchup.home_team_id) || {}
-  const away = teams.find((t) => t.uid === matchup.away_team_id) || {}
+  const home = teams.find((t) => t.team_id === matchup.home_team_id) || {}
+  const away = teams.find((t) => t.team_id === matchup.away_team_id) || {}
   const handleClick = () =>
     navigate(
-      `/leagues/${matchup.lid}/matchups/${matchup.season_year}/${matchup.week}/${matchup.uid}`
+      `/leagues/${matchup.lid}/matchups/${matchup.season_year}/${matchup.week}/${matchup.matchup_id}`
     )
   const formatSpread = (value) =>
     value === 0 ? 'EVEN' : value > 0 ? `+${value}` : value

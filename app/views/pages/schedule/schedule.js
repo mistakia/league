@@ -32,7 +32,11 @@ export default function SchedulePage({ matchups, load }) {
     const items = []
     for (const matchup of matchups) {
       items.push(
-        <Matchup key={matchup.uid} matchup={matchup} matchupId={matchup.uid} />
+        <Matchup
+          key={matchup.matchup_id}
+          matchup={matchup}
+          matchupId={matchup.matchup_id}
+        />
       )
     }
     const section = (

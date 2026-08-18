@@ -22,7 +22,7 @@ const run = async ({ lid }) => {
 
   const rows = await db('rosters_players').whereIn(
     'roster_id',
-    rosters.map((r) => r.uid)
+    rosters.map((r) => r.roster_id)
   )
 
   for (const { pid, roster_id } of rows) {

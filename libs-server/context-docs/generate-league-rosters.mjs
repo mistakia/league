@@ -59,7 +59,7 @@ export default async function generate_league_rosters({
     related: {
       parent: doc_url(base_url, { lid }),
       children: team_rosters.map(({ team }) =>
-        doc_url(base_url, { lid, tid: team.uid })
+        doc_url(base_url, { lid, tid: team.team_id })
       ),
       related: [
         doc_url(base_url, { lid, view: 'rules' }),
@@ -84,7 +84,7 @@ export default async function generate_league_rosters({
       active: roster.active.length,
       practice_squad: roster.practice.length,
       reserve: roster.reserve.length,
-      tid: team.uid
+      tid: team.team_id
     }))
     .sort((a, b) => a.space - b.space)
 
@@ -112,7 +112,7 @@ export default async function generate_league_rosters({
 
   const roster_sections = team_rosters.map(({ team, rows }) =>
     section(
-      `${team.name} (team ${team.uid})`,
+      `${team.name} (team ${team.team_id})`,
       rows.length
         ? markdown_table(
             [
@@ -159,7 +159,7 @@ export default async function generate_league_rosters({
     { label: 'Documentation index', url: docs_index_url(base_url) },
     ...team_rosters.map(({ team }) => ({
       label: `Team: ${team.name}`,
-      url: doc_url(base_url, { lid, tid: team.uid })
+      url: doc_url(base_url, { lid, tid: team.team_id })
     }))
   ])
 

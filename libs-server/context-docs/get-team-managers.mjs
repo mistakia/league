@@ -9,7 +9,7 @@
 export default async function get_team_managers({ db, lid, year }) {
   const rows = await db('users_teams')
     .join('teams', function () {
-      this.on('users_teams.tid', '=', 'teams.uid').andOn(
+      this.on('users_teams.tid', '=', 'teams.team_id').andOn(
         'users_teams.season_year',
         '=',
         'teams.season_year'

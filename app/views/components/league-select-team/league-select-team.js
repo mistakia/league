@@ -34,18 +34,19 @@ export default function LeagueSelectTeam({
     set_popper_open(false)
   }
 
-  const selected_team = teams.find((team) => team.uid === selected_tid) || {}
+  const selected_team =
+    teams.find((team) => team.team_id === selected_tid) || {}
   const historical_rank = historical_ranks[selected_tid] || {}
 
   const select_items = []
   teams.forEach((team) => {
     select_items.push(
       <div
-        key={team.uid}
+        key={team.team_id}
         className='league-select-team__item'
-        onClick={() => handle_team_select(team.uid)}
+        onClick={() => handle_team_select(team.team_id)}
       >
-        <TeamImage tid={team.uid} />
+        <TeamImage tid={team.team_id} />
         {team.name}
       </div>
     )

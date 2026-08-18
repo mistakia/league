@@ -6,7 +6,7 @@ export default async function ({ userId, leagueId }) {
   const query1 = await db('teams')
     .select('teams.*')
     .join('users_teams', function () {
-      this.on('teams.uid', '=', 'users_teams.tid').andOn(
+      this.on('teams.team_id', '=', 'users_teams.tid').andOn(
         'teams.season_year',
         '=',
         'users_teams.season_year'
@@ -17,7 +17,7 @@ export default async function ({ userId, leagueId }) {
     .where('teams.season_year', current_season.year)
 
   if (query1.length) {
-    const tid = query1[0].uid
+    const tid = query1[0].team_id
     // Every bid this team has outstanding, on its own players and on others'.
     const bids = await build_active_restricted_free_agency_bids_query({
       db,

@@ -39,7 +39,7 @@ export default class SettingsTeamsTeam extends React.Component {
   }
 
   onChange = (value) => {
-    const teamId = this.props.team.uid
+    const teamId = this.props.team.team_id
     this.props.update({ teamId, ...value })
   }
 
@@ -48,7 +48,7 @@ export default class SettingsTeamsTeam extends React.Component {
       title: 'Delete Team',
       description:
         'Remove team from league and permanently delete team & roster data',
-      on_confirm_func: () => this.props.delete(this.props.team.uid)
+      on_confirm_func: () => this.props.delete(this.props.team.team_id)
     })
   }
 
@@ -61,7 +61,7 @@ export default class SettingsTeamsTeam extends React.Component {
         <SettingsTeamsTeamPlayer
           key={index}
           pid={rosterPlayer.pid}
-          teamId={team.uid}
+          teamId={team.team_id}
           value={rosterPlayer.player_salary}
         />
       )
@@ -71,8 +71,11 @@ export default class SettingsTeamsTeam extends React.Component {
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <div className='settings__section-title'>{team.name}</div>
           <div className='settings__section-action'>
-            {team.uid !== teamId && (
-              <Button text onClick={() => this.handleConfirmation(team.uid)}>
+            {team.team_id !== teamId && (
+              <Button
+                text
+                onClick={() => this.handleConfirmation(team.team_id)}
+              >
                 delete
               </Button>
             )}

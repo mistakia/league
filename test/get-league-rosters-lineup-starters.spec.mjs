@@ -34,7 +34,7 @@ describe('get-league-rosters-from-database lineup starters', function () {
     await knex('rosters').del().where({ lid, season_year: year })
     await knex('rosters').insert(
       [1, 2, 10].map((week) => ({
-        uid: 9000 + week,
+        roster_id: 9000 + week,
         tid,
         lid,
         week,

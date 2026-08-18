@@ -10,7 +10,7 @@ export default async function ({ leagueId, player, teamId, userId }) {
     })
     .limit(1)
 
-  const rid = rids[0].uid
+  const rid = rids[0].roster_id
 
   await db('rosters_players')
     .where({

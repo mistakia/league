@@ -102,9 +102,9 @@ const main = async () => {
         )
       ]
       const teams = await db('teams')
-        .whereIn('uid', team_ids)
-        .select('uid', 'name')
-      const team_names = new Map(teams.map((t) => [t.uid, t.name]))
+        .whereIn('team_id', team_ids)
+        .select('team_id', 'name')
+      const team_names = new Map(teams.map((t) => [t.team_id, t.name]))
 
       console.log('MATCHUP RESULTS:\n')
       for (const matchup of results.matchups) {

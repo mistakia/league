@@ -57,7 +57,7 @@ const format_team_list = async (team_ids) => {
 
     const team_names = teams
       .filter((team) => team !== null)
-      .map((team) => team.name || `Team ${team.uid}`)
+      .map((team) => team.name || `Team ${team.team_id}`)
       .join(', ')
 
     return team_names || 'Unknown teams'
@@ -111,7 +111,7 @@ export const format_nomination_message = async ({
   }
 
   const player_display = format_player_display(player)
-  const team_name = team.name || `Team ${team.uid}`
+  const team_name = team.name || `Team ${team.team_id}`
   const teams_display = await format_team_list(eligible_teams)
 
   return `${team_name} has ${is_nomination ? 'nominated' : 'bid on'} ${player_display} at $${bid_amount}. Eligible teams: ${teams_display}. Eligible teams must pass or bid.`

@@ -20,7 +20,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
 
   // Get data from Redux store
   const pick_details = useSelector((state) =>
-    state.getIn(['draft', 'pick_details', pick?.uid])
+    state.getIn(['draft', 'pick_details', pick?.draft_pick_id])
   )
   const players_state = useSelector((state) => state.get('players'))
   const players_items = players_state.get('items')
@@ -31,7 +31,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
   // Load pick details when sheet opens
   useEffect(() => {
     if (isOpen && pick && (!pick_details || !pick_details.get('loaded'))) {
-      dispatch(draft_actions.load_draft_pick_details(pick.uid))
+      dispatch(draft_actions.load_draft_pick_details(pick.draft_pick_id))
     }
   }, [isOpen, pick, pick_details, dispatch])
 
@@ -167,7 +167,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
     // Create current pick data
     const current_pick_item = (
       <DraftPickItem
-        key={`${pick.season_year}-${pick.uid}`}
+        key={`${pick.season_year}-${pick.draft_pick_id}`}
         player={selected_player}
         pick={pick}
         year={pick.season_year}
@@ -194,7 +194,7 @@ export default function DraftPickSheet({ pick, isOpen, onClose }) {
         }
         return (
           <DraftPickItem
-            key={`${historical_pick.get('season_year')}-${historical_pick.get('uid')}`}
+            key={`${historical_pick.get('season_year')}-${historical_pick.get('draft_pick_id')}`}
             player={player}
             pick={pick_data}
             year={historical_pick.get('season_year')}

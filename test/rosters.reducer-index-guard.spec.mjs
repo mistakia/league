@@ -230,7 +230,7 @@ describe('immutable path index guards', function () {
       const { findings: control } = scan_source(
         'app/core/control.js',
         `export const r = (state, pid) =>
-           state.setIn([state.picks.findIndex((i) => i.uid === pid), 'pid'], pid)`
+           state.setIn([state.picks.findIndex((i) => i.draft_pick_id === pid), 'pid'], pid)`
       )
       expect(control).to.have.lengthOf(1)
       expect(control[0]).to.include('inline findIndex')

@@ -15,7 +15,7 @@
 //
 // Rows are cleared BEFORE the caller restarts any sequence that hands out their
 // ids. Restarting first leaves a window where the sequence is back at 1 while
-// rows holding uid 1..n are still present, so any insert landing in that window
+// rows holding id 1..n are still present, so any insert landing in that window
 // collides on the primary key. The window is reachable whenever a spec times out
 // mid-fixture: mocha abandons the test but cannot cancel its in-flight queries,
 // so the orphaned inserts run on against the next test's reset. Callers must

@@ -80,7 +80,7 @@ const generate_league_season_teams = async ({
 
   for (let i = 0; i < draft_order.length; i++) {
     const team_id = draft_order[i]
-    const team = teams.find((t) => t.uid === team_id)
+    const team = teams.find((t) => t.team_id === team_id)
 
     team_inserts.push({
       ...team,
@@ -114,7 +114,7 @@ const generate_league_season_teams = async ({
   if (team_inserts.length) {
     await db('teams')
       .insert(team_inserts)
-      .onConflict(['season_year', 'uid'])
+      .onConflict(['season_year', 'team_id'])
       .merge()
     log(`generated ${team_inserts.length} teams for lid ${lid} year ${year}`)
   }

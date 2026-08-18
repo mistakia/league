@@ -42,7 +42,7 @@ describe('API /teams - update', function () {
       // verify database change
       res.body.value.should.equal(value)
       const team = await knex('teams')
-        .where({ uid: 1, season_year: current_season.year })
+        .where({ team_id: 1, season_year: current_season.year })
         .first()
 
       expect(team.name).to.equal(value)
@@ -66,7 +66,7 @@ describe('API /teams - update', function () {
       // verify database change
       res.body.value.should.equal(value)
       const team = await knex('teams')
-        .where({ uid: 2, season_year: current_season.year })
+        .where({ team_id: 2, season_year: current_season.year })
         .first()
 
       expect(team.name).to.equal(value)
@@ -90,7 +90,7 @@ describe('API /teams - update', function () {
       // verify database change
       res.body.value.should.equal(value)
       const team = await knex('teams')
-        .where({ uid: 1, season_year: current_season.year })
+        .where({ team_id: 1, season_year: current_season.year })
         .first()
 
       expect(team.image).to.equal(value)
@@ -114,7 +114,7 @@ describe('API /teams - update', function () {
       // verify database change
       res.body.value.should.equal(value)
       const team = await knex('teams')
-        .where({ uid: 1, season_year: current_season.year })
+        .where({ team_id: 1, season_year: current_season.year })
         .first()
 
       expect(team.abbreviation).to.equal(value)
