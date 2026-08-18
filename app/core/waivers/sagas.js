@@ -50,8 +50,8 @@ export function* reorder({ payload }) {
     )
   }
   const waivers = newWaiver.map((w, index) => w.waiver_id).toJS()
-  const reset = items.map(({ uid, priority_order }) => ({
-    uid,
+  const reset = items.map(({ waiver_id, priority_order }) => ({
+    waiver_id,
     priority_order
   }))
   yield call(api_post_waiver_order, { leagueId, teamId, waivers, reset })

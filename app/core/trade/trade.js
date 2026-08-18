@@ -1,7 +1,7 @@
 import { Record, List, Map } from 'immutable'
 
 export const Trade = new Record({
-  uid: null,
+  trade_id: null,
   propose_tid: null,
   accept_tid: null,
   lid: null,
@@ -23,7 +23,7 @@ export const Trade = new Record({
 })
 
 export function create_trade({
-  uid,
+  trade_id,
   propose_tid,
   accept_tid,
   lid,
@@ -44,7 +44,7 @@ export function create_trade({
   acceptingTeamSlots
 }) {
   return new Trade({
-    uid,
+    trade_id,
     propose_tid,
     accept_tid,
     lid,

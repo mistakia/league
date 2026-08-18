@@ -1,15 +1,15 @@
 import { Record } from 'immutable'
 
 export const Source = new Record({
-  uid: null,
+  source_id: null,
   name: null,
   url: null,
   weight: null
 })
 
-export function createSource({ uid, name, url, weight }) {
+export function createSource({ source_id, name, url, weight }) {
   return new Source({
-    uid,
+    source_id,
     name,
     url,
     weight

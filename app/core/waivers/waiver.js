@@ -1,7 +1,7 @@
 import { Record, List, Map } from 'immutable'
 
 export const Waiver = new Record({
-  uid: null,
+  waiver_id: null,
   tid: null,
   pid: null,
   priority_order: 0,
@@ -14,7 +14,7 @@ export const Waiver = new Record({
 })
 
 export function createWaiver({
-  uid,
+  waiver_id,
   tid,
   pid,
   priority_order,
@@ -25,7 +25,7 @@ export function createWaiver({
   type
 }) {
   return new Waiver({
-    uid,
+    waiver_id,
     tid,
     pid,
     priority_order,
