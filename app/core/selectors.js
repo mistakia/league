@@ -1590,7 +1590,7 @@ export const getPoachById = createSelector(
   get_poaches_for_current_league,
   (state, { poachId }) => poachId,
   (poaches, poachId) => {
-    return poaches.find((p) => p.uid === poachId) || new Poach()
+    return poaches.find((p) => p.poach_id === poachId) || new Poach()
   }
 )
 

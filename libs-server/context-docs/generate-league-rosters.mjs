@@ -40,7 +40,7 @@ export default async function generate_league_rosters({
     fields: {
       canonical_url: doc_url(base_url, { lid, view: 'rosters' }),
       csv_url,
-      league_id: league.uid,
+      league_id: league.league_id,
       league_name: league.name,
       year,
       number_teams: team_rosters.length,

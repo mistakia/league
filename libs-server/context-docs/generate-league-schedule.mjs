@@ -79,7 +79,7 @@ export default async function generate_league_schedule({
     type: 'league_schedule',
     fields: {
       canonical_url: doc_url(base_url, { lid, view: 'schedule' }),
-      league_id: league.uid,
+      league_id: league.league_id,
       league_name: league.name,
       year
     },

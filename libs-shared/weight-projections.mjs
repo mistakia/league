@@ -58,7 +58,7 @@ const weightProjections = ({ projections, weights = [], userId, week }) => {
     }
 
     const { source_id } = projection
-    const source = weights.find((w) => w.uid === source_id)
+    const source = weights.find((w) => w.source_id === source_id)
     const weight = source && source.weight !== null ? source.weight : 1
 
     for (const r in data) {

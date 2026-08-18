@@ -201,7 +201,7 @@ export function* init({ payload }) {
     yield fork(load_league_players)
   } else {
     const team_id = (payload.data.teams[0] || {}).team_id
-    const league_id = (payload.data.leagues[0] || {}).uid
+    const league_id = (payload.data.leagues[0] || {}).league_id
     yield fork(load_team_players, {
       payload: { teamId: team_id, leagueId: league_id }
     })

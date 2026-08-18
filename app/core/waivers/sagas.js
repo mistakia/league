@@ -45,8 +45,8 @@ export function* reorder({ payload }) {
     newWaiver = newWaiver.sort(
       (a, b) =>
         b.bid_amount - a.bid_amount ||
-        newWaiver.findIndex((i) => i.uid === a.uid) -
-          newWaiver.findIndex((i) => i.uid === b.uid)
+        newWaiver.findIndex((i) => i.waiver_id === a.waiver_id) -
+          newWaiver.findIndex((i) => i.waiver_id === b.waiver_id)
     )
   }
   const waivers = newWaiver.map((w, index) => w.waiver_id).toJS()

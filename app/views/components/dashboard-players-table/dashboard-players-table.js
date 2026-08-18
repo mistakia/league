@@ -126,8 +126,10 @@ export default function DashboardPlayersTable({
           modifiers={[restrictToVerticalAxis, restrictToParentElement]}
           onDragEnd={({ active, over }) => {
             if (active.id !== over?.id) {
-              const oldIndex = claims.findIndex((c) => c.uid === active.id)
-              const newIndex = claims.findIndex((c) => c.uid === over.id)
+              const oldIndex = claims.findIndex(
+                (c) => c.waiver_id === active.id
+              )
+              const newIndex = claims.findIndex((c) => c.waiver_id === over.id)
               reorderWaivers({ oldIndex, newIndex, type: waiverType })
             }
           }}

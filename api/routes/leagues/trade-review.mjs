@@ -293,8 +293,8 @@ router.get('/:tradeId', async (req, res) => {
     const league = await authorize(req, res)
     if (!league) return
 
-    const trade_uid = Number(req.params.tradeId)
-    if (!Number.isInteger(trade_uid)) {
+    const trade_id = Number(req.params.tradeId)
+    if (!Number.isInteger(trade_id)) {
       return res.status(400).send({ error: 'invalid tradeId' })
     }
 
