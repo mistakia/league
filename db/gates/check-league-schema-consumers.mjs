@@ -1249,9 +1249,14 @@ const LEAGUE_DATABASE_NAMES = new Set([LEAGUE_DATABASE])
 const SHELL_ASSIGNMENT_RE =
   /^[ \t]*(?:local[ \t]+|export[ \t]+|declare[ \t]+-[A-Za-z]+[ \t]+)?([A-Za-z_][A-Za-z_0-9]*)=(['"])([\s\S]*?)\2/gm
 
-// `psql ... -c "SELECT ..."`. The quote style is captured so the body ends at the
-// matching close rather than at the first quote of either kind.
-const SHELL_PSQL_INLINE_RE = /-c[ \t]+(['"])([\s\S]*?)\1/g
+// `psql ... -c "SELECT ..."`, including a flag cluster (`-tAc "..."`) and the
+// escaped-quote form an ssh command string forces (`-c \"...\"`). The opener --
+// a quote or a backslash-plus-quote -- is captured as one group so the body ends
+// at the matching close rather than at the first quote of either kind. A body
+// that does not open on a SQL statement keyword is declined downstream by
+// `looks_like_shell_sql`, which is what keeps a `python -c "..."` from being
+// read as SQL.
+const SHELL_PSQL_INLINE_RE = /-[A-Za-z]*c\b[ \t]+((\\)?["'])([\s\S]*?)\1/g
 
 // A heredoc body, `<<TAG` / `<<'TAG'` / `<<-TAG`, ending at a line holding only
 // the tag. There are none carrying SQL in the corpus today (15 `<<EOF`, 8
@@ -1344,7 +1349,16 @@ const resolve_shell_database_target = (source) => {
     }
   }
 
-  if (unresolvable.length) {
+  // A file whose psql targets include BOTH a resolvable database and an
+  // unresolvable variable target is bound to the resolvable one rather than
+  // declared UNRESOLVED. `check-league-config-drift.sh` is the standing
+  // instance: its inline SQL ships over `-d league_production` while an
+  // unrelated `.pgpass` probe on another line connects by `dbname=$d`, and
+  // leaving the inline SQL unchecked because of the probe's variable would be
+  // the same silent skip this bucket exists to print. UNRESOLVED is reserved
+  // for a file with NO resolvable target -- `check-index-corruption.sh`, whose
+  // only `-d $database` is a loop variable.
+  if (!resolved.size && unresolvable.length) {
     return {
       database: null,
       reason: `psql target ${unresolvable[0]} does not reduce to a literal`
@@ -1463,9 +1477,9 @@ const collect_shell_sql_blocks = (
 
     SHELL_PSQL_INLINE_RE.lastIndex = 0
     while ((match = SHELL_PSQL_INLINE_RE.exec(source))) {
-      if (!looks_like_shell_sql(match[2])) continue
+      if (!looks_like_shell_sql(match[3])) continue
       coverage.psql_inline += 1
-      take(match[2], match.index, 'psql -c')
+      take(match[3], match.index, 'psql -c')
     }
 
     SHELL_HEREDOC_RE.lastIndex = 0
@@ -2407,6 +2421,42 @@ const run_negative_control = async ({
     cases.push([
       'gate 3 extracts SQL from a bash assignment and declines one that is not SQL',
       took_the_sql && declined_the_prose
+    ])
+  }
+
+  // 7b. gate 3: the inline `psql -c` extractor still sees the two shapes the
+  //     bare-`-c` pattern missed -- a flag cluster (`-tAc "..."`) and escaped
+  //     quotes inside an ssh string (`-c \"...\"`) -- and still declines a `-c`
+  //     whose body is prose. Both directions on one synthetic file, the same
+  //     discipline as case 7: an extractor that swallowed every quoted string
+  //     would hand EXPLAIN arbitrary prose and bury the real findings. The
+  //     binding precondition is satisfied (`DB_NAME="league_production"`), so a
+  //     decline here is the extractor's decision, not a file skipped as
+  //     UNRESOLVED.
+  {
+    const synthetic_path = path.join(
+      repo_root,
+      '__negative_control_psql_c__.sh'
+    )
+    const source = [
+      'DB_NAME="league_production"',
+      'rows=$(ssh database "psql -d $DB_NAME -tAc \\"SELECT p.negative_control_absent FROM player p\\"")',
+      'res=$(psql -d "$DB_NAME" -tAc "SELECT p.negative_control_absent FROM player p")',
+      'greeting=$(psql -d "$DB_NAME" -c "counted the rows and reported them")'
+    ].join('\n')
+    const run = collect_shell_sql_blocks(
+      [{ file: synthetic_path, root: '.', absolute_root: repo_root }],
+      () => source
+    )
+    const took_the_inline_sql =
+      run.statements.filter((statement) => /FROM player/i.test(statement.sql))
+        .length === 2
+    const declined_the_prose = !run.statements.some((statement) =>
+      /counted the rows|proceed/i.test(statement.sql)
+    )
+    cases.push([
+      'gate 3 extracts inline psql -c SQL behind a flag cluster or escaped quotes and declines one carrying prose',
+      took_the_inline_sql && declined_the_prose
     ])
   }
 
