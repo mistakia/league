@@ -5,14 +5,17 @@ import fs from 'fs'
 import * as chai from 'chai'
 
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
+import data_view_fields_index from '#libs-shared/data-view-fields-index.mjs'
 import * as migration_module from '#libs-shared/data-views-saved-view-migration.mjs'
 import {
   BOOLEAN_PREFIX_PARAM_RENAMES,
+  COLUMN_ID_RENAMES,
   COUNTING_STAT_PARAM_RENAMES,
   MARKETS_PARAM_RENAMES,
   PLAYS_LOCAL_PARAM_RENAMES,
   RECEIVING_PREFIX_PARAM_RENAMES,
   SHORTHAND_PARAM_RENAMES,
+  apply_column_id_rename,
   migrate_column_entry,
   migrate_table_state
 } from '#libs-shared/data-views-saved-view-migration.mjs'
@@ -837,5 +840,36 @@ describe('rename-map target liveness', () => {
       stranded,
       'legacy keys resolving to a name no registry carries'
     ).to.deep.equal([])
+  })
+
+  it('resolves every legacy column id to a live fields-index key', () => {
+    // COLUMN_ID_RENAMES is a SINGLE lookup with no chaining, so a value that
+    // does not name a live id resolves to a dead one -- and the SPA renders a
+    // blank cell rather than erroring, which no other gate can see. Resolve
+    // through apply_column_id_rename rather than reading the raw values so a
+    // legitimate future chain still passes.
+    const stranded = []
+    for (const legacy_column_id of Object.keys(COLUMN_ID_RENAMES)) {
+      const current_column_id = apply_column_id_rename(legacy_column_id)
+      const is_live = Object.prototype.hasOwnProperty.call(
+        data_view_fields_index,
+        current_column_id
+      )
+      if (!is_live) {
+        stranded.push(`${legacy_column_id} -> ${current_column_id}`)
+      }
+    }
+    expect(
+      stranded,
+      'legacy column ids resolving to a name the fields index does not carry'
+    ).to.deep.equal([])
+  })
+
+  // The assertion above iterates the map under test, so it cannot see a rule
+  // DELETED from it. This count is what catches that. If a future rename adds
+  // rules here, raise this number deliberately rather than deleting the
+  // assertion.
+  it('carries a rule for each of the 41 column ids that moved', () => {
+    expect(Object.keys(COLUMN_ID_RENAMES)).to.have.lengthOf(41)
   })
 })

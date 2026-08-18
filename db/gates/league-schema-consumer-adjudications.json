@@ -19,12 +19,34 @@
     "                    live instruction counts as a defect",
     "kind = not_a_column the token is a real thing that is not a database column",
     "                    (a config key, a JS property, a spec basename, a value)",
+    "kind = pending_ruling  the SQL is genuinely broken and its INTENT is ambiguous,",
+    "                    so no repair can be chosen without an operator ruling.",
+    "                    Unlike the kinds above this does NOT assert the site is",
+    "                    correct -- it records that the finding is real, understood,",
+    "                    and parked on a decision. State the decision being awaited.",
+    "",
     "kind = fragment     a documented block that continues a structure an EARLIER",
     "                    block defined, so it names a relation that is real in the",
     "                    doc's narrative and absent from any schema. Record which",
     "                    block defines it, so the entry falls when that one moves."
   ],
   "adjudications": [
+    {
+      "gate": 1,
+      "path": "CLAUDE.md",
+      "table": "player_gamelogs",
+      "column": "count",
+      "kind": "not_a_column",
+      "reason": "The worked EXAMPLE of a CTE alias shadowing a physical table, quoted in the gate-4 section to explain why .sql files were removed from gate 1's prose derivation. The sentence's entire point is that `player_gamelogs` there is a WITH alias and `count` is its projection, so gate 1 reporting it is the illustration rather than a defect."
+    },
+    {
+      "gate": 4,
+      "path": "nfl/query/matchup/player-occurrences-vs-specific-defense.sql",
+      "statement_contains": "select player.short_name, player.primary_position, nfl_team, opponent_nfl_team",
+      "kind": "pending_ruling",
+      "reason": "Real 42803, deliberately left failing pending an operator ruling on what the query is for. It projects nine per-game columns (targets, receiving_yards, rushing_attempts, ...) beside a count(*) under `group by year_week`, which is incoherent read either way: as a per-game listing the group by is wrong, as an occurrence count the nine columns are. Repairing it either direction would pick a meaning nobody has chosen. Remove this entry when the ruling lands and the query is rewritten.",
+      "gate_4_first_reported": "2026-08-18, on the run that introduced the .sql extraction"
+    },
     {
       "gate": 1,
       "path": "server/crontab-main/league-imports.cron",

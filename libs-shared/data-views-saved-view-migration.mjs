@@ -576,7 +576,7 @@ export const apply_dvoa_type_value_renames = (params) => {
 // Nothing could have caught that: check-saved-view-param-coverage walks param
 // KEYS, so a semantic repoint under a stable id is invisible to it. Anyone
 // wanting routes adds `player_pff_routes` deliberately.
-const COLUMN_ID_RENAMES = {
+export const COLUMN_ID_RENAMES = {
   player_fantasy_games_played_from_seasonlogs: 'player_games_played',
   player_fantasy_games_played_from_careerlogs: 'player_games_played',
   player_pff_receiving_snaps: 'player_pff_pass_plays',
