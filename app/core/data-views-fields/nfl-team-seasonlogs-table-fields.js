@@ -381,7 +381,7 @@ export default {
   nfl_team_seasonlogs_pass_epa_per_db: create_seasonlog_field({
     column_title: 'Pass EPA per Dropback Generated/Allowed By Position',
     header_label: 'EPA/DB',
-    player_value_path: 'nfl_team_seasonlogs_pass_epa_per_db'
+    player_value_path: 'nfl_team_seasonlogs_pass_epa_per_dropback'
   }),
   nfl_team_seasonlogs_avg_time_to_throw: create_seasonlog_field({
     column_title: 'Average Time to Throw Generated/Allowed By Position',
