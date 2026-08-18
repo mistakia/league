@@ -6,6 +6,10 @@ import { fileURLToPath } from 'url'
 import MockDate from 'mockdate'
 import scoring_formats_seed from '#db/fixtures/scoring-formats.mjs'
 import server from '#api'
+import {
+  assert_holdout_is_current,
+  print_response_validation_report
+} from '#api/swagger/response-validation.mjs'
 
 // Pin the suite's clock. Anything clock-derived (data view "next week"
 // matchups, current_season week/seas_type) otherwise varies with the real
@@ -105,6 +109,18 @@ export async function mochaGlobalSetup() {
   original_server_close = server.close.bind(server)
   server.close = (cb) => {
     if (cb) cb()
+  }
+}
+
+// The hold-out list's self-cleaning half. This runs as a root `afterAll` hook
+// rather than out of `mochaGlobalTeardown` on purpose: a hook failure is a
+// reported, counted mocha failure, where a throw from global teardown competes
+// with `--exit`'s own exit code. See api/swagger/response-validation.mjs for
+// what makes an entry stale and why an unexercised entry is silent.
+export const mochaHooks = {
+  afterAll() {
+    const report = assert_holdout_is_current()
+    print_response_validation_report(report)
   }
 }
 
