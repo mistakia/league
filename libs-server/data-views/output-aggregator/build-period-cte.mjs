@@ -363,6 +363,12 @@ export const build_batched_period_cte = ({
 
   if (source.extra_join) source.extra_join(sub)
 
+  // The cohort expansion is what makes the subject-id expression resolvable at
+  // all for a cohort source -- `pid_expr` names the members alias this join
+  // binds. It multiplies rows by group size, which is the whole cost of a share
+  // and is documented on the registry entry.
+  if (source.cohort_expansion) source.cohort_expansion.join(sub)
+
   const include_year =
     !is_aggregate || query_context.row_axes.includes('year') || force_year_grain
   sub.innerJoin('nfl_games', 'nfl_games.esbid', `${source_table}.esbid`)

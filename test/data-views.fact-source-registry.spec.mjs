@@ -2,12 +2,14 @@
 
 import * as chai from 'chai'
 
+import db from '#db'
 import {
   FACT_SOURCES,
   SUBJECT_ATTRIBUTIONS,
   SUBJECT_ID_LOOKUPS,
   resolve_fact_source,
-  subject_id_expression
+  subject_id_expression,
+  validate_fact_source
 } from '#libs-server/data-views/measure/fact-source-registry.mjs'
 import { resolve_source_table } from '#libs-server/data-views/output-aggregator/measure-batch.mjs'
 
@@ -106,5 +108,76 @@ describe('data views fact source registry', function () {
         requires_player_join: true
       })
     }
+  })
+
+  describe('cohort expansion', function () {
+    it('reads the subject id off the MEMBERS row, not the fact row', function () {
+      // nfl_plays names a team play and carries no member at all, so a cohort
+      // source that resolved against the fact table would group by a column
+      // that cannot identify a subject.
+      expect(
+        subject_id_expression({ fact_source: FACT_SOURCES.plays_cohort })
+      ).to.deep.equal({
+        expression: 'pg.pid',
+        requires_player_join: false
+      })
+    })
+
+    it('emits the join create_team_share_stat already emits', function () {
+      // The conversion must not move the share's SCAN -- the fan-out it pays is
+      // the one production pays today. Compare the emitted join against the
+      // incumbent CTE's, written here verbatim so a drift in either shows up as
+      // a text difference rather than as a silently different denominator.
+      const candidate = db('nfl_plays').select('pg.pid')
+      FACT_SOURCES.plays_cohort.cohort_expansion.join(candidate)
+
+      const incumbent = db('nfl_plays')
+        .select('pg.pid')
+        .join('player_gamelogs as pg', function () {
+          this.on('nfl_plays.esbid', '=', 'pg.esbid').andOn(
+            'nfl_plays.offense_nfl_team',
+            '=',
+            'pg.nfl_team'
+          )
+        })
+
+      expect(candidate.toString()).to.equal(incumbent.toString())
+    })
+
+    it('refuses a cohort attribution with no expansion to name its members', function () {
+      const { cohort_expansion, ...without_expansion } =
+        FACT_SOURCES.plays_cohort
+      expect(cohort_expansion).to.be.an('object')
+      expect(() =>
+        validate_fact_source('synthetic', without_expansion)
+      ).to.throw(/must declare a cohort_expansion/)
+    })
+
+    it('refuses the two halves declared apart', function () {
+      // Either half alone emits a scan that attributes to nobody, and neither
+      // failure is visible in the SQL.
+      expect(() =>
+        validate_fact_source('synthetic', {
+          ...FACT_SOURCES.plays_cohort,
+          subject_id_lookup: 'column',
+          subject_id_column: 'pid'
+        })
+      ).to.throw(/reads its subject id from 'column'/)
+
+      expect(() =>
+        validate_fact_source('synthetic', {
+          ...FACT_SOURCES.plays_cohort,
+          subject_attribution: 'direct'
+        })
+      ).to.throw(/does not attribute through one/)
+    })
+
+    it('accepts the registry entry it ships', function () {
+      // The positive control: the three refusals above are only meaningful if
+      // the real declaration passes the same function.
+      expect(() =>
+        validate_fact_source('plays_cohort', FACT_SOURCES.plays_cohort)
+      ).to.not.throw()
+    })
   })
 })

@@ -7,7 +7,7 @@ import {
   render_accumulator,
   render_accumulators
 } from '#libs-server/data-views/measure/accumulator.mjs'
-import { render_combine } from '#libs-server/data-views/measure/combine.mjs'
+import { render_combine_accumulators } from '#libs-server/data-views/measure/combine-accumulators.mjs'
 import {
   derive_supports_output,
   PARTITION_PERIODS
@@ -76,11 +76,11 @@ describe('data views measure vocabulary', function () {
     })
   })
 
-  describe('combine', function () {
+  describe('combine_accumulators', function () {
     it('emits an identity combine with no cast', function () {
-      const sql = render_combine({
+      const sql = render_combine_accumulators({
         measure_name: 'demo',
-        combine: 'identity',
+        combine_accumulators: 'identity',
         accumulator_sql: render_accumulators({
           measure_name: 'demo',
           accumulators: { value: { aggregate: 'sum', expr: 'n' } }
@@ -92,9 +92,9 @@ describe('data views measure vocabulary', function () {
 
     it('refuses an identity combine over more than one accumulator', function () {
       expect(() =>
-        render_combine({
+        render_combine_accumulators({
           measure_name: 'demo',
-          combine: 'identity',
+          combine_accumulators: 'identity',
           accumulator_sql: render_accumulators({
             measure_name: 'demo',
             accumulators: ratio_accumulators
@@ -105,18 +105,18 @@ describe('data views measure vocabulary', function () {
 
     it('refuses an absent combine rather than defaulting to identity', function () {
       expect(() =>
-        render_combine({
+        render_combine_accumulators({
           measure_name: 'demo',
-          combine: undefined,
+          combine_accumulators: undefined,
           accumulator_sql: { value: 'SUM(n)' }
         })
       ).to.throw(/'identity' or a function/)
     })
 
     it('answers NULL for a ratio with a zero denominator', async function () {
-      const sql = render_combine({
+      const sql = render_combine_accumulators({
         measure_name: 'demo',
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         accumulator_sql: render_accumulators({
           measure_name: 'demo',
@@ -135,9 +135,9 @@ describe('data views measure vocabulary', function () {
     })
 
     it('does not truncate an integer ratio', async function () {
-      const sql = render_combine({
+      const sql = render_combine_accumulators({
         measure_name: 'demo',
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         accumulator_sql: render_accumulators({
           measure_name: 'demo',
@@ -149,9 +149,9 @@ describe('data views measure vocabulary', function () {
     })
 
     it('scales a percentage to the left of the division', async function () {
-      const sql = render_combine({
+      const sql = render_combine_accumulators({
         measure_name: 'demo',
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           divide({
             numerator: a.numerator,
             denominator: a.denominator,
@@ -178,9 +178,9 @@ describe('data views measure vocabulary', function () {
           team_air_yards: { aggregate: 'sum', expr: 'd * 10' }
         }
       })
-      const sql = render_combine({
+      const sql = render_combine_accumulators({
         measure_name: 'wopr',
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           `${divide({
             numerator: a.player_targets,
             denominator: a.team_targets,
@@ -201,9 +201,9 @@ describe('data views measure vocabulary', function () {
     })
 
     it('applies decimals outside the combine', function () {
-      const sql = render_combine({
+      const sql = render_combine_accumulators({
         measure_name: 'demo',
-        combine: 'identity',
+        combine_accumulators: 'identity',
         accumulator_sql: { value: 'SUM(n)' },
         decimals: 2
       })

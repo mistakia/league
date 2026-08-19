@@ -139,7 +139,7 @@ const team_stat_from_plays = ({
     force_player_active || params?.limit_to_player_active_games || false
 
   // Measure-first contract: a rate-capable single-aggregate column declares an
-  // explicit `measure: { accumulators, combine }`; derive_measure produces the
+  // explicit `measure: { accumulators, combine_accumulators }`; derive_measure produces the
   // season render, numerator measure_expr, period aggregate (sum or
   // count_distinct), supports_output, and decimals rounding from it. is_rate
   // numerator/denominator columns and AVG carve-outs declare no measure and
@@ -153,7 +153,7 @@ const team_stat_from_plays = ({
   // column MUST pass supports_periods: []. Throws at module load.
   if (!is_rate && !derived && supports_periods && supports_periods.length > 0) {
     throw new Error(
-      `team_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { accumulators, combine } or set supports_periods: []`
+      `team_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { accumulators, combine_accumulators } or set supports_periods: []`
     )
   }
 
@@ -342,7 +342,7 @@ const stat_specs = {
   team_pass_yards_from_plays: {
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `pass_yards` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_pass_yds_from_plays'
   },
@@ -371,7 +371,7 @@ const stat_specs = {
           expr: `CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_pass_att_from_plays'
   },
@@ -383,7 +383,7 @@ const stat_specs = {
           expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_pass_comp_from_plays'
   },
@@ -395,28 +395,28 @@ const stat_specs = {
           expr: `CASE WHEN is_passing_touchdown = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_pass_td_from_plays'
   },
   team_pass_air_yards_from_plays: {
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `depth_of_target` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_pass_air_yds_from_plays'
   },
   team_yards_after_catch_from_plays: {
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `yards_after_catch` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_yards_after_catch_from_plays'
   },
   team_rush_yards_from_plays: {
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `rush_yards` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_rush_yds_from_plays'
   },
@@ -428,7 +428,7 @@ const stat_specs = {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_rush_att_from_plays'
   },
@@ -440,14 +440,14 @@ const stat_specs = {
           expr: `CASE WHEN is_rushing_touchdown = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_rush_td_from_plays'
   },
   team_expected_points_added_from_plays: {
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `epa` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_ep_added_from_plays'
   },
@@ -456,7 +456,7 @@ const stat_specs = {
       accumulators: {
         value: { aggregate: 'sum', expr: `win_probability_added` }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_wp_added_from_plays'
   },
@@ -490,7 +490,7 @@ const stat_specs = {
   team_play_count_from_plays: {
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `1` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_play_count_from_plays'
   },
@@ -506,7 +506,7 @@ const stat_specs = {
           expr: `CONCAT(nfl_plays.esbid, '_', series_sequence)`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_series_count_from_plays'
   },
@@ -518,7 +518,7 @@ const stat_specs = {
           expr: `CONCAT(nfl_plays.esbid, '_', drive_sequence)`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_drive_count_from_plays'
   },
@@ -530,21 +530,21 @@ const stat_specs = {
           expr: `CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_offensive_play_count_from_plays'
   },
   team_yards_created_from_plays: {
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `yards_created` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_yards_created_from_plays'
   },
   team_yards_blocked_from_plays: {
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `yards_blocked` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'team_yards_blocked_from_plays'
   },
