@@ -1,11 +1,93 @@
+// @ts-check
 import db from '#db'
 import { current_season } from '#constants'
-import { create_default_league } from '#libs-shared'
+import { create_default_league, epoch_to_timestamptz } from '#libs-shared'
 import {
   get_open_league_pause,
   get_latest_league_resume
 } from './league-pause.mjs'
 
+/**
+ * The league object 32 consumers destructure.
+ *
+ * It is the four joined rows merged flat, plus two computed groups, which is
+ * why no single table type describes it: `leagues` left-joined to `seasons`,
+ * `league_formats` and `league_scoring_formats`, then the division-name map
+ * and the pause state spread over the top. The row types are DERIVED from
+ * db/schema.postgres.sql (db/tools/generate-schema-types.mjs), so a column
+ * that a rename moves out from under a consumer becomes a type error here
+ * rather than an `undefined` that reads as "not configured".
+ *
+ * The `Partial` on the three joined sides is not laziness -- these are LEFT
+ * joins, so a league with no `seasons` row for the requested year genuinely
+ * carries none of those keys, and typing them as present would assert
+ * something the query does not guarantee.
+ *
+ * @typedef {Omit<import('#db/schema-types.js').LeaguesRow, DefaultLeagueAbsentColumn>
+ *   & Partial<Pick<import('#db/schema-types.js').LeaguesRow, DefaultLeagueAbsentColumn>>
+ *   & Partial<import('#db/schema-types.js').SeasonsRow>
+ *   & Partial<import('#db/schema-types.js').LeagueFormatsRow>
+ *   & Partial<import('#db/schema-types.js').LeagueScoringFormatsRow>
+ *   & LeagueDivisionNames
+ *   & LeaguePauseState} League
+ */
+
+/**
+ * The `leagues` columns the SYNTHETIC lid=0 league does not carry.
+ *
+ * `create_default_league()` supplies league configuration, not a `leagues`
+ * row: of that table's 13 columns it produces three, and the `lid=0` branch
+ * below adds `league_id`. The nine named here are therefore `undefined` on the
+ * default league and present on every real one — which is exactly the
+ * absent-key shape that has repeatedly reached production through the SPA's
+ * Immutable `Record`, so it is recorded in the type rather than left for a
+ * consumer to discover as a falsy value that reads like configuration.
+ *
+ * They are typed optional rather than fixed by widening
+ * `create_default_league`. Adding keys there is NOT a safe local change: the
+ * same object seeds `libs-server/create-league.mjs`'s INSERT, so a declared
+ * `league_id: null` or `archived_at: null` would flow into league creation
+ * against a NOT NULL surrogate key. Narrowing this belongs with that call
+ * site, not with the type.
+ *
+ * @typedef {'discord_webhook_url'
+ *   | 'is_hosted'
+ *   | 'archived_at'
+ *   | 'espn_league_id'
+ *   | 'sleeper_league_id'
+ *   | 'mfl_league_id'
+ *   | 'fleaflicker_league_id'
+ *   | 'salary_attribution_rule'
+ *   | 'discord_announcements_webhook_url'} DefaultLeagueAbsentColumn
+ */
+
+/**
+ * Division names arrive as computed keys (`division_1_name`, ...), so the
+ * shape is keyed by pattern rather than by a fixed key set -- the division
+ * count is league configuration, not a constant.
+ *
+ * The key is a TEMPLATE pattern rather than a bare `[key: string]` index
+ * signature. A bare one would claim every key on the merged league object and
+ * force all 120 of them to be strings, which both fails here and would silently
+ * accept any misspelled read. This is the interpolated-key class the census
+ * ranks at four occurrences and calls invisible by construction: there is no
+ * literal to grep, so the pattern in the type is the only thing that states it.
+ *
+ * @typedef {{ [division_name_key: `division_${number}_name`]: string | undefined }} LeagueDivisionNames
+ */
+
+/**
+ * @typedef {object} LeaguePauseState
+ * @property {Date | null} paused_at
+ * @property {Date | null} resumed_at
+ */
+
+/**
+ * @param {object} params
+ * @param {number} params.lid
+ * @param {number} params.year
+ * @returns {Promise<LeagueDivisionNames>}
+ */
 async function get_league_divisions({ lid, year }) {
   const divisions = await db('league_divisions')
     .where({ lid, season_year: year })
@@ -17,6 +99,12 @@ async function get_league_divisions({ lid, year }) {
   }, {})
 }
 
+/**
+ * @param {object} [params]
+ * @param {number | string} [params.lid]
+ * @param {number | string} [params.year]
+ * @returns {Promise<League | undefined>}
+ */
 export default async function ({ lid, year = current_season.year } = {}) {
   lid = Number(lid)
 
@@ -29,7 +117,24 @@ export default async function ({ lid, year = current_season.year } = {}) {
 
   if (!lid) {
     const league = create_default_league()
-    return { league_id: 0, ...league }
+    return {
+      league_id: 0,
+      ...league,
+      // `create_default_league` is a SEED payload for the write path, where
+      // `create-league.mjs` runs this field through `epoch_to_timestamptz`
+      // before binding it. Reading it back out here skipped that conversion,
+      // so `trade_deadline_at` was epoch SECONDS on the synthetic lid=0 league
+      // and a `Date` on every real one — one field name, two units, decided by
+      // which branch the caller landed in.
+      //
+      // Neither consumer can tell them apart: `dayjs(1606626000)` reads the
+      // number as MILLISECONDS and yields 1970-01-19 rather than 2020-11-29,
+      // and it neither throws nor produces an invalid date, so the trade
+      // deadline simply reads as long past. That is the mixed-unit residue of
+      // the 2026-08-07 timestamptz retype, surfaced by the type checker rather
+      // than by any consumer.
+      trade_deadline_at: epoch_to_timestamptz(league.trade_deadline_at)
+    }
   }
 
   const league = await db('leagues')
@@ -78,6 +183,10 @@ export default async function ({ lid, year = current_season.year } = {}) {
  * `resumed_at` travels because it is what voids the draft's standing
  * publication: without it the SPA would render windows from a slate the resume
  * already cancelled.
+ *
+ * @param {object} params
+ * @param {number} params.lid
+ * @returns {Promise<LeaguePauseState>}
  */
 async function get_league_pause_state({ lid }) {
   const open_pause = await get_open_league_pause({ league_id: lid })

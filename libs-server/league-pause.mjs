@@ -1,5 +1,14 @@
+// @ts-check
 import default_db from '#db'
 import { LeaguePaused } from '#libs-shared/errors.mjs'
+
+/** @typedef {import('#db/schema-types.js').LeaguePausesRow} LeaguePausesRow */
+
+/**
+ * @typedef {object} LeaguePauseState
+ * @property {Date | null} paused_at
+ * @property {Date | null} resumed_at
+ */
 
 /**
  * The single module that decides whether a league is paused.
@@ -26,7 +35,7 @@ import { LeaguePaused } from '#libs-shared/errors.mjs'
  * @param {Object} args
  * @param {number} args.league_id
  * @param {Object} [args.db]
- * @returns {Promise<Object|null>} The open pause row, or null.
+ * @returns {Promise<LeaguePausesRow|null>} The open pause row, or null.
  */
 export const get_open_league_pause = async ({ league_id, db = default_db }) => {
   if (!league_id) return null
@@ -55,10 +64,20 @@ export const get_open_league_pause = async ({ league_id, db = default_db }) => {
  * league write with a 423, so no window it might have voided is reachable, and
  * the SPA freezes its display clock off `paused_at` instead.
  *
+ * A `Date` or null, NEVER a string. `league_pauses.resumed_at` is
+ * `timestamp with time zone` and is selected without a cast, so node-pg's
+ * parser for that OID hands back a `Date`; the annotation here read
+ * `string|Date|null` until the type-check tier surfaced it, and a union of two
+ * representations is the shape that invites the retype family of defects this
+ * repo has already paid for — `Number(date)` yields milliseconds and
+ * `dayjs.unix(date)` yields a year-58,000 date, neither of which throws. A
+ * consumer branching on which one it got is guessing about something the
+ * column settles.
+ *
  * @param {Object} args
  * @param {number} args.league_id
  * @param {Object} [args.db]
- * @returns {Promise<string|Date|null>} The latest `resumed_at`, or null.
+ * @returns {Promise<Date|null>} The latest `resumed_at`, or null.
  */
 export const get_latest_league_resume = async ({
   league_id,
@@ -89,7 +108,7 @@ export const get_latest_league_resume = async ({
  * @param {Object} args
  * @param {Array<{league_id: number}>} args.leagues
  * @param {Object} [args.db]
- * @returns {Promise<Object>} Keyed by league id, each `{ paused_at, resumed_at }`.
+ * @returns {Promise<Record<number, LeaguePauseState>>} Keyed by league id.
  */
 export const get_pause_state_by_league_id = async ({
   leagues,
@@ -103,6 +122,7 @@ export const get_pause_state_by_league_id = async ({
     .orderBy('paused_at', 'asc')
     .select('league_id', 'paused_at', 'resumed_at')
 
+  /** @type {Record<number, LeaguePauseState>} */
   const pause_state = {}
   for (const league of leagues) {
     const league_id = Number(league.league_id)

@@ -68,7 +68,17 @@ const create_default_league = ({ commissioner_user_id = 0 } = {}) => {
     // intervals. Declared rather than left absent so every consumer of a
     // default league sees the same shape a real one has -- an absent
     // `draft_pause_periods` credits nothing silently.
+    //
+    // `resumed_at` is the third member of that set and was missing until the
+    // type-check tier surfaced it: `get-league.mjs` attaches BOTH pause fields
+    // to a real league, and the SPA's `League` Record declares both, so only
+    // the synthetic lid=0 league was short one key. That is the partly-visible
+    // sibling set the defect census names -- conforming the visible half
+    // (`paused_at`, when the pause feature moved from intervals to the
+    // `resumed_at` scalar) left the other half behind, in the one shape that
+    // reads as configuration rather than as absence.
     paused_at: null,
+    resumed_at: null,
     draft_pause_periods: [],
     free_agency_live_auction_start: null,
     min_bid: 1,

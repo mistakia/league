@@ -1,0 +1,51 @@
+{
+  // Type-check gate for the incremental `//@ts-check` tier.
+  //
+  // `checkJs` is deliberately FALSE. Nothing in this tree is checked until a
+  // file opts in by carrying a `//@ts-check` pragma on its first line, so the
+  // pragma IS the ratchet: adding one to a producer is the whole action, and
+  // `yarn check:types` then holds it. A broad `include` is what makes that
+  // work — every server root is in the program so an opted-in file can resolve
+  // its imports, while the files around it stay unchecked and silent.
+  //
+  // `noEmit` with no output directory: this config exists to produce a verdict,
+  // never a build. Webpack and babel remain the only things that compile here.
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "target": "es2022",
+    "lib": ["es2023", "dom"],
+    // `nodenext` is required rather than preferred: every server module reaches
+    // its siblings through the `#`-prefixed subpath imports declared in
+    // package.json, and node16/nodenext is the only resolution mode that reads
+    // that field. Under `bundler` or `node` every `#libs-server` import is
+    // unresolvable and each checked file reports its whole import list as an
+    // error, which reads as the file being broken.
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    // Left non-strict on purpose. An untyped parameter is the ordinary state of
+    // an un-annotated producer here, so `noImplicitAny` would report thousands
+    // of positions that carry no defect and drown the seam findings this tier
+    // exists to surface. What stays on is the part that catches the census
+    // classes: a destructured key that the producer does not return, a property
+    // read that does not exist on the shape, an argument whose type disagrees.
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false
+  },
+  "include": [
+    "libs-server/**/*.mjs",
+    "libs-shared/**/*.mjs",
+    "api/**/*.mjs",
+    "db/**/*.mjs",
+    "jobs/**/*.mjs",
+    "scripts/**/*.mjs",
+    "config/**/*.mjs"
+  ],
+  "exclude": ["node_modules", "dist", "private", "data"]
+}

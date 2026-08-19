@@ -3,3 +3,11 @@ dist
 data
 tmp
 config/external-league-credentials-key.sops.json
+
+# Generated from db/schema.postgres.sql by db/tools/generate-schema-types.mjs.
+# It must be ignored rather than merely left alone: `yarn prettier` is
+# `prettier --write .` over the WHOLE tree, so a sibling formatting an
+# unrelated file would rewrite this one, and `yarn check:types` compares the
+# committed bytes against a fresh generation -- the format run would turn its
+# own currency gate red with nothing wrong.
+db/schema-types.d.ts

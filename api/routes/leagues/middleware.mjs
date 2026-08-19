@@ -1,5 +1,8 @@
+// @ts-check
 import { getLeague, validators } from '#libs-server'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
+
+/** @typedef {import('#libs-server/get-league.mjs').League} League */
 
 // Requests that cannot write, and so are never blocked by a pause.
 const SAFE_HTTP_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
@@ -24,9 +27,9 @@ export function require_auth(req, res) {
 
 /**
  * Validate and get league
- * @param {string} leagueId - League ID from params
+ * @param {string|number} leagueId - League ID from params
  * @param {Object} res - Express response object
- * @returns {Promise<Object|null>} League object or null if validation failed
+ * @returns {Promise<League|null>} League object or null if validation failed
  */
 export async function validate_and_get_league(leagueId, res) {
   // Validate league ID
@@ -48,7 +51,7 @@ export async function validate_and_get_league(leagueId, res) {
 
 /**
  * Require user to be league commissioner
- * @param {Object} league - League object
+ * @param {League} league - League object
  * @param {number} userId - User ID
  * @param {Object} res - Express response object
  * @param {string} action - Action being performed (for error message)
@@ -78,9 +81,9 @@ export function require_commissioner(league, userId, res, action) {
  * during the offseason window before the new season's rows exist, and every
  * caller of this helper is a league-scoped read.
  *
- * @param {Object} league - League object
+ * @param {League} league - League object
  * @param {number} userId - User ID
- * @param {string} leagueId - League ID
+ * @param {string|number} leagueId - League ID
  * @param {Object} db - Database connection
  * @param {Object} res - Express response object
  * @returns {Promise<boolean>} True if authorized, false if response was sent
