@@ -52,8 +52,8 @@ const HISTORICAL_PLAYS_FIELDS = [
   'nfl_plays.play_type_nfl',
   'nfl_plays.updated',
   'nfl_plays.is_qb_kneel',
-  'nfl_games.home_nfl_team as h',
-  'nfl_games.away_nfl_team as v'
+  'nfl_games.home_nfl_team',
+  'nfl_games.away_nfl_team'
 ]
 
 // ============================================================================
@@ -685,31 +685,20 @@ router.post('/views/search', async (req, res) => {
 router.get('/views', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { user_id, username } = req.query
-    const user_ids = []
-
-    if (username) {
-      const user = await db('users').where({ username }).first()
-      if (user) {
-        user_ids.push(user.id)
-      }
+    // This route is mounted before the blanket auth guard in api/index.mjs, so
+    // it must self-enforce. It is owner-scoped with no filter parameters: a
+    // caller can only ever list their own views. Sharing goes through the
+    // view_id, which resolves unauthenticated.
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).send({ error: 'invalid userId' })
     }
 
-    if (user_id) {
-      user_ids.push(user_id)
-    }
-
-    const query = db('user_plays_views')
+    const views = await db('user_plays_views')
       .select('user_plays_views.*', 'users.username as view_username')
       .leftJoin('users', 'user_plays_views.user_id', 'users.id')
+      .where('user_plays_views.user_id', req.auth.userId)
+      .limit(100)
 
-    if (user_ids.length) {
-      query.whereIn('user_plays_views.user_id', user_ids)
-    }
-
-    query.limit(100)
-
-    const views = await query
     return res.status(200).send(views)
   } catch (error) {
     logger(error)
