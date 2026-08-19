@@ -3,7 +3,9 @@
   "player_air_yards_per_target_from_plays": [
     "ROUND(SUM(depth_of_target)::decimal / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as air_yds_per_trg_from_plays"
   ],
-  "player_air_yards_share_from_plays": null,
+  "player_air_yards_share_from_plays": [
+    "ROUND(100.0 * SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END) / NULLIF(SUM(nfl_plays.depth_of_target), 0), 2) as air_yds_share_from_plays"
+  ],
   "player_average_box_defenders_per_rush_attempt_from_plays": [
     "ROUND(SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN box_defenders ELSE 0 END)::decimal / NULLIF(SUM(CASE WHEN ball_carrier_pid IS NOT NULL AND box_defenders IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as average_box_defenders_per_rush_att_from_plays"
   ],
@@ -52,7 +54,9 @@
   "player_opportunities_from_plays": [
     "SUM(CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL OR (passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false)) THEN 1 ELSE 0 END) as opportunities_from_plays"
   ],
-  "player_opportunity_share_from_plays": null,
+  "player_opportunity_share_from_plays": [
+    "ROUND(100.0 * (COUNT(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN 1 ELSE NULL END) + COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END)) / NULLIF(SUM(CASE WHEN nfl_plays.ball_carrier_pid IS NOT NULL OR nfl_plays.target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as opportunity_share_from_plays"
+  ],
   "player_pass_air_yards_from_plays": [
     "SUM(depth_of_target) as pass_air_yds_from_plays"
   ],
@@ -135,7 +139,9 @@
   "player_receiving_first_down_percentage_from_plays": [
     "ROUND(100.0 * SUM(CASE WHEN is_first_down = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as recv_first_down_pct_from_plays"
   ],
-  "player_receiving_first_down_share_from_plays": null,
+  "player_receiving_first_down_share_from_plays": [
+    "ROUND(100.0 * SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END), 0), 2) as recv_first_down_share_from_plays"
+  ],
   "player_receiving_or_rushing_touchdowns_from_plays": [
     "SUM(CASE WHEN is_touchdown = true THEN 1 ELSE 0 END) as rec_or_rush_tds_from_plays"
   ],
@@ -163,11 +169,15 @@
   "player_rush_attempts_from_plays": [
     "SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END) as rush_atts_from_plays"
   ],
-  "player_rush_attempts_share_from_plays": null,
+  "player_rush_attempts_share_from_plays": [
+    "ROUND(100.0 * COUNT(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as rush_att_share_from_plays"
+  ],
   "player_rush_first_down_percentage_from_plays": [
     "ROUND(100.0 * SUM(CASE WHEN is_first_down = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as rush_first_down_pct_from_plays"
   ],
-  "player_rush_first_down_share_from_plays": null,
+  "player_rush_first_down_share_from_plays": [
+    "ROUND(100.0 * SUM(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END), 0), 2) as rush_first_down_share_from_plays"
+  ],
   "player_rush_first_downs_from_plays": [
     "SUM(CASE WHEN is_first_down = true THEN 1 ELSE 0 END) as rush_first_downs_from_plays"
   ],
@@ -181,7 +191,9 @@
     "ROUND(SUM(yards_after_any_contact)::decimal / NULLIF(SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as rush_yds_after_contact_per_att_from_plays"
   ],
   "player_rush_yards_from_plays": ["SUM(rush_yards) as rush_yds_from_plays"],
-  "player_rush_yards_share_from_plays": null,
+  "player_rush_yards_share_from_plays": [
+    "ROUND(100.0 * SUM(CASE WHEN nfl_plays.ball_carrier_pid = pg.pid THEN nfl_plays.rush_yards ELSE 0 END) / NULLIF(SUM(nfl_plays.rush_yards), 0), 2) as rush_yds_share_from_plays"
+  ],
   "player_rush_yds_per_attempt_from_plays": [
     "ROUND(SUM(rush_yards)::decimal / NULLIF(SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as rush_yds_per_att_from_plays"
   ],
@@ -206,7 +218,9 @@
   "player_successful_rushing_and_receiving_play_percentage_from_plays": [
     "ROUND(100.0 * SUM(CASE WHEN is_successful_play = true THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as successful_rushing_and_receiving_play_pct_from_plays"
   ],
-  "player_target_share_from_plays": null,
+  "player_target_share_from_plays": [
+    "ROUND(100.0 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays"
+  ],
   "player_targets_from_plays": [
     "SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays"
   ],
@@ -293,7 +307,9 @@
   "player_weighted_opportunity_from_plays": [
     "ROUND(SUM(CASE WHEN nfl_plays.yard_line_100 <= 20 AND ball_carrier_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.yard_line_100 <= 20 AND target_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.yard_line_100 > 20 AND ball_carrier_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.yard_line_100 > 20 AND target_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays"
   ],
-  "player_weighted_opportunity_rating_from_plays": null,
+  "player_weighted_opportunity_rating_from_plays": [
+    "ROUND((1.5 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END) / NULLIF(SUM(nfl_plays.depth_of_target), 0)), 4) as weighted_opp_rating_from_plays"
+  ],
   "player_yards_blocked_from_plays": [
     "SUM(yards_blocked) as yards_blocked_from_plays"
   ],
