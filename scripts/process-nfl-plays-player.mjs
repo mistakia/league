@@ -129,11 +129,8 @@ const process_nfl_plays_player = async () => {
     try {
       await updatePlayer({
         player_row,
-        update: {
-          gsis_it_player_id,
-          allow_protected_props: true,
-          ignore_retired: true
-        },
+        update: { gsis_it_player_id },
+        allow_protected_props: true,
         source: 'nfl'
       })
     } catch (err) {

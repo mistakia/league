@@ -98,6 +98,22 @@ const updatePlayer = async ({
     throw new Error('Player row is missing pid')
   }
 
+  // A key that is not a real column on `player` produces no diff entry --
+  // deep-diff has nothing on the row side to compare it against, so the value
+  // is discarded with no error and nothing in the log, and a typo in a caller
+  // is indistinguishable from a field that legitimately did not change. Checked
+  // against the fetched row rather than information_schema, matching
+  // set-player-field-override.mjs: the row is already in hand, it is always
+  // exactly the live schema, and it is the same object diff() below compares
+  // against.
+  for (const key of Object.keys(update)) {
+    if (!Object.prototype.hasOwnProperty.call(player_row, key)) {
+      throw new Error(
+        `updatePlayer: '${key}' is not a column on player (pid ${player_row.pid}) -- check for a typo against db/schema.postgres.sql`
+      )
+    }
+  }
+
   const formatted_update = {
     ...update
   }
