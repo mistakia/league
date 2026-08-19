@@ -479,8 +479,7 @@ export const consumes_params = [
   'career_year',
   'career_game',
   'matchup_opponent_type',
-  'output_column_params',
-  'rate_type_column_params'
+  'output_column_params'
   // team_attribution is intentionally NOT listed: it does not affect the
   // per_game denominator CTE (see get_per_game_cte_table_name) -- only the
   // join target, resolved per-column at assembly time. Contrast per_team_play,

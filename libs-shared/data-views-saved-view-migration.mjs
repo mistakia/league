@@ -1,4 +1,7 @@
-import { translate_rate_type_to_output } from './data-views-output-tokens.mjs'
+import {
+  translate_rate_type_to_output,
+  LEGACY_OUTPUT_PARAM_KEYS
+} from './data-views-output-tokens.mjs'
 
 const TEAM_FROM_PLAYS_RE = /^team_(.+)_from_plays$/
 
@@ -742,7 +745,13 @@ const PARAM_KEY_RENAMES = {
   ...COUNTING_STAT_PARAM_RENAMES,
   ...MARKETS_PARAM_RENAMES,
   ...LONG_TAIL_PARAM_RENAMES,
-  ...RECEIVING_PREFIX_PARAM_RENAMES
+  ...RECEIVING_PREFIX_PARAM_RENAMES,
+  // The pre-identity output vocabulary, declared in data-views-output-tokens so
+  // the server request boundary rewrites the same two keys from one source.
+  // Folded in here rather than rewritten by hand below so they inherit the
+  // both-keys-present rule and land in MIGRATED_PARAM_KEYS, which the saved-view
+  // coverage gate reads -- it could not recognise either key before.
+  ...LEGACY_OUTPUT_PARAM_KEYS
 }
 
 // Every legacy param key this module rewrites at read time, exported so
@@ -806,19 +815,6 @@ const migrate_params = (params) => {
   if (Object.prototype.hasOwnProperty.call(next, 'rate_type')) {
     const { rate_type: _drop, ...rest } = next
     next = rest
-    changed = true
-  }
-
-  if (
-    Object.prototype.hasOwnProperty.call(next, 'rate_type_match_column_params')
-  ) {
-    const { rate_type_match_column_params: value, ...rest } = next
-    next = { ...rest, output_match_column_params: value }
-    changed = true
-  }
-  if (Object.prototype.hasOwnProperty.call(next, 'rate_type_column_params')) {
-    const { rate_type_column_params: value, ...rest } = next
-    next = { ...rest, output_column_params: value }
     changed = true
   }
 

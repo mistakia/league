@@ -42,7 +42,7 @@ export function get_play_level_params_hash_suffix({
   params,
   rate_type_params = {}
 } = {}) {
-  const denominator_params = get_rate_type_denominator_params({ params })
+  const denominator_params = get_output_denominator_params({ params })
   return Object.entries(denominator_params)
     .filter(
       ([key]) => play_level_param_keys.has(key) && !(key in rate_type_params)
@@ -52,7 +52,7 @@ export function get_play_level_params_hash_suffix({
     .join('')
 }
 
-export default function get_rate_type_denominator_params({ params = {} } = {}) {
+export default function get_output_denominator_params({ params = {} } = {}) {
   const result = {}
 
   // Always include time/scope params
@@ -62,13 +62,14 @@ export default function get_rate_type_denominator_params({ params = {} } = {}) {
     }
   }
 
-  // Canonical key is `output_column_params`; `rate_type_column_params` is read
-  // only when it is absent. That alias is permanent, not a deprecation window:
-  // shared short URLs are immutable rows in the production `urls` table and
-  // carry the old key forever, and the saved-view migrator runs against browser
-  // localStorage rather than the request path, so it cannot reach them.
-  const output_column_params =
-    params.output_column_params ?? params.rate_type_column_params
+  // `output_column_params` is the only spelling that reaches this far. The
+  // legacy `rate_type_column_params` that immutable short URLs carry forever is
+  // rewritten at the request boundary (get-data-view-results), so the `??`
+  // fallback that used to sit here is dead. Do not restore it: the CTE name each
+  // denominator plugin builds hashes the params THIS function returns, so a
+  // reader that silently accepts a second spelling is how the vocabulary spreads
+  // back out of the boundary.
+  const output_column_params = params.output_column_params
 
   if (output_column_params) {
     for (const [key, value] of Object.entries(output_column_params)) {

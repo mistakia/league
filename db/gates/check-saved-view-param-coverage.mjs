@@ -76,7 +76,18 @@ const PARAM_CONSUMER_DIRECTORIES = [
 const PARAM_CONSUMER_FILES = [
   'libs-server/apply-play-by-play-column-params-to-query.mjs',
   'libs-server/get-data-view-results.mjs',
-  'libs-shared/data-views-saved-view-migration.mjs'
+  'libs-shared/data-views-saved-view-migration.mjs',
+  // The output-param UI is a real consumer, and the only one for a param that
+  // no server registry reads: `output_match_column_params` is the toggle
+  // deciding whether the denominator override panel applies, so the client
+  // resolves it and the request carries only its RESULT in
+  // `output_column_params`. It was recognised until 2026-08-19 purely because
+  // the migration module happened to name it in a hand-written rename block;
+  // folding that block into a map removed the literal and the gate immediately
+  // reported the key as orphaned across a live saved view. Nothing was broken --
+  // the recognition had just always been accidental, which is the same
+  // prose-versus-consumer confusion this file's header was written about.
+  'libs-shared/output-column-param.mjs'
 ]
 
 const walk_directory = async (directory) => {

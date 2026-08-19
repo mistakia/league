@@ -1,6 +1,7 @@
 import db from '#db'
 import debug from 'debug'
 import { named_scoring_formats, named_league_formats } from '#libs-shared'
+import { LEGACY_OUTPUT_PARAM_KEYS } from '#libs-shared/data-views-output-tokens.mjs'
 import {
   format_nfl_week_identifier,
   parse_nfl_week_identifier,
@@ -109,6 +110,16 @@ const rename_rate_type = (rate_type) => {
   return rate_type_mapping[rate_type] || rate_type
 }
 
+// The request boundary for the pre-identity `rate_type` vocabulary: both the
+// legacy TOKEN spellings and the legacy param KEYS are rewritten onto the
+// canonical output vocabulary here, so nothing downstream has to accept two
+// spellings of the same thing.
+//
+// Rewriting at the boundary rather than at each reader is what keeps the legacy
+// spelling from spreading: it previously survived as a `??` fallback buried in
+// the denominator-params helper, so every future reader of that key had to
+// remember the second spelling. Downstream of here the canonical key is the
+// only one that exists.
 const process_rate_type_backwards_compatibility = (params) => {
   if (params.rate_type) {
     if (Array.isArray(params.rate_type)) {
@@ -117,6 +128,22 @@ const process_rate_type_backwards_compatibility = (params) => {
       params.rate_type = rename_rate_type(params.rate_type)
     }
   }
+
+  for (const [legacy_key, current_key] of Object.entries(
+    LEGACY_OUTPUT_PARAM_KEYS
+  )) {
+    if (!Object.prototype.hasOwnProperty.call(params, legacy_key)) continue
+    const { [legacy_key]: value, ...rest } = params
+    log(
+      `Legacy output param key: rewriting "${legacy_key}" to "${current_key}"`
+    )
+    // A request carrying both keys keeps the canonical one; the legacy key is
+    // the stale copy by construction. Matches the saved-view migrator's rule.
+    params = Object.prototype.hasOwnProperty.call(rest, current_key)
+      ? rest
+      : { ...rest, [current_key]: value }
+  }
+
   return params
 }
 

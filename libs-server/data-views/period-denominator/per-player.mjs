@@ -2,9 +2,9 @@ import db from '#db'
 import { emit_rate_outer_select } from './emit-rate-outer-select.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
-import get_rate_type_denominator_params, {
+import get_output_denominator_params, {
   get_play_level_params_hash_suffix
-} from '#libs-shared/get-rate-type-denominator-params.mjs'
+} from '#libs-shared/get-output-denominator-params.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import {
   resolve_year_offset_range,
@@ -104,7 +104,7 @@ export const add_per_player_cte = ({
     }
   }
 
-  const denominator_params = get_rate_type_denominator_params({ params })
+  const denominator_params = get_output_denominator_params({ params })
   delete denominator_params.year_offset
   const filtered_params = {
     ...denominator_params,
@@ -189,8 +189,7 @@ export const consumes_params = [
   'nfl_week_id',
   'seas_type',
   'year_offset',
-  'output_column_params',
-  'rate_type_column_params'
+  'output_column_params'
 ]
 
 export const get_cte_name = ({ params, dispatch_params = {} }) => {

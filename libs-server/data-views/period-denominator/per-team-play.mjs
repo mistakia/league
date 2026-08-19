@@ -6,9 +6,9 @@ import {
 import { emit_rate_outer_select } from './emit-rate-outer-select.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
-import get_rate_type_denominator_params, {
+import get_output_denominator_params, {
   get_play_level_params_hash_suffix
-} from '#libs-shared/get-rate-type-denominator-params.mjs'
+} from '#libs-shared/get-output-denominator-params.mjs'
 import resolve_nfl_week_id_from_year_param from '#libs-server/data-views/resolve-nfl-week-id-from-year-param.mjs'
 import * as identity_bridge_registry from '#libs-server/data-views/identity-bridge-registry.mjs'
 import {
@@ -146,7 +146,7 @@ export const add_per_team_play_cte = ({
     cte_query.groupBy('nfl_plays.season_year')
   }
 
-  const denominator_params = get_rate_type_denominator_params({ params })
+  const denominator_params = get_output_denominator_params({ params })
   delete denominator_params.year_offset
 
   apply_play_by_play_column_params_to_query({
@@ -275,7 +275,6 @@ export const consumes_params = [
   'matchup_opponent_type',
   'team_unit',
   'output_column_params',
-  'rate_type_column_params',
   'team_attribution'
 ]
 
