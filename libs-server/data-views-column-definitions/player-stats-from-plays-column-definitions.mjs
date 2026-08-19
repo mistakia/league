@@ -48,7 +48,7 @@ const generate_table_alias = ({ type, params = {}, pid_columns } = {}) => {
   }
 
   const key = get_stats_column_param_key({ params })
-  const pid_columns_string = pid_columns.sort().join('_')
+  const pid_columns_string = [...pid_columns].sort().join('_')
   return get_table_hash(`${type}_${pid_columns_string}_${key}`)
 }
 
