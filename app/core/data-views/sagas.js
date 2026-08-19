@@ -251,6 +251,14 @@ function* report_client_observed_duration({
   // 2026-07-31 double-render defect. The server drops any timing frame whose
   // execution_id is not live for that socket, so an unattributable frame is
   // better dropped than sent under an ambiguous id.
+  //
+  // This guard depends on the server minting execution_id at request ENTRY,
+  // not at queue admission. A CACHE HIT answers from send_cached_result and
+  // never enters the queue, so an id minted in the queue path would leave
+  // every cache hit unattributable and silently drop its timing -- which
+  // deletes exactly the fast-path denominator that sending on every settled
+  // request (no client-side floor) exists to preserve, biasing any percentile
+  // toward cache misses with nothing reporting the gap.
   if (!execution_id) return
 
   yield call(send, {
