@@ -301,7 +301,7 @@ const build_role_union_period_cte = ({
   // career_year / career_game: legacy with_func joined player_seasonlogs on
   // (pid, year, seas_type) and filtered between bounds. Mirror that here so
   // role-union numerators respect career_year params -- without this, the
-  // per-game denominator (rate-type-per-game.mjs) correctly restricts to
+  // per-game denominator (period-denominator/per-game.mjs) correctly restricts to
   // career_year games while the numerator sums all-time, inflating the rate.
   const career_year = params && params.career_year
   const career_game = params && params.career_game

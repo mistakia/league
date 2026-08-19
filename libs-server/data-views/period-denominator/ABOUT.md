@@ -1,20 +1,26 @@
-# Rate-Type CTE Builders
+# Period Denominator CTE Builders
 
-This directory contains the CTE builders that produce the denominator aggregations used by data-view columns. Each file targets a specific aggregation grain and is bound to its `(period, 'rate')` tuples by `../output-aggregator-registry.mjs`.
+This directory contains the CTE builders that produce the per-period denominator aggregations used by data-view columns under the `rate` output aggregation. Each module targets one denominator FAMILY and is bound to its `(period, 'rate')` tuples by `../output-aggregator-registry.mjs`.
 
-These are the live implementation, not a compat shim — the directory keeps its `rate-type` name only because renaming it has not been done yet (`user:task/league/data-views/retire-rate-type-compat-shims.md`). The `rate_type` request param is separately permanent, since shared short URLs carry it; `../normalize-output-param.mjs` translates it to `output` before any of these builders run.
+Nothing here is a compat shim. `rate_type` survives on the REQUEST path only — shared short URLs carry it permanently, so `../normalize-output-param.mjs` translates it to `output` before any builder runs, and the server normalizes the legacy param keys at the request boundary.
 
 ## Files
 
-- `rate-type-per-game.mjs` -- per-game denominators over `player_gamelogs` (+ `nfl_games`) for player variants, and over `nfl_plays` for team variants.
-- `rate-type-per-player-play.mjs` -- per-player-play denominators over `nfl_plays` joined with `nfl_snaps`.
-- `rate-type-per-team-play.mjs` -- per-team-play denominators over `nfl_plays`.
-- `rate-type-per-player-route.mjs` -- per-player-route denominators over `nfl_plays_receiver` joined with `nfl_plays`.
-- `rate-type-per-player.mjs` -- per-player stat-counted denominators over `nfl_plays` (rush/pass/target/reception variants).
-- `emit-rate-outer-select.mjs` -- shared outer-SELECT emission for the legacy rate path.
-- `per-team-play-wrap.mjs` -- the multi-year-no-split wrap that re-attributes per-year team volume.
+- `per-game.mjs` — per-game denominators over `player_gamelogs` (+ `nfl_games`) for player variants, and over `nfl_games` (home/away union) for team variants.
+- `per-player-play.mjs` — per-player-play denominators over `nfl_plays` joined with `nfl_snaps`.
+- `per-team-play.mjs` — per-team-play denominators over `nfl_plays`.
+- `per-player-route.mjs` — per-player-route denominators over `nfl_plays_receiver` joined with `nfl_plays`.
+- `per-player.mjs` — per-player stat-counted denominators over `nfl_plays` (rush/pass/target/reception variants).
+- `emit-rate-outer-select.mjs` — the outer-SELECT emission all five plugins share as their `emit_outer_select`.
+- `per-team-play-wrap.mjs` — the multi-year-no-split wrap that re-attributes per-year team volume, flushed by `libs-server/get-data-view-results.mjs`.
 
-Dispatch lives one level up in `../output-aggregator-registry.mjs`, which resolves `(period, aggregation)` to a plugin exposing `get_cte_name`, `add_cte`, `join_cte`, and `emit_outer_select`. There is no `index.mjs` here.
+## Dispatch
+
+Dispatch lives one level up in `../output-aggregator-registry.mjs`, which resolves `(period, aggregation)` to a plugin exposing `get_cte_name`, `add_cte`, `join_cte` and `emit_outer_select`, plus the optional `handles_numerator` hook that suppresses the standard `aggregator-rate` numerator path when a plugin materializes its own. There is no `index.mjs` here and no single entry point.
+
+**A module name tracks the denominator family, not a period token.** The registry is module-keyed: it registers 19 `(period, 'rate')` tuples across five plugins, capturing `dispatch_params` in the registration closure. `per-team-play.mjs` serves seven tokens (`team_play`, `team_pass_play`, `team_rush_play`, `team_half`, `team_quarter`, `team_drive`, `team_series`) and `per-player.mjs` serves nine, so naming a module per token was never possible.
+
+Four column-definition files plus `../participation-status-cte.mjs` and `../register-per-game-cte.mjs` import these modules directly rather than through the registry; those call sites carry the `data_view_options` obligation below.
 
 These plugins do NOT declare `consumes_params`. That is the `output-aggregator/` interface, where it feeds `consumed_params_signature` for the count and rate aggregators. Here each plugin names its own CTE by hashing the params it actually resolves — see `get_per_player_cte_table_name`, which folds in the play-level denominator params — so a `consumes_params` list would be inert. Five of them were, until 2026-08-19: declared, plumbed through the registry adapter, and read by nothing.
 

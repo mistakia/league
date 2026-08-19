@@ -16,11 +16,11 @@
       "emission": "SUM(measure_total) / COUNT(period_key)",
       "plugins": [
         "output-aggregator/aggregator-rate.mjs",
-        "rate-type/rate-type-per-game.mjs",
-        "rate-type/rate-type-per-team-play.mjs",
-        "rate-type/rate-type-per-player.mjs",
-        "rate-type/rate-type-per-player-play.mjs",
-        "rate-type/rate-type-per-player-route.mjs"
+        "period-denominator/per-game.mjs",
+        "period-denominator/per-team-play.mjs",
+        "period-denominator/per-player.mjs",
+        "period-denominator/per-player-play.mjs",
+        "period-denominator/per-player-route.mjs"
       ],
       "replaces": "every legacy rate_type token",
       "cell_format": "fixed: 2"

@@ -630,11 +630,11 @@ Every plugin exports:
 
 `compute_group_key` keys on measure source, period, identity, sorted pid columns, rendered measure predicate, `apply_filters` body, team unit, and the consumed-params signature. CTE names are `rate_<period>_<md5 prefix>`. Registration is deferred until `flush_measure_batches` runs after the per-column dispatch loop.
 
-### Denominator CTE builders (`rate-type/`)
+### Denominator CTE builders (`period-denominator/`)
 
-The per-period denominator builders still live under `libs-server/data-views/rate-type/` — `rate-type-per-game.mjs`, `rate-type-per-team-play.mjs`, `rate-type-per-player.mjs`, `rate-type-per-player-play.mjs`, `rate-type-per-player-route.mjs`. They are the live implementation, not a compat shim, and are bound to their `(period, 'rate')` tuples by the registry. There is no `rate-type/index.mjs` dispatcher.
+The per-period denominator builders live under `libs-server/data-views/period-denominator/` — `per-game.mjs`, `per-team-play.mjs`, `per-player.mjs`, `per-player-play.mjs`, `per-player-route.mjs`. They are the live implementation, not a compat shim, and are bound to their `(period, 'rate')` tuples by the registry, which is module-keyed: one module serves a denominator family across several period tokens. There is no `index.mjs` dispatcher.
 
-Their author invariants — apply `effective_years` as a `WHERE ... IN` on every year-partitioned table scanned, and register every CTE with `withMaterialized` — are in `libs-server/data-views/rate-type/ABOUT.md`.
+Their author invariants — apply `effective_years` as a `WHERE ... IN` on every year-partitioned table scanned, and register every CTE with `withMaterialized` — are in `libs-server/data-views/period-denominator/ABOUT.md`.
 
 ## Utility Functions
 

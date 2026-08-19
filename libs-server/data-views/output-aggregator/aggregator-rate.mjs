@@ -88,7 +88,7 @@ export const add_cte = (args) => {
 // `source` is forwarded to the bridge so its resolve_year_range can consult
 // source.year_default when neither query_context.year_range nor params.year
 // is set (e.g. team-stat columns in offseason).
-// Exported so the per_game denominator join (rate-type-per-game.mjs) projects
+// Exported so the per_game denominator join (period-denominator/per-game.mjs) projects
 // onto the SAME team as this numerator -- both apply the player_year->team_year
 // bridge and return player_year_teams.team, eliminating the historical numerator
 // vs current_nfl_team denominator split for offseason team-changers.

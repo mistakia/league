@@ -11,7 +11,7 @@
 //     raw bool_or(active). Sibling active/started/snaps task consumes this CTE
 //     directly via the `columns` extension point -- no enum decoding.
 //   - team_weeks_played           -- DISTINCT (team, year, week) the team played
-//     (rate-type-per-game.mjs), shared with the per-game denominator's h/v union.
+//     (period-denominator/per-game.mjs), shared with the per-game denominator's h/v union.
 //   - player_years_teams          -- the player's season team set, for bye
 //     classification (player-team-bridge-cte.mjs).
 //
