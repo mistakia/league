@@ -27,6 +27,13 @@
 // render is fractional. It does not round an integral SEASON render -- a count
 // has nothing to round, and rounding one would move every distinct-count
 // golden while changing no value.
+//
+// A measure carrying a real combine also derives its RECOMBINATION -- the same
+// combine applied one grain coarser, over an offset window whose CTE has
+// already projected one column per accumulator. That is the law at a second
+// scope rather than a second emitter: `render_combine` stays the only place a
+// combine is rendered, and "sum of per-year ratios" is unrepresentable because
+// the recombination sums ACCUMULATORS and combines after.
 
 import { render_accumulators, validate_accumulator } from './accumulator.mjs'
 import { render_combine, validate_combine } from './combine.mjs'
@@ -104,18 +111,60 @@ export const derive_measure = ({ stat_name, measure, supports_periods }) => {
 
   const aggregate = sole_accumulator ? sole_accumulator.aggregate : null
 
-  const capability = derive_supports_output({
-    denominator_unit_periods: ['game', ...supports_periods]
-  })
-  const supports_output = {
-    periods: capability.periods,
-    aggregations: capability.aggregations.filter((aggregation) =>
-      SERVEABLE_AGGREGATIONS.includes(aggregation)
-    )
-  }
+  // Recombination: the same combine over an offset window. The period CTE
+  // projects `<stat>_<accumulator>` per accumulator (see accumulator_selects),
+  // so the window sums each one and combines after -- never the reverse.
+  const accumulator_names = Object.keys(accumulators)
+  const is_combined = combine !== 'identity'
+  const accumulator_selects = is_combined
+    ? accumulator_names.map(
+        (name) => `${accumulator_sql[name]} as ${stat_name}_${name}`
+      )
+    : null
+  const recombine = is_combined
+    ? ({ table_name }) =>
+        render_combine({
+          measure_name: stat_name,
+          combine,
+          accumulator_sql: Object.fromEntries(
+            accumulator_names.map((name) => [
+              name,
+              `SUM(${table_name}.${stat_name}_${name})`
+            ])
+          ),
+          decimals
+        })
+    : null
+
+  // Capability is what the wire can be ASKED for, so it advertises only what
+  // the output aggregator can serve. Every plugin consumes a single
+  // `measure_expr` (`measure-batch.mjs` throws without one), which a combined
+  // measure does not have -- its value is a function of several accumulators
+  // and only exists after the per-period reducer evaluates the combine at
+  // period grain. So a combined measure advertises nothing until that reducer
+  // lands. This is the SERVEABLE_AGGREGATIONS rule above at the measure level,
+  // NOT the measure-shape exclusion the operator reversed: `rate` and `mean`
+  // both stay semantically legal on a combined measure (see capability.mjs),
+  // and the moment the reducer can evaluate one they are offered.
+  const supports_output = is_combined
+    ? null
+    : (() => {
+        const capability = derive_supports_output({
+          denominator_unit_periods: ['game', ...supports_periods]
+        })
+        return {
+          periods: capability.periods,
+          aggregations: capability.aggregations.filter((aggregation) =>
+            SERVEABLE_AGGREGATIONS.includes(aggregation)
+          )
+        }
+      })()
 
   return {
     with_select,
+    accumulator_selects,
+    recombine,
+    is_combined,
     measure_expr,
     aggregate,
     supports_output,
