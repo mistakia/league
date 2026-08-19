@@ -9,6 +9,10 @@ import get_stats_column_param_key from '#libs-server/data-views/get-stats-column
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 import { derive_measure } from '#libs-server/data-views/measure/measure-contract.mjs'
+import {
+  FACT_SOURCES,
+  subject_id_expression
+} from '#libs-server/data-views/measure/fact-source-registry.mjs'
 import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 
 // Every key apply_play_by_play_column_params_to_query may read from the
@@ -209,24 +213,27 @@ const player_stat_from_plays = ({
   }
 }
 
+// The share scan's cohort source, read from the registry rather than restated:
+// the expansion join and the subject-id column both come from `plays_cohort`,
+// which `build-period-cte.mjs` reads for the same two facts.
+const plays_cohort_source = FACT_SOURCES.plays_cohort
+const cohort_subject_id = subject_id_expression({
+  fact_source: plays_cohort_source
+}).expression
+
 // A share is an ordinary two-accumulator measure over a cohort-expanded scan:
 // one accumulator scoped to the subject, one to the whole team. Only the SCAN
 // is bespoke here -- the arithmetic goes through the same accumulator/combine
 // modules every other column uses. The cohort expansion moves to the
 // fact-source registry in a later step, at which point this factory goes away.
-const create_team_share_stat = ({
-  column_name,
-  pid_columns,
-  measure = null,
-  with_select_string,
-  with_select_string_year_offset_range,
-  main_select_string_year_offset_range
-}) => {
-  const derived = measure
-    ? derive_measure({ stat_name: column_name, measure, supports_periods: [] })
-    : null
-  const is_combined = Boolean(derived?.is_combined)
-  const season_select = derived ? derived.with_select : with_select_string
+const create_team_share_stat = ({ column_name, pid_columns, measure }) => {
+  const derived = derive_measure({
+    stat_name: column_name,
+    measure,
+    supports_periods: []
+  })
+  const is_combined = derived.is_combined
+  const season_select = derived.with_select
   return {
     with: ({
       query,
@@ -238,30 +245,31 @@ const create_team_share_stat = ({
     }) => {
       const { seas_type } = get_play_by_play_default_params({ params })
 
+      // The cohort expansion is DECLARED once, in the fact-source registry, and
+      // applied here and by the period-CTE builder from that one declaration --
+      // otherwise the season scan and the period scan are two hand-written
+      // copies of one join that nothing can notice disagreeing.
       const with_query = db('nfl_plays')
-        .select('pg.pid')
-        .join('player_gamelogs as pg', function () {
-          this.on('nfl_plays.esbid', '=', 'pg.esbid').andOn(
-            'nfl_plays.offense_nfl_team',
-            '=',
-            'pg.nfl_team'
-          )
-        })
+        .select(cohort_subject_id)
         .whereNot('play_type', 'NOPL')
+      plays_cohort_source.cohort_expansion.join(with_query)
+      with_query
         .where(function () {
           for (const pid_column of pid_columns) {
             this.orWhereNotNull(pid_column)
           }
         })
-        .groupBy('pg.pid')
+        .groupBy(cohort_subject_id)
 
-      if (is_year_offset_range(params)) {
-        if (is_combined) {
-          for (const accumulator_select of derived.accumulator_selects) {
-            with_query.select(db.raw(accumulator_select))
-          }
-        } else if (with_select_string_year_offset_range) {
-          with_query.select(db.raw(with_select_string_year_offset_range))
+      // Over an offset window the CTE carries the ACCUMULATORS so the outer
+      // query can sum each and combine after -- never the per-year combined
+      // value, which is the sum-of-ratios class this contract makes
+      // unrepresentable. An identity share has one additive accumulator, so its
+      // combined value IS summable and the window reduces it with the ordinary
+      // SUM(column_name) branch in select-string.mjs.
+      if (is_year_offset_range(params) && is_combined) {
+        for (const accumulator_select of derived.accumulator_selects) {
+          with_query.select(db.raw(accumulator_select))
         }
       } else {
         with_query.select(db.raw(`${season_select} as ${column_name}`))
@@ -353,7 +361,6 @@ const create_team_share_stat = ({
     table_alias: ({ params }) =>
       generate_table_alias({ type: column_name, params, pid_columns }),
     source: plays_source,
-    main_select_string_year_offset_range,
     ...(is_combined ? { range_offset_select: derived.recombine } : {}),
     with_where: ({ params }) => {
       if (is_year_offset_range(params) && is_combined) {
@@ -361,17 +368,9 @@ const create_team_share_stat = ({
       }
       return season_select
     },
-    main_where: ({ params, table_name, data_view_options }) => {
-      if (is_year_offset_range(params)) {
-        if (is_combined) {
-          return derived.recombine({ table_name })
-        } else if (main_select_string_year_offset_range) {
-          return main_select_string_year_offset_range({
-            table_name,
-            params,
-            data_view_options
-          })
-        }
+    main_where: ({ params, table_name }) => {
+      if (is_year_offset_range(params) && is_combined) {
+        return derived.recombine({ table_name })
       }
       return null
     },
@@ -1560,25 +1559,58 @@ export default {
   player_weighted_opportunity_rating_from_plays: create_team_share_stat({
     column_name: 'weighted_opp_rating_from_plays',
     pid_columns: ['target_pid'],
-    with_select_string:
-      'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END) / NULLIF(SUM(nfl_plays.depth_of_target), 0)), 4)',
-    with_select_string_year_offset_range:
-      'COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) as player_targets, SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) as team_targets, SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END) as player_air_yards, SUM(nfl_plays.depth_of_target) as team_air_yards',
-    main_select_string_year_offset_range: ({
-      table_name,
-      params,
-      data_view_options = {}
-    }) => {
-      // The CTE only projects `year` when a year split exposes a
-      // year_reference to correlate against; without one it groups to pid
-      // grain and is already scoped to the offset window by its own effective
-      // years, so the window predicate is both invalid and redundant. Mirrors
-      // the year_reference guard in player-team-column-definition.
-      const year_reference = data_view_options.year_reference
-      const year_predicate = year_reference
-        ? ` AND ${table_name}.year BETWEEN ${year_reference} + ${Math.min(...params.year_offset)} AND ${year_reference} + ${Math.max(...params.year_offset)}`
-        : ''
-      return `(SELECT ROUND((1.5 * SUM(${table_name}.player_targets) / NULLIF(SUM(${table_name}.team_targets), 0)) + (0.7 * SUM(${table_name}.player_air_yards) / NULLIF(SUM(${table_name}.team_air_yards), 0)), 4) FROM ${table_name} WHERE ${table_name}.pid = ${data_view_options.pid_reference}${year_predicate})`
+    // WOPR is the column that broke the two-slot numerator/denominator
+    // contract: it is a WEIGHTED SUM OF TWO RATIOS, which one numerator and one
+    // denominator cannot express, so it escaped into three independently
+    // maintained SQL strings -- the season render, the offset-range CTE
+    // projection, and the offset-range recombination. The three were verified
+    // to AGREE by execution (0.6033 and 0.6385 for two receivers over 2022-2024
+    // REG) before this conversion, so there was no disagreement to adjudicate;
+    // the hazard was that nothing could have noticed one.
+    //
+    // Four accumulators plus a combine expresses it directly, and all three
+    // strings derive from the one declaration. Two things are load-bearing in
+    // the combine and both are silent when wrong:
+    //
+    //   - The 1.5 and 0.7 factors sit to the LEFT of their divisions. `1.5 *
+    //     COUNT(...) / NULLIF(...)` promotes to numeric before dividing;
+    //     `1.5 * (COUNT(...) / NULLIF(...))` is bigint integer division and
+    //     collapses WOPR to 0 for every player.
+    //   - The value is a 0-1 rating and carries NO percentage scale. There is
+    //     no flag saying so -- the combine IS the statement -- which is the
+    //     point of deleting `is_percentage`: an author who consulted that flag
+    //     would rescale WOPR 100x, from 0.60 to 60.33, and the client would
+    //     render it happily.
+    measure: {
+      accumulators: {
+        player_targets: {
+          aggregate: 'count',
+          expr: `CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END`
+        },
+        team_targets: {
+          aggregate: 'sum',
+          expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
+        },
+        player_air_yards: {
+          aggregate: 'sum',
+          expr: `CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END`
+        },
+        team_air_yards: {
+          aggregate: 'sum',
+          expr: `nfl_plays.depth_of_target`
+        }
+      },
+      combine_accumulators: (a, { divide }) =>
+        `(${divide({
+          numerator: a.player_targets,
+          denominator: a.team_targets,
+          scale: '1.5'
+        })}) + (${divide({
+          numerator: a.player_air_yards,
+          denominator: a.team_air_yards,
+          scale: '0.7'
+        })})`,
+      decimals: 4
     }
   }),
   player_receiving_first_down_share_from_plays: create_team_share_stat({
