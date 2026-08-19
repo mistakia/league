@@ -117,6 +117,7 @@ const map_state_to_props = createSelector(
   get_players_percentiles,
   (state) => state.getIn(['app', 'user', 'username']),
   (state) => state.get('data_view_request'),
+  (state) => state.getIn(['websocket', 'is_connected']),
   get_has_unsaved_local_edits_map,
   get_data_view_organization_props_for_table_view_controller,
   (
@@ -134,6 +135,7 @@ const map_state_to_props = createSelector(
     players_percentiles,
     user_username,
     data_view_request,
+    is_socket_connected,
     has_unsaved_local_edits_map,
     view_organization_props
   ) => ({
@@ -162,6 +164,7 @@ const map_state_to_props = createSelector(
     players_percentiles,
     user_username,
     data_view_request: data_view_request.toJS(),
+    is_socket_connected,
     ...view_organization_props
   })
 )

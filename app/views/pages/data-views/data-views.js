@@ -5,6 +5,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import Table from 'react-table/index.js'
 import generate_view_id from 'react-table/src/utils/generate-view-id.js'
 import * as table_constants from 'react-table/src/constants.mjs'
+import Button from '@mui/material/Button'
 
 import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
@@ -86,6 +87,7 @@ export default function DataViewsPage({
   load_data_views,
   user_username,
   data_view_request,
+  is_socket_connected,
   reset_data_view_cache,
   load_data_view,
   revert_data_view,
@@ -314,12 +316,29 @@ export default function DataViewsPage({
   const render_request_status = () => {
     if (!data_view_request.current_request) return null
 
-    const { status, position } = data_view_request
+    const { status, position, client_timeout } = data_view_request
+    const is_waiting = status === 'pending' || status === 'processing'
 
-    if (status === 'pending' && position) {
+    // A dropped socket outranks whatever the last server-sent status was: that
+    // status is now stale by definition, and the request is being replayed on
+    // reconnect rather than progressing.
+    if (is_waiting && !is_socket_connected) {
       return (
         <div className='view-request-status-container'>
-          Request queued. Position: {position}
+          Connection lost. Reconnecting and retrying your request...
+        </div>
+      )
+    }
+
+    if (status === 'pending') {
+      // Without the position fallback this branch rendered nothing at all, so
+      // a request still waiting for its first queue update showed a bare
+      // spinner with no text -- indistinguishable from a hung page.
+      return (
+        <div className='view-request-status-container'>
+          {position
+            ? `Request queued. Position: ${position}`
+            : 'Request queued...'}
         </div>
       )
     }
@@ -333,9 +352,19 @@ export default function DataViewsPage({
     }
 
     if (status === 'error') {
+      // Deliberately not rendering `error`: the server sends the raw driver
+      // message, which is the full generated SQL and is neither readable nor
+      // safe to put on screen.
       return (
         <div className='view-request-status-container error'>
-          Error occured while processing request
+          <span>
+            {client_timeout
+              ? 'No response from the server.'
+              : 'Error occured while processing request'}
+          </span>
+          <Button size='small' onClick={() => reset_data_view_cache()}>
+            Retry
+          </Button>
         </div>
       )
     }
@@ -596,6 +625,7 @@ DataViewsPage.propTypes = {
   load_data_views: PropTypes.func,
   user_username: PropTypes.string,
   data_view_request: PropTypes.object,
+  is_socket_connected: PropTypes.bool,
   reset_data_view_cache: PropTypes.func,
   load_data_view: PropTypes.func,
   revert_data_view: PropTypes.func,

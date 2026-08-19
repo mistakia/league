@@ -134,6 +134,27 @@ export async function resolve(specifier, context, nextResolve) {
       }
     }
 
+    // Node RESOLVED the specifier and then refused it because it names a
+    // directory. That is capability 3 above, reached by the one route the
+    // alias/relative branches cannot cover: a `#`-prefixed subpath import,
+    // which the package's own `imports` map sends to a directory. The error
+    // carries the directory it resolved to, so the main-file lookup can run
+    // against that rather than against a path this hook re-derives.
+    if (node_resolution_error.code === 'ERR_UNSUPPORTED_DIR_IMPORT') {
+      const directory = node_resolution_error.url
+      if (directory?.startsWith('file:')) {
+        const found = resolve_to_file(new URL(directory).pathname)
+        if (found) {
+          return {
+            url: pathToFileURL(found).href,
+            format: undefined,
+            importAttributes: context.importAttributes,
+            shortCircuit: true
+          }
+        }
+      }
+    }
+
     // A BARE package subpath that omits its extension -- `dayjs/plugin/timezone`
     // -- reaches here only when the package publishes no `exports` map, since a
     // package that does have one has already answered. Retry the package's own

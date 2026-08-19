@@ -4,7 +4,10 @@ import {
   call,
   select,
   put,
-  debounce
+  debounce,
+  race,
+  take,
+  delay
 } from 'redux-saga/effects'
 
 import { data_views_actions } from './index'
@@ -24,7 +27,7 @@ import {
   api_delete_data_view_tag
 } from '@core/api'
 import { api, api_request } from '@core/api/service'
-import { send } from '@core/ws'
+import { send, isOpen, wsActions } from '@core/ws'
 import {
   get_app,
   get_selected_data_view,
@@ -112,6 +115,134 @@ function* handle_data_view_request({
   })
 
   yield put(data_view_request_actions.data_view_request(opts))
+}
+
+//= ====================================
+//  REQUEST WATCHDOG / RECONNECT REPLAY
+// -------------------------------------
+
+// How long the server may stay SILENT before we call the request lost. This is
+// a silence budget, not a deadline measured from send: every progress message
+// resets it. That distinction is the whole design. Queue wait is unbounded and
+// is added on top of execution time, so any fixed deadline from send fires on
+// requests that were merely queued behind other work.
+//
+// The budget must exceed the longest legitimate gap between two server
+// messages, which is a single query execution -- the server emits nothing
+// between DATA_VIEW_STATUS(processing) and the result. That ceiling is the
+// signed-in execution timeout of 5 minutes, so anything at or below 5 minutes
+// can fire on a query that was still coming.
+export const DATA_VIEW_SILENCE_TIMEOUT = 6 * 60 * 1000
+
+const PROGRESS_ACTIONS = [
+  data_view_request_actions.DATA_VIEW_POSITION,
+  data_view_request_actions.DATA_VIEW_STATUS
+]
+
+const TERMINAL_ACTIONS = [
+  data_view_request_actions.DATA_VIEW_RESULT,
+  data_view_request_actions.DATA_VIEW_ERROR
+]
+
+// A request that never terminates leaves the page on a bare spinner forever.
+// Nothing else in the client bounds it: the reducer reaches a terminal status
+// only on a server-sent result or error, so a dropped reply, a crashed API
+// process, or a restart mid-flight simply hangs.
+export function* handle_data_view_request_watchdog({ payload }) {
+  const started_at = Date.now()
+
+  while (true) {
+    const { timed_out, settled } = yield race({
+      timed_out: delay(DATA_VIEW_SILENCE_TIMEOUT),
+      progress: take(PROGRESS_ACTIONS),
+      settled: take(TERMINAL_ACTIONS)
+    })
+
+    if (settled) {
+      yield call(report_client_observed_duration, {
+        view_id: payload.view_id,
+        duration_ms: Date.now() - started_at,
+        settled_type: settled.type
+      })
+      return
+    }
+
+    if (!timed_out) continue
+
+    // A closed socket is not a timeout. The reconnect loop is already working
+    // the problem and will replay this request when it lands, so surfacing an
+    // error here would replace a recoverable state with a dead end.
+    if (!isOpen()) return
+
+    yield put({
+      type: data_view_request_actions.DATA_VIEW_ERROR,
+      payload: {
+        request_id: payload.view_id,
+        error: 'Timed out waiting for the server to respond',
+        client_timeout: true
+      }
+    })
+    return
+  }
+}
+
+export function* watch_data_view_request_watchdog() {
+  // takeLatest, so a superseding request cancels the previous watchdog rather
+  // than leaving it to fire against a request nobody is waiting on.
+  yield takeLatest(
+    data_view_request_actions.DATA_VIEW_REQUEST,
+    handle_data_view_request_watchdog
+  )
+}
+
+// One measurement, one send. The server owns every threshold and does the
+// classification and emission; the client reports only what the server cannot
+// observe, which is when the answer actually reached the browser. Sent over
+// the socket that is already open -- deliberately not an HTTP endpoint, which
+// would be an anonymous write that mints signals.
+function* report_client_observed_duration({
+  view_id,
+  duration_ms,
+  settled_type
+}) {
+  if (!isOpen()) return
+
+  yield call(send, {
+    type: 'DATA_VIEW_CLIENT_TIMING',
+    payload: {
+      request_id: view_id,
+      client_duration_ms: duration_ms,
+      outcome:
+        settled_type === data_view_request_actions.DATA_VIEW_RESULT
+          ? 'result'
+          : 'error'
+    }
+  })
+}
+
+// The client buffers only messages it could not send; a DATA_VIEW_REQUEST
+// already on the wire when the socket dropped is simply lost, and the reducer
+// keeps the view id rather than the params, so nothing could retransmit it.
+// Re-deriving the request from the selected view is what makes the reconnect
+// actually restore the page instead of reconnecting into the same spinner.
+export function* replay_in_flight_data_view_request() {
+  const status = yield select((state) =>
+    state.getIn(['data_view_request', 'status'])
+  )
+
+  if (status !== 'pending' && status !== 'processing') return
+
+  const data_view = yield select(get_selected_data_view)
+  if (!data_view) return
+
+  yield call(handle_data_view_request, { data_view })
+}
+
+export function* watch_websocket_reconnected() {
+  yield takeLatest(
+    wsActions.WEBSOCKET_RECONNECTED,
+    replay_in_flight_data_view_request
+  )
 }
 
 export function* data_view_changed({ payload }) {
@@ -751,6 +882,8 @@ export const data_views_sagas = [
   fork(watch_toggle_data_view_favorite),
   fork(watch_add_data_view_tag),
   fork(watch_remove_data_view_tag),
+  fork(watch_data_view_request_watchdog),
+  fork(watch_websocket_reconnected),
   debounce(
     250,
     data_views_actions.DATA_VIEW_CHANGED,

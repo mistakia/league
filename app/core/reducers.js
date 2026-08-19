@@ -31,6 +31,11 @@ import { api_reducer } from './api'
 import { league_team_daily_values_reducer } from './league-team-daily-values'
 import { league_careerlogs_reducer } from './league-careerlogs'
 import { seasons_reducer } from './seasons'
+// Imported from the reducer module directly rather than from './ws'. The ws
+// index re-exports service.js, which imports @core/store -- and store.js
+// imports this file, so going through the index would put a cycle in the
+// store's own module graph.
+import { websocket_reducer } from './ws/reducer'
 
 // data_views, data_view_organization, data_view_request, plays_views,
 // plays_view_request, selected_player_plays_request reducers are lazy-
@@ -69,6 +74,7 @@ const rootReducer = (router, dynamic_reducers = {}) =>
     league_team_daily_values: league_team_daily_values_reducer,
     league_careerlogs: league_careerlogs_reducer,
     seasons: seasons_reducer,
+    websocket: websocket_reducer,
     ...dynamic_reducers
   })
 

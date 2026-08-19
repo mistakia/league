@@ -9,6 +9,7 @@ const initial_state = fromJS({
   result: List(),
   metadata: null,
   error: null,
+  client_timeout: false,
   param_option_counts: Map(),
   param_option_counts_signatures: Map()
 })
@@ -102,7 +103,11 @@ export function data_view_request_reducer(
     case data_view_request_actions.DATA_VIEW_ERROR:
       return state.merge({
         status: 'error',
-        error: payload.error
+        error: payload.error,
+        // Distinguishes a server-reported failure from the client watchdog
+        // giving up on a server that never answered. The two need different
+        // wording -- only one of them is something the server knows about.
+        client_timeout: Boolean(payload.client_timeout)
       })
 
     case data_view_request_actions.DATA_VIEW_PARAM_OPTION_COUNTS_FULFILLED:

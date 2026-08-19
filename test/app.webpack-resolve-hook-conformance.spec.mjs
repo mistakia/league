@@ -99,6 +99,41 @@ describe('webpack resolution hook conformance', function () {
     }
   })
 
+  // The header claims `resolve.mainFiles`, and the alias and relative branches
+  // deliver it for the two specifier shapes they cover. A `#`-prefixed subpath
+  // import is neither: the package's own `imports` map resolves it to a
+  // DIRECTORY, so Node fails with ERR_UNSUPPORTED_DIR_IMPORT after resolution
+  // rather than before it, and the fallback used to have nothing to retry.
+  // `@core/data-view-request/reducer` is the module that surfaced it -- it
+  // imports `#app/core/data-views`.
+  it('resolves a directory reached through a # subpath import', async function () {
+    const resolved = await import('#app/core/utils')
+    expect(
+      Object.keys(resolved).length,
+      '#app/core/utils must resolve to its index and evaluate'
+    ).to.be.at.least(1)
+
+    // The module that surfaced the gap. It cannot be asserted on its exports:
+    // it reaches `window` through app/core/data-views/index.js and dies on the
+    // documented DOM wall, which is a separate limit and not this one. What
+    // must hold is that it gets PAST resolution, so assert on the error CLASS
+    // rather than on success -- that is the only thing distinguishing the two
+    // failures, and asserting success here would pin the DOM wall by accident.
+    let caught = null
+    try {
+      await import('#app/core/data-view-request/reducer')
+    } catch (error) {
+      caught = error
+    }
+
+    if (caught) {
+      expect(
+        caught.code,
+        'a # subpath naming a directory must resolve, not raise a directory-import error'
+      ).to.not.equal('ERR_UNSUPPORTED_DIR_IMPORT')
+    }
+  })
+
   // Not a resolution property, but the same failure mode: a DefinePlugin global
   // is not an import, so nothing can supply it and every module reaching
   // `app/core/constants.js` throws ReferenceError on load without it.

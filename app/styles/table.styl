@@ -36,6 +36,13 @@
   &.error
     color red
     border-color red
+    // The error variant carries a retry button alongside its text, so it
+    // cannot use the fixed 40px height the status-only variants share.
+    height auto
+    min-height 40px
+    padding 4px 8px
+    gap 8px
+    opacity 1
 
 .table__row
   width max-content
