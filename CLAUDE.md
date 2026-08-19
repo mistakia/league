@@ -26,6 +26,15 @@ This is **xo.football**, an open-source fantasy football league management platf
 - `yarn prettier` - Format code with Prettier. **The script is `prettier --write .` — it rewrites the WHOLE tree and ignores extra args, so `yarn prettier --check <file>` still reformats files you never touched (2026-08-15: dirtied two `scripts/social-cards/*.html` this way).** Scope with the direct binary: `npx prettier --check <files>` / `npx prettier --write <files>`.
 - `yarn test --reporter min` - Run all tests with Mocha
 - `yarn test --reporter min test/filename.spec.mjs` - Run specific test file
+- `yarn check:types` - The incremental `//@ts-check` tier (see below). In CI.
+- `yarn measure:seams` - Advisory seam count plus ts-check coverage. Never a gate.
+
+**The `//@ts-check` tier is OPT-IN per file, and the pragma IS the ratchet.** Nothing in this tree is type-checked until a file carries `// @ts-check` on its first line, so adding one is the whole adoption action; `tsconfig.json` sets `checkJs: false` and includes the server roots so an opted-in file can resolve its imports while everything around it stays silent. `yarn check:types` regenerates `db/schema-types.d.ts` from `db/schema.postgres.sql` and fails if the committed copy disagrees, then runs `tsc`. Both it and `db/gates/check-ts-check-ratchet.mjs` are in CI. Four things to know before touching it:
+
+- **Row types are GENERATED, never hand-edited** — `node db/tools/generate-schema-types.mjs` after any DDL change. A checked producer annotates its return as a row type, so a rename moves the type under every consumer; that is the entire value, and a hand-written shape would be a second schema that decays.
+- **Put the pragma AFTER a shebang.** Above one, `#!` becomes illegal on line 2 and **tsc then reports ONLY that parse error and suppresses every semantic diagnostic in the whole program** — a short output at exit 2 reads exactly like a clean tree. An adoption measurement once read "31 of 32 files clean" and was entirely this artifact.
+- **`noImplicitAny` is load-bearing, not a strictness preference.** With it off, an unknown property on an INFERRED type resolves to `any` instead of being reported, which silently un-covers every destructure over a locally-built array. Its cost is bounded to opted-in files by `checkJs: false`.
+- **Adopting a file means adding it to `db/gates/ts-check-adoption.json`.** The ratchet checks that list against the tree both ways, because `tsc` is structurally blind to a file that has been UN-adopted: deleting one comment makes a type error vanish and `check:types` still exits 0 (measured). A file that loses its pragma fails, and a file that gains one fails until it is listed.
 
 **Build & Deploy:**
 
