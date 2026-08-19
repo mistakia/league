@@ -6,6 +6,7 @@ import { JSDOM } from 'jsdom'
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main, updatePlayer, find_player_row } from '#libs-server'
+import { resolve_pfr_draft_team } from '#libs-server/resolve-pfr-draft-team.mjs'
 import { fixTeam } from '#libs-shared'
 import { create_logger } from '#libs-shared/log.mjs'
 import { fetch_pfr_pages } from '#private/libs-server/pro-football-reference-pages.mjs'
@@ -40,7 +41,11 @@ const parse_draft_html = (html, year) => {
     const overall_pick = Number(pick_el.textContent)
     if (!round || !overall_pick) continue
 
-    const team = team_el ? fixTeam(team_el.textContent) : null
+    // PFR spells HOU as both the Oilers (1990-96) and the Texans (2002+); the
+    // draft year disambiguates. fixTeam's global HOU = Texans mapping stays for
+    // its other callers, so the Oilers era resolves here.
+    const parsed_team = team_el ? fixTeam(team_el.textContent) : null
+    const team = resolve_pfr_draft_team(parsed_team, year)
     const player_name = player_el
       ? player_el.textContent
       : row.querySelector('[data-stat="player"]')?.textContent || ''
