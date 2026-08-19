@@ -1,10 +1,18 @@
+// @ts-check
 import express from 'express'
+
+/**
+ * `mergeParams: true` is what puts `leagueId` on this router's params -- it is
+ * declared by the PARENT mount, so a bare Request type does not know about it.
+ *
+ * @typedef {import('express').Request<{ leagueId: string }>} LeagueRequest
+ */
 
 const router = express.Router({
   mergeParams: true
 })
 
-router.get('/?', async (req, res) => {
+router.get('/?', async (/** @type {LeagueRequest} */ req, res) => {
   const { leagueId } = req.params
   const { db, logger } = req.app.locals
   try {
@@ -26,10 +34,17 @@ router.get('/?', async (req, res) => {
     ])
 
     // Separate user_careerlogs and usernames
-    const usernames = user_careerlogs.map(({ user_id, username }) => ({
-      id: user_id,
-      username
-    }))
+    const usernames = user_careerlogs.map(
+      (
+        /** @type {{ user_id: number, username: string }} */ {
+          user_id,
+          username
+        }
+      ) => ({
+        id: user_id,
+        username
+      })
+    )
 
     res.json({
       team_careerlogs,

@@ -3,6 +3,7 @@ import default_db from '#db'
 import { LeaguePaused } from '#libs-shared/errors.mjs'
 
 /** @typedef {import('#db/schema-types.js').LeaguePausesRow} LeaguePausesRow */
+/** @typedef {import('knex').Knex} Knex */
 
 /**
  * @typedef {object} LeaguePauseState
@@ -34,7 +35,7 @@ import { LeaguePaused } from '#libs-shared/errors.mjs'
  *
  * @param {Object} args
  * @param {number} args.league_id
- * @param {Object} [args.db]
+ * @param {Knex} [args.db]
  * @returns {Promise<LeaguePausesRow|null>} The open pause row, or null.
  */
 export const get_open_league_pause = async ({ league_id, db = default_db }) => {
@@ -76,7 +77,7 @@ export const get_open_league_pause = async ({ league_id, db = default_db }) => {
  *
  * @param {Object} args
  * @param {number} args.league_id
- * @param {Object} [args.db]
+ * @param {Knex} [args.db]
  * @returns {Promise<Date|null>} The latest `resumed_at`, or null.
  */
 export const get_latest_league_resume = async ({
@@ -107,7 +108,7 @@ export const get_latest_league_resume = async ({
  *
  * @param {Object} args
  * @param {Array<{league_id: number}>} args.leagues
- * @param {Object} [args.db]
+ * @param {Knex} [args.db]
  * @returns {Promise<Record<number, LeaguePauseState>>} Keyed by league id.
  */
 export const get_pause_state_by_league_id = async ({
@@ -127,9 +128,12 @@ export const get_pause_state_by_league_id = async ({
   for (const league of leagues) {
     const league_id = Number(league.league_id)
     const league_rows = pause_rows.filter(
-      (pause_row) => Number(pause_row.league_id) === league_id
+      (/** @type {LeaguePausesRow} */ pause_row) =>
+        Number(pause_row.league_id) === league_id
     )
-    const open_pause = league_rows.find((pause_row) => !pause_row.resumed_at)
+    const open_pause = league_rows.find(
+      (/** @type {LeaguePausesRow} */ pause_row) => !pause_row.resumed_at
+    )
 
     // Ordered by `paused_at` ascending, so the last CLOSED row is the latest
     // resume. Reading it off the pause order rather than sorting on
@@ -158,7 +162,7 @@ export const get_pause_state_by_league_id = async ({
  *
  * @param {Object} args
  * @param {number} args.league_id
- * @param {Object} [args.db]
+ * @param {Knex} [args.db]
  * @throws {LeaguePaused}
  */
 export const assert_league_not_paused = async ({

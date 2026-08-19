@@ -28,14 +28,27 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    // Left non-strict on purpose. An untyped parameter is the ordinary state of
-    // an un-annotated producer here, so `noImplicitAny` would report thousands
-    // of positions that carry no defect and drown the seam findings this tier
-    // exists to surface. What stays on is the part that catches the census
-    // classes: a destructured key that the producer does not return, a property
-    // read that does not exist on the shape, an argument whose type disagrees.
     "strict": false,
-    "noImplicitAny": false,
+    // ON, and load-bearing rather than a strictness preference. With it OFF,
+    // TypeScript resolves an unknown property against an INFERRED type to
+    // `any` instead of reporting it -- so `rows.map(({ pid, pnts }) => ...)`
+    // over a locally-built array was accepted silently. That is the fourth seam
+    // shape, the one the Stage-1 scan could not count, and it is the shape with
+    // no import and no literal to anchor a grep on. Measured both ways on a
+    // control: with the flag off the bad destructure and the matching property
+    // read are both silent; with it on both are TS2339.
+    //
+    // Its blast radius is bounded by `checkJs: false` -- only files carrying the
+    // pragma are reported, so the cost is per opted-in file rather than tree
+    // wide. An earlier revision of this file asserted the opposite and turned
+    // the flag off for it; the real number across the first six opted-in files
+    // was 47 diagnostics, all genuine and all fixed.
+    "noImplicitAny": true,
+    // Still off. Turning it on is a separate, much larger tier: every nullable
+    // column in the generated row types is already declared `| null`, so the
+    // information is recorded and enabling it later is a config change rather
+    // than a re-annotation. Doing it now would bury the seam findings under
+    // null-guard noise on code that is not otherwise being touched.
     "strictNullChecks": false
   },
   "include": [

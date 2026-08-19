@@ -1,3 +1,4 @@
+// @ts-check
 /*
   The registered data checks.
 
@@ -117,7 +118,7 @@ const registry = [
     grain: ['season_year', 'week', 'stat'],
     rows: () =>
       pfr_gamelog_agreement_rows({ season_years: PFR_GRADED_SEASONS }),
-    precondition: (row) =>
+    precondition: (/** @type {Record<string, any>} */ row) =>
       row.our_games > 0 && row.reference_games === row.our_games,
     min_rate: 1.0,
     calibration:
@@ -150,7 +151,8 @@ const registry = [
     // week at 40 plays now surfaces as un-gradeable instead of vanishing.
     // Measured 2026-08-14: all 533 weeks clear this, the smallest at 163, so it
     // excludes nothing today.
-    precondition: (row) => row.denominator >= 100,
+    precondition: (/** @type {Record<string, any>} */ row) =>
+      row.denominator >= 100,
     min_rate: 0.8,
     calibration:
       'The one threshold here that is a genuine TOLERANCE rather than a target: nflfastR does not enrich every play by design. Across 533 graded weeks measured 2026-08-14 the median is 0.9540 and the minimum is 0.8493, with zero weeks below the floor; the one real defect this was written for (2021 REG week 15, before repair) sat at 0.425. The floor is six points under the healthy minimum and thirty-seven above the defect — calibrated on the gap, not on the worst normal reading. PRE is excluded because nflfastR publishes REG and POST only, so grading it would put roughly 100 permanently-red weeks in front of the one that is real.',
@@ -185,7 +187,7 @@ const registry = [
       // distinguishable from a healthy corpus.
       return per_table.flatMap(({ child_table, scanned, orphans }) =>
         orphans.length
-          ? orphans.map((row) => ({
+          ? orphans.map((/** @type {Record<string, any>} */ row) => ({
               child_table,
               esbid: row.esbid,
               pid: row.pid,
@@ -269,7 +271,7 @@ const registry = [
       // One statement rather than a builder chain: the predicate is a self-join
       // with a per-row aggregate over 32 columns on both sides, which knex
       // cannot express without re-spelling the identifier list twice.
-      const id_expression = (alias) =>
+      const id_expression = (/** @type {string} */ alias) =>
         `num_nonnulls(${PLAYER_EXTERNAL_ID_COLUMNS.map((column) => `${alias}.${column}`).join(', ')})`
 
       const { rows: found } = await db.raw(
@@ -297,7 +299,11 @@ const registry = [
       const denominator = Number(scanned.count)
 
       return found.length
-        ? found.map((row) => ({ pid: row.pid, numerator: 1, denominator }))
+        ? found.map((/** @type {Record<string, any>} */ row) => ({
+            pid: row.pid,
+            numerator: 1,
+            denominator
+          }))
         : [{ pid: null, numerator: 0, denominator }]
     },
     max_count: 0,
@@ -433,7 +439,7 @@ const registry = [
       const denominator = Number(scanned.count)
 
       return found.length
-        ? found.map((row) => ({
+        ? found.map((/** @type {Record<string, any>} */ row) => ({
             pid: row.pid,
             duplicate_pid: row.duplicate_pid,
             numerator: 1,
@@ -488,16 +494,18 @@ const registry = [
       // larger one.
       const denominator = found.length
 
-      const violations = found.filter((row) => {
-        if (row.is_player_row_missing) return true
-        const { override_value, live_value } = row
-        if (override_value == null && live_value == null) return false
-        if (override_value == null || live_value == null) return true
-        return String(override_value) !== String(live_value)
-      })
+      const violations = found.filter(
+        (/** @type {Record<string, any>} */ row) => {
+          if (row.is_player_row_missing) return true
+          const { override_value, live_value } = row
+          if (override_value == null && live_value == null) return false
+          if (override_value == null || live_value == null) return true
+          return String(override_value) !== String(live_value)
+        }
+      )
 
       return violations.length
-        ? violations.map((row) => ({
+        ? violations.map((/** @type {Record<string, any>} */ row) => ({
             pid: row.pid,
             column_name: row.column_name,
             numerator: 1,

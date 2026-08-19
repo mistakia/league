@@ -2695,6 +2695,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/debug@npm:^4.1.13":
+  version: 4.1.13
+  resolution: "@types/debug@npm:4.1.13"
+  dependencies:
+    "@types/ms": "npm:*"
+  checksum: 10/5091d4ebda85236e6f4a6ecea552860e521e11d1d388d3f6255b40726f5a4a7cf1baa0d09f60853838e4cac6c12a13b14114d5f422ccecaee4d1d07dab349900
+  languageName: node
+  linkType: hard
+
 "@types/eslint-scope@npm:^3.7.7":
   version: 3.7.7
   resolution: "@types/eslint-scope@npm:3.7.7"
@@ -10460,6 +10469,7 @@ __metadata:
     "@mui/x-date-pickers": "npm:^7.23.6"
     "@simonwep/pickr": "npm:^1.9.1"
     "@trashman/ed25519-blake2b": "npm:0.0.8"
+    "@types/debug": "npm:^4.1.13"
     ajv: "npm:^8.18.0"
     ajv-formats: "npm:^3.0.1"
     babel-loader: "npm:^9.2.1"

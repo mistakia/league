@@ -64,6 +64,18 @@ const NFL_WEEK_REGEX = new RegExp(
   `^(\\d{4})_(${SEASON_TYPES.join('|')})_WEEK_(\\d+)$`
 )
 
+/**
+ * Week bounds for the two FIXED-length season types.
+ *
+ * REG is deliberately absent -- its length is era-dependent and comes from
+ * REG_MAX_WEEKS_BY_ERA below. The map is typed as a Partial over the whole
+ * vocabulary so that absence is part of the contract: every lookup here is
+ * keyed by a season type that may be REG, and a reader that forgets to handle
+ * the miss is the interpolated-key class again. The existing `range ? ... : 0`
+ * guards were already right; the type now says why they have to be there.
+ *
+ * @type {Partial<Record<SeasonType, { min: number, max: number }>>}
+ */
 export const WEEK_RANGES = {
   PRE: { min: 1, max: 4 },
   POST: { min: 1, max: 4 }
@@ -74,6 +86,10 @@ const MIN_YEAR = 2000
 // Era-specific REG week caps, sourced from nfl_games history.
 // 1970-1977 = 14, 1978-1989 = 16 (1982 strike = 9, 1987 strike = 15),
 // 1990-2020 = 17, 2021+ = 18.
+/**
+ * @param {{ year: number }} params
+ * @returns {number}
+ */
 const REG_MAX_WEEKS_BY_ERA = ({ year }) => {
   if (year === 1982) return 9
   if (year === 1987) return 15
@@ -246,6 +262,7 @@ export const format_week_ranges = ({ weeks }) => {
   return ranges.join(', ')
 }
 
+/** @type {Record<number, string>} */
 const POSTSEASON_WEEK_LABELS = {
   1: 'Wild Card',
   2: 'Divisional',
@@ -382,7 +399,11 @@ export const get_max_weeks_for_season_type = ({ seas_type, year }) => {
     if (!year) return 0
     return REG_MAX_WEEKS_BY_ERA({ year })
   }
-  const range = WEEK_RANGES[seas_type]
+  // Cast at the lookup because the caller may hand over a raw token split out
+  // of a group key rather than a checked SeasonType. The `range ? ... : 0`
+  // below is what makes that safe -- an unknown season type answers 0, which
+  // every caller already treats as "no such type".
+  const range = WEEK_RANGES[/** @type {SeasonType} */ (seas_type)]
   return range ? range.max : 0
 }
 
@@ -395,6 +416,7 @@ export const compare_nfl_week_group_keys = (a, b) => {
   const [ya, ta] = a.split('_')
   const [yb, tb] = b.split('_')
   if (ya !== yb) return parseInt(yb, 10) - parseInt(ya, 10)
+  /** @type {Record<string, number>} */
   const type_order = { PRE: 0, REG: 1, POST: 2 }
   return (type_order[ta] ?? 0) - (type_order[tb] ?? 0)
 }
@@ -443,7 +465,13 @@ export const is_full_year_seas_type_coverage = ({ nfl_weeks }) => {
     const year = parseInt(year_str, 10)
     const max = get_max_weeks_for_season_type({ seas_type, year })
     if (!max) return false
-    const min = seas_type === 'REG' ? 1 : WEEK_RANGES[seas_type].min
+    // Unreachable for an unknown season type: get_max_weeks_for_season_type
+    // answers 0 for one and the `if (!max) return false` above has already
+    // returned. Same cast, same reason as in that function.
+    const min =
+      seas_type === 'REG'
+        ? 1
+        : WEEK_RANGES[/** @type {SeasonType} */ (seas_type)].min
     const weeks = new Set(groups[key])
     const expected_size = max - min + 1
     if (weeks.size !== expected_size) return false

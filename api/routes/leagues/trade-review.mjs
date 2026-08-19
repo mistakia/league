@@ -1,3 +1,4 @@
+// @ts-check
 import express from 'express'
 
 import grade_trades from '#libs-server/trade-review/grade-trades.mjs'
@@ -20,6 +21,17 @@ const router = express.Router({ mergeParams: true })
 // correct cache key would have to span both the lineage refresh clock and the
 // keeptradecut_valuations clock, which move independently.
 
+/**
+ * `leagueId` reaches this router through the PARENT mount (`mergeParams`), so
+ * it is not on a bare Request's params -- each handler declares it.
+ *
+ * @typedef {import('express').Request<{ leagueId: string, tradeId?: string }> & { auth?: { userId: number } }} TradeReviewRequest
+ */
+
+/**
+ * @param {TradeReviewRequest} req
+ * @param {import('express').Response} res
+ */
 const authorize = async (req, res) => {
   if (!require_auth(req, res)) return null
   const league = await validate_and_get_league(req.params.leagueId, res)
@@ -38,10 +50,17 @@ const authorize = async (req, res) => {
 // The list omits per-asset lineage chains, which the detail route carries. A
 // row needs the three net figures and the assets by name; the chains are an
 // order of magnitude more data and nothing on the list renders them.
+/**
+ * @param {{ acquired_assets: Array<Record<string, any>>, sent_assets: Array<Record<string, any>> }} trade
+ */
 const without_chains = (trade) => ({
   ...trade,
-  acquired_assets: trade.acquired_assets.map(({ chain, ...asset }) => asset),
-  sent_assets: trade.sent_assets.map(({ chain, ...asset }) => asset)
+  acquired_assets: trade.acquired_assets.map(
+    (/** @type {Record<string, any>} */ { chain, ...asset }) => asset
+  ),
+  sent_assets: trade.sent_assets.map(
+    (/** @type {Record<string, any>} */ { chain, ...asset }) => asset
+  )
 })
 
 /**
@@ -229,7 +248,7 @@ const without_chains = (trade) => ({
  *           items:
  *             type: object
  */
-router.get('/?', async (req, res) => {
+router.get('/?', async (/** @type {TradeReviewRequest} */ req, res) => {
   const { logger } = req.app.locals
   try {
     const league = await authorize(req, res)
@@ -287,7 +306,7 @@ router.get('/?', async (req, res) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/:tradeId', async (req, res) => {
+router.get('/:tradeId', async (/** @type {TradeReviewRequest} */ req, res) => {
   const { logger } = req.app.locals
   try {
     const league = await authorize(req, res)

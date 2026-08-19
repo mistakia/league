@@ -57,13 +57,34 @@ const log = debug('proxy-manager')
  * request, after the retries and the proxy work are all spent. Naming the set
  * makes the typo a type error at the call site instead.
  *
- * @typedef {'json' | 'text' | 'arrayBuffer' | 'blob' | 'formData' | 'bytes'} ResponseBodyMethod
+ * `bytes` is deliberately absent: undici's Response does not declare it, and
+ * this module returns responses from BOTH undici (proxied) and the global fetch
+ * (direct), so the set is the intersection the two agree on. Listing a method
+ * only one of them has would be a promise the direct path cannot keep.
+ *
+ * @typedef {'json' | 'text' | 'arrayBuffer' | 'blob' | 'formData'} ResponseBodyMethod
+ */
+
+/**
+ * A response from either transport.
+ *
+ * The proxied path goes through undici's fetch and the direct fallback through
+ * the global one, and their Response types are NOT the same declaration. Naming
+ * the union here is what keeps every signature in this file honest about the
+ * fact that a caller cannot know which transport served it.
+ *
+ * @typedef {Awaited<ReturnType<typeof fetch>> | Awaited<ReturnType<typeof undiciFetch>>} FetchResponse
  */
 
 // Abortable sleep. A plain setTimeout cannot be interrupted, so an overall
 // import deadline (passed down as an AbortSignal) could not cut short the
 // all-proxies-failed backoff below — a single sleep would run to completion even
 // after the budget was spent. Rejecting on abort lets the caller stop promptly.
+/**
+ * @param {number} ms
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<void>}
+ */
 const sleep = (ms, signal) =>
   new Promise((resolve, reject) => {
     if (signal?.aborted) {
@@ -159,7 +180,9 @@ class ProxyPool {
     }
     this.name = name
     this.selection = selection
+    /** @type {Map<string, ProxyPoolEntry>} */
     this.proxies = new Map()
+    /** @type {string[]} */
     this.proxy_keys = []
     this.round_robin_index = 0
     this.retry_count = 0
@@ -382,6 +405,11 @@ class ProxyManager {
     return this.pools.get(pool_name)
   }
 
+  /**
+   * @param {string} [pool_name]
+   * @param {AbortSignal} [signal]
+   * @returns {Promise<SelectedProxy|null>}
+   */
   async get_working_proxy(pool_name = 'default', signal) {
     await this.initialize()
 
@@ -399,6 +427,10 @@ class ProxyManager {
     return pool.get_working_proxy(signal)
   }
 
+  /**
+   * @param {{ connection_string: string, pool_name?: string }} proxy_config
+   * @returns {void}
+   */
   mark_proxy_failed(proxy_config) {
     // Find the pool this proxy belongs to and mark it failed
     const pool_name = proxy_config.pool_name || 'default'
@@ -428,6 +460,7 @@ const proxy_manager = new ProxyManager()
 // immediately: retrying a misconfigured or empty pool cannot succeed, and the
 // backoff would only delay the report.
 class ProxyRequirementError extends Error {
+  /** @param {string} message */
   constructor(message) {
     super(message)
     this.name = 'ProxyRequirementError'
@@ -442,6 +475,10 @@ const proxy_signal_log = create_logger('proxy-manager', {
 // the failure that otherwise succeeds silently from the wrong IP -- so it
 // raises a signal before throwing, per user:guideline/surface-pipeline-failures.
 // The message names the POOL only; a proxy key's username half is a credential.
+/**
+ * @param {string} message
+ * @returns {Promise<never>}
+ */
 const refuse_unproxied = async (message) => {
   log(message)
   const emitted = proxy_signal_log.error(new Error(message), {
@@ -457,6 +494,15 @@ const refuse_unproxied = async (message) => {
 // fetch_with_retry's throw-before-return on any non-2xx would swallow exactly
 // the information the caller needs. Falls back to a direct fetch if no proxy
 // is available, same as fetch_with_retry.
+/**
+ * @param {object} params
+ * @param {string} params.url
+ * @param {string} [params.method]
+ * @param {Record<string, string>} [params.headers]
+ * @param {string | Buffer | URLSearchParams} [params.body]
+ * @param {string} [params.proxy_pool]
+ * @returns {Promise<FetchResponse>} The RAW response, with no ok-check.
+ */
 async function fetch_via_proxy_raw({
   url,
   method,
@@ -482,6 +528,13 @@ async function fetch_via_proxy_raw({
   return undiciFetch(url, { ...fetch_options, dispatcher: proxyAgent })
 }
 
+/**
+ * @param {object} params
+ * @param {string} params.url
+ * @param {Record<string, any>} [params.options]
+ * @param {boolean} [params.force_proxy]
+ * @returns {Promise<FetchResponse>}
+ */
 async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
   await proxy_manager.initialize()
 

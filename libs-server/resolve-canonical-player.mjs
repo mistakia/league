@@ -1,3 +1,4 @@
+// @ts-check
 import { format_player_name } from '#libs-shared'
 import db from '#db'
 
@@ -55,6 +56,33 @@ export const UNIQUE_EXTERNAL_ID_COLUMNS = [
   'fantasy_data_player_id'
 ]
 
+/** @typedef {import('#db/schema-types.js').PlayerRow} PlayerRow */
+
+/**
+ * The resolver's verdict.
+ *
+ * `status` is a closed three-value set, and naming it as one is the point: the
+ * caller branches on it to decide whether a player may be CREATED, and a
+ * misspelled status falls through every branch to the safe-looking one. Read
+ * off the actual returns rather than guessed -- an earlier draft of this
+ * typedef omitted `player_row` and `reason` entirely and the checker named
+ * both.
+ *
+ * `candidates` is the player rows the name rungs reached; an empty list with
+ * status `new` means a create is possible.
+ *
+ * @typedef {object} PlayerResolution
+ * @property {'exists' | 'new' | 'unknown'} status
+ * @property {Array<Record<string, any>>} [candidates]
+ * @property {Record<string, any>} [player_row]
+ * @property {string} [reason]
+ * @property {string | null} [matched_external_id_column]
+ */
+
+/**
+ * @param {{ date_of_birth?: string | null }} row
+ * @returns {boolean}
+ */
 const holds_real_birth_date = (row) =>
   Boolean(row.date_of_birth) && row.date_of_birth !== BIRTH_DATE_PLACEHOLDER
 
@@ -104,6 +132,13 @@ const holds_real_birth_date = (row) =>
   insert possible" rather than "who is this person" -- and its worst failure is a
   wrongly refused create, which is the cheap error by the asymmetry above.
 */
+/**
+ * @param {object} params
+ * @param {string} params.name
+ * @param {string} [params.date_of_birth]
+ * @param {Record<string, string|number|null|undefined>} [params.external_ids]
+ * @returns {Promise<PlayerResolution>}
+ */
 const resolve_canonical_player = async ({
   name,
   date_of_birth,
@@ -172,7 +207,10 @@ const resolve_canonical_player = async ({
   })
 
   if (!candidates.length) {
-    return { status: 'new', candidates: [] }
+    return {
+      status: 'new',
+      candidates: /** @type {Array<Record<string, any>>} */ ([])
+    }
   }
 
   if (!date_of_birth || date_of_birth === BIRTH_DATE_PLACEHOLDER) {
@@ -240,8 +278,14 @@ const resolve_canonical_player = async ({
 
 export default resolve_canonical_player
 
+/**
+ * @param {{ name: string, date_of_birth?: string, resolution: PlayerResolution }} params
+ * @returns {string}
+ */
 export const describe_resolution = ({ name, date_of_birth, resolution }) => {
-  const pids = (resolution.candidates || []).map((row) => row.pid).join(', ')
+  const pids = (resolution.candidates || [])
+    .map((/** @type {{ pid: string }} */ row) => row.pid)
+    .join(', ')
   const matched_column = resolution.matched_external_id_column
     ? ` on=${resolution.matched_external_id_column}`
     : ''

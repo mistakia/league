@@ -1,3 +1,4 @@
+// @ts-check
 import {
   nfl_team_abbreviations,
   nfl_team_value_groups,
@@ -34,6 +35,9 @@ const team_info_by_code = new Map(
   ])
 )
 
+/**
+ * @param {string} code
+ */
 const get_team_row = (code) => {
   const info = team_info_by_code.get(code)
   if (!info) throw new Error(`Unknown nfl team_code: ${code}`)

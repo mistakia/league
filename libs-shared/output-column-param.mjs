@@ -1,3 +1,4 @@
+// @ts-check
 import { NON_PLAY_LEVEL_PERIODS } from './data-views-output-tokens.mjs'
 
 // The `output` column param: how a numeric measure aggregates to a row.
@@ -14,6 +15,30 @@ import { NON_PLAY_LEVEL_PERIODS } from './data-views-output-tokens.mjs'
 // react-table, which is why this definition declares no data_type. A flat
 // SELECT fallback would write a scalar over the object.
 
+/**
+ * @param {string} value
+ * @param {string} label
+ * @returns {{ value: string, label: string }}
+ */
+/**
+ * The persisted shape of an output param, as saved views carry it.
+ *
+ * `threshold` is a nested `{ op, value }` object rather than two flat sibling
+ * keys, which is worth naming: this value is PERSISTED in `table_state`, so the
+ * nesting is part of a saved view's on-disk format and a reader that flattens
+ * it silently matches nothing.
+ *
+ * @typedef {object} OutputParamValue
+ * @property {string} [period]
+ * @property {string} [aggregation]
+ * @property {{ op: string, value: number }} [threshold]
+ */
+
+/**
+ * @param {string} value
+ * @param {string} label
+ * @returns {{ value: string, label: string }}
+ */
 const period_option = (value, label) => ({ value, label })
 
 // Periods available to every rate-capable column.
@@ -88,6 +113,10 @@ const threshold_operator_label_by_value = new Map(
   THRESHOLD_OPERATOR_OPTIONS.map(({ value, label }) => [value, label])
 )
 
+/**
+ * @param {{ value?: OutputParamValue | null }} params
+ * @returns {string|null}
+ */
 export const format_output_value = ({ value }) => {
   if (!value || !value.period) return null
 
@@ -136,6 +165,7 @@ const param_override_config = {
 
 const base_output_param = {
   label: 'Output',
+  /** @type {Record<string, any> | null} */
   default_value: null,
   format_value: format_output_value,
   param_override_config,

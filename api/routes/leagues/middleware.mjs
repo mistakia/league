@@ -3,6 +3,10 @@ import { getLeague, validators } from '#libs-server'
 import { get_open_league_pause } from '#libs-server/league-pause.mjs'
 
 /** @typedef {import('#libs-server/get-league.mjs').League} League */
+/** @typedef {import('express').Request} Request */
+/** @typedef {import('express').Response} Response */
+/** @typedef {import('express').NextFunction} NextFunction */
+/** @typedef {import('knex').Knex} Knex */
 
 // Requests that cannot write, and so are never blocked by a pause.
 const SAFE_HTTP_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
@@ -13,8 +17,10 @@ const PAUSE_ROUTE_PATH = /^\/pause\/?$/
 
 /**
  * Validate authentication
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * @param {Request & { auth?: { userId: number } }} req - `auth` is attached by
+ *   express-jwt and is absent on the pre-guard routers, which is the whole
+ *   reason this helper exists.
+ * @param {Response} res
  * @returns {boolean} True if authenticated, false if response was sent
  */
 export function require_auth(req, res) {
@@ -28,7 +34,7 @@ export function require_auth(req, res) {
 /**
  * Validate and get league
  * @param {string|number} leagueId - League ID from params
- * @param {Object} res - Express response object
+ * @param {Response} res
  * @returns {Promise<League|null>} League object or null if validation failed
  */
 export async function validate_and_get_league(leagueId, res) {
@@ -53,7 +59,7 @@ export async function validate_and_get_league(leagueId, res) {
  * Require user to be league commissioner
  * @param {League} league - League object
  * @param {number} userId - User ID
- * @param {Object} res - Express response object
+ * @param {Response} res
  * @param {string} action - Action being performed (for error message)
  * @returns {boolean} True if authorized, false if response was sent
  */
@@ -84,8 +90,8 @@ export function require_commissioner(league, userId, res, action) {
  * @param {League} league - League object
  * @param {number} userId - User ID
  * @param {string|number} leagueId - League ID
- * @param {Object} db - Database connection
- * @param {Object} res - Express response object
+ * @param {Knex} db - Database connection
+ * @param {Response} res
  * @returns {Promise<boolean>} True if authorized, false if response was sent
  */
 export async function require_league_access(league, userId, leagueId, db, res) {
@@ -139,9 +145,9 @@ export async function require_league_access(league, userId, leagueId, db, res) {
  * microseconds before the pause row landed, and a pause does not roll back
  * committed work.
  *
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express next callback
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
  */
 export async function require_league_not_paused(req, res, next) {
   try {
@@ -178,8 +184,8 @@ export async function require_league_not_paused(req, res, next) {
 /**
  * Standard error handler for route handlers
  * @param {Error} err - Error object
- * @param {Function} logger - Logger function
- * @param {Object} res - Express response object
+ * @param {(err: Error) => void} logger - Logger function
+ * @param {Response} res
  */
 export function handle_error(err, logger, res) {
   logger(err)

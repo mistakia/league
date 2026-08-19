@@ -1,3 +1,4 @@
+// @ts-check
 import { current_season } from '#constants'
 import convert_to_csv from '#libs-shared/convert-to-csv.mjs'
 
@@ -27,6 +28,12 @@ const csv_columns = [
   'extensions'
 ]
 
+/**
+ * @param {object} params
+ * @param {import('knex').Knex} params.db
+ * @param {number} params.lid
+ * @param {number} [params.year]
+ */
 export default async function generate_league_rosters_csv({
   db,
   lid,
@@ -41,7 +48,7 @@ export default async function generate_league_rosters_csv({
   )
 
   const rows = team_rosters.flatMap(({ rows }) =>
-    rows.map((row) => ({
+    rows.map((/** @type {Record<string, any>} */ row) => ({
       league_id: league.league_id,
       year,
       team_id: row.tid,
