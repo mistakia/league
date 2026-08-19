@@ -1,5 +1,4 @@
-import db from '#db'
-import { nfl_plays_column_params, data_views_constants } from '#libs-shared'
+import { nfl_plays_column_params } from '#libs-shared'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import { add_player_stats_play_by_play_with_statement } from '#libs-server/data-views/add-player-stats-play-by-play-with-statement.mjs'
@@ -7,8 +6,8 @@ import { apply_plays_join } from '#libs-server/data-views/source-attach/apply-pl
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
-import get_effective_years from '#libs-server/data-views/get-effective-years.mjs'
 import { derive_measure } from '#libs-server/data-views/measure/measure-contract.mjs'
+import { FACT_SOURCES } from '#libs-server/data-views/measure/fact-source-registry.mjs'
 import { is_year_offset_range } from '#libs-server/data-views/year-offset-range.mjs'
 
 // Every key apply_play_by_play_column_params_to_query may read from the
@@ -90,8 +89,24 @@ const player_stat_from_plays = ({
     'player_route',
     'player_pass_play',
     'player_rush_play'
-  ]
+  ],
+  // Which fact source the scan reads, by registry name. `plays` names the
+  // subject on the play; `plays_cohort` expands each team play across the
+  // players who appeared in that game, which is what a share measures against.
+  // The registry supplies the expansion join and the subject-id column, so the
+  // only thing a share declares beyond an ordinary column is this one word.
+  fact_source_name = 'plays'
 }) => {
+  const fact_source = FACT_SOURCES[fact_source_name]
+  if (!fact_source) {
+    throw new Error(
+      `player_stat_from_plays: '${stat_name}' names unknown fact source '${fact_source_name}'`
+    )
+  }
+  const alias_type =
+    fact_source_name === 'plays'
+      ? 'play_by_play'
+      : `play_by_play_${fact_source_name}`
   // Measure-first contract: a column declares an explicit
   // `measure: { accumulators, combine_accumulators }`, and derive_measure produces the
   // season render, the offset-window recombination, the numerator measure_expr,
@@ -153,8 +168,21 @@ const player_stat_from_plays = ({
       }
     : null
   return {
+    // The alias keys on the FACT SOURCE as well as the role list, because a
+    // cohort scan and a role scan over the same roles are different relations
+    // -- sharing an alias would put two incompatible scans behind one CTE, the
+    // collapse class `289b88483` repaired for role ORDER. Columns that agree on
+    // both DO share one scan, which is the batching every role column already
+    // gets and shares now get too: eight share columns over three role lists
+    // become three cohort scans rather than eight, and a cohort scan is the
+    // expensive one.
+    //
+    // `plays` keeps the bare `play_by_play` literal deliberately. The alias is
+    // a cache key with no other meaning, and qualifying it would move every
+    // from-plays CTE name in the registry -- invalidating every cached
+    // from-plays result to express something no reader was confused about.
     table_alias: ({ params }) =>
-      generate_table_alias({ type: 'play_by_play', params, pid_columns }),
+      generate_table_alias({ type: alias_type, params, pid_columns }),
     column_name: stat_name,
     with_select: ({ params = {} }) => {
       // In a multi-year range the CTE carries the ACCUMULATORS, so the outer
@@ -189,7 +217,8 @@ const player_stat_from_plays = ({
       return []
     },
     pid_columns,
-    with: add_player_stats_play_by_play_with_statement,
+    with: (args) =>
+      add_player_stats_play_by_play_with_statement({ ...args, fact_source }),
     source: plays_source,
     use_having: true,
     supports_periods,
@@ -205,176 +234,6 @@ const player_stat_from_plays = ({
           consumes_params_extra: play_by_play_filter_param_keys
         }
       : {}),
-    get_cache_info: get_cache_info_for_fields_from_plays
-  }
-}
-
-// A share is an ordinary two-accumulator measure over a cohort-expanded scan:
-// one accumulator scoped to the subject, one to the whole team. Only the SCAN
-// is bespoke here -- the arithmetic goes through the same accumulator/combine
-// modules every other column uses. The cohort expansion moves to the
-// fact-source registry in a later step, at which point this factory goes away.
-const create_team_share_stat = ({
-  column_name,
-  pid_columns,
-  measure = null,
-  with_select_string,
-  with_select_string_year_offset_range,
-  main_select_string_year_offset_range
-}) => {
-  const derived = measure
-    ? derive_measure({ stat_name: column_name, measure, supports_periods: [] })
-    : null
-  const is_combined = Boolean(derived?.is_combined)
-  const season_select = derived ? derived.with_select : with_select_string
-  return {
-    with: ({
-      query,
-      with_table_name,
-      params,
-      having_clauses = [],
-      row_axes = [],
-      data_view_options = {}
-    }) => {
-      const { seas_type } = get_play_by_play_default_params({ params })
-
-      const with_query = db('nfl_plays')
-        .select('pg.pid')
-        .join('player_gamelogs as pg', function () {
-          this.on('nfl_plays.esbid', '=', 'pg.esbid').andOn(
-            'nfl_plays.offense_nfl_team',
-            '=',
-            'pg.nfl_team'
-          )
-        })
-        .whereNot('play_type', 'NOPL')
-        .where(function () {
-          for (const pid_column of pid_columns) {
-            this.orWhereNotNull(pid_column)
-          }
-        })
-        .groupBy('pg.pid')
-
-      if (is_year_offset_range(params)) {
-        if (is_combined) {
-          for (const accumulator_select of derived.accumulator_selects) {
-            with_query.select(db.raw(accumulator_select))
-          }
-        } else if (with_select_string_year_offset_range) {
-          with_query.select(db.raw(with_select_string_year_offset_range))
-        }
-      } else {
-        with_query.select(db.raw(`${season_select} as ${column_name}`))
-      }
-
-      for (const row_axis of row_axes) {
-        if (data_views_constants.row_axis_params.includes(row_axis)) {
-          const column_param_definition = nfl_plays_column_params[row_axis]
-          const table_name =
-            (column_param_definition && column_param_definition.table) ||
-            'nfl_plays'
-          // Grain axis stays 'year' in the row-axis vocabulary; the physical
-          // column is season_year post-rename, so alias it back to 'year' at
-          // this CTE boundary.
-          const physical_row_axis =
-            row_axis === 'year' ? 'season_year' : row_axis
-          const row_axis_statement =
-            row_axis === 'year'
-              ? `${table_name}.${physical_row_axis} as year`
-              : `${table_name}.${physical_row_axis}`
-          with_query.select(row_axis_statement)
-          with_query.groupBy(`${table_name}.${physical_row_axis}`)
-        }
-      }
-
-      // Handle career_year
-      if (params.career_year) {
-        with_query.join('player_seasonlogs', function () {
-          this.on('nfl_plays.season_year', '=', 'player_seasonlogs.season_year')
-            .andOn(
-              'nfl_plays.season_type',
-              '=',
-              'player_seasonlogs.season_type'
-            )
-            .andOn('pg.pid', '=', 'player_seasonlogs.pid')
-        })
-        with_query.whereBetween('player_seasonlogs.career_year', [
-          Math.min(params.career_year[0], params.career_year[1]),
-          Math.max(params.career_year[0], params.career_year[1])
-        ])
-      }
-
-      // Handle career_game
-      if (params.career_game) {
-        with_query.whereBetween('pg.career_game', [
-          Math.min(params.career_game[0], params.career_game[1]),
-          Math.max(params.career_game[0], params.career_game[1])
-        ])
-      }
-
-      // Remove career_year and career_game from params before applying other filters
-      const filtered_params = { ...params, seas_type }
-      delete filtered_params.career_year
-      delete filtered_params.career_game
-
-      apply_play_by_play_column_params_to_query({
-        query: with_query,
-        params: filtered_params,
-        query_context: data_view_options.query_context
-      })
-
-      const unique_having_clauses = new Set(having_clauses)
-      for (const having_clause of unique_having_clauses) {
-        with_query.havingRaw(having_clause)
-      }
-
-      const view_scope_emitted =
-        data_view_options.query_context &&
-        data_view_options.query_context.nfl_week_ids &&
-        data_view_options.query_context.nfl_week_ids.length
-      const effective_years = get_effective_years({ params, data_view_options })
-      if (effective_years.length) {
-        // pg.season_year (player_gamelogs) is always safe to push -- apply_play_by_play
-        // does not reach player_gamelogs. Skip nfl_plays.season_year when nfl_week_id is
-        // set OR when view scope has already emitted year, to avoid a duplicate.
-        if (!params.nfl_week_id && !view_scope_emitted) {
-          with_query.whereIn('nfl_plays.season_year', effective_years)
-        }
-        with_query.whereIn('pg.season_year', effective_years)
-      }
-
-      // MATERIALIZED required: predicates are pushed at construction time; planner
-      // predicate push-into-CTE is not needed and would let the planner inline the
-      // CTE into a nested-loop that re-executes it per outer row.
-      query.withMaterialized(with_table_name, with_query)
-    },
-    column_name,
-    use_having: true,
-    table_alias: ({ params }) =>
-      generate_table_alias({ type: column_name, params, pid_columns }),
-    source: plays_source,
-    main_select_string_year_offset_range,
-    ...(is_combined ? { range_offset_select: derived.recombine } : {}),
-    with_where: ({ params }) => {
-      if (is_year_offset_range(params) && is_combined) {
-        return null // the WITH statement carries accumulators, not a value
-      }
-      return season_select
-    },
-    main_where: ({ params, table_name, data_view_options }) => {
-      if (is_year_offset_range(params)) {
-        if (is_combined) {
-          return derived.recombine({ table_name })
-        } else if (main_select_string_year_offset_range) {
-          return main_select_string_year_offset_range({
-            table_name,
-            params,
-            data_view_options
-          })
-        }
-      }
-      return null
-    },
     get_cache_info: get_cache_info_for_fields_from_plays
   }
 }
@@ -1094,8 +953,10 @@ export default {
     stat_name: 'opportunities_from_plays'
   }),
 
-  player_rush_attempts_share_from_plays: create_team_share_stat({
-    column_name: 'rush_att_share_from_plays',
+  player_rush_attempts_share_from_plays: player_stat_from_plays({
+    fact_source_name: 'plays_cohort',
+    supports_periods: [],
+    stat_name: 'rush_att_share_from_plays',
     pid_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
@@ -1117,8 +978,10 @@ export default {
       decimals: 2
     }
   }),
-  player_rush_yards_share_from_plays: create_team_share_stat({
-    column_name: 'rush_yds_share_from_plays',
+  player_rush_yards_share_from_plays: player_stat_from_plays({
+    fact_source_name: 'plays_cohort',
+    supports_periods: [],
+    stat_name: 'rush_yds_share_from_plays',
     pid_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
@@ -1137,8 +1000,10 @@ export default {
       decimals: 2
     }
   }),
-  player_rush_first_down_share_from_plays: create_team_share_stat({
-    column_name: 'rush_first_down_share_from_plays',
+  player_rush_first_down_share_from_plays: player_stat_from_plays({
+    fact_source_name: 'plays_cohort',
+    supports_periods: [],
+    stat_name: 'rush_first_down_share_from_plays',
     pid_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: {
@@ -1161,8 +1026,10 @@ export default {
     }
   }),
 
-  player_opportunity_share_from_plays: create_team_share_stat({
-    column_name: 'opportunity_share_from_plays',
+  player_opportunity_share_from_plays: player_stat_from_plays({
+    fact_source_name: 'plays_cohort',
+    supports_periods: [],
+    stat_name: 'opportunity_share_from_plays',
     pid_columns: ['ball_carrier_pid', 'target_pid'],
     // The subject's opportunities are carries plus targets, so each counts as
     // its own accumulator and the combine adds them after the window sums each.
@@ -1511,8 +1378,10 @@ export default {
     supports_periods: []
   }),
 
-  player_air_yards_share_from_plays: create_team_share_stat({
-    column_name: 'air_yds_share_from_plays',
+  player_air_yards_share_from_plays: player_stat_from_plays({
+    fact_source_name: 'plays_cohort',
+    supports_periods: [],
+    stat_name: 'air_yds_share_from_plays',
     pid_columns: ['target_pid'],
     // A share is a ratio, not additive: a range year_offset must recombine the
     // summed player air yards over the summed team air yards, not SUM the
@@ -1534,8 +1403,10 @@ export default {
       decimals: 2
     }
   }),
-  player_target_share_from_plays: create_team_share_stat({
-    column_name: 'trg_share_from_plays',
+  player_target_share_from_plays: player_stat_from_plays({
+    fact_source_name: 'plays_cohort',
+    supports_periods: [],
+    stat_name: 'trg_share_from_plays',
     pid_columns: ['target_pid'],
     measure: {
       accumulators: {
@@ -1557,32 +1428,69 @@ export default {
       decimals: 2
     }
   }),
-  player_weighted_opportunity_rating_from_plays: create_team_share_stat({
-    column_name: 'weighted_opp_rating_from_plays',
+  player_weighted_opportunity_rating_from_plays: player_stat_from_plays({
+    fact_source_name: 'plays_cohort',
+    supports_periods: [],
+    stat_name: 'weighted_opp_rating_from_plays',
     pid_columns: ['target_pid'],
-    with_select_string:
-      'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END) / NULLIF(SUM(nfl_plays.depth_of_target), 0)), 4)',
-    with_select_string_year_offset_range:
-      'COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) as player_targets, SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) as team_targets, SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END) as player_air_yards, SUM(nfl_plays.depth_of_target) as team_air_yards',
-    main_select_string_year_offset_range: ({
-      table_name,
-      params,
-      data_view_options = {}
-    }) => {
-      // The CTE only projects `year` when a year split exposes a
-      // year_reference to correlate against; without one it groups to pid
-      // grain and is already scoped to the offset window by its own effective
-      // years, so the window predicate is both invalid and redundant. Mirrors
-      // the year_reference guard in player-team-column-definition.
-      const year_reference = data_view_options.year_reference
-      const year_predicate = year_reference
-        ? ` AND ${table_name}.year BETWEEN ${year_reference} + ${Math.min(...params.year_offset)} AND ${year_reference} + ${Math.max(...params.year_offset)}`
-        : ''
-      return `(SELECT ROUND((1.5 * SUM(${table_name}.player_targets) / NULLIF(SUM(${table_name}.team_targets), 0)) + (0.7 * SUM(${table_name}.player_air_yards) / NULLIF(SUM(${table_name}.team_air_yards), 0)), 4) FROM ${table_name} WHERE ${table_name}.pid = ${data_view_options.pid_reference}${year_predicate})`
+    // WOPR is the column that broke the two-slot numerator/denominator
+    // contract: it is a WEIGHTED SUM OF TWO RATIOS, which one numerator and one
+    // denominator cannot express, so it escaped into three independently
+    // maintained SQL strings -- the season render, the offset-range CTE
+    // projection, and the offset-range recombination. The three were verified
+    // to AGREE by execution (0.6033 and 0.6385 for two receivers over 2022-2024
+    // REG) before this conversion, so there was no disagreement to adjudicate;
+    // the hazard was that nothing could have noticed one.
+    //
+    // Four accumulators plus a combine expresses it directly, and all three
+    // strings derive from the one declaration. Two things are load-bearing in
+    // the combine and both are silent when wrong:
+    //
+    //   - The 1.5 and 0.7 factors sit to the LEFT of their divisions. `1.5 *
+    //     COUNT(...) / NULLIF(...)` promotes to numeric before dividing;
+    //     `1.5 * (COUNT(...) / NULLIF(...))` is bigint integer division and
+    //     collapses WOPR to 0 for every player.
+    //   - The value is a 0-1 rating and carries NO percentage scale. There is
+    //     no flag saying so -- the combine IS the statement -- which is the
+    //     point of deleting `is_percentage`: an author who consulted that flag
+    //     would rescale WOPR 100x, from 0.60 to 60.33, and the client would
+    //     render it happily.
+    measure: {
+      accumulators: {
+        player_targets: {
+          aggregate: 'count',
+          expr: `CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END`
+        },
+        team_targets: {
+          aggregate: 'sum',
+          expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
+        },
+        player_air_yards: {
+          aggregate: 'sum',
+          expr: `CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END`
+        },
+        team_air_yards: {
+          aggregate: 'sum',
+          expr: `nfl_plays.depth_of_target`
+        }
+      },
+      combine_accumulators: (a, { divide }) =>
+        `(${divide({
+          numerator: a.player_targets,
+          denominator: a.team_targets,
+          scale: '1.5'
+        })}) + (${divide({
+          numerator: a.player_air_yards,
+          denominator: a.team_air_yards,
+          scale: '0.7'
+        })})`,
+      decimals: 4
     }
   }),
-  player_receiving_first_down_share_from_plays: create_team_share_stat({
-    column_name: 'recv_first_down_share_from_plays',
+  player_receiving_first_down_share_from_plays: player_stat_from_plays({
+    fact_source_name: 'plays_cohort',
+    supports_periods: [],
+    stat_name: 'recv_first_down_share_from_plays',
     pid_columns: ['target_pid'],
     measure: {
       accumulators: {

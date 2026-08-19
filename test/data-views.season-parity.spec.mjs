@@ -20,9 +20,14 @@ const current_dir = path.dirname(fileURLToPath(import.meta.url))
 // COUNT(CASE), COUNT(DISTINCT), the guarded-division combine, and the
 // remaining raw carve-outs.
 //
-// It is BLIND to the eight create_team_share_stat columns, which define no
-// with_select and are stored here as null -- their season render is built
-// inside the share CTE, so read the query goldens for those.
+// It was BLIND to the eight share columns for as long as `create_team_share_stat`
+// existed: that factory built the season render inside its own CTE and defined
+// no `with_select`, so all eight were stored here as null and three of them had
+// moved unseen. Folding the share scan onto the one from-plays factory closed
+// that -- every column in the registry now defines a `with_select` and no entry
+// here is null. The eight were filled with renders proven byte-identical to
+// what the share factory emitted, so the fill records the blind spot closing
+// rather than a value moving.
 //
 // Two regenerations are recorded rather than assumed. The additive conversion
 // (ce27846ef) moved NOTHING: all 59 columns rendered byte-identically. The
@@ -45,6 +50,14 @@ describe('data-views season-total parity (blocking gate for factory migration)',
 
   it('golden covers exactly the current from-plays column set', () => {
     expect(Object.keys(all).sort()).to.deep.equal(Object.keys(golden).sort())
+  })
+
+  // A null entry is a column this gate cannot see. There are none, and an entry
+  // going null again would be a factory that has stopped declaring a season
+  // render -- reported here rather than passing vacuously.
+  it('covers every column, with no unreadable entry', () => {
+    const blind = Object.keys(golden).filter((key) => golden[key] === null)
+    expect(blind, blind.join(', ')).to.have.length(0)
   })
 
   for (const [column_id, expected] of Object.entries(golden)) {

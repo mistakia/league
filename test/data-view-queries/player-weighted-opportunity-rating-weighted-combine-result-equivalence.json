@@ -1,0 +1,46 @@
+{
+  "name": "weighted opportunity rating combines two ratios at their declared weights (executed-result parity)",
+  "description": "WOPR is a WEIGHTED SUM OF TWO RATIOS, which one numerator and one denominator cannot express -- which is why it lived in three independently maintained SQL strings until the four-accumulator conversion. Seed one cohort of two receivers over five team targets whose TARGET share and AIR YARDS share disagree in shape: player A takes 1 of 5 targets carrying 30 of 50 air yards, player B takes 4 of 5 carrying 20 of 50. A = 1.5*(1/5) + 0.7*(30/50) = 0.72 and B = 1.5*(4/5) + 0.7*(20/50) = 1.48. The shares are deliberately ASYMMETRIC about one half: with a symmetric split, transposing the two weights merely PERMUTES the two players' values and the comparison -- which is order-insensitive -- stays green over the transposition it exists to catch. Here the transposed pair is {1.04, 1.16}, a different multiset. Also pins the absence of a percentage scale: a 100.0 anywhere in the combine renders 72.00 instead of 0.72.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_weighted_opportunity_rating_from_plays",
+        "params": {
+          "year": [2024]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["MLB"]
+      }
+    ]
+  },
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-WOPA-000931', 'Test', 'Wopa', 'T.Wopa', 'Test Wopa', 'MLB', 'MLB', '2000-01-01', 2020)",
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-WOPB-000932', 'Test', 'Wopb', 'T.Wopb', 'Test Wopb', 'MLB', 'MLB', '2000-01-01', 2020)",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year) VALUES (990401, 'TEST-WOPA-000931', 'OP', 'ZZ', 'MLB', 2024)",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year) VALUES (990401, 'TEST-WOPB-000932', 'OP', 'ZZ', 'MLB', 2024)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990401, 1, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPA-000931', 30)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990401, 2, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPB-000932', 5)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990401, 3, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPB-000932', 5)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990401, 4, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPB-000932', 5)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, target_pid, depth_of_target) VALUES (990401, 5, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'ZZ', 'TEST-WOPB-000932', 5)"
+    ],
+    "expected_rows": [
+      {
+        "weighted_opp_rating_from_plays_0": "0.72"
+      },
+      {
+        "weighted_opp_rating_from_plays_0": "1.48"
+      }
+    ],
+    "compare_columns": ["weighted_opp_rating_from_plays_0"]
+  },
+  "tags": ["from_plays", "season", "result-equivalence"],
+  "expected_query": "with \"t630d7a53f9c55c28de5ee80580929062\" as materialized (select \"pg\".\"pid\", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.target_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.target_pid = pg.pid THEN nfl_plays.depth_of_target ELSE 0 END) / NULLIF(SUM(nfl_plays.depth_of_target), 0)), 4) as weighted_opp_rating_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"offense_nfl_team\" = \"pg\".\"nfl_team\" where not \"play_type\" = 'NOPL' and (\"target_pid\" is not null) and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2024) and \"pg\".\"season_year\" in (2024) group by \"pg\".\"pid\"), \"base_years\" as (SELECT unnest(ARRAY[2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.first_name, player.last_name, \"t630d7a53f9c55c28de5ee80580929062\".\"weighted_opp_rating_from_plays\" AS \"weighted_opp_rating_from_plays_0\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t630d7a53f9c55c28de5ee80580929062\" on \"t630d7a53f9c55c28de5ee80580929062\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"t630d7a53f9c55c28de5ee80580929062\".\"weighted_opp_rating_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500"
+}
