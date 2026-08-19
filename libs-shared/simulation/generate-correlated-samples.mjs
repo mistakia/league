@@ -91,7 +91,7 @@ function seeded_random(seed) {
  *
  * @param {Object} params
  * @param {number[][]} params.correlation_matrix - Symmetric positive-definite correlation matrix
- * @returns {Object} { lower_matrix, is_positive_definite }
+ * @returns {{ lower_matrix: number[][], is_positive_definite: boolean }}
  */
 export function cholesky_decomposition({ correlation_matrix }) {
   const matrix = new Matrix(correlation_matrix)

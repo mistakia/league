@@ -5,6 +5,11 @@
  * `pid` strings, so this selects name/position/NFL-team in a single
  * `whereIn` and returns `{ [pid]: { name, primary_position, nfl_team } }`.
  * Callers render from this map so no bare pid ever reaches a doc.
+ *
+ * @param {object} params
+ * @param {import('knex').Knex} params.db
+ * @param {string[]} params.pids
+ * @returns {Promise<Record<string, { name: string, primary_position: string, nfl_team: string }>>}
  */
 export default async function get_players({ db, pids }) {
   const unique_pids = [...new Set((pids || []).filter(Boolean))]
@@ -22,6 +27,7 @@ export default async function get_players({ db, pids }) {
       'current_nfl_team'
     )
 
+  /** @type {Record<string, { name: string, primary_position: string, nfl_team: string }>} */
   const players = {}
   for (const row of rows) {
     players[row.pid] = {

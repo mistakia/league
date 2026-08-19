@@ -5,6 +5,12 @@
  */
 
 export class ContextDocError extends Error {
+  /**
+   * @param {string} message
+   * @param {object} [options]
+   * @param {number} [options.status] - HTTP status the route should respond with
+   * @param {string} [options.code] - Machine-readable discriminator
+   */
   constructor(message, { status = 500, code } = {}) {
     super(message)
     this.name = 'ContextDocError'

@@ -11,7 +11,7 @@ import { mean, standardDeviation, median, quantile } from 'simple-statistics'
  *
  * @param {Object} params
  * @param {Map|Object} params.team_scores - Map or object of team_id -> score
- * @returns {Object} { winners: team_id[], max_score: number, win_credit: number }
+ * @returns {{ winners: number[], max_score: number, win_credit: number }}
  */
 export function find_winners({ team_scores }) {
   let max_score = -Infinity
@@ -63,7 +63,7 @@ export function distribute_win_credit({ team_wins, winners, win_credit }) {
  * @param {Object} [options={}] - Options
  * @param {boolean} [options.include_percentiles=true] - Include median and percentiles
  * @param {boolean} [options.is_locked=false] - Whether this is a locked (actual) score
- * @returns {Object} Distribution statistics
+ * @returns {Record<string, number>} Distribution statistics
  */
 export function calculate_distribution(scores, options = {}) {
   const { include_percentiles = true, is_locked = false } = options
@@ -101,7 +101,7 @@ export function calculate_distribution(scores, options = {}) {
  * @param {number} value - The constant value
  * @param {Object} [options={}] - Options
  * @param {boolean} [options.include_percentiles=false] - Include percentile fields
- * @returns {Object} Distribution with zero variance
+ * @returns {Record<string, number>} Distribution with zero variance
  */
 export function create_constant_distribution(value, options = {}) {
   const { include_percentiles = false } = options

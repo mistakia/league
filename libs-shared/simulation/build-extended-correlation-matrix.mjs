@@ -106,7 +106,7 @@ function get_position_default(pos, archetype, position_defaults) {
  * @param {Map} params.game_outcome_correlations - Map of pid -> { correlation, confidence }
  * @param {Map} params.position_defaults - Map of 'pos' or 'pos:archetype' -> { default_correlation }
  * @param {number} [params.epsilon] - Regularization strength
- * @returns {Object} { matrix, player_indices, game_indices, n_players, n_games, used_fallback }
+ * @returns {{ matrix: number[][], player_indices: Map<string, number>, game_indices: Map<number, number>, n_players: number, n_games: number, used_fallback: boolean }}
  */
 export function build_extended_correlation_matrix({
   players,

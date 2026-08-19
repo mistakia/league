@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * Core Monte Carlo simulation engine for fantasy football matchups.
  * Pure math operations - no database access.
@@ -28,26 +29,79 @@ import { calculate_variance_scale } from './apply-game-environment-adjustments.m
 const log = debug('simulation:run-simulation')
 
 /**
+ * The vocabulary this engine works over. Declared here rather than imported
+ * from the server-side simulation helpers, because libs-shared is also what the
+ * SPA bundles and must not reach into libs-server.
+ *
+ * @typedef {object} SimulationPlayer
+ * @property {string} pid
+ * @property {string} nfl_team
+ * @property {string} position
+ * @property {number | string} [position_rank]
+ * @property {number} [team_id] - Fantasy team, for grouping
+ * @property {number | null} [esbid] - NFL game, for game correlations
+ *
+ * @typedef {object} FantasyTeam
+ * @property {number} team_id
+ * @property {string} [name]
+ *
+ * @typedef {object} VarianceStats
+ * @property {number} [mean_points]
+ * @property {number} [std_points]
+ * @property {number} [coefficient_of_variation]
+ * @property {number} [games_played]
+ *
+ * @typedef {object} GameEnvironment
+ * @property {number} [game_total]
+ * @property {number} [home_spread]
+ * @property {number} [away_spread]
+ * @property {string} [home_team]
+ * @property {string} [away_team]
+ *
+ * @typedef {{ correlation: number, confidence?: number }} GameOutcomeCorrelation
+ * @typedef {{ default_correlation: number }} PositionDefault
+ */
+
+/**
+ * `raw_team_scores` and `game_outcome_samples` are present only when the caller
+ * asked for them, which is why they are optional rather than always-null: a
+ * multi-week aggregation needs the per-simulation scores, and nothing else
+ * should pay to carry n_simulations arrays per team.
+ *
+ * @typedef {object} SimulationResult
+ * @property {Map<number, number>} win_probabilities
+ * @property {Map<number, any>} score_distributions
+ * @property {Map<string, any>} player_score_distributions
+ * @property {number} n_simulations
+ * @property {number} elapsed_ms
+ * @property {boolean} [correlation_fallback]
+ * @property {number} locked_player_count
+ * @property {boolean} [extended_matrix_used]
+ * @property {number} [n_games_correlated]
+ * @property {Map<number, number[]>} [raw_team_scores]
+ * @property {any[]} [game_outcome_samples]
+ */
+
+/**
  * Run Monte Carlo simulation for fantasy matchup.
  *
- * @param {Object} params
- * @param {Object[]} params.players - Array of players with { pid, nfl_team, position, position_rank, team_id, esbid }
- *   team_id = fantasy team ID for grouping, esbid = NFL game ID for game correlations
- * @param {Map} params.projections - Map of pid -> projected_points (mean projection)
- * @param {Map} params.variance_cache - Map of pid -> { mean_points, std_points, coefficient_of_variation, games_played }
- * @param {Map} params.correlation_cache - Pre-loaded correlations from database
- * @param {Map} params.archetypes - Map of pid -> archetype
- * @param {Object} params.schedule - Pre-loaded NFL schedule
- * @param {Object[]} params.teams - Array of fantasy teams { team_id, name }
+ * @param {object} params
+ * @param {SimulationPlayer[]} params.players
+ * @param {Map<string, number>} params.projections - pid -> projected_points (mean projection)
+ * @param {Map<string, VarianceStats>} params.variance_cache
+ * @param {Map<string, any>} params.correlation_cache - Pre-loaded correlations from database
+ * @param {Map<string, string>} params.archetypes - pid -> archetype
+ * @param {Record<string, any>} params.schedule - Pre-loaded NFL schedule
+ * @param {FantasyTeam[]} params.teams
  * @param {number} [params.n_simulations] - Number of simulations
  * @param {number} [params.seed] - Optional seed for reproducibility
  * @param {boolean} [params.return_raw_scores=false] - If true, include raw per-simulation scores in results
- * @param {Map} [params.locked_scores=new Map()] - Map of pid -> actual_points for players with completed games
- * @param {Map} [params.game_environment] - Map of esbid -> { game_total, home_spread, away_spread, home_team, away_team }
- * @param {Map} [params.game_outcome_correlations] - Map of pid -> { correlation, confidence } for game script correlations
- * @param {Map} [params.position_defaults] - Map of 'pos' or 'pos:archetype' -> { default_correlation } for blending
+ * @param {Map<string, number>} [params.locked_scores] - pid -> actual_points for players with completed games
+ * @param {Map<number, GameEnvironment>} [params.game_environment] - esbid -> game environment
+ * @param {Map<string, GameOutcomeCorrelation>} [params.game_outcome_correlations] - pid -> game script correlation
+ * @param {Map<string, PositionDefault>} [params.position_defaults] - 'pos' or 'pos:archetype' -> blend default
  * @param {boolean} [params.return_game_outcomes=false] - If true, include game outcome samples in results
- * @returns {Object} { win_probabilities, score_distributions, player_score_distributions, n_simulations, elapsed_ms, correlation_fallback, locked_player_count, raw_team_scores?, game_outcome_samples?, extended_matrix_used }
+ * @returns {SimulationResult}
  */
 export function run_simulation({
   players,
@@ -232,6 +286,7 @@ export function run_simulation({
   const player_scores = new Map()
 
   // Storage for game outcome samples if requested
+  /** @type {any[] | null} */
   const game_outcome_samples =
     return_game_outcomes && use_extended_matrix ? [] : null
 
@@ -275,6 +330,7 @@ export function run_simulation({
     // Calculate team totals (simulated + locked)
     const team_totals = new Map()
     teams.forEach((team) => {
+      /** @type {number[]} */
       const player_indices = team_player_indices.get(team.team_id)
       const simulated_total = player_indices.reduce(
         (sum, idx) => sum + sampled_scores[idx],
@@ -330,6 +386,7 @@ export function run_simulation({
   const elapsed_ms = Date.now() - start_time
   log(`Simulation completed in ${elapsed_ms}ms`)
 
+  /** @type {SimulationResult} */
   const result = {
     win_probabilities,
     score_distributions,
@@ -358,6 +415,19 @@ export function run_simulation({
 /**
  * Build a simulation result object.
  * Shared helper to reduce duplication between result-building functions.
+ *
+ * @param {object} params
+ * @param {FantasyTeam[]} params.teams
+ * @param {Map<number, number>} params.win_probabilities
+ * @param {Map<number, any>} params.score_distributions
+ * @param {Map<string, any>} [params.player_score_distributions]
+ * @param {number} params.n_simulations
+ * @param {number} [params.elapsed_ms]
+ * @param {boolean} [params.correlation_fallback]
+ * @param {number} [params.locked_player_count]
+ * @param {boolean} [params.return_raw_scores]
+ * @param {(team: FantasyTeam) => number[]} [params.raw_scores_generator]
+ * @returns {SimulationResult}
  */
 function build_simulation_result({
   teams,
@@ -371,6 +441,7 @@ function build_simulation_result({
   return_raw_scores = false,
   raw_scores_generator // Function: (team) => scores array
 }) {
+  /** @type {SimulationResult} */
   const result = {
     win_probabilities,
     score_distributions,
@@ -397,6 +468,11 @@ function build_simulation_result({
 
 /**
  * Create empty results when no active players.
+ *
+ * @param {object} params
+ * @param {FantasyTeam[]} params.teams
+ * @param {number} params.n_simulations
+ * @param {boolean} [params.return_raw_scores]
  */
 function create_empty_results({ teams, n_simulations, return_raw_scores }) {
   const equal_probability = 1 / teams.length
@@ -423,6 +499,14 @@ function create_empty_results({ teams, n_simulations, return_raw_scores }) {
 
 /**
  * Create results when all players are locked (no simulation needed).
+ *
+ * @param {object} params
+ * @param {FantasyTeam[]} params.teams
+ * @param {SimulationPlayer[]} params.locked_players
+ * @param {Map<string, number>} params.locked_scores
+ * @param {Map<number, number>} params.locked_team_totals
+ * @param {number} params.n_simulations
+ * @param {boolean} [params.return_raw_scores]
  */
 function create_locked_only_results({
   teams,

@@ -50,6 +50,10 @@ export const league_calendar_events = [
  * enumerated event set, sorted by date, each tagged past/upcoming relative to
  * now. Playoff weeks are derived separately (see `derive_playoff_weeks`) since
  * they are week numbers, not timestamps.
+ *
+ * @param {object} params
+ * @param {Record<string, any>} params.league
+ * @param {number} [params.now_unix] - Defaults to now; injectable for tests.
  */
 export function build_league_calendar({ league, now_unix }) {
   const now = now_unix || dayjs().unix()
@@ -90,6 +94,10 @@ export function derive_playoff_weeks({ league }) {
  * Resolve a compact current-phase label for the banner. Checks the known
  * windows in chronological order and falls back to regular season / offseason.
  * Mirrors the app's use of `dayjs()` for "now".
+ *
+ * @param {object} params
+ * @param {Record<string, any>} params.league
+ * @param {number} [params.now_unix] - Defaults to now; injectable for tests.
  */
 export function resolve_current_phase({ league, now_unix }) {
   const now = now_unix || dayjs().unix()

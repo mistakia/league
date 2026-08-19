@@ -68,6 +68,14 @@ export function build_frontmatter({ type, fields = {}, related = {} }) {
  * readable document, `csv` its machine-readable sibling at the identical path
  * (`/leagues/1/rosters.csv`). Only views that publish one accept it.
  */
+/**
+ * @param {string} base_url
+ * @param {object} [options]
+ * @param {number|string} [options.lid]
+ * @param {number|string} [options.tid]
+ * @param {string} [options.view]
+ * @param {string} [options.format]
+ */
 export function doc_url(base_url, { lid, tid, view, format = 'md' } = {}) {
   if (tid !== undefined && tid !== null) {
     return `${base_url}/leagues/${lid}/teams/${tid}.${format}`

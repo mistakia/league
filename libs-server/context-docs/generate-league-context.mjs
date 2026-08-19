@@ -1,3 +1,4 @@
+// @ts-check
 import { current_season, transaction_type_display_names } from '#constants'
 import timestamptz_to_epoch from '#libs-shared/timestamptz-to-epoch.mjs'
 
@@ -27,10 +28,21 @@ import {
 
 const DEFAULT_BASE_URL = 'https://xo.football'
 
+/** @typedef {import('knex').Knex} Knex */
+/** @typedef {import('#db/schema-types.js').TeamsRow} TeamsRow */
+/** @typedef {import('#db/schema-types.js').TransactionsRow} TransactionsRow */
+/** @typedef {import('#db/schema-types.js').LeagueTeamSeasonlogsRow} LeagueTeamSeasonlogsRow */
+/** @typedef {Awaited<ReturnType<typeof getLeague>>} League */
+
 /**
  * Load the league and enforce the lifecycle guards shared by every generator:
  * a missing league is a 404, and a league with no configured season for the
  * year (no `scoring_format_id`) is a 404 rather than a degenerate doc.
+ *
+ * @param {object} params
+ * @param {Knex} params.db
+ * @param {number} params.lid
+ * @param {number} params.year
  */
 export async function load_configured_league({ db, lid, year }) {
   const league = await getLeague({ lid, year })
@@ -46,20 +58,27 @@ export async function load_configured_league({ db, lid, year }) {
   return league
 }
 
+/**
+ * @param {object} params
+ * @param {TeamsRow[]} params.teams
+ * @param {LeagueTeamSeasonlogsRow[]} params.seasonlogs
+ * @param {Record<number, string[]>} params.managers
+ * @param {League} params.league
+ */
 function build_standings({ teams, seasonlogs, managers, league }) {
   const seasonlog_by_tid = new Map(seasonlogs.map((row) => [row.tid, row]))
 
   const rows = teams.map((team) => {
-    const log = seasonlog_by_tid.get(team.team_id) || {}
+    const log = seasonlog_by_tid.get(team.team_id)
     return {
       tid: team.team_id,
       name: team.name,
       manager: (managers[team.team_id] || []).join(', ') || '—',
-      wins: log.regular_season_wins || 0,
-      losses: log.regular_season_losses || 0,
-      ties: log.regular_season_ties || 0,
-      points_for: Number(log.points_for || 0),
-      points_against: Number(log.points_against || 0),
+      wins: log?.regular_season_wins || 0,
+      losses: log?.regular_season_losses || 0,
+      ties: log?.regular_season_ties || 0,
+      points_for: Number(log?.points_for || 0),
+      points_against: Number(log?.points_against || 0),
       division:
         league[`division_${team.division}_name`] ||
         (team.division ? `Division ${team.division}` : '—')
@@ -70,6 +89,13 @@ function build_standings({ teams, seasonlogs, managers, league }) {
   return rows
 }
 
+/**
+ * @param {object} params
+ * @param {Knex} params.db
+ * @param {number} params.lid
+ * @param {number} [params.year]
+ * @param {string} [params.base_url]
+ */
 export default async function generate_league_context({
   db,
   lid,

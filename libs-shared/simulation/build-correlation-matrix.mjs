@@ -184,7 +184,7 @@ function get_archetype_adjusted_default({
  * @param {Map} params.correlation_cache - Pre-loaded correlations from database
  * @param {Map} params.archetypes - Map of pid -> archetype
  * @param {number} [params.epsilon] - Regularization strength for positive definiteness
- * @returns {Object} { matrix, player_indices, used_fallback }
+ * @returns {{ matrix: number[][], player_indices: Map<string, number>, used_fallback: boolean }}
  */
 export function build_correlation_matrix({
   players,

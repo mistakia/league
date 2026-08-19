@@ -6,6 +6,7 @@
     "api/routes/leagues/trade-review.mjs",
     "db/checks/registry.mjs",
     "db/index.mjs",
+    "libs-server/context-docs/generate-league-context.mjs",
     "libs-server/context-docs/generate-league-rosters-csv.mjs",
     "libs-server/data-views/derive-column-row-grains.mjs",
     "libs-server/data-views/team-values-cte.mjs",
@@ -22,7 +23,9 @@
     "libs-shared/constants/season-constants.mjs",
     "libs-shared/constants/stats-constants.mjs",
     "libs-shared/get-free-agent-period.mjs",
+    "libs-shared/get-play-from-play-stats.mjs",
     "libs-shared/nfl-week-identifier.mjs",
-    "libs-shared/output-column-param.mjs"
+    "libs-shared/output-column-param.mjs",
+    "libs-shared/simulation/run-simulation.mjs"
   ]
 }

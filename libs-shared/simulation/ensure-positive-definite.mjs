@@ -93,7 +93,7 @@ export function normalize_correlation_matrix(matrix) {
  * @param {number[][]} params.matrix - Input correlation matrix
  * @param {number} [params.epsilon] - Regularization strength (shrinkage toward identity)
  * @param {number} [params.min_eigenvalue] - Minimum eigenvalue after clipping
- * @returns {Object} { matrix: number[][], used_fallback: boolean }
+ * @returns {{ matrix: number[][], used_fallback: boolean }}
  */
 export function ensure_positive_definite({
   matrix,

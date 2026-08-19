@@ -91,7 +91,7 @@ export function get_rookie_default_cv({ position }) {
  * @param {Object} params
  * @param {number} params.mean_points - Mean projected fantasy points
  * @param {number} params.std_points - Standard deviation of fantasy points
- * @returns {Object} { alpha (shape), theta (scale) }
+ * @returns {{ alpha: number, theta: number }} alpha = shape, theta = scale
  */
 export function fit_gamma_params({ mean_points, std_points }) {
   const variance = std_points * std_points
@@ -107,7 +107,7 @@ export function fit_gamma_params({ mean_points, std_points }) {
  * @param {Object} params
  * @param {number} params.mean_points - Mean projected fantasy points
  * @param {number} params.std_points - Standard deviation of fantasy points
- * @returns {Object} { mu, sigma }
+ * @returns {{ mu: number, sigma: number }}
  */
 export function fit_log_normal_params({ mean_points, std_points }) {
   const coefficient_of_variation = std_points / mean_points
@@ -173,7 +173,7 @@ export function sample_from_distribution({
  * @param {number} params.projected_points - Mean projected fantasy points
  * @param {number} params.std_points - Standard deviation (from variance cache or default)
  * @param {string} params.position - Player position
- * @returns {Object} { distribution_type, distribution_params, projected_points, std_points }
+ * @returns {{ distribution_type: string, distribution_params: Record<string, number>, projected_points: number, std_points: number }}
  */
 export function get_player_distribution_params({
   projected_points,

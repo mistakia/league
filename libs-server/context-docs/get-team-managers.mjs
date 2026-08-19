@@ -5,6 +5,12 @@
  * no owner identity, so this joins `users_teams` -> `users` and returns a map
  * of `{ [tid]: [username, ...] }`. A team with no linked user resolves to an
  * empty array rather than being absent.
+ *
+ * @param {object} params
+ * @param {import('knex').Knex} params.db
+ * @param {number} params.lid
+ * @param {number} params.year
+ * @returns {Promise<Record<number, string[]>>}
  */
 export default async function get_team_managers({ db, lid, year }) {
   const rows = await db('users_teams')
@@ -20,6 +26,7 @@ export default async function get_team_managers({ db, lid, year }) {
     .where('teams.season_year', year)
     .select('users_teams.tid', 'users.username')
 
+  /** @type {Record<number, string[]>} */
   const managers = {}
   for (const row of rows) {
     if (!managers[row.tid]) {

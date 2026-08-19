@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * GSIS StatID Documentation:
  * - Official: http://www.nflgsis.com/gsis/Documentation/Partners/StatIDs.html
@@ -9,7 +10,27 @@
  * - Stat ID 4 (1st Down Passing) - Team-level, use play.is_first_down + receiving stats for player attribution
  */
 
+/**
+ * `playRow` accumulates `nfl_plays` columns, so it is typed against the
+ * generated row type: a stat-id branch assigning a name that is not a real
+ * column is then a compile error rather than a field that silently never
+ * persists. The three tackler arrays are assembly-time only and have no column.
+ *
+ * @param {{ playStats: Array<Record<string, any>> }} play
+ * @returns {Partial<import('#db/schema-types.js').NflPlaysRow> & {
+ *   tacklers_solo: any[],
+ *   tacklers_with_assisters: any[],
+ *   tackle_assisters: any[]
+ * }}
+ */
 export default function getPlayFromPlayStats(play) {
+  /**
+   * @type {Partial<import('#db/schema-types.js').NflPlaysRow> & {
+   *   tacklers_solo: any[],
+   *   tacklers_with_assisters: any[],
+   *   tackle_assisters: any[]
+   * }}
+   */
   const playRow = {
     tacklers_solo: [],
     tacklers_with_assisters: [],
