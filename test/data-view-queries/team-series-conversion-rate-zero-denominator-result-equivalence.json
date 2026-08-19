@@ -1,0 +1,35 @@
+{
+  "name": "team_series_conversion_rate_from_plays renders NULL rather than raising on a zero denominator (executed-result parity)",
+  "description": "Seed team ZZ's only 2023 series as a QB kneel, which the denominator's COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') ...) excludes, so the denominator is 0 over a NON-EMPTY group. Until 2026-08-19 the team recombination emitted a bare sum(num)/sum(den) with no NULLIF, and Postgres raises `division by zero` on that -- a 500 for the whole request, reachable through a season-type param. The answer is NULL: a team that ran no countable series has no conversion rate.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "team_series_conversion_rate_from_plays",
+        "params": { "year": [2023] }
+      }
+    ],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+    ]
+  },
+  "expected_query": "with \"t43a888c621d3f08435232dd6603579a7\" as materialized (select \"nfl_plays\".\"offense_nfl_team\" as \"nfl_team\", COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_sequence) END) as team_series_conversion_rate_from_plays_numerator, COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_sequence) END) as team_series_conversion_rate_from_plays_denominator from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2023) group by \"nfl_plays\".\"offense_nfl_team\"), \"t43a888c621d3f08435232dd6603579a7_team_stats\" as materialized (select \"t43a888c621d3f08435232dd6603579a7\".\"nfl_team\", sum(t43a888c621d3f08435232dd6603579a7.team_series_conversion_rate_from_plays_numerator) / NULLIF(sum(t43a888c621d3f08435232dd6603579a7.team_series_conversion_rate_from_plays_denominator), 0) as team_series_conversion_rate_from_plays from \"t43a888c621d3f08435232dd6603579a7\" group by \"t43a888c621d3f08435232dd6603579a7\".\"nfl_team\"), \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_year_teams\" as materialized (select \"pid\", \"year\", (array_agg(nfl_team ORDER BY game_count DESC, nfl_team ASC))[1] as team from (select \"player_gamelogs\".\"pid\", \"nfl_games\".\"season_year\" as \"year\", \"player_gamelogs\".\"nfl_team\", count(*) as \"game_count\" from \"player_gamelogs\" inner join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"season_type\" in ('REG') and \"nfl_games\".\"season_year\" in (2023) and \"player_gamelogs\".\"season_year\" in (2023) group by \"player_gamelogs\".\"pid\", \"nfl_games\".\"season_year\", \"player_gamelogs\".\"nfl_team\") as \"player_year_team_counts\" group by \"pid\", \"year\") select \"player\".\"pid\", player.first_name, player.last_name, \"t43a888c621d3f08435232dd6603579a7_team_stats\".\"team_series_conversion_rate_from_plays\" AS \"team_series_conversion_rate_from_plays_0\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"player_year_teams\" on \"player_year_teams\".\"pid\" = \"player\".\"pid\" and \"player_year_teams\".\"year\" = 2023 left join \"t43a888c621d3f08435232dd6603579a7_team_stats\" on \"t43a888c621d3f08435232dd6603579a7_team_stats\".\"nfl_team\" = \"player_year_teams\".\"team\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"t43a888c621d3f08435232dd6603579a7_team_stats\".\"team_series_conversion_rate_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year, current_nfl_team) VALUES ('TEST-TSCR-000905', 'Test', 'Tscr', 'T.Tscr', 'Test Tscr', 'MLB', 'MLB', '2000-01-01', 2020, 'ZZ')",
+      "INSERT INTO nfl_games (esbid, season_year, week, season_type, away_nfl_team, home_nfl_team) VALUES (991101, 2023, 1, 'REG', 'ZZ', 'OP')",
+      "INSERT INTO player_gamelogs (esbid, pid, opponent_nfl_team, nfl_team, player_position, season_year, rushing_first_downs, receiving_first_downs, rushing_yards_excluding_kneels) VALUES (991101, 'TEST-TSCR-000905', 'OP', 'ZZ', 'MLB', 2023, 0, 0, 0)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, series_result, series_sequence) VALUES (991101, 1, 2023, 1, to_timestamp(0), 'REG', 'RUSH', 'ZZ', 'QB_KNEEL', 1)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, offense_nfl_team, series_result, series_sequence) VALUES (991101, 2, 2023, 1, to_timestamp(0), 'REG', 'RUSH', 'ZZ', 'QB_KNEEL', 1)"
+    ],
+    "expected_rows": [{ "team_series_conversion_rate_from_plays_0": null }],
+    "compare_columns": ["team_series_conversion_rate_from_plays_0"]
+  },
+  "tags": [
+    "team",
+    "from_plays",
+    "zero_denominator",
+    "null_disposition",
+    "result-equivalence"
+  ]
+}

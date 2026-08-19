@@ -414,7 +414,12 @@ function add_select_columns({
       } else {
         query.select(
           db.raw(
-            `sum(${with_table_name}.${select_column_name}_numerator) / sum(${with_table_name}.${select_column_name}_denominator) as ${select_column_name}`
+            // NULLIF, matching the sibling site above. Without it a group whose
+            // denominator sums to zero raises `division by zero` and takes the
+            // whole query with it -- reachable on
+            // team_series_conversion_rate_from_plays, whose COUNT(DISTINCT
+            // CASE ...) denominator returns 0 for preseason groups.
+            `sum(${with_table_name}.${select_column_name}_numerator) / NULLIF(sum(${with_table_name}.${select_column_name}_denominator), 0) as ${select_column_name}`
           )
         )
       }
