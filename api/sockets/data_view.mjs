@@ -1,223 +1,206 @@
-import { get_data_view_results, redis_cache } from '#libs-server'
+import crypto from 'crypto'
+import { redis_cache } from '#libs-server'
 import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
+import {
+  execute_data_view_request,
+  log_data_view_telemetry
+} from '#libs-server/data-views/execute-data-view-request.mjs'
 import debug from 'debug'
 import { generate_client_id, send_websocket_message } from './utils.mjs'
 
 const log = debug('data-view-socket')
 
-class DataViewQueue {
-  constructor() {
-    this.queue = []
-    this.processing = false
-    this.non_auth_requests = new Map()
-    log('DataViewQueue initialized')
+// Per-socket execution tracking. `request_id` is the VIEW id, not a per-request
+// identity, so executions are keyed on the server-minted `execution_id`; the
+// client echoes it in DATA_VIEW_CLIENT_TIMING and the server validates it
+// against this map. That kills cross-client forgery (a forged id is not in this
+// socket's set) and the same-view-same-client ambiguity (each request gets a
+// fresh id). Entries survive the terminal frame so the timing frame -- which
+// arrives one round trip later -- can still be correlated.
+const socket_executions = new WeakMap()
+
+const get_executions = (ws) => {
+  let executions = socket_executions.get(ws)
+  if (!executions) {
+    executions = new Map()
+    socket_executions.set(ws, executions)
+  }
+  return executions
+}
+
+// A client timing frame must arrive within a second or two of the terminal
+// frame; anything older than this retention window is unattributable and pruned.
+const TIMING_RETENTION_MS = 60 * 1000
+
+const prune_stale_executions = (executions) => {
+  const now = Date.now()
+  for (const [id, exec] of executions) {
+    if (exec.state === 'done' && now - exec.started_at > TIMING_RETENTION_MS) {
+      executions.delete(id)
+    }
+  }
+}
+
+export const handle_data_view_request = async ({
+  ws,
+  user_id,
+  request_id,
+  params,
+  ignore_cache,
+  cache_get = (key) => redis_cache.get(key)
+}) => {
+  const executions = get_executions(ws)
+  prune_stale_executions(executions)
+
+  // At most one live request per socket. A second request supersedes the first:
+  // a queued waiter is aborted; an in-flight execution finishes bounded by its
+  // timeout, writes the cache, and its result is not delivered. The client's
+  // reconnect replay re-requests on the fresh socket, so aborting on supersede
+  // is the same path as aborting on disconnect.
+  for (const [id, exec] of executions) {
+    if (exec.state === 'waiting' || exec.state === 'executing') {
+      exec.controller.abort()
+      exec.state = 'superseded'
+      executions.delete(id)
+    }
   }
 
-  async add_request({ ws, request_id, params, user_id, ignore_cache = false }) {
-    log('Adding request', { request_id, user_id })
-    const cache_key = `/data-views/${get_data_view_hash({ ...params, user_id: user_id || null })}`
-    const cached_value = await redis_cache.get(cache_key)
+  // Minted at REQUEST ENTRY, before the cache lookup -- not at admission. A
+  // cache hit never enters the queue, so a late-minted id would leave every
+  // cache-hit result frame without one, and the client suppresses an
+  // unattributable timing frame, silently deleting the fast-path denominator
+  // the no-floor contract protects.
+  const execution_id = crypto.randomBytes(8).toString('hex')
+  const controller = new AbortController()
+  const exec = {
+    request_id,
+    execution_id,
+    state: 'waiting',
+    controller,
+    started_at: Date.now()
+  }
+  executions.set(execution_id, exec)
 
+  const cache_key = `/data-views/${get_data_view_hash({
+    ...params,
+    user_id: user_id || null
+  })}`
+
+  try {
+    const cached_value = await cache_get(cache_key)
     if (cached_value && !ignore_cache) {
       // The cache value is the canonical { data_view_results, data_view_metadata }
-      // object. Tolerate a legacy bare-array entry (older /data-views/search builds
-      // cached the raw rows array under this same key) so a shape mismatch can never
-      // surface to the client as result: undefined and crash the data-view render.
+      // object; tolerate a legacy bare-array entry (older builds cached raw rows
+      // under this same key) so a shape mismatch can never surface as
+      // result: undefined and crash the render.
       const normalized = Array.isArray(cached_value)
         ? { data_view_results: cached_value, data_view_metadata: {} }
         : cached_value
-      log('Cache hit', { request_id })
-      this.send_cached_result({
-        ws,
+      send_websocket_message(ws, 'DATA_VIEW_RESULT', {
         request_id,
+        execution_id,
         result: normalized.data_view_results,
         metadata: normalized.data_view_metadata,
         append_results: params.append_results
       })
-    } else {
-      if (ignore_cache) {
-        log('Ignoring cache', { request_id })
-      } else {
-        log('Cache miss', { request_id })
-      }
-      if (!user_id) {
-        this.handle_non_auth_request({ ws, request_id, params, cache_key })
-      } else {
-        this.add_to_queue({ ws, request_id, params, user_id, cache_key })
-      }
-      this.process_queue()
+      exec.state = 'done'
+      return
     }
-  }
 
-  handle_non_auth_request({ ws, request_id, params, cache_key }) {
-    log('Handling non-auth request', { request_id })
-    const existing_request = this.non_auth_requests.get(ws.client_id)
-    if (existing_request) {
-      // Update the existing request in the queue
-      const queue_index = this.queue.findIndex(
-        (item) => item === existing_request
-      )
-      if (queue_index !== -1) {
-        const new_request = {
-          ws,
-          request_id,
-          params,
-          user_id: null,
-          cache_key,
-          position: existing_request.position
-        }
-        this.queue[queue_index] = new_request
-        this.non_auth_requests.set(ws.client_id, new_request)
-        this.send_position_update({
-          ws: new_request.ws,
-          request_id: new_request.request_id,
-          position: new_request.position
-        })
-      }
-    } else {
-      // Add new request to the queue
-      const new_request = { ws, request_id, params, user_id: null, cache_key }
-      this.non_auth_requests.set(ws.client_id, new_request)
-      this.add_to_queue(new_request)
-    }
-  }
+    const on_heartbeat = (payload) =>
+      send_websocket_message(ws, 'DATA_VIEW_HEARTBEAT', payload)
+    const on_status = (payload) =>
+      send_websocket_message(ws, 'DATA_VIEW_STATUS', payload)
 
-  add_to_queue(request) {
-    const position = this.queue.length + 1
-    request.position = position
-    this.queue.push(request)
-    log('Added to queue', { request_id: request.request_id, position })
-    this.send_position_update({
-      ws: request.ws,
-      request_id: request.request_id,
-      position
+    const result = await execute_data_view_request({
+      request_id,
+      execution_id,
+      params,
+      user_id,
+      path: 'socket',
+      cache_key,
+      signal: controller.signal,
+      on_heartbeat,
+      on_status
     })
-  }
 
-  send_cached_result({ ws, request_id, result, metadata, append_results }) {
+    // A result for an execution that was superseded while running is discarded
+    // with a record -- the exact gap the handoff found (a completed query whose
+    // requester moved on was thrown away silently).
+    if (executions.get(execution_id) !== exec) {
+      log_data_view_telemetry({
+        event: 'execution',
+        execution_id,
+        request_id,
+        path: 'socket',
+        outcome: 'discarded'
+      })
+      return
+    }
+
     send_websocket_message(ws, 'DATA_VIEW_RESULT', {
       request_id,
-      result,
-      metadata,
-      append_results
+      execution_id,
+      result: result.data_view_results || [],
+      metadata: result.data_view_metadata,
+      append_results: params.append_results
     })
-  }
-
-  remove_request(client_id) {
-    log('Removing request', { client_id })
-    this.queue = this.queue.filter(
-      (item) => item.ws.client_id !== client_id || item.user_id
-    )
-    this.non_auth_requests.delete(client_id)
-    this.update_queue_positions()
-  }
-
-  send_position_update({ ws, request_id, position }) {
-    send_websocket_message(ws, 'DATA_VIEW_POSITION', {
-      request_id,
-      position
-    })
-  }
-
-  update_queue_positions() {
-    this.queue.forEach((item, index) => {
-      const new_position = index + 1
-      if (item.position !== new_position) {
-        item.position = new_position
-        this.send_position_update({
-          ws: item.ws,
-          request_id: item.request_id,
-          position: new_position
-        })
-      }
-    })
-  }
-
-  async process_queue() {
-    if (this.processing || this.queue.length === 0) return
-
-    this.processing = true
-    const { ws, request_id, params, cache_key, user_id } = this.queue.shift()
-    log('Processing request', { request_id, user_id })
-
-    try {
-      this.send_message_to_client({
-        ws,
-        type: 'DATA_VIEW_STATUS',
-        payload: { request_id, status: 'processing' }
-      })
-
-      const signed_in_timeout = 5 * 60 * 1000 // 5 minutes
-      const signed_out_timeout = 40 * 1000 // 40 seconds
-      const timeout = user_id ? signed_in_timeout : signed_out_timeout
-
-      // Only calculate total count on initial requests (not pagination)
-      const is_pagination_request = params.offset > 0 && params.append_results
-      const calculate_total_count = !is_pagination_request
-
-      const { data_view_results, data_view_metadata } =
-        await get_data_view_results({
-          ...params,
-          calculate_total_count,
-          // After the spread: `params` is the client's table state and must not
-          // be able to name its own viewer, nor its own deadline. `timeout`
-          // reaches Postgres as SET LOCAL statement_timeout verbatim, so a
-          // client-supplied one let an anonymous caller run for hours and hold
-          // the process-wide serial queue against every other user.
-          timeout,
-          user_id: user_id || null
-        })
-
-      if (data_view_results && data_view_results.length) {
-        const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours (ms)
-        await redis_cache.set(
-          cache_key,
-          {
-            data_view_results,
-            data_view_metadata
-          },
-          Math.round(cache_ttl / 1000) // redis EX is seconds; cache_ttl is ms
-        )
-
-        if (data_view_metadata.cache_expire_at) {
-          await redis_cache.expire_at(
-            cache_key,
-            data_view_metadata.cache_expire_at
-          )
-        }
-      }
-
-      this.send_message_to_client({
-        ws,
-        type: 'DATA_VIEW_RESULT',
-        payload: {
-          request_id,
-          result: data_view_results || [],
-          metadata: data_view_metadata,
-          append_results: params.append_results
-        }
-      })
-      log('Request processed successfully', { request_id })
-    } catch (error) {
-      log('Error processing request', { request_id, error: error.toString() })
-      this.send_message_to_client({
-        ws,
-        type: 'DATA_VIEW_ERROR',
-        payload: { request_id, error: error.toString() }
-      })
-    } finally {
-      this.processing = false
-      this.non_auth_requests.delete(ws.client_id)
-      this.process_queue()
+    exec.state = 'done'
+  } catch (error) {
+    if (error.code === 'ABORTED') {
+      // Superseded or disconnected while waiting -- the client has moved on and
+      // no error frame is due.
+      return
     }
-  }
-
-  send_message_to_client({ ws, type, payload }) {
-    send_websocket_message(ws, type, payload)
+    if (executions.get(execution_id) !== exec) return
+    log('Error processing request', { request_id, error: error.toString() })
+    send_websocket_message(ws, 'DATA_VIEW_ERROR', {
+      request_id,
+      execution_id,
+      error: error.toString()
+    })
+    exec.state = 'done'
   }
 }
 
-const data_view_queue = new DataViewQueue()
+// The client reports only what the server cannot observe: when the answer
+// actually reached the browser. The frame is unauthenticated and the value is
+// client-supplied, so it is treated as untrusted end to end: clamped, labelled
+// client-reported, and never allowed near the severity ladder or the slow-query
+// dedup key. The poisoning target is the percentile, and the clamp bounds it.
+export const handle_client_timing = ({ ws, payload }) => {
+  const { request_id, execution_id, client_duration_ms, outcome } =
+    payload || {}
+  const exec = execution_id ? get_executions(ws).get(execution_id) : null
+  if (!exec) {
+    // Unknown execution for this socket: a forged id from another client, or a
+    // pruned one. Dropping it is what makes cross-client forgery inert.
+    log('dropped client timing frame for unknown execution', {
+      request_id,
+      execution_id
+    })
+    return null
+  }
+
+  // client_duration_ms is untrusted (anonymous, client-supplied): clamped,
+  // labelled client-reported, and kept out of the severity ladder and the
+  // slow-query dedup key. The poisoning target is the percentile; the clamp
+  // bounds that too. Returns the telemetry entry for testability.
+  const clamped = Number.isFinite(client_duration_ms)
+    ? Math.max(0, Math.min(Math.round(client_duration_ms), 3600 * 1000))
+    : null
+
+  const entry = {
+    event: 'client_timing',
+    execution_id,
+    request_id,
+    client_duration_ms: clamped,
+    outcome,
+    client_reported: true
+  }
+  log_data_view_telemetry(entry)
+  return entry
+}
 
 export default function handle_data_view_socket(wss) {
   wss.on('connection', function (ws, request) {
@@ -236,22 +219,33 @@ export default function handle_data_view_socket(wss) {
 
       if (message.type === 'DATA_VIEW_REQUEST') {
         const { request_id, params, ignore_cache } = message.payload
-        log('Received DATA_VIEW_REQUEST', { request_id, user_id })
-        data_view_queue.add_request({
+        // handle_data_view_request catches internally and sends its own error
+        // frame; this catch is only a final log for a failure before it could
+        // (the socket layer itself throwing).
+        handle_data_view_request({
           ws,
+          user_id,
           request_id,
           params,
-          user_id,
           ignore_cache
+        }).catch((error) => {
+          log('handle_data_view_request failed', {
+            request_id,
+            error: error.toString()
+          })
         })
+      } else if (message.type === 'DATA_VIEW_CLIENT_TIMING') {
+        handle_client_timing({ ws, payload: message.payload })
       }
     })
 
     ws.on('close', () => {
       log('WebSocket connection closed', { client_id: ws.client_id, user_id })
-      if (!user_id) {
-        data_view_queue.remove_request(ws.client_id)
+      const executions = get_executions(ws)
+      for (const [, exec] of executions) {
+        exec.controller.abort()
       }
+      socket_executions.delete(ws)
     })
   })
 }

@@ -16,6 +16,11 @@ module.exports = {
       max_restarts: 10,
       env_production: {
         NODE_ENV: 'production',
+        // Pinned here, not inherited from /etc/environment: a `pm2 delete` then
+        // `pm2 start` from a shell lacking these would otherwise run the API
+        // with every emit_signal silently muted (the transport no-ops when the
+        // variables are unset).
+        BASE_API_URL: 'https://base.tint.space',
         BASE_MACHINE_SLUG: 'league',
         BASE_INSTANCE_KEY_FILE: '/root/.base-instance-private.key'
       },

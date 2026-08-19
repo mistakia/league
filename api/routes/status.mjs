@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 
 import { job_title_by_id } from '#libs-shared/job-constants.mjs'
 import { getJobs } from '#libs-server'
+import { get_admission_state } from '#libs-server/data-views/execute-data-view-request.mjs'
 
 const router = express.Router()
 
@@ -146,6 +147,30 @@ router.get('/?', async (req, res) => {
     logger(error)
     res.status(500).send({ error: error.toString() })
   }
+})
+
+/**
+ * @swagger
+ * /status/admission:
+ *   get:
+ *     tags:
+ *       - System
+ *     summary: Data-view admission gate state
+ *     description: |
+ *       Current occupancy of the data-view admission gate and its lifetime
+ *       counters. The counters are the output oracle for the gate: arrivals
+ *       with zero admissions distinguish a wedged gate from an idle one.
+ *     operationId: getDataViewAdmissionState
+ *     responses:
+ *       '200':
+ *         description: Data-view admission state
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ */
+router.get('/admission', async (req, res) => {
+  res.send(get_admission_state())
 })
 
 /**

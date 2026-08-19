@@ -5,44 +5,48 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const socket_path = path.join(__dirname, '../api/sockets/data_view.mjs')
+// The invariant moved with the queue: the executor
+// (libs-server/data-views/execute-data-view-request.mjs) is now the single
+// place a data-view query is executed, so the server-owned keys live there.
+const executor_path = path.join(
+  __dirname,
+  '../libs-server/data-views/execute-data-view-request.mjs'
+)
 
 chai.should()
 const expect = chai.expect
 
-// `process_queue` builds the get_data_view_results argument by spreading the
-// client's table state (`...params`) into an object literal. Every server-owned
-// key in that literal therefore has to sit AFTER the spread, because a later key
-// wins -- a key written before it is a default the client can overwrite.
+// The executor builds the run_query argument by spreading the client's table
+// state (`...params`) into an object literal. Every server-owned key in that
+// literal therefore has to sit AFTER the spread, because a later key wins -- a
+// key written before it is a default the client can overwrite.
 //
-// `timeout` was written before the spread and reaches Postgres as SET LOCAL
-// statement_timeout verbatim, so an anonymous caller could send
+// `timeout` was written before the spread in the old queue and reached Postgres
+// as SET LOCAL statement_timeout verbatim, so an anonymous caller could send
 // params.timeout and run for as long as it liked against a 40s policy.
 // Confirmed by execution against production on 2026-08-19: params.timeout=1 and
 // params.timeout=400 each errored at exactly the injected deadline. Because
-// DataViewQueue.processing is one process-wide boolean and remove_request only
-// drops entries with no user_id, that also pins the head of the serial queue
-// against every other user, and survives the abusing socket closing.
+// DataViewQueue.processing was one process-wide boolean and remove_request only
+// dropped entries with no user_id, that also pinned the head of the serial
+// queue against every other user, and survived the abusing socket closing.
 //
 // `user_id` was already placed correctly, with a comment explaining why -- the
 // reasoning existed and had been applied to one key and not the other.
 //
-// A behavioral spec is not available: DataViewQueue is not exported and
-// get_data_view_results is imported directly, so there is no seam to stub. Per
-// league CLAUDE.md, extracting one would destroy the red-at-the-broken-revision
-// proof, since the extracted module does not exist at the pre-fix commit. So
-// this reads the source, in the manner of
+// A behavioral spec is not available at the pre-fix revision: the executor
+// module does not exist there, so a behavioral spec would fail on module-not-
+// found rather than on the defect. So this reads the source, in the manner of
 // test/app.api-service-verb-contract.spec.mjs.
 //
 // It discriminates on POSITION, not presence: the broken form contains the word
 // `timeout` in the same call, so any grep for the token passes over the defect.
 
 // Every key the server owns and the client must not be able to name. Add to
-// this list when process_queue starts passing another server-decided value.
+// this list when the executor starts passing another server-decided value.
 const SERVER_OWNED_KEYS = ['timeout', 'user_id', 'calculate_total_count']
 
 const read_call_argument = (source) => {
-  const call_start = source.indexOf('await get_data_view_results({')
+  const call_start = source.indexOf('await run_query({')
   if (call_start === -1) return null
 
   const open_brace = source.indexOf('{', call_start)
@@ -57,14 +61,14 @@ const read_call_argument = (source) => {
   return null
 }
 
-describe('data view socket cannot let a client override server policy', function () {
-  const source = fs.readFileSync(socket_path, 'utf8')
+describe('data view executor cannot let a client override server policy', function () {
+  const source = fs.readFileSync(executor_path, 'utf8')
   const call_argument = read_call_argument(source)
 
-  it('finds the get_data_view_results call it is asserting about', function () {
+  it('finds the run_query call it is asserting about', function () {
     // Without this the whole file passes vacuously if the call is ever renamed
     // or reshaped -- a matcher that stops matching must not read as compliance.
-    expect(call_argument, 'process_queue call argument located').to.be.a(
+    expect(call_argument, 'executor run_query call argument located').to.be.a(
       'string'
     )
     expect(call_argument).to.include('...params')
