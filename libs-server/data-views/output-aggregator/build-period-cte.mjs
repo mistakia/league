@@ -10,6 +10,11 @@ import {
 } from './measure-batch.mjs'
 import { normalize_career_year_range } from '../param-utils.mjs'
 import { apply_scope_to_query } from '../apply-scope-to-query.mjs'
+import {
+  FACT_SOURCES,
+  resolve_fact_source,
+  subject_id_expression
+} from '../measure/fact-source-registry.mjs'
 
 const game_period_key =
   "CONCAT(nfl_games.season_year, '_', nfl_games.week, '_', nfl_games.esbid)"
@@ -34,75 +39,21 @@ const period_key_expr = (period) => {
   throw new Error(`build_period_cte does not handle period: ${period}`)
 }
 
-// Source registry: declares how each measure source bridges to the
-// canonical (pid|team_code, year, period_key, measure_total) shape that
-// aggregator-rate / aggregator-count consume.
+// This builder no longer owns the source table: which table a measure's facts
+// live in, how a fact attributes to a subject and where the subject id is read
+// from are declared in `measure/fact-source-registry.mjs`. What stays here is
+// the scan -- bridging a source to the canonical
+// (pid|team_code, year, period_key, measure_total) shape that aggregator-rate
+// and aggregator-count consume.
 //
-// - `table`: the leaf table the measure rows live in.
-// - `team_col`: the column holding `team_code`; null disables team variant.
-// - `pid_via`: how to emit `pid`. 'native' = source has `pid`. 'gsis_bridge'
-//   = INNER JOIN player ON player.gsis_it_player_id = source.gsis_it_player_id; emits
-//   player.pid.
-// - `extra_join`: optional join applied before the (year, period_key)
-//   grouping. Used by `plays_receiver` to bring in `nfl_plays` for the
-//   `play_type='PASS'` predicate parity with the legacy per_player_route
-//   denominator CTE.
-const SOURCES = {
-  plays: {
-    table: 'nfl_plays',
-    team_col: 'possession_nfl_team',
-    pid_via: 'native_or_role'
-  },
-  gamelogs: {
-    table: 'player_gamelogs',
-    team_col: 'nfl_team',
-    pid_via: 'native'
-  },
-  snaps: {
-    table: 'nfl_snaps',
-    team_col: null,
-    pid_via: 'gsis_bridge'
-  },
-  plays_receiver: {
-    table: 'nfl_plays_receiver',
-    team_col: null,
-    pid_via: 'gsis_bridge',
-    extra_join: (q) => {
-      q.join('nfl_plays', function () {
-        this.on('nfl_plays_receiver.esbid', '=', 'nfl_plays.esbid').andOn(
-          'nfl_plays_receiver.play_id',
-          '=',
-          'nfl_plays.play_id'
-        )
-      })
-    }
-  },
-  // role_union: one column-def attributes a single play row to multiple
-  // pids via per-role UNION ALL. Each role contributes a `{ pid_column,
-  // measure_expr }` tuple -- or, when the credited player is not named by any
-  // column on nfl_plays, a `{ pid_expr, apply_joins, measure_expr }` tuple that
-  // reaches the table that does name them. build_period_cte materializes the
-  // inner UNION ALL and groups by (pid, period_key, year). Used by
-  // player_fantasy_points_from_plays where a play credits QB + receiver
-  // simultaneously and a COALESCE(pid_columns) shape would drop one
-  // attribution.
-  //
-  // A role may additionally declare `game_aggregates` -- see the per-game stage
-  // in build_role_union_period_cte below.
-  plays_role_union: {
-    table: 'nfl_plays',
-    team_col: null,
-    pid_via: 'role_union'
-  }
-}
-
-const resolve_source = (measure_source) => {
-  // Back-compat: undefined / unknown falls through to gamelogs (preserves
-  // legacy `measure_source === 'plays' ? 'nfl_plays' : 'player_gamelogs'`
-  // semantic).
-  if (measure_source && SOURCES[measure_source]) return SOURCES[measure_source]
-  return SOURCES.gamelogs
-}
+// A `multi_role` source attributes ONE fact row to several subjects, so each
+// role contributes a `{ pid_column, measure_expr }` tuple -- or, when the
+// credited player is not named by any column on the fact table, a
+// `{ pid_expr, apply_joins, measure_expr }` tuple that reaches the table which
+// does name them. `build_period_cte` materializes the inner UNION ALL and
+// groups by (pid, period_key, year). A role may additionally declare
+// `game_aggregates` -- see the per-game stage in
+// `build_role_union_period_cte` below.
 
 // Single-measure entrypoint. Thin wrapper over `build_batched_period_cte`
 // that lifts the legacy `measure_expr` arg into a one-entry `measures` list
@@ -182,10 +133,9 @@ const build_role_union_period_cte = ({
   params,
   force_year_grain = false
 }) => {
-  // Preserved verbatim from the legacy role-union branch. Role-union sources
-  // build a per-role UNION ALL and are not batchable; see measure-batch.mjs
-  // `BATCHABLE_SOURCES`.
-  const source = SOURCES.plays_role_union
+  // Multi-role sources build a per-role UNION ALL and are not batchable; see
+  // measure-batch.mjs `is_batchable`.
+  const source = FACT_SOURCES.plays_role_union
   const source_table = source.table
   const period_key = period_key_expr(period)
   const is_aggregate = period === 'aggregate'
@@ -358,20 +308,20 @@ export const build_batched_period_cte = ({
 }) => {
   const is_team = identity_id.startsWith('team')
   const period_key = period_key_expr(period)
-  const base_source = resolve_source(measure_source)
+  const base_source = resolve_fact_source(measure_source)
   // For the `plays` source, params.team_unit selects which side of the play
   // the team grouping uses: 'def' groups by defender, otherwise offense
   // (possession_nfl_team). Mirrors the legacy
   // `add_team_stats_play_by_play_with_statement` semantics so team_unit='def'
   // team-stat columns aggregate per defender.
-  const team_col_override =
+  const team_code_column =
     measure_source === 'plays' && params?.team_unit === 'def'
       ? 'defense_nfl_team'
-      : base_source.team_col
-  const source = { ...base_source, team_col: team_col_override }
+      : base_source.team_code_column
+  const source = { ...base_source, team_code_column }
   const source_table = source.table
 
-  if (is_team && !source.team_col) {
+  if (is_team && !source.team_code_column) {
     throw new Error(
       `measure_source '${measure_source}' does not support team identity`
     )
@@ -379,9 +329,9 @@ export const build_batched_period_cte = ({
 
   const is_aggregate = period === 'aggregate'
 
-  if (source.pid_via === 'role_union') {
+  if (source.subject_attribution === 'multi_role') {
     throw new Error(
-      'build_batched_period_cte does not handle role_union; route via build_period_cte'
+      'build_batched_period_cte does not handle multi_role attribution; route via build_period_cte'
     )
   }
 
@@ -397,32 +347,17 @@ export const build_batched_period_cte = ({
     )
   }
 
-  // pid expression resolution.
-  // - 'native': source has a `pid` column.
-  // - 'gsis_bridge': source carries gsis_it_player_id; INNER JOIN player to emit pid.
-  // - 'native_or_role' (plays): `nfl_plays` has no pid; column-definition
-  //   declares which per-play role columns (`target_pid`, `ball_carrier_pid`,
-  //   `passer_pid`, ...) participate via `pid_columns`. COALESCE them into a
-  //   single key.
-  let pid_expr
-  let extra_player_join = false
-  if (source.pid_via === 'native') {
-    pid_expr = `${source_table}.pid`
-  } else if (source.pid_via === 'gsis_bridge') {
-    pid_expr = 'player.pid'
-    extra_player_join = true
-  } else {
-    // native_or_role
-    if (!pid_columns || !pid_columns.length) {
-      pid_expr = `${source_table}.pid`
-    } else if (pid_columns.length === 1) {
-      pid_expr = `${source_table}.${pid_columns[0]}`
-    } else {
-      pid_expr = `COALESCE(${pid_columns
-        .map((col) => `${source_table}.${col}`)
-        .join(', ')})`
-    }
-  }
+  // The subject-id expression and whether reaching it needs the `player` join
+  // are both properties of the fact source, so the registry answers them. A
+  // `single_role` source names no subject of its own and takes the column's
+  // declared role columns, coalesced in their declared order -- which is the
+  // sorted order, since a declaration is required to be sorted and the alias
+  // hash sorts it too.
+  const { expression: pid_expr, requires_player_join: extra_player_join } =
+    subject_id_expression({
+      fact_source: source,
+      role_columns: pid_columns
+    })
 
   const sub = db(source_table)
 
@@ -445,7 +380,7 @@ export const build_batched_period_cte = ({
   }
 
   if (is_team) {
-    sub.select(`${source_table}.${source.team_col} as team_code`)
+    sub.select(`${source_table}.${source.team_code_column} as team_code`)
   } else {
     sub.select(db.raw(`${pid_expr} AS pid`))
   }
@@ -465,7 +400,9 @@ export const build_batched_period_cte = ({
       sub.select(db.raw(`SUM(${m_expr}) AS ${alias}`))
     }
   }
-  sub.groupByRaw(is_team ? `${source_table}.${source.team_col}` : pid_expr)
+  sub.groupByRaw(
+    is_team ? `${source_table}.${source.team_code_column}` : pid_expr
+  )
   if (!is_aggregate) sub.groupByRaw(period_key)
   if (include_year) sub.groupByRaw('"nfl_games"."season_year"')
 
@@ -548,11 +485,14 @@ export const add_period_cte = async ({
   period
 }) => {
   ensure_split_bridges({ query_context, identity_id })
-  const source = resolve_source(column_def.measure_source)
+  const source = resolve_fact_source(column_def.measure_source)
   // Batchable sources route into the measure-batch registry; the CTE is
   // materialized in a single `withMaterialized` call at flush time with one
   // `SUM(...) AS m_<hash>` column per registered measure. See measure-batch.mjs.
-  if (is_batchable({ column_def }) && source.pid_via !== 'role_union') {
+  if (
+    is_batchable({ column_def }) &&
+    source.subject_attribution !== 'multi_role'
+  ) {
     const measure_alias = compute_measure_alias({
       column_def,
       params,

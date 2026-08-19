@@ -11,7 +11,12 @@ const defensive_player_table_alias = ({ pid_columns, params = {} } = {}) => {
   }
 
   const key = get_stats_column_param_key({ params })
-  const pid_columns_string = [...pid_columns].sort().join('_')
+  // ORDER-SENSITIVE, matching the player factory: the alias must reflect what
+  // the emitter emits, which here is UNION-ALL arm order rather than a COALESCE.
+  // Arm order does not change a defensive count, so this family could hash as a
+  // set and be correct today -- one rule across both factories is what stops
+  // the next role list from rediscovering the shared-CTE mis-attribution.
+  const pid_columns_string = pid_columns.join('_')
   return get_table_hash(`defensive_player_stats_${pid_columns_string}_${key}`)
 }
 

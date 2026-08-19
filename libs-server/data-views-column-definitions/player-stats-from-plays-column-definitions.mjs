@@ -48,7 +48,18 @@ const generate_table_alias = ({ type, params = {}, pid_columns } = {}) => {
   }
 
   const key = get_stats_column_param_key({ params })
-  const pid_columns_string = [...pid_columns].sort().join('_')
+  // ORDER-SENSITIVE, deliberately. The role list is emitted as an ORDERED
+  // COALESCE, and the order decides which player a fact is credited to:
+  // measured against production over 2023+, `passer_pid` and `target_pid` are
+  // both non-null and different on 60,547 plays. Hashing the list as a SET made
+  // two columns declaring the same roles in different orders share one alias
+  // and therefore one CTE, whose single COALESCE was decided by whichever
+  // column came second in the request -- so one of the two was always
+  // mis-attributed. `player_opportunities_from_plays` (receiver-first) and
+  // `player_total_expected_points_added_from_plays` (passer-first) were that
+  // pair. Sorting the DECLARATIONS instead would have been the wrong repair: it
+  // silently re-credits every pass opportunity to the quarterback.
+  const pid_columns_string = pid_columns.join('_')
   return get_table_hash(`${type}_${pid_columns_string}_${key}`)
 }
 
