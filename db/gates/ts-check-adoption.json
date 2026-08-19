@@ -26,6 +26,9 @@
     "libs-shared/get-play-from-play-stats.mjs",
     "libs-shared/nfl-week-identifier.mjs",
     "libs-shared/output-column-param.mjs",
-    "libs-shared/simulation/run-simulation.mjs"
+    "libs-shared/simulation/run-simulation.mjs",
+    "scripts/audit-drive-seq-coherence.mjs",
+    "scripts/create-season-partitions.mjs",
+    "scripts/reset-protected-designation.mjs"
   ]
 }

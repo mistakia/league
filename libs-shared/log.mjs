@@ -139,6 +139,15 @@ export const create_logger = (namespace, { service } = {}) => {
   const resolved_service = resolve_service(service)
   const debug_log = debug(namespace)
 
+  /**
+   * @param {Error | string} message
+   * @param {object} [options]
+   * @param {Record<string, any>} [options.context] - Forensic payload carried on the signal
+   * @param {string} [options.severity]
+   * @param {string} [options.fingerprint_override]
+   * @param {string} [options.source]
+   * @param {string | null} [options.forensic_link]
+   */
   const error = (
     message,
     {

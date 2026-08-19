@@ -1,3 +1,4 @@
+// @ts-check
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -22,8 +23,12 @@ debug.enable('reset-protected-designation')
 const NOTIFICATION_TYPE_PROTECTIONS_EXPIRED =
   'practice_squad_protections_expired'
 
+// parseSync() rather than `.argv`: the two return the same object for a config
+// with no async middleware, but `.argv` is TYPED as a union with a Promise, so
+// every property read off it is an error. parseSync also throws rather than
+// silently handing back a promise if async middleware is ever added here.
 const initialize_cli = () => {
-  return yargs(hideBin(process.argv)).argv
+  return yargs(hideBin(process.argv)).parseSync()
 }
 
 // Constitution art. 11 (as amended by Amendment XI): a protected practice squad
@@ -52,6 +57,7 @@ const PROTECTED_SLOTS = {
 // Read BEFORE the reset, because the reset is what destroys the evidence: once
 // the slots are PS/PSD nothing distinguishes a player who was protected this
 // morning from one who never was.
+/** @param {{ lid: number }} params */
 const get_protected_pids = async ({ lid }) => {
   const rows = await db('rosters_players')
     .distinct('pid')
@@ -61,11 +67,13 @@ const get_protected_pids = async ({ lid }) => {
   return rows.map(({ pid }) => pid)
 }
 
+/** @param {{ expired_count: number }} params */
 const format_protections_expired_message = ({ expired_count }) =>
   `The extension deadline has passed. Protected practice squad designations have expired — ${expired_count} practice squad ${
     expired_count === 1 ? 'player is' : 'players are'
   } now eligible to be poached.`
 
+/** @param {{ lid: number, dry_run?: boolean }} params */
 const reset_league = async ({ lid, dry_run = false }) => {
   let updated = 0
 
@@ -115,6 +123,13 @@ const reset_league = async ({ lid, dry_run = false }) => {
 //
 // Throws on send failure so the caller can turn it into a job error rather than
 // dropping the announcement silently. Nothing retries a claimed send.
+/**
+ * @param {object} params
+ * @param {number} params.lid
+ * @param {number} params.extension_deadline_at - Epoch seconds, via timestamptz_to_epoch
+ * @param {number} params.expired_count
+ * @param {boolean} [params.dry_run]
+ */
 const announce_protections_expired = async ({
   lid,
   extension_deadline_at,
@@ -280,7 +295,8 @@ const reset_protected_designations_for_due_leagues = async ({
 const main = async () => {
   let error
   const argv = initialize_cli()
-  const { lid, dry_run = false } = argv
+  const lid = argv.lid ? Number(argv.lid) : undefined
+  const dry_run = Boolean(argv.dry_run)
 
   try {
     if (lid) {

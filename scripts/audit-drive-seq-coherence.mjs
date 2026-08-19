@@ -1,3 +1,4 @@
+// @ts-check
 import debug from 'debug'
 
 import db from '#db'
@@ -37,6 +38,19 @@ const signal_log = create_logger('audit-drive-seq-coherence', {
 // week and train the operator to ignore it, while genuinely new corruption
 // still surfaces. LOWER THESE as repairs land -- a baseline left stale after a
 // repair silently re-admits the same volume of corruption.
+/**
+ * @typedef {'restart_at_1' | 'other'} ViolationClass
+ *
+ * @typedef {object} Violation
+ * @property {number} esbid
+ * @property {ViolationClass} violation_class
+ * @property {number} first_half_max
+ * @property {number} second_half_min
+ * @property {number} distinct_drive_seqs
+ * @property {number} distinct_half_drive_seqs
+ */
+
+/** @type {Record<ViolationClass, number>} */
 const KNOWN_VIOLATION_BASELINE = {
   // Was 48 games (2025: 32 PRE, 13 POST, 3 REG) where half 2 restarted
   // numbering at 1. Repaired 2026-07-24 by
@@ -78,8 +92,12 @@ const KNOWN_VIOLATION_BASELINE = {
  * diverge exactly when one drive_sequence value spans both halves, which is what
  * makes the drive key address two drives at once.
  *
- * @param {Array} rows - Rows carrying esbid, quarter, and drive_sequence
- * @returns {Object} games_checked, violations, violation_counts_by_class
+ * @param {Array<{ esbid: number, quarter: number, drive_sequence: number | null }>} rows
+ * @returns {{
+ *   games_checked: number,
+ *   violations: Violation[],
+ *   violation_counts_by_class: Record<ViolationClass, number>
+ * }}
  */
 export const classify_drive_seq_coherence = (rows) => {
   const games = new Map()
@@ -125,6 +143,7 @@ export const classify_drive_seq_coherence = (rows) => {
     }
   }
 
+  /** @type {Violation[]} */
   const violations = []
 
   for (const [esbid, game] of games.entries()) {
@@ -150,6 +169,7 @@ export const classify_drive_seq_coherence = (rows) => {
     })
   }
 
+  /** @type {Record<ViolationClass, number>} */
   const violation_counts_by_class = { restart_at_1: 0, other: 0 }
   for (const { violation_class } of violations) {
     violation_counts_by_class[violation_class] += 1
@@ -216,7 +236,9 @@ const audit_drive_seq_coherence = async () => {
     `  other: ${violation_counts_by_class.other} (baseline ${KNOWN_VIOLATION_BASELINE.other})`
   )
 
-  const regressions = Object.entries(KNOWN_VIOLATION_BASELINE)
+  const regressions = /** @type {[ViolationClass, number][]} */ (
+    Object.entries(KNOWN_VIOLATION_BASELINE)
+  )
     .filter(
       ([violation_class, baseline]) =>
         violation_counts_by_class[violation_class] > baseline

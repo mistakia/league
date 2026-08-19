@@ -1,3 +1,4 @@
+// @ts-check
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -7,8 +8,12 @@ import { current_season } from '#constants'
 import { is_main, report_job, throw_if_shortfall } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
+// parseSync() rather than `.argv`: the two return the same object for a config
+// with no async middleware, but `.argv` is TYPED as a union with a Promise, so
+// every property read off it is an error. parseSync also throws rather than
+// silently handing back a promise if async middleware is ever added here.
 const initialize_cli = () => {
-  return yargs(hideBin(process.argv)).argv
+  return yargs(hideBin(process.argv)).parseSync()
 }
 
 const log = debug('create-season-partitions')
@@ -55,7 +60,9 @@ const create_season_partitions = async ({
     WHERE table_schema = 'public'
   `)
 
-  const existing_tables = table_exists_results.rows.map((row) => row.table_name)
+  const existing_tables = table_exists_results.rows.map(
+    (/** @type {{ table_name: string }} */ row) => row.table_name
+  )
   const partition_creation_errors = []
 
   for (const {
@@ -232,7 +239,7 @@ const main = async () => {
   try {
     const argv = initialize_cli()
     const year = argv.year ? Number(argv.year) : current_season.year
-    const dry_run = argv.dry || false
+    const dry_run = Boolean(argv.dry)
 
     const result = await create_season_partitions({ year, dry_run })
 
@@ -260,7 +267,11 @@ const main = async () => {
         [partition_names]
       )
       const attached = new Set(
-        attached_rows.rows.map((r) => `${r.parent_table}|${r.partition_table}`)
+        attached_rows.rows.map(
+          (
+            /** @type {{ parent_table: string, partition_table: string }} */ r
+          ) => `${r.parent_table}|${r.partition_table}`
+        )
       )
       const missing = expected_partitions.filter(
         ({ parent_table, partition_table }) =>
