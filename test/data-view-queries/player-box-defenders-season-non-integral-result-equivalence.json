@@ -1,0 +1,30 @@
+{
+  "name": "player average box defenders per rush attempt renders a non-integral season mean (executed-result parity)",
+  "description": "Seed 2024 rush plays carrying box_defenders 6 and 7 plus a rush attempt with no reading. The season render must be 6.50, so an emitter that divides bigint by bigint (which truncates to 6) fails. This is the grain the year_offset range fixture is structurally blind to: the range path double-SUMs, and SUM(bigint) promotes to numeric, so truncation is unreachable there.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_average_box_defenders_per_rush_attempt_from_plays",
+        "params": { "year": [2024] }
+      }
+    ],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+    ]
+  },
+  "expected_query": "with \"td58a581a64349ce01594aad40d276a38\" as materialized (select COALESCE(ball_carrier_pid) as pid, CAST(ROUND(AVG(CASE WHEN ball_carrier_pid IS NOT NULL THEN box_defenders ELSE NULL END)::decimal, 2) AS decimal) as average_box_defenders_per_rush_att_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2024) group by COALESCE(ball_carrier_pid)), \"base_years\" as (SELECT unnest(ARRAY[2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.first_name, player.last_name, \"td58a581a64349ce01594aad40d276a38\".\"average_box_defenders_per_rush_att_from_plays\" AS \"average_box_defenders_per_rush_att_from_plays_0\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"td58a581a64349ce01594aad40d276a38\" on \"td58a581a64349ce01594aad40d276a38\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"td58a581a64349ce01594aad40d276a38\".\"average_box_defenders_per_rush_att_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-BOXS-000902', 'Test', 'Boxs', 'T.Boxs', 'Test Boxs', 'MLB', 'MLB', '2000-01-01', 2020)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, ball_carrier_pid, box_defenders) VALUES (990111, 1, 2024, 1, to_timestamp(0), 'REG', 'RUSH', 'TEST-BOXS-000902', 6)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, ball_carrier_pid, box_defenders) VALUES (990111, 2, 2024, 1, to_timestamp(0), 'REG', 'RUSH', 'TEST-BOXS-000902', 7)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, ball_carrier_pid, box_defenders) VALUES (990111, 3, 2024, 1, to_timestamp(0), 'REG', 'RUSH', 'TEST-BOXS-000902', NULL)"
+    ],
+    "expected_rows": [
+      { "average_box_defenders_per_rush_att_from_plays_0": "6.5" }
+    ],
+    "compare_columns": ["average_box_defenders_per_rush_att_from_plays_0"]
+  },
+  "tags": ["from_plays", "season", "result-equivalence"]
+}

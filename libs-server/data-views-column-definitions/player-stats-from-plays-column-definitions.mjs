@@ -699,8 +699,20 @@ export default {
       pid_columns: ['ball_carrier_pid'],
       with_select_string: `CAST(ROUND(AVG(CASE WHEN ball_carrier_pid IS NOT NULL THEN box_defenders ELSE NULL END)::decimal, 2) AS decimal)`,
       stat_name: 'average_box_defenders_per_rush_att_from_plays',
-      numerator_select: `AVG(CASE WHEN ball_carrier_pid IS NOT NULL THEN box_defenders ELSE NULL END)`,
-      denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END)`,
+      // The numerator/denominator pair must decompose the SEASON RENDER's AVG,
+      // not the column's NAME. AVG(box_defenders) is SUM(box_defenders) over
+      // COUNT(box_defenders), so the denominator counts rows carrying a
+      // box_defenders reading -- NOT rush attempts. The two differ: 14,680
+      // against 14,687 for 2024 REG.
+      //
+      // The previous declaration paired an AVG numerator with a rush-attempt
+      // denominator, so every year_offset-range recombination divided a MEAN
+      // (~6.7) by an attempt COUNT -- measured 0.000460 against a true pooled
+      // 6.760 for 2022-2024 REG, and reproduced on seeded data at 1.83 against
+      // a true 7.33 by
+      // test/data-view-queries/player-box-defenders-range-offset-pooled-result-equivalence.json.
+      numerator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL THEN box_defenders ELSE 0 END)`,
+      denominator_select: `SUM(CASE WHEN ball_carrier_pid IS NOT NULL AND box_defenders IS NOT NULL THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
       supports_periods: []
     }),
