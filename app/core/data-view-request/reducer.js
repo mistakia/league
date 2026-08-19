@@ -5,6 +5,7 @@ import { data_view_request_actions } from './actions'
 const initial_state = fromJS({
   current_request: null,
   position: null,
+  execution_id: null,
   status: null,
   result: List(),
   metadata: null,
@@ -23,6 +24,7 @@ export function data_view_request_reducer(
       return state.merge({
         current_request: payload.view_id,
         position: null,
+        execution_id: null,
         status: 'pending',
         result: payload.append_results ? state.get('result') : List(),
         metadata: payload.append_results ? state.get('metadata') : null
@@ -33,6 +35,7 @@ export function data_view_request_reducer(
         return state.merge({
           current_request: payload.data_view_id,
           position: null,
+          execution_id: null,
           status: 'pending',
           result: payload.view_change_params.append_results
             ? state.get('result')
@@ -51,6 +54,7 @@ export function data_view_request_reducer(
         return state.merge({
           current_request: payload.data_view.view_id,
           position: null,
+          execution_id: null,
           status: 'pending',
           result: payload.view_change_params.append_results
             ? state.get('result')
@@ -66,6 +70,23 @@ export function data_view_request_reducer(
 
     case data_view_request_actions.DATA_VIEW_POSITION:
       return state.set('position', payload.position)
+
+    case data_view_request_actions.DATA_VIEW_HEARTBEAT: {
+      // The heartbeat carries the authoritative phase, and it is what the UI
+      // renders "waiting" from once DATA_VIEW_POSITION retires server-side --
+      // that message carried no ordering guarantee under concurrent admission,
+      // and the heartbeat carries no number to replace it with.
+      //
+      // Guarded against a terminal status so a heartbeat racing the result
+      // cannot put a completed table back under a spinner.
+      const status = state.get('status')
+      if (status === 'completed' || status === 'error') return state
+
+      return state.merge({
+        execution_id: payload.execution_id,
+        status: payload.state === 'executing' ? 'processing' : 'pending'
+      })
+    }
 
     case data_view_request_actions.DATA_VIEW_STATUS:
       return state.set('status', payload.status)

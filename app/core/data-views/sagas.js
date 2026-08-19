@@ -127,32 +127,39 @@ function* handle_data_view_request({
 // is added on top of execution time, so any fixed deadline from send fires on
 // requests that were merely queued behind other work.
 //
-// PROVISIONAL, and the number is not defensible on its own. A silence budget
-// is only well-defined if the server guarantees a MAXIMUM silence, and today
-// it guarantees none: a queued request gets exactly two messages before its
-// result -- one DATA_VIEW_POSITION on entry, one DATA_VIEW_STATUS when it
-// reaches the head -- and nothing in between. Verified live with three
-// concurrent clients, where the third was never told it advanced and sat
-// silent for its whole wait. update_queue_positions has one caller, inside
-// remove_request, so positions refresh when a client DISCONNECTS and never as
-// the queue drains. (A probe that closes sockets on completion exercises that
-// disconnect path and makes the queue look correct -- keep sockets open.)
+// The server heartbeats every 2s from acceptance through queue wait AND
+// execution, which is what makes a silence budget well-defined at all: a
+// budget is only meaningful against a guaranteed MAXIMUM silence, and until
+// the heartbeat there was none. A queued request used to get exactly two
+// messages before its result -- one position on entry, one status when it
+// reached the head -- so legitimate silence spanned the whole queue wait and
+// was unbounded in queue DEPTH rather than in any query's timeout.
+export const DATA_VIEW_HEARTBEAT_INTERVAL = 2 * 1000
+
+// Six missed heartbeats. Derived from the interval rather than chosen, which
+// is the point -- it is correct at any queue depth and coupled to no server
+// timeout constant. Do NOT re-derive it from the server's 5-minute signed-in
+// execution timeout: that constant is a placeholder introduced whole in
+// b395a7b3b (2024-08-23) replacing an untimed call and never revisited.
+export const DATA_VIEW_SILENCE_TIMEOUT = 6 * DATA_VIEW_HEARTBEAT_INTERVAL
+
+// Used until this request has actually SEEN a heartbeat. The tight budget above
+// is only valid against a server that provides the guarantee it is derived
+// from, so applying it to a server that does not heartbeat would fail every
+// request slower than 12s -- and measured p50 is 5.1s with a 22-34s tail, so
+// that is most of them, not an edge case.
 //
-// So legitimate silence spans the entire queue wait and is unbounded in queue
-// DEPTH, not bounded by any single query's timeout. Do NOT re-derive this from
-// the server's 5-minute signed-in execution timeout: that constant is itself a
-// placeholder, introduced whole in b395a7b3b (2024-08-23) replacing an untimed
-// call and never revisited, and bounding one term of an unbounded sum proves
-// nothing anyway.
-//
-// This value is therefore a stopgap that is strictly better than the previous
-// state of no bound at all, and wrong for a deep queue. The server side is
-// adding a periodic heartbeat while a request is queued or in flight; once it
-// lands, set this to a small multiple of that interval, which is correct at
-// any queue depth and coupled to no server timeout.
-export const DATA_VIEW_SILENCE_TIMEOUT = 6 * 60 * 1000
+// This is deliberately not a migration shim to delete once the server ships.
+// It removes the deploy-ordering coupling permanently, in a repo whose
+// recurring production incident is a PARTIAL deploy (a frontend shipped
+// without its backend, or the reverse), and it keeps the client safe if the
+// heartbeat later regresses server-side. The client tightens its budget
+// exactly when the server has demonstrated the guarantee, and never on the
+// assumption of it.
+export const DATA_VIEW_SILENCE_TIMEOUT_WITHOUT_HEARTBEAT = 6 * 60 * 1000
 
 const PROGRESS_ACTIONS = [
+  data_view_request_actions.DATA_VIEW_HEARTBEAT,
   data_view_request_actions.DATA_VIEW_POSITION,
   data_view_request_actions.DATA_VIEW_STATUS
 ]
@@ -168,10 +175,15 @@ const TERMINAL_ACTIONS = [
 // process, or a restart mid-flight simply hangs.
 export function* handle_data_view_request_watchdog({ payload }) {
   const started_at = Date.now()
+  let has_seen_heartbeat = false
 
   while (true) {
-    const { timed_out, settled } = yield race({
-      timed_out: delay(DATA_VIEW_SILENCE_TIMEOUT),
+    const { timed_out, progress, settled } = yield race({
+      timed_out: delay(
+        has_seen_heartbeat
+          ? DATA_VIEW_SILENCE_TIMEOUT
+          : DATA_VIEW_SILENCE_TIMEOUT_WITHOUT_HEARTBEAT
+      ),
       progress: take(PROGRESS_ACTIONS),
       settled: take(TERMINAL_ACTIONS)
     })
@@ -179,10 +191,17 @@ export function* handle_data_view_request_watchdog({ payload }) {
     if (settled) {
       yield call(report_client_observed_duration, {
         view_id: payload.view_id,
+        execution_id: settled.payload?.execution_id,
         duration_ms: Date.now() - started_at,
         settled_type: settled.type
       })
       return
+    }
+
+    // One heartbeat is the server demonstrating the guarantee the tight budget
+    // is derived from, so the budget tightens from here on for this request.
+    if (progress?.type === data_view_request_actions.DATA_VIEW_HEARTBEAT) {
+      has_seen_heartbeat = true
     }
 
     if (!timed_out) continue
@@ -220,15 +239,25 @@ export function* watch_data_view_request_watchdog() {
 // would be an anonymous write that mints signals.
 function* report_client_observed_duration({
   view_id,
+  execution_id,
   duration_ms,
   settled_type
 }) {
   if (!isOpen()) return
 
+  // execution_id is SERVER-minted and echoed back from the terminal frame. It
+  // is what makes the frame attributable at all: request_id is the VIEW id, so
+  // two in-flight requests for one view share it -- the same field behind the
+  // 2026-07-31 double-render defect. The server drops any timing frame whose
+  // execution_id is not live for that socket, so an unattributable frame is
+  // better dropped than sent under an ambiguous id.
+  if (!execution_id) return
+
   yield call(send, {
     type: 'DATA_VIEW_CLIENT_TIMING',
     payload: {
       request_id: view_id,
+      execution_id,
       client_duration_ms: duration_ms,
       outcome:
         settled_type === data_view_request_actions.DATA_VIEW_RESULT
