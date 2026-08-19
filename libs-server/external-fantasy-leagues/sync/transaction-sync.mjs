@@ -26,14 +26,14 @@ export class TransactionSync {
 
   /**
    * Sync transactions from external platform
-   * @param {Object} options - Transaction sync options
-   * @param {Object} options.adapter - Platform adapter instance
-   * @param {Object} options.sync_context - Sync context with league and platform info
-   * @param {Object} [options.sync_options] - Additional sync options
-   * @param {Object} options.sync_stats - Sync statistics object
-   * @param {Function} [options.progress_callback] - Optional progress reporting callback
-   * @param {Array} [options.sync_stats_errors] - Array to collect sync errors
-   * @returns {Promise<Object>} Transaction sync results
+   * @param {object} options - Transaction sync options
+   * @param {object} options.adapter - Platform adapter instance
+   * @param {object} options.sync_context - Sync context with league and platform info
+   * @param {object} [options.sync_options] - Additional sync options
+   * @param {object} options.sync_stats - Sync statistics object
+   * @param {(message: string, progress: number, context_data: object) => Promise<void>} [options.progress_callback] - Optional progress reporting callback
+   * @param {object[]} [options.sync_stats_errors] - Array to collect sync errors
+   * @returns {Promise<object>} Transaction sync results
    */
   async sync_transactions({
     adapter,
@@ -112,13 +112,13 @@ export class TransactionSync {
 
   /**
    * Process transactions
-   * @param {Object} options - Transaction processing options
-   * @param {Array} options.external_transactions - Array of external transaction data
-   * @param {Object} options.sync_context - Sync context
-   * @param {Function} [options.progress_callback] - Optional progress reporting callback
-   * @param {Object} options.sync_stats - Sync statistics object
-   * @param {Array} options.sync_stats_errors - Array to collect sync errors
-   * @returns {Promise<Object>} Processing results
+   * @param {object} options - Transaction processing options
+   * @param {object[]} options.external_transactions - Array of external transaction data
+   * @param {object} options.sync_context - Sync context
+   * @param {(message: string, progress: number, context_data: object) => Promise<void>} [options.progress_callback] - Optional progress reporting callback
+   * @param {object} options.sync_stats - Sync statistics object
+   * @param {object[]} options.sync_stats_errors - Array to collect sync errors
+   * @returns {Promise<object>} Processing results
    * @private
    */
   async _process_transactions({
@@ -207,10 +207,10 @@ export class TransactionSync {
 
   /**
    * Insert transaction into database with conflict handling
-   * @param {Object} options - Transaction insertion options
-   * @param {Object} options.transaction - Mapped transaction data
-   * @param {Object} options.sync_stats - Sync statistics object
-   * @param {Array} options.sync_stats_errors - Array to collect sync errors
+   * @param {object} options - Transaction insertion options
+   * @param {object} options.transaction - Mapped transaction data
+   * @param {object} options.sync_stats - Sync statistics object
+   * @param {object[]} options.sync_stats_errors - Array to collect sync errors
    * @returns {Promise<void>}
    * @private
    */

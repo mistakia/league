@@ -6,15 +6,15 @@ import validate_trade_slot_assignment from '#libs-shared/validate-trade-slot-ass
  * All slot assignments must be provided by the client. The server only validates
  * that the assigned slots are valid and available.
  *
- * @param {Object} params - The parameters object
+ * @param {object} params - The parameters object
  * @param {Array<string>} params.incoming_player_ids - PIDs of players this team will receive
- * @param {Array<Object>} params.player_rows - Player data rows with full player info
- * @param {Object} params.slot_assignments - Map of pid to assigned slot (required for all players)
- * @param {Object} params.roster - Roster object for the receiving team
+ * @param {Array<object>} params.player_rows - Player data rows with full player info
+ * @param {object} params.slot_assignments - Map of pid to assigned slot (required for all players)
+ * @param {object} params.roster - Roster object for the receiving team
  * @param {number} params.week - Current week number
  * @param {boolean} params.is_regular_season - Whether it's regular season
- * @param {Object} params.player_extensions - Optional map of pid to extension count
- * @returns {Array<Object>} Array of validation errors with { pid, slot, error }, empty if all valid
+ * @param {object} params.player_extensions - Optional map of pid to extension count
+ * @returns {Array<object>} Array of validation errors with { pid, slot, error }, empty if all valid
  */
 export default function validate_trade_roster_slots({
   incoming_player_ids,

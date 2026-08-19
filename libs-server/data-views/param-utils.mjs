@@ -18,7 +18,7 @@ const format_sql_literal = (value) => {
  * Resolve params.year_offset into [min, max]. Returns null when no offset is
  * specified so callers can take their non-offset code path. Shared across the
  * source-attach rules and aggregator-rate join logic.
- * @param {Object} params
+ * @param {object} params
  * @returns {[number, number]|null}
  */
 export const resolve_year_offset_range = (params) => {
@@ -69,13 +69,13 @@ export const offset_expanded_years = (years, offset_range) => {
  * rule so every year-grained source -- CTE-attach bridges, direct joins, the
  * rate-type joiners -- can share one implementation. `is_first` selects
  * builder.on/onIn (first predicate in a join) vs andOn/andOnIn.
- * @param {Object} args
- * @param {Object} args.builder - knex join/where builder
- * @param {Object} args.db - knex instance
+ * @param {object} args
+ * @param {object} args.builder - knex join/where builder
+ * @param {object} args.db - knex instance
  * @param {string|null} args.year_reference - SQL fragment for the base-year anchor
- * @param {Object} args.source - source descriptor (reads source.year_default)
- * @param {Object} args.key_columns - { year: '<source year column>' }
- * @param {Object} args.params - column params (reads params.year_offset)
+ * @param {object} args.source - source descriptor (reads source.year_default)
+ * @param {object} args.key_columns - { year: '<source year column>' }
+ * @param {object} args.params - column params (reads params.year_offset)
  * @param {string} args.ref - source relation alias/name to qualify the year column
  * @param {boolean} [args.is_first=false] - emit as the first ON predicate
  */
@@ -184,13 +184,13 @@ export const emit_year_match = ({
  * get-data-view-results drops for a range offset with no where-clause
  * (skip_join_for_offset_range) -- a dangling alias and invalid SQL. This rebuilds
  * the value from the underlying table so the override is self-contained.
- * @param {Object} args
+ * @param {object} args
  * @param {string} args.table - real source table (NOT the JOIN alias)
  * @param {string} args.column - resolved real column to aggregate
- * @param {Object} args.source - source descriptor (key_columns.team, year_default)
- * @param {Object} args.params - column params (reads year_offset / year)
- * @param {Object} [args.data_view_options] - reads year_reference
- * @param {Object} [args.query_context] - passed to resolve_team_join_target
+ * @param {object} args.source - source descriptor (key_columns.team, year_default)
+ * @param {object} args.params - column params (reads year_offset / year)
+ * @param {object} [args.data_view_options] - reads year_reference
+ * @param {object} [args.query_context] - passed to resolve_team_join_target
  * @param {string} [args.aggregate='AVG'] - window reduction (grades/rates AVG)
  * @param {Array<{column:string,value:*}>} [args.extra_predicates] - discriminators
  * @returns {string} parenthesised scalar subquery expression
@@ -249,12 +249,12 @@ export const team_year_offset_range_select = ({
  *    year DESC LIMIT 1)` -- for year-less metadata (text positional / unit
  *    columns) where neither SUM nor AVG is defined and the meaningful window
  *    reduction is the most-recent (anchor) season's value.
- * @param {Object} args
+ * @param {object} args
  * @param {string} args.table - real source table (NOT the JOIN alias)
  * @param {string} args.column - resolved real column to render
- * @param {Object} args.source - source descriptor (key_columns.pid, year_default)
- * @param {Object} args.params - column params (reads year_offset / year)
- * @param {Object} [args.data_view_options] - reads year_reference / pid_reference
+ * @param {object} args.source - source descriptor (key_columns.pid, year_default)
+ * @param {object} args.params - column params (reads year_offset / year)
+ * @param {object} [args.data_view_options] - reads year_reference / pid_reference
  * @param {string} [args.aggregate='AVG'] - window reduction (ignored when latest_by_year)
  * @param {boolean} [args.latest_by_year=false] - render the most-recent season's value
  * @param {Array<{column:string,value:*}>} [args.extra_predicates] - discriminators
@@ -306,7 +306,7 @@ export const player_year_offset_range_select = ({
  * Normalise a career_year or career_game param (which arrives as a 2-element
  * array [lo, hi] in any order) into a guaranteed [lo, hi] pair where lo <=
  * hi. Used by the three play-by-play with-statement builders.
- * @param {Array} arr - Two-element array [a, b]
+ * @param {number[]} arr - Two-element array [a, b]
  * @returns {[number, number]} [min, max]
  */
 export const normalize_career_year_range = (arr) => [
@@ -332,7 +332,7 @@ export const get_single_value = (value, default_value) => {
 
 /**
  * Extracts the scoring format id from params with proper default handling
- * @param {Object} params - Column parameters object
+ * @param {object} params - Column parameters object
  * @returns {string} Scoring format id
  */
 export const get_scoring_format_id = (params = {}) => {
@@ -341,7 +341,7 @@ export const get_scoring_format_id = (params = {}) => {
 
 /**
  * Extracts the league format id from params with proper default handling
- * @param {Object} params - Column parameters object
+ * @param {object} params - Column parameters object
  * @returns {string} League format id
  */
 export const get_league_format_id = (params = {}) => {

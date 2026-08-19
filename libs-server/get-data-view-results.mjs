@@ -650,13 +650,13 @@ const find_sort_column = ({ column_id, column_index = 0, columns }) => {
 
 /**
  * Determines the optimal from table based on sort configuration and row_axes
- * @param {Object} params - Parameters object
- * @param {Array} params.sort - Sort configuration from user request
- * @param {Array} params.columns - Column configurations
- * @param {Array} params.prefix_columns - Prefix column configurations
- * @param {Array} params.row_axes - Active row axes ['year', 'week']
- * @param {Object} params.data_views_column_definitions - Column definition registry
- * @returns {Object} From table information
+ * @param {object} params - Parameters object
+ * @param {object[]} params.sort - Sort configuration from user request
+ * @param {object[]} params.columns - Column configurations
+ * @param {object[]} params.prefix_columns - Prefix column configurations
+ * @param {string[]} params.row_axes - Active row axes ['year', 'week']
+ * @param {object} params.data_views_column_definitions - Column definition registry
+ * @returns {object} From table information
  */
 const determine_from_table = ({
   sort = [],
@@ -750,7 +750,7 @@ const determine_from_table = ({
  * Checks if a column can be used as a FROM table for optimization
  * CTE-based columns (with `with` property) are eligible if they're whitelisted
  * Table-based columns are eligible if they have `get_table_conditions`
- * @param {Object} column_definition - Column definition object
+ * @param {object} column_definition - Column definition object
  * @param {string} column_id - Column identifier
  * @returns {boolean} True if column can be used as FROM table
  */
@@ -768,13 +768,13 @@ const can_use_as_from_table = (column_definition, column_id) => {
 
 /**
  * Determines the final from table to use for the query
- * @param {Object} params - Parameters object
- * @param {Array} params.sort - Sort configuration
- * @param {Array} params.columns - Column configurations
- * @param {Array} params.prefix_columns - Prefix column configurations
- * @param {Array} params.row_axes - Active row axes
- * @param {Object} params.data_views_column_definitions - Column definition registry
- * @returns {Object} Final from table configuration
+ * @param {object} params - Parameters object
+ * @param {object[]} params.sort - Sort configuration
+ * @param {object[]} params.columns - Column configurations
+ * @param {object[]} params.prefix_columns - Prefix column configurations
+ * @param {string[]} params.row_axes - Active row axes
+ * @param {object} params.data_views_column_definitions - Column definition registry
+ * @returns {object} Final from table configuration
  */
 const get_from_table_config = ({
   sort,
@@ -861,11 +861,11 @@ const get_from_table_config = ({
 
 /**
  * Sets up the from table and player joins for the query
- * @param {Object} params - Parameters object
- * @param {Object} params.players_query - The Knex query builder instance
- * @param {Object} params.from_table_config - From table configuration
- * @param {Object} params.data_views_column_definitions - Column definition registry
- * @param {Array} params.row_axes - Active row axes
+ * @param {object} params - Parameters object
+ * @param {object} params.players_query - The Knex query builder instance
+ * @param {object} params.from_table_config - From table configuration
+ * @param {object} params.data_views_column_definitions - Column definition registry
+ * @param {string[]} params.row_axes - Active row axes
  * @returns {void}
  */
 const setup_from_table_and_player_joins = ({

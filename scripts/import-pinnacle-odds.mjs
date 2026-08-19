@@ -114,7 +114,7 @@ if (!process.env.DEBUG) {
 
 /**
  * Formats the source event name based on matchup type
- * @param {Object} params - Event name parameters
+ * @param {object} params - Event name parameters
  * @returns {string|null} Formatted event name
  */
 const format_source_event_name = ({
@@ -136,8 +136,8 @@ const format_source_event_name = ({
 
 /**
  * Extracts team information from pinnacle matchup participants
- * @param {Object} pinnacle_matchup - The pinnacle matchup data
- * @returns {Object} Team information
+ * @param {object} pinnacle_matchup - The pinnacle matchup data
+ * @returns {object} Team information
  */
 const extract_team_info = (pinnacle_matchup) => {
   const participants = pinnacle_matchup.participants || []
@@ -158,10 +158,10 @@ const extract_team_info = (pinnacle_matchup) => {
 
 /**
  * Finds the corresponding NFL game for a matchup
- * @param {Object} team_info - Team information
- * @param {Object} pinnacle_matchup - Pinnacle matchup data
- * @param {Array} nfl_games - Available NFL games
- * @returns {Object|null} Matching NFL game or null
+ * @param {object} team_info - Team information
+ * @param {object} pinnacle_matchup - Pinnacle matchup data
+ * @param {NflGamesRow[]} nfl_games - Available NFL games
+ * @returns {object|null} Matching NFL game or null
  */
 const find_nfl_game = (team_info, pinnacle_matchup, nfl_games) => {
   if (!team_info.home_team || !team_info.away_team) {
@@ -184,8 +184,8 @@ const find_nfl_game = (team_info, pinnacle_matchup, nfl_games) => {
 
 /**
  * Attempts to find a player from the special description or participant name
- * @param {Object} params - Player lookup parameters
- * @returns {Object|null} Player data or null
+ * @param {object} params - Player lookup parameters
+ * @returns {object|null} Player data or null
  */
 const find_player_from_market = ({
   special_category,
@@ -215,8 +215,8 @@ const find_player_from_market = ({
 /**
  * Helper function to safely attempt player lookup
  * @param {string} player_name - Name to search for
- * @param {Array} teams - Teams to search within
- * @returns {Object|null} Player data or null
+ * @param {string[]} teams - Teams to search within
+ * @returns {object|null} Player data or null
  */
 const try_find_player = (player_name, teams) => {
   try {
@@ -234,7 +234,7 @@ const try_find_player = (player_name, teams) => {
 
 /**
  * Finds participant by ID or alignment based on matchup type
- * @param {Object} params - Participant lookup parameters
+ * @param {object} params - Participant lookup parameters
  * @returns {string|null} Participant name or null
  */
 const find_participant_name = ({ pinnacle_matchup, participant_id }) => {
@@ -253,7 +253,7 @@ const find_participant_name = ({ pinnacle_matchup, participant_id }) => {
 
 /**
  * Determines the selection PID based on market type and participant
- * @param {Object} params - Selection PID parameters
+ * @param {object} params - Selection PID parameters
  * @returns {string|null} Selection PID or null
  */
 const determine_selection_pid = ({
@@ -277,8 +277,8 @@ const determine_selection_pid = ({
 
 /**
  * Processes market selection odds and creates selection objects
- * @param {Object} params - Selection processing parameters
- * @returns {Array} Array of selection objects
+ * @param {object} params - Selection processing parameters
+ * @returns {object[]} Array of selection objects
  */
 const process_market_selections = ({
   market_selection_odds,
@@ -320,8 +320,8 @@ const process_market_selections = ({
 
 /**
  * Processes market odds and formats them for database insertion
- * @param {Object} params - Market processing parameters
- * @returns {Array} Array of formatted markets
+ * @param {object} params - Market processing parameters
+ * @returns {object[]} Array of formatted markets
  */
 const process_market_odds = async (
   pinnacle_matchup,
@@ -366,7 +366,7 @@ const process_market_odds = async (
 
 /**
  * Tracks unmatched markets for reporting
- * @param {Object} params - Unmatched market tracking parameters
+ * @param {object} params - Unmatched market tracking parameters
  */
 const track_unmatched_market = ({
   pinnacle_matchup,
@@ -397,8 +397,8 @@ const track_unmatched_market = ({
 
 /**
  * Formats a single market for database insertion
- * @param {Object} params - Market formatting parameters
- * @returns {Object} Formatted market object
+ * @param {object} params - Market formatting parameters
+ * @returns {object} Formatted market object
  */
 const format_market = async ({
   pinnacle_matchup,
@@ -482,8 +482,8 @@ const format_market = async ({
 
 /**
  * Collects unique values from matchups for analysis
- * @param {Array} matchups - Array of pinnacle matchups
- * @returns {Object} Collection of unique values
+ * @param {object[]} matchups - Array of pinnacle matchups
+ * @returns {object} Collection of unique values
  */
 const collect_unique_values = (matchups) => {
   const unique_categories = new Set()
@@ -525,8 +525,8 @@ const collect_unique_values = (matchups) => {
 
 /**
  * Processes a single matchup and returns formatted results
- * @param {Object} params - Matchup processing parameters
- * @returns {Object} Processing result
+ * @param {object} params - Matchup processing parameters
+ * @returns {object} Processing result
  */
 const process_single_matchup = async ({
   pinnacle_matchup,
@@ -597,8 +597,8 @@ const process_single_matchup = async ({
 
 /**
  * Processes matchups in batches with concurrency control
- * @param {Object} params - Batch processing parameters
- * @returns {Object} Processing results
+ * @param {object} params - Batch processing parameters
+ * @returns {object} Processing results
  */
 const process_matchup_batches = async ({
   pinnacle_matchups,
@@ -699,7 +699,7 @@ const process_matchup_batches = async ({
 
 /**
  * Saves data to files if requested
- * @param {Object} params - Save parameters
+ * @param {object} params - Save parameters
  */
 const save_data_files = async ({
   timestamp,
@@ -724,7 +724,7 @@ const save_data_files = async ({
 
 /**
  * Logs summary information about unique values and unmatched markets
- * @param {Object} params - Summary parameters
+ * @param {object} params - Summary parameters
  */
 const log_summary = ({
   unique_values,
@@ -775,7 +775,7 @@ const log_summary = ({
 
 /**
  * Main function to import pinnacle odds
- * @param {Object} options - Import options
+ * @param {object} options - Import options
  */
 const import_pinnacle_odds = async ({
   dry_run = false,
@@ -960,7 +960,7 @@ const import_pinnacle_odds = async ({
 
 /**
  * Job wrapper function for pinnacle odds import
- * @param {Object} options - Job options
+ * @param {object} options - Job options
  * @param {boolean} options.dry_run - Dry run mode
  * @param {boolean} options.ignore_cache - Ignore cache
  * @param {boolean} options.ignore_wait - Ignore wait

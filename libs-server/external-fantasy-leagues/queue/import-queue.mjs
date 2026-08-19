@@ -29,11 +29,11 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Queue a new sync job
-   * @param {Object} params - Job parameters
+   * @param {object} params - Job parameters
    * @param {WebSocket} params.ws - WebSocket connection for real-time updates
    * @param {string} params.connection_id - External league connection ID
    * @param {string} [params.job_type='full_sync'] - Type of sync job
-   * @param {Object} [params.sync_components] - Components to sync (league_config, rosters, transactions)
+   * @param {object} [params.sync_components] - Components to sync (league_config, rosters, transactions)
    * @param {boolean} [params.dry_run=false] - Whether this is a dry run (preview only)
    * @param {number} params.user_id - User initiating the job
    * @returns {Promise<string>} Job ID
@@ -118,7 +118,7 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Cancel a sync job
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.job_id - Job ID to cancel
    * @param {number} params.user_id - User requesting cancellation
    */
@@ -173,7 +173,7 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Get current position of job in queue
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.job_id - Job ID
    * @returns {Promise<number>} Queue position (1-based)
    */
@@ -299,7 +299,7 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Execute a sync job
-   * @param {Object} job - Job details from database
+   * @param {object} job - Job details from database
    */
   async execute_job(job) {
     const job_id = job.job_id
@@ -404,11 +404,11 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Update job progress
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.job_id - Job ID
    * @param {number} params.progress - Progress percentage (0-100)
    * @param {string} params.step - Current step description
-   * @param {Object} [params.details={}] - Additional progress details
+   * @param {object} [params.details={}] - Additional progress details
    */
   async update_job_progress({ job_id, progress, step, details = {} }) {
     try {
@@ -440,11 +440,11 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Complete a job
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.job_id - Job ID
    * @param {boolean} params.success - Whether job succeeded
-   * @param {Object} params.result - Job results
-   * @param {Object} params.job_info - Job info from active_jobs
+   * @param {object} params.result - Job results
+   * @param {object} params.job_info - Job info from active_jobs
    */
   async complete_job({ job_id, success, result, job_info }) {
     try {
@@ -493,9 +493,9 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Get job status and details
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.job_id - Job ID
-   * @returns {Promise<Object>} Job status
+   * @returns {Promise<object>} Job status
    */
   async get_job_status({ job_id }) {
     const job = await db('external_league_import_jobs')
@@ -538,7 +538,7 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Remove client connection when WebSocket disconnects
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.client_id - WebSocket client ID
    */
   remove_client({ client_id }) {
@@ -591,10 +591,10 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Send message to WebSocket client
-   * @param {Object} params - Message parameters
+   * @param {object} params - Message parameters
    * @param {WebSocket} params.ws - WebSocket connection
    * @param {string} params.type - Message type
-   * @param {Object} params.payload - Message payload
+   * @param {object} params.payload - Message payload
    */
   send_message_to_client({ ws, type, payload }) {
     if (ws && ws.readyState === 1) {
@@ -609,7 +609,7 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Get queue statistics
-   * @returns {Promise<Object>} Queue statistics
+   * @returns {Promise<object>} Queue statistics
    */
   async get_queue_stats() {
     const stats = await db('external_league_import_jobs')
@@ -637,8 +637,8 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Validate sync components structure
-   * @param {Object} sync_components - Sync components to validate
-   * @returns {Object} Validated sync components with defaults
+   * @param {object} sync_components - Sync components to validate
+   * @returns {object} Validated sync components with defaults
    * @private
    */
   _validate_sync_components(sync_components) {
@@ -665,8 +665,8 @@ class ExternalLeagueSyncQueue {
 
   /**
    * Parse sync components from database (handles string or object)
-   * @param {string|Object} sync_components - Sync components from database
-   * @returns {Object} Parsed sync components
+   * @param {string|object} sync_components - Sync components from database
+   * @returns {object} Parsed sync components
    * @private
    */
   _parse_sync_components(sync_components) {

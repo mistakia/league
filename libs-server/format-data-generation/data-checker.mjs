@@ -12,7 +12,7 @@ import { generation_scripts, SCRIPT_CONFIG } from './config.mjs'
 
 /**
  * Check if a format exists in the database
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.format_id - Hash of the format to check
  * @param {string} params.format_type - Type of format ('scoring' or 'league')
  * @returns {Promise<boolean>}
@@ -37,10 +37,10 @@ export const check_format_exists = async ({ format_id, format_type }) => {
 
 /**
  * Build query conditions based on step type
- * @param {Object} params - Parameters object
- * @param {Object} params.query - Database query object
+ * @param {object} params - Parameters object
+ * @param {object} params.query - Database query object
  * @param {string} params.step_name - Name of the generation step
- * @returns {Object} Modified query object
+ * @returns {object} Modified query object
  */
 export const build_step_query_conditions = ({ query, step_name }) => {
   if (step_name.includes('gamelogs')) {
@@ -61,7 +61,7 @@ export const build_step_query_conditions = ({ query, step_name }) => {
 
 /**
  * Check if data exists for a format in a specific table
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.format_id - Hash of the format
  * @param {string} params.format_type - Type of format ('scoring' or 'league')
  * @param {string} params.step_name - Name of the generation step
@@ -100,7 +100,7 @@ export const check_format_data_exists = async ({
 
 /**
  * Check if format data removal is safe
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.format_id - Format hash to check
  * @returns {Promise<boolean>}
  */
@@ -132,7 +132,7 @@ export const check_removal_safety = async ({ format_id }) => {
  * its own separate (and working) usage check. Nothing downstream noticed,
  * because a safety gate that always passes looks exactly like a safe corpus.
  *
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.format_id - Scoring format id to check
  * @returns {Promise<{safe: boolean, reasons: string[]}>} Safety check result
  */
@@ -183,7 +183,7 @@ export const check_scoring_format_removal_safety = async ({ format_id }) => {
 
 /**
  * Check if a league format can be safely removed
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.format_id - League format hash to check
  * @returns {Promise<{safe: boolean, reasons: string[]}>} Safety check result
  */

@@ -22,7 +22,7 @@ export const DISTRIBUTION_TYPES = {
 /**
  * Select the appropriate distribution type based on player characteristics.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.mean_points - Mean projected fantasy points
  * @param {number} params.std_points - Standard deviation of fantasy points
  * @returns {string} Distribution type from DISTRIBUTION_TYPES
@@ -52,7 +52,7 @@ export function select_distribution({ mean_points, std_points }) {
 /**
  * Constrain variance using position-specific CV bounds.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.mean_points - Mean projected fantasy points
  * @param {number} params.std_points - Standard deviation of fantasy points
  * @param {string} params.position - Player position (QB, RB, WR, TE, K, DST)
@@ -76,7 +76,7 @@ export function constrain_variance({ mean_points, std_points, position }) {
 /**
  * Get default CV for a player without historical data (rookie).
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.position - Player position
  * @returns {number} Default CV value
  */
@@ -88,7 +88,7 @@ export function get_rookie_default_cv({ position }) {
  * Fit Gamma distribution parameters from mean and std.
  * Uses shape-scale parameterization (alpha, theta).
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.mean_points - Mean projected fantasy points
  * @param {number} params.std_points - Standard deviation of fantasy points
  * @returns {{ alpha: number, theta: number }} alpha = shape, theta = scale
@@ -104,7 +104,7 @@ export function fit_gamma_params({ mean_points, std_points }) {
 /**
  * Fit Log-normal distribution parameters from mean and std.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.mean_points - Mean projected fantasy points
  * @param {number} params.std_points - Standard deviation of fantasy points
  * @returns {{ mu: number, sigma: number }}
@@ -124,10 +124,10 @@ export function fit_log_normal_params({ mean_points, std_points }) {
  * Sample from a fitted distribution using a uniform random value.
  * Transforms uniform [0,1] to the target distribution via inverse CDF.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.uniform_sample - Uniform random value in [0,1]
  * @param {string} params.distribution_type - Type from DISTRIBUTION_TYPES
- * @param {Object} params.distribution_params - Parameters for the distribution
+ * @param {object} params.distribution_params - Parameters for the distribution
  * @returns {number} Sampled fantasy points value
  */
 export function sample_from_distribution({
@@ -169,7 +169,7 @@ export function sample_from_distribution({
  * Get complete distribution parameters for a player.
  * Handles all edge cases and returns ready-to-sample parameters.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.projected_points - Mean projected fantasy points
  * @param {number} params.std_points - Standard deviation (from variance cache or default)
  * @param {string} params.position - Player position

@@ -22,7 +22,7 @@ const log_validation = debug('external:adapter:validation')
 export default class BaseAdapter {
   /**
    * Create a new adapter instance
-   * @param {Object} [config={}] - Platform-specific configuration options
+   * @param {object} [config={}] - Platform-specific configuration options
    */
   constructor(config = {}) {
     this.config = config
@@ -48,7 +48,7 @@ export default class BaseAdapter {
 
   /**
    * Authenticate with the platform (if required)
-   * @param {Object} credentials - Platform-specific credentials
+   * @param {object} credentials - Platform-specific credentials
    * @returns {Promise<boolean>} Authentication success
    */
   async authenticate(credentials) {
@@ -60,8 +60,8 @@ export default class BaseAdapter {
   /**
    * Get league information in canonical format
    * @param {string} league_id - External league identifier
-   * @param {Object} [options={}] - Additional options (e.g., year for multi-season platforms)
-   * @returns {Promise<Object>} League configuration data in canonical format
+   * @param {object} [options={}] - Additional options (e.g., year for multi-season platforms)
+   * @returns {Promise<object>} League configuration data in canonical format
    */
   async get_league(league_id, options = {}) {
     throw new Error(
@@ -72,7 +72,7 @@ export default class BaseAdapter {
   /**
    * Get teams in a league
    * @param {string} league_id - External league identifier
-   * @returns {Promise<Array>} Array of team objects
+   * @returns {Promise<object[]>} Array of team objects
    */
   async get_teams(league_id) {
     throw new Error(
@@ -82,11 +82,11 @@ export default class BaseAdapter {
 
   /**
    * Get rosters for all teams in a league in canonical format
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.league_id - External league identifier
    * @param {number} [params.week] - Optional week number for historical data
    * @param {number} [params.year] - Optional year for multi-season platforms
-   * @returns {Promise<Array>} Array of roster objects in canonical format
+   * @returns {Promise<object[]>} Array of roster objects in canonical format
    */
   async get_rosters({ league_id, week = null, year = null }) {
     throw new Error(
@@ -96,9 +96,9 @@ export default class BaseAdapter {
 
   /**
    * Get players available on the platform
-   * @param {Object} [params] - Parameters object
-   * @param {Object} [params.filters] - Optional filters for players
-   * @returns {Promise<Array>} Array of player objects
+   * @param {object} [params] - Parameters object
+   * @param {object} [params.filters] - Optional filters for players
+   * @returns {Promise<object[]>} Array of player objects
    */
   async get_players({ filters = {} } = {}) {
     throw new Error(
@@ -108,11 +108,11 @@ export default class BaseAdapter {
 
   /**
    * Get transactions for a league in canonical format
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.league_id - External league identifier
-   * @param {Object} [params.options={}] - Optional filters (week, transaction_type, team_id, etc.)
+   * @param {object} [params.options={}] - Optional filters (week, transaction_type, team_id, etc.)
    * @param {number} [params.year] - Optional year for multi-season platforms
-   * @returns {Promise<Array>} Array of transaction objects in canonical format
+   * @returns {Promise<object[]>} Array of transaction objects in canonical format
    */
   async get_transactions({ league_id, options = {}, year = null }) {
     throw new Error(
@@ -122,10 +122,10 @@ export default class BaseAdapter {
 
   /**
    * Get matchups for a specific week
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.league_id - External league identifier
    * @param {number} params.week - Week number
-   * @returns {Promise<Array>} Array of matchup objects
+   * @returns {Promise<object[]>} Array of matchup objects
    */
   async get_matchups({ league_id, week }) {
     throw new Error(
@@ -136,7 +136,7 @@ export default class BaseAdapter {
   /**
    * Get league scoring format/rules
    * @param {string} league_id - External league identifier
-   * @returns {Promise<Object>} Scoring format configuration
+   * @returns {Promise<object>} Scoring format configuration
    */
   async get_scoring_format(league_id) {
     throw new Error(
@@ -147,7 +147,7 @@ export default class BaseAdapter {
   /**
    * Get draft results for a league
    * @param {string} league_id - External league identifier
-   * @returns {Promise<Array>} Array of draft pick objects
+   * @returns {Promise<object[]>} Array of draft pick objects
    */
   async get_draft_results(league_id) {
     throw new Error(
@@ -168,7 +168,7 @@ export default class BaseAdapter {
 
   /**
    * Validate league configuration data (legacy method - use schema_validator for canonical format)
-   * @param {Object} league_data - League data to validate
+   * @param {object} league_data - League data to validate
    * @returns {boolean} True if valid
    * @deprecated Use schema_validator.validate_league() for canonical format validation
    */
@@ -184,7 +184,7 @@ export default class BaseAdapter {
 
   /**
    * Validate roster data (legacy method - use schema_validator for canonical format)
-   * @param {Object} roster_data - Roster data to validate
+   * @param {object} roster_data - Roster data to validate
    * @returns {boolean} True if valid
    * @deprecated Use schema_validator.validate_roster() for canonical format validation
    */
@@ -204,7 +204,7 @@ export default class BaseAdapter {
 
   /**
    * Validate transaction data
-   * @param {Object} transaction_data - Transaction data to validate
+   * @param {object} transaction_data - Transaction data to validate
    * @returns {boolean} True if valid
    */
   validate_transaction_data(transaction_data) {
@@ -229,7 +229,7 @@ export default class BaseAdapter {
    * Log adapter activity using debug library
    * @param {string} level - Log level (info, warn, error, debug)
    * @param {string} message - Log message
-   * @param {Object} [data={}] - Additional data to log
+   * @param {object} [data={}] - Additional data to log
    */
   log(level, message, data = {}) {
     const log_data = {

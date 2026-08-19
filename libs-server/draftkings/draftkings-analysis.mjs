@@ -9,7 +9,7 @@ const log = debug('import-draft-kings')
 
 /**
  * Analyzes formatted markets for missing fields and unmatched market types
- * @param {Array} formatted_markets - Array of formatted market objects
+ * @param {object[]} formatted_markets - Array of formatted market objects
  */
 export const analyze_formatted_markets = (formatted_markets) => {
   log(`\n=== MARKET ANALYSIS ===`)
@@ -98,7 +98,7 @@ export const analyze_formatted_markets = (formatted_markets) => {
 
 /**
  * Logs analysis of events missing esbid
- * @param {Map} events_missing_esbid - Map of events missing esbid
+ * @param {Map<string, object>} events_missing_esbid - Map of events missing esbid
  */
 const log_missing_esbid_analysis = (events_missing_esbid) => {
   const total_markets_missing_esbid = Array.from(
@@ -128,7 +128,7 @@ const log_missing_esbid_analysis = (events_missing_esbid) => {
 
 /**
  * Logs analysis of events missing year
- * @param {Map} events_missing_year - Map of events missing year
+ * @param {Map<string, object>} events_missing_year - Map of events missing year
  */
 const log_missing_year_analysis = (events_missing_year) => {
   const total_markets_missing_year = Array.from(
@@ -158,8 +158,8 @@ const log_missing_year_analysis = (events_missing_year) => {
 
 /**
  * Logs analysis of missing market types
- * @param {Array} missing_market_type - Array of markets missing market type
- * @param {Set} source_markets_missing_market_type - Set of unique market names missing type
+ * @param {object[]} missing_market_type - Array of markets missing market type
+ * @param {Set<string>} source_markets_missing_market_type - Set of unique market names missing type
  */
 const log_missing_market_type_analysis = (
   missing_market_type,
@@ -214,7 +214,7 @@ const log_missing_market_type_analysis = (
 
 /**
  * Logs summary of failed requests
- * @param {Array} failed_requests - Array of failed request objects
+ * @param {object[]} failed_requests - Array of failed request objects
  */
 export const log_failed_requests_summary = (failed_requests) => {
   if (failed_requests.length === 0) {
@@ -245,8 +245,8 @@ export const log_failed_requests_summary = (failed_requests) => {
 
 /**
  * Logs processing summary
- * @param {Array} formatted_markets - Array of formatted markets
- * @param {Array} failed_requests - Array of failed requests
+ * @param {object[]} formatted_markets - Array of formatted markets
+ * @param {object[]} failed_requests - Array of failed requests
  */
 export const log_processing_summary = (formatted_markets, failed_requests) => {
   log(`\n=== PROCESSING SUMMARY ===`)

@@ -14,9 +14,9 @@ import {
 
 /**
  * Get tables and hash column for format type
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.format_type - Type of format ('league' or 'scoring')
- * @returns {Object} Tables configuration
+ * @returns {object} Tables configuration
  */
 const get_format_tables = ({ format_type }) => {
   if (format_type === 'league') {
@@ -46,12 +46,12 @@ const get_format_tables = ({ format_type }) => {
 
 /**
  * Remove format data from database
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.format_hash - Format hash to remove
  * @param {string} params.format_type - Type of format ('league' or 'scoring')
- * @param {Object} [params.options={}] - Options object
+ * @param {object} [params.options={}] - Options object
  * @param {boolean} [params.options.dry_run=false] - Whether to perform dry run
- * @returns {Promise<Object>} Removal counts by table
+ * @returns {Promise<object>} Removal counts by table
  */
 export const remove_format_data = async ({
   format_hash,
@@ -141,9 +141,9 @@ export const discover_all_format_hashes = async () => {
 
 /**
  * Check if format hashes are actively used
- * @param {Object} params - Parameters object
- * @param {Set} params.league_hashes - League format hashes to check
- * @returns {Promise<{active_in_seasons: Set}>} Active usage information
+ * @param {object} params - Parameters object
+ * @param {Set<string>} params.league_hashes - League format hashes to check
+ * @returns {Promise<{active_in_seasons: Set<string>}>} Active usage information
  */
 export const check_active_usage = async ({ league_hashes }) => {
   const active_in_seasons = new Set()
@@ -164,7 +164,7 @@ export const check_active_usage = async ({ league_hashes }) => {
 
 /**
  * Check if scoring format is referenced by league formats
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.scoring_hash - Scoring format hash to check
  * @returns {Promise<boolean>}
  */
@@ -182,7 +182,7 @@ const is_scoring_format_referenced = async ({ scoring_hash }) => {
 
 /**
  * Classify format orphans
- * @returns {Promise<Object>} Classification of all formats
+ * @returns {Promise<object>} Classification of all formats
  */
 export const classify_format_orphans = async () => {
   // Discover all format hashes
@@ -233,7 +233,7 @@ export const classify_format_orphans = async () => {
 
 /**
  * Enhanced orphaned data cleanup
- * @param {Object} [options={}] - Options object
+ * @param {object} [options={}] - Options object
  * @param {boolean} [options.dry_run=false] - Whether to perform dry run
  */
 export const cleanup_orphaned_data = async (options = {}) => {

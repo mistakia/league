@@ -68,8 +68,8 @@ export const levenshtein_ratio = (a, b) => {
  * Calculate the Jaccard distance between two sets or strings.
  * Jaccard distance measures dissimilarity between sets as 1 - (intersection/union).
  *
- * @param {string|Array|Set} a - First set, array, or string (string is converted to character set)
- * @param {string|Array|Set} b - Second set, array, or string
+ * @param {string|string[]|Set<string>} a - First set, array, or string (string is converted to character set)
+ * @param {string|string[]|Set<string>} b - Second set, array, or string
  * @returns {number} Jaccard distance (0 = identical, 1 = no common elements)
  */
 export const jaccard_distance = (a, b) => {
@@ -119,7 +119,7 @@ export const ngram_distance = (a, b, n = 2) => {
  *
  * @param {string} a - First string
  * @param {string} b - Second string
- * @param {Object} [options] - Threshold options
+ * @param {object} [options] - Threshold options
  * @param {number} [options.levenshtein_threshold=0.3] - Max Levenshtein ratio to consider similar
  * @param {number} [options.ngram_threshold=0.4] - Max n-gram distance to consider similar
  * @returns {boolean} True if strings are similar

@@ -37,7 +37,7 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Authenticate with Sleeper using ffscrapr patterns (no auth required - API is public)
-   * @param {Object} credentials - Not used for Sleeper
+   * @param {object} credentials - Not used for Sleeper
    * @returns {Promise<boolean>} Always returns true
    */
   async authenticate(credentials = {}) {
@@ -98,10 +98,10 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Get user's leagues for a season
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.user_id - Sleeper user ID
    * @param {number} [params.season] - NFL season year
-   * @returns {Promise<Array>} Array of league objects
+   * @returns {Promise<object[]>} Array of league objects
    */
   async get_user_leagues({ user_id, season = current_season.year }) {
     const leagues = await this.api_client.get(
@@ -117,8 +117,8 @@ export default class SleeperAdapter extends BaseAdapter {
   /**
    * Get league information in canonical format
    * @param {string} league_id - Sleeper league ID
-   * @param {Object} [options={}] - Additional options (not currently used by Sleeper)
-   * @returns {Promise<Object>} League configuration data in canonical format
+   * @param {object} [options={}] - Additional options (not currently used by Sleeper)
+   * @returns {Promise<object>} League configuration data in canonical format
    */
   async get_league(league_id, options = {}) {
     const [league_data, users] = await Promise.all([
@@ -200,7 +200,7 @@ export default class SleeperAdapter extends BaseAdapter {
   /**
    * Get teams in a league
    * @param {string} league_id - Sleeper league ID
-   * @returns {Promise<Array>} Array of team objects
+   * @returns {Promise<object[]>} Array of team objects
    */
   async get_teams(league_id, options = {}) {
     const league_data = await this.get_league(league_id, options)
@@ -209,11 +209,11 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Get rosters for all teams in a league in canonical format
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.league_id - Sleeper league ID
    * @param {number} [params.week] - Optional week number for historical data
    * @param {number} [params.year] - Optional year (not currently used by Sleeper API)
-   * @returns {Promise<Array>} Array of roster objects in canonical format
+   * @returns {Promise<object[]>} Array of roster objects in canonical format
    */
   async get_rosters({ league_id, week = null, year = null }) {
     // ffscrapr pattern: Sleeper does not support historical week rosters via API
@@ -323,9 +323,9 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Get players available on the platform
-   * @param {Object} [params] - Parameters object
-   * @param {Object} [params.filters] - Optional filters for players
-   * @returns {Promise<Array>} Array of player objects in canonical format
+   * @param {object} [params] - Parameters object
+   * @param {object} [params.filters] - Optional filters for players
+   * @returns {Promise<object[]>} Array of player objects in canonical format
    */
   async get_players({ filters = {} } = {}) {
     const players = await this.api_client.get('/players/nfl')
@@ -435,11 +435,11 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Get transactions for a league in canonical format
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.league_id - Sleeper league ID
-   * @param {Object} [params.options={}] - Optional filters (week, transaction_type, team_id, etc.)
+   * @param {object} [params.options={}] - Optional filters (week, transaction_type, team_id, etc.)
    * @param {number} [params.year] - Optional year (not currently used by Sleeper API)
-   * @returns {Promise<Array>} Array of transaction objects in canonical format
+   * @returns {Promise<object[]>} Array of transaction objects in canonical format
    */
   async get_transactions({ league_id, options = {}, year = null }) {
     // ffscrapr references:
@@ -565,10 +565,10 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Get matchups for a specific week
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.league_id - Sleeper league ID
    * @param {number} params.week - Week number
-   * @returns {Promise<Array>} Array of matchup objects
+   * @returns {Promise<object[]>} Array of matchup objects
    */
   async get_matchups({ league_id, week }) {
     const matchups = await this.api_client.get(
@@ -605,7 +605,7 @@ export default class SleeperAdapter extends BaseAdapter {
   /**
    * Get league scoring format/rules
    * @param {string} league_id - Sleeper league ID
-   * @returns {Promise<Object>} Scoring format configuration
+   * @returns {Promise<object>} Scoring format configuration
    */
   async get_scoring_format(league_id) {
     const league_data = await this.get_league(league_id)
@@ -615,7 +615,7 @@ export default class SleeperAdapter extends BaseAdapter {
   /**
    * Get draft results for a league
    * @param {string} league_id - Sleeper league ID
-   * @returns {Promise<Array>} Array of draft pick objects
+   * @returns {Promise<object[]>} Array of draft pick objects
    */
   async get_draft_results(league_id) {
     const drafts = await this.api_client.get(`/league/${league_id}/drafts`)
@@ -679,8 +679,8 @@ export default class SleeperAdapter extends BaseAdapter {
   /**
    * Determine roster slot and category for canonical format
    * @param {string} player_id - Sleeper player ID
-   * @param {Object} roster - Sleeper roster object
-   * @returns {Object} Slot info with slot and category
+   * @param {object} roster - Sleeper roster object
+   * @returns {object} Slot info with slot and category
    */
   determine_roster_slot_info(player_id, roster) {
     if (roster.starters?.includes(player_id)) {
@@ -725,7 +725,7 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Map Sleeper season type to canonical format
-   * @param {Object} settings - Sleeper league settings
+   * @param {object} settings - Sleeper league settings
    * @returns {string} Standard season type
    */
   map_season_type(settings = {}) {
@@ -827,8 +827,8 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Map Sleeper scoring settings to canonical format
-   * @param {Object} scoring - Sleeper scoring settings
-   * @returns {Object} Standard scoring settings
+   * @param {object} scoring - Sleeper scoring settings
+   * @returns {object} Standard scoring settings
    */
   map_scoring_settings_to_canonical(scoring = {}) {
     return {
@@ -938,9 +938,9 @@ export default class SleeperAdapter extends BaseAdapter {
   /**
    * Map Sleeper user to standard team format
    * Required fields: external_team_id, owner_id, name (per canonical league format schema)
-   * @param {Object} user - Sleeper user object
-   * @param {Object} league_data - Sleeper league data
-   * @returns {Object} Standard team format (canonical league format team definition)
+   * @param {object} user - Sleeper user object
+   * @param {object} league_data - Sleeper league data
+   * @returns {object} Standard team format (canonical league format team definition)
    */
   map_team_to_canonical(user, league_data) {
     return {
@@ -994,8 +994,8 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Extract teams involved in a transaction
-   * @param {Object} transaction - Sleeper transaction object
-   * @returns {Array} Array of team IDs
+   * @param {object} transaction - Sleeper transaction object
+   * @returns {string[]} Array of team IDs
    */
   extract_transaction_teams(transaction) {
     const teams = new Set()
@@ -1023,8 +1023,8 @@ export default class SleeperAdapter extends BaseAdapter {
   /**
    * Extract teams involved in a transaction - schema-compliant format
    * Returns array of objects with team_external_id and team_role per schema
-   * @param {Object} transaction - Sleeper transaction object
-   * @returns {Array} Array of team objects with team_external_id and team_role
+   * @param {object} transaction - Sleeper transaction object
+   * @returns {object[]} Array of team objects with team_external_id and team_role
    */
   extract_transaction_teams_standard(transaction) {
     const team_ids = this.extract_transaction_teams(transaction)
@@ -1037,8 +1037,8 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Map transaction players to canonical format
-   * @param {Object} transaction - Sleeper transaction object
-   * @returns {Array} Array of player actions in canonical format
+   * @param {object} transaction - Sleeper transaction object
+   * @returns {object[]} Array of player actions in canonical format
    */
   map_transaction_players_to_canonical(transaction) {
     const players = []
@@ -1078,8 +1078,8 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Map transaction players to schema-compliant player_moves format
-   * @param {Object} transaction - Sleeper transaction object
-   * @returns {Array} Array of player_move objects per schema
+   * @param {object} transaction - Sleeper transaction object
+   * @returns {object[]} Array of player_move objects per schema
    */
   map_transaction_players_to_schema_format(transaction) {
     const player_moves = []
@@ -1150,7 +1150,7 @@ export default class SleeperAdapter extends BaseAdapter {
    * Sleeper stores waiver bid in multiple formats:
    * - settings.waiver_bid (single value)
    * - waiver_budget: [{ sender, receiver, amount }] (array of budget changes)
-   * @param {Object} transaction - Sleeper transaction object
+   * @param {object} transaction - Sleeper transaction object
    * @returns {number|null} Waiver bid amount
    */
   extract_waiver_bid(transaction) {
@@ -1172,8 +1172,8 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Extract trade partner team IDs
-   * @param {Object} transaction - Sleeper transaction object
-   * @returns {Array} Array of trade partner team IDs
+   * @param {object} transaction - Sleeper transaction object
+   * @returns {string[]} Array of trade partner team IDs
    */
   extract_trade_partners(transaction) {
     if (transaction.type !== 'trade') return []
@@ -1184,7 +1184,7 @@ export default class SleeperAdapter extends BaseAdapter {
 
   /**
    * Get the team ID that created/initiated the transaction
-   * @param {Object} transaction - Sleeper transaction object
+   * @param {object} transaction - Sleeper transaction object
    * @returns {string|null} Creator team ID
    */
   get_transaction_creator_team(transaction) {

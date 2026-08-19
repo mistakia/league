@@ -18,14 +18,14 @@ const log = debug('play-enrichment:player-identification')
  * - Tacklers with assists (tacklers_with_assisters arrays)
  * - Tackle assisters (tackle_assisters arrays)
  *
- * @param {Array} plays - Array of play objects with esbid and play_id
- * @param {Array} play_stats - Array of play stat objects with GSIS IDs
- * @param {Object} player_cache - Player cache instance with find_player method
- * @param {Map} [snap_roster_by_esbid] - Optional week-accurate participation
+ * @param {object[]} plays - Array of play objects with esbid and play_id
+ * @param {object[]} play_stats - Array of play stat objects with GSIS IDs
+ * @param {object} player_cache - Player cache instance with find_player method
+ * @param {Map<number, Map<string, object[]>>} [snap_roster_by_esbid] - Optional week-accurate participation
  *   index: esbid -> Map(normalized player name -> [{ pid, gsisid }]) built from
  *   nfl_snaps (who was on the field that game). Enables the source-NULL-gsisId
  *   fallback below.
- * @returns {Array} Plays with all player _pid fields populated
+ * @returns {object[]} Plays with all player _pid fields populated
  */
 export const enrich_player_identifications = (
   plays,

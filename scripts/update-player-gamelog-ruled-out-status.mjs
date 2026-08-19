@@ -106,11 +106,11 @@ const get_following_wednesday_timestamp = (game_timestamp) => {
 /**
  * Load games for the specified parameters
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.year - Season year
  * @param {number} params.week - Week number
  * @param {string} params.seas_type - Season type (PRE, REG, POST)
- * @returns {Promise<Array>} Array of game objects
+ * @returns {Promise<NflGamesRow[]>} Array of game objects
  */
 const load_games = async ({ year, week, seas_type }) => {
   const query = db('nfl_games')
@@ -135,7 +135,7 @@ const load_games = async ({ year, week, seas_type }) => {
  * Load active player gamelogs for specific games
  *
  * @param {Array<number>} esbids - Game IDs
- * @returns {Promise<Array>} Array of gamelog objects
+ * @returns {Promise<PlayerGamelogsRow[]>} Array of gamelog objects
  */
 const load_active_gamelogs = async (esbids) => {
   const gamelogs = await db('player_gamelogs')
@@ -160,7 +160,7 @@ const load_active_gamelogs = async (esbids) => {
  * @param {Array<string>} pids - Player IDs
  * @param {number} start_timestamp - Window start (game time)
  * @param {number} end_timestamp - Window end (following Wednesday)
- * @returns {Promise<Array>} Array of status records with OUT designation
+ * @returns {Promise<object[]>} Array of status records with OUT designation
  */
 const find_out_status_records = async ({
   pids,
@@ -185,9 +185,9 @@ const find_out_status_records = async ({
 /**
  * Process a single game to identify ruled-out players
  *
- * @param {Object} game - Game object with esbid and timestamp
- * @param {Array} gamelogs - Active gamelogs for this game
- * @returns {Promise<Object>} Results object with updates and stats
+ * @param {object} game - Game object with esbid and timestamp
+ * @param {PlayerGamelogsRow[]} gamelogs - Active gamelogs for this game
+ * @returns {Promise<object>} Results object with updates and stats
  */
 const process_game = async (game, gamelogs) => {
   const { esbid, kickoff_at, week, home_nfl_team, away_nfl_team } = game
@@ -281,7 +281,7 @@ const process_game = async (game, gamelogs) => {
 /**
  * Apply updates to the database
  *
- * @param {Array} updates - Array of update objects
+ * @param {object[]} updates - Array of update objects
  * @param {boolean} dry_run - If true, skip actual database writes
  * @returns {Promise<number>} Number of records updated
  */

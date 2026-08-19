@@ -169,12 +169,12 @@ export default class LeagueConfigMapper {
 
   /**
    * Map external platform league configuration to internal format hashes
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier (sleeper, espn, yahoo)
-   * @param {Object} params.league_config - External league configuration (number_teams, salary_cap, etc.)
-   * @param {Object} params.scoring_config - External scoring configuration (points per stat)
-   * @param {Object} params.roster_config - External roster configuration (position counts)
-   * @returns {Object} Object containing:
+   * @param {object} params.league_config - External league configuration (number_teams, salary_cap, etc.)
+   * @param {object} params.scoring_config - External scoring configuration (points per stat)
+   * @param {object} params.roster_config - External roster configuration (position counts)
+   * @returns {object} Object containing:
    *   - scoring_params: Mapped scoring parameters (config-tuple fields)
    *   - league_params: Mapped league parameters (roster + cap fields)
    */
@@ -207,10 +207,10 @@ export default class LeagueConfigMapper {
 
   /**
    * Map external scoring configuration to internal scoring parameters
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier
-   * @param {Object} params.scoring_config - External scoring configuration
-   * @returns {Object} Internal scoring parameters
+   * @param {object} params.scoring_config - External scoring configuration
+   * @returns {object} Internal scoring parameters
    */
   map_scoring_config({ platform, scoring_config }) {
     const scoring_map = this.scoring_mappings[platform.toLowerCase()]
@@ -255,11 +255,11 @@ export default class LeagueConfigMapper {
 
   /**
    * Map external roster configuration to internal league parameters
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier
-   * @param {Object} params.roster_config - External roster configuration
-   * @param {Object} params.league_config - External league configuration
-   * @returns {Object} Internal league parameters
+   * @param {object} params.roster_config - External roster configuration
+   * @param {object} params.league_config - External league configuration
+   * @returns {object} Internal league parameters
    */
   map_roster_config({ platform, roster_config, league_config }) {
     const roster_map = this.roster_mappings[platform.toLowerCase()]
@@ -316,10 +316,10 @@ export default class LeagueConfigMapper {
 
   /**
    * Apply platform-specific scoring rules and adjustments
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier
-   * @param {Object} params.scoring_config - External scoring configuration
-   * @param {Object} params.scoring_params - Internal scoring parameters to modify
+   * @param {object} params.scoring_config - External scoring configuration
+   * @param {object} params.scoring_params - Internal scoring parameters to modify
    * @private
    */
   apply_platform_scoring_rules({ platform, scoring_config, scoring_params }) {
@@ -383,7 +383,7 @@ export default class LeagueConfigMapper {
 
   /**
    * Get default scoring parameters
-   * @returns {Object} Default scoring parameters
+   * @returns {object} Default scoring parameters
    */
   get_default_scoring_params() {
     return {
@@ -428,7 +428,7 @@ export default class LeagueConfigMapper {
 
   /**
    * Get default league parameters
-   * @returns {Object} Default league parameters
+   * @returns {object} Default league parameters
    */
   get_default_league_params() {
     return {
@@ -454,9 +454,9 @@ export default class LeagueConfigMapper {
 
   /**
    * Validate mapped configuration
-   * @param {Object} params - Parameters object
-   * @param {Object} params.league_format - Mapped league format
-   * @param {Object} params.scoring_format - Mapped scoring format
+   * @param {object} params - Parameters object
+   * @param {object} params.league_format - Mapped league format
+   * @param {object} params.scoring_format - Mapped scoring format
    * @returns {boolean} True if valid
    */
   validate_mapped_config({ league_params, scoring_params }) {

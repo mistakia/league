@@ -76,7 +76,7 @@ export default class SyncOrchestrator {
   /**
    * Create a new sync_stats object for each sync operation
    * This ensures concurrent syncs don't interfere with each other
-   * @returns {Object} Fresh sync statistics object
+   * @returns {object} Fresh sync statistics object
    * @private
    */
   _create_sync_stats() {
@@ -93,7 +93,7 @@ export default class SyncOrchestrator {
 
   /**
    * Check if a platform is supported
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier to check
    * @returns {boolean} True if platform is supported
    */
@@ -103,12 +103,12 @@ export default class SyncOrchestrator {
 
   /**
    * Fetch external league data in canonical format (read-only, no DB writes)
-   * @param {Object} options - Fetch options
+   * @param {object} options - Fetch options
    * @param {string} options.platform_name - Platform identifier
    * @param {string} options.external_league_id - External league ID
-   * @param {Object} [options.credentials] - Platform authentication credentials
-   * @param {Object} [options.fetch_options] - Additional fetch options
-   * @returns {Promise<Object>} Canonical league data components
+   * @param {object} [options.credentials] - Platform authentication credentials
+   * @param {object} [options.fetch_options] - Additional fetch options
+   * @returns {Promise<object>} Canonical league data components
    */
   async fetch_league_data({
     platform_name,
@@ -290,10 +290,10 @@ export default class SyncOrchestrator {
 
   /**
    * Initialize adapter for a platform
-   * @param {Object} options - Adapter initialization options
+   * @param {object} options - Adapter initialization options
    * @param {string} options.platform_name - Platform identifier
-   * @param {Object} [options.adapter_config] - Platform-specific configuration
-   * @returns {Object} Adapter instance
+   * @param {object} [options.adapter_config] - Platform-specific configuration
+   * @returns {object} Adapter instance
    */
   initialize_adapter({ platform_name, adapter_config = {} }) {
     try {
@@ -320,13 +320,13 @@ export default class SyncOrchestrator {
 
   /**
    * Perform full sync of external league
-   * @param {Object} options - Full sync options
+   * @param {object} options - Full sync options
    * @param {string} options.platform_name - Platform identifier
    * @param {string} options.external_league_id - External league ID
    * @param {string} options.internal_league_id - Internal league ID
-   * @param {Object} [options.credentials] - Platform authentication credentials
-   * @param {Object} [options.sync_options] - Additional sync options including progress_callback
-   * @returns {Promise<Object>} Standardized sync results
+   * @param {object} [options.credentials] - Platform authentication credentials
+   * @param {object} [options.sync_options] - Additional sync options including progress_callback
+   * @returns {Promise<object>} Standardized sync results
    */
   async sync_league({
     platform_name,
@@ -500,14 +500,14 @@ export default class SyncOrchestrator {
 
   /**
    * Main sync method dispatcher
-   * @param {Object} options - Sync options
+   * @param {object} options - Sync options
    * @param {string} options.platform_name - Platform identifier
    * @param {string} options.external_league_id - External league ID
    * @param {string} options.internal_league_id - Internal league ID
-   * @param {Object} [options.credentials] - Platform authentication credentials
+   * @param {object} [options.credentials] - Platform authentication credentials
    * @param {boolean} [options.dry_run] - Whether to perform a dry run
-   * @param {Object} [options.sync_options] - Sync options including progress_callback
-   * @returns {Promise<Object>} Standardized sync results
+   * @param {object} [options.sync_options] - Sync options including progress_callback
+   * @returns {Promise<object>} Standardized sync results
    */
   async sync({
     platform_name,
@@ -559,13 +559,13 @@ export default class SyncOrchestrator {
 
   /**
    * Perform validation-only sync (dry run)
-   * @param {Object} options - Validation sync options
+   * @param {object} options - Validation sync options
    * @param {string} options.platform_name - Platform identifier
    * @param {string} options.external_league_id - External league ID
    * @param {string} options.internal_league_id - Internal league ID
-   * @param {Object} options.credentials - Platform credentials
-   * @param {Object} options.sync_options - Additional sync options
-   * @returns {Promise<Object>} Validation results
+   * @param {object} options.credentials - Platform credentials
+   * @param {object} options.sync_options - Additional sync options
+   * @returns {Promise<object>} Validation results
    * @private
    */
   async _perform_validation_sync({

@@ -20,11 +20,11 @@ const GAME_OUTCOME_THRESHOLDS = {
 /**
  * Get effective game outcome correlation for a player with blending.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.pid - Player ID
  * @param {string} params.pos - Player position
  * @param {string} [params.archetype] - Player archetype
- * @param {Map} params.player_correlations - Map of pid -> { correlation, confidence }
+ * @param {Map<string, object>} params.player_correlations - Map of pid -> { correlation, confidence }
  * @param {Map<string, { default_correlation: number }>} [params.position_defaults] - Map of
  *   'pos' or 'pos:archetype' -> { default_correlation }. OPTIONAL: get_position_default
  *   below opens with `if (!position_defaults) return 0`, so absence is a
@@ -104,12 +104,12 @@ function get_position_default(pos, archetype, position_defaults) {
  * Build an extended correlation matrix that includes game outcome latent variables.
  * The matrix is (N_players + N_games) x (N_players + N_games).
  *
- * @param {Object} params
- * @param {Object[]} params.players - Array of players with { pid, nfl_team, position, position_rank, esbid }
- * @param {Object} params.schedule - Pre-loaded NFL schedule
- * @param {Map} params.correlation_cache - Pre-loaded player-player correlations
- * @param {Map} params.archetypes - Map of pid -> archetype
- * @param {Map} params.game_outcome_correlations - Map of pid -> { correlation, confidence }
+ * @param {object} params
+ * @param {object[]} params.players - Array of players with { pid, nfl_team, position, position_rank, esbid }
+ * @param {object} params.schedule - Pre-loaded NFL schedule
+ * @param {Map<string, any>} params.correlation_cache - Pre-loaded player-player correlations
+ * @param {Map<string, string>} params.archetypes - Map of pid -> archetype
+ * @param {Map<string, object>} params.game_outcome_correlations - Map of pid -> { correlation, confidence }
  * @param {Map<string, { default_correlation: number }>} [params.position_defaults] - Map of
  *   'pos' or 'pos:archetype' -> { default_correlation }. OPTIONAL: get_position_default
  *   below opens with `if (!position_defaults) return 0`, so absence is a
@@ -236,11 +236,11 @@ export function build_extended_correlation_matrix({
 /**
  * Extract game outcome samples from the extended sample array.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number[]} params.samples - Full sample array from extended matrix
- * @param {Map} params.game_indices - Map of esbid -> matrix index
+ * @param {Map<number, number>} params.game_indices - Map of esbid -> matrix index
  * @param {number} params.n_players - Number of players in matrix
- * @returns {Map} Map of esbid -> game_outcome_value
+ * @returns {Map<number, number>} Map of esbid -> game_outcome_value
  */
 export function extract_game_outcome_samples({
   samples,

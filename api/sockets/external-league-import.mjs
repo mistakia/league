@@ -84,7 +84,7 @@ export const JOB_STATUS = {
  * WebSocket handler for external league sync operations
  * Routes incoming messages to appropriate handlers
  * @param {WebSocket} ws - WebSocket connection
- * @param {Object} message - Parsed message object with type and payload
+ * @param {object} message - Parsed message object with type and payload
  */
 export default function handle_external_league_import_socket(ws, message) {
   const { type, payload } = message
@@ -118,10 +118,10 @@ export default function handle_external_league_import_socket(ws, message) {
 /**
  * Handle sync job queuing request
  * @param {WebSocket} ws - WebSocket connection
- * @param {Object} payload - Request payload
+ * @param {object} payload - Request payload
  * @param {string} payload.connection_id - External league connection ID
  * @param {string} [payload.job_type='full_sync'] - Type of sync job
- * @param {Object} [payload.sync_components] - Components to sync
+ * @param {object} [payload.sync_components] - Components to sync
  * @param {boolean} [payload.dry_run=false] - Whether this is a dry run
  * @param {number} payload.user_id - User initiating the job
  */
@@ -168,7 +168,7 @@ async function handle_queue_sync_job(ws, payload) {
 /**
  * Handle sync job cancellation request
  * @param {WebSocket} ws - WebSocket connection
- * @param {Object} payload - Request payload
+ * @param {object} payload - Request payload
  * @param {string} payload.job_id - Job ID to cancel
  * @param {number} payload.user_id - User requesting cancellation
  */
@@ -201,7 +201,7 @@ async function handle_cancel_sync_job(ws, payload) {
 /**
  * Handle job status request
  * @param {WebSocket} ws - WebSocket connection
- * @param {Object} payload - Request payload
+ * @param {object} payload - Request payload
  * @param {string} payload.job_id - Job ID to get status for
  */
 async function handle_get_job_status(ws, payload) {
@@ -230,7 +230,7 @@ async function handle_get_job_status(ws, payload) {
 /**
  * Handle queue statistics request
  * @param {WebSocket} ws - WebSocket connection
- * @param {Object} _payload - Request payload (unused)
+ * @param {object} _payload - Request payload (unused)
  */
 async function handle_get_queue_stats(ws, _payload) {
   try {
@@ -249,7 +249,7 @@ async function handle_get_queue_stats(ws, _payload) {
  * Handle connection status request
  * Retrieves connection details and sync history from database
  * @param {WebSocket} ws - WebSocket connection
- * @param {Object} payload - Request payload
+ * @param {object} payload - Request payload
  * @param {string} payload.connection_id - Connection ID to get status for
  */
 async function handle_get_connection_status(ws, payload) {
@@ -331,10 +331,10 @@ async function handle_get_connection_status(ws, payload) {
  * Handle connection validation request
  * Tests credentials and connectivity without importing data
  * @param {WebSocket} ws - WebSocket connection
- * @param {Object} payload - Request payload
+ * @param {object} payload - Request payload
  * @param {string} payload.platform - Platform identifier
  * @param {string} payload.external_league_id - External league ID
- * @param {Object} [payload.credentials={}] - Platform authentication credentials
+ * @param {object} [payload.credentials={}] - Platform authentication credentials
  */
 async function handle_validate_connection(ws, payload) {
   try {
@@ -396,7 +396,7 @@ async function handle_validate_connection(ws, payload) {
  * Handle job subscription request
  * Subscribes WebSocket to receive updates for a specific job
  * @param {WebSocket} ws - WebSocket connection
- * @param {Object} payload - Request payload
+ * @param {object} payload - Request payload
  * @param {string} payload.job_id - Job ID to subscribe to
  */
 async function handle_subscribe_to_job(ws, payload) {
@@ -450,7 +450,7 @@ async function handle_subscribe_to_job(ws, payload) {
  * Handle job unsubscription request
  * Removes WebSocket from receiving updates for a specific job
  * @param {WebSocket} ws - WebSocket connection
- * @param {Object} payload - Request payload
+ * @param {object} payload - Request payload
  * @param {string} payload.job_id - Job ID to unsubscribe from
  */
 async function handle_unsubscribe_from_job(ws, payload) {
@@ -498,7 +498,7 @@ async function handle_unsubscribe_from_job(ws, payload) {
  * Wrapper around shared utility for consistency
  * @param {WebSocket} ws - WebSocket connection
  * @param {string} type - Message type
- * @param {Object} payload - Message payload
+ * @param {object} payload - Message payload
  */
 function send_message(ws, type, payload) {
   send_websocket_message(ws, type, payload)
@@ -523,7 +523,7 @@ function send_error_message(ws, error_message, context) {
  * Used by the import queue to notify multiple subscribers
  * @param {string} job_id - Job ID
  * @param {string} type - Message type
- * @param {Object} payload - Message payload
+ * @param {object} payload - Message payload
  */
 export function broadcast_to_job_subscribers(job_id, type, payload) {
   const subscribers = job_subscriptions.get(job_id)

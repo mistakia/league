@@ -33,15 +33,15 @@ const log = debug('simulation:load-team-rosters')
  * For current/past weeks: Returns actual starters from roster slot assignments.
  * For future weeks: Computes optimal lineup from current roster pool.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.team_id - Fantasy team ID
  * @param {number} params.week - Target week to get starters for
  * @param {number} params.year - NFL year
  * @param {number} params.current_week - The actual current week (for determining actual vs optimal)
  * @param {string} params.scoring_format_id - Scoring format hash for projections
- * @param {Object} params.league - League settings for optimizer constraints
- * @returns {Promise<Object>} { team_id, player_ids: string[] }
+ * @param {object} params.league - League settings for optimizer constraints
+ * @returns {Promise<object>} { team_id, player_ids: string[] }
  */
 export async function load_team_starters({
   league_id,
@@ -90,7 +90,7 @@ export async function load_team_starters({
  * and typically processes all results. Use load_all_teams_starters() if you
  * need a Map keyed by team_id for lookups.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number[]} params.team_ids - Array of fantasy team IDs
  * @param {number} params.week - Target week to get starters for
@@ -149,7 +149,7 @@ export async function load_teams_starters({
  * matchups. Use load_teams_starters() if you have specific team_ids and
  * want an Array result.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.week - Target week
  * @param {number} params.year - NFL year
@@ -208,7 +208,7 @@ export async function load_all_teams_starters({
  * Load actual starters from roster slot assignments.
  * Used for current and past weeks where we have actual lineup data.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.team_id - Fantasy team ID
  * @param {number} params.week - NFL week
@@ -233,14 +233,14 @@ async function load_actual_starters({ league_id, team_id, week, year }) {
  * Calculate optimal starters for a future week.
  * Uses current roster pool with projections for the target week.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.team_id - Fantasy team ID
  * @param {number} params.roster_week - Week to get roster pool from (usually current week)
  * @param {number} params.projection_week - Week to get projections for
  * @param {number} params.year - NFL year
  * @param {string} params.scoring_format_id - Scoring format hash
- * @param {Object} params.league - League settings for optimizer
+ * @param {object} params.league - League settings for optimizer
  * @returns {Promise<string[]>} Array of optimal starter player IDs
  */
 async function calculate_optimal_starters({
@@ -325,7 +325,7 @@ async function calculate_optimal_starters({
  * Returns a Map keyed by week number, where each value is an Array of
  * team rosters for that week.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number[]} params.team_ids - Array of fantasy team IDs
  * @param {number[]} params.weeks - Array of weeks to load

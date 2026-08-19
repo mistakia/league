@@ -108,9 +108,9 @@ const should_overwrite_field = (
  * Compute changes for a play without executing database operations.
  * Returns collections for batch processing.
  *
- * @param {Object} params
- * @param {Object} params.play_row - Current play state from database
- * @param {Object} params.update - Fields to update
+ * @param {object} params
+ * @param {object} params.play_row - Current play state from database
+ * @param {object} params.update - Fields to update
  * @param {boolean} params.overwrite_existing - Overwrite all existing values
  * @param {Array<string>} params.overwrite_fields - Specific fields to overwrite
  * @param {Set<string>} params.clearable_fields - Fields where a `null` rhs is a real clear
@@ -122,7 +122,7 @@ const should_overwrite_field = (
  *   `overwrite_existing` is true or the field is listed in `overwrite_fields`. Used by
  *   the Sportradar importer to protect FTN/nflfastR-owned fields. Default empty set
  *   preserves prior behavior for every other caller.
- * @returns {Object} { changelog_entries, field_updates, changes_count }
+ * @returns {object} { changelog_entries, field_updates, changes_count }
  */
 export const compute_play_changes = ({
   play_row,
@@ -243,10 +243,10 @@ export const compute_play_changes = ({
  * 2. overwrite_fields=['field1', 'field2'] → Overwrites ONLY specified fields
  * 3. Default → Skip updates for fields with existing values
  *
- * @param {Object} play_row - Existing play record from database
+ * @param {object} play_row - Existing play record from database
  * @param {number} esbid - Game ID (alternative to play_row)
  * @param {number} play_id - Play ID (alternative to play_row)
- * @param {Object} update - Field updates to apply
+ * @param {object} update - Field updates to apply
  * @param {boolean} overwrite_existing - If true, overwrite all existing values
  * @param {Array<string>} overwrite_fields - Specific fields to overwrite (e.g., ['game_clock_end', 'seconds_remaining_quarter'])
  * @param {Set<string>} protected_fields - Fields a more-authoritative source owns; never

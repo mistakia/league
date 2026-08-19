@@ -28,9 +28,9 @@ const log = debug('analyze-wagers')
  * Build player summary from unique selections and print player exposure table if requested.
  *
  * @param {object} params
- * @param {Array} params.unique_selections
- * @param {Array} params.filtered_wagers
- * @param {Object} params.wager_summary
+ * @param {object[]} params.unique_selections
+ * @param {object[]} params.filtered_wagers
+ * @param {object} params.wager_summary
  * @param {boolean} params.show_player_exposure
  */
 export const print_player_exposure_if_requested = ({
@@ -77,8 +77,8 @@ export const print_player_exposure_if_requested = ({
  * Print wager summary and props summary tables.
  *
  * @param {object} params
- * @param {Object} params.wager_summary
- * @param {Object} params.props_summary
+ * @param {object} params.wager_summary
+ * @param {object} params.props_summary
  * @param {boolean} params.show_counts
  * @param {boolean} params.show_potential_gain
  */
@@ -101,7 +101,7 @@ export const print_summary_tables = ({
  * Print round robin analysis if requested.
  *
  * @param {object} params
- * @param {Array} params.fanduel_round_robin_wagers
+ * @param {object[]} params.fanduel_round_robin_wagers
  * @param {boolean} params.show_round_robins
  */
 export const print_round_robin_analysis_if_requested = ({
@@ -127,7 +127,7 @@ export const print_round_robin_analysis_if_requested = ({
  * Print lost by legs table if counts are requested.
  *
  * @param {object} params
- * @param {Object} params.wager_summary
+ * @param {object} params.wager_summary
  * @param {boolean} params.show_counts
  */
 export const print_lost_by_legs_if_requested = ({
@@ -144,7 +144,7 @@ export const print_lost_by_legs_if_requested = ({
  * Print unique props table.
  *
  * @param {object} params
- * @param {Array} params.unique_selections
+ * @param {object[]} params.unique_selections
  * @param {boolean} params.show_counts
  * @param {boolean} params.show_potential_gain
  */
@@ -165,8 +165,8 @@ export const print_unique_props_table = ({
  * Build event ID to ESBID mapping and game titles, then print exposures by game.
  *
  * @param {object} params
- * @param {Array} params.wagers
- * @param {Array} params.unique_selections
+ * @param {object[]} params.wagers
+ * @param {object[]} params.unique_selections
  * @param {boolean} params.show_counts
  * @param {boolean} params.show_potential_gain
  */
@@ -249,9 +249,9 @@ export const print_exposures_by_game = async ({
  * Print prop combination tables for near misses.
  *
  * @param {object} params
- * @param {Array} params.one_prop
- * @param {Array} params.two_props
- * @param {Array} params.three_props
+ * @param {object[]} params.one_prop
+ * @param {object[]} params.two_props
+ * @param {object[]} params.three_props
  */
 export const print_prop_combination_tables = ({
   one_prop,
@@ -277,12 +277,12 @@ export const print_prop_combination_tables = ({
  * Print individual wager tables if not hidden.
  *
  * @param {object} params
- * @param {Array} params.filtered_wagers
- * @param {Object} params.wager_summary
+ * @param {object[]} params.filtered_wagers
+ * @param {object} params.wager_summary
  * @param {boolean} params.hide_wagers
  * @param {number} params.wagers_lost_leg_limit
- * @param {Array} params.exclude_selections
- * @param {Array} params.include_selections
+ * @param {string[]} params.exclude_selections
+ * @param {string[]} params.include_selections
  * @param {string} params.sort_by
  * @param {number} params.wagers_limit
  * @param {boolean} params.show_wager_roi
@@ -342,7 +342,7 @@ export const print_individual_wagers_if_not_hidden = ({
  * Print Fanatics sets analysis if requested.
  *
  * @param {object} params
- * @param {Array} params.wagers
+ * @param {object[]} params.wagers
  * @param {boolean} params.show_fanatics_sets
  */
 export const print_fanatics_sets_if_requested = ({

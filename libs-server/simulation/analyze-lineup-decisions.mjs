@@ -25,18 +25,18 @@ const log = debug('simulation:analyze-lineup-decisions')
 /**
  * Analyze lineup decisions for start/sit recommendations.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.team_id - Fantasy team ID to analyze
  * @param {number[]} params.opponent_team_ids - Array of opponent team IDs
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
- * @param {Object[]} [params.alternatives] - Optional specific swaps to evaluate
+ * @param {object[]} [params.alternatives] - Optional specific swaps to evaluate
  *   Each: { starter_pid, bench_pid, slot }
  * @param {number} [params.n_simulations=5000] - Simulations per lineup evaluation
  * @param {boolean} [params.include_practice_squad=false] - Include practice squad players as swap candidates
  * @param {boolean} [params.include_reserve=false] - Include short-term reserve (IR) players as swap candidates
- * @returns {Promise<Object>} Lineup analysis results
+ * @returns {Promise<object>} Lineup analysis results
  */
 export async function analyze_lineup_decisions({
   league_id,
@@ -262,12 +262,12 @@ export async function analyze_lineup_decisions({
  * Generate potential swaps for lineup positions using slot-based eligibility.
  * Only generates swaps where the bench player's position is eligible for the starter's slot.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.starters - Array of starter player IDs
- * @param {Map} params.starter_slot_map - Map of starter pid -> slot number
- * @param {Object[]} params.bench_players - Array of bench players with pid, slot, projection
- * @param {Map} params.player_info - Map of pid -> { position, nfl_team }
- * @returns {Object[]} Array of valid swap objects
+ * @param {Map<string, number>} params.starter_slot_map - Map of starter pid -> slot number
+ * @param {object[]} params.bench_players - Array of bench players with pid, slot, projection
+ * @param {Map<string, object>} params.player_info - Map of pid -> { position, nfl_team }
+ * @returns {object[]} Array of valid swap objects
  */
 function generate_potential_swaps({
   starters,

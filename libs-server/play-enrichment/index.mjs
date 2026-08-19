@@ -14,19 +14,19 @@ const log = debug('play-enrichment')
 /**
  * Main enrichment orchestrator that coordinates all play enrichment operations
  *
- * @param {Object} params - Enrichment parameters
- * @param {Array} params.plays - Array of play objects to enrich
- * @param {Array} params.play_stats - Array of play stat objects for player identification
- * @param {Map|Object} params.games_map - Map or object of game data keyed by esbid
- * @param {Object} params.player_cache - Player cache instance for GSIS ID lookups
- * @param {Object} params.options - Optional flags to control which enrichments to run
+ * @param {object} params - Enrichment parameters
+ * @param {object[]} params.plays - Array of play objects to enrich
+ * @param {object[]} params.play_stats - Array of play stat objects for player identification
+ * @param {Map<string, object>|object} params.games_map - Map or object of game data keyed by esbid
+ * @param {object} params.player_cache - Player cache instance for GSIS ID lookups
+ * @param {object} params.options - Optional flags to control which enrichments to run
  * @param {boolean} params.options.teams - Enable team assignment enrichment (default: true)
  * @param {boolean} params.options.play_types - Enable play type enrichment (default: true)
  * @param {boolean} params.options.success - Enable success metric enrichment (default: true)
  * @param {boolean} params.options.players - Enable player identification enrichment (default: true)
  * @param {boolean} params.options.fixed_drives - Enable fixed drive sequence enrichment (default: true)
  * @param {boolean} params.options.drive_counts - Enable drive play count enrichment (default: true)
- * @returns {Promise<Array>} Enriched play objects (does NOT persist to database)
+ * @returns {Promise<object[]>} Enriched play objects (does NOT persist to database)
  */
 export const enrich_plays = async ({
   plays,

@@ -13,12 +13,12 @@ const log = debug('import-draft-kings')
 
 /**
  * Processes all categories and subcategories
- * @param {Object} params - Parameters object
- * @param {Array} params.nfl_games - Array of NFL games
+ * @param {object} params - Parameters object
+ * @param {NflGamesRow[]} params.nfl_games - Array of NFL games
  * @param {number} params.timestamp - Timestamp for formatting
- * @param {Array} params.category_filter - Optional category filter
- * @param {Array} params.subcategory_filter - Optional subcategory filter
- * @returns {Object} - Processing results
+ * @param {number[]} params.category_filter - Optional category filter
+ * @param {number[]} params.subcategory_filter - Optional subcategory filter
+ * @returns {object} - Processing results
  */
 export const run_all_mode = async ({
   nfl_games,
@@ -93,13 +93,13 @@ export const run_all_mode = async ({
 
 /**
  * Processes specific events with their categories
- * @param {Object} params - Parameters object
- * @param {Array} params.nfl_games - Array of NFL games
+ * @param {object} params - Parameters object
+ * @param {NflGamesRow[]} params.nfl_games - Array of NFL games
  * @param {number} params.timestamp - Timestamp for formatting
- * @param {Array} params.category_filter - Optional category filter
- * @param {Array} params.subcategory_filter - Optional subcategory filter
- * @param {Array} params.event_filter - Optional event filter
- * @returns {Object} - Processing results
+ * @param {number[]} params.category_filter - Optional category filter
+ * @param {number[]} params.subcategory_filter - Optional subcategory filter
+ * @param {string[]} params.event_filter - Optional event filter
+ * @returns {object} - Processing results
  */
 export const run_events_mode = async ({
   nfl_games,
@@ -158,11 +158,11 @@ export const run_events_mode = async ({
 
 /**
  * Builds list of subcategories to process based on filters
- * @param {Array} categories - Array of categories
- * @param {Object} subcategories_by_category - Subcategories grouped by category
- * @param {Array} category_filter - Optional category filter
- * @param {Array} subcategory_filter - Optional subcategory filter
- * @returns {Array} - Array of subcategories to process
+ * @param {object[]} categories - Array of categories
+ * @param {object} subcategories_by_category - Subcategories grouped by category
+ * @param {number[]} category_filter - Optional category filter
+ * @param {number[]} subcategory_filter - Optional subcategory filter
+ * @returns {object[]} - Array of subcategories to process
  */
 const build_subcategories_to_process = (
   categories,
@@ -200,8 +200,8 @@ const build_subcategories_to_process = (
 
 /**
  * Builds subcategory lookup map
- * @param {Array} subcategories - Array of subcategories
- * @returns {Object} - Subcategory lookup map
+ * @param {object[]} subcategories - Array of subcategories
+ * @returns {object} - Subcategory lookup map
  */
 const build_subcategory_lookup = (subcategories) => {
   const subcategory_lookup = {}
@@ -218,9 +218,9 @@ const build_subcategory_lookup = (subcategories) => {
 
 /**
  * Logs processing information
- * @param {Object} league_data - League data object
- * @param {Array} category_filter - Category filter
- * @param {Array} subcategory_filter - Subcategory filter
+ * @param {object} league_data - League data object
+ * @param {number[]} category_filter - Category filter
+ * @param {number[]} subcategory_filter - Subcategory filter
  */
 const log_processing_info = (
   league_data,
@@ -239,12 +239,12 @@ const log_processing_info = (
 
 /**
  * Processes a single subcategory
- * @param {Object} subcategory - Subcategory to process
- * @param {Array} nfl_games - Array of NFL games
+ * @param {object} subcategory - Subcategory to process
+ * @param {NflGamesRow[]} nfl_games - Array of NFL games
  * @param {Date} observed_at - Observation time for formatting
- * @param {Object} stats - Processing stats object
+ * @param {object} stats - Processing stats object
  * @param {number} consecutive_empty_count - Current consecutive empty count
- * @returns {Object} - Processing result
+ * @returns {object} - Processing result
  */
 const process_subcategory = async (
   subcategory,
@@ -388,13 +388,13 @@ const process_subcategory = async (
 
 /**
  * Processes a single event
- * @param {Object} event - Event to process
- * @param {Array} nfl_games - Array of NFL games
+ * @param {object} event - Event to process
+ * @param {NflGamesRow[]} nfl_games - Array of NFL games
  * @param {Date} observed_at - Observation time for formatting
- * @param {Array} category_filter - Optional category filter
- * @param {Array} subcategory_filter - Optional subcategory filter
- * @param {Object} subcategory_lookup - Subcategory lookup map
- * @returns {Object} - Processing result
+ * @param {number[]} category_filter - Optional category filter
+ * @param {number[]} subcategory_filter - Optional subcategory filter
+ * @param {object} subcategory_lookup - Subcategory lookup map
+ * @returns {object} - Processing result
  */
 const process_event = async (
   event,
@@ -456,13 +456,13 @@ const process_event = async (
 
 /**
  * Processes a single event category
- * @param {Object} event - Event object
- * @param {Object} category - Category object
- * @param {Array} nfl_games - Array of NFL games
+ * @param {object} event - Event object
+ * @param {object} category - Category object
+ * @param {NflGamesRow[]} nfl_games - Array of NFL games
  * @param {Date} observed_at - Observation time for formatting
- * @param {Array} subcategory_filter - Optional subcategory filter
- * @param {Object} subcategory_lookup - Subcategory lookup map
- * @returns {Object} - Processing result
+ * @param {number[]} subcategory_filter - Optional subcategory filter
+ * @param {object} subcategory_lookup - Subcategory lookup map
+ * @returns {object} - Processing result
  */
 const process_event_category = async (
   event,
@@ -555,7 +555,7 @@ const process_event_category = async (
 
 /**
  * Logs subcategory processing summary
- * @param {Object} stats - Processing stats
+ * @param {object} stats - Processing stats
  */
 const log_subcategory_summary = (stats) => {
   log(`\n=== SUBCATEGORY SUMMARY ===`)

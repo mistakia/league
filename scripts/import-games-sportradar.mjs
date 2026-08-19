@@ -23,8 +23,8 @@ debug.enable('import-games-sportradar,sportradar')
 
 /**
  * Extract team mappings from Sportradar games response
- * @param {Array} games - Games from Sportradar API response
- * @returns {Map} Map of team data keyed by Sportradar team ID
+ * @param {object[]} games - Games from Sportradar API response
+ * @returns {Map<string, object>} Map of team data keyed by Sportradar team ID
  */
 const extract_team_mappings = ({ games }) => {
   const team_mappings = new Map()
@@ -56,7 +56,7 @@ const extract_team_mappings = ({ games }) => {
 
 /**
  * Store team mappings in the config table as a single row
- * @param {Map} team_mappings - Map of team data keyed by Sportradar team ID
+ * @param {Map<string, object>} team_mappings - Map of team data keyed by Sportradar team ID
  */
 const store_team_mappings = async ({ team_mappings }) => {
   // Convert Map to object for storage
@@ -77,7 +77,7 @@ const store_team_mappings = async ({ team_mappings }) => {
  * Preload games from database for a given year
  * @param {number} year - The year to load games for
  * @param {number|null} week - Optional week filter
- * @returns {Map} Map of games keyed by "home-away" (without date for fuzzy matching)
+ * @returns {Map<string, object>} Map of games keyed by "home-away" (without date for fuzzy matching)
  */
 const preload_games = async ({ year, week = null }) => {
   const query = db('nfl_games')
@@ -126,9 +126,9 @@ const preload_games = async ({ year, week = null }) => {
 
 /**
  * Match a Sportradar game to an existing nfl_games record
- * @param {Object} sportradar_game - Game object from Sportradar API
- * @param {Map} games_map - Preloaded games map
- * @returns {Object|null} Matched game record or null
+ * @param {object} sportradar_game - Game object from Sportradar API
+ * @param {Map<string, object>} games_map - Preloaded games map
+ * @returns {object|null} Matched game record or null
  */
 const match_game_to_esbid = ({ sportradar_game, games_map }) => {
   if (!sportradar_game.home || !sportradar_game.away) {

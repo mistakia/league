@@ -25,13 +25,13 @@ import { current_season, roster_slot_types } from '#constants'
 /**
  * Ensure all players have slot assignments by calculating defaults for any missing slots
  *
- * @param {Object} params
- * @param {Array} params.player_ids - Array of player IDs being traded
- * @param {Map} params.current_slots - Current slot assignments map
- * @param {Map} params.player_maps - Player data from state
- * @param {Object} params.roster_record - Roster record for the receiving team
- * @param {Object} params.league - League object
- * @returns {Object} Complete slot assignments object
+ * @param {object} params
+ * @param {string[]} params.player_ids - Array of player IDs being traded
+ * @param {Map<string, number>} params.current_slots - Current slot assignments map
+ * @param {Map<string, object>} params.player_maps - Player data from state
+ * @param {object} params.roster_record - Roster record for the receiving team
+ * @param {object} params.league - League object
+ * @returns {object} Complete slot assignments object
  */
 function ensure_complete_slot_assignments({
   player_ids,

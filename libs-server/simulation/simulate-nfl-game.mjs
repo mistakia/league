@@ -13,19 +13,19 @@ const log = debug('simulation:simulate-nfl-game')
  * Simulate all players in a single NFL game.
  * Returns raw per-simulation scores for aggregation.
  *
- * @param {Object} params
- * @param {Object[]} params.game_players - Array of players in this NFL game
+ * @param {object} params
+ * @param {object[]} params.game_players - Array of players in this NFL game
  *   Each player: { pid, nfl_team, position, position_rank, team_id }
- * @param {Map} params.projections - Map of pid -> projected_points
- * @param {Map} params.variance_cache - Map of pid -> variance data
- * @param {Map} params.correlation_cache - Map of correlation key -> correlation value
- * @param {Map} params.archetypes - Map of pid -> archetype
- * @param {Object} params.game_schedule - Single-game schedule object
+ * @param {Map<string, number>} params.projections - Map of pid -> projected_points
+ * @param {Map<string, object>} params.variance_cache - Map of pid -> variance data
+ * @param {Map<string, any>} params.correlation_cache - Map of correlation key -> correlation value
+ * @param {Map<string, string>} params.archetypes - Map of pid -> archetype
+ * @param {object} params.game_schedule - Single-game schedule object
  *   Format: { [team_abbrev]: { opponent, esbid, is_home, is_final } }
  * @param {number} params.n_simulations - Number of simulations
  * @param {number} [params.seed] - Optional seed for reproducibility
- * @param {Map} [params.locked_scores] - Map of pid -> actual_points for completed games
- * @returns {Object} { player_scores: Map<pid, number[]>, elapsed_ms }
+ * @param {Map<string, number>} [params.locked_scores] - Map of pid -> actual_points for completed games
+ * @returns {object} { player_scores: Map<string, number[]>, elapsed_ms }
  */
 export function simulate_nfl_game({
   game_players,
@@ -126,11 +126,11 @@ export function simulate_nfl_game({
  * Simulate a single NFL game and return per-player raw scores.
  * This version returns actual per-simulation scores for aggregation.
  *
- * @param {Object} params - Same as simulate_nfl_game plus extended matrix params
- * @param {Map} [params.game_environment] - Map of esbid -> { game_total, home_spread, ... }
- * @param {Map} [params.game_outcome_correlations] - Map of pid -> { correlation, confidence }
- * @param {Map} [params.position_defaults] - Map of 'pos' or 'pos:archetype' -> { default_correlation }
- * @returns {Object} { player_scores: Map<pid, number[]>, elapsed_ms, extended_matrix_used }
+ * @param {object} params - Same as simulate_nfl_game plus extended matrix params
+ * @param {Map<number, object>} [params.game_environment] - Map of esbid -> { game_total, home_spread, ... }
+ * @param {Map<string, object>} [params.game_outcome_correlations] - Map of pid -> { correlation, confidence }
+ * @param {Map<string, object>} [params.position_defaults] - Map of 'pos' or 'pos:archetype' -> { default_correlation }
+ * @returns {object} { player_scores: Map<string, number[]>, elapsed_ms, extended_matrix_used }
  */
 export function simulate_nfl_game_with_raw_scores({
   game_players,

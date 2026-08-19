@@ -37,7 +37,7 @@ class PlayCache {
 
   /**
    * Preloads plays into memory cache
-   * @param {Object} options - Configuration options
+   * @param {object} options - Configuration options
    * @param {number[]} options.years - Load specific years (default: current year)
    * @param {number[]} options.weeks - Load specific weeks (optional)
    * @param {number[]} options.esbids - Load specific games by esbid (optional)
@@ -86,7 +86,7 @@ class PlayCache {
 
   /**
    * Finds a play by various identifiers
-   * @param {Object} params - Search parameters
+   * @param {object} params - Search parameters
    * @param {number} params.esbid - Game esbid
    * @param {number} params.play_id - Play ID
    * @param {number} params.week - Week number (for context search)
@@ -108,7 +108,7 @@ class PlayCache {
    * @param {number} params.home_score - Home team score (optional, for kickoff disambiguation)
    * @param {number} params.away_score - Away team score (optional, for kickoff disambiguation)
    * @param {boolean} params.return_all_matches - If true, return array of all matches instead of throwing on multiple matches (default: false)
-   * @returns {Object|Array|null} Play object if found (or array if return_all_matches=true), null otherwise
+   * @returns {NflPlaysRow|NflPlaysRow[]|null} Play object if found (or array if return_all_matches=true), null otherwise
    * @throws {Error} If cache not initialized
    * @throws {MultiplePlayMatchError} If multiple plays match the search criteria and return_all_matches=false
    */
@@ -179,7 +179,7 @@ class PlayCache {
 
   /**
    * Returns cache statistics for monitoring
-   * @returns {Object} Cache statistics
+   * @returns {object} Cache statistics
    */
   get_cache_stats() {
     return {
@@ -194,8 +194,8 @@ class PlayCache {
 
   /**
    * Fetches plays from database based on filters
-   * @param {Object} options - Filter options
-   * @returns {Promise<Array>} Array of play objects
+   * @param {object} options - Filter options
+   * @returns {Promise<NflPlaysRow[]>} Array of play objects
    * @private
    */
   async _fetch_plays({ years, weeks, esbids, all_plays }) {
@@ -232,7 +232,7 @@ class PlayCache {
 
   /**
    * Builds composite key index from play data
-   * @param {Array} plays - Array of play objects
+   * @param {NflPlaysRow[]} plays - Array of play objects
    * @private
    */
   _build_composite_index(plays) {
@@ -244,7 +244,7 @@ class PlayCache {
 
   /**
    * Builds esbid index from play data
-   * @param {Array} plays - Array of play objects
+   * @param {NflPlaysRow[]} plays - Array of play objects
    * @private
    */
   _build_esbid_index(plays) {
@@ -258,7 +258,7 @@ class PlayCache {
 
   /**
    * Builds game context index from play data
-   * @param {Array} plays - Array of play objects
+   * @param {NflPlaysRow[]} plays - Array of play objects
    * @private
    */
   _build_game_context_index(plays) {

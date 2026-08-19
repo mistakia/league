@@ -24,13 +24,13 @@ const log = debug('simulation:load-data-with-fallback')
  * Load projections with automatic fallback to base week when data is missing.
  * Players with projections for target week use those; others fall back.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.week - Target NFL week
  * @param {number} params.year - NFL year
  * @param {string} params.scoring_format_id - Scoring format hash
  * @param {number} [params.fallback_week] - Week to use if target week has no data
- * @returns {Promise<Object>} { projections, fallback_count }
+ * @returns {Promise<object>} { projections, fallback_count }
  */
 export async function load_projections_with_fallback({
   player_ids,
@@ -98,7 +98,7 @@ export async function load_projections_with_fallback({
 /**
  * Load bench players with projection data, supporting fallback for future weeks.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.team_id - Fantasy team ID
  * @param {number} params.week - Target NFL week
@@ -108,7 +108,7 @@ export async function load_projections_with_fallback({
  * @param {number} [params.fallback_week] - Week to use for projections if missing
  * @param {boolean} [params.include_practice_squad=false] - Include practice squad players
  * @param {boolean} [params.include_reserve=false] - Include short-term reserve (IR) players
- * @returns {Promise<Object[]>} Array of bench players with { pid, slot, projection }
+ * @returns {Promise<object[]>} Array of bench players with { pid, slot, projection }
  */
 export async function load_bench_players_with_fallback({
   league_id,
@@ -229,7 +229,7 @@ export async function load_bench_players_with_fallback({
  * player IDs for players with valid projections. Useful for correlation
  * analysis where you only need the player list, not projection values.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_id - League ID
  * @param {number} params.team_id - Fantasy team ID
  * @param {number} params.week - Target NFL week (for projection lookup)

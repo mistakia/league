@@ -13,10 +13,10 @@ export const RELATIONSHIP_TYPES = {
 /**
  * Get the relationship between two players based on NFL schedule.
  *
- * @param {Object} params
- * @param {Object} params.player_a - First player { pid, nfl_team }
- * @param {Object} params.player_b - Second player { pid, nfl_team }
- * @param {Object} params.schedule - Pre-loaded schedule from libs-server
+ * @param {object} params
+ * @param {object} params.player_a - First player { pid, nfl_team }
+ * @param {object} params.player_b - Second player { pid, nfl_team }
+ * @param {object} params.schedule - Pre-loaded schedule from libs-server
  *   Format: { [team_abbrev]: { opponent, esbid, is_home } }
  * @returns {string|null} Relationship type or null if either player's team is on bye
  */
@@ -53,8 +53,8 @@ export function get_player_relationship({ player_a, player_b, schedule }) {
 /**
  * Get list of teams on bye for a given week.
  *
- * @param {Object} params
- * @param {Object} params.schedule - Pre-loaded schedule from libs-server
+ * @param {object} params
+ * @param {object} params.schedule - Pre-loaded schedule from libs-server
  * @param {string[]} params.all_nfl_teams - Array of all 32 NFL team abbreviations
  * @returns {string[]} Array of team abbreviations on bye
  */
@@ -65,9 +65,9 @@ export function get_teams_on_bye({ schedule, all_nfl_teams }) {
 /**
  * Check if a player's team is on bye.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.nfl_team - NFL team abbreviation
- * @param {Object} params.schedule - Pre-loaded schedule
+ * @param {object} params.schedule - Pre-loaded schedule
  * @returns {boolean} True if team is on bye
  */
 export function is_team_on_bye({ nfl_team, schedule }) {
@@ -78,9 +78,9 @@ export function is_team_on_bye({ nfl_team, schedule }) {
  * Get all unique NFL games from a list of players.
  * Useful for understanding how many games a fantasy matchup spans.
  *
- * @param {Object} params
- * @param {Object[]} params.players - Array of players with { pid, nfl_team }
- * @param {Object} params.schedule - Pre-loaded schedule
+ * @param {object} params
+ * @param {object[]} params.players - Array of players with { pid, nfl_team }
+ * @param {object} params.schedule - Pre-loaded schedule
  * @returns {Set<number>} Set of unique esbid values
  */
 export function get_unique_nfl_games({ players, schedule }) {
@@ -100,10 +100,10 @@ export function get_unique_nfl_games({ players, schedule }) {
  * Group players by their NFL game.
  * Players on bye are excluded.
  *
- * @param {Object} params
- * @param {Object[]} params.players - Array of players with { pid, nfl_team, ... }
- * @param {Object} params.schedule - Pre-loaded schedule
- * @returns {Map<number, Object[]>} Map of esbid -> players in that game
+ * @param {object} params
+ * @param {object[]} params.players - Array of players with { pid, nfl_team, ... }
+ * @param {object} params.schedule - Pre-loaded schedule
+ * @returns {Map<number, object[]>} Map of esbid -> players in that game
  */
 export function group_players_by_nfl_game({ players, schedule }) {
   const games_map = new Map()
@@ -125,7 +125,7 @@ export function group_players_by_nfl_game({ players, schedule }) {
  * Determine if two players have a same-team relationship that may be affected
  * by a mid-season team change.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.current_team_a - Current NFL team of player A
  * @param {string} params.current_team_b - Current NFL team of player B
  * @param {string} params.correlation_team_a - Team A was on when correlation was calculated

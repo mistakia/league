@@ -23,9 +23,9 @@ const log = debug('import-draft-kings')
 
 /**
  * Finds matching NFL game for a DraftKings event
- * @param {Object} draftkings_event - The DraftKings event
- * @param {Array} nfl_games - Array of NFL games
- * @returns {Object|null} - Matching NFL game or null
+ * @param {object} draftkings_event - The DraftKings event
+ * @param {NflGamesRow[]} nfl_games - Array of NFL games
+ * @returns {object|null} - Matching NFL game or null
  */
 const find_matching_nfl_game = (draftkings_event, nfl_games) => {
   const { week, seas_type } = current_season.calculate_week(
@@ -74,12 +74,12 @@ const find_matching_nfl_game = (draftkings_event, nfl_games) => {
 
 /**
  * Processes a DraftKings selection and returns formatted selection data
- * @param {Object} selection - The DraftKings selection
- * @param {Object} market - The DraftKings market
- * @param {Object} event - The DraftKings event
- * @param {Array} nfl_team_abbreviations - Array of NFL team abbreviations
+ * @param {object} selection - The DraftKings selection
+ * @param {object} market - The DraftKings market
+ * @param {object} event - The DraftKings event
+ * @param {string[]} nfl_team_abbreviations - Array of NFL team abbreviations
  * @param {string} market_type - The determined market type for this selection
- * @returns {Object} - Formatted selection object
+ * @returns {object} - Formatted selection object
  */
 const process_selection = (
   selection,
@@ -213,15 +213,15 @@ const process_selection = (
 
 /**
  * Formats a DraftKings market into the standard format
- * @param {Object} params - Parameters object
- * @param {Object} params.draftkings_market - The DraftKings market
- * @param {Array} params.draftkings_selections - Array of DraftKings selections
- * @param {Array} params.draftkings_events - Array of DraftKings events
- * @param {Object} params.draftkings_offer_category - The offer category
- * @param {Object} params.draftkings_offer_sub_category - The offer subcategory
+ * @param {object} params - Parameters object
+ * @param {object} params.draftkings_market - The DraftKings market
+ * @param {object[]} params.draftkings_selections - Array of DraftKings selections
+ * @param {object[]} params.draftkings_events - Array of DraftKings events
+ * @param {object} params.draftkings_offer_category - The offer category
+ * @param {object} params.draftkings_offer_sub_category - The offer subcategory
  * @param {Date} params.format_observed_at - Observation time for formatting
- * @param {Array} params.nfl_games - Array of NFL games
- * @returns {Object|null} - Formatted market object or null
+ * @param {NflGamesRow[]} params.nfl_games - Array of NFL games
+ * @returns {object|null} - Formatted market object or null
  */
 export const format_market = async ({
   draftkings_market,

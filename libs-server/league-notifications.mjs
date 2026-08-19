@@ -13,7 +13,7 @@ const to_timestamptz = (epoch_seconds) => new Date(epoch_seconds * 1000)
 
 /**
  * Check if a league notification has already been sent
- * @param {Object} params - Parameters
+ * @param {object} params - Parameters
  * @param {number} params.lid - League ID
  * @param {number} params.season_year - Season year
  * @param {string} params.notification_type - Type of notification
@@ -52,13 +52,13 @@ export async function has_league_notification_been_sent({
  * exactly one process proceeds to send. Callers that claim must treat a send
  * failure as loud -- the marker is already written, so nothing will retry.
  *
- * @param {Object} params - Parameters
+ * @param {object} params - Parameters
  * @param {number} params.lid - League ID
  * @param {number} params.season_year - Season year
  * @param {string} params.notification_type - Type of notification
  * @param {number} params.event_timestamp - Unix timestamp (seconds) of the event being notified about
  * @param {string} params.message - The notification message being sent
- * @param {Object} params.metadata - Optional metadata to store with the notification
+ * @param {object} params.metadata - Optional metadata to store with the notification
  * @returns {Promise<boolean>} True when this caller won the claim and should send
  */
 export async function claim_league_notification({
@@ -93,13 +93,13 @@ export async function claim_league_notification({
 
 /**
  * Record that a league notification has been sent in the database
- * @param {Object} params - Parameters
+ * @param {object} params - Parameters
  * @param {number} params.lid - League ID
  * @param {number} params.season_year - Season year
  * @param {string} params.notification_type - Type of notification
  * @param {number} params.event_timestamp - Unix timestamp (seconds) of the event being notified about
  * @param {string} params.message - The notification message that was sent
- * @param {Object} params.metadata - Optional metadata to store with the notification
+ * @param {object} params.metadata - Optional metadata to store with the notification
  * @returns {Promise<void>}
  */
 export async function record_league_notification_sent({

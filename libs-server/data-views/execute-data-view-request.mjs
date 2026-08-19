@@ -248,11 +248,11 @@ const release_slot = () => {
  * @param {AbortSignal} [opts.signal] - abort while waiting (disconnect / supersede)
  * @param {(state: 'waiting'|'executing') => boolean} [opts.on_heartbeat] - called
  *   every interval while queued or in flight; return false (socket closed) to stop.
- * @param {Function} [opts.on_status] - called once when execution starts.
- * @param {Function} [opts.run_query] - execution seam (defaults to get_data_view_results)
- * @param {Function} [opts.signal_emitter] - seam for the slow-query emitter
- * @param {Function} [opts.signal_resolver] - seam for the self-resolve arm
- * @param {Function} [opts.cache_get] - seam for the admission cache re-check
+ * @param {(info: object) => void} [opts.on_status] - called once when execution starts.
+ * @param {(opts: object) => Promise<{ data_view_results: object, data_view_metadata: object }>} [opts.run_query] - execution seam (defaults to get_data_view_results)
+ * @param {(opts: object) => void} [opts.signal_emitter] - seam for the slow-query emitter
+ * @param {(opts: object) => void} [opts.signal_resolver] - seam for the self-resolve arm
+ * @param {(key: string) => Promise<object|null>} [opts.cache_get] - seam for the admission cache re-check
  * @param {boolean} [opts.skip_cache] - bypass the admission re-check and cache
  *   write (the /debug route must keep its bypass-cache contract)
  * @param {number} [opts.heartbeat_interval_ms] - seam for a short interval in tests

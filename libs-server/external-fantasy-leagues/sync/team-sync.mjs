@@ -24,12 +24,12 @@ export class TeamSync {
 
   /**
    * Sync teams from external platform
-   * @param {Object} options - Team sync options
-   * @param {Object} options.adapter - Platform adapter instance
-   * @param {Object} options.sync_context - Sync context with league and platform info
-   * @param {Function} [options.progress_callback] - Optional progress reporting callback
-   * @param {Array} [options.sync_stats_errors] - Array to collect sync errors
-   * @returns {Promise<Object>} Team sync results
+   * @param {object} options - Team sync options
+   * @param {object} options.adapter - Platform adapter instance
+   * @param {object} options.sync_context - Sync context with league and platform info
+   * @param {(message: string, progress: number, context_data: object) => Promise<void>} [options.progress_callback] - Optional progress reporting callback
+   * @param {object[]} [options.sync_stats_errors] - Array to collect sync errors
+   * @returns {Promise<object>} Team sync results
    */
   async sync_teams({
     adapter,
@@ -92,9 +92,9 @@ export class TeamSync {
 
   /**
    * Map external team ID to internal team ID
-   * @param {Object} options - Team mapping options
+   * @param {object} options - Team mapping options
    * @param {string} options.external_team_id - External team identifier
-   * @param {Object} [options.sync_context] - Sync context for additional mapping logic
+   * @param {object} [options.sync_context] - Sync context for additional mapping logic
    * @returns {string} Internal team identifier
    *
    * Note: This is a placeholder implementation. In a full implementation, this would:
@@ -110,8 +110,8 @@ export class TeamSync {
 
   /**
    * Extract external team ID from team data (canonical format)
-   * @param {Object} options - Team ID extraction options
-   * @param {Object} options.external_team - External team data object in canonical format
+   * @param {object} options - Team ID extraction options
+   * @param {object} options.external_team - External team data object in canonical format
    * @returns {string} External team identifier
    */
   extract_external_team_id({ external_team }) {
@@ -127,11 +127,11 @@ export class TeamSync {
 
   /**
    * Process team mappings for all external teams
-   * @param {Object} options - Processing options
-   * @param {Array} options.external_teams - Array of external team data
-   * @param {Object} options.sync_context - Sync context
-   * @param {Function} [options.progress_callback] - Optional progress reporting callback
-   * @returns {Promise<Map>} Team mappings (external_id -> internal_id)
+   * @param {object} options - Processing options
+   * @param {object[]} options.external_teams - Array of external team data
+   * @param {object} options.sync_context - Sync context
+   * @param {(message: string, progress: number, context_data: object) => Promise<void>} [options.progress_callback] - Optional progress reporting callback
+   * @returns {Promise<Map<string, string>>} Team mappings (external_id -> internal_id)
    * @private
    */
   async _process_team_mappings({

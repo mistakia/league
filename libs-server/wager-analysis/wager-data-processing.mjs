@@ -8,8 +8,8 @@ import { current_season } from '#constants'
  * Adds exposure and payout aggregations and computes week from selection time.
  *
  * @param {object} params
- * @param {Array} params.wagers
- * @returns {{ selections_index: Object }}
+ * @param {object[]} params.wagers
+ * @returns {{ selections_index: object }}
  */
 export const build_selection_index = ({ wagers }) => {
   const selections_index = {}
@@ -50,9 +50,9 @@ export const build_selection_index = ({ wagers }) => {
  * Returns matching stats and mutated indexes.
  *
  * @param {object} params
- * @param {Object} params.selections_index
- * @param {Array} params.filtered_wagers
- * @returns {Promise<{ matching_stats: Object, selections_index: Object }>}
+ * @param {object} params.selections_index
+ * @param {object[]} params.filtered_wagers
+ * @returns {Promise<{ matching_stats: object, selections_index: object }>}
  */
 export const enrich_selections_from_db = async ({
   selections_index,
@@ -188,10 +188,10 @@ export const enrich_selections_from_db = async ({
  * Transform selections index into a sorted list with derived fields.
  *
  * @param {object} params
- * @param {Object} params.selections_index
- * @param {Array} params.filtered_wagers
+ * @param {object} params.selections_index
+ * @param {object[]} params.filtered_wagers
  * @param {number} params.total_risk
- * @returns {Array}
+ * @returns {object[]}
  */
 export const build_unique_selections = ({
   selections_index,

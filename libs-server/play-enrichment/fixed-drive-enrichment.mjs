@@ -27,10 +27,10 @@ const log = debug('fixed-drive-enrichment')
 /**
  * Determines if a play should start a new drive
  *
- * @param {Object} play - Current play object
- * @param {Object|null} prev_play - Previous play object (null for first play)
- * @param {Object|null} prev_play_2 - Play 2 positions back (for timeout edge cases)
- * @param {Object|null} prev_play_3 - Play 3 positions back (for double timeout edge cases)
+ * @param {object} play - Current play object
+ * @param {object|null} prev_play - Previous play object (null for first play)
+ * @param {object|null} prev_play_2 - Play 2 positions back (for timeout edge cases)
+ * @param {object|null} prev_play_3 - Play 3 positions back (for double timeout edge cases)
  * @returns {boolean} True if this play starts a new drive
  */
 const is_new_drive = (play, prev_play, prev_play_2, prev_play_3) => {
@@ -91,7 +91,7 @@ const is_new_drive = (play, prev_play, prev_play_2, prev_play_3) => {
  * On kickoffs that are recovered/fumbled, the kicking team should be treated
  * as the posteam for drive calculation purposes (swap from defteam).
  *
- * @param {Object} play - Play object
+ * @param {object} play - Play object
  * @returns {string|null} Effective possession team
  */
 const get_effective_posteam = (play) => {
@@ -280,8 +280,8 @@ export const get_half = (play) => (play.quarter <= 2 ? 1 : 2)
  * written by the first poll of a live game and decline forever after, freezing
  * drive_sequence at whatever that first partial write contained.
  *
- * @param {Array} plays - Array of play objects, one or more games
- * @returns {Array} Plays with drive_sequence set where the game had none
+ * @param {object[]} plays - Array of play objects, one or more games
+ * @returns {object[]} Plays with drive_sequence set where the game had none
  */
 export const enrich_fixed_drives = (plays) => {
   log(`Starting fixed drive enrichment for ${plays.length} plays`)

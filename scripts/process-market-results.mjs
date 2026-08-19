@@ -110,8 +110,8 @@ const is_main = (url) => process.argv[1] === fileURLToPath(url)
 
 /**
  * Analyze and categorize errors from processing results
- * @param {Array} results - Array of processing results
- * @returns {Object} Error analysis with counts and samples
+ * @param {object[]} results - Array of processing results
+ * @returns {object} Error analysis with counts and samples
  */
 const analyze_errors = (results) => {
   const error_results = results.filter((r) => r.error)
@@ -167,7 +167,7 @@ const analyze_errors = (results) => {
 
 /**
  * Generate detailed error report
- * @param {Object} error_analysis - Error analysis results
+ * @param {object} error_analysis - Error analysis results
  * @returns {string} Formatted error report
  */
 const generate_error_report = (error_analysis) => {
@@ -233,7 +233,7 @@ const generate_error_report = (error_analysis) => {
 
 /**
  * Export error report to file
- * @param {Object} error_analysis - Error analysis results
+ * @param {object} error_analysis - Error analysis results
  * @param {string} filename - Output filename
  */
 const export_error_report = async (error_analysis, filename) => {
@@ -256,11 +256,11 @@ const export_error_report = async (error_analysis, filename) => {
 /**
  * Process markets with workers
  *
- * @param {Object} params - Named parameters
- * @param {Array} params.market_batches - Array of market batches to process
- * @param {Object} params.preloaded_data - Preloaded game data for processing
- * @param {Object} params.config - Configuration object with workers, verbose options
- * @returns {Promise<Array>} Array of processed market results
+ * @param {object} params - Named parameters
+ * @param {object[]} params.market_batches - Array of market batches to process
+ * @param {object} params.preloaded_data - Preloaded game data for processing
+ * @param {object} params.config - Configuration object with workers, verbose options
+ * @returns {Promise<object[]>} Array of processed market results
  */
 const process_markets_with_workers = async ({
   market_batches,
@@ -339,12 +339,12 @@ const process_markets_with_workers = async ({
 /**
  * Core processing logic shared by CLI and programmatic interfaces
  *
- * @param {Object} options - Processing options
- * @param {Object} options.config - Configuration object with year, week, seas_type, etc.
+ * @param {object} options - Processing options
+ * @param {object} options.config - Configuration object with year, week, seas_type, etc.
  * @param {boolean} options.enable_error_reporting - Enable detailed error analysis
  * @param {boolean} options.enable_job_reporting - Enable job status reporting
  * @param {boolean} options.close_db_on_complete - Close database connection when done
- * @returns {Promise<Object>} Processing results with stats
+ * @returns {Promise<object>} Processing results with stats
  */
 const execute_processing = async ({
   config,
@@ -595,14 +595,14 @@ const main = async () => {
  * Process market results for specified games
  * Wrapper function for programmatic use (e.g., from finalize_game)
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.year - Season year
  * @param {number} params.week - Week number (optional if esbids provided)
  * @param {string} params.seas_type - Season type (PRE, REG, POST)
  * @param {Array<string>} params.esbids - Array of game IDs to process
  * @param {boolean} params.dry_run - Preview mode
  * @param {boolean} params.verbose - Verbose logging
- * @returns {Promise<Object>} Processing results with stats
+ * @returns {Promise<object>} Processing results with stats
  */
 export const process_market_results = async ({
   year,

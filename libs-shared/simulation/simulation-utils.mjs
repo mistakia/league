@@ -9,8 +9,8 @@ import { mean, standardDeviation, median, quantile } from 'simple-statistics'
  * Find winners from team scores (handles ties).
  * Returns team IDs with the highest score, splitting credit for ties.
  *
- * @param {Object} params
- * @param {Map|Object} params.team_scores - Map or object of team_id -> score
+ * @param {object} params
+ * @param {Map<string, number>|object} params.team_scores - Map or object of team_id -> score
  * @returns {{ winners: number[], max_score: number, win_credit: number }}
  */
 export function find_winners({ team_scores }) {
@@ -44,8 +44,8 @@ export function find_winners({ team_scores }) {
  * Distribute win credit to winners.
  * Mutates the team_wins map by adding win_credit to each winner.
  *
- * @param {Object} params
- * @param {Map} params.team_wins - Map of team_id -> win count (mutated)
+ * @param {object} params
+ * @param {Map<string, number>} params.team_wins - Map of team_id -> win count (mutated)
  * @param {string[]|number[]} params.winners - Array of winning team IDs
  * @param {number} params.win_credit - Credit to add per winner (typically 1/winners.length)
  */
@@ -60,7 +60,7 @@ export function distribute_win_credit({ team_wins, winners, win_credit }) {
  * Unified function that handles both team and player distributions.
  *
  * @param {number[]} scores - Array of scores
- * @param {Object} [options={}] - Options
+ * @param {object} [options={}] - Options
  * @param {boolean} [options.include_percentiles=true] - Include median and percentiles
  * @param {boolean} [options.is_locked=false] - Whether this is a locked (actual) score
  * @returns {Record<string, number>} Distribution statistics
@@ -99,7 +99,7 @@ export function calculate_distribution(scores, options = {}) {
  * Create a constant distribution for a fixed value (locked/actual scores).
  *
  * @param {number} value - The constant value
- * @param {Object} [options={}] - Options
+ * @param {object} [options={}] - Options
  * @param {boolean} [options.include_percentiles=false] - Include percentile fields
  * @returns {Record<string, number>} Distribution with zero variance
  */

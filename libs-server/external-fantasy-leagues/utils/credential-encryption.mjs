@@ -91,8 +91,8 @@ function resolve_key(key_hex) {
 
 /**
  * Encrypt credentials object
- * @param {Object} credentials - Plain credentials object
- * @param {Object} [options]
+ * @param {object} credentials - Plain credentials object
+ * @param {object} [options]
  * @param {string} [options.key_hex] - optional 64-hex key override (tests / rekey)
  * @returns {string} Encrypted credentials (base64-encoded: iv + authTag + ciphertext)
  */
@@ -132,9 +132,9 @@ export function encrypt_credentials(credentials, { key_hex } = {}) {
 /**
  * Decrypt credentials string
  * @param {string} encrypted_string - Base64-encoded encrypted credentials or legacy JSON
- * @param {Object} [options]
+ * @param {object} [options]
  * @param {string} [options.key_hex] - optional 64-hex key override (tests / rekey)
- * @returns {Object} Decrypted credentials object (empty object if input is null/empty)
+ * @returns {object} Decrypted credentials object (empty object if input is null/empty)
  * @throws {Error} If decryption fails or encrypted data is malformed
  */
 export function decrypt_credentials(encrypted_string, { key_hex } = {}) {
@@ -214,7 +214,7 @@ export function is_encrypted(credentials_string) {
 /**
  * Migrate legacy credentials to encrypted format
  * @param {string} credentials_string - Potentially unencrypted credentials
- * @param {Object} [options]
+ * @param {object} [options]
  * @param {string} [options.key_hex] - optional 64-hex key override (tests / rekey)
  * @returns {string|null} Encrypted credentials string or null if empty
  */

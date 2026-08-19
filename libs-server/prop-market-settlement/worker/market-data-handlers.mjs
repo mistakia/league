@@ -26,9 +26,9 @@ class MarketDataHandler {
 
   /**
    * Create error results for both OPEN and CLOSE time types
-   * @param {Object} market - Market object
+   * @param {object} market - Market object
    * @param {string} error_message - Error description
-   * @returns {Array<Object>} Array with OPEN and CLOSE error result objects
+   * @returns {Array<object>} Array with OPEN and CLOSE error result objects
    */
   _create_error_results(market, error_message) {
     return create_dual_result_objects({
@@ -42,10 +42,10 @@ class MarketDataHandler {
 
   /**
    * Create success results for both OPEN and CLOSE time types
-   * @param {Object} market - Market object
+   * @param {object} market - Market object
    * @param {number} metric_value - Calculated metric value
    * @param {string} selection_result - WON/LOST result
-   * @returns {Array<Object>} Array with OPEN and CLOSE success result objects
+   * @returns {Array<object>} Array with OPEN and CLOSE success result objects
    */
   _create_success_results(market, metric_value, selection_result) {
     return create_dual_result_objects({
@@ -58,8 +58,8 @@ class MarketDataHandler {
 
   /**
    * Get market mapping configuration
-   * @param {Object} market - Market object
-   * @returns {Object} Market mapping configuration
+   * @param {object} market - Market object
+   * @returns {object} Market mapping configuration
    */
   _get_market_mapping(market) {
     return market.mapping || market_type_mappings[market.market_type]
@@ -77,8 +77,8 @@ export class PlayerGamelogMarketHandler extends MarketDataHandler {
 
   /**
    * Process a batch of markets using player gamelog data
-   * @param {Array<Object>} markets - Array of market objects to process
-   * @returns {Promise<Array<Object>>} Array of result objects for both OPEN and CLOSE
+   * @param {Array<object>} markets - Array of market objects to process
+   * @returns {Promise<Array<object>>} Array of result objects for both OPEN and CLOSE
    */
   async batch_calculate(markets) {
     const all_results = []
@@ -98,8 +98,8 @@ export class PlayerGamelogMarketHandler extends MarketDataHandler {
 
   /**
    * Process a single market using player gamelog data
-   * @param {Object} market - Market object to process
-   * @returns {Array<Object>} Array with OPEN and CLOSE result objects
+   * @param {object} market - Market object to process
+   * @returns {Array<object>} Array with OPEN and CLOSE result objects
    */
   _process_single_market(market) {
     const mapping = this._get_market_mapping(market)
@@ -127,9 +127,9 @@ export class PlayerGamelogMarketHandler extends MarketDataHandler {
 
   /**
    * Find gamelog for specific player in game data
-   * @param {Array<Object>} game_gamelogs - Array of gamelogs for a specific game
+   * @param {Array<object>} game_gamelogs - Array of gamelogs for a specific game
    * @param {string} player_id - Player ID to find
-   * @returns {Object|null} Player gamelog or null if not found
+   * @returns {object|null} Player gamelog or null if not found
    */
   _find_player_gamelog(game_gamelogs, player_id) {
     return game_gamelogs.find((gamelog) => gamelog.pid === player_id) || null
@@ -147,8 +147,8 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
 
   /**
    * Process a batch of markets using NFL plays data
-   * @param {Array<Object>} markets - Array of market objects to process
-   * @returns {Promise<Array<Object>>} Array of result objects for both OPEN and CLOSE
+   * @param {Array<object>} markets - Array of market objects to process
+   * @returns {Promise<Array<object>>} Array of result objects for both OPEN and CLOSE
    */
   async batch_calculate(markets) {
     const all_results = []
@@ -168,8 +168,8 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
 
   /**
    * Process a single market using NFL plays data
-   * @param {Object} market - Market object to process
-   * @returns {Array<Object>} Array with OPEN and CLOSE result objects
+   * @param {object} market - Market object to process
+   * @returns {Array<object>} Array with OPEN and CLOSE result objects
    */
   _process_single_market(market) {
     const mapping = this._get_market_mapping(market)
@@ -231,10 +231,10 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
 
   /**
    * Filter plays based on market requirements (player, team, quarter, etc.)
-   * @param {Array<Object>} game_plays - All plays for a specific game
-   * @param {Object} market - Market object containing selection criteria
-   * @param {Object} mapping - Market mapping configuration
-   * @returns {Array<Object>} Filtered plays relevant to the market
+   * @param {Array<object>} game_plays - All plays for a specific game
+   * @param {object} market - Market object containing selection criteria
+   * @param {object} mapping - Market mapping configuration
+   * @returns {Array<object>} Filtered plays relevant to the market
    */
   _filter_plays_for_market(game_plays, market, mapping) {
     if (!game_plays) {
@@ -323,9 +323,9 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
 
   /**
    * Calculate metric value from filtered plays based on aggregation type
-   * @param {Array<Object>} plays - Filtered plays to calculate from
-   * @param {Object} mapping - Market mapping configuration
-   * @param {Object} market - Market data (needed for first_touchdown_scorer logic)
+   * @param {Array<object>} plays - Filtered plays to calculate from
+   * @param {object} mapping - Market mapping configuration
+   * @param {object} market - Market data (needed for first_touchdown_scorer logic)
    * @returns {number} Calculated metric value
    */
   _calculate_plays_metric(plays, mapping, market = null) {
@@ -372,8 +372,8 @@ export class NFLGamesMarketHandler {
 
   /**
    * Process a batch of markets using NFL games data
-   * @param {Array<Object>} markets - Array of market objects to process
-   * @returns {Promise<Array<Object>>} Array of result objects for both OPEN and CLOSE
+   * @param {Array<object>} markets - Array of market objects to process
+   * @returns {Promise<Array<object>>} Array of result objects for both OPEN and CLOSE
    */
   async batch_calculate(markets) {
     const all_results = []
@@ -393,8 +393,8 @@ export class NFLGamesMarketHandler {
 
   /**
    * Process a single market using NFL games data
-   * @param {Object} market - Market object to process
-   * @returns {Array<Object>} Array with OPEN and CLOSE result objects
+   * @param {object} market - Market object to process
+   * @returns {Array<object>} Array with OPEN and CLOSE result objects
    */
   _process_single_market(market) {
     const mapping = this._get_market_mapping(market)
@@ -425,7 +425,7 @@ export class NFLGamesMarketHandler {
   /**
    * Validate team selection against game participants
    * @param {string} selection_pid - Selected team ID
-   * @param {Object} game - Game data with home_nfl_team and away_nfl_team team codes
+   * @param {object} game - Game data with home_nfl_team and away_nfl_team team codes
    * @returns {{ is_home_team: boolean }|null} Team info or null if not found
    */
   _validate_team_selection(selection_pid, game) {
@@ -440,11 +440,11 @@ export class NFLGamesMarketHandler {
 
   /**
    * Process game outcome markets (spread, total, moneyline)
-   * @param {Object} params - Named parameters
-   * @param {Object} params.market - Market object
-   * @param {Object} params.game - Game data with home_nfl_team, away_nfl_team, home_score, away_score
-   * @param {Object} params.mapping - Market mapping configuration
-   * @returns {Array<Object>} Array with OPEN and CLOSE result objects
+   * @param {object} params - Named parameters
+   * @param {object} params.market - Market object
+   * @param {object} params.game - Game data with home_nfl_team, away_nfl_team, home_score, away_score
+   * @param {object} params.mapping - Market mapping configuration
+   * @returns {Array<object>} Array with OPEN and CLOSE result objects
    */
   _process_game_outcome_market({ market, game, mapping }) {
     const { calculation_type } = mapping
@@ -565,9 +565,9 @@ export class NFLGamesMarketHandler {
 
   /**
    * Create error results for both OPEN and CLOSE time types
-   * @param {Object} market - Market object
+   * @param {object} market - Market object
    * @param {string} error_message - Error description
-   * @returns {Array<Object>} Array with OPEN and CLOSE error result objects
+   * @returns {Array<object>} Array with OPEN and CLOSE error result objects
    */
   _create_error_results(market, error_message) {
     return create_dual_result_objects({
@@ -581,10 +581,10 @@ export class NFLGamesMarketHandler {
 
   /**
    * Create success results for both OPEN and CLOSE time types
-   * @param {Object} market - Market object
+   * @param {object} market - Market object
    * @param {number} metric_value - Calculated metric value
    * @param {string} selection_result - WON/LOST result
-   * @returns {Array<Object>} Array with OPEN and CLOSE success result objects
+   * @returns {Array<object>} Array with OPEN and CLOSE success result objects
    */
   _create_success_results(market, metric_value, selection_result) {
     return create_dual_result_objects({
@@ -597,8 +597,8 @@ export class NFLGamesMarketHandler {
 
   /**
    * Get market mapping configuration
-   * @param {Object} market - Market object
-   * @returns {Object} Market mapping configuration
+   * @param {object} market - Market object
+   * @returns {object} Market mapping configuration
    */
   _get_market_mapping(market) {
     return market.mapping || market_type_mappings[market.market_type]
@@ -606,8 +606,8 @@ export class NFLGamesMarketHandler {
 
   /**
    * Index games by their esbid for fast lookup
-   * @param {Array<Object>} games - Array of game objects
-   * @returns {Object} Games indexed by esbid
+   * @param {Array<object>} games - Array of game objects
+   * @returns {object} Games indexed by esbid
    */
   _index_games_by_id(games) {
     const games_by_id = {}

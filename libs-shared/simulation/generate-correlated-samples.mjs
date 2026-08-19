@@ -20,7 +20,7 @@ export function normal_cdf(value) {
 /**
  * Generate a pair of independent standard normal values using Box-Muller transform.
  *
- * @param {Function} random - Random function returning values in [0,1)
+ * @param {() => number} random - Random function returning values in [0,1)
  * @returns {[number, number]} Pair of independent standard normal values
  */
 function box_muller_pair(random) {
@@ -35,7 +35,7 @@ function box_muller_pair(random) {
  * Generate an array of n standard normal values using Box-Muller transform.
  *
  * @param {number} n - Number of values to generate
- * @param {Function} random - Random function returning values in [0,1)
+ * @param {() => number} random - Random function returning values in [0,1)
  * @returns {number[]} Array of standard normal values
  */
 function generate_normals_array(n, random) {
@@ -54,7 +54,7 @@ function generate_normals_array(n, random) {
  * Generate standard normal random values.
  * Uses Box-Muller transform for generating pairs of independent normals.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.n_simulations - Number of simulations
  * @param {number} params.n_players - Number of players
  * @param {number} [params.seed] - Optional seed for reproducibility
@@ -75,7 +75,7 @@ export function generate_standard_normals({ n_simulations, n_players, seed }) {
  * Simple seeded PRNG (mulberry32).
  *
  * @param {number} seed - Seed value
- * @returns {Function} Random function that returns values in [0,1)
+ * @returns {() => number} Random function that returns values in [0,1)
  */
 function seeded_random(seed) {
   return function () {
@@ -89,7 +89,7 @@ function seeded_random(seed) {
 /**
  * Perform Cholesky decomposition on a correlation matrix.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number[][]} params.correlation_matrix - Symmetric positive-definite correlation matrix
  * @returns {{ lower_matrix: number[][], is_positive_definite: boolean }}
  */
@@ -108,7 +108,7 @@ export function cholesky_decomposition({ correlation_matrix }) {
  * Uses Cholesky decomposition to transform independent normals to correlated normals,
  * then transforms to uniforms via the normal CDF.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number[][]} params.correlation_matrix - Correlation matrix (already positive-definite)
  * @param {number} params.n_simulations - Number of simulations to run
  * @param {number} [params.seed] - Optional seed for reproducibility
@@ -169,10 +169,10 @@ export function generate_correlated_uniforms({
  * Generate correlated samples for a single simulation.
  * Useful when running simulations one at a time.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number[][]} params.lower_matrix - Pre-computed Cholesky lower matrix
  * @param {number} params.n_players - Number of players
- * @param {Function} [params.random] - Random function, defaults to Math.random
+ * @param {() => number} [params.random] - Random function, defaults to Math.random
  * @returns {number[]} Array of correlated uniform values for one simulation
  */
 export function generate_single_correlated_sample({

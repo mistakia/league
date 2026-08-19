@@ -24,7 +24,7 @@ const log = debug('simulation:build-correlation-matrix')
  * Get normalized cache key for correlation lookup.
  * Enforces pid_first < pid_second ordering to match database constraint.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.player_id_a - First player ID
  * @param {string} params.player_id_b - Second player ID
  * @returns {string} Normalized cache key
@@ -39,12 +39,12 @@ export function get_correlation_cache_key({ player_id_a, player_id_b }) {
  * Get correlation between two players using the correlation lookup hierarchy.
  * Hierarchy: player-specific -> blended -> archetype-adjusted default -> position default -> 0
  *
- * @param {Object} params
- * @param {Object} params.player_a - First player { pid, nfl_team, position, position_rank }
- * @param {Object} params.player_b - Second player { pid, nfl_team, position, position_rank }
+ * @param {object} params
+ * @param {object} params.player_a - First player { pid, nfl_team, position, position_rank }
+ * @param {object} params.player_b - Second player { pid, nfl_team, position, position_rank }
  * @param {string} params.relationship - Relationship type from get_player_relationship
- * @param {Map} params.correlation_cache - Pre-loaded correlations from database
- * @param {Map} params.archetypes - Map of pid -> archetype
+ * @param {Map<string, any>} params.correlation_cache - Pre-loaded correlations from database
+ * @param {Map<string, string>} params.archetypes - Map of pid -> archetype
  * @returns {number} Correlation value
  */
 export function get_player_pair_correlation({
@@ -143,7 +143,7 @@ export function get_player_pair_correlation({
 /**
  * Get archetype-adjusted default correlation.
  *
- * @param {Object} params
+ * @param {object} params
  * @returns {number} Adjusted default correlation
  */
 function get_archetype_adjusted_default({
@@ -178,11 +178,11 @@ function get_archetype_adjusted_default({
 /**
  * Build a correlation matrix for a set of players.
  *
- * @param {Object} params
- * @param {Object[]} params.players - Array of players with { pid, nfl_team, position, position_rank }
- * @param {Object} params.schedule - Pre-loaded NFL schedule from libs-server
- * @param {Map} params.correlation_cache - Pre-loaded correlations from database
- * @param {Map} params.archetypes - Map of pid -> archetype
+ * @param {object} params
+ * @param {object[]} params.players - Array of players with { pid, nfl_team, position, position_rank }
+ * @param {object} params.schedule - Pre-loaded NFL schedule from libs-server
+ * @param {Map<string, any>} params.correlation_cache - Pre-loaded correlations from database
+ * @param {Map<string, string>} params.archetypes - Map of pid -> archetype
  * @param {number} [params.epsilon] - Regularization strength for positive definiteness
  * @returns {{ matrix: number[][], player_indices: Map<string, number>, used_fallback: boolean }}
  */
@@ -260,9 +260,9 @@ export function build_correlation_matrix({
 /**
  * Get correlation for a specific pair from a built matrix.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number[][]} params.matrix - Correlation matrix
- * @param {Map} params.player_indices - Map of pid -> index
+ * @param {Map<string, number>} params.player_indices - Map of pid -> index
  * @param {string} params.pid_first - First player ID
  * @param {string} params.pid_second - Second player ID
  * @returns {number|null} Correlation value or null if player not in matrix

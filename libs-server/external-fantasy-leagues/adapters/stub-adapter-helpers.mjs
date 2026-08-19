@@ -7,7 +7,7 @@
  * Create a standardized "not implemented" error message
  * @param {string} platform_name - Platform name
  * @param {string} method_name - Method name that's not implemented
- * @param {Object} [context={}] - Additional context (e.g., league_id, week)
+ * @param {object} [context={}] - Additional context (e.g., league_id, week)
  * @returns {Error} Standardized error
  */
 export function create_not_implemented_error(
@@ -26,9 +26,9 @@ export function create_not_implemented_error(
 
 /**
  * Log a "not implemented" warning
- * @param {Function} log_fn - Adapter's log function
+ * @param {(level: string, message: string, context?: object) => void} log_fn - Adapter's log function
  * @param {string} method_name - Method name
- * @param {Object} [context={}] - Additional context
+ * @param {object} [context={}] - Additional context
  */
 export function log_not_implemented(log_fn, method_name, context = {}) {
   log_fn('warn', `${method_name} not yet implemented`, context)
@@ -36,7 +36,7 @@ export function log_not_implemented(log_fn, method_name, context = {}) {
 
 /**
  * Standard stub implementation for authenticate method
- * @param {Function} log_fn - Adapter's log function
+ * @param {(level: string, message: string, context?: object) => void} log_fn - Adapter's log function
  * @param {string} platform_name - Platform name
  * @returns {Promise<boolean>} Always returns false
  */
@@ -47,10 +47,10 @@ export async function stub_authenticate(log_fn, platform_name) {
 
 /**
  * Standard stub implementation for get methods
- * @param {Function} log_fn - Adapter's log function
+ * @param {(level: string, message: string, context?: object) => void} log_fn - Adapter's log function
  * @param {string} platform_name - Platform name
  * @param {string} method_name - Method name
- * @param {Object} [context={}] - Method context
+ * @param {object} [context={}] - Method context
  * @throws {Error} Always throws "not implemented" error
  */
 export function stub_get_method(
@@ -65,7 +65,7 @@ export function stub_get_method(
 
 /**
  * Standard stub implementation for map_player_to_internal
- * @param {Function} log_fn - Adapter's log function
+ * @param {(level: string, message: string, context?: object) => void} log_fn - Adapter's log function
  * @param {string} platform_name - Platform name
  * @param {string} external_player_id - External player ID
  * @returns {Promise<null>} Always returns null

@@ -24,8 +24,8 @@ dayjs.extend(timezone)
  * pick stays outstanding, which holds every later index still rather than
  * jittering the slate between refetches.
  *
- * @param {Object} args
- * @param {Array} [args.draft_picks] - The WHOLE board, as `{ pick, pid,
+ * @param {object} args
+ * @param {object[]} [args.draft_picks] - The WHOLE board, as `{ pick, pid,
  *   selection_timestamp }` rows in any order.
  * @param {import('dayjs').Dayjs} args.boundary
  * @returns {number[]|null} Null with no board at all, which the caller reads as
@@ -48,8 +48,8 @@ export function resolve_outstanding_picks({ draft_picks, boundary }) {
  * pick numbers past the end of the board — the draft-end estimate wants the
  * slot after the last one — and such a pick is unmade, not made.
  *
- * @param {Object} args
- * @param {Object} args.draft_pick - A `{ pick, pid, selection_timestamp }` row.
+ * @param {object} args
+ * @param {object} args.draft_pick - A `{ pick, pid, selection_timestamp }` row.
  * @param {import('dayjs').Dayjs} args.boundary
  * @returns {boolean}
  */
@@ -74,7 +74,7 @@ export function is_selected_as_of({ draft_pick, boundary }) {
  * With no board at all every preceding pick is unmade by definition, which is
  * the pre-draft case the bare `pick_number` stands in for.
  *
- * @param {Object} args
+ * @param {object} args
  * @param {number[]|null} args.outstanding
  * @param {number} args.pick_number
  * @returns {number}

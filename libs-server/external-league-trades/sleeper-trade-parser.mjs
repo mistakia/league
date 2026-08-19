@@ -56,7 +56,7 @@ export const SLEEPER_MAX_TRANSACTION_BUCKET = 18
  * the week -- which would be invisible, since a bucket that does not exist and
  * a bucket we declined to ask for look identical afterwards.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.league_season_year - The league-season being imported
  * @param {number} params.current_season_year
  * @param {number} params.current_season_week - Continuous counter from
@@ -130,10 +130,10 @@ export const derive_is_superflex = (roster_positions) => {
 
 /**
  * Map a Sleeper league payload to an external_leagues row.
- * @param {Object} params
- * @param {Object} params.league - Raw Sleeper /league/{id} payload
+ * @param {object} params
+ * @param {object} params.league - Raw Sleeper /league/{id} payload
  * @param {string} [params.discovered_via] - How the crawler reached this league
- * @returns {Object|null} Row, or null when the payload is unusable
+ * @returns {object|null} Row, or null when the payload is unusable
  */
 export const parse_sleeper_league = ({ league, discovered_via = null }) => {
   if (!league || !league.league_id) {
@@ -214,8 +214,8 @@ export const parse_sleeper_league = ({ league, discovered_via = null }) => {
  * This is the league -> members direction of the graph. The users it yields are
  * frontier nodes: known to exist, never expanded.
  *
- * @param {Object} params
- * @param {Array<Object>} params.users - Raw /league/{id}/users payload
+ * @param {object} params
+ * @param {Array<object>} params.users - Raw /league/{id}/users payload
  * @param {string} params.external_league_id
  * @returns {{ users: Array<Object>, memberships: Array<Object> }}
  */
@@ -274,8 +274,8 @@ export const parse_sleeper_league_member_users = ({
  * is what lets a discovered league be persisted immediately rather than held in
  * memory until a later stage gets around to fetching it.
  *
- * @param {Object} params
- * @param {Array<Object>} params.leagues - Raw user-leagues payload
+ * @param {object} params
+ * @param {Array<object>} params.leagues - Raw user-leagues payload
  * @param {string} params.external_user_id - The manager whose list this is
  * @returns {{ leagues: Array<Object>, memberships: Array<Object> }}
  */
@@ -320,12 +320,12 @@ export const parse_sleeper_user_leagues = ({ leagues, external_user_id }) => {
  * array. `adds` names the RECEIVING roster and `drops` the SENDING roster for
  * the same player, so the two maps together give both directions.
  *
- * @param {Object} params
- * @param {Object} params.transaction - Raw Sleeper transaction payload
+ * @param {object} params
+ * @param {object} params.transaction - Raw Sleeper transaction payload
  * @param {string} params.external_league_id
  * @param {number} params.season_year
  * @param {number} params.platform_transaction_bucket
- * @returns {Object|null} { trade, legs }, or null when not a completed trade
+ * @returns {object|null} { trade, legs }, or null when not a completed trade
  */
 export const parse_sleeper_trade = ({
   transaction,
@@ -436,7 +436,7 @@ export const parse_sleeper_trade = ({
 
 /**
  * Parse a full Sleeper transactions payload, keeping only completed trades.
- * @returns {Array<Object>} Array of { trade, legs }
+ * @returns {Array<object>} Array of { trade, legs }
  */
 export const parse_sleeper_transactions = ({
   transactions,

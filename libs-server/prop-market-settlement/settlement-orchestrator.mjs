@@ -39,7 +39,7 @@ export class SettlementOrchestrator {
   /**
    * Register a calculator for a specific type
    * @param {string} calculator_type - The type identifier for the calculator
-   * @param {Object} calculator_instance - The calculator instance with batch_calculate method
+   * @param {object} calculator_instance - The calculator instance with batch_calculate method
    * @throws {Error} If calculator_type is invalid or calculator_instance is missing
    */
   async register_calculator(calculator_type, calculator_instance) {
@@ -76,8 +76,8 @@ export class SettlementOrchestrator {
 
   /**
    * Calculate results for a batch of markets using appropriate calculators
-   * @param {Array<Object>} markets - Array of market objects to process
-   * @returns {Promise<Array<Object>>} Array of calculation results
+   * @param {Array<object>} markets - Array of market objects to process
+   * @returns {Promise<Array<object>>} Array of calculation results
    */
   async batch_calculate_markets(markets) {
     if (!markets || markets.length === 0) {
@@ -111,8 +111,8 @@ export class SettlementOrchestrator {
 
   /**
    * Process unsupported markets and return error results
-   * @param {Array} unsupported_markets - Array of unsupported market objects
-   * @returns {Array} Array of error result objects
+   * @param {object[]} unsupported_markets - Array of unsupported market objects
+   * @returns {object[]} Array of error result objects
    * @private
    */
   _process_unsupported_markets(unsupported_markets) {
@@ -126,8 +126,8 @@ export class SettlementOrchestrator {
   /**
    * Process a batch of markets for a specific calculator type
    * @param {string} calculator_type - The calculator type
-   * @param {Array} markets - Array of market objects
-   * @returns {Promise<Array>} Array of result objects
+   * @param {object[]} markets - Array of market objects
+   * @returns {Promise<object[]>} Array of result objects
    * @private
    */
   async _process_calculator_batch(calculator_type, markets) {
@@ -154,9 +154,9 @@ export class SettlementOrchestrator {
 
   /**
    * Create error results for a batch of markets
-   * @param {Array} markets - Array of market objects
+   * @param {object[]} markets - Array of market objects
    * @param {string} error_message - Error message to include
-   * @returns {Array} Array of error result objects
+   * @returns {object[]} Array of error result objects
    * @private
    */
   _create_error_results_for_markets(markets, error_message) {
@@ -169,10 +169,10 @@ export class SettlementOrchestrator {
 
   /**
    * Group markets by their required calculator type
-   * @param {Array} markets - Array of market objects to group
-   * @returns {Object} Object containing groups and unsupported markets
-   * @returns {Object} returns.groups - Markets grouped by calculator type
-   * @returns {Array} returns.unsupported - Markets with unsupported types
+   * @param {object[]} markets - Array of market objects to group
+   * @returns {object} Object containing groups and unsupported markets
+   * @returns {object} returns.groups - Markets grouped by calculator type
+   * @returns {object[]} returns.unsupported - Markets with unsupported types
    * @private
    */
   _group_markets_by_calculator(markets) {

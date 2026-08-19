@@ -25,13 +25,13 @@ export class RosterSync {
 
   /**
    * Sync rosters from external platform
-   * @param {Object} options - Roster sync options
-   * @param {Object} options.adapter - Platform adapter instance
-   * @param {Object} options.sync_context - Sync context with league and platform info
-   * @param {Object} options.sync_stats - Sync statistics object
-   * @param {Function} [options.progress_callback] - Optional progress reporting callback
-   * @param {Array} [options.sync_stats_errors] - Array to collect sync errors
-   * @returns {Promise<Object>} Roster sync results
+   * @param {object} options - Roster sync options
+   * @param {object} options.adapter - Platform adapter instance
+   * @param {object} options.sync_context - Sync context with league and platform info
+   * @param {object} options.sync_stats - Sync statistics object
+   * @param {(message: string, progress: number, detail: object) => Promise<void>} [options.progress_callback] - Optional progress reporting callback
+   * @param {object[]} [options.sync_stats_errors] - Array to collect sync errors
+   * @returns {Promise<object>} Roster sync results
    */
   async sync_rosters({
     adapter,
@@ -123,9 +123,9 @@ export class RosterSync {
 
   /**
    * Sync single roster
-   * @param {Object} options - Single roster sync options
-   * @param {Object} options.external_roster - External roster data
-   * @param {Object} options.sync_context - Sync context with league and platform info
+   * @param {object} options - Single roster sync options
+   * @param {object} options.external_roster - External roster data
+   * @param {object} options.sync_context - Sync context with league and platform info
    * @returns {Promise<void>}
    */
   async sync_single_roster({ external_roster, sync_context }) {
@@ -184,10 +184,10 @@ export class RosterSync {
 
   /**
    * Setup player mappings from external players
-   * @param {Object} options - Player mapping setup options
-   * @param {Object} options.adapter - Platform adapter instance
-   * @param {Object} options.sync_context - Sync context
-   * @param {Object} options.sync_stats - Sync statistics object
+   * @param {object} options - Player mapping setup options
+   * @param {object} options.adapter - Platform adapter instance
+   * @param {object} options.sync_context - Sync context
+   * @param {object} options.sync_stats - Sync statistics object
    * @returns {Promise<void>}
    * @private
    */
@@ -217,9 +217,9 @@ export class RosterSync {
 
   /**
    * Build player mapping context from external players
-   * @param {Object} options - Context building options
-   * @param {Array} options.external_players - Array of external player data
-   * @returns {Object} Player mapping context
+   * @param {object} options - Context building options
+   * @param {object[]} options.external_players - Array of external player data
+   * @returns {object} Player mapping context
    * @private
    */
   _build_player_mapping_context({ external_players }) {
@@ -239,8 +239,8 @@ export class RosterSync {
 
   /**
    * Extract team ID from external roster (canonical format)
-   * @param {Object} options - Team ID extraction options
-   * @param {Object} options.external_roster - External roster data in canonical format
+   * @param {object} options - Team ID extraction options
+   * @param {object} options.external_roster - External roster data in canonical format
    * @returns {string} External team ID
    * @private
    */
@@ -255,9 +255,9 @@ export class RosterSync {
 
   /**
    * Extract roster players from external roster
-   * @param {Object} options - Roster players extraction options
-   * @param {Object} options.external_roster - External roster data
-   * @returns {Array} Array of external player IDs
+   * @param {object} options - Roster players extraction options
+   * @param {object} options.external_roster - External roster data
+   * @returns {string[]} Array of external player IDs
    * @private
    */
   _extract_roster_players({ external_roster }) {
@@ -266,12 +266,12 @@ export class RosterSync {
 
   /**
    * Get current roster from database
-   * @param {Object} options - Current roster retrieval options
+   * @param {object} options - Current roster retrieval options
    * @param {string} options.internal_league_id - Internal league ID
    * @param {string} options.internal_team_id - Internal team ID
    * @param {number} options.week - Week number
    * @param {number} options.year - Season year
-   * @returns {Promise<Array>} Current roster entries
+   * @returns {Promise<object[]>} Current roster entries
    * @private
    */
   async _get_current_roster({
@@ -290,7 +290,7 @@ export class RosterSync {
 
   /**
    * Add player to roster
-   * @param {Object} options - Player addition options
+   * @param {object} options - Player addition options
    * @param {string} options.internal_league_id - Internal league ID
    * @param {string} options.internal_team_id - Internal team ID
    * @param {string} options.pid - Player ID
@@ -324,9 +324,9 @@ export class RosterSync {
 
   /**
    * Remove players no longer on external roster
-   * @param {Object} options - Player removal options
-   * @param {Set} options.current_pids - Set of current player IDs
-   * @param {Set} options.external_pids - Set of external player IDs
+   * @param {object} options - Player removal options
+   * @param {Set<string>} options.current_pids - Set of current player IDs
+   * @param {Set<string>} options.external_pids - Set of external player IDs
    * @param {string} options.internal_league_id - Internal league ID
    * @param {string} options.internal_team_id - Internal team ID
    * @param {number} options.week - Week number

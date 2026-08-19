@@ -42,7 +42,7 @@ debug.enable('announce-free-agency-period-start')
 
 /**
  * Initialize CLI argument parsing
- * @returns {Object} Parsed command line arguments
+ * @returns {object} Parsed command line arguments
  */
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -51,10 +51,10 @@ const initialize_cli = () => {
 /**
  * Get all leagues that are eligible for free agency period notifications
  * Checks for both advance notice (7 days before) and start notice (within 60 minutes after)
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {number} params.check_window_minutes - How many minutes after the start to check (default: 60)
  * @param {boolean} params.dry_run - Whether this is a dry run
- * @returns {Promise<Array>} Array of eligible league objects with timing info and notice type
+ * @returns {Promise<object[]>} Array of eligible league objects with timing info and notice type
  */
 const get_eligible_leagues_for_free_agency_period_notifications = async ({
   check_window_minutes = DEFAULT_CHECK_WINDOW_MINUTES,
@@ -150,7 +150,7 @@ const get_eligible_leagues_for_free_agency_period_notifications = async ({
 
 /**
  * Format the free agency period advance notice message (7 days before)
- * @param {Object} params - Parameters
+ * @param {object} params - Parameters
  * @param {string} params.league_name - League name
  * @param {dayjs.Dayjs} params.period_start_time - When the free agency period will start
  * @returns {string} Formatted notification message
@@ -168,7 +168,7 @@ const format_free_agency_period_advance_message = ({
 
 /**
  * Format the free agency period start message
- * @param {Object} params - Parameters
+ * @param {object} params - Parameters
  * @param {string} params.league_name - League name
  * @param {dayjs.Dayjs} params.period_start_time - When the free agency period started
  * @returns {string} Formatted notification message
@@ -186,7 +186,7 @@ const format_free_agency_period_start_message = ({
 
 /**
  * Announce free agency period notification for a league (advance or start)
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {number} params.lid - League ID
  * @param {string} params.notice_type - Type of notice: 'advance' or 'start'
  * @param {boolean} params.dry_run - Whether this is a dry run
@@ -305,7 +305,7 @@ const announce_free_agency_period_notification = async ({
  * descriptive string when a league was due but its notification marker was
  * not written (silent partial-success).
  *
- * @param {Object} params - Parameters
+ * @param {object} params - Parameters
  * @param {boolean} params.dry_run - Whether this is a dry run
  * @param {number} params.check_window_minutes - Check window in minutes
  * @returns {Promise<{ shortfall: string | null }>}

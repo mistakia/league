@@ -9,7 +9,7 @@ const log = debug('external:transaction-mapper')
  * Helper to get value from Map or plain object mapping
  * Handles type coercion for numeric/string key lookups (e.g., "123" vs 123)
  * Used for mapping external platform IDs to internal IDs
- * @param {Map|Object} mapping - Map or plain object containing ID mappings
+ * @param {Map<string|number, string|number>|object} mapping - Map or plain object containing ID mappings
  * @param {string|number} key - External ID to look up
  * @returns {string|number|undefined} Internal ID if found, undefined otherwise
  */
@@ -116,17 +116,17 @@ export default class TransactionMapper {
 
   /**
    * Map external platform transaction to internal transaction format
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier (sleeper, espn, yahoo, mfl)
-   * @param {Object} params.external_transaction - External platform transaction data
-   * @param {Object} params.context - Mapping context containing:
+   * @param {object} params.external_transaction - External platform transaction data
+   * @param {object} params.context - Mapping context containing:
    *   - league_id: Internal league ID
    *   - year: Season year
    *   - week: NFL week number
    *   - player_mappings: Map of external_player_id -> internal_pid
    *   - team_mappings: Map of external_team_id -> internal_tid
    *   - user_mappings: Map of external_user_id -> internal_userid (optional)
-   * @returns {Array<Object>} Mapped internal transaction rows (empty if skipped/invalid).
+   * @returns {Array<object>} Mapped internal transaction rows (empty if skipped/invalid).
    *   A single external transaction may map to multiple internal rows
    *   (Sleeper trades and waiver claims fan out one row per moved player).
    */
@@ -308,9 +308,9 @@ export default class TransactionMapper {
 
   /**
    * Extract transaction type from external transaction
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier
-   * @param {Object} params.external_transaction - External transaction data
+   * @param {object} params.external_transaction - External transaction data
    * @returns {string} Transaction type
    * @private
    */
@@ -344,7 +344,7 @@ export default class TransactionMapper {
   /**
    * Extract Unix timestamp from external transaction
    * Handles various timestamp formats (milliseconds, seconds, ISO strings)
-   * @param {Object} external_transaction - External transaction data
+   * @param {object} external_transaction - External transaction data
    * @returns {number} Unix timestamp in seconds
    * @private
    */
@@ -392,7 +392,7 @@ export default class TransactionMapper {
 
   /**
    * Extract NFL week number from external transaction
-   * @param {Object} external_transaction - External transaction data
+   * @param {object} external_transaction - External transaction data
    * @returns {number} NFL week number (1-18, or 0 for offseason)
    * @private
    */
@@ -414,11 +414,11 @@ export default class TransactionMapper {
   /**
    * Map platform-specific fields to internal transaction
    * Extracts and maps player IDs, team IDs, bid amounts, and user IDs
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier
-   * @param {Object} params.external_transaction - External platform transaction data
-   * @param {Object} params.transaction - Internal transaction object being built (modified in place)
-   * @param {Object} params.context - Mapping context with player_mappings, team_mappings, etc.
+   * @param {object} params.external_transaction - External platform transaction data
+   * @param {object} params.transaction - Internal transaction object being built (modified in place)
+   * @param {object} params.context - Mapping context with player_mappings, team_mappings, etc.
    * @private
    */
   map_platform_fields({
@@ -447,7 +447,7 @@ export default class TransactionMapper {
 
   /**
    * Map ESPN-specific transaction fields
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @private
    */
   map_espn_fields({ external_transaction, transaction, context }) {
@@ -473,7 +473,7 @@ export default class TransactionMapper {
 
   /**
    * Map Yahoo-specific transaction fields
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @private
    */
   map_yahoo_fields({ external_transaction, transaction, context }) {
@@ -497,7 +497,7 @@ export default class TransactionMapper {
 
   /**
    * Map MyFantasyLeague-specific transaction fields
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @private
    */
   map_mfl_fields({ external_transaction, transaction, context }) {
@@ -525,7 +525,7 @@ export default class TransactionMapper {
 
   /**
    * Map generic transaction fields
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @private
    */
   map_generic_fields({ external_transaction, transaction, context }) {
@@ -566,11 +566,11 @@ export default class TransactionMapper {
 
   /**
    * Bulk map multiple external transactions to internal format
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier
-   * @param {Array<Object>} params.external_transactions - Array of external platform transactions
-   * @param {Object} params.context - Mapping context (same as map_transaction)
-   * @returns {Array<Object>} Array of successfully mapped internal transactions (skipped ones excluded)
+   * @param {Array<object>} params.external_transactions - Array of external platform transactions
+   * @param {object} params.context - Mapping context (same as map_transaction)
+   * @returns {Array<object>} Array of successfully mapped internal transactions (skipped ones excluded)
    */
   bulk_map_transactions({ platform, external_transactions, context }) {
     const mapped_transactions = []
@@ -594,7 +594,7 @@ export default class TransactionMapper {
 
   /**
    * Validate mapped internal transaction has all required fields
-   * @param {Object} transaction - Mapped internal transaction object
+   * @param {object} transaction - Mapped internal transaction object
    * @returns {boolean} True if transaction is valid and complete
    */
   validate_transaction(transaction) {
@@ -633,7 +633,7 @@ export default class TransactionMapper {
 
   /**
    * Check if platform is supported
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier
    * @returns {boolean} True if platform is supported
    */

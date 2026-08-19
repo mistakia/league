@@ -58,7 +58,7 @@ export const safe_fix_team = (team_name) => {
 
 /**
  * Checks if an event is a game event vs futures/non-game event
- * @param {Object} draftkings_event - The DraftKings event object
+ * @param {object} draftkings_event - The DraftKings event object
  * @returns {boolean} - Whether this is a game event
  */
 export const is_game_event = (draftkings_event) => {
@@ -100,7 +100,7 @@ export const is_game_event = (draftkings_event) => {
 
 /**
  * Extracts team abbreviations from a DraftKings event
- * @param {Object} draftkings_event - The DraftKings event object
+ * @param {object} draftkings_event - The DraftKings event object
  * @param {boolean} is_game_event_result - Whether this is a game event
  * @returns {string[]} - Array of team abbreviations
  */
@@ -128,8 +128,8 @@ export const extract_team_abbreviations = (
 
 /**
  * Determines visitor and home teams from a DraftKings event
- * @param {Object} draftkings_event - The DraftKings event object
- * @returns {Object} - Object with visitor_team and home_team
+ * @param {object} draftkings_event - The DraftKings event object
+ * @returns {object} - Object with visitor_team and home_team
  */
 export const determine_teams = (draftkings_event) => {
   let visitor_team, home_team
@@ -178,7 +178,7 @@ export const determine_teams = (draftkings_event) => {
 /**
  * Extracts player name and team from a DraftKings player name
  * @param {string} draftkings_player_name - The player name from DraftKings
- * @returns {Object} - Object with cleaned name and team
+ * @returns {object} - Object with cleaned name and team
  */
 export const extract_player_info = (draftkings_player_name) => {
   if (!draftkings_player_name) {
@@ -360,7 +360,7 @@ export const format_selection_type = (selection_name, market_type = null) => {
 
 /**
  * Extracts team from participant data
- * @param {Object} params - The parameters
+ * @param {object} params - The parameters
  * @param {string} params.participant - The participant name
  * @param {string} params.participantType - The participant type
  * @returns {string|null} - Team abbreviation or null

@@ -84,7 +84,7 @@ export default class AuthenticatedApiClient {
    * - 'oauth2': Sets Authorization header with Bearer token (e.g., Yahoo)
    * - 'api_key': Sets Authorization header with Bearer token (e.g., MFL)
    *
-   * @param {Object} credentials - Platform-specific credentials object
+   * @param {object} credentials - Platform-specific credentials object
    *   - For cookie_based: { espn_s2, swid }
    *   - For oauth2: { access_token, refresh_token?, expires_at? }
    *   - For api_key: { api_key }
@@ -261,8 +261,8 @@ export default class AuthenticatedApiClient {
   /**
    * Make authenticated HTTP request with comprehensive retry logic
    * @param {string} url - Request URL
-   * @param {Object} options - Request options
-   * @returns {Promise<Object>} Response data
+   * @param {object} options - Request options
+   * @returns {Promise<object>} Response data
    */
   async request(url, options = {}) {
     // Check circuit breaker
@@ -316,8 +316,8 @@ export default class AuthenticatedApiClient {
   /**
    * Internal method to make request with retry logic
    * @param {string} url - Full request URL
-   * @param {Object} options - Request options
-   * @returns {Promise<Object>} Response data
+   * @param {object} options - Request options
+   * @returns {Promise<object>} Response data
    */
   async _make_request_with_retries(url, options) {
     let last_error
@@ -388,7 +388,7 @@ export default class AuthenticatedApiClient {
   /**
    * Parse error response from API
    * @param {Response} response - Fetch response object
-   * @returns {Promise<Object>} Error data
+   * @returns {Promise<object>} Error data
    */
   async _parse_error_response(response) {
     try {
@@ -456,7 +456,7 @@ export default class AuthenticatedApiClient {
 
   /**
    * Get comprehensive client statistics
-   * @returns {Object} Client statistics
+   * @returns {object} Client statistics
    */
   get_stats() {
     return {

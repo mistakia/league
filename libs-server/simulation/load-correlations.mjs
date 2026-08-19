@@ -13,7 +13,7 @@ const log = debug('simulation:load-correlations')
  * Load correlations with flexible options.
  * Supports loading within a single player set or between two sets.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} [params.player_ids] - Single set of player IDs (for within-set queries)
  * @param {string[]} [params.player_set_a] - First set of player IDs (for between-set queries)
  * @param {string[]} [params.player_set_b] - Second set of player IDs (for between-set queries)
@@ -23,7 +23,7 @@ const log = debug('simulation:load-correlations')
  * @param {number} [params.min_correlation=0] - Minimum absolute correlation to include
  * @param {string} [params.relationship_type] - Optional filter: 'same_team' or 'cross_team_same_game'
  * @param {string} [params.output_format='array'] - 'array' returns array of records, 'map' returns Map keyed by pid pair
- * @returns {Promise<Array|Map>} Correlations in requested format
+ * @returns {Promise<object[]|Map<string, object>>} Correlations in requested format
  */
 export async function load_correlations({
   player_ids,
@@ -188,10 +188,10 @@ export async function load_correlations({
  * Load correlations for a set of players, returning a Map for simulation cache.
  * Convenience wrapper for the common simulation use case.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.year - Year of correlation data (typically prior year)
- * @returns {Promise<Map>} Map of 'pid_first:pid_second' -> correlation data
+ * @returns {Promise<Map<string, object>>} Map of 'pid_first:pid_second' -> correlation data
  */
 export async function load_correlations_for_players({ player_ids, year }) {
   return load_correlations({
@@ -206,13 +206,13 @@ export async function load_correlations_for_players({ player_ids, year }) {
  * Load correlations between two player sets with year fallback.
  * Convenience wrapper for cross-team analysis.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_set_a - First set of player IDs
  * @param {string[]} params.player_set_b - Second set of player IDs
  * @param {number} params.year - Current year
  * @param {string} [params.relationship_type] - Optional filter
  * @param {number} [params.min_correlation=0] - Minimum absolute correlation
- * @returns {Promise<Object[]>} Array of correlation records with data_year field
+ * @returns {Promise<object[]>} Array of correlation records with data_year field
  */
 export async function load_correlations_between_sets({
   player_set_a,
@@ -236,12 +236,12 @@ export async function load_correlations_between_sets({
  * Load correlations within a single player set with year fallback.
  * Convenience wrapper for same-team correlation analysis.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Player IDs to find correlations between
  * @param {number} params.year - Current year
  * @param {string} [params.relationship_type] - Optional filter
  * @param {number} [params.min_correlation=0] - Minimum absolute correlation
- * @returns {Promise<Object[]>} Array of correlation records
+ * @returns {Promise<object[]>} Array of correlation records
  */
 export async function load_correlations_within_set({
   player_ids,
@@ -263,11 +263,11 @@ export async function load_correlations_within_set({
  * Load correlations with smart year selection.
  * Queries both current and prior year, preferring data with more games together.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.year - Current year
  * @param {number} [params.min_games_together=3] - Minimum games for valid correlation
- * @returns {Promise<Map>} Map of 'pid_first:pid_second' -> correlation data
+ * @returns {Promise<Map<string, object>>} Map of 'pid_first:pid_second' -> correlation data
  */
 export async function load_correlations_smart({
   player_ids,

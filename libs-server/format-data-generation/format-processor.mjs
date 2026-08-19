@@ -21,7 +21,7 @@ import { remove_format_data } from './cleanup-manager.mjs'
 /**
  * Check if a step should be skipped based on options
  * @param {string} step_name - Name of the step
- * @param {Object} options - Options object
+ * @param {object} options - Options object
  * @returns {boolean}
  */
 const should_skip_step = (step_name, options) => {
@@ -64,7 +64,7 @@ const should_process_format = (format_name, format_filter) => {
  * @param {Error} error - The error that occurred
  * @param {string} step_name - Name of the step that failed
  * @param {string} format_name - Name of the format being processed
- * @param {Object} options - Options object
+ * @param {object} options - Options object
  */
 export const handle_step_error = (error, step_name, format_name, options) => {
   console.error(`Failed to execute step ${step_name}:`, error.message)
@@ -92,7 +92,7 @@ export const handle_step_error = (error, step_name, format_name, options) => {
  * @param {string} format_name - Name of the format
  * @param {string} format_hash - Hash of the format
  * @param {string} format_type - Type of format
- * @param {Object} options - Options object
+ * @param {object} options - Options object
  */
 export const execute_generation_step = async (
   step_name,
@@ -137,7 +137,7 @@ export const execute_generation_step = async (
  * @param {string} format_hash - Hash of the format
  * @param {string} format_type - Type of format ('scoring' or 'league')
  * @param {string[]} steps - Array of step names to execute
- * @param {Object} options - Options object
+ * @param {object} options - Options object
  */
 export const generate_format_data = async (
   format_name,
@@ -197,9 +197,9 @@ export const generate_format_data = async (
 /**
  * Process formats of a specific type
  * @param {string} format_type - Type of format ('scoring' or 'league')
- * @param {Object} formats - Object containing format data
+ * @param {object} formats - Object containing format data
  * @param {string[]} steps - Array of step names to execute
- * @param {Object} options - Options object
+ * @param {object} options - Options object
  */
 export const process_format_type = async (
   format_type,
@@ -232,11 +232,11 @@ export const process_format_type = async (
 
 /**
  * Process a single format (generate or remove data)
- * @param {Object} format_info - Format information
+ * @param {object} format_info - Format information
  * @param {string} format_info.hash - Format hash
  * @param {string} format_info.name - Format name
  * @param {string} format_info.type - Format type
- * @param {Object} options - Options object
+ * @param {object} options - Options object
  */
 export const process_single_format = async (
   { hash, name, type },

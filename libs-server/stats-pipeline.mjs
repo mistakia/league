@@ -52,7 +52,7 @@ export const get_hosted_league_ids = async () => {
  * for 2025, every other catalog format dropped out of the generated set, and
  * the default-league `draftkings` fallback was left with no 2025 rows.
  *
- * @returns {Promise<Object>} Default league plus the scoring and league format id sets
+ * @returns {Promise<object>} Default league plus the scoring and league format id sets
  */
 export const get_format_ids = async () => {
   const default_league = create_default_league()
@@ -86,13 +86,13 @@ export const get_format_ids = async () => {
 
 /**
  * Run a pipeline step with timing and error handling
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.name - Step name for logging
- * @param {Function} params.fn - Async function to execute
- * @param {Object} params.results - Results object to update (optional)
+ * @param {() => Promise<unknown>} params.fn - Async function to execute
+ * @param {object} params.results - Results object to update (optional)
  * @param {boolean} params.continue_on_error - Whether to continue on error (default: true)
- * @param {Function} params.logger - Logger function (optional)
- * @returns {Promise<Object>} Result object with success, duration, error
+ * @param {(message: string) => void} params.logger - Logger function (optional)
+ * @returns {Promise<object>} Result object with success, duration, error
  */
 export const run_step = async ({
   name,
@@ -129,7 +129,7 @@ export const run_step = async ({
 
 /**
  * Process scoring format gamelogs for all unique scoring formats
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.week - Week number
  * @returns {Promise<void>}
  */
@@ -144,7 +144,7 @@ export const process_all_scoring_format_gamelogs = async ({ week }) => {
 
 /**
  * Process league format gamelogs for all unique league formats
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.week - Week number
  * @returns {Promise<void>}
  */
@@ -159,7 +159,7 @@ export const process_all_league_format_gamelogs = async ({ week }) => {
 
 /**
  * Process all format gamelogs (scoring + league)
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.week - Week number
  * @returns {Promise<void>}
  */
@@ -238,7 +238,7 @@ export const process_all_aggregates = async () => {
 
 /**
  * Update all format stats for a given week (gamelogs + seasonlogs + careerlogs)
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.week - Week number
  * @returns {Promise<void>}
  */

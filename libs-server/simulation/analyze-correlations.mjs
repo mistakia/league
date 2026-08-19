@@ -13,11 +13,11 @@ import {
  * Get correlation-based swap opportunities.
  * Identifies bench players that correlate with opponent starters.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.bench_pids - Bench player IDs
  * @param {string[]} params.opponent_player_ids - Opponent starter player IDs
  * @param {number} params.year - Year for correlation lookup
- * @returns {Promise<Object[]>} Correlation opportunities
+ * @returns {Promise<object[]>} Correlation opportunities
  */
 export async function get_correlation_opportunities({
   bench_pids,
@@ -75,10 +75,10 @@ export async function get_correlation_opportunities({
  * Get same-team correlations within a lineup.
  * Identifies significant correlations between teammates (stacks).
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Starter player IDs
  * @param {number} params.year - Year for correlation lookup
- * @returns {Promise<Object[]>} Array of same-team correlation pairs
+ * @returns {Promise<object[]>} Array of same-team correlation pairs
  */
 export async function get_same_team_correlations({ player_ids, year }) {
   if (player_ids.length < 2) {
@@ -116,11 +116,11 @@ export async function get_same_team_correlations({ player_ids, year }) {
  * Get correlation insights for a lineup.
  * Identifies significant positive and negative correlations with opponents.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Starter player IDs
  * @param {string[]} params.opponent_player_ids - Opponent starter player IDs
  * @param {number} params.year - Year for correlation lookup
- * @returns {Promise<Object>} Correlation insights
+ * @returns {Promise<object>} Correlation insights
  */
 export async function get_correlation_insights({
   player_ids,

@@ -30,7 +30,7 @@ export const SPREAD_ADJUSTMENT_COEFFICIENTS = {
  * Calculate variance scale factor based on game total.
  * Higher totals = more variance, lower totals = less variance.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.game_total - Expected game total from betting markets
  * @returns {number} Variance scale factor (centered around 1.0)
  */
@@ -53,7 +53,7 @@ export function calculate_variance_scale({ game_total }) {
 /**
  * Calculate projection adjustment based on spread.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.position - Player position
  * @param {number} params.team_spread - Team's spread (negative = favored)
  * @param {number} params.base_projection - Base projection before adjustment
@@ -81,10 +81,10 @@ export function calculate_spread_adjustment({
 /**
  * Apply game environment adjustments to player projections and variance.
  *
- * @param {Object} params
- * @param {Object[]} params.players - Array of player objects with projection, variance, position, nfl_team, esbid
- * @param {Map} params.game_environment - Map of esbid -> { game_total, home_spread, away_spread, home_team, away_team }
- * @returns {Object[]} Players with adjusted projections and variance
+ * @param {object} params
+ * @param {object[]} params.players - Array of player objects with projection, variance, position, nfl_team, esbid
+ * @param {Map<number, object>} params.game_environment - Map of esbid -> { game_total, home_spread, away_spread, home_team, away_team }
+ * @returns {object[]} Players with adjusted projections and variance
  */
 export function apply_game_environment_adjustments({
   players,

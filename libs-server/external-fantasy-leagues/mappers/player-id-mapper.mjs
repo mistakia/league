@@ -43,10 +43,10 @@ export default class PlayerIdMapper {
 
   /**
    * Map external platform player ID to internal player ID (PID)
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier (sleeper, espn, yahoo, mfl, etc.)
    * @param {string|number} params.external_player_id - Platform-specific player identifier
-   * @param {Object} [params.fallback_data] - Optional player data for fallback matching:
+   * @param {object} [params.fallback_data] - Optional player data for fallback matching:
    *   - name: Player name
    *   - position: Player position (QB, RB, WR, etc.)
    *   - team: NFL team abbreviation
@@ -142,9 +142,9 @@ export default class PlayerIdMapper {
 
   /**
    * Bulk map multiple external player IDs to internal PIDs
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier
-   * @param {Array<Object>} params.players - Array of player objects:
+   * @param {Array<object>} params.players - Array of player objects:
    *   - external_id: Platform-specific player ID
    *   - fallback_data: Optional player data for fallback matching
    * @returns {Promise<Map<string|number, string>>} Map of external_player_id -> internal_pid
@@ -166,7 +166,7 @@ export default class PlayerIdMapper {
 
   /**
    * Update player record with external platform ID
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.pid - Internal player ID
    * @param {string} params.column - Database column name for the external ID
    * @param {string|number} params.external_id - External platform player ID
@@ -203,7 +203,7 @@ export default class PlayerIdMapper {
 
   /**
    * Check if a platform is supported
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.platform - Platform identifier
    * @returns {boolean} True if platform is supported
    */
@@ -263,7 +263,7 @@ export default class PlayerIdMapper {
 
   /**
    * Get cache statistics
-   * @returns {Object} Cache statistics
+   * @returns {object} Cache statistics
    */
   get_cache_stats() {
     const now = Date.now()

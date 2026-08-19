@@ -23,10 +23,10 @@ export class ProgressReporter {
 
   /**
    * Create a standardized progress callback with default behavior
-   * @param {Object} options - Progress callback options
-   * @param {Function} [options.callback] - Custom progress callback function
+   * @param {object} options - Progress callback options
+   * @param {(message: string, progress_percentage: number, context_data: object) => Promise<void>} [options.callback] - Custom progress callback function
    * @param {boolean} [options.enable_logging] - Enable debug logging
-   * @returns {Function} Progress callback function
+   * @returns {(message: string, progress_percentage: number, context_data: object) => Promise<void>} Progress callback function
    */
   create_progress_callback({ callback = null, enable_logging = true }) {
     return async (message, progress_percentage, context_data = {}) => {
@@ -42,10 +42,10 @@ export class ProgressReporter {
 
   /**
    * Report validation step progress
-   * @param {Object} options - Validation progress options
-   * @param {Function} options.progress_callback - Progress callback function
+   * @param {object} options - Validation progress options
+   * @param {(message: string, progress_percentage: number, context_data: object) => Promise<void>} options.progress_callback - Progress callback function
    * @param {string} [options.status] - Validation status
-   * @param {Array} [options.validation_errors] - Validation errors if any
+   * @param {object[]} [options.validation_errors] - Validation errors if any
    * @returns {Promise<void>}
    */
   async report_validation_progress({
@@ -67,8 +67,8 @@ export class ProgressReporter {
 
   /**
    * Report adapter initialization progress
-   * @param {Object} options - Adapter initialization progress options
-   * @param {Function} options.progress_callback - Progress callback function
+   * @param {object} options - Adapter initialization progress options
+   * @param {(message: string, progress_percentage: number, context_data: object) => Promise<void>} options.progress_callback - Progress callback function
    * @param {string} options.platform_name - Platform identifier
    * @param {string} [options.status] - Initialization status
    * @returns {Promise<void>}
@@ -91,11 +91,11 @@ export class ProgressReporter {
 
   /**
    * Report data fetching progress
-   * @param {Object} options - Data fetching progress options
-   * @param {Function} options.progress_callback - Progress callback function
+   * @param {object} options - Data fetching progress options
+   * @param {(message: string, progress_percentage: number, context_data: object) => Promise<void>} options.progress_callback - Progress callback function
    * @param {string} options.data_type - Type of data being fetched
    * @param {number} [options.progress_percentage] - Current progress percentage
-   * @param {Object} [options.context_data] - Additional context data
+   * @param {object} [options.context_data] - Additional context data
    * @returns {Promise<void>}
    */
   async report_fetch_progress({
@@ -120,11 +120,11 @@ export class ProgressReporter {
 
   /**
    * Report sync completion progress
-   * @param {Object} options - Completion progress options
-   * @param {Function} options.progress_callback - Progress callback function
+   * @param {object} options - Completion progress options
+   * @param {(message: string, progress_percentage: number, context_data: object) => Promise<void>} options.progress_callback - Progress callback function
    * @param {string} [options.status] - Completion status
-   * @param {Object} [options.sync_stats] - Final sync statistics
-   * @param {Object} [options.validation_results] - Validation results
+   * @param {object} [options.sync_stats] - Final sync statistics
+   * @param {object} [options.validation_results] - Validation results
    * @param {string} [options.error_message] - Error message if failed
    * @returns {Promise<void>}
    */
@@ -156,7 +156,7 @@ export class ProgressReporter {
 
   /**
    * Calculate progress percentage within a step range
-   * @param {Object} options - Progress calculation options
+   * @param {object} options - Progress calculation options
    * @param {string} options.step_name - Name of the progress step
    * @param {number} options.current_item - Current item index (0-based)
    * @param {number} options.total_items - Total number of items
@@ -176,12 +176,12 @@ export class ProgressReporter {
 
   /**
    * Create a step-specific progress reporter
-   * @param {Object} options - Step progress reporter options
-   * @param {Function} options.progress_callback - Main progress callback
+   * @param {object} options - Step progress reporter options
+   * @param {(message: string, progress_percentage: number, context_data: object) => Promise<void>} options.progress_callback - Main progress callback
    * @param {string} options.step_name - Name of the step
    * @param {number} options.total_items - Total items to process
    * @param {string} options.item_type - Type of items being processed
-   * @returns {Function} Step-specific progress reporter function
+   * @returns {(current_item: number, item_context: object) => Promise<void>} Step-specific progress reporter function
    */
   create_step_progress_reporter({
     progress_callback,

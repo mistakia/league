@@ -45,7 +45,7 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Authenticate with ESPN using ffscrapr patterns (dual auth support)
-   * @param {Object} credentials - ESPN credentials
+   * @param {object} credentials - ESPN credentials
    * @param {string} [credentials.espn_s2] - ESPN s2 cookie (for private leagues)
    * @param {string} [credentials.swid] - ESPN SWID cookie (for private leagues)
    * @param {string} [credentials.username] - ESPN username (alternative login)
@@ -93,7 +93,7 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Get user's ESPN leagues (requires authentication for private leagues)
-   * @returns {Promise<Array>} Array of league objects
+   * @returns {Promise<object[]>} Array of league objects
    */
   async get_user_leagues() {
     if (!this.supports_private_leagues) {
@@ -127,7 +127,7 @@ export default class EspnAdapter extends BaseAdapter {
   /**
    * Get league information
    * @param {string} league_id - ESPN league ID
-   * @returns {Promise<Object>} League configuration data in canonical format
+   * @returns {Promise<object>} League configuration data in canonical format
    */
   async get_league(league_id, options = {}) {
     const year = options.year || current_season.year
@@ -223,7 +223,7 @@ export default class EspnAdapter extends BaseAdapter {
   /**
    * Get teams in a league
    * @param {string} league_id - ESPN league ID
-   * @returns {Promise<Array>} Array of team objects
+   * @returns {Promise<object[]>} Array of team objects
    */
   async get_teams(league_id) {
     const league_data = await this.get_league(league_id)
@@ -232,10 +232,10 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Get rosters for all teams in a league
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.league_id - ESPN league ID
    * @param {number} [params.week] - Optional week number for historical data
-   * @returns {Promise<Array>} Array of roster objects in canonical format
+   * @returns {Promise<object[]>} Array of roster objects in canonical format
    */
   async get_rosters({ league_id, week = null, year = null }) {
     const scoring_period =
@@ -387,9 +387,9 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Get players available on the platform
-   * @param {Object} [params] - Parameters object
-   * @param {Object} [params.filters] - Optional filters for players
-   * @returns {Promise<Array>} Array of player objects in canonical format
+   * @param {object} [params] - Parameters object
+   * @param {object} [params.filters] - Optional filters for players
+   * @returns {Promise<object[]>} Array of player objects in canonical format
    */
   async get_players({ filters = {} } = {}) {
     // ESPN doesn't have a comprehensive standalone players endpoint,
@@ -490,10 +490,10 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Get transactions for a league
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.league_id - ESPN league ID
-   * @param {Object} [params.options] - Optional filters
-   * @returns {Promise<Array>} Array of transaction objects in canonical format
+   * @param {object} [params.options] - Optional filters
+   * @returns {Promise<object[]>} Array of transaction objects in canonical format
    */
   async get_transactions({ league_id, options = {}, year = null }) {
     const target_year = year || current_season.year
@@ -653,10 +653,10 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Get matchups for a specific week
-   * @param {Object} params - Parameters object
+   * @param {object} params - Parameters object
    * @param {string} params.league_id - ESPN league ID
    * @param {number} params.week - Week number
-   * @returns {Promise<Array>} Array of matchup objects
+   * @returns {Promise<object[]>} Array of matchup objects
    */
   async get_matchups({ league_id, week }) {
     const url = `/seasons/${current_season.year}/segments/0/leagues/${league_id}`
@@ -684,7 +684,7 @@ export default class EspnAdapter extends BaseAdapter {
   /**
    * Get league scoring format/rules
    * @param {string} league_id - ESPN league ID
-   * @returns {Promise<Object>} Scoring format configuration
+   * @returns {Promise<object>} Scoring format configuration
    */
   async get_scoring_format(league_id) {
     const league_data = await this.get_league(league_id)
@@ -694,7 +694,7 @@ export default class EspnAdapter extends BaseAdapter {
   /**
    * Get draft results for a league
    * @param {string} league_id - ESPN league ID
-   * @returns {Promise<Array>} Array of draft pick objects
+   * @returns {Promise<object[]>} Array of draft pick objects
    */
   async get_draft_results(league_id) {
     const url = `/games/ffl/seasons/${current_season.year}/segments/0/leagues/${league_id}`
@@ -781,8 +781,8 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Map ESPN scoring settings to canonical format
-   * @param {Object} espn_scoring - ESPN scoring settings
-   * @returns {Object} Standard scoring settings
+   * @param {object} espn_scoring - ESPN scoring settings
+   * @returns {object} Standard scoring settings
    */
   map_scoring_settings_to_canonical(espn_scoring) {
     const standard_scoring = {
@@ -810,8 +810,8 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Map ESPN roster positions to canonical format
-   * @param {Object} espn_roster_settings - ESPN roster settings
-   * @returns {Array} Standard roster slots
+   * @param {object} espn_roster_settings - ESPN roster settings
+   * @returns {object[]} Standard roster slots
    */
   map_roster_positions_to_canonical(espn_roster_settings) {
     const lineup_slot_counts = espn_roster_settings.lineupSlotCounts || {}
@@ -889,8 +889,8 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Map ESPN team to canonical format
-   * @param {Object} espn_team - ESPN team data
-   * @returns {Object} Standard team data
+   * @param {object} espn_team - ESPN team data
+   * @returns {object} Standard team data
    */
   map_team_to_canonical(espn_team) {
     // Extract primary owner - use first owner from owners array, or primaryOwner field
@@ -952,8 +952,8 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Determine roster slot information for ESPN roster entry
-   * @param {Object} espn_entry - ESPN roster entry
-   * @returns {Object} Slot information with slot name and category
+   * @param {object} espn_entry - ESPN roster entry
+   * @returns {object} Slot information with slot name and category
    */
   determine_roster_slot_info_espn(espn_entry) {
     const lineup_slot_id = espn_entry.lineupSlotId
@@ -1113,8 +1113,8 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Extract teams involved in ESPN transaction
-   * @param {Object} espn_transaction - ESPN transaction data
-   * @returns {Array} Array of team external IDs involved
+   * @param {object} espn_transaction - ESPN transaction data
+   * @returns {string[]} Array of team external IDs involved
    */
   extract_teams_from_espn_transaction(espn_transaction) {
     const teams = new Set()
@@ -1137,8 +1137,8 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Map ESPN matchup data (legacy method - kept for backward compatibility)
-   * @param {Object} espn_matchup - ESPN matchup data
-   * @returns {Object} Matchup data
+   * @param {object} espn_matchup - ESPN matchup data
+   * @returns {object} Matchup data
    */
   map_matchup_data(espn_matchup) {
     return {
@@ -1152,8 +1152,8 @@ export default class EspnAdapter extends BaseAdapter {
 
   /**
    * Map ESPN draft pick data (legacy method - kept for backward compatibility)
-   * @param {Object} espn_pick - ESPN draft pick data
-   * @returns {Object} Draft pick data
+   * @param {object} espn_pick - ESPN draft pick data
+   * @returns {object} Draft pick data
    */
   map_draft_pick(espn_pick) {
     return {

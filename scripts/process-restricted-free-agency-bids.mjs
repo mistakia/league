@@ -46,8 +46,8 @@ const initialize_cli = () => {
 
 /**
  * Sort bids by waiver order for the given league
- * @param {Array} bids - Array of bids to sort
- * @returns {Promise<Array>} Sorted array of bids
+ * @param {object[]} bids - Array of bids to sort
+ * @returns {Promise<object[]>} Sorted array of bids
  */
 async function sort_bids_by_waiver_order(bids) {
   if (!bids || !bids.length) return []
@@ -77,8 +77,8 @@ async function sort_bids_by_waiver_order(bids) {
  * Classifying per bid costs one statement each on a set that has never exceeded
  * a handful per auction.
  *
- * @param {Object} params
- * @param {Object} params.winning_bid - The bid that signed the player
+ * @param {object} params
+ * @param {object} params.winning_bid - The bid that signed the player
  * @param {number} params.lid - League id
  * @param {number} params.original_team_id - Team holding the player's rights
  * @param {Date} params.processed_at - Processing instant, bound to the
@@ -130,8 +130,8 @@ async function settle_losing_bids({
  * duration after this one, so it always strictly precedes the next window
  * opening — by `restricted_free_agency_processing_lead_hours`.
  *
- * @param {Object} params
- * @param {Object} params.league - League with window configuration
+ * @param {object} params
+ * @param {object} params.league - League with window configuration
  * @param {number} params.announced - When the player's nomination was announced
  * @returns {number} Timestamp at which the bid becomes processable, or
  *   Infinity when the player has no announcement and so has no window yet
@@ -172,8 +172,8 @@ function get_bid_processing_due({ league, announced }) {
  * and never `dayjs.unix(value)` or `Number(value)` -- the first yields a
  * nonsense year and the second yields milliseconds, and neither throws.
  *
- * @param {Object} params
- * @param {Object} params.league - League-season row (carries the pause columns)
+ * @param {object} params
+ * @param {object} params.league - League-season row (carries the pause columns)
  * @param {number} params.timestamp - Run timestamp, unix seconds
  * @returns {?{paused_at: number, paused_until: ?number, reason: string}} Null
  *   when not paused

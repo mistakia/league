@@ -16,12 +16,12 @@ const log = debug('simulation:load-projection-data')
  * Market stats override traditional stats where they exist.
  * Converts anytime_td to position-appropriate TD stat.
  *
- * @param {Object} params
- * @param {Object} params.traditional_stats - Traditional projection stats { passing_yards, rushing_yards, receiving_yards, receptions, rushing_touchdowns, receiving_touchdowns, ... }
- * @param {Object} params.market_data - Market projection data { stats: { ... }, projection }
+ * @param {object} params
+ * @param {object} params.traditional_stats - Traditional projection stats { passing_yards, rushing_yards, receiving_yards, receptions, rushing_touchdowns, receiving_touchdowns, ... }
+ * @param {object} params.market_data - Market projection data { stats: { ... }, projection }
  * @param {string} params.position - Player position (QB, RB, WR, TE, K, DST)
- * @param {Object} params.league_settings - League scoring settings
- * @returns {Object|null} { points, source, merged_stats } or null if no data
+ * @param {object} params.league_settings - League scoring settings
+ * @returns {object|null} { points, source, merged_stats } or null if no data
  */
 export function merge_market_stats_with_traditional({
   traditional_stats,
@@ -95,12 +95,12 @@ export function merge_market_stats_with_traditional({
  * Uses pre-calculated projections from scoring_format_player_projection_points
  * which includes all positions (QB, RB, WR, TE, K, DST).
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
  * @param {string} params.scoring_format_id - Scoring format hash for point calculation
- * @returns {Promise<Map>} Map of pid -> projected_points
+ * @returns {Promise<Map<string, number>>} Map of pid -> projected_points
  */
 export async function load_player_projections({
   player_ids,
@@ -144,11 +144,11 @@ export async function load_player_projections({
  * Load raw projection stats for stat-level merging with market data.
  * Returns weighted average stats across all projection sources.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string[]} params.player_ids - Array of player IDs
  * @param {number} params.week - NFL week
  * @param {number} params.year - NFL year
- * @returns {Promise<Map>} Map of pid -> { passing_yards, rushing_yards, receiving_yards, receptions, passing_touchdowns, rushing_touchdowns, receiving_touchdowns, ... }
+ * @returns {Promise<Map<string, object>>} Map of pid -> { passing_yards, rushing_yards, receiving_yards, receptions, passing_touchdowns, rushing_touchdowns, receiving_touchdowns, ... }
  */
 export async function load_player_projection_stats({ player_ids, week, year }) {
   if (!player_ids.length) {

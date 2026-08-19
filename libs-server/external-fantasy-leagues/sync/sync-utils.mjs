@@ -14,13 +14,13 @@ export class SyncUtils {
 
   /**
    * Create a sync context with default mappings
-   * @param {Object} options - Sync context options
+   * @param {object} options - Sync context options
    * @param {string} options.platform_name - Platform identifier
    * @param {string} options.external_league_id - External league ID
    * @param {string} options.internal_league_id - Internal league ID
    * @param {number} [options.year] - Season year
    * @param {number} [options.week] - Week number
-   * @returns {Object} Initialized sync context with mappings for teams, players, and users
+   * @returns {object} Initialized sync context with mappings for teams, players, and users
    */
   create_sync_context({
     platform_name,
@@ -51,14 +51,14 @@ export class SyncUtils {
    * this matches the dominant full-season import use case while preserving
    * the fast per-week path for incremental syncs.
    *
-   * @param {Object} options
-   * @param {Object} options.adapter - Platform adapter instance
+   * @param {object} options
+   * @param {object} options.adapter - Platform adapter instance
    * @param {string} options.league_id - External league ID
    * @param {number} [options.year]
    * @param {number} [options.week] - When undefined, iterate weeks 1..max_week
    * @param {number} [options.max_week=18]
    * @param {number} [options.concurrency=4]
-   * @returns {Promise<Array>} Concatenated transaction array
+   * @returns {Promise<object[]>} Concatenated transaction array
    */
   async fetch_transactions_in_range({
     adapter,
@@ -104,10 +104,10 @@ export class SyncUtils {
    * the supplied roster set. Used to scope `fetch_league_data` output to
    * league-relevant players when `include_players` is left at its default.
    *
-   * @param {Object} options
-   * @param {Array} options.players - Canonical player array from adapter.get_players
-   * @param {Array} options.rosters - Canonical roster array from adapter.get_rosters
-   * @returns {Array} Subset of `players` whose external IDs appear on a roster
+   * @param {object} options
+   * @param {object[]} options.players - Canonical player array from adapter.get_players
+   * @param {object[]} options.rosters - Canonical roster array from adapter.get_rosters
+   * @returns {object[]} Subset of `players` whose external IDs appear on a roster
    */
   filter_players_to_rostered({ players, rosters }) {
     if (!Array.isArray(players) || players.length === 0) return []
@@ -148,7 +148,7 @@ export class SyncUtils {
 
   /**
    * Initialize sync statistics object
-   * @returns {Object} Initialized sync statistics
+   * @returns {object} Initialized sync statistics
    */
   init_sync_stats() {
     return {
@@ -161,8 +161,8 @@ export class SyncUtils {
 
   /**
    * Reset sync statistics to initial state
-   * @param {Object} sync_stats - Sync statistics object to reset
-   * @returns {Object} Reset sync statistics
+   * @param {object} sync_stats - Sync statistics object to reset
+   * @returns {object} Reset sync statistics
    */
   reset_sync_stats(sync_stats) {
     sync_stats.players_mapped = 0
@@ -174,12 +174,12 @@ export class SyncUtils {
 
   /**
    * Validate sync parameters
-   * @param {Object} params - Parameters to validate
+   * @param {object} params - Parameters to validate
    * @param {string} params.platform_name - Platform identifier
    * @param {string} params.external_league_id - External league ID
    * @param {string} params.internal_league_id - Internal league ID
-   * @param {Object} [params.credentials] - Platform credentials
-   * @returns {Object} Validation result with valid flag and errors array
+   * @param {object} [params.credentials] - Platform credentials
+   * @returns {object} Validation result with valid flag and errors array
    */
   validate_sync_params(params) {
     const errors = []
@@ -207,15 +207,15 @@ export class SyncUtils {
    * Input parameter names match output keys 1:1 — the result has `platform`,
    * `validation`, etc., so callers can use destructuring shorthand or rename
    * at the boundary (e.g. `platform: platform_name`).
-   * @param {Object} options - Output creation options
+   * @param {object} options - Output creation options
    * @param {string} options.platform - Platform identifier
    * @param {boolean} [options.success] - Whether sync was successful
-   * @param {Object} [options.raw_data] - Raw data from platform
-   * @param {Object} [options.mapped_data] - Processed/mapped data
-   * @param {Object} [options.validation] - Validation results
-   * @param {Array} [options.errors] - Any errors encountered
-   * @param {Object} [options.metadata] - Additional metadata
-   * @returns {Object} Standardized sync output
+   * @param {object} [options.raw_data] - Raw data from platform
+   * @param {object} [options.mapped_data] - Processed/mapped data
+   * @param {object} [options.validation] - Validation results
+   * @param {object[]} [options.errors] - Any errors encountered
+   * @param {object} [options.metadata] - Additional metadata
+   * @returns {object} Standardized sync output
    */
   create_standardized_output({
     platform,
@@ -267,12 +267,12 @@ export class SyncUtils {
 
   /**
    * Create standardized error object for sync operations
-   * @param {Object} options - Error creation options
+   * @param {object} options - Error creation options
    * @param {string} options.error_type - Type of error (e.g., 'sync_failure', 'validation_error')
    * @param {string} options.error_message - Error message
    * @param {string} [options.step] - Sync step where error occurred (e.g., 'sync_teams', 'sync_rosters')
-   * @param {Object} [options.context_data] - Additional context data (e.g., transaction_id, team_id)
-   * @returns {Object} Standardized error object compatible with sync_stats_errors array
+   * @param {object} [options.context_data] - Additional context data (e.g., transaction_id, team_id)
+   * @returns {object} Standardized error object compatible with sync_stats_errors array
    */
   create_sync_error({
     error_type,

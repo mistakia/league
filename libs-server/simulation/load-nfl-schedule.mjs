@@ -50,11 +50,11 @@ export const NFL_TEAMS = [
  * Load NFL schedule for a specific week.
  * Delegates to load_nfl_schedules_for_weeks for a single week.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.year - NFL year
  * @param {number} params.week - NFL week
  * @param {string} [params.seas_type='REG'] - Season type (REG or POST)
- * @returns {Promise<Object>} Schedule object: { [team_abbrev]: { opponent, esbid, is_home } }
+ * @returns {Promise<object>} Schedule object: { [team_abbrev]: { opponent, esbid, is_home } }
  */
 export async function load_nfl_schedule({ year, week, seas_type = 'REG' }) {
   const schedules = await load_nfl_schedules_for_weeks({
@@ -68,11 +68,11 @@ export async function load_nfl_schedule({ year, week, seas_type = 'REG' }) {
 /**
  * Load NFL schedule for multiple weeks in a single query.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {number} params.year - NFL year
  * @param {number[]} params.weeks - Array of NFL weeks
  * @param {string} [params.seas_type='REG'] - Season type (REG or POST)
- * @returns {Promise<Map>} Map of week -> schedule object
+ * @returns {Promise<Map<number, object>>} Map of week -> schedule object
  */
 export async function load_nfl_schedules_for_weeks({
   year,
@@ -140,7 +140,7 @@ export async function load_nfl_schedules_for_weeks({
 /**
  * Get opponent for a team in a specific week.
  *
- * @param {Object} params
+ * @param {object} params
  * @param {string} params.team - NFL team abbreviation
  * @param {number} params.year - NFL year
  * @param {number} params.week - NFL week

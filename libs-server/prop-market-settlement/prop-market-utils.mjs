@@ -27,8 +27,8 @@ const parse_score = (value) => {
 
 /**
  * Calculate metric value by summing specified columns or using calculation_type
- * @param {Object} data_item - Data object containing metric columns or game data
- * @param {Object} mapping - Market mapping with metric_columns or calculation_type
+ * @param {object} data_item - Data object containing metric columns or game data
+ * @param {object} mapping - Market mapping with metric_columns or calculation_type
  * @returns {number} Total metric value
  */
 export const calculate_metric_value = (data_item, mapping) => {
@@ -73,11 +73,11 @@ export const calculate_metric_value = (data_item, mapping) => {
 
 /**
  * Determine selection result based on type and line
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {number} params.metric_value - Calculated metric value
  * @param {string} params.selection_type - OVER/UNDER/YES/NO or team_id for spreads
  * @param {number} params.selection_metric_line - Line to compare against
- * @param {Object} params.mapping - Market mapping configuration
+ * @param {object} params.mapping - Market mapping configuration
  * @returns {string} 'WON', 'LOST', or 'PUSH'
  */
 export const determine_selection_result = ({
@@ -150,8 +150,8 @@ export const determine_selection_result = ({
 
 /**
  * Group data by game ID (esbid)
- * @param {Array} data - Array of data objects with esbid property
- * @returns {Object} Data grouped by esbid
+ * @param {object[]} data - Array of data objects with esbid property
+ * @returns {object} Data grouped by esbid
  */
 export const group_by_game = (data) => {
   const grouped = {}
@@ -167,13 +167,13 @@ export const group_by_game = (data) => {
 
 /**
  * Create both OPEN and CLOSE result objects for a single market calculation
- * @param {Object} params - Named parameters
- * @param {Object} params.market - Market object (should not have time_type set)
+ * @param {object} params - Named parameters
+ * @param {object} params.market - Market object (should not have time_type set)
  * @param {number} params.metric_value - Calculated metric value
  * @param {string} params.selection_result - WON/LOST result
  * @param {string} params.handler_type - Handler type identifier
  * @param {string} params.error - Error message if any
- * @returns {Array<Object>} Array with OPEN and CLOSE result objects
+ * @returns {Array<object>} Array with OPEN and CLOSE result objects
  */
 export const create_dual_result_objects = ({
   market,
@@ -244,12 +244,12 @@ export const validate_games_with_data = async (esbids) => {
  * Fetch OPEN markets for specified games
  * Each fetched OPEN market will generate both OPEN and CLOSE results in the handlers
  *
- * @param {Object} params - Named parameters
+ * @param {object} params - Named parameters
  * @param {Array<string>} params.esbids - Game IDs to fetch markets for
  * @param {number} params.year - Season year
  * @param {boolean} params.missing_only - Only fetch unsettled markets
  * @param {Array<string>} params.supported_market_types - Supported market types
- * @returns {Array} OPEN market data (will generate 2x results: OPEN and CLOSE)
+ * @returns {object[]} OPEN market data (will generate 2x results: OPEN and CLOSE)
  */
 export const fetch_markets_for_games = async ({
   esbids,

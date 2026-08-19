@@ -23,8 +23,8 @@ export { default as RtsportsAdapter } from './adapters/rtsports.mjs'
 
 /**
  * Convenience function for syncing external league
- * @param {Object} params - Sync parameters
- * @returns {Promise<Object>} Sync results
+ * @param {object} params - Sync parameters
+ * @returns {Promise<object>} Sync results
  */
 export async function sync_external_league(params) {
   const orchestrator = new SyncOrchestrator()
@@ -33,12 +33,12 @@ export async function sync_external_league(params) {
 
 /**
  * Convenience function for fetching external league data (read-only)
- * @param {Object} params - Fetch parameters
+ * @param {object} params - Fetch parameters
  * @param {string} params.platform - Platform identifier
  * @param {string} params.external_league_id - External league ID
- * @param {Object} [params.credentials] - Platform authentication credentials
- * @param {Object} [params.config] - Platform-specific configuration
- * @returns {Promise<Object>} Standardized league data
+ * @param {object} [params.credentials] - Platform authentication credentials
+ * @param {object} [params.config] - Platform-specific configuration
+ * @returns {Promise<object>} Standardized league data
  */
 export async function fetch_external_league_data(params) {
   const orchestrator = new SyncOrchestrator()
@@ -61,7 +61,7 @@ export function get_supported_platforms() {
 
 /**
  * Check if a platform is supported
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.platform - Platform identifier to check
  * @returns {boolean} True if platform is supported
  */
@@ -72,10 +72,10 @@ export function is_platform_supported(params) {
 
 /**
  * Create and configure a platform adapter directly
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {string} params.platform - Platform identifier
- * @param {Object} [params.config] - Platform-specific configuration
- * @returns {Object} Configured adapter instance
+ * @param {object} [params.config] - Platform-specific configuration
+ * @returns {object} Configured adapter instance
  */
 export function create_adapter(params) {
   const orchestrator = new SyncOrchestrator()

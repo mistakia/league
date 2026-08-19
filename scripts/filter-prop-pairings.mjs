@@ -34,7 +34,7 @@ const data_path = path.join(__dirname, '../tmp')
 
 /**
  * Default filter options for prop pairings
- * @type {Object}
+ * @type {object}
  */
 const default_options = {
   market_odds_max_threshold: 1,
@@ -153,10 +153,10 @@ const PROP_OPPONENT_ALLOWED_MAPPING = {
 
 /**
  * Checks if opponent allowed stats are below threshold for a specific prop type
- * @param {Object} params - Parameters object
- * @param {Object} params.opponent_seasonlog - Season log data for the opponent
+ * @param {object} params - Parameters object
+ * @param {object} params.opponent_seasonlog - Season log data for the opponent
  * @param {string} params.market_type - The market type to check
- * @param {Object} params.opts - Options containing threshold values
+ * @param {object} params.opts - Options containing threshold values
  * @returns {boolean} True if opponent allowed stats are below threshold
  */
 const is_opponent_allowed_below_threshold = ({
@@ -194,8 +194,8 @@ const is_opponent_allowed_below_threshold = ({
 
 /**
  * Checks if a prop should be excluded based on player filters
- * @param {Object} prop - The prop pairing object
- * @param {Object} opts - Filter options
+ * @param {object} prop - The prop pairing object
+ * @param {object} opts - Filter options
  * @returns {boolean} True if prop should be excluded
  */
 const should_exclude_by_player_filters = (prop, opts) => {
@@ -230,8 +230,8 @@ const should_exclude_by_player_filters = (prop, opts) => {
 
 /**
  * Checks if individual props meet the minimum requirements
- * @param {Object} prop - The prop pairing object
- * @param {Object} opts - Filter options
+ * @param {object} prop - The prop pairing object
+ * @param {object} opts - Filter options
  * @returns {boolean} True if all props meet requirements
  */
 const validate_individual_props = (prop, opts) => {
@@ -258,9 +258,9 @@ const validate_individual_props = (prop, opts) => {
 
 /**
  * Checks if opponent allowed stats are below threshold for all props
- * @param {Object} prop - The prop pairing object
- * @param {Array} nfl_team_seasonlogs - Team season logs
- * @param {Object} opts - Filter options
+ * @param {object} prop - The prop pairing object
+ * @param {NflTeamSeasonlogsRow[]} nfl_team_seasonlogs - Team season logs
+ * @param {object} opts - Filter options
  * @returns {boolean} True if any prop fails opponent allowed check
  */
 const check_opponent_allowed_stats = (prop, nfl_team_seasonlogs, opts) => {
@@ -289,9 +289,9 @@ const check_opponent_allowed_stats = (prop, nfl_team_seasonlogs, opts) => {
 
 /**
  * Checks for duplicate prop combinations and team limits
- * @param {Object} prop - The prop pairing object
- * @param {Object} unique_index - Index to track unique prop combinations
- * @param {Object} team_index - Index to track team occurrences
+ * @param {object} prop - The prop pairing object
+ * @param {object} unique_index - Index to track unique prop combinations
+ * @param {object} team_index - Index to track team occurrences
  * @returns {boolean} True if prop is a duplicate
  */
 const is_duplicate_prop = (prop, unique_index, team_index) => {
@@ -317,13 +317,13 @@ const is_duplicate_prop = (prop, unique_index, team_index) => {
 
 /**
  * Filters a batch of prop pairings based on various criteria
- * @param {Array} pairings - Array of prop pairings to filter
- * @param {Array} nfl_team_seasonlogs - Team season logs for opponent checks
- * @param {Object} opts - Filter options
+ * @param {object[]} pairings - Array of prop pairings to filter
+ * @param {NflTeamSeasonlogsRow[]} nfl_team_seasonlogs - Team season logs for opponent checks
+ * @param {object} opts - Filter options
  * @param {boolean} filter_by_allowed_over_average - Whether to filter by opponent allowed stats
- * @param {Object} unique_index - Index to track unique combinations
- * @param {Object} team_index - Index to track team occurrences
- * @returns {Array} Filtered array of prop pairings
+ * @param {object} unique_index - Index to track unique combinations
+ * @param {object} team_index - Index to track team occurrences
+ * @returns {object[]} Filtered array of prop pairings
  */
 const filter_batch = (
   pairings,
@@ -363,8 +363,8 @@ const filter_batch = (
 
 /**
  * Fetches prop pairing properties for given pairing IDs in batches
- * @param {Array} pairing_ids - Array of pairing IDs to fetch
- * @returns {Promise<Array>} Array of prop pairing properties
+ * @param {string[]} pairing_ids - Array of pairing IDs to fetch
+ * @returns {Promise<object[]>} Array of prop pairing properties
  */
 const fetch_prop_pairing_props = async (pairing_ids) => {
   const batches = chunk_array({ items: pairing_ids, chunk_size: BATCH_SIZE })
@@ -416,8 +416,8 @@ const fetch_prop_pairing_props = async (pairing_ids) => {
 
 /**
  * Applies threshold filters to the query
- * @param {Object} query - Knex query builder
- * @param {Object} opts - Filter options
+ * @param {object} query - Knex query builder
+ * @param {object} opts - Filter options
  */
 const apply_threshold_filters = (query, opts) => {
   const threshold_filters = [
@@ -532,8 +532,8 @@ const apply_threshold_filters = (query, opts) => {
 
 /**
  * Applies team and player filters to the query
- * @param {Object} query - Knex query builder
- * @param {Object} opts - Filter options
+ * @param {object} query - Knex query builder
+ * @param {object} opts - Filter options
  */
 const apply_team_player_filters = (query, opts) => {
   if (opts.exclude_nfl_team.length) {
@@ -547,10 +547,10 @@ const apply_team_player_filters = (query, opts) => {
 
 /**
  * Builds the base prop pairing query with all filters applied
- * @param {Object} opts - Filter options
+ * @param {object} opts - Filter options
  * @param {number} week - Week number
  * @param {string} source - Data source
- * @returns {Object} Knex query builder
+ * @returns {object} Knex query builder
  */
 const build_prop_pairing_query = (opts, week, source, year, seas_type) => {
   const query = db('prop_pairings')
@@ -575,7 +575,7 @@ const build_prop_pairing_query = (opts, week, source, year, seas_type) => {
 
 /**
  * Main function to filter prop pairings based on various criteria
- * @param {Object} params - Parameters object
+ * @param {object} params - Parameters object
  * @param {number} params.week - Week number (defaults to current NFL season week)
  * @param {number} params.year - Year (defaults to current season year)
  * @param {string} params.source - Data source (defaults to 'FANDUEL')
@@ -700,8 +700,8 @@ const filter_prop_pairings = async ({
 
   /**
    * Calculates summary statistics for filtered prop pairings
-   * @param {Array} filtered_pairings - Array of filtered prop pairings
-   * @returns {Object} Summary statistics
+   * @param {object[]} filtered_pairings - Array of filtered prop pairings
+   * @returns {object} Summary statistics
    */
   const calculate_summary_stats = (filtered_pairings) => {
     return filtered_pairings.reduce(
