@@ -271,7 +271,6 @@ class PlayerCache {
 
   /**
    * Fetches all players from database
-   * @returns {Promise<PlayerRow[]>} Array of all player objects with cleaned formatted names
    * @private
    */
   async _fetch_all_players() {
@@ -286,7 +285,6 @@ class PlayerCache {
 
   /**
    * Fetches all active players from database
-   * @returns {Promise<PlayerRow[]>} Array of active player objects with cleaned formatted names
    * @private
    */
   async _fetch_active_players() {
@@ -305,7 +303,6 @@ class PlayerCache {
   /**
    * Fetches aliases for given players
    * @param {PlayerRow[]} players - Array of player objects
-   * @returns {Promise<PlayerAliasesRow[]>} Array of alias objects with cleaned formatted_alias
    * @private
    */
   async _fetch_player_aliases(players) {
@@ -368,7 +365,7 @@ class PlayerCache {
 
   /**
    * Builds alias indexes from alias data
-   * @param {PlayerAliasesRow[]} aliases - Array of alias objects
+   * @param {Pick<PlayerAliasesRow, 'pid' | 'formatted_alias'>[]} aliases - the two columns _fetch_player_aliases selects
    * @private
    */
   _build_alias_indexes(aliases) {

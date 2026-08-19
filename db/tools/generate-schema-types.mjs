@@ -1,7 +1,19 @@
 #!/usr/bin/env node
 
-// Emits db/schema-types.d.ts -- one row type per table in
-// db/schema.postgres.sql, plus a union type per CREATE TYPE enum.
+// Emits two generated files from db/schema.postgres.sql:
+//
+//   db/schema-types.d.ts  -- one row type per table, plus a union per enum.
+//   db/knex-tables.d.ts   -- the knex `Tables` augmentation mapping every
+//                            table NAME to its row type, so `db('player')`
+//                            resolves to PlayerRow with no annotation in the
+//                            consuming file.
+//
+// The second file is why the first one scales. Without it every consumer
+// hand-copies the same fact -- `@returns {Promise<PlayerRow[]>}` on a query
+// over `player` -- and there are ~1,500 `db('<table>')` call sites across 163
+// tables in this tree, so the fact would be written 1,500 times and decay
+// independently at each. Declared once here, a column rename moves under every
+// call site at once and a misspelled property is TS2551 at the read.
 //
 // WHY THIS IS DERIVED AND NOT HAND-WRITTEN. The point of the `//@ts-check`
 // tier is to catch a consumer naming a column the producer does not return,
@@ -23,6 +35,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo_root = path.join(__dirname, '..', '..')
 const schema_path = path.join(repo_root, 'db', 'schema.postgres.sql')
 const output_path = path.join(repo_root, 'db', 'schema-types.d.ts')
+const knex_tables_path = path.join(repo_root, 'db', 'knex-tables.d.ts')
+
+// The row-type interface name for a table, used by BOTH outputs so the two
+// cannot drift into disagreeing about what `player` is called.
+const row_type_name = (table_name) => `${to_pascal_case(table_name)}Row`
 
 // A column line is `    <name> <type>[ modifiers],`. Everything else inside a
 // CREATE TABLE body is skipped explicitly rather than by falling through:
@@ -200,7 +217,7 @@ const render = ({ enums, tables }) => {
   for (const [table_name, columns] of [...tables].sort((a, b) =>
     a[0].localeCompare(b[0])
   )) {
-    lines.push(`export interface ${to_pascal_case(table_name)}Row {`)
+    lines.push(`export interface ${row_type_name(table_name)} {`)
     for (const { column_name, ts_type, is_not_null } of columns) {
       const key = /^[a-z_][a-z0-9_]*$/i.test(column_name)
         ? column_name
@@ -210,6 +227,76 @@ const render = ({ enums, tables }) => {
     lines.push('}')
     lines.push('')
   }
+
+  return lines.join('\n')
+}
+
+const render_knex_tables = ({ tables }) => {
+  const names = [...tables.keys()].sort()
+  const lines = []
+  lines.push('// GENERATED FILE -- do not edit.')
+  lines.push('//')
+  lines.push('// Source: db/schema.postgres.sql')
+  lines.push('// Regenerate: node db/tools/generate-schema-types.mjs')
+  lines.push(
+    '// Currency gate: yarn check:types (runs this generator with --check)'
+  )
+  lines.push('//')
+  lines.push(
+    '// Maps every table NAME to its row type for knex, so a checked file gets'
+  )
+  lines.push(
+    "// `db('player').select('*')` typed as PlayerRow[] with no annotation of its"
+  )
+  lines.push(
+    '// own, and a misspelled column read reports TS2551 with the correct'
+  )
+  lines.push('// spelling. This is the alternative to hand-copying the same')
+  lines.push(
+    '// `@returns {Promise<XRow[]>}` at every one of ~1,500 call sites.'
+  )
+  lines.push('//')
+  lines.push(
+    '// THIS FILE MUST BE LISTED IN tsconfig.json `include`. The include patterns'
+  )
+  lines.push(
+    '// are `**/*.mjs`, which does not match a .d.ts, and a module augmentation'
+  )
+  lines.push(
+    '// that is not in the program applies to nothing while every check still'
+  )
+  lines.push(
+    '// passes -- a vacuous green indistinguishable from a working one. Verify'
+  )
+  lines.push('// with a deliberate typo, never with an exit code.')
+  lines.push('//')
+  lines.push('// Known limits, so coverage is not overclaimed: a join or an')
+  lines.push(
+    '// aliased select narrows imperfectly, `db.raw()` stays untyped, and a'
+  )
+  lines.push(
+    '// bespoke computed shape still needs its own hand-written typedef.'
+  )
+  lines.push('')
+  // No trailing comma on the last import: the repo's prettier config would
+  // strip it, and `yarn prettier` rewrites the WHOLE tree, so an output that is
+  // not prettier-stable makes the formatter and this generator's `--check`
+  // permanently disagree -- whichever ran last leaves the other red.
+  lines.push('import type {')
+  names.forEach((name, i) =>
+    lines.push(`  ${row_type_name(name)}${i === names.length - 1 ? '' : ','}`)
+  )
+  lines.push("} from './schema-types.js'")
+  lines.push('')
+  lines.push("declare module 'knex/types/tables' {")
+  lines.push('  interface Tables {')
+  for (const name of names) {
+    const key = /^[a-z_][a-z0-9_]*$/i.test(name) ? name : `'${name}'`
+    lines.push(`    ${key}: ${row_type_name(name)}`)
+  }
+  lines.push('  }')
+  lines.push('}')
+  lines.push('')
 
   return lines.join('\n')
 }
@@ -235,17 +322,24 @@ const main = () => {
   }
   const total_columns = [...tables.values()].reduce((n, c) => n + c.length, 0)
 
-  const output = render({ enums, tables })
+  const outputs = [
+    { file_path: output_path, content: render({ enums, tables }) },
+    { file_path: knex_tables_path, content: render_knex_tables({ tables }) }
+  ]
   const is_check = process.argv.includes('--check')
 
   if (is_check) {
-    const existing = fs.existsSync(output_path)
-      ? fs.readFileSync(output_path, 'utf8')
-      : null
-    if (existing !== output) {
-      console.error('FAIL: db/schema-types.d.ts is stale.')
-      console.error('Regenerate with: node db/tools/generate-schema-types.mjs')
-      process.exit(1)
+    for (const { file_path, content } of outputs) {
+      const existing = fs.existsSync(file_path)
+        ? fs.readFileSync(file_path, 'utf8')
+        : null
+      if (existing !== content) {
+        console.error(`FAIL: ${path.relative(repo_root, file_path)} is stale.`)
+        console.error(
+          'Regenerate with: node db/tools/generate-schema-types.mjs'
+        )
+        process.exit(1)
+      }
     }
     console.log(
       `schema types current: ${tables.size} tables, ${total_columns} columns, ${enums.size} enums`
@@ -253,9 +347,11 @@ const main = () => {
     return
   }
 
-  fs.writeFileSync(output_path, output)
+  for (const { file_path, content } of outputs) {
+    fs.writeFileSync(file_path, content)
+  }
   console.log(
-    `wrote ${path.relative(repo_root, output_path)}: ${tables.size} tables, ${total_columns} columns, ${enums.size} enums`
+    `wrote db/schema-types.d.ts and db/knex-tables.d.ts: ${tables.size} tables, ${total_columns} columns, ${enums.size} enums`
   )
   if (unknown_types.size) {
     console.log(

@@ -45,6 +45,13 @@ export const EXISTS_REASONS = {
   the same human under an abbreviated first name, and both recurred on every
   run, which made the job's own oracle report failure nightly and permanently.
 */
+/**
+ * Typed as `player` columns rather than as strings so the list is checked
+ * against the schema: a rename or a drop of any one of these fails here,
+ * instead of turning into a rung that silently matches nothing.
+ *
+ * @type {(keyof PlayerRow)[]}
+ */
 export const UNIQUE_EXTERNAL_ID_COLUMNS = [
   'sleeper_player_id',
   'gsis_player_id',

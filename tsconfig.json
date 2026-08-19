@@ -52,6 +52,13 @@
     "strictNullChecks": false
   },
   "include": [
+    // GENERATED, and listed EXPLICITLY because every other pattern here ends in
+    // `*.mjs` and so matches no .d.ts. `db/knex-tables.d.ts` augments knex's
+    // `Tables` interface so `db('player')` resolves to PlayerRow tree-wide; an
+    // augmentation outside the program applies to nothing while `tsc` still
+    // exits 0, which is a vacuous green indistinguishable from a working one.
+    // Prove it with a deliberate column typo, not with an exit code.
+    "db/knex-tables.d.ts",
     "libs-server/**/*.mjs",
     "libs-shared/**/*.mjs",
     "api/**/*.mjs",

@@ -274,11 +274,9 @@ async function calculate_super_priority_from_source({
     if (regular_season_started) {
       const active_at_regular_season_start = await db('rosters_players')
         .join('rosters', 'rosters_players.roster_id', 'rosters.roster_id')
-        .where({
-          'rosters_players.pid': pid,
-          'rosters_players.tid': poaching_tid,
-          'rosters_players.lid': lid
-        })
+        .where('rosters_players.pid', pid)
+        .where('rosters_players.tid', poaching_tid)
+        .where('rosters_players.lid', lid)
         .where('rosters.season_year', poach_year)
         .where('rosters.week', 1)
         .whereIn('rosters_players.slot', active_roster_slots)
@@ -298,11 +296,9 @@ async function calculate_super_priority_from_source({
   // (counted within the poach year)
   const weeks_rostered_query = db('rosters_players')
     .join('rosters', 'rosters_players.roster_id', 'rosters.roster_id')
-    .where({
-      'rosters_players.pid': pid,
-      'rosters_players.tid': poaching_tid,
-      'rosters_players.lid': lid
-    })
+    .where('rosters_players.pid', pid)
+    .where('rosters_players.tid', poaching_tid)
+    .where('rosters_players.lid', lid)
     .where('rosters.season_year', poach_year)
     .where('rosters.week', '>=', 1)
 
@@ -310,7 +306,7 @@ async function calculate_super_priority_from_source({
     weeks_rostered_query.where('rosters.week', '<=', current_season.week)
   }
 
-  const weeks_rostered = await weeks_rostered_query.count('* as count')
+  const weeks_rostered = await weeks_rostered_query.count({ count: '*' })
 
   if (Number(weeks_rostered[0].count) >= 4) {
     return {
@@ -323,11 +319,9 @@ async function calculate_super_priority_from_source({
   // Check if player started 1+ games (was in a starting slot) in the poach year
   const games_started_query = db('rosters_players')
     .join('rosters', 'rosters_players.roster_id', 'rosters.roster_id')
-    .where({
-      'rosters_players.pid': pid,
-      'rosters_players.tid': poaching_tid,
-      'rosters_players.lid': lid
-    })
+    .where('rosters_players.pid', pid)
+    .where('rosters_players.tid', poaching_tid)
+    .where('rosters_players.lid', lid)
     .where('rosters.season_year', poach_year)
     .where('rosters.week', '>=', 1)
     .whereIn('rosters_players.slot', starting_lineup_slots)
@@ -336,7 +330,7 @@ async function calculate_super_priority_from_source({
     games_started_query.where('rosters.week', '<=', current_season.week)
   }
 
-  const games_started = await games_started_query.count('* as count')
+  const games_started = await games_started_query.count({ count: '*' })
 
   if (Number(games_started[0].count) >= 1) {
     return {

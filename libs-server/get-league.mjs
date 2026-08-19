@@ -99,7 +99,7 @@ async function get_league_divisions({ lid, year }) {
   return divisions.reduce((acc, div) => {
     acc[`division_${div.division_id}_name`] = div.division_name
     return acc
-  }, {})
+  }, /** @type {LeagueDivisionNames} */ ({}))
 }
 
 /**
@@ -159,10 +159,19 @@ export default async function ({ lid, year = current_season.year } = {}) {
   if (league) {
     const divisions = await get_league_divisions({ lid, year })
     const pause_state = await get_league_pause_state({ lid })
-    return { ...league, ...divisions, ...pause_state }
+    // The assertion is the index signature, not the columns. TypeScript drops
+    // an index signature when its source is spread into an object literal, so
+    // the division-name keys `divisions` carries cannot survive into the
+    // literal's inferred type no matter how the spread is written. Everything
+    // else here is checked structurally: `league` is the joined row types, and
+    // any column the schema renames still fails at the consumer.
+    return /** @type {League} */ ({ ...league, ...divisions, ...pause_state })
   }
 
-  return league
+  // Reaching here means `.first()` found no row. Returning `league` itself
+  // would be the same value but claims the row type, which is what the
+  // `League` return contract then has to reconcile against a missing league.
+  return undefined
 }
 
 /**

@@ -295,7 +295,7 @@ const registry = [
         `
       )
 
-      const [scanned] = await db('player').count('* as count')
+      const [scanned] = await db('player').count({ count: '*' })
       const denominator = Number(scanned.count)
 
       return found.length

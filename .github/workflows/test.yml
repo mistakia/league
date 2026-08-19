@@ -164,6 +164,16 @@ jobs:
       - name: ts-check adoption ratchet
         run: node db/gates/check-ts-check-ratchet.mjs
 
+      # The knex table-type map, which is what makes the row types reach ~1,500
+      # `db('<table>')` call sites without any of them annotating anything. It
+      # only applies if db/knex-tables.d.ts is in the program, and every
+      # `include` pattern in tsconfig.json ends in *.mjs and matches no .d.ts --
+      # so the file is listed there explicitly, and losing that one line leaves
+      # both steps above exiting 0 over a tree that is no longer covered. This
+      # asserts the behavior as a red/green pair and the wiring separately.
+      - name: knex table types in effect
+        run: node db/gates/check-knex-table-types.mjs
+
       - name: Install PostgreSQL client
         run: |
           sudo apt-get update
