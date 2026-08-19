@@ -1084,10 +1084,14 @@ export default {
   }),
   player_receiving_yards_per_target_from_plays: player_stat_from_plays({
     pid_columns: ['target_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
+    // Divides by TARGETS. Until 2026-08-19 every expression here was
+    // byte-identical to player_receiving_yards_per_reception_from_plays above,
+    // so the two columns emitted the same number on both the season render and
+    // the year-offset range.
+    with_select_string: `CASE WHEN SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)::decimal / SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
     stat_name: 'rec_yds_per_trg_from_plays',
     numerator_select: `SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END)`,
+    denominator_select: `SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true,
     supports_periods: []
   }),

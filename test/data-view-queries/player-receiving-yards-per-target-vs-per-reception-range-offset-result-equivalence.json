@@ -1,0 +1,47 @@
+{
+  "name": "player receiving yards per target and per reception differ across a year_offset range (executed-result parity)",
+  "description": "Seed 2 targets in 2024 (one completion, 10 yards) and 2 in 2025 (one completion, 20 yards), then pool over year=[2023] + year_offset=[1,2]. Per reception is 30/2 = 15; per target is 30/4 = 7.5. Covers the numerator/denominator recombination, which the season fixture is blind to.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_receiving_yards_per_reception_from_plays",
+        "params": { "year": [2023], "year_offset": [1, 2] }
+      },
+      {
+        "column_id": "player_receiving_yards_per_target_from_plays",
+        "params": { "year": [2023], "year_offset": [1, 2] }
+      }
+    ],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+    ]
+  },
+  "expected_query": "with \"tbfcf5ec884b1757c002245651e975812\" as materialized (select COALESCE(target_pid) as pid, SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END) as rec_yds_per_rec_from_plays_numerator, SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) as rec_yds_per_rec_from_plays_denominator, SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END) as rec_yds_per_trg_from_plays_numerator, SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) as rec_yds_per_trg_from_plays_denominator from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2024, 2025) group by COALESCE(target_pid)) select \"player\".\"pid\", player.first_name, player.last_name, (SELECT SUM(tbfcf5ec884b1757c002245651e975812.rec_yds_per_rec_from_plays_numerator) / NULLIF(SUM(tbfcf5ec884b1757c002245651e975812.rec_yds_per_rec_from_plays_denominator), 0) FROM tbfcf5ec884b1757c002245651e975812 WHERE tbfcf5ec884b1757c002245651e975812.pid = player.pid) AS \"rec_yds_per_rec_from_plays_0\", (SELECT SUM(tbfcf5ec884b1757c002245651e975812.rec_yds_per_trg_from_plays_numerator) / NULLIF(SUM(tbfcf5ec884b1757c002245651e975812.rec_yds_per_trg_from_plays_denominator), 0) FROM tbfcf5ec884b1757c002245651e975812 WHERE tbfcf5ec884b1757c002245651e975812.pid = player.pid) AS \"rec_yds_per_trg_from_plays_0\", \"player\".\"primary_position\" from \"player\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-YPTR-000904', 'Test', 'Yptr', 'T.Yptr', 'Test Yptr', 'MLB', 'MLB', '2000-01-01', 2020)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990211, 1, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'TEST-YPTR-000904', true, 10)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990211, 2, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'TEST-YPTR-000904', false, NULL)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990212, 1, 2025, 1, to_timestamp(0), 'REG', 'PASS', 'TEST-YPTR-000904', true, 20)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990212, 2, 2025, 1, to_timestamp(0), 'REG', 'PASS', 'TEST-YPTR-000904', false, NULL)"
+    ],
+    "expected_rows": [
+      {
+        "rec_yds_per_rec_from_plays_0": "15",
+        "rec_yds_per_trg_from_plays_0": "7.5"
+      }
+    ],
+    "compare_columns": [
+      "rec_yds_per_rec_from_plays_0",
+      "rec_yds_per_trg_from_plays_0"
+    ]
+  },
+  "tags": [
+    "year_offset",
+    "from_plays",
+    "numerator_denominator",
+    "range",
+    "result-equivalence"
+  ]
+}

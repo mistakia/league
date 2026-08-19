@@ -1,0 +1,40 @@
+{
+  "name": "player receiving yards per target and per reception render different season values (executed-result parity)",
+  "description": "Seed 3 targets in 2024, of which 2 are completions for 10 and 20 receiving yards. Per reception is 30/2 = 15.00; per target is 30/3 = 10.00. Until 2026-08-19 the per-target column was byte-identical to the per-reception column and both rendered 15.00.",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_receiving_yards_per_reception_from_plays",
+        "params": { "year": [2024] }
+      },
+      {
+        "column_id": "player_receiving_yards_per_target_from_plays",
+        "params": { "year": [2024] }
+      }
+    ],
+    "where": [
+      { "column_id": "player_position", "operator": "IN", "value": ["MLB"] }
+    ]
+  },
+  "expected_query": "with \"t00ee1b47d93e01c805aa643c0db3ef8d\" as materialized (select COALESCE(target_pid) as pid, CASE WHEN SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)::decimal / SUM(CASE WHEN is_completion = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rec_yds_per_rec_from_plays, CASE WHEN SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END)::decimal / SUM(CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as rec_yds_per_trg_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"season_type\" in ('REG') and \"nfl_plays\".\"season_year\" in (2024) group by COALESCE(target_pid)), \"base_years\" as (SELECT unnest(ARRAY[2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.first_name, player.last_name, \"t00ee1b47d93e01c805aa643c0db3ef8d\".\"rec_yds_per_rec_from_plays\" AS \"rec_yds_per_rec_from_plays_0\", \"t00ee1b47d93e01c805aa643c0db3ef8d\".\"rec_yds_per_trg_from_plays\" AS \"rec_yds_per_trg_from_plays_0\", \"player\".\"primary_position\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t00ee1b47d93e01c805aa643c0db3ef8d\" on \"t00ee1b47d93e01c805aa643c0db3ef8d\".\"pid\" = \"player\".\"pid\" where player.primary_position IN ('MLB') group by player.first_name, player.last_name, \"t00ee1b47d93e01c805aa643c0db3ef8d\".\"rec_yds_per_rec_from_plays\", \"t00ee1b47d93e01c805aa643c0db3ef8d\".\"rec_yds_per_trg_from_plays\", \"player\".\"pid\", \"player\".\"last_name\", \"player\".\"first_name\", \"player\".\"primary_position\" order by \"player\".\"pid\" asc limit 500",
+  "result_equivalence": {
+    "seed": [
+      "INSERT INTO player (pid, first_name, last_name, short_name, formatted_name, primary_position, secondary_position, date_of_birth, nfl_draft_year) VALUES ('TEST-YPTS-000903', 'Test', 'Ypts', 'T.Ypts', 'Test Ypts', 'MLB', 'MLB', '2000-01-01', 2020)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990201, 1, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'TEST-YPTS-000903', true, 10)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990201, 2, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'TEST-YPTS-000903', true, 20)",
+      "INSERT INTO nfl_plays (esbid, play_id, season_year, week, updated, season_type, play_type, target_pid, is_completion, receiving_yards) VALUES (990201, 3, 2024, 1, to_timestamp(0), 'REG', 'PASS', 'TEST-YPTS-000903', false, NULL)"
+    ],
+    "expected_rows": [
+      {
+        "rec_yds_per_rec_from_plays_0": "15",
+        "rec_yds_per_trg_from_plays_0": "10"
+      }
+    ],
+    "compare_columns": [
+      "rec_yds_per_rec_from_plays_0",
+      "rec_yds_per_trg_from_plays_0"
+    ]
+  },
+  "tags": ["from_plays", "season", "result-equivalence"]
+}
