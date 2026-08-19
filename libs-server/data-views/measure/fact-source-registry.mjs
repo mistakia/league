@@ -18,13 +18,23 @@
 //
 //   column        a column on the fact row
 //   gsis_bridge   an inner join to `player` on gsis_it_player_id
+//   cohort        a column on the COHORT MEMBERS row, so the source must also
+//                 declare a `cohort_expansion`
 //
 // The registry declares the attribution KIND; the column supplies its
 // `role_columns`, because both role kinds are parameterized per column and six
 // distinct role sets sit over the one `plays` source.
 //
-// `cohort_member` has no entry yet -- it arrives with the share conversion,
-// which registers a `cohort_expansion` naming the members table and its join.
+// COHORT EXPANSION is the one primitive here that MULTIPLIES rows: it joins the
+// members of the group a fact belongs to, so one team play becomes one row per
+// member. That is what puts a team total in scope of a player-grain group, and
+// it is what makes a share an ordinary two-accumulator measure rather than a
+// column family of its own. Measured on production for 2024 REG, the expansion
+// materializes 1,096,224 rows against the 41,152 the unexpanded scan reads --
+// 26.6x, which is offensive-roster size per team play and exactly what the shape
+// predicts. The cost is NOT new: it is what `create_team_share_stat` emits in
+// production today. What the conversion adds is the option of paying it at
+// PERIOD grain, which only a `count` or `mean` request reaches.
 
 export const SUBJECT_ATTRIBUTIONS = Object.freeze([
   'direct',
@@ -33,7 +43,11 @@ export const SUBJECT_ATTRIBUTIONS = Object.freeze([
   'cohort_member'
 ])
 
-export const SUBJECT_ID_LOOKUPS = Object.freeze(['column', 'gsis_bridge'])
+export const SUBJECT_ID_LOOKUPS = Object.freeze([
+  'column',
+  'gsis_bridge',
+  'cohort'
+])
 
 // Every source here joins `nfl_games` on `esbid`, so every one partitions by
 // game and by season. A source at season grain would declare `['season']`.
@@ -103,48 +117,122 @@ export const FACT_SOURCES = Object.freeze({
     subject_id_column: 'pid',
     team_code_column: null,
     partition_periods: GAME_AND_SEASON
+  },
+  // A share: every offensive play of a team attributes to every player who
+  // appeared in that game for that team, so a measure can put the subject's own
+  // events over the team's in one scan. The denominator is therefore team plays
+  // in GAMES THE PLAYER APPEARED IN, not the team's whole season -- that is the
+  // standard definition and what ships today, and per-period evaluation inherits
+  // it unchanged.
+  //
+  // `team_code_column` is null because a share is a player-versus-team fraction:
+  // grouping it by team would put the team on both sides of its own division.
+  plays_cohort: {
+    table: 'nfl_plays',
+    subject_attribution: 'cohort_member',
+    subject_id_lookup: 'cohort',
+    subject_id_column: null,
+    team_code_column: null,
+    partition_periods: GAME_AND_SEASON,
+    cohort_expansion: {
+      table: 'player_gamelogs',
+      alias: 'pg',
+      subject_id_column: 'pid',
+      join: (query) => {
+        query.join('player_gamelogs as pg', function () {
+          this.on('nfl_plays.esbid', '=', 'pg.esbid').andOn(
+            'nfl_plays.offense_nfl_team',
+            '=',
+            'pg.nfl_team'
+          )
+        })
+      }
+    }
   }
 })
 
-// Fails at module load rather than emitting wrong SQL at query time.
-const validate_registry = () => {
+// Fails at module load rather than emitting wrong SQL at query time. Exported
+// per ENTRY so the rules can be exercised against a declaration that is not in
+// the registry -- a spec cannot otherwise reach them, since the only way to run
+// them is to ship a broken source.
+export const validate_fact_source = (name, source) => {
   const attributions = new Set(SUBJECT_ATTRIBUTIONS)
   const lookups = new Set(SUBJECT_ID_LOOKUPS)
-  for (const [name, source] of Object.entries(FACT_SOURCES)) {
-    if (typeof source.table !== 'string' || source.table.length === 0) {
-      throw new Error(`fact source: ${name} requires a non-empty table`)
-    }
-    if (!attributions.has(source.subject_attribution)) {
+  if (typeof source.table !== 'string' || source.table.length === 0) {
+    throw new Error(`fact source: ${name} requires a non-empty table`)
+  }
+  if (!attributions.has(source.subject_attribution)) {
+    throw new Error(
+      `fact source: ${name} has unknown subject_attribution '${source.subject_attribution}' (expected ${SUBJECT_ATTRIBUTIONS.join(' | ')})`
+    )
+  }
+  if (!lookups.has(source.subject_id_lookup)) {
+    throw new Error(
+      `fact source: ${name} has unknown subject_id_lookup '${source.subject_id_lookup}' (expected ${SUBJECT_ID_LOOKUPS.join(' | ')})`
+    )
+  }
+  if (
+    source.subject_id_lookup === 'column' &&
+    (typeof source.subject_id_column !== 'string' ||
+      source.subject_id_column.length === 0)
+  ) {
+    throw new Error(
+      `fact source: ${name} looks the subject id up on a column and must name one`
+    )
+  }
+  // A cohort source is exactly the pairing of the two: the attribution says a
+  // fact reaches the subject through a group, and the expansion is the only
+  // thing that can name the group's members. Either half alone emits a scan
+  // that silently attributes to nobody, so both throw at module load.
+  const declares_cohort =
+    source.subject_attribution === 'cohort_member' ||
+    source.subject_id_lookup === 'cohort'
+  if (declares_cohort) {
+    if (source.subject_attribution !== 'cohort_member') {
       throw new Error(
-        `fact source: ${name} has unknown subject_attribution '${source.subject_attribution}' (expected ${SUBJECT_ATTRIBUTIONS.join(' | ')})`
+        `fact source: ${name} looks the subject id up on a cohort but does not attribute through one`
       )
     }
-    if (!lookups.has(source.subject_id_lookup)) {
+    if (source.subject_id_lookup !== 'cohort') {
       throw new Error(
-        `fact source: ${name} has unknown subject_id_lookup '${source.subject_id_lookup}' (expected ${SUBJECT_ID_LOOKUPS.join(' | ')})`
+        `fact source: ${name} attributes through a cohort but reads its subject id from '${source.subject_id_lookup}'`
       )
     }
-    if (
-      source.subject_id_lookup === 'column' &&
-      (typeof source.subject_id_column !== 'string' ||
-        source.subject_id_column.length === 0)
-    ) {
+    const expansion = source.cohort_expansion
+    if (!expansion || typeof expansion !== 'object') {
       throw new Error(
-        `fact source: ${name} looks the subject id up on a column and must name one`
+        `fact source: ${name} attributes through a cohort and must declare a cohort_expansion`
       )
     }
-    if (
-      !Array.isArray(source.partition_periods) ||
-      source.partition_periods.length === 0
-    ) {
+    for (const field of ['table', 'alias', 'subject_id_column']) {
+      if (
+        typeof expansion[field] !== 'string' ||
+        expansion[field].length === 0
+      ) {
+        throw new Error(
+          `fact source: ${name} cohort_expansion requires a non-empty ${field}`
+        )
+      }
+    }
+    if (typeof expansion.join !== 'function') {
       throw new Error(
-        `fact source: ${name} requires at least one partition period`
+        `fact source: ${name} cohort_expansion requires a join function`
       )
     }
   }
+  if (
+    !Array.isArray(source.partition_periods) ||
+    source.partition_periods.length === 0
+  ) {
+    throw new Error(
+      `fact source: ${name} requires at least one partition period`
+    )
+  }
 }
 
-validate_registry()
+for (const [name, source] of Object.entries(FACT_SOURCES)) {
+  validate_fact_source(name, source)
+}
 
 // Back-compat: undefined / unknown falls through to gamelogs, preserving the
 // legacy `measure_source === 'plays' ? 'nfl_plays' : 'player_gamelogs'`
@@ -162,6 +250,16 @@ export const resolve_fact_source = (measure_source) => {
 export const subject_id_expression = ({ fact_source, role_columns }) => {
   if (fact_source.subject_id_lookup === 'gsis_bridge') {
     return { expression: 'player.pid', requires_player_join: true }
+  }
+
+  // The cohort members row carries the subject, not the fact row -- the fact row
+  // names a team play and has no member on it at all.
+  if (fact_source.subject_id_lookup === 'cohort') {
+    const { alias, subject_id_column } = fact_source.cohort_expansion
+    return {
+      expression: `${alias}.${subject_id_column}`,
+      requires_player_join: false
+    }
   }
 
   const bare = `${fact_source.table}.${fact_source.subject_id_column}`

@@ -28,7 +28,7 @@ const current_dir = path.dirname(fileURLToPath(import.meta.url))
 // (ce27846ef) moved NOTHING: all 59 columns rendered byte-identically. The
 // ratio conversion moved exactly the 34 player numerator/denominator columns,
 // each from a hand-written CASE/CAST form to the one guarded division
-// combine.mjs emits -- and five of those (pass touchdown, interception and
+// combine-accumulators.mjs emits -- and five of those (pass touchdown, interception and
 // interception-worthy percentage, and the two successful-play percentages)
 // were guarding on their NUMERATOR, so they rendered blank for a subject with
 // a real denominator and no events. That is a value change, covered by

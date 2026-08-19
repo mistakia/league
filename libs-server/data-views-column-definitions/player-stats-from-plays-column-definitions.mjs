@@ -93,7 +93,7 @@ const player_stat_from_plays = ({
   ]
 }) => {
   // Measure-first contract: a column declares an explicit
-  // `measure: { accumulators, combine }`, and derive_measure produces the
+  // `measure: { accumulators, combine_accumulators }`, and derive_measure produces the
   // season render, the offset-window recombination, the numerator measure_expr,
   // the period aggregate, supports_output and the rounding from it. A ratio is
   // a two-accumulator measure whose combine divides; it is not a second
@@ -111,7 +111,7 @@ const player_stat_from_plays = ({
   // impossible.
   if (!derived && supports_periods && supports_periods.length > 0) {
     throw new Error(
-      `player_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { accumulators, combine } or set supports_periods: []`
+      `player_stat_from_plays: '${stat_name}' advertises output periods but declares no measure -- declare measure: { accumulators, combine_accumulators } or set supports_periods: []`
     )
   }
 
@@ -384,7 +384,7 @@ export default {
     pid_columns: ['passer_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `pass_yards` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'pass_yds_from_plays'
   }),
@@ -397,7 +397,7 @@ export default {
           expr: `CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'pass_atts_from_plays'
   }),
@@ -417,7 +417,7 @@ export default {
           expr: `CASE WHEN is_touchdown = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'pass_tds_from_plays'
   }),
@@ -430,7 +430,7 @@ export default {
           expr: `CASE WHEN is_interception = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'pass_ints_from_plays'
   }),
@@ -443,7 +443,7 @@ export default {
           expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'pass_comps_from_plays'
   }),
@@ -456,7 +456,7 @@ export default {
           expr: `CASE WHEN is_first_down = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'pass_first_downs_from_plays'
   }),
@@ -469,7 +469,7 @@ export default {
           expr: `CASE WHEN is_dropped_pass = true THEN depth_of_target ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'drop_pass_yds_from_plays'
   }),
@@ -487,7 +487,7 @@ export default {
           expr: `CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -515,7 +515,7 @@ export default {
             expr: `CASE WHEN completion_percentage_over_expected IS NOT NULL THEN 1 ELSE 0 END`
           }
         },
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         decimals: null
       },
@@ -538,7 +538,7 @@ export default {
           expr: `CASE WHEN completion_probability IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -562,7 +562,7 @@ export default {
           expr: `CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -586,7 +586,7 @@ export default {
           expr: `CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -611,7 +611,7 @@ export default {
             expr: `CASE WHEN is_sack is null or is_sack = false THEN 1 ELSE 0 END`
           }
         },
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           divide({
             numerator: a.numerator,
             denominator: a.denominator,
@@ -626,7 +626,7 @@ export default {
     pid_columns: ['passer_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `yards_after_catch` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'pass_yds_after_catch_from_plays'
   }),
@@ -642,7 +642,7 @@ export default {
             expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
           }
         },
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         decimals: 2
       },
@@ -659,7 +659,7 @@ export default {
           expr: `CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
     },
@@ -676,7 +676,7 @@ export default {
           expr: `CASE WHEN passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
     },
@@ -686,7 +686,7 @@ export default {
     pid_columns: ['passer_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `depth_of_target` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'pass_air_yds_from_plays'
   }),
@@ -701,7 +701,7 @@ export default {
           expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
     },
@@ -719,7 +719,7 @@ export default {
         },
         denominator: { aggregate: 'sum', expr: `depth_of_target` }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 4
     },
@@ -734,7 +734,7 @@ export default {
           expr: `CASE WHEN is_sack = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'sacked_from_plays'
   }),
@@ -747,7 +747,7 @@ export default {
           expr: `CASE WHEN is_sack = true THEN yards_gained ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'sacked_yds_from_plays'
   }),
@@ -765,7 +765,7 @@ export default {
           expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -789,7 +789,7 @@ export default {
           expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -813,7 +813,7 @@ export default {
           expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -837,7 +837,7 @@ export default {
           expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -867,7 +867,7 @@ export default {
           expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: `(${a.pass_yards} - ${a.sack_yards})`,
           denominator: a.dropbacks
@@ -881,7 +881,7 @@ export default {
     pid_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `rush_yards` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'rush_yds_from_plays'
   }),
@@ -894,7 +894,7 @@ export default {
           expr: `CASE WHEN is_touchdown = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'rush_tds_from_plays'
   }),
@@ -909,7 +909,7 @@ export default {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
     },
@@ -924,7 +924,7 @@ export default {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'rush_atts_from_plays'
   }),
@@ -955,7 +955,7 @@ export default {
             expr: `CASE WHEN ball_carrier_pid IS NOT NULL AND box_defenders IS NOT NULL THEN 1 ELSE 0 END`
           }
         },
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         decimals: 2
       },
@@ -970,7 +970,7 @@ export default {
           expr: `CASE WHEN is_first_down = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'rush_first_downs_from_plays'
   }),
@@ -983,7 +983,7 @@ export default {
           expr: `CASE WHEN rush_yards > 0 THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'positive_rush_atts_from_plays'
   }),
@@ -993,7 +993,7 @@ export default {
       accumulators: {
         value: { aggregate: 'sum', expr: `yards_after_any_contact` }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'rush_yds_after_contact_from_plays'
   }),
@@ -1009,7 +1009,7 @@ export default {
             expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
           }
         },
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         decimals: 2
       },
@@ -1029,7 +1029,7 @@ export default {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1048,7 +1048,7 @@ export default {
           expr: `CASE WHEN nfl_plays.yard_line_100 <= 20 AND ball_carrier_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.yard_line_100 <= 20 AND target_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.yard_line_100 > 20 AND ball_carrier_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.yard_line_100 > 20 AND target_pid IS NOT NULL THEN 1.43 ELSE 0 END`
         }
       },
-      combine: 'identity',
+      combine_accumulators: 'identity',
       decimals: 2
     },
     stat_name: 'weighted_opportunity_from_plays'
@@ -1062,7 +1062,7 @@ export default {
           expr: `CASE WHEN (ball_carrier_pid IS NOT NULL AND yard_line_100 <= 10) OR (target_pid IS NOT NULL AND is_completion = true) THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'high_value_touches_from_plays'
   }),
@@ -1075,7 +1075,7 @@ export default {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL OR (target_pid IS NOT NULL AND is_completion = true) THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'touches_from_plays'
   }),
@@ -1089,7 +1089,7 @@ export default {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL OR (passer_pid IS NOT NULL AND (is_sack IS NULL OR is_sack = false)) THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'opportunities_from_plays'
   }),
@@ -1108,7 +1108,7 @@ export default {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1128,7 +1128,7 @@ export default {
         },
         denominator: { aggregate: 'sum', expr: `nfl_plays.rush_yards` }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1151,7 +1151,7 @@ export default {
           expr: `CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1181,7 +1181,7 @@ export default {
           expr: `CASE WHEN nfl_plays.ball_carrier_pid IS NOT NULL OR nfl_plays.target_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: `(${a.carries} + ${a.targets})`,
           denominator: a.team_opportunities,
@@ -1200,7 +1200,7 @@ export default {
           expr: `CASE WHEN fumble_lost_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'fumbles_from_plays'
   }),
@@ -1214,7 +1214,7 @@ export default {
           expr: `CASE WHEN fumble_lost_pid IS NOT NULL AND is_fumble_lost = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'fumbles_lost_from_plays'
   }),
@@ -1233,7 +1233,7 @@ export default {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1257,7 +1257,7 @@ export default {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1281,7 +1281,7 @@ export default {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1297,7 +1297,7 @@ export default {
       accumulators: {
         value: { aggregate: 'sum', expr: `missed_or_broken_tackle` }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'broken_tackles_from_plays'
   }),
@@ -1312,7 +1312,7 @@ export default {
           expr: `CASE WHEN ball_carrier_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
     },
@@ -1327,7 +1327,7 @@ export default {
           expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'recs_from_plays'
   }),
@@ -1340,7 +1340,7 @@ export default {
           expr: `CASE WHEN is_completion = true THEN receiving_yards ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'rec_yds_from_plays',
     measure_expr: ({ table_name }) =>
@@ -1355,7 +1355,7 @@ export default {
           expr: `CASE WHEN is_completion = true AND is_touchdown = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'rec_tds_from_plays'
   }),
@@ -1368,7 +1368,7 @@ export default {
           expr: `CASE WHEN is_touchdown = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'rec_or_rush_tds_from_plays'
   }),
@@ -1381,7 +1381,7 @@ export default {
           expr: `CASE WHEN is_dropped_pass = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'drops_from_plays'
   }),
@@ -1394,7 +1394,7 @@ export default {
           expr: `CASE WHEN is_dropped_pass = true THEN depth_of_target ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'drop_rec_yds_from_plays'
   }),
@@ -1407,7 +1407,7 @@ export default {
           expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'trg_from_plays'
   }),
@@ -1420,7 +1420,7 @@ export default {
           expr: `CASE WHEN depth_of_target >= 20 THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'deep_trg_from_plays'
   }),
@@ -1438,7 +1438,7 @@ export default {
           expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1459,7 +1459,7 @@ export default {
           expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
     },
@@ -1469,7 +1469,7 @@ export default {
     pid_columns: ['target_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `depth_of_target` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'air_yds_from_plays'
   }),
@@ -1482,7 +1482,7 @@ export default {
           expr: `CASE WHEN is_first_down = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'recv_first_down_from_plays'
   }),
@@ -1500,7 +1500,7 @@ export default {
           expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1525,7 +1525,7 @@ export default {
         },
         denominator: { aggregate: 'sum', expr: `nfl_plays.depth_of_target` }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1548,7 +1548,7 @@ export default {
           expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1595,7 +1595,7 @@ export default {
           expr: `CASE WHEN nfl_plays.is_first_down THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1613,7 +1613,7 @@ export default {
           expr: `CASE WHEN is_completion = true THEN yards_after_catch ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'rec_yds_after_catch_from_plays'
   }),
@@ -1630,7 +1630,7 @@ export default {
         },
         denominator: { aggregate: 'sum', expr: `depth_of_target` }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 4
     },
@@ -1650,7 +1650,7 @@ export default {
           expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
     },
@@ -1674,7 +1674,7 @@ export default {
           expr: `CASE WHEN target_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: 2
     },
@@ -1695,7 +1695,7 @@ export default {
             expr: `CASE WHEN is_completion = true THEN 1 ELSE 0 END`
           }
         },
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           divide({ numerator: a.numerator, denominator: a.denominator }),
         decimals: 2
       },
@@ -1706,7 +1706,7 @@ export default {
     pid_columns: ['ball_carrier_pid', 'target_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `yards_created` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'yards_created_from_plays'
   }),
@@ -1715,7 +1715,7 @@ export default {
     pid_columns: ['ball_carrier_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `yards_blocked` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'yards_blocked_from_plays'
   }),
@@ -1735,7 +1735,7 @@ export default {
           expr: `CASE WHEN passer_pid IS NOT NULL THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({
           numerator: a.numerator,
           denominator: a.denominator,
@@ -1763,7 +1763,7 @@ export default {
             expr: `CASE WHEN ball_carrier_pid IS NOT NULL OR target_pid IS NOT NULL THEN 1 ELSE 0 END`
           }
         },
-        combine: (a, { divide }) =>
+        combine_accumulators: (a, { divide }) =>
           divide({
             numerator: a.numerator,
             denominator: a.denominator,
@@ -1778,7 +1778,7 @@ export default {
     pid_columns: ['passer_pid', 'ball_carrier_pid', 'target_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `epa` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'total_expected_points_added_from_plays'
   }),
@@ -1787,7 +1787,7 @@ export default {
     pid_columns: ['passer_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `epa` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'passing_expected_points_added_from_plays'
   }),
@@ -1797,7 +1797,7 @@ export default {
       pid_columns: ['ball_carrier_pid', 'target_pid'],
       measure: {
         accumulators: { value: { aggregate: 'sum', expr: `epa` } },
-        combine: 'identity'
+        combine_accumulators: 'identity'
       },
       stat_name: 'rushing_and_receiving_expected_points_added_from_plays'
     }),
@@ -1806,7 +1806,7 @@ export default {
     pid_columns: ['qb_pid'],
     measure: {
       accumulators: { value: { aggregate: 'sum', expr: `quarterback_epa` } },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'quarterback_epa_from_plays'
   }),
@@ -1820,7 +1820,7 @@ export default {
           expr: `CASE WHEN is_qb_pressure_tracking = true OR is_qb_pressure = true THEN 1 ELSE 0 END`
         }
       },
-      combine: 'identity'
+      combine_accumulators: 'identity'
     },
     stat_name: 'quarterback_pressures_from_plays'
   }),
@@ -1842,7 +1842,7 @@ export default {
           expr: `CASE WHEN time_to_throw IS NOT NULL AND (is_sack IS NULL OR is_sack = false) THEN 1 ELSE 0 END`
         }
       },
-      combine: (a, { divide }) =>
+      combine_accumulators: (a, { divide }) =>
         divide({ numerator: a.numerator, denominator: a.denominator }),
       decimals: null
     },

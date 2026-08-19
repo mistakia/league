@@ -14,11 +14,11 @@
 //
 //   measure: {
 //     accumulators: { <name>: { aggregate, expr } },
-//     combine: 'identity' | (accumulator_sql, { divide }) => <sql fragment>,
+//     combine_accumulators: 'identity' | (accumulator_sql, { divide }) => <sql fragment>,
 //     decimals: <int | null>
 //   }
 //
-// `combine` is REQUIRED and `'identity'` requires exactly one accumulator.
+// `combine_accumulators` is REQUIRED and `'identity'` requires exactly one accumulator.
 // Absence is not identity: a misspelled key would otherwise fall through,
 // advertise a denominator vocabulary on a ratio column, and emit wrong SQL
 // with nothing throwing.
@@ -31,12 +31,15 @@
 // A measure carrying a real combine also derives its RECOMBINATION -- the same
 // combine applied one grain coarser, over an offset window whose CTE has
 // already projected one column per accumulator. That is the law at a second
-// scope rather than a second emitter: `render_combine` stays the only place a
+// scope rather than a second emitter: `render_combine_accumulators` stays the only place a
 // combine is rendered, and "sum of per-year ratios" is unrepresentable because
 // the recombination sums ACCUMULATORS and combines after.
 
 import { render_accumulators, validate_accumulator } from './accumulator.mjs'
-import { render_combine, validate_combine } from './combine.mjs'
+import {
+  render_combine_accumulators,
+  validate_combine_accumulators
+} from './combine-accumulators.mjs'
 import { derive_supports_output } from './capability.mjs'
 
 const INTEGRAL_AGGREGATES = new Set(['count', 'count_distinct'])
@@ -49,7 +52,7 @@ const SERVEABLE_AGGREGATIONS = ['rate', 'count']
 const assert_measure = ({ stat_name, measure }) => {
   if (!measure || typeof measure !== 'object') {
     throw new Error(
-      `measure-contract: ${stat_name} requires a measure object { accumulators, combine }`
+      `measure-contract: ${stat_name} requires a measure object { accumulators, combine_accumulators }`
     )
   }
   const entries = Object.entries(measure.accumulators || {})
@@ -61,9 +64,9 @@ const assert_measure = ({ stat_name, measure }) => {
   for (const [name, accumulator] of entries) {
     validate_accumulator({ label: `${stat_name}.${name}`, accumulator })
   }
-  validate_combine({
+  validate_combine_accumulators({
     measure_name: stat_name,
-    combine: measure.combine,
+    combine_accumulators: measure.combine_accumulators,
     accumulators: measure.accumulators
   })
 }
@@ -71,14 +74,14 @@ const assert_measure = ({ stat_name, measure }) => {
 export const derive_measure = ({ stat_name, measure, supports_periods }) => {
   assert_measure({ stat_name, measure })
 
-  const { accumulators, combine } = measure
+  const { accumulators, combine_accumulators } = measure
   const entries = Object.entries(accumulators)
   const [sole_name, sole_accumulator] = entries.length === 1 ? entries[0] : []
 
   const decimals =
     measure.decimals != null
       ? measure.decimals
-      : combine === 'identity' &&
+      : combine_accumulators === 'identity' &&
           sole_accumulator?.aggregate === 'count_distinct'
         ? 2
         : null
@@ -86,7 +89,7 @@ export const derive_measure = ({ stat_name, measure, supports_periods }) => {
   // An integral value has nothing to round at the season grain, whatever its
   // rate render does.
   const value_is_integral =
-    combine === 'identity' &&
+    combine_accumulators === 'identity' &&
     INTEGRAL_AGGREGATES.has(sole_accumulator.aggregate)
 
   const accumulator_sql = render_accumulators({
@@ -94,9 +97,9 @@ export const derive_measure = ({ stat_name, measure, supports_periods }) => {
     accumulators
   })
 
-  const with_select = render_combine({
+  const with_select = render_combine_accumulators({
     measure_name: stat_name,
-    combine,
+    combine_accumulators,
     accumulator_sql,
     decimals: value_is_integral ? null : decimals
   })
@@ -115,7 +118,7 @@ export const derive_measure = ({ stat_name, measure, supports_periods }) => {
   // projects `<stat>_<accumulator>` per accumulator (see accumulator_selects),
   // so the window sums each one and combines after -- never the reverse.
   const accumulator_names = Object.keys(accumulators)
-  const is_combined = combine !== 'identity'
+  const is_combined = combine_accumulators !== 'identity'
   const accumulator_selects = is_combined
     ? accumulator_names.map(
         (name) => `${accumulator_sql[name]} as ${stat_name}_${name}`
@@ -123,9 +126,9 @@ export const derive_measure = ({ stat_name, measure, supports_periods }) => {
     : null
   const recombine = is_combined
     ? ({ table_name }) =>
-        render_combine({
+        render_combine_accumulators({
           measure_name: stat_name,
-          combine,
+          combine_accumulators,
           accumulator_sql: Object.fromEntries(
             accumulator_names.map((name) => [
               name,

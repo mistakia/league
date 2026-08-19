@@ -23,7 +23,7 @@ describe('data-views measure-contract', () => {
         stat_name: 'rush_yds_from_plays',
         measure: {
           accumulators: { value: { aggregate: 'sum', expr: 'rush_yards' } },
-          combine: 'identity'
+          combine_accumulators: 'identity'
         },
         supports_periods: TEAM_PERIODS
       })
@@ -43,7 +43,7 @@ describe('data-views measure-contract', () => {
               expr: 'CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END'
             }
           },
-          combine: 'identity',
+          combine_accumulators: 'identity',
           decimals: 2
         },
         supports_periods: TEAM_PERIODS
@@ -67,7 +67,7 @@ describe('data-views measure-contract', () => {
               expr: "CONCAT(esbid, '_', series_sequence)"
             }
           },
-          combine: 'identity'
+          combine_accumulators: 'identity'
         },
         supports_periods: TEAM_PERIODS
       })
@@ -90,7 +90,7 @@ describe('data-views measure-contract', () => {
               expr: "CONCAT(esbid, '_', drive_sequence)"
             }
           },
-          combine: 'identity'
+          combine_accumulators: 'identity'
         },
         supports_periods: TEAM_PERIODS
       })
@@ -109,7 +109,7 @@ describe('data-views measure-contract', () => {
               expr: "CONCAT(esbid, '_', drive_sequence)"
             }
           },
-          combine: 'identity',
+          combine_accumulators: 'identity',
           decimals: 0
         },
         supports_periods: TEAM_PERIODS
@@ -124,7 +124,7 @@ describe('data-views measure-contract', () => {
         stat_name: 'rush_yds_from_plays',
         measure: {
           accumulators: { value: { aggregate: 'sum', expr: 'rush_yards' } },
-          combine: 'identity'
+          combine_accumulators: 'identity'
         },
         supports_periods: TEAM_PERIODS
       })
@@ -148,7 +148,7 @@ describe('data-views measure-contract', () => {
           stat_name: 'bad_col',
           measure: {
             accumulators: { value: { aggregate: 'average', expr: 'x' } },
-            combine: 'identity'
+            combine_accumulators: 'identity'
           },
           supports_periods: TEAM_PERIODS
         })
@@ -161,7 +161,7 @@ describe('data-views measure-contract', () => {
           stat_name: 'bad_col',
           measure: {
             accumulators: { value: { aggregate: 'sum' } },
-            combine: 'identity'
+            combine_accumulators: 'identity'
           },
           supports_periods: TEAM_PERIODS
         })
@@ -189,7 +189,7 @@ describe('data-views measure-contract', () => {
               numerator: { aggregate: 'sum', expr: 'a' },
               denominator: { aggregate: 'sum', expr: 'b' }
             },
-            combine: 'identity'
+            combine_accumulators: 'identity'
           },
           supports_periods: TEAM_PERIODS
         })
@@ -200,7 +200,7 @@ describe('data-views measure-contract', () => {
       expect(() =>
         derive_measure({
           stat_name: 'bad_col',
-          measure: { accumulators: {}, combine: 'identity' },
+          measure: { accumulators: {}, combine_accumulators: 'identity' },
           supports_periods: TEAM_PERIODS
         })
       ).to.throw(/declares no accumulators/)

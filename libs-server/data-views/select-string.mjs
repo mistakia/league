@@ -232,7 +232,7 @@ const get_select_string = ({
       // ACCUMULATOR the CTE projected and applying the combine after -- never by
       // summing the per-year combined value, which is the sum-of-ratios class
       // this contract makes unrepresentable. The expression comes from the
-      // column's own measure declaration through combine.mjs, so the scale, the
+      // column's own measure declaration through combine-accumulators.mjs, so the scale, the
       // zero-denominator answer and the rounding are the season render's, at a
       // coarser grain. It replaces a hand-written copy that disagreed with the
       // other four on both the cast and the rounding.
