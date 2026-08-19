@@ -32,20 +32,27 @@ export const guarded_divide = ({ numerator, denominator, scale = null }) => {
 export const apply_decimals = ({ sql, decimals }) =>
   decimals != null ? `ROUND(${sql}, ${decimals})` : sql
 
-// `combine` is `'identity'` or a function of the rendered accumulator map.
+// `combine_accumulators` is `'identity'` or a function of the rendered accumulator map.
 // Absence is NOT identity -- a misspelled key would otherwise fall through to
 // identity, advertise a denominator vocabulary on a ratio column and emit
 // wrong SQL with no throw anywhere.
-export const validate_combine = ({ measure_name, combine, accumulators }) => {
+export const validate_combine_accumulators = ({
+  measure_name,
+  combine_accumulators,
+  accumulators
+}) => {
   const names = Object.keys(accumulators || {})
-  if (combine !== 'identity' && typeof combine !== 'function') {
+  if (
+    combine_accumulators !== 'identity' &&
+    typeof combine_accumulators !== 'function'
+  ) {
     throw new Error(
-      `combine: ${measure_name} must declare combine as 'identity' or a function`
+      `combine_accumulators: ${measure_name} must declare combine_accumulators as 'identity' or a function`
     )
   }
-  if (combine === 'identity' && names.length !== 1) {
+  if (combine_accumulators === 'identity' && names.length !== 1) {
     throw new Error(
-      `combine: ${measure_name} declares an identity combine with ${names.length} accumulators; identity requires exactly one`
+      `combine_accumulators: ${measure_name} declares an identity combine_accumulators with ${names.length} accumulators; identity requires exactly one`
     )
   }
 }
@@ -53,22 +60,28 @@ export const validate_combine = ({ measure_name, combine, accumulators }) => {
 // Render the combine over a name -> SQL map of already-rendered accumulators.
 // The map is what makes this grain-agnostic: the caller decides whether those
 // fragments aggregate the whole scope, one period, or one offset window.
-export const render_combine = ({
+export const render_combine_accumulators = ({
   measure_name,
-  combine,
+  combine_accumulators,
   accumulator_sql,
   decimals = null
 }) => {
-  validate_combine({ measure_name, combine, accumulators: accumulator_sql })
+  validate_combine_accumulators({
+    measure_name,
+    combine_accumulators,
+    accumulators: accumulator_sql
+  })
 
-  if (combine === 'identity') {
+  if (combine_accumulators === 'identity') {
     const [only] = Object.values(accumulator_sql)
     return apply_decimals({ sql: only, decimals })
   }
 
-  const sql = combine(accumulator_sql, { divide: guarded_divide })
+  const sql = combine_accumulators(accumulator_sql, { divide: guarded_divide })
   if (typeof sql !== 'string' || sql.length === 0) {
-    throw new Error(`combine: ${measure_name} combine returned no SQL fragment`)
+    throw new Error(
+      `combine_accumulators: ${measure_name} combine_accumulators returned no SQL fragment`
+    )
   }
   return apply_decimals({ sql, decimals })
 }
