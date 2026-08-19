@@ -101,19 +101,25 @@ describe('data view admission gate and instrumentation', function () {
   })
 
   it('never executes a waiter that was superseded while waiting', async function () {
+    // Fill the gate's capacity so a further request must queue as a waiter; the
+    // cap is read from the module, not hardcoded, so this stays correct when
+    // DATA_VIEW_MAX_CONCURRENT_QUERIES changes.
+    const cap = get_admission_state().max_concurrent_queries
     const controller = new AbortController()
-    const holder = execute_data_view_request({
-      request_id: 'v1',
-      params: sample_params(),
-      user_id: null,
-      path: 'socket',
-      cache_key: 'k-holder',
-      run_query: async () => {
-        await sleep(150)
-        return empty_result()
-      },
-      cache_get: async () => null
-    })
+    const holders = Array.from({ length: cap }, (_, i) =>
+      execute_data_view_request({
+        request_id: `h${i}`,
+        params: sample_params(),
+        user_id: null,
+        path: 'socket',
+        cache_key: `k-holder-${i}`,
+        run_query: async () => {
+          await sleep(150)
+          return empty_result()
+        },
+        cache_get: async () => null
+      })
+    )
     await sleep(20)
 
     let executed = false
@@ -133,25 +139,28 @@ describe('data view admission gate and instrumentation', function () {
     await sleep(20)
     controller.abort()
     await expect_throws(waiter)
-    await holder
+    await Promise.all(holders)
     expect(executed).to.equal(false)
     expect(get_admission_state().active_request_count).to.equal(0)
   })
 
   it('fires a heartbeat while a request is still waiting for a slot', async function () {
+    const cap = get_admission_state().max_concurrent_queries
     const heartbeats = []
-    const holder = execute_data_view_request({
-      request_id: 'v1',
-      params: sample_params(),
-      user_id: null,
-      path: 'socket',
-      cache_key: 'k-holder',
-      run_query: async () => {
-        await sleep(120)
-        return empty_result()
-      },
-      cache_get: async () => null
-    })
+    const holders = Array.from({ length: cap }, (_, i) =>
+      execute_data_view_request({
+        request_id: `h${i}`,
+        params: sample_params(),
+        user_id: null,
+        path: 'socket',
+        cache_key: `k-holder-${i}`,
+        run_query: async () => {
+          await sleep(120)
+          return empty_result()
+        },
+        cache_get: async () => null
+      })
+    )
     await sleep(20)
 
     await execute_data_view_request({
@@ -168,7 +177,7 @@ describe('data view admission gate and instrumentation', function () {
       cache_get: async () => null,
       heartbeat_interval_ms: 20
     })
-    await holder
+    await Promise.all(holders)
 
     expect(heartbeats, 'heartbeat fired during queue wait').to.include(
       'waiting'

@@ -11,11 +11,15 @@ import {
 // instrumentation, so admission and timeout policy cannot diverge across the
 // four call sites again.
 //
-// Milestone 1 keeps concurrency at 1 -- today's effective behavior -- so the
-// telemetry/signal half can ship without new blast radius. The cap is raised
-// from measurement (scratch/league/data-view-tuning/) in Milestone 2, in the
-// same change that lands the Postgres blast-radius backstops.
-const DATA_VIEW_MAX_CONCURRENT_QUERIES = 1
+// Cap derived from measurement on 2026-08-19 (see
+// user:task/league/data-views/tune-data-view-request-queue.md): the heaviest
+// organic data-view shape (a wide dynasty view, ~4.4s, CPU-bound, no temp
+// spill) degrades median query duration 24% at N=2 and >66% at N=4 against N=1,
+// and each concurrent data-view query holds one of the 20-connection knex pool,
+// so N=2 sits well below pool max and cannot starve auth/roster reads. The
+// Postgres blast-radius backstops (temp_file_limit, idle_in_transaction_session_timeout)
+// land in the same change.
+const DATA_VIEW_MAX_CONCURRENT_QUERIES = 2
 const DATA_VIEW_HEARTBEAT_INTERVAL_MS = 2000
 // The 5s target IS the emission threshold (operator ruling 2026-08-19), never a
 // cutoff. Severity tiers are sized off the real distribution (current-log p50
