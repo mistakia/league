@@ -1064,6 +1064,8 @@ WebSocket endpoints in `/api/sockets/`:
 
 Dynamic table configurations in `/app/core/data-views/` allow users to create custom data tables with:
 
+**Service objectives** (the sub-5s target, no-idle-wait queueing, and the telemetry/signal/backstop goals any data-view tuning or extension is measured against) live at [[user:text/league/data-views/data-view-service-objectives.md]].
+
 - Configurable columns and filters
 - Real-time data updates via WebSocket
 - Export capabilities (CSV)

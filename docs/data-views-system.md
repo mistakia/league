@@ -1128,6 +1128,8 @@ For comprehensive documentation of every function in the query builder system, s
 
 ## Performance Improvement Opportunities
 
+**Service objectives** (the sub-5s target, no-idle-wait queueing, and the telemetry/signal/backstop goals) are canonical at [[user:text/league/data-views/data-view-service-objectives.md]] — any performance or extension work here is measured against them.
+
 ### Current Performance Bottlenecks
 
 1. **Monolithic Query Builder**: `get_data_view_results_query()` is a 1500+ line function that's difficult to optimize
