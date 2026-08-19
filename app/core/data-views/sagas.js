@@ -127,11 +127,29 @@ function* handle_data_view_request({
 // is added on top of execution time, so any fixed deadline from send fires on
 // requests that were merely queued behind other work.
 //
-// The budget must exceed the longest legitimate gap between two server
-// messages, which is a single query execution -- the server emits nothing
-// between DATA_VIEW_STATUS(processing) and the result. That ceiling is the
-// signed-in execution timeout of 5 minutes, so anything at or below 5 minutes
-// can fire on a query that was still coming.
+// PROVISIONAL, and the number is not defensible on its own. A silence budget
+// is only well-defined if the server guarantees a MAXIMUM silence, and today
+// it guarantees none: a queued request gets exactly two messages before its
+// result -- one DATA_VIEW_POSITION on entry, one DATA_VIEW_STATUS when it
+// reaches the head -- and nothing in between. Verified live with three
+// concurrent clients, where the third was never told it advanced and sat
+// silent for its whole wait. update_queue_positions has one caller, inside
+// remove_request, so positions refresh when a client DISCONNECTS and never as
+// the queue drains. (A probe that closes sockets on completion exercises that
+// disconnect path and makes the queue look correct -- keep sockets open.)
+//
+// So legitimate silence spans the entire queue wait and is unbounded in queue
+// DEPTH, not bounded by any single query's timeout. Do NOT re-derive this from
+// the server's 5-minute signed-in execution timeout: that constant is itself a
+// placeholder, introduced whole in b395a7b3b (2024-08-23) replacing an untimed
+// call and never revisited, and bounding one term of an unbounded sum proves
+// nothing anyway.
+//
+// This value is therefore a stopgap that is strictly better than the previous
+// state of no bound at all, and wrong for a deep queue. The server side is
+// adding a periodic heartbeat while a request is queued or in flight; once it
+// lands, set this to a small multiple of that interval, which is correct at
+// any queue depth and coupled to no server timeout.
 export const DATA_VIEW_SILENCE_TIMEOUT = 6 * 60 * 1000
 
 const PROGRESS_ACTIONS = [
