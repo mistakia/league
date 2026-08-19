@@ -1,7 +1,7 @@
 {
   "description": "Per-file allowance for eslint-rules/no-bare-container-jsdoc. Occurrences beyond a file allowance are errors; a file absent here is allowed zero. Allowances only move DOWN -- --check fails on any entry that allows more than the file contains.",
   "generated_by": "node eslint-rules/generate-bare-container-jsdoc-baseline.mjs",
-  "total_occurrences": 1160,
+  "total_occurrences": 1135,
   "allowances": {
     "api/routes/leagues/external.mjs": 3,
     "api/sockets/external-league-import.mjs": 13,
@@ -157,11 +157,6 @@
     "libs-shared/simulation/simulation-utils.mjs": 7,
     "libs-shared/string-distance.mjs": 5,
     "libs-shared/validate-trade-slot-assignment.mjs": 4,
-    "private/libs-server/cloakbrowser.mjs": 2,
-    "private/libs-server/combination-odds/get-source-selections.mjs": 10,
-    "private/libs-server/combination-odds/resolve-selection.mjs": 7,
-    "private/libs-server/combination-odds/store-combination-odds.mjs": 2,
-    "private/scripts/finalize-season.mjs": 4,
     "scripts/analyze-draftkings-wagers.mjs": 2,
     "scripts/analyze-fanduel-wagers.mjs": 2,
     "scripts/analyze-wagers.mjs": 2,

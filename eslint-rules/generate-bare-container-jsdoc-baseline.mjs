@@ -70,6 +70,11 @@ const main = () => {
 
   const allowances = {}
   for (const file_path of files) {
+    // `private/` is a SUBMODULE that CI never checks out, so a baseline entry
+    // for one of its files grades a population the runner does not have and
+    // reads as slack that was never created. eslint.config.mjs gives that tree
+    // only the proxy-safety rule for the same reason.
+    if (path.relative(repo_root, file_path).startsWith('private/')) continue
     let source
     try {
       source = fs.readFileSync(file_path, 'utf8')
@@ -88,9 +93,25 @@ const main = () => {
   if (process.argv.includes('--check')) {
     const existing = JSON.parse(fs.readFileSync(baseline_path, 'utf8'))
     const stale = []
+    const absent = []
     for (const [file, allowance] of Object.entries(existing.allowances || {})) {
+      // A file the run never reached is UN-GRADEABLE, not fixed. Reading its
+      // absence as zero is how this gate turned master red: it cannot tell a
+      // deleted file, an unchecked-out submodule, and a genuinely emptied file
+      // apart, so it must decline to grade rather than guess the flattering
+      // reading -- or in this case, the unflattering one.
+      if (!fs.existsSync(path.join(repo_root, file))) {
+        absent.push(file)
+        continue
+      }
       const actual = sorted[file] || 0
       if (allowance > actual) stale.push({ file, allowance, actual })
+    }
+
+    if (absent.length) {
+      console.log(
+        `  ${absent.length} baseline entr(ies) name files this run did not reach; not graded.`
+      )
     }
 
     if (stale.length) {

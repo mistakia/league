@@ -126,8 +126,13 @@ export default [
     },
 
     rules: {
-      'local/no-unproxied-fetch-with-retry': 'error',
-      'local/no-bare-container-jsdoc': 'error'
+      // Deliberately ONLY the proxy-safety rule. no-bare-container-jsdoc is a
+      // ratchet against a committed baseline, and CI never checks this
+      // submodule out -- so a baseline entry for a private/ file reads as
+      // "allowance 2, actual 0" on the runner and fails the gate for a file
+      // that was never fixed and is merely absent. That turned master red on
+      // 32f05d60f. The submodule's own repo is where such a rule would belong.
+      'local/no-unproxied-fetch-with-retry': 'error'
     }
   }
 ]
