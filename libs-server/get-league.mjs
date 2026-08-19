@@ -44,11 +44,14 @@ import {
  * consumer to discover as a falsy value that reads like configuration.
  *
  * They are typed optional rather than fixed by widening
- * `create_default_league`. Adding keys there is NOT a safe local change: the
- * same object seeds `libs-server/create-league.mjs`'s INSERT, so a declared
- * `league_id: null` or `archived_at: null` would flow into league creation
- * against a NOT NULL surrogate key. Narrowing this belongs with that call
- * site, not with the type.
+ * `create_default_league`, and that stays the ruling. Adding keys there is NOT
+ * a safe local change, though not for the reason this comment gave until
+ * 2026-08-19: `create-league.mjs` builds its `leagues` INSERT from an explicit
+ * three-field allowlist, so nothing added here can reach that table. The
+ * exposure is the SEASONS insert, which spreads `...league_params` wholesale —
+ * so any key added to `create_default_league` lands in it and knex throws on
+ * the unknown column. Making that spread an explicit allowlist is the
+ * prerequisite for widening the default league, and it is its own change.
  *
  * @typedef {'discord_webhook_url'
  *   | 'is_hosted'
